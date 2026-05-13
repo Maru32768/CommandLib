@@ -1,28 +1,28 @@
-# Bukkit Integration Test
+# Integration Test
 
 ## Purpose
 
-This module automates the manual Test Plugin workflow.
+This module automates the manual Test Plugin/MOD workflow.
 The main goal is to verify that commands using each `Argument` can be registered, parsed, and executed on a real
 Minecraft server.
 
 This is intentionally not a normal unit test.
-CommandLib depends on Bukkit, Brigadier, and NMS behavior that is only reliable inside an actual server runtime.
+CommandLib depends on each platform, Brigadier, and NMS behavior that is only reliable inside an actual server runtime.
 
-Fast tests remain in `spigot/src/test` and `spigot-testing`.
-Use this module only for cases that need a real Bukkit-compatible server, NMS, command registration, or a real player
-connection.
+Fast tests remain in the module-level test projects such as `spigot/src/test`, `spigot-testing`, and `paper-testing`.
+Use this module only for cases that need a real server, platform runtime internals, command registration, or a real
+player connection.
 
 ## Flow
 
 Each `minecraftIntegrationTest*` task does the following:
 
-1. Builds the target fixture plugin.
-2. Downloads or prepares the matching server jar and server-side helper plugin jars.
+1. Builds the target fixture plugin or mod.
+2. Downloads or prepares the matching server jar and server-side helper artifacts.
 3. Starts the server in Docker through Testcontainers.
 4. Connects a fake player named `Maru32768` through MCProtocolLib.
-5. Lets the plugin execute its command test suite in game.
-6. Waits for the plugin to write a JUnit XML report.
+5. Lets the fixture execute its command test suite in game.
+6. Waits for the fixture to write a JUnit XML report.
 7. Fails the Gradle test if the JUnit XML report contains failures or errors.
 
 The report is written under:
@@ -33,8 +33,8 @@ integration-test/shared/test-results/
 
 ## Why MCProtocolLib
 
-The plugin cases are command execution tests, not just parser unit tests.
-A real player connection exercises the Bukkit command path more closely than a mocked sender.
+The fixture cases are command execution tests, not just parser unit tests.
+A real player connection exercises the server command path more closely than a mocked sender.
 
 MCProtocolLib is used because it can connect to the server without launching a full Minecraft client.
 Different Minecraft versions require different MCProtocolLib artifacts, so Gradle keeps each protocol client on its own
@@ -42,7 +42,7 @@ configuration.
 
 ## Why Docker
 
-The server process needs version-specific Minecraft and Bukkit-compatible server classes.
+The server process needs version-specific Minecraft and platform server classes.
 Running it in Docker keeps the Java runtime and server process isolated from the Gradle test JVM.
 
 The integration test intentionally fails when Docker is unavailable.
@@ -51,25 +51,35 @@ infrastructure failure rather than a skipped test.
 
 ## Layout
 
-Each target owns its test plugin project:
+Each target owns its fixture project:
 
 ```text
 integration-test/targets/{platform}-{version}/test-plugin/
 ```
 
-Shared test plugin code lives under:
+The current targets are Bukkit-compatible plugin fixtures. Future Forge targets can add a platform-specific fixture
+layout while reusing the same top-level integration-test runner.
+
+Shared fixture code is split by responsibility:
 
 ```text
-integration-test/shared/bukkit-test-plugin
+integration-test/shared/core
+integration-test/shared/spigot
+integration-test/shared/paper
 ```
 
-The shared Gradle script is:
+`shared/core` is limited to platform-neutral result and report helpers so future Forge integration fixtures can reuse it
+without inheriting Bukkit lifecycle or command-dispatch assumptions. Spigot and Paper cases are intentionally separate
+even when they currently look similar.
+
+The shared Gradle script for current Bukkit-compatible plugin fixtures is:
 
 ```text
-integration-test/shared/bukkit-test-plugin.gradle.kts
+integration-test/shared/integration-test.gradle.kts
 ```
 
-Target plugin setup downloads PlugManX and AutoReloader into each configured server `plugins` directory.
+Current Bukkit-compatible target setup downloads PlugManX and AutoReloader into each configured server `plugins`
+directory.
 The AutoReloader URL can be overridden when needed:
 
 ```powershell
@@ -93,10 +103,10 @@ The aggregate task depends on per-target subprojects, so Gradle can run independ
 
 ## Generated NMS Jars
 
-Some tests need a real server jar that contains NMS and CraftBukkit classes.
+Some Bukkit-compatible tests need a real server jar that contains NMS and CraftBukkit classes.
 The downloadable server launcher jar is not always that jar.
 
-Target plugin projects expose `generatePatchedJar` for this purpose.
+Current Bukkit-compatible fixture projects expose `generatePatchedJar` for this purpose.
 The task starts the downloaded server once when the expected generated jar is missing, then validates that the
 distribution-specific jar path exists.
 
@@ -106,7 +116,7 @@ Paper has two known layouts:
 - Paper `1.18` and newer: `server/versions/<version>/paper-<version>.jar`
 
 Mohist does not follow Paper's single-path convention consistently.
-When a Mohist target needs generated NMS jars, configure `nmsJarPaths` explicitly in that target plugin's
+When a Mohist target needs generated NMS jars, configure `nmsJarPaths` explicitly in that target fixture's
 `build.gradle.kts`.
 For example, Mohist `1.20.1` splits server and CraftBukkit classes across Forge-generated jars, so the fixture checks
 both generated jar paths.
@@ -123,7 +133,7 @@ integration-test/targets/paper-1.16.5/test-plugin/server/cache/patched_1.16.5.ja
 ## Mohist Constraint
 
 Mohist targets require a first startup before the integration test server is launched in Docker.
-That startup generates Mohist libraries, mappings, and server-side files in the target plugin's `server` directory.
+That startup generates Mohist libraries, mappings, and server-side files in the target fixture's `server` directory.
 
 Gradle handles this with per-target `bootstrapMohist` tasks.
 The task checks for generated marker paths such as `libraries` and `world`.
@@ -158,8 +168,8 @@ Run all configured targets:
 ```
 
 Each target builds a reusable Docker image for its server base before running the Minecraft integration test. The image
-contains the server jar, generated libraries, helper plugins, base configuration, and pre-generated overworld data. The
-current test plugin jar is copied into the container at test startup, so normal code changes do not require recopying the
+contains the server jar, generated libraries, helper artifacts, base configuration, and pre-generated overworld data. The
+current fixture artifact is copied into the container at test startup, so normal code changes do not require recopying the
 whole server directory. Gradle marks the image task up-to-date while the staged server base is unchanged.
 
 Gradle project parallelism is enabled by default, but Minecraft server tests are throttled to avoid starting every

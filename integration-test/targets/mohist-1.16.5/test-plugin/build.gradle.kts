@@ -9,4 +9,4 @@ extra["includeProtocolLib"] = "true"
 extra["nmsGenerationServerJar"] = "mohist.jar"
 extra["nmsJarPaths"] = "cache/patched_1.16.5.jar"
 
-apply(from = "../../../shared/bukkit-test-plugin.gradle.kts")
+apply(from = "../../../shared/integration-test.gradle.kts")

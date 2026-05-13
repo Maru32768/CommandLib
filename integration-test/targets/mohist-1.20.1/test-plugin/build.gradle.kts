@@ -11,4 +11,4 @@ extra["nmsJarPaths"] =
     "libraries/net/minecraftforge/forge/1.20.1-47.3.22/forge-1.20.1-47.3.22-server.jar|" +
             "libraries/net/minecraftforge/forge/1.20.1-47.3.22/forge-1.20.1-47.3.22-universal.jar"
 
-apply(from = "../../../shared/bukkit-test-plugin.gradle.kts")
+apply(from = "../../../shared/integration-test.gradle.kts")

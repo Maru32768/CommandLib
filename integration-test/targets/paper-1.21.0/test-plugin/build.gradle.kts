@@ -6,4 +6,4 @@ extra["minecraftServerVersion"] = "1.21"
 extra["serverJarDownloads"] =
     "https://api.papermc.io/v2/projects/paper/versions/1.21/builds/130/downloads/paper-1.21-130.jar=>server/server.jar"
 
-apply(from = "../../../shared/bukkit-test-plugin.gradle.kts")
+apply(from = "../../../shared/integration-test.gradle.kts")

@@ -11,4 +11,4 @@ dependencies {
     }
 }
 
-apply(from = "../../gradle/bukkit-integration-target.gradle.kts")
+apply(from = "../../gradle/integration-test-target.gradle.kts")

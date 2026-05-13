@@ -3,7 +3,7 @@ allprojects {
     version = "0.17.2"
 }
 
-val publishedProjects = setOf("common", "common-testing", "spigot", "spigot-testing", "paper", "paper-testing", "forge")
+val publishedProjectPaths = setOf(":common", ":common-testing", ":spigot", ":spigot-testing", ":paper", ":paper-testing", ":forge")
 
 subprojects {
     apply(plugin = "java")
@@ -26,7 +26,7 @@ subprojects {
         options.encoding = "UTF-8"
     }
 
-    if (project.name in publishedProjects) {
+    if (project.path in publishedProjectPaths) {
         apply(plugin = "maven-publish")
 
         extensions.configure<PublishingExtension> {

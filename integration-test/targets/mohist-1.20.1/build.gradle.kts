@@ -11,4 +11,4 @@ dependencies {
     mcProtocol("com.github.steveice10:mcprotocollib:1.20-1")
 }
 
-apply(from = "../../gradle/bukkit-integration-target.gradle.kts")
+apply(from = "../../gradle/integration-test-target.gradle.kts")

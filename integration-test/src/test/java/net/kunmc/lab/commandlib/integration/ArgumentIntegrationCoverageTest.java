@@ -19,24 +19,29 @@ class ArgumentIntegrationCoverageTest {
             "LiteralArgument");
 
     @Test
-    void bukkit_family_public_arguments_have_integration_cases() throws IOException {
+    void spigot_public_arguments_have_integration_cases() throws IOException {
         Path rootDir = Path.of(System.getProperty("commandlib.rootDir", "."));
-        Set<String> spigotArguments = publicArgumentClassNames(rootDir.resolve(
-                "spigot/src/main/java/net/kunmc/lab/commandlib/argument"));
-        Set<String> paperArguments = publicArgumentClassNames(rootDir.resolve(
-                "paper/src/main/java/net/kunmc/lab/commandlib/argument"));
-        Set<String> commonBukkitArguments = new HashSet<>(spigotArguments);
-        commonBukkitArguments.retainAll(paperArguments);
-        commonBukkitArguments.removeAll(EXCLUDED_ARGUMENTS);
+        assertIntegrationCases(rootDir, "spigot");
+    }
+
+    @Test
+    void paper_public_arguments_have_integration_cases() throws IOException {
+        Path rootDir = Path.of(System.getProperty("commandlib.rootDir", "."));
+        assertIntegrationCases(rootDir, "paper");
+    }
+
+    private void assertIntegrationCases(Path rootDir, String moduleName) throws IOException {
+        Set<String> arguments = new HashSet<>(publicArgumentClassNames(rootDir.resolve(
+                moduleName + "/src/main/java/net/kunmc/lab/commandlib/argument")));
+        arguments.removeAll(EXCLUDED_ARGUMENTS);
 
         String argumentTestSource = Files.readString(rootDir.resolve(
-                "integration-test/shared/bukkit-test-plugin/src/main/java/net/kunmc/lab/testplugin/ArgumentTest.java"));
-        Set<String> missing = commonBukkitArguments.stream()
-                                                   .filter(argument -> !instantiatesArgument(argumentTestSource,
-                                                                                             argument))
-                                                   .collect(Collectors.toCollection(java.util.TreeSet::new));
+                "integration-test/shared/" + moduleName + "/src/main/java/net/kunmc/lab/testplugin/ArgumentTest.java"));
+        Set<String> missing = arguments.stream()
+                                       .filter(argument -> !instantiatesArgument(argumentTestSource, argument))
+                                       .collect(Collectors.toCollection(java.util.TreeSet::new));
 
-        assertThat(missing).as("Add integration coverage in shared Bukkit ArgumentTest or document an exclusion")
+        assertThat(missing).as("Add integration coverage in shared " + moduleName + " ArgumentTest or document an exclusion")
                            .isEmpty();
     }
 

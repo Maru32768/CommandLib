@@ -8,4 +8,4 @@ dependencies {
     mcProtocol("org.geysermc.mcprotocollib:protocol:1.20.6-2-SNAPSHOT")
 }
 
-apply(from = "../../gradle/bukkit-integration-target.gradle.kts")
+apply(from = "../../gradle/integration-test-target.gradle.kts")

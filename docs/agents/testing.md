@@ -18,9 +18,8 @@ Compile checks:
 ./gradlew :spigot-testing:compileJava
 ```
 
-Integration tests may require Docker or a local Minecraft/Bukkit test
-environment. Run them only when the touched behavior requires it or the user
-asks for it:
+Integration tests may require Docker or a local Minecraft server environment.
+Run them only when the touched behavior requires it or the user asks for it:
 
 ```bash
 ./gradlew :integration-test:minecraftIntegrationTest

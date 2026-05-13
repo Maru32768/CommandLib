@@ -49,12 +49,13 @@ Use this checklist whenever adding a public `*Argument` class.
 
 ## 4. Add Integration Coverage
 
-- Add an execution case to `integration-test/shared/bukkit-test-plugin/.../ArgumentTest.java` when the argument exists in
-  both Spigot and Paper modules.
-- For platform-specific arguments, add a reflected optional case in the same fixture so it runs only when that module
-  contains the argument.
+- Add an execution case to the matching integration fixture:
+    - `integration-test/shared/spigot/.../ArgumentTest.java` for Spigot arguments.
+    - `integration-test/shared/paper/.../ArgumentTest.java` for Paper arguments.
+- Keep the two fixtures intentionally independent. It is acceptable to duplicate small cases when platform behavior is
+  stable; use the shared core fixture only for platform-neutral result/reporting helpers.
 - `:integration-test:test` includes a lightweight coverage check that fails when a public argument class shared by
-  Spigot and Paper is missing from the common Bukkit integration fixture. Add an explicit exclusion there only when a
+  Spigot or Paper is missing from the matching integration fixture. Add an explicit exclusion there only when a
   real-server case is intentionally not applicable.
 - The integration case should:
     - register the argument,

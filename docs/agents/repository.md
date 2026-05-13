@@ -15,7 +15,8 @@ instructions.
 - `paper`: Paper-facing API using Paper official command/lifecycle API and
   Adventure components. Targets Paper 1.20.6+.
 - `spigot-testing`: test utilities for downstream plugins and this repository.
-- `integration-test`: Minecraft/Bukkit integration tests.
+- `integration-test`: Minecraft integration tests. Current targets are
+  Bukkit-compatible plugin fixtures; Forge fixtures may be added separately.
 - `forge`: Forge-facing integration.
 - `sample`: sample usage.
 
