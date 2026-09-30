@@ -4,8 +4,6 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.server.permission.PermissionAPI;
-import net.minecraftforge.server.permission.nodes.PermissionNode;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -78,11 +76,7 @@ final class ForgeCommandActor implements CommandActor {
     public boolean hasPermission(@NotNull String permission) {
         Entity entity = source.getEntity();
         if (entity instanceof ServerPlayer) {
-            PermissionNode<Boolean> node = CommandLib.permissionNode(Objects.requireNonNull(permission));
-            if (node != null) {
-                return PermissionAPI.getPermission((ServerPlayer) entity, node);
-            }
-            return source.hasPermission(4);
+            return CommandLib.hasPermission(source, (ServerPlayer) entity, Objects.requireNonNull(permission));
         }
         return false;
     }

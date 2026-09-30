@@ -7,8 +7,6 @@ import net.kunmc.lab.commandlib.util.text.TranslatableComponentBuilderImpl;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.server.permission.PermissionAPI;
-import net.minecraftforge.server.permission.nodes.PermissionNode;
 import org.jetbrains.annotations.NotNull;
 
 public final class PlatformAdapterImpl implements PlatformAdapter<CommandSourceStack, Component, CommandContext, Command> {
@@ -30,11 +28,7 @@ public final class PlatformAdapterImpl implements PlatformAdapter<CommandSourceS
     @Override
     public boolean hasPermission(CommandSourceStack commandSource, String permissionNode) {
         if (commandSource.getEntity() instanceof ServerPlayer) {
-            PermissionNode<Boolean> node = CommandLib.permissionNode(permissionNode);
-            if (node != null) {
-                return PermissionAPI.getPermission((ServerPlayer) commandSource.getEntity(), node);
-            }
-            return commandSource.hasPermission(4);
+            return CommandLib.hasPermission(commandSource, (ServerPlayer) commandSource.getEntity(), permissionNode);
         }
         return true;
     }

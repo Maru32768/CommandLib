@@ -142,7 +142,12 @@ public final class CommandContext extends CommonCommandContext<CommandSourceStac
     public void sendFailure(@Nullable String message, boolean allowLogging) {
         MutableComponent component = Component.literal(String.valueOf(message))
                                              .withStyle(ChatFormatting.RED);
-        getSender().sendFailure(component);
+        if (allowLogging) {
+            // CommandSourceStack#sendFailure never broadcasts to ops, so route through sendSuccess.
+            sendMessage(component, true);
+        } else {
+            getSender().sendFailure(component);
+        }
     }
 
     @Override
