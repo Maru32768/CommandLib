@@ -21,12 +21,12 @@
 | Bukkit / Spigot / Paper support     | `[~]` | 現行 `bukkit` module は実質的な Spigot 互換実装。複数 version 向け NMS bridge がある。                                                                      | `spigot` への rename / move、Paper 公式 API module、Folia 対応。                    |
 | Paper 1.20.6+ registration          | `[x]` | `LifecycleEvents.COMMANDS` + `Commands registrar` + `CommandSourceStack` を使った公式 API 登録が実装済み。Adventure component を標準 message path として利用。 | bootstrap compatibility。                                                   |
 | Spigot / Paper module split         | `[x]` | `bukkit` を `spigot` へ rename / move し、`paper` module を新設済み。                                                                               | —                                                                          |
-| Forge support                       | `[~]` | Forge 1.16.5 module がある。                                                                                                                | 新しい Forge / NeoForge 対応、Bukkit との差分整理。                                     |
+| Forge support                       | `[~]` | Forge 1.16.5 / 1.20.1 module がある（version ごとのソースコピー）。                                                                                                                | Architectury Loom + Stonecutter による単一ソース化、1.16.5+ 全 version 対応、Bukkit との差分整理。                                     |
 | Mohist support                      | `[~]` | README 上で tested version が記載されている。                                                                                                      | integration test の明文化、非対応ケースの整理。                                           |
 | Folia support                       | `[ ]` | なし。                                                                                                                                     | scheduler / threading model を踏まえた Paper 互換性確認。                             |
-| Velocity support                    | `[ ]` | なし。                                                                                                                                     | proxy command model 向け module / API 設計。                                    |
-| NeoForge support                    | `[ ]` | なし。                                                                                                                                     | Forge との差分調査と module 方針。                                                   |
-| Fabric support                      | `[ ]` | なし。                                                                                                                                     | Fabric command registration / Brigadier integration 設計。                    |
+| Velocity support                    | `[ ]` | なし。                                                                                                                                     | proxy command model 向け module / API 設計（方針案: Pillar 11）。                                    |
+| NeoForge support                    | `[ ]` | なし。                                                                                                                                     | Stonecutter matrix への追加（方針案: Pillar 11）。                                                   |
+| Fabric support                      | `[ ]` | なし。                                                                                                                                     | Fabric command registration / Brigadier integration 設計、Stonecutter matrix への追加（方針案: Pillar 11）。                    |
 | Brigadier / NMS hiding              | `[~]` | 利用者 API から Brigadier / NMS を隠している。                                                                                                      | capability detection、公式 API 優先、fallback policy。                            |
 | `/execute` integration              | `[~]` | README と Bukkit registration path で `/execute run` 連携を扱っている。                                                                            | command block / function / tag / datapack での保証と tests。                     |
 | Built-in arguments                  | `[~]` | 基本的な primitive、string、player、entity、location、item などがある。                                                                                | CommandAPI / Paper との argument catalog、NBT、registry、biome、sound 等の不足補完。    |
@@ -89,9 +89,14 @@
 
 - `[ ]` Folia support 方針を決める。
 - `[ ]` Forge testing strategy を決め、`forge-testing` を追加する。
-- `[ ]` NeoForge support 方針を決める。
-- `[ ]` Fabric support 方針を決める。
-- `[ ]` Velocity support 方針を決める。
+- `[~]` NeoForge / Fabric / Forge の module 方針を決める。方針案は
+  [11. Platform Architecture](#11-platform-architecture) を参照。
+- `[~]` Velocity support 方針を決める。方針案は [11. Platform Architecture](#11-platform-architecture) を参照。
+- `[ ]` Architectury Loom + Stonecutter の PoC として、`forge:1.16.5` と `forge:1.20.1` を単一ソースから build する。
+- `[ ]` mod loader 系 module を `minecraft`（MC version 依存・loader 非依存）と `loader/*`（loader 依存）に分割する。
+- `[ ]` sender / message abstraction（Adventure と vanilla `Component` の差分吸収）を Velocity 着手前に設計する。
+- `[ ]` public API の binary compatibility check（japicmp 等）を CI に追加する。
+- `[ ]` downstream mod 向けに JarJar / `include()` と shade + relocate の推奨方針を決めて docs に書く。
 - `[ ]` capability-based registration に移行する。
 - `[ ]` runtime platform capability diagnostics を追加する。
 
@@ -196,7 +201,7 @@ CommandLib は、複数の Minecraft version と platform をまたいで 1 つ�
 
 Required:
 
-- `docs/compatibility.md` を追加し、Bukkit、Spigot、Paper、Mohist、Forge、NeoForge ごとに
+- `docs/compatibility.md` を追加し、Bukkit、Spigot、Paper、Folia、Mohist、Velocity、Forge、NeoForge、Fabric ごとに
   supported、tested、best-effort、unsupported を明示する。
 - supported modules に対する focused compile / test matrix を作る。
 - integration test の結果を docs に掲載する。
@@ -442,6 +447,88 @@ Required README additions:
 - compatibility matrix への link。
 - testing guide への link。
 
+### 11. Platform Architecture
+
+1.16.5 以降の全 Minecraft version と、Spigot、Paper、Folia、Mohist、Velocity、Forge、NeoForge、Fabric を含む全環境を
+同じ public command model で支える。`common` が Brigadier のみに依存する現行構成を前提に、platform を性質で 2 種類に分けて扱う。
+
+| 分類          | 対象                                                         | version の扱い                                  | 構成                                                  |
+|-------------|------------------------------------------------------------|----------------------------------------------|-----------------------------------------------------|
+| 安定 API 型    | Spigot、Paper、Folia、Velocity（将来: Sponge、BungeeCord、Minestom） | platform API が互換性を保つため、1 module で複数 version に対応できる | 現行 Spigot と同じ単一 module 方式。NMS 差分は module 内の bridge で吸収する |
+| MC 直結型      | Forge、NeoForge、Fabric                                       | Minecraft 本体に直接 compile するため、MC version × loader の matrix になる | Architectury Loom + Stonecutter による単一ソース・複数 build          |
+
+#### MC 直結型（Forge / NeoForge / Fabric）
+
+Spigot のように単一 jar で複数 version に対応することは目指さない。理由:
+
+- Bukkit のような安定 API 層がなく、Minecraft 本体に直接 compile する。
+- mapping と runtime 名が version ごとに異なる（1.16.5 は MCP / SRG、1.17+ Forge は Mojang mappings / SRG、
+  NeoForge 1.20.5+ は runtime も Mojang 名）。reflection での吸収は現実的でない。
+- 1.17 の package 再編など、class 名・package 構成が大きく変わる。
+- ForgeGradle / NeoGradle は 1 project 1 MC version 前提で、必要な Java version も 8 → 16 → 17 → 21 と変わる。
+- `mods.toml` / `neoforge.mods.toml` / `fabric.mod.json` などの metadata も loader・version ごとに異なる。
+
+現行の `forge:1.16.5` と `forge:1.20.1` は同じ file 構成のコピーで、約 1,600 行中約 540 行の diff がある。
+diff の大半は MCP 名と Mojang 名の差・import 変更などの機械的なもので、対象 version と loader が増えるとコピー方式は破綻する。
+
+方針:
+
+- **Architectury Loom** で Fabric、Forge（1.16.5+）、NeoForge を同一 toolchain で build し、1.16.5 を含む全 target を
+  Mojang mappings で記述する。これで diff の大半（mapping 差）が消え、実 API 差分だけが残る。1.16.5 の MCP snapshot
+  mappings は廃止する。
+- **Stonecutter** で単一ソースに `//? if >=1.19 {` 形式の条件コメントを書き、MC version × loader ごとの build を生成する。
+- module は変更軸で分ける:
+
+  ```
+  common/          platform 非依存（現行のまま）
+  minecraft/       Brigadier 連携・argument 型など。MC version 依存、loader 非依存（コードの大半）
+  loader/forge     RegisterCommandsEvent、entrypoint、mods.toml
+  loader/neoforge  同上
+  loader/fabric    CommandRegistrationCallback（1.19 で v1 → v2）、fabric.mod.json
+  ```
+
+- `Argument` 実装は可能な限り vanilla class のみで `minecraft/` に書き、loader 依存層は command 登録・permission・metadata
+  程度に最小化する。
+- 破壊的変更が集中する version 境界: 1.17（package 再編、Java 16）、1.19（Component API、Fabric command API v2）、
+  1.20.5（item components による `ItemStackArgument` への影響、Java 21）、1.21.x の各 drop。
+- 互換性のある patch version（例: 1.21 / 1.21.1）は metadata の version range で 1 jar にまとめる。まとめられる範囲は
+  integration test で裏付ける。
+- artifact 名は `commandlib-<loader>-<mcVersion>` 形式を基本とし、公開前に確定する。
+
+#### 安定 API 型（Velocity など）
+
+Velocity:
+
+- `BrigadierCommand` で Brigadier をネイティブに扱えるため、`common` の `CommandNodeCreator` をほぼそのまま利用できる。
+- world / entity / block の概念がないため、`LocationArgument`、`EntityArgument` などは提供しない。
+- client に送れる argument type は Brigadier の基本型に限られるため、Player / Server などは string + 独自 parse +
+  suggestion（`CommonNameableObjectArgument` 方式）で実装する。
+- Spigot / Paper 間の argument parity 方針は Velocity には適用しない。platform ごとの argument 提供範囲を
+  `docs/compatibility.md` で明文化する。
+
+Brigadier を持たない環境（BungeeCord、Minestom など）を対応する場合は、CommandLib 内部に `CommandDispatcher` を持ち、
+文字列入力を自前で dispatch する adapter を用意して `common` を変更せずに済ませる。
+
+Sender / message abstraction は Velocity 着手前に設計する。Velocity と Paper は Adventure、Forge / NeoForge / Fabric は
+vanilla `Component` が native であり、platform が増えるほど後からの変更コストが大きくなる。
+
+#### Mod loader の互換性リスク
+
+Forge 系で「マイナーアップデートで mod が動かなくなる」原因は次のように分解でき、それぞれ対策を持つ。
+
+1. **MC マイナー version の破壊的変更**（最多）: 近年の Mojang は 1.20.5、1.21.2、1.21.4、1.21.5 などでも大きな変更を入れる。
+   argument 型や `Component` 周りが直撃するため、version 境界ごとに build を分けて Stonecutter で吸収する。
+2. **metadata の version range による起動拒否**: `versionRange` を狭く書くと binary 互換があっても load されない。
+   互換範囲を test で確認した上で適切な range を宣言する。
+3. **loader 自身の API 変更**: 同一 MC version 内の loader build 更新でも API が変わることがある
+   （`[?]` Forge 1.21.6+ の EventBus 刷新による listener 登録方法の変更を要確認）。loader 依存層を最小化し、
+   CI で各 MC version の最古・最新 loader build の両方をテストする。
+4. **JarJar / `include()` による CommandLib の version 衝突**（library として最重要）: Forge / NeoForge の JarJar と
+   Fabric の `include()` は、複数 mod が異なる CommandLib version を同梱した場合に最新の 1 つだけを load する。
+   古い CommandLib 向けに compile された mod が新しい CommandLib 上で動くため、`NoSuchMethodError` などが起きうる。
+   - public API の binary compatibility を維持し、japicmp 等で CI チェックする。
+   - downstream 向けに JarJar / `include()` と shade + relocate のどちらを推奨するかを決めて docs に書く。
+
 ## Release Phases
 
 Phase 0（Freeze Direction）と Phase 1（GA Module Split）は完了済み。詳細は [`docs/roadmap-history.md`](roadmap-history.md) を参照。
@@ -497,7 +584,9 @@ Exit criteria:
 
 - Folia の対応方針が決まっている。
 - Forge testing module の方針が決まっている。
-- NeoForge / Fabric / Velocity の module 方針が決まっている。
+- NeoForge / Fabric / Velocity の module 方針が決まっている（[11. Platform Architecture](#11-platform-architecture)）。
+- Forge / NeoForge / Fabric が Stonecutter による単一ソースから build されている。
+- public API の binary compatibility check が CI で動いている。
 - runtime platform capability diagnostics が使える。
 
 ### Phase 5: Ecosystem And Tooling
