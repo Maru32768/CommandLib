@@ -1,5 +1,6 @@
 package net.kunmc.lab.commandlib;
 
+import net.kunmc.lab.commandlib.CommonCommand;
 import net.minecraftforge.server.permission.DefaultPermissionLevel;
 import org.jetbrains.annotations.NotNull;
 

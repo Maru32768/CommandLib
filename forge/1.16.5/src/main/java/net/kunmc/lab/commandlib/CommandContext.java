@@ -1,5 +1,6 @@
 package net.kunmc.lab.commandlib;
 
+import net.kunmc.lab.commandlib.CommonCommandContext;
 import net.kunmc.lab.commandlib.util.Location;
 import net.minecraft.command.CommandSource;
 import net.minecraft.entity.Entity;
@@ -36,14 +37,8 @@ public final class CommandContext extends CommonCommandContext<CommandSource, IT
                                   .getPos());
     }
 
-    public CommandSource getSender() {
+    public @NotNull CommandSource getSender() {
         return handle.getSource();
-    }
-
-    @Override
-    @NotNull
-    public CommandActor getActor() {
-        return new ForgeCommandActor(getSender());
     }
 
     @Override
@@ -87,6 +82,12 @@ public final class CommandContext extends CommonCommandContext<CommandSource, IT
         } catch (ReflectiveOperationException ignored) {
             return null;
         }
+    }
+
+    @Override
+    @NotNull
+    public CommandActor getActor() {
+        return new ForgeCommandActor(getSender());
     }
 
     @Override

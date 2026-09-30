@@ -82,7 +82,8 @@ Run focused checks for touched modules. Typical commands:
 ```bash
 ./gradlew :spigot:compileJava :spigot-testing:test
 ./gradlew :paper:compileJava :paper-testing:test
-./gradlew :forge:compileJava
+./gradlew :forge:1.16.5:compileJava
+./gradlew :forge:1.20.1:compileJava
 ```
 
 For integration fixture source changes, compile representative fixtures:

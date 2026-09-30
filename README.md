@@ -13,7 +13,7 @@ with ease.
 |------------|----------|------------------------------------------------------------|---------------------------------------------------------------|
 | **Spigot** | `spigot` | `1.16.5`, `1.19.4`, `1.20.1`, `1.20.4`, `1.20.6`, `1.21.0` | Expected to work on intermediate versions. Requires Java 11+. |
 | **Paper**  | `paper`  | `1.21.0`                                                   | Uses Paper official command/lifecycle API. Requires Java 21+. |
-| **Forge**  | `forge`  | `1.16.5`                                                   | Currently supports only `1.16.5` and works fully.             |
+| **Forge**  | `forge-<minecraft-version>` | `1.16.5`, `1.20.1`                             | Use the artifact that matches the target Minecraft version.   |
 | **Mohist** | `spigot` | `1.16.5`, `1.20.1`                                         | Works on Mohist since it's compatible with Spigot.            |
 
 ## Features
@@ -167,13 +167,13 @@ repositories {
 }
 
 dependencies {
-    implementation "com.github.Maru32768.CommandLib:forge:latest.release"
+    implementation "com.github.Maru32768.CommandLib:forge-1.20.1:latest.release"
 }
 
 shadowJar {
     archiveFileName = "${rootProject.name}-${project.version}.jar"
     dependencies {
-        include(dependency("com.github.Maru32768.CommandLib:forge:.*"))
+        include(dependency("com.github.Maru32768.CommandLib:forge-1.20.1:.*"))
     }
     // Avoid package conflicts
     relocate "net.kunmc.lab.commandlib", "${project.group}.${project.name.toLowerCase()}.commandlib"
@@ -203,7 +203,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.github.Maru32768.CommandLib:forge:latest.release")
+    implementation("com.github.Maru32768.CommandLib:forge-1.20.1:latest.release")
 }
 
 val projectGroup = project.group.toString()
@@ -211,7 +211,7 @@ val projectNameLower = project.name.lowercase()
 tasks.named<ShadowJar>("shadowJar") {
     archiveFileName.set("${rootProject.name}-${project.version}.jar")
     dependencies {
-        include(dependency("com.github.Maru32768.CommandLib:forge:.*"))
+        include(dependency("com.github.Maru32768.CommandLib:forge-1.20.1:.*"))
     }
     // Avoid package conflicts
     relocate("net.kunmc.lab.commandlib", "$projectGroup.$projectNameLower.commandlib")

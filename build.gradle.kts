@@ -3,7 +3,21 @@ allprojects {
     version = "0.17.2"
 }
 
-val publishedProjectPaths = setOf(":common", ":common-testing", ":spigot", ":spigot-testing", ":paper", ":paper-testing", ":forge")
+val publishedArtifactIds = mapOf(
+    ":forge:1.16.5" to "forge-1.16.5",
+    ":forge:1.20.1" to "forge-1.20.1",
+)
+
+val publishedProjectPaths = setOf(
+    ":common",
+    ":common-testing",
+    ":spigot",
+    ":spigot-testing",
+    ":paper",
+    ":paper-testing",
+    ":forge:1.16.5",
+    ":forge:1.20.1",
+)
 
 subprojects {
     apply(plugin = "java")
@@ -33,7 +47,7 @@ subprojects {
             publications {
                 create<MavenPublication>("maven") {
                     groupId = project.group.toString()
-                    artifactId = project.name
+                    artifactId = publishedArtifactIds[project.path] ?: project.name
                     version = project.version.toString()
 
                     from(components["java"])
