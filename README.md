@@ -233,12 +233,15 @@ dependencies {
     testImplementation("com.github.Maru32768.CommandLib:common-testing:latest.release")
     testImplementation("com.github.Maru32768.CommandLib:spigot-testing:latest.release")
     testImplementation("com.github.Maru32768.CommandLib:paper-testing:latest.release")
+    testImplementation("com.github.Maru32768.CommandLib:forge-testing-1.20.1:latest.release")
 }
 ```
 
 Use `common-testing` for commands built against the platform-neutral `common`
-API, `spigot-testing` for commands built against the `spigot` artifact, and
-`paper-testing` for commands built against the `paper` artifact. They provide
+API, `spigot-testing` for commands built against the `spigot` artifact,
+`paper-testing` for commands built against the `paper` artifact, and
+`forge-testing-<minecraft-version>` for commands built against the matching
+`forge-<minecraft-version>` artifact. They provide
 `CommandTester` and `FakeSender` so commands can be executed without a running
 Minecraft server. Use one testing artifact per test module; these artifacts
 share package-level helper names.
@@ -258,6 +261,12 @@ class Test {
 `paper-testing` stubs Paper `ArgumentTypes`, selector resolvers, and several
 registry-backed argument paths for command-level tests. Paper lifecycle
 registration and real server registry behavior are covered by integration tests.
+
+`forge-testing` bootstraps Minecraft's registries, so vanilla argument types
+such as items, blocks, and effects parse for real. The server is a Mockito mock:
+fake players added with `CommandTester#withPlayer` (and the executing player)
+are online, so player, entity, game profile, and UUID arguments resolve them by
+name. Worlds, scoreboards, and other server state are not available.
 
 ## Code Examples
 

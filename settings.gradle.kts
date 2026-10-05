@@ -17,8 +17,13 @@ include("spigot", "paper")
 include("common")
 include("common-testing", "spigot-testing", "paper-testing")
 include("forge")
+include("forge-testing")
 stonecutter {
     create("forge") {
+        versions("1.16.5", "1.20.1")
+        vcsVersion = "1.20.1"
+    }
+    create("forge-testing") {
         versions("1.16.5", "1.20.1")
         vcsVersion = "1.20.1"
     }

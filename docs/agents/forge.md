@@ -50,11 +50,16 @@ MutableComponent component = Component.literal(message);
 ## Verification
 
 Compile every Forge version after any change under `forge/`, not only the
-version you were working on:
+version you were working on, and run the `forge-testing` tests:
 
 ```bash
 ./gradlew :forge:1.16.5:compileJava :forge:1.20.1:compileJava
+./gradlew :forge-testing:1.16.5:test :forge-testing:1.20.1:test
 ```
+
+`forge-testing` is the public testing artifact (`CommandTester`, `FakeSender`). It is a Stonecutter tree like
+`forge`, with the same conditional comment rules. It bootstraps Minecraft's registries and mocks the server, Forge's
+`NetworkHooks` during bootstrap, and the permission lookup while a command executes.
 
 When a change can affect the public API or published jars, also run
 `./gradlew :forge:1.16.5:build :forge:1.20.1:build` and inspect the remapped jars
@@ -84,8 +89,10 @@ public argument class, add a case to its `ArgumentTest`; `:integration-test:test
 4. Check the Java version selection in `forge/build.gradle.kts`.
 5. Compile every version and fix errors with conditional comments, adjusting
    existing boundaries when the new version shows they were wrong.
-6. Add the version to the test mod tree in `settings.gradle.kts`, create
+6. Add the version to the `forge-testing` tree in `settings.gradle.kts`, create
+   `forge-testing/versions/<version>/gradle.properties`, and add the project to the root publication lists.
+7. Add the version to the test mod tree in `settings.gradle.kts`, create
    `integration-test/shared/forge/versions/<version>/gradle.properties`, and add an
    `integration-test/targets/forge-<version>` target registered in the `minecraftIntegrationTest` aggregate task.
-7. Update the supported versions in `README.md` and
+8. Update the supported versions in `README.md` and
    `docs/design/forge-version-support.md`.

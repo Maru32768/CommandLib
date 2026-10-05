@@ -6,6 +6,8 @@ allprojects {
 val publishedArtifactIds = mapOf(
     ":forge:1.16.5" to "forge-1.16.5",
     ":forge:1.20.1" to "forge-1.20.1",
+    ":forge-testing:1.16.5" to "forge-testing-1.16.5",
+    ":forge-testing:1.20.1" to "forge-testing-1.20.1",
 )
 
 val publishedProjectPaths = setOf(
@@ -17,6 +19,8 @@ val publishedProjectPaths = setOf(
     ":paper-testing",
     ":forge:1.16.5",
     ":forge:1.20.1",
+    ":forge-testing:1.16.5",
+    ":forge-testing:1.20.1",
 )
 
 subprojects {
@@ -46,7 +50,7 @@ subprojects {
         extensions.configure<PublishingExtension> {
             publications {
                 create<MavenPublication>("maven") {
-                    groupId = project.group.toString()
+                    groupId = rootProject.group.toString()
                     artifactId = publishedArtifactIds[project.path] ?: project.name
                     version = project.version.toString()
 

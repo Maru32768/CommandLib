@@ -33,7 +33,7 @@
 | `common-test` | Maybe | none | `common` の parser / command tree / options / help / permission model の test helpers。公開するかは要検討。 |
 | `spigot-test` | Yes | `bukkit-test` | Spigot/Bukkit plugin 向け command testing utilities。NMS mock と fake sender を含む。 |
 | `paper-testing` | Yes | none | Paper command API、Adventure component、Paper suggestions、Paper registry arguments の testing utilities。 |
-| `forge-test` | Yes | none | Forge command testing utilities。Forge module の testing story が決まってから追加する。 |
+| `forge-testing-<version>` | Yes | none | Forge command testing utilities。`forge` と同じく Minecraft version ごとの artifact。 |
 
 ### Repository-only integration modules
 
@@ -114,9 +114,9 @@ Open questions:
 - Adventure component assertion を CommandLib 独自に持つか、Kyori test utilities に寄せるか。
 - Folia-safe behavior を `paper-testing` に含めるか、`folia-test` を別に作るか。
 
-## `forge-test`
+## `forge-testing`
 
-`forge-test` は Forge module 境界が固まってから追加する。
+`forge-testing` は `forge` と同じ Stonecutter 構成で、Minecraft version ごとに `forge-testing-<version>` を公開する。
 
 Responsibilities:
 
@@ -126,11 +126,20 @@ Responsibilities:
 - Forge argument parsing helpers。
 - downstream Forge mod 向け public testing utilities。
 
+Decisions:
+
+- Testing API は `forge` と同じく version ごとの artifact に分ける。公開 API の形（`CommandTester` / `FakeSender`）は
+  全 version で揃える。
+- Minecraft の `Bootstrap` を実行して registry を初期化し、vanilla argument type は本物で parse する。Forge 1.17+ の
+  `Bootstrap` が呼ぶ `NetworkHooks.init` は FML の class transformer が前提のため、bootstrap 中だけ mock する。
+- `MinecraftServer` / `PlayerList` / `GameProfileCache` は Mockito mock。fake player は名前で解決できる。
+- Permission node は実行中の `FakeSender` が答える（1.18+ は `CommandLib#hasPermission`、1.16.5 は
+  `PermissionAPI#hasPermission` を実行中だけ mock）。
+
 Open questions:
 
-- Forge 1.16.5 と新しい Forge の testing API を同じ artifact に入れるか。
 - NeoForge と共有できる test utilities を作るか。
-- server bootstrap なしでどこまで command execution を fake できるか。
+- World / scoreboard を必要とする argument（`TeamArgument` など）を fake するか。
 
 ## `integration-test` Aggregator
 
@@ -233,7 +242,7 @@ Split later when:
 
 ### Step 4: Forge testing
 
-- Add `forge-test` after Forge module version strategy is defined。
+- Add `forge-testing` after Forge module version strategy is defined。
 - Add Forge integration targets only when server/mod bootstrap is reliable。
 
 ## Roadmap Checklist
@@ -243,6 +252,6 @@ Split later when:
 - `[ ]` Add platform metadata to integration targets。
 - `[ ]` Decide fixture naming convention。
 - `[x]` Add `paper-testing` design after Paper module API is drafted。
-- `[ ]` Add `forge-test` design after Forge support strategy is updated。
+- `[x]` Add `forge-testing` after Forge support strategy is updated。
 - `[x]` Update README dependency snippets for test artifacts。
 - `[ ]` Publish `spigot-testing` and `paper-testing`; keep `integration-test` unpublished。

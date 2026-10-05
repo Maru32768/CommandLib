@@ -24,6 +24,7 @@ other than the active one is only type-checked when that version compiles (see
 
 ```bash
 ./gradlew :forge:1.16.5:compileJava :forge:1.20.1:compileJava
+./gradlew :forge-testing:1.16.5:test :forge-testing:1.20.1:test
 ```
 
 Integration tests may require Docker or a local Minecraft server environment.
