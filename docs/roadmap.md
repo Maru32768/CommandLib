@@ -18,6 +18,11 @@
 |-------------------------------------|------:|-----------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------|
 | Fluent / tree API                   | `[x]` | `Command`、`argument(...)`、`addChildren(...)` による command tree 定義がある。                                                                    | API stability policy と migration guide。                                    |
 | 型安全な argument callback              | `[x]` | `Unary` から `Hept` までの typed branch callback がある。                                                                                        | 8 個以上の引数、optional/default/list 系の表現整理。                                     |
+| Variadic / optional arguments       | `[ ]` | なし。省略形ごとに branch を並べる必要がある。                                                                                                            | 末尾 variadic argument（`List<T>`）、末尾 optional argument（default 値付き）。              |
+| Execution result                    | `[ ]` | `CommandExecutor` は `void` を返す。                                                                                                          | int result / success を返し `/execute store result / success` に反映する。                |
+| Async execution                     | `[ ]` | async suggestions のみ。実行は同期。                                                                                                            | `CompletableFuture` ベースの非同期実行と main / region thread への復帰。                      |
+| Dynamic command tree refresh        | `[ ]` | なし。                                                                                                                                     | permission / state 変化時に対象 player へ command tree を再送する API。                       |
+| Vanilla-style feedback              | `[ ]` | なし。                                                                                                                                     | `sendCommandFeedback` / `logAdminCommands` gamerule を尊重する success feedback と op broadcast。 |
 | Bukkit / Spigot / Paper support     | `[~]` | 現行 `bukkit` module は実質的な Spigot 互換実装。複数 version 向け NMS bridge がある。                                                                      | `spigot` への rename / move、Paper 公式 API module、Folia 対応。                    |
 | Paper 1.20.6+ registration          | `[x]` | `LifecycleEvents.COMMANDS` + `Commands registrar` + `CommandSourceStack` を使った公式 API 登録が実装済み。Adventure component を標準 message path として利用。 | bootstrap compatibility。                                                   |
 | Spigot / Paper module split         | `[x]` | `bukkit` を `spigot` へ rename / move し、`paper` module を新設済み。                                                                               | —                                                                          |
@@ -73,11 +78,28 @@
   `EntityTypeArgument`、`AttributeArgument` などは Paper の `ArgumentTypes.resource(RegistryKey...)` と同等の
   `minecraft:...` 入力・補完を基準にし、Spigot 側も可能な限り同じ public behavior に合わせる。
 - `[ ]` `/execute`、command blocks、functions、tags の挙動を検証して docs / tests に落とす。
+- `[ ]` execution result を返せるようにする。`ctx.result(int)` または int を返す executor variant を追加し、
+  `/execute store result` / `store success` に反映する。成功 / 失敗の区別も扱う。
+- `[ ]` vanilla-style feedback を追加する。`ctx.sendSuccess(message, broadcastToOps)` 相当で
+  `sendCommandFeedback` / `logAdminCommands` gamerule を尊重し、selector で複数 target に適用した場合の集計 message も扱う。
+- `[ ]` `RangeArgument`（`1..10`、`..5`、`3..`）と `DurationArgument`（`1h30m`、`20t` 等）を追加する。
 - `[ ]` error taxonomy を公開仕様として整理する。
 - `[ ]` CommandAPI migration guide を追加する。
 
 ### P4: Cloud / Lamp に対抗する developer experience を追加する
 
+annotation API / Kotlin DSL の `@Optional` や default args はこの土台の上に載せるため、先頭 3 項目を優先する。
+
+- `[ ]` variadic argument を追加する。`new PlayerArgument("targets").variadic()` のように末尾 argument を
+  `List<T>` として受け取れるようにする。
+- `[ ]` optional argument を追加する（要設計）。`.optional(defaultValue)` の形を候補とし、optional / variadic は
+  argument 列の末尾にのみ置ける制約とする。末尾以外に置いた場合は command 登録時の assertion で runtime error にする。
+- `[ ]` async execution を追加する。`executeAsync(ctx -> CompletableFuture<...>)` で重い処理を非同期化し、結果を
+  main thread（Folia では entity / region thread）で返す。例外は既存の `UncaughtExceptionHandler` に流す。
+  Folia support の thread 抽象と設計を共有する。
+- `[ ]` confirmation / cooldown を middleware を待たずに標準機能として追加する（`confirm()`、`cooldown(Duration)`）。
+- `[ ]` dynamic command tree refresh を追加する。permission や plugin state の変化時に対象 player の command tree を
+  再送し、権限・状態に応じた command 表示を動的に切り替えられるようにする。
 - `[ ]` annotation API を設計・実装する。
 - `[ ]` Kotlin DSL を設計・実装する。
 - `[ ]` middleware / interceptor API を追加する。
@@ -107,6 +129,8 @@
 - `[ ]` runtime diagnostics command を追加する。
 - `[ ]` example plugin collection を整備する。
 - `[ ]` documentation site を作る。
+- `[?]` （優先度低・候補）config-driven customization。server admin が YAML 等で command 名、alias、無効化、message を
+  再コンパイルなしで上書きできるようにする。需要を見て採否を決める。
 
 ## 目標
 
@@ -225,6 +249,7 @@ Required:
 - missing arguments を実際の plugin 需要と parity gap に基づいて優先付けする。
 - すべての argument に parse、suggestion、validation、error のテストを追加する。
 - range、optional、default、list、map、greedy、quoted string、namespaced key、registry value、enum alias の挙動を標準化する。
+- optional / variadic argument は argument 列の末尾にのみ置けるものとし、違反は登録時に runtime error にする。
 - Bukkit と Forge の同じ概念の argument は common API で揃える。
 
 High-priority arguments:
@@ -244,6 +269,7 @@ High-priority arguments:
 - NBT / SNBT。
 - Component / JSON text。
 - Time / duration。
+- Range（int / double）。
 - Angle / rotation。
 - Predicate arguments。
 
@@ -300,6 +326,7 @@ Required:
 - platform ごとの default permission behavior を文書化する。
 - permission registration、unregistering、reload、tab completion、help visibility の integration tests を追加する。
 - LuckPerms guide を追加する。
+- permission / state 変化時に command tree を再送する dynamic refresh API を追加する。
 
 Stretch:
 
@@ -373,7 +400,10 @@ Required:
 - pre-execution validation hooks。
 - post-execution hooks。
 - exception mapping。
-- result handling。
+- result handling（int result / success を `/execute store` に反映）。
+- async execution と main / region thread への復帰。
+- cooldown module。
+- confirmation module。
 - dependency injection hooks。
 - sender mapper。
 - context enrichment。
@@ -381,8 +411,6 @@ Required:
 Stretch:
 
 - transaction-like command execution。
-- cooldown module。
-- confirmation module。
 - rate limit module。
 - metrics hooks。
 
@@ -542,6 +570,8 @@ Phase 0（Freeze Direction）と Phase 1（GA Module Split）は完了済み。�
 - `/execute`、command block、function、tag behavior を検証する。
 - error taxonomy を改善する。
 - options syntax を拡張する。
+- execution result と `/execute store` 連携を追加する。
+- vanilla-style feedback を追加する。
 - CommandAPI からの migration guide を追加する。
 
 Exit criteria:
@@ -554,6 +584,10 @@ Exit criteria:
 
 目的: modern users が期待する authoring styles と extension points を追加する。
 
+- variadic / optional argument。
+- async execution。
+- confirmation / cooldown。
+- dynamic command tree refresh。
 - annotation API。
 - Kotlin DSL。
 - middleware / interceptor API。
@@ -614,6 +648,7 @@ Exit criteria:
 - 競合ライブラリの API を完全にコピーする。
 - Minecraft parity より先に non-Minecraft CLI / JDA support を優先する。
 - supported legacy versions を壊してまで reflection / NMS を完全排除する。
+- unknown subcommand / 値に対する error 時の「もしかして」提案。入力補完で十分にカバーできるため。
 
 ## Success Metrics
 
