@@ -68,7 +68,7 @@ final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U ext
                                      .executes(context -> {
                                          try {
                                              C ctx = platformAdapter.createCommandContext(context);
-                                             helpAction.accept(ctx);
+                                             CurrentCommandContext.run(ctx, () -> helpAction.accept(ctx));
                                              return 1;
                                          } catch (Exception e) {
                                              e.printStackTrace();

@@ -103,9 +103,8 @@ class CommonCommandRequireTest {
     void require_on_argument_child_typed_factory_receives_argument() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("cmd") {{
             argument(new CommonStringArgument<>("key")).require(SUCCEEDING_EXTRACTOR)
-                                                       .child(keyArg -> new TestCommand("get") {{
-                                                           execute(ctx -> ctx.sendMessage("get:" + ctx.getArgument(
-                                                                   keyArg)));
+                                                       .child(key -> new TestCommand("get") {{
+                                                           execute(ctx -> ctx.sendMessage("get:" + key.get()));
                                                        }});
         }});
 
@@ -118,7 +117,7 @@ class CommonCommandRequireTest {
     void require_on_argument_child_inherits_prerequisite_from_extractor() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("cmd") {{
             argument(new CommonStringArgument<>("key")).require(FAILING_EXTRACTOR)
-                                                       .child(keyArg -> new TestCommand("get") {{
+                                                       .child(key -> new TestCommand("get") {{
                                                            execute(ctx -> ctx.sendMessage("executed"));
                                                        }});
         }});

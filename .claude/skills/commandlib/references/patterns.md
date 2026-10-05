@@ -61,9 +61,11 @@ matching a vanilla-like command tree or an existing command contract:
 ```
 
 Use typed argument instances for this shape. The `child(...)` factory receives
-the `Argument` instances, not parsed values, because child commands are built
-before a command is executed. Read parent values inside the child executor with
-`ctx.getArgument(argument)`.
+an `ArgRef<T>` for each parent argument, not the parsed value, because child
+commands are built before a command is executed. Read the parent value with
+`ref.get()` inside the child's executor, suggestion actions, or other command
+callbacks. Outside of a callback (for example in a scheduled task), resolve the
+value first (`String k = key.get();`) or use `ref.get(ctx)`.
 
 The same argument branch can define multiple children by calling `child(...)`
 multiple times:
@@ -74,16 +76,14 @@ class ConfigCommand extends Command {
         super("config");
 
         argument(new StringArgument("key")).description("Select a config key")
-                                           .child(keyArg -> new Command("get") {{
+                                           .child(key -> new Command("get") {{
                                                execute(ctx -> {
-                                                   String key = ctx.getArgument(keyArg);
-                                                   ctx.sendMessage("get " + key);
+                                                   ctx.sendMessage("get " + key.get());
                                                });
                                            }})
-                                           .child(keyArg -> new Command("set") {{
+                                           .child(key -> new Command("set") {{
                                                argument(new StringArgument("value")).execute((value, ctx) -> {
-                                                   String key = ctx.getArgument(keyArg);
-                                                   ctx.sendMessage("set " + key + " to " + value);
+                                                   ctx.sendMessage("set " + key.get() + " to " + value);
                                                });
                                            }});
     }

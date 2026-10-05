@@ -1,5 +1,6 @@
 package net.kunmc.lab.commandlib.branch;
 
+import net.kunmc.lab.commandlib.ArgRef;
 import net.kunmc.lab.commandlib.CommonCommandContext;
 import net.kunmc.lab.commandlib.CommonArgument;
 import net.kunmc.lab.commandlib.CommonCommand;
@@ -95,8 +96,8 @@ public final class TriArgumentBranch<T1, T2, T3, C extends CommonCommandContext<
         return this;
     }
 
-    public TriArgumentBranch<T1, T2, T3, C, T> child(@NotNull TriFunction<CommonArgument<T1, C, ?>, CommonArgument<T2, C, ?>, CommonArgument<T3, C, ?>, T> factory) {
-        child(factory.apply(argument1, argument2, argument3));
+    public TriArgumentBranch<T1, T2, T3, C, T> child(@NotNull TriFunction<ArgRef<T1>, ArgRef<T2>, ArgRef<T3>, T> factory) {
+        child(factory.apply(ArgRef.of(argument1), ArgRef.of(argument2), ArgRef.of(argument3)));
         return this;
     }
 

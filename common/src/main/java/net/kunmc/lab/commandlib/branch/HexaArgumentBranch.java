@@ -1,5 +1,6 @@
 package net.kunmc.lab.commandlib.branch;
 
+import net.kunmc.lab.commandlib.ArgRef;
 import net.kunmc.lab.commandlib.CommonCommandContext;
 import net.kunmc.lab.commandlib.CommonArgument;
 import net.kunmc.lab.commandlib.CommonCommand;
@@ -107,8 +108,8 @@ public final class HexaArgumentBranch<T1, T2, T3, T4, T5, T6, C extends CommonCo
         return this;
     }
 
-    public HexaArgumentBranch<T1, T2, T3, T4, T5, T6, C, T> child(@NotNull HexaFunction<CommonArgument<T1, C, ?>, CommonArgument<T2, C, ?>, CommonArgument<T3, C, ?>, CommonArgument<T4, C, ?>, CommonArgument<T5, C, ?>, CommonArgument<T6, C, ?>, T> factory) {
-        child(factory.apply(argument1, argument2, argument3, argument4, argument5, argument6));
+    public HexaArgumentBranch<T1, T2, T3, T4, T5, T6, C, T> child(@NotNull HexaFunction<ArgRef<T1>, ArgRef<T2>, ArgRef<T3>, ArgRef<T4>, ArgRef<T5>, ArgRef<T6>, T> factory) {
+        child(factory.apply(ArgRef.of(argument1), ArgRef.of(argument2), ArgRef.of(argument3), ArgRef.of(argument4), ArgRef.of(argument5), ArgRef.of(argument6)));
         return this;
     }
 

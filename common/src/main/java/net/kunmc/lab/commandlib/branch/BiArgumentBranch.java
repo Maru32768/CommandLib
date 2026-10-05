@@ -1,5 +1,6 @@
 package net.kunmc.lab.commandlib.branch;
 
+import net.kunmc.lab.commandlib.ArgRef;
 import net.kunmc.lab.commandlib.CommonCommandContext;
 import net.kunmc.lab.commandlib.CommonArgument;
 import net.kunmc.lab.commandlib.CommonCommand;
@@ -88,8 +89,8 @@ public final class BiArgumentBranch<T1, T2, C extends CommonCommandContext<?, ?>
         return this;
     }
 
-    public BiArgumentBranch<T1, T2, C, T> child(@NotNull BiFunction<CommonArgument<T1, C, ?>, CommonArgument<T2, C, ?>, T> factory) {
-        child(factory.apply(argument1, argument2));
+    public BiArgumentBranch<T1, T2, C, T> child(@NotNull BiFunction<ArgRef<T1>, ArgRef<T2>, T> factory) {
+        child(factory.apply(ArgRef.of(argument1), ArgRef.of(argument2)));
         return this;
     }
 

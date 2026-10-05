@@ -1,5 +1,6 @@
 package net.kunmc.lab.commandlib.branch;
 
+import net.kunmc.lab.commandlib.ArgRef;
 import net.kunmc.lab.commandlib.CommonCommandContext;
 import net.kunmc.lab.commandlib.CommonArgument;
 import net.kunmc.lab.commandlib.CommonCommand;
@@ -99,8 +100,8 @@ public final class TetraArgumentBranch<T1, T2, T3, T4, C extends CommonCommandCo
         return this;
     }
 
-    public TetraArgumentBranch<T1, T2, T3, T4, C, T> child(@NotNull TetraFunction<CommonArgument<T1, C, ?>, CommonArgument<T2, C, ?>, CommonArgument<T3, C, ?>, CommonArgument<T4, C, ?>, T> factory) {
-        child(factory.apply(argument1, argument2, argument3, argument4));
+    public TetraArgumentBranch<T1, T2, T3, T4, C, T> child(@NotNull TetraFunction<ArgRef<T1>, ArgRef<T2>, ArgRef<T3>, ArgRef<T4>, T> factory) {
+        child(factory.apply(ArgRef.of(argument1), ArgRef.of(argument2), ArgRef.of(argument3), ArgRef.of(argument4)));
         return this;
     }
 

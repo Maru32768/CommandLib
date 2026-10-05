@@ -130,24 +130,24 @@ class CommonCommandHelpSnapshotTest {
             // These branches intentionally omit executors so each partially typed input falls through to help.
             argument(new CommonIntegerArgument<>("n"),
                      new CommonStringArgument<>("p")).description("Run root arguments")
-                                                     .child((nArg, pArg) -> new TestCommand("sub") {{
+                                                     .child((n, p) -> new TestCommand("sub") {{
                                                          description("Sub command");
                                                          argument(new CommonBooleanArgument<>("b")).description(
                                                                  "Boolean argument");
-                                                         argument(new CommonFloatArgument<>("float")).child((floatArg) -> new TestCommand(
+                                                         argument(new CommonFloatArgument<>("float")).child(f -> new TestCommand(
                                                                                                              "sub") {{
                                                                                                          description("Nested sub command");
                                                                                                          execute(ctx -> {
                                                                                                              ctx.sendSuccess("sub sub");
-                                                                                                             ctx.sendSuccess(ctx.getArgument(nArg));
-                                                                                                             ctx.sendSuccess(ctx.getArgument(pArg));
-                                                                                                             ctx.sendSuccess(ctx.getArgument(floatArg));
+                                                                                                             ctx.sendSuccess(n.get());
+                                                                                                             ctx.sendSuccess(p.get(ctx));
+                                                                                                             ctx.sendSuccess(f.get());
                                                                                                          });
                                                                                                      }})
                                                                                                      .description(
                                                                                                              "Float argument");
                                                      }})
-                                                     .child((nArg, pArg) -> new TestCommand("sub2") {{
+                                                     .child((n, p) -> new TestCommand("sub2") {{
                                                          description("sub2");
                                                          argument(new CommonEnumArgument<>("enum",
                                                                                            TestEnum.class)).description(

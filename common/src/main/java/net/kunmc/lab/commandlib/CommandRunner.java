@@ -51,57 +51,60 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
     public int run(CommandContext<S> context) {
         try {
             C ctx = platformAdapter.createCommandContext(context);
+            return CurrentCommandContext.call(ctx, () -> runInContext(ctx));
+        } catch (Throwable e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    private int runInContext(C ctx) {
+        try {
+            if (!platformAdapter.hasPermission(ctx, command.permissionName(permissionPrefix))) {
+                ctx.sendFailure("You do not have permission to execute this command.");
+                return 0;
+            }
 
             try {
-                if (!platformAdapter.hasPermission(ctx, command.permissionName(permissionPrefix))) {
+                parseOptions(ctx);
+                validateOptions(ctx);
+            } catch (ArgumentParseException e) {
+                e.sendMessage(ctx);
+                return 1;
+            }
+
+            for (Arguments<C> arguments : argumentsList) {
+                if (!platformAdapter.hasPermission(ctx, arguments.permissionName(permissionPrefix))) {
                     ctx.sendFailure("You do not have permission to execute this command.");
                     return 0;
                 }
 
                 try {
-                    parseOptions(ctx);
-                    validateOptions(ctx);
+                    arguments.parse(ctx);
                 } catch (ArgumentParseException e) {
                     e.sendMessage(ctx);
                     return 1;
                 }
-
-                for (Arguments<C> arguments : argumentsList) {
-                    if (!platformAdapter.hasPermission(ctx, arguments.permissionName(permissionPrefix))) {
-                        ctx.sendFailure("You do not have permission to execute this command.");
-                        return 0;
-                    }
-
-                    try {
-                        arguments.parse(ctx);
-                    } catch (ArgumentParseException e) {
-                        e.sendMessage(ctx);
-                        return 1;
-                    }
-                }
-                try {
-                    prerequisite.check(ctx);
-                } catch (CommandPrerequisiteException e) {
-                    e.sendMessage(ctx);
-                    return 0;
-                }
-
-                if (executor == null) {
-                    return executeWithStackTrace(ctx, helpAction);
-                }
-
-                if (!preprocess.test(ctx)) {
-                    return 0;
-                }
-
-                return executeWithStackTrace(ctx, executor);
-            } catch (Throwable e) {
-                e.printStackTrace();
-                uncaughtExceptionHandlers.forEach(x -> x.uncaughtException(e, ctx));
-                throw e;
             }
+            try {
+                prerequisite.check(ctx);
+            } catch (CommandPrerequisiteException e) {
+                e.sendMessage(ctx);
+                return 0;
+            }
+
+            if (executor == null) {
+                return executeWithStackTrace(ctx, helpAction);
+            }
+
+            if (!preprocess.test(ctx)) {
+                return 0;
+            }
+
+            return executeWithStackTrace(ctx, executor);
         } catch (Throwable e) {
             e.printStackTrace();
+            uncaughtExceptionHandlers.forEach(x -> x.uncaughtException(e, ctx));
             throw e;
         }
     }

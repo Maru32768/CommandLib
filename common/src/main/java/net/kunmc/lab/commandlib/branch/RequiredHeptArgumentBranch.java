@@ -1,5 +1,6 @@
 package net.kunmc.lab.commandlib.branch;
 
+import net.kunmc.lab.commandlib.ArgRef;
 import net.kunmc.lab.commandlib.CommonCommandContext;
 import net.kunmc.lab.commandlib.CommonArgument;
 import net.kunmc.lab.commandlib.CommonCommand;
@@ -54,8 +55,8 @@ public final class RequiredHeptArgumentBranch<S, T1, T2, T3, T4, T5, T6, T7, C e
         return this;
     }
 
-    public RequiredHeptArgumentBranch<S, T1, T2, T3, T4, T5, T6, T7, C, T> child(@NotNull HeptFunction<CommonArgument<T1, C, ?>, CommonArgument<T2, C, ?>, CommonArgument<T3, C, ?>, CommonArgument<T4, C, ?>, CommonArgument<T5, C, ?>, CommonArgument<T6, C, ?>, CommonArgument<T7, C, ?>, T> factory) {
-        super.child(factory.apply(argument1, argument2, argument3, argument4, argument5, argument6, argument7));
+    public RequiredHeptArgumentBranch<S, T1, T2, T3, T4, T5, T6, T7, C, T> child(@NotNull HeptFunction<ArgRef<T1>, ArgRef<T2>, ArgRef<T3>, ArgRef<T4>, ArgRef<T5>, ArgRef<T6>, ArgRef<T7>, T> factory) {
+        super.child(factory.apply(ArgRef.of(argument1), ArgRef.of(argument2), ArgRef.of(argument3), ArgRef.of(argument4), ArgRef.of(argument5), ArgRef.of(argument6), ArgRef.of(argument7)));
         return this;
     }
 }

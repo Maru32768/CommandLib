@@ -5,7 +5,11 @@ import net.kunmc.lab.commandlib.argument.CommonStringArgument;
 import net.kunmc.lab.commandlib.exception.CommandPrerequisiteException;
 import org.junit.jupiter.api.Test;
 
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Predicate;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class CommonCommandExecutionTest {
     @Test
@@ -67,11 +71,10 @@ class CommonCommandExecutionTest {
 
     @Test
     void argument_chain_can_have_child_command() throws Exception {
-        CommonArgument<String, TestCommandContext, ?> key = new CommonStringArgument<>("key");
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("config") {{
-            argument(key).child(keyArg -> new TestCommand("get") {{
+            argument(new CommonStringArgument<>("key")).child(key -> new TestCommand("get") {{
                 execute(ctx -> {
-                    ctx.sendMessage("get:" + ctx.getArgument(keyArg));
+                    ctx.sendMessage("get:" + key.get());
                 });
             }});
         }});
@@ -83,11 +86,10 @@ class CommonCommandExecutionTest {
 
     @Test
     void argument_child_command_can_have_its_own_arguments() throws Exception {
-        CommonArgument<String, TestCommandContext, ?> key = new CommonStringArgument<>("key");
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("config") {{
-            argument(key).child(keyArg -> new TestCommand("set") {{
+            argument(new CommonStringArgument<>("key")).child(key -> new TestCommand("set") {{
                 argument(new CommonStringArgument<>("value")).execute((value, ctx) -> {
-                    ctx.sendMessage(ctx.getArgument(keyArg) + "=" + value);
+                    ctx.sendMessage(key.get() + "=" + value);
                 });
             }});
         }});
@@ -99,11 +101,10 @@ class CommonCommandExecutionTest {
 
     @Test
     void argument_child_command_can_read_parent_argument_after_child_argument_is_parsed() throws Exception {
-        CommonArgument<Integer, TestCommandContext, ?> count = new CommonIntegerArgument<>("count");
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("counter") {{
-            argument(count).child(countArg -> new TestCommand("label") {{
+            argument(new CommonIntegerArgument<>("count")).child(count -> new TestCommand("label") {{
                 argument(new CommonStringArgument<>("name")).execute((name, ctx) -> {
-                    ctx.sendMessage(ctx.getArgument(countArg) + ":" + name);
+                    ctx.sendMessage(count.get() + ":" + name);
                 });
             }});
         }});
@@ -115,13 +116,12 @@ class CommonCommandExecutionTest {
 
     @Test
     void argument_branch_can_have_multiple_child_factories() throws Exception {
-        CommonArgument<String, TestCommandContext, ?> key = new CommonStringArgument<>("key");
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("config") {{
-            argument(key).child(keyArg -> new TestCommand("get") {{
-                             execute(ctx -> ctx.sendMessage("get:" + ctx.getArgument(keyArg)));
+            argument(new CommonStringArgument<>("key")).child(key -> new TestCommand("get") {{
+                             execute(ctx -> ctx.sendMessage("get:" + key.get()));
                          }})
-                         .child(keyArg -> new TestCommand("delete") {{
-                             execute(ctx -> ctx.sendMessage("delete:" + ctx.getArgument(keyArg)));
+                         .child(key -> new TestCommand("delete") {{
+                             execute(ctx -> ctx.sendMessage("delete:" + key.get()));
                          }});
         }});
 
@@ -298,4 +298,63 @@ class CommonCommandExecutionTest {
                                                    "Check the console for details.");
     }
 
+    @Test
+    void arg_ref_resolves_parent_value_with_and_without_context() throws Exception {
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("config") {{
+            argument(new CommonStringArgument<>("key")).child(key -> new TestCommand("get") {{
+                execute(ctx -> ctx.sendMessage(key.get() + ":" + key.get(ctx)));
+            }});
+        }});
+
+        TestCommandContext ctx = runner.execute("config difficulty get");
+
+        assertThat(ctx.messages()).containsExactly("difficulty:difficulty");
+    }
+
+    @Test
+    void arg_ref_resolves_parent_value_in_child_suggestion() throws Exception {
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("config") {{
+            argument(new CommonStringArgument<>("key")).child(key -> new TestCommand("set") {{
+                CommonArgument<String, TestCommandContext, ?> value = new CommonStringArgument<>("value");
+                value.addSuggestionAction(sb -> sb.suggest(key.get() + "-value"));
+                argument(value).execute((v, ctx) -> ctx.sendMessage(v));
+            }});
+        }});
+
+        assertThat(runner.suggest("config difficulty set ")).contains("difficulty-value");
+    }
+
+    @Test
+    void arg_ref_resolves_parent_value_in_argument_parsing_during_suggestion() throws Exception {
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("config") {{
+            argument(new CommonStringArgument<>("key")).child(key -> new TestCommand("set") {{
+                CommonArgument<String, TestCommandContext, ?> field = new CommonStringArgument<>("field");
+                field.validator((Predicate<String>) f -> key.get()
+                                                          .equals("difficulty"));
+                CommonArgument<String, TestCommandContext, ?> value = new CommonStringArgument<>("value");
+                value.addSuggestionAction(sb -> sb.suggest(sb.getArgument("field") + "-value"));
+                argument(field, value).execute((f, v, ctx) -> ctx.sendMessage(f + "=" + v));
+            }});
+        }});
+
+        assertThat(runner.suggest("config difficulty set mode ")).contains("mode-value");
+    }
+
+    @Test
+    void arg_ref_get_outside_command_callback_throws() throws Exception {
+        AtomicReference<ArgRef<String>> captured = new AtomicReference<>();
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("config") {{
+            argument(new CommonStringArgument<>("key")).child(key -> {
+                captured.set(key);
+                return new TestCommand("get") {{
+                    execute(ctx -> ctx.sendMessage(key.get()));
+                }};
+            });
+        }});
+        runner.execute("config difficulty get");
+
+        assertThatThrownBy(() -> captured.get()
+                                         .get()).isInstanceOf(IllegalStateException.class)
+                                                .hasMessageContaining("key");
+    }
 }

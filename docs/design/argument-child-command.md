@@ -34,14 +34,14 @@ API is expected to behave, and which internal boundaries are intentional.
       .description("...")
       .execute((nValue, pValue, ctx) -> {
       })
-      .child((nArg, pArg) -> new Command("sub") {{
+      .child((n, p) -> new Command("sub") {{
       }});
   ```
 
 - Let child commands read parent arguments in a typed way:
 
   ```java
-  Integer n = ctx.getArgument(nArg);
+  Integer parsedN = n.get();
   ```
 
 - Keep internal tree storage types out of the public API where possible.
@@ -79,31 +79,21 @@ These classes exist so the branch can expose typed `execute(...)` and typed
 child factories:
 
 ```java
-IntegerArgument n = new IntegerArgument("n");
-PlayerArgument p = new PlayerArgument("p");
-
-argument(n, p)
-    .
-
-execute((parsedN, parsedP, ctx) ->{
-        })
-        .
-
-child((nArg, pArg) ->new
-
-Command("sub") {
-    {
+argument(new IntegerArgument("n"), new PlayerArgument("p"))
+    .execute((parsedN, parsedP, ctx) -> {
+    })
+    .child((n, p) -> new Command("sub") {{
         execute(ctx -> {
-            Integer parsedN = ctx.getArgument(nArg);
-            Player parsedP = ctx.getArgument(pArg);
+            Integer parsedN = n.get();
+            Player parsedP = p.get();
         });
-    }
-});
+    }});
 ```
 
-The child factory receives `CommonArgument` instances, not parsed values. Parsed
-values do not exist when the command tree is being constructed; they only exist
-when an executor runs.
+The child factory receives an `ArgRef<T>` per parent argument, not parsed
+values. Parsed values do not exist when the command tree is being constructed;
+they only exist while a command callback runs. See
+[Parent Argument References](#parent-argument-references).
 
 ## Why `child` Instead of `command`
 
@@ -189,14 +179,8 @@ keeps the package split clean:
 For a typed branch:
 
 ```java
-argument(n, p).
-
-child((nArg, pArg) ->new
-
-Command("sub") {
-    {
-    }
-});
+argument(n, p).child((nRef, pRef) -> new Command("sub") {{
+}});
 ```
 
 the flow is:
@@ -205,8 +189,8 @@ the flow is:
 2. `CommonCommand` creates an `ArgumentBranchDelegate` bound to that
    `Arguments`.
 3. `BiArgumentBranch` stores the two `CommonArgument` instances.
-4. `BiArgumentBranch#child(...)` calls the factory with those argument
-   instances.
+4. `BiArgumentBranch#child(...)` wraps those argument instances in `ArgRef`
+   and calls the factory with them.
 5. The produced command is passed to `ArgumentBranch#child(...)`.
 6. `ArgumentBranch` calls `delegate.addChildren(...)`.
 7. `CommonCommand#addArgumentChildren(...)` validates the children, stores them
@@ -231,22 +215,10 @@ The same argument branch can receive multiple children:
 
 ```java
 argument(n, p)
-    .
-
-child((nArg, pArg) ->new
-
-Command("sub") {
-    {
-    }
-})
-        .
-
-child((nArg, pArg) ->new
-
-Command("sub2") {
-    {
-    }
-});
+    .child((nRef, pRef) -> new Command("sub") {{
+    }})
+    .child((nRef, pRef) -> new Command("sub2") {{
+    }});
 ```
 
 Internally this appends both commands to the same `Arguments#children` list:
@@ -319,12 +291,59 @@ Because of that, parent arguments can be read through the normal argument
 implementation:
 
 ```java
-Integer n = ctx.getArgument(nArg);
+Integer parsedN = n.get();
 ```
 
 No raw-input fallback is required for the current implementation. If a future
 change removes or changes root context rebuilding, argument-child parsing should
 be revalidated with tests before adding any fallback behavior.
+
+## Parent Argument References
+
+Child factories receive `ArgRef<T>` rather than the parent `CommonArgument` or
+its value:
+
+```java
+argument(new StringArgument("key")).child(key -> new Command("get") {{
+    execute(ctx -> ctx.sendMessage("get:" + key.get()));
+}});
+```
+
+`ArgRef` is a thin handle around the parent `CommonArgument`:
+
+- `get(ctx)` reads the value through `ctx.getArgument(argument)`.
+- `get()` reads the value from the command context currently being processed on
+  this thread.
+
+The current context is tracked by the package-private `CurrentCommandContext`,
+a `ThreadLocal` stack. Callers never push or pop directly; they wrap the work in
+`CurrentCommandContext.call(ctx, supplier)` or `run(ctx, runnable)`, which
+restore the stack in `finally`. This is used around:
+
+- `CommandRunner#run`: permission checks, option/argument parsing,
+  prerequisites, preprocess, executors, and help fallback
+- suggestion handling in `ArgumentCommandNodeCreator`: both the argument parsing
+  that pre-populates the context (validators, transformers) and the suggestion
+  actions
+- the generated `help` literal node
+
+A stack is used because a callback may dispatch another command on the same
+thread. The `ThreadLocal` is removed when the stack becomes empty.
+
+Calling `get()` outside of those callbacks (for example from a task scheduled by
+an executor, or from work completed asynchronously through
+`SuggestionBuilder#await`) throws `IllegalStateException` naming the argument.
+Such code should resolve the value inside the callback or use `get(ctx)`.
+
+### Suggestions
+
+`ctx.getArgument(...)` only sees arguments stored by `Arguments#parse`. Suggestion
+handling therefore parses every chain in `executorArguments` (inherited parent
+chains first, then the current chain), not just the current chain. Each chain is
+parsed best-effort in its own `try` so one failing conversion does not hide the
+others; `Arguments#parse` stops at the first argument without input, so partially
+typed chains are fine. This makes parent values readable from a child's
+suggestion actions, matching execution behavior.
 
 ## Help Generation
 

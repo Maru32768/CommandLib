@@ -128,9 +128,11 @@ class MyPlugin extends JavaPlugin {
 Argument chains can also have child commands. Prefer this only for vanilla-like
 or compatibility syntax where the target comes before the action.
 
-The `child(...)` factory receives `Argument` instances, not parsed runtime
-values. Use those instances with `ctx.getArgument(argument)` inside the child
-executor:
+The `child(...)` factory receives an `ArgRef<T>` for each parent argument, not
+the parsed runtime value. Call `ref.get()` inside the child's executor or
+suggestion actions to read the value. In code that runs after the callback
+returns (such as a scheduled task), resolve the value first or use
+`ref.get(ctx)`:
 
 ```java
 class ConfigCommand extends Command {
@@ -138,16 +140,14 @@ class ConfigCommand extends Command {
         super("config");
 
         argument(new StringArgument("key")).description("Select a config key")
-                                           .child(keyArg -> new Command("get") {{
+                                           .child(key -> new Command("get") {{
                                                execute(ctx -> {
-                                                   String key = ctx.getArgument(keyArg);
-                                                   ctx.sendMessage("get " + key);
+                                                   ctx.sendMessage("get " + key.get());
                                                });
                                            }})
-                                           .child(keyArg -> new Command("set") {{
+                                           .child(key -> new Command("set") {{
                                                argument(new StringArgument("value")).execute((value, ctx) -> {
-                                                   String key = ctx.getArgument(keyArg);
-                                                   ctx.sendMessage("set " + key + " to " + value);
+                                                   ctx.sendMessage("set " + key.get() + " to " + value);
                                                });
                                            }});
     }

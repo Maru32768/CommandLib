@@ -1,5 +1,6 @@
 package net.kunmc.lab.commandlib.branch;
 
+import net.kunmc.lab.commandlib.ArgRef;
 import net.kunmc.lab.commandlib.CommonCommandContext;
 import net.kunmc.lab.commandlib.CommonArgument;
 import net.kunmc.lab.commandlib.CommonCommand;
@@ -83,8 +84,8 @@ public final class UnaryArgumentBranch<T1, C extends CommonCommandContext<?, ?>,
         return this;
     }
 
-    public UnaryArgumentBranch<T1, C, T> child(@NotNull Function<CommonArgument<T1, C, ?>, T> factory) {
-        child(factory.apply(argument1));
+    public UnaryArgumentBranch<T1, C, T> child(@NotNull Function<ArgRef<T1>, T> factory) {
+        child(factory.apply(ArgRef.of(argument1)));
         return this;
     }
 

@@ -39,26 +39,33 @@ final class ArgumentCommandNodeCreator<S, T, C extends CommonCommandContext<S, T
                     return Suggestions.empty();
                 }
                 C ctx = platformAdapter.createCommandContext(context);
-                try {
-                    arguments.parse(ctx);
-                } catch (Exception ignored) {
-                    // Best-effort: pre-populate ctx with already-parsed arguments for use in
-                    // suggestion actions. Failures (e.g. platform-specific context differences)
-                    // are non-fatal - the suggestion action still runs.
-                }
-
                 SuggestionBuilder<C> suggestionBuilder = new SuggestionBuilder<>(ctx, sb.getRemaining());
                 List<CompletableFuture<Suggestions>> defaultFutures = new ArrayList<>();
-                for (ArgumentSuggestionAction<C> suggestionAction : argument.suggestionActions()) {
-                    if (suggestionAction.isDefaultSuggestions()) {
-                        defaultFutures.add(argument.type()
-                                                   .listSuggestions(context, sb)
-                                                   .toCompletableFuture());
-                    } else {
-                        suggestionAction.action()
-                                        .accept(suggestionBuilder);
+                // Parsing runs user code (validators, transformers) too, so it shares the current context with the
+                // suggestion actions, matching CommandRunner.
+                CurrentCommandContext.run(ctx, () -> {
+                    // Include inherited parent arguments so argument child commands can read them while suggesting.
+                    for (Arguments<C> parsed : executorArguments) {
+                        try {
+                            parsed.parse(ctx);
+                        } catch (Exception ignored) {
+                            // Best-effort: pre-populate ctx with already-parsed arguments for use in
+                            // suggestion actions. Failures (e.g. platform-specific context differences)
+                            // are non-fatal - the suggestion action still runs.
+                        }
                     }
-                }
+
+                    for (ArgumentSuggestionAction<C> suggestionAction : argument.suggestionActions()) {
+                        if (suggestionAction.isDefaultSuggestions()) {
+                            defaultFutures.add(argument.type()
+                                                       .listSuggestions(context, sb)
+                                                       .toCompletableFuture());
+                        } else {
+                            suggestionAction.action()
+                                            .accept(suggestionBuilder);
+                        }
+                    }
+                });
 
                 CompletableFuture<Void> customFuture = suggestionBuilder.awaitAll()
                                                                         .toCompletableFuture()

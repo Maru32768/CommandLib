@@ -345,16 +345,16 @@ public final class ConfigCommand extends Command {
         super("config");
 
         argument(new StringArgument("key")).description("Select a config key")
-                                           .child(keyArg -> new Command("get") {{
+                                           .child(key -> new Command("get") {{
                                                execute(ctx -> {
-                                                   String key = ctx.getArgument(keyArg);
+                                                   String configKey = key.get();
 
                                                    // Get config value
                                                });
                                            }})
-                                           .child(keyArg -> new Command("set") {{
-                                               argument(new StringArgument("value")).execute((valueValue, ctx) -> {
-                                                   String key = ctx.getArgument(keyArg);
+                                           .child(key -> new Command("set") {{
+                                               argument(new StringArgument("value")).execute((value, ctx) -> {
+                                                   String configKey = key.get();
 
                                                    // Set config value
                                                });
@@ -362,6 +362,10 @@ public final class ConfigCommand extends Command {
     }
 }
 ```
+
+The `child(...)` factory receives an `ArgRef<T>` for each parent argument. Call `key.get()` inside the child's executor
+or suggestion actions to read the parsed value. In code that runs after the callback returns, such as a scheduled task,
+read the value first or use `key.get(ctx)`.
 
 Valid inputs:
 
@@ -694,16 +698,16 @@ public final class ConfigCommand extends Command {
         super("config");
 
         argument(new StringArgument("key")).permission("myplugin.command.config.key")
-                                           .child(keyArg -> new Command("get") {{
+                                           .child(key -> new Command("get") {{
                                                execute(ctx -> {
-                                                   String key = ctx.getArgument(keyArg);
+                                                   String configKey = key.get();
 
                                                    // Get config value
                                                });
                                            }})
-                                           .child(keyArg -> new Command("set") {{
+                                           .child(key -> new Command("set") {{
                                                argument(new StringArgument("value")).execute((value, ctx) -> {
-                                                   String key = ctx.getArgument(keyArg);
+                                                   String configKey = key.get();
 
                                                    // Set config value
                                                });
