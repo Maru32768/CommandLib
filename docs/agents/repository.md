@@ -19,8 +19,8 @@ instructions.
   Bukkit-compatible plugin fixtures; Forge fixtures may be added separately.
 - `forge`: Forge-facing integration. One shared source tree in `forge/src`
   builds every supported Minecraft version (`:forge:1.16.5`, `:forge:1.20.1`)
-  through Stonecutter conditional comments and Architectury Loom. See
-  `docs/design/forge-version-support.md` before editing it.
+  through Stonecutter conditional comments and Architectury Loom. Read
+  `docs/agents/forge.md` before editing it.
 - `sample`: sample usage.
 
 Prefer the existing module boundaries. Keep shared behavior in `common` when it
