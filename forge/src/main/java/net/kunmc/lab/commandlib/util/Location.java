@@ -56,10 +56,7 @@ public class Location implements Cloneable {
     }
 
     public LevelChunk getChunk() {
-        //? if >=1.20 {
         return getWorld().getChunk(getBlockX() >> 4, getBlockZ() >> 4);
-        //?} else
-        /*return getWorld().getChunk(getBlockX(), getBlockZ());*/
     }
 
     public BlockState getBlockState() {
