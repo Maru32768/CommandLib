@@ -149,7 +149,7 @@ Example:
 
 | Artifact | Compile target | Supported Forge range | Notes |
 |---|---|---|---|
-| `forge-1.16.5` | `1.16.5-36.2.20` | `36.2.x` | `36.0.x` and `36.1.x` are not promised unless tested. |
+| `forge-1.16.5` | `1.16.5-36.2.42` | `36.2.x` | Compiles against the recommended build. 36.2.20 crashes on current Java 11 updates (see `integration-test/README.md`). `36.0.x` and `36.1.x` are not promised unless tested. |
 | `forge-1.20.1` | `1.20.1-47.3.x` | `47.3.x` | Exact lower bound should be set by integration tests. |
 
 Do not split a module just because Forge has a different patch version. Split

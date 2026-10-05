@@ -123,8 +123,8 @@ Test cases run from the server console source while the bot is online, and cover
 
 Notes:
 
-- The 1.16.5 target runs Forge 36.2.42. Older 36.2.x builds such as 36.2.20, which the library compiles against,
-  crash on current Java 11 updates with `NoSuchMethodError` in `ManifestEntryVerifier`.
+- The 1.16.5 target runs Forge 36.2.42, the recommended build, which the library also compiles against. Older 36.2.x
+  builds such as 36.2.20 crash on current Java 11 updates with `NoSuchMethodError` in `ManifestEntryVerifier`.
 - MCProtocolLib 1.16.5 cannot decode `brigadier:long`, so the `LongArgument` case is not registered on 1.16.5, the
   same as the Spigot fixture.
 
