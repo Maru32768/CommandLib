@@ -7,7 +7,8 @@ import org.jetbrains.annotations.NotNull;
 //? if >=1.18 {
 import net.minecraft.server.level.ServerPlayer;
 //?} else {
-/*import net.minecraftforge.server.permission.PermissionAPI;
+/*import net.minecraft.commands.CommandSource;
+import net.minecraftforge.server.permission.PermissionAPI;
 
 import java.lang.reflect.Field;
 *///?}
@@ -117,13 +118,30 @@ final class ForgeCommandActor implements CommandActor {
         //? if >=1.18 {
         return source.source;
         //?} else {
-        /*try {
-            Field field = CommandSourceStack.class.getDeclaredField("source");
-            field.setAccessible(true);
-            return field.get(source);
+        /*if (RAW_SOURCE_FIELD == null) {
+            return null;
+        }
+        try {
+            return RAW_SOURCE_FIELD.get(source);
         } catch (ReflectiveOperationException ignored) {
             return null;
         }
         *///?}
     }
+
+    //? if <1.18 {
+    /*// The field is private here and named differently in development (Mojang) and production (SRG),
+    // so look it up by its type. CommandSourceStack has exactly one CommandSource field.
+    private static final Field RAW_SOURCE_FIELD = findRawSourceField();
+
+    private static Field findRawSourceField() {
+        for (Field field : CommandSourceStack.class.getDeclaredFields()) {
+            if (field.getType() == CommandSource.class) {
+                field.setAccessible(true);
+                return field;
+            }
+        }
+        return null;
+    }
+    *///?}
 }
