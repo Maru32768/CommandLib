@@ -5,19 +5,29 @@ module beyond Minecraft 1.16.5.
 
 ## Current State
 
-The current `forge` module is a Forge 1.16.5 implementation:
+Forge 1.16.5 and 1.20.1 are built from one shared source tree with
+[Stonecutter](https://stonecutter.kikugie.dev/) and Architectury Loom:
 
-- `forge/build.gradle.kts` compiles against
-  `net.minecraftforge:forge:1.16.5-36.2.20`.
-- It uses MCP snapshot mappings: `snapshot`, `20210309-1.16.5`.
-- Public API classes expose Forge 1.16.5 / Minecraft 1.16.5 types such as
-  `CommandSource`, `ITextComponent`, `PlayerEntity`, `ServerPlayerEntity`,
-  `ServerWorld`, and `DefaultPermissionLevel`.
-- Command registration is tied to `FMLServerStartedEvent` and direct mutation of
-  the server command dispatcher root.
-- Permission registration and lookup use the old
-  `PermissionAPI.registerNode(String, DefaultPermissionLevel, String)` and
-  `PermissionAPI.hasPermission(PlayerEntity, String)` API.
+- `forge/src/main/java` is the only Forge source tree. Version-specific code is
+  selected with Stonecutter conditional comments (`//? if >=1.19 { ... }`).
+- `forge/versions/<minecraft-version>/gradle.properties` holds per-version
+  settings (`loom.platform=forge` and the Forge build in `deps.forge`).
+- `forge/build.gradle.kts` is the shared version template and
+  `forge/stonecutter.gradle.kts` is the Stonecutter controller.
+- Gradle paths and artifact IDs are unchanged: `:forge:1.16.5` publishes
+  `forge-1.16.5` and `:forge:1.20.1` publishes `forge-1.20.1`.
+- All versions are written against official Mojang mappings, including 1.16.5.
+  Loom remaps the built jars to SRG, so published jars keep the same public API
+  and the same runtime member references as the previous ForgeGradle builds
+  (verified by comparing `javap` output of both builds).
+- Public API still exposes each Minecraft version's native types. The 1.16.5
+  artifact keeps its `DefaultPermissionLevel` overloads and
+  `FMLServerStartedEvent` registration; 1.20.1 uses `RegisterCommandsEvent` and
+  `PermissionNode`.
+
+The previous 1.16.5-only module used MCP snapshot mappings
+(`snapshot`, `20210309-1.16.5`) and ForgeGradle. ForgeGradle does not support
+Gradle 9, which Stonecutter and current Architectury Loom require.
 
 This is materially different from the Spigot module. The Spigot module can keep
 one artifact and choose version-specific NMS bridges at runtime because its
@@ -190,6 +200,25 @@ Recommended split:
   `DefaultPermissionLevel` in any modern API. Use CommandLib's
   `DefaultPermission` in common-facing APIs, and adapt to Forge-specific
   permission systems internally.
+
+## Stonecutter Workflow
+
+- Edit only `forge/src`. The committed state of that directory is the
+  `vcsVersion` (currently 1.20.1).
+- Condition boundaries use the Minecraft version where the API actually
+  changed when it is known (for example `>=1.19` for `Component.literal`,
+  `>=1.19.3` for `Registries`, `>=1.19.4` for `BlockPos.containing`,
+  `>=1.18` for the Forge permission node API). Only 1.16.5 and 1.20.1 are built
+  today, so boundaries for versions in between are not verified yet; adding a
+  version is expected to adjust some of them.
+- Java does not allow nested block comments, so code inside a conditional block
+  must not contain `/* */` or Javadoc. Use `//` comments there.
+- Switching the active version in the IDE rewrites `forge/src` in place. Reset
+  to the `vcsVersion` before committing.
+- Adding a Minecraft version means adding it to `versions(...)` in
+  `settings.gradle.kts`, creating `forge/versions/<version>/gradle.properties`,
+  adding the artifact mapping in the root `build.gradle.kts`, and fixing
+  compile errors with conditions.
 
 ## Migration Path
 

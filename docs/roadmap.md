@@ -92,7 +92,7 @@
 - `[~]` NeoForge / Fabric / Forge の module 方針を決める。方針案は
   [11. Platform Architecture](#11-platform-architecture) を参照。
 - `[~]` Velocity support 方針を決める。方針案は [11. Platform Architecture](#11-platform-architecture) を参照。
-- `[ ]` Architectury Loom + Stonecutter の PoC として、`forge:1.16.5` と `forge:1.20.1` を単一ソースから build する。
+- `[x]` Architectury Loom + Stonecutter の PoC として、`forge:1.16.5` と `forge:1.20.1` を単一ソースから build する。
 - `[ ]` mod loader 系 module を `minecraft`（MC version 依存・loader 非依存）と `loader/*`（loader 依存）に分割する。
 - `[ ]` sender / message abstraction（Adventure と vanilla `Component` の差分吸収）を Velocity 着手前に設計する。
 - `[ ]` public API の binary compatibility check（japicmp 等）を CI に追加する。

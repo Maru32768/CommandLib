@@ -11,6 +11,7 @@ dependencies {
 
     testImplementation("com.mojang:brigadier:1.0.18")
     testImplementation("org.junit.jupiter:junit-jupiter:5.8.1")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("org.assertj:assertj-core:3.25.1")
 }
 
