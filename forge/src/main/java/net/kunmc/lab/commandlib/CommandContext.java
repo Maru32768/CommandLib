@@ -166,18 +166,17 @@ public final class CommandContext extends CommonCommandContext<CommandSourceStac
         //? if >=1.19 {
         MutableComponent component = Component.literal(String.valueOf(message))
                                              .withStyle(ChatFormatting.RED);
+        //?} else {
+        /*BaseComponent component = new TextComponent(String.valueOf(message));
+        component.setStyle(component.getStyle()
+                                    .withColor(TextColor.fromRgb(ChatFormatting.RED.getColor())));
+        *///?}
         if (allowLogging) {
             // CommandSourceStack#sendFailure never broadcasts to ops, so route through sendSuccess.
             sendMessage(component, true);
         } else {
             getSender().sendFailure(component);
         }
-        //?} else {
-        /*BaseComponent component = new TextComponent(String.valueOf(message));
-        component.setStyle(component.getStyle()
-                                    .withColor(TextColor.fromRgb(ChatFormatting.RED.getColor())));
-        sendMessage(component, allowLogging);
-        *///?}
     }
 
     @Override
