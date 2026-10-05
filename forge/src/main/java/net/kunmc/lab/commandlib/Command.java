@@ -17,10 +17,7 @@ import java.util.AbstractMap;
 import java.util.Map;
 *///?}
 
-//? if >=1.18 {
-public abstract class Command extends CommonCommand<CommandContext, Command> {
-//?} else
-/*public class Command extends CommonCommand<CommandContext, Command> {*/
+public class Command extends CommonCommand<CommandContext, Command> {
     public Command(@NotNull String name) {
         super(name);
     }
