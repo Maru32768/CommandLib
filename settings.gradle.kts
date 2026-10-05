@@ -31,6 +31,14 @@ include(
 )
 project(":integration-test:shared:spigot-fixture").projectDir = file("integration-test/shared/spigot")
 project(":integration-test:shared:paper-fixture").projectDir = file("integration-test/shared/paper")
+include("integration-test:shared:forge-fixture")
+project(":integration-test:shared:forge-fixture").projectDir = file("integration-test/shared/forge")
+stonecutter {
+    create(":integration-test:shared:forge-fixture") {
+        versions("1.16.5", "1.20.1")
+        vcsVersion = "1.20.1"
+    }
+}
 include(
     "integration-test:targets:paper-1.16.5",
     "integration-test:targets:mohist-1.16.5",
@@ -41,4 +49,6 @@ include(
     "integration-test:targets:paper-1.20.5",
     "integration-test:targets:paper-1.20.6",
     "integration-test:targets:paper-1.21.0",
+    "integration-test:targets:forge-1.16.5",
+    "integration-test:targets:forge-1.20.1",
 )

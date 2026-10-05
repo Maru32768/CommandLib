@@ -54,6 +54,31 @@ val requiresMohistBootstrap = if (extra.has("commandlib.integration.requiresMohi
 }
     .toBooleanStrictOrNull()
     ?: false
+// Directory under the target project that holds the server directory. Bukkit-family targets use their nested
+// test-plugin Gradle project; other platforms only need a work directory.
+val workDirectory = if (extra.has("commandlib.integration.workDirectory")) {
+    extra["commandlib.integration.workDirectory"].toString()
+} else {
+    "test-plugin"
+}
+// Directory inside the server directory that receives the test plugin or mod jar.
+val testPluginSubdirectory = if (extra.has("commandlib.integration.testPluginSubdirectory")) {
+    extra["commandlib.integration.testPluginSubdirectory"].toString()
+} else {
+    "plugins"
+}
+val testPluginJarPattern = if (extra.has("commandlib.integration.testPluginJarPattern")) {
+    extra["commandlib.integration.testPluginJarPattern"].toString()
+} else {
+    "TestPlugin.*\\.jar"
+}
+// Java arguments that start the server, such as "-jar server.jar" or an @argument file.
+val serverLaunchArgs = if (extra.has("commandlib.integration.serverLaunchArgs")) {
+    extra["commandlib.integration.serverLaunchArgs"].toString()
+} else {
+    "-jar $serverJarName"
+}
+val isBukkitPlatform = targetPlatform == "paper" || targetPlatform == "mohist"
 val reportFileName = "TEST-commandlib-$minecraftVersion-$targetPlatform.xml"
 
 val mcProtocol = configurations.named("mcProtocol")
@@ -107,14 +132,16 @@ tasks.named<Test>("test") {
 val nestedGradleUserHome = rootProject.file(".gradle-user-home-integration-test")
 val integrationTestDir = rootProject.file("integration-test")
 val sharedDir = integrationTestDir.resolve("shared")
-val testPluginDir = project.file("test-plugin")
+val testPluginDir = project.file(workDirectory)
 val stagedDockerServerDir = layout.buildDirectory.dir("docker-server")
 val dockerImageMarker = layout.buildDirectory.file("docker-server-image/tag.txt")
 val dockerImageName = "commandlib-it-${targetName.lowercase()}:latest"
 val isWindows = System.getProperty("os.name").startsWith("Windows", ignoreCase = true)
 val javaToolchains = extensions.getByType<JavaToolchainService>()
 
-val prepareTask = tasks.register<Exec>("prepareTestPlugin") {
+// A target can register its own prepareTestPlugin task before applying this script, for example to install a
+// Forge server and copy the test mod built in this Gradle build. Otherwise the nested test-plugin build runs.
+val prepareTask = if ("prepareTestPlugin" in tasks.names) tasks.named("prepareTestPlugin") else tasks.register<Exec>("prepareTestPlugin") {
     val hasWrapperJar = testPluginDir.resolve("gradle/wrapper/gradle-wrapper.jar").isFile
 
     workingDir(if (hasWrapperJar) testPluginDir else rootProject.projectDir)
@@ -253,7 +280,9 @@ val writeDockerServerProperties = tasks.register("writeDockerServerProperties") 
 
     doLast {
         writeServerProperties(serverDir, 25565)
-        writeBukkitConfig(serverDir)
+        if (isBukkitPlatform) {
+            writeBukkitConfig(serverDir)
+        }
         deleteDisabledDimensionDirectories(serverDir)
         if (targetPlatform == "mohist") {
             writeMohistConfig(serverDir, false)
@@ -280,6 +309,7 @@ val stageDockerServerDirectory = tasks.register<Sync>("stageDockerServerDirector
         "flat/**",
         "flat_*/**",
         "plugins/TestPlugin*.jar",
+        "mods/TestMod*.jar",
         "usercache.json",
         "usernamecache.json",
         "banned-ips.json",
@@ -472,6 +502,9 @@ tasks.register<Test>("minecraftIntegrationTest") {
     systemProperty("commandlib.reportFileName", reportFileName)
     systemProperty("commandlib.serverDirectory", serverDirectory)
     systemProperty("commandlib.serverJarName", serverJarName)
+    systemProperty("commandlib.serverLaunchArgs", serverLaunchArgs)
+    systemProperty("commandlib.testPluginSubdirectory", testPluginSubdirectory)
+    systemProperty("commandlib.testPluginJarPattern", testPluginJarPattern)
     systemProperty("commandlib.minecraftJavaVersion", minecraftJavaVersion.toString())
     systemProperty("commandlib.containerCpuLimit", containerCpuLimit.get().toString())
 }

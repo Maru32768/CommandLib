@@ -57,8 +57,8 @@ Each target owns its fixture project:
 integration-test/targets/{platform}-{version}/test-plugin/
 ```
 
-The current targets are Bukkit-compatible plugin fixtures. Future Forge targets can add a platform-specific fixture
-layout while reusing the same top-level integration-test runner.
+Bukkit-compatible targets build their plugin in that nested `test-plugin` project. Forge targets have no nested
+project; see [Forge Targets](#forge-targets).
 
 Shared fixture code is split by responsibility:
 
@@ -66,9 +66,10 @@ Shared fixture code is split by responsibility:
 integration-test/shared/core
 integration-test/shared/spigot
 integration-test/shared/paper
+integration-test/shared/forge
 ```
 
-`shared/core` is limited to platform-neutral result and report helpers so future Forge integration fixtures can reuse it
+`shared/core` is limited to platform-neutral result and report helpers so the Forge test mod can reuse it
 without inheriting Bukkit lifecycle or command-dispatch assumptions. Spigot and Paper cases are intentionally separate
 even when they currently look similar.
 
@@ -100,6 +101,32 @@ For example:
 
 `minecraftIntegrationTest` is the aggregate task for all configured targets.
 The aggregate task depends on per-target subprojects, so Gradle can run independent targets in parallel by default.
+
+## Forge Targets
+
+Forge targets (`forge-1.16.5`, `forge-1.20.1`) reuse the same runner, Docker image flow, and MCProtocolLib bot, but
+prepare the server differently:
+
+- The test mod lives in `integration-test/shared/forge` and is built in the main Gradle build as a Stonecutter tree
+  (`:integration-test:shared:forge-fixture:<minecraft-version>`), like the `forge` module. Conditional comments follow
+  `docs/agents/forge.md`.
+- `testModJar` bundles the published, SRG-remapped `:forge:<version>` jar together with `common` and `shared/core`.
+  The tests therefore run the same artifact downstream mods use, which catches bugs that only appear with production
+  names.
+- `integration-test/gradle/forge-integration-target.gradle.kts` registers `prepareTestPlugin`. It downloads the Forge
+  installer, installs the server into `targets/forge-<version>/work/server`, and copies the test mod into `mods`.
+- The server is started with the target's `commandlib.integration.serverLaunchArgs` (an `@libraries/.../unix_args.txt`
+  file for 1.17+, `-jar forge-<version>.jar` for 1.16.5).
+
+Test cases run from the server console source while the bot is online, and cover every public Forge argument
+(enforced by `ArgumentIntegrationCoverageTest`) plus `CommandActor` behavior.
+
+Notes:
+
+- The 1.16.5 target runs Forge 36.2.42. Older 36.2.x builds such as 36.2.20, which the library compiles against,
+  crash on current Java 11 updates with `NoSuchMethodError` in `ManifestEntryVerifier`.
+- MCProtocolLib 1.16.5 cannot decode `brigadier:long`, so the `LongArgument` case is not registered on 1.16.5, the
+  same as the Spigot fixture.
 
 ## Generated NMS Jars
 

@@ -52,10 +52,15 @@ class IntegrationTest {
         String reportFileName = System.getProperty("commandlib.reportFileName",
                                                    "TEST-commandlib-" + targetName + ".xml");
         String serverJarName = System.getProperty("commandlib.serverJarName", "server.jar");
+        String serverLaunchArgs = System.getProperty("commandlib.serverLaunchArgs", "-jar " + serverJarName);
         String dockerImageName = System.getProperty("commandlib.dockerImageName");
+        String serverDirectory = System.getProperty("commandlib.serverDirectory", "server");
+        String testPluginSubdirectory = System.getProperty("commandlib.testPluginSubdirectory", "plugins");
+        String testPluginJarPattern = System.getProperty("commandlib.testPluginJarPattern", "TestPlugin.*\\.jar");
 
         Path testPluginDir = Path.of(System.getProperty("commandlib.testPluginDir"));
-        Path testPluginJar = findTestPluginJar(testPluginDir.resolve("server/plugins"));
+        Path testPluginJar = findTestPluginJar(testPluginDir.resolve(serverDirectory)
+                                                            .resolve(testPluginSubdirectory), testPluginJarPattern);
         Path sharedDir = Path.of(System.getProperty("commandlib.sharedDir"));
         Path reportDir = sharedDir.resolve("test-results");
         Path reportFile = reportDir.resolve(reportFileName);
@@ -66,8 +71,9 @@ class IntegrationTest {
         try (GenericContainer<?> container = createContainer(targetName,
                                                              dockerImageName,
                                                              testPluginJar,
+                                                             testPluginSubdirectory,
                                                              reportDir,
-                                                             serverJarName,
+                                                             serverLaunchArgs,
                                                              reportFileName,
                                                              containerCpuLimit)) {
             try {
@@ -205,12 +211,12 @@ class IntegrationTest {
         }
     }
 
-    private static Path findTestPluginJar(Path pluginsDir) throws IOException {
+    private static Path findTestPluginJar(Path pluginsDir, String jarPattern) throws IOException {
         try (var files = Files.list(pluginsDir)) {
             return files.filter(Files::isRegularFile)
                         .filter(path -> path.getFileName()
                                             .toString()
-                                            .matches("TestPlugin.*\\.jar"))
+                                            .matches(jarPattern))
                         .findFirst()
                         .orElseThrow(() -> new IllegalStateException("Test plugin jar was not found in " + pluginsDir));
         }
@@ -219,8 +225,9 @@ class IntegrationTest {
     private static GenericContainer<?> createContainer(String targetName,
                                                        String dockerImageName,
                                                        Path testPluginJar,
+                                                       String testPluginSubdirectory,
                                                        Path reportDir,
-                                                       String serverJarName,
+                                                       String serverLaunchArgs,
                                                        String reportFileName,
                                                        double containerCpuLimit) {
         String containerWorkDir = "/workspace/server";
@@ -230,7 +237,7 @@ class IntegrationTest {
         return new GenericContainer<>(DockerImageName.parse(dockerImageName)).withExposedPorts(25565)
                                                                              .withCopyFileToContainer(MountableFile.forHostPath(
                                                                                                               testPluginJar),
-                                                                                                      containerWorkDir + "/plugins/" + testPluginJar.getFileName())
+                                                                                                      containerWorkDir + "/" + testPluginSubdirectory + "/" + testPluginJar.getFileName())
                                                                              .withFileSystemBind(reportDir.toAbsolutePath()
                                                                                                           .toString(),
                                                                                                  "/workspace/test-results",
@@ -255,7 +262,7 @@ class IntegrationTest {
                                                                                           "printf 'eula=true\n' > eula.txt && "
                                                                                                   // Write ops.json before the server starts so the player has operator permission on join.
                                                                                                   // Offline UUID is deterministic: UUID.nameUUIDFromBytes("OfflinePlayer:<name>").
-                                                                                                  + "printf '" + opsJson + "' > ops.json && " + "java -Dplugin.env=CI -Dcommandlib.testReportName=" + reportFileName + " " + "-Dcommandlib.testReportDir=/workspace/test-results " + "-jar " + serverJarName + " nogui")
+                                                                                                  + "printf '" + opsJson + "' > ops.json && " + "java -Dplugin.env=CI -Dcommandlib.testReportName=" + reportFileName + " " + "-Dcommandlib.testReportDir=/workspace/test-results " + serverLaunchArgs + " nogui")
                                                                              .waitingFor(Wait.forLogMessage(
                                                                                      ".*Done \\(.*\\)! For help, type \"help\".*",
                                                                                      1))

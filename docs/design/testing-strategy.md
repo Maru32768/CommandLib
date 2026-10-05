@@ -206,4 +206,4 @@ integration テスト（Layer 3）で実 NMS 動作は保証されるため、�
 - `[ ]` `/execute`・command block の integration テストを追加する。
 - `[x]` `paper-testing` 設計を開始する（Paper module API 確定後）。
 - `[ ]` JUnit extension を追加する（downstream 向け）。
-- `[ ]` Forge testing 設計を開始する（Forge module version strategy 確定後）。
+- `[~]` Forge testing 設計を開始する。実サーバーの integration targets は追加済み（`integration-test/README.md` の Forge Targets）。サーバーなしの `forge-testing` は未着手。

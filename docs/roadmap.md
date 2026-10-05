@@ -88,7 +88,7 @@
 ### P5: Platform expansion
 
 - `[ ]` Folia support 方針を決める。
-- `[ ]` Forge testing strategy を決め、`forge-testing` を追加する。
+- `[~]` Forge testing strategy を決め、`forge-testing` を追加する。実サーバーの integration targets（`forge-1.16.5`、`forge-1.20.1`）は追加済み。サーバーなしの `forge-testing` は未着手。
 - `[~]` NeoForge / Fabric / Forge の module 方針を決める。方針案は
   [11. Platform Architecture](#11-platform-architecture) を参照。
 - `[~]` Velocity support 方針を決める。方針案は [11. Platform Architecture](#11-platform-architecture) を参照。

@@ -30,13 +30,26 @@ class ArgumentIntegrationCoverageTest {
         assertIntegrationCases(rootDir, "paper");
     }
 
+    @Test
+    void forge_public_arguments_have_integration_cases() throws IOException {
+        Path rootDir = Path.of(System.getProperty("commandlib.rootDir", "."));
+        assertIntegrationCases(rootDir,
+                               "forge",
+                               "integration-test/shared/forge/src/main/java/net/kunmc/lab/testmod/ArgumentTest.java");
+    }
+
     private void assertIntegrationCases(Path rootDir, String moduleName) throws IOException {
+        assertIntegrationCases(rootDir,
+                               moduleName,
+                               "integration-test/shared/" + moduleName + "/src/main/java/net/kunmc/lab/testplugin/ArgumentTest.java");
+    }
+
+    private void assertIntegrationCases(Path rootDir, String moduleName, String argumentTestPath) throws IOException {
         Set<String> arguments = new HashSet<>(publicArgumentClassNames(rootDir.resolve(
                 moduleName + "/src/main/java/net/kunmc/lab/commandlib/argument")));
         arguments.removeAll(EXCLUDED_ARGUMENTS);
 
-        String argumentTestSource = Files.readString(rootDir.resolve(
-                "integration-test/shared/" + moduleName + "/src/main/java/net/kunmc/lab/testplugin/ArgumentTest.java"));
+        String argumentTestSource = Files.readString(rootDir.resolve(argumentTestPath));
         Set<String> missing = arguments.stream()
                                        .filter(argument -> !instantiatesArgument(argumentTestSource, argument))
                                        .collect(Collectors.toCollection(java.util.TreeSet::new));

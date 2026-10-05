@@ -52,10 +52,11 @@ Use this checklist whenever adding a public `*Argument` class.
 - Add an execution case to the matching integration fixture:
     - `integration-test/shared/spigot/.../ArgumentTest.java` for Spigot arguments.
     - `integration-test/shared/paper/.../ArgumentTest.java` for Paper arguments.
-- Keep the two fixtures intentionally independent. It is acceptable to duplicate small cases when platform behavior is
+    - `integration-test/shared/forge/.../ArgumentTest.java` for Forge arguments.
+- Keep the fixtures intentionally independent. It is acceptable to duplicate small cases when platform behavior is
   stable; use the shared core fixture only for platform-neutral result/reporting helpers.
-- `:integration-test:test` includes a lightweight coverage check that fails when a public argument class shared by
-  Spigot or Paper is missing from the matching integration fixture. Add an explicit exclusion there only when a
+- `:integration-test:test` includes a lightweight coverage check that fails when a public Spigot, Paper, or Forge
+  argument class is missing from the matching integration fixture. Add an explicit exclusion there only when a
   real-server case is intentionally not applicable.
 - The integration case should:
     - register the argument,

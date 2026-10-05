@@ -62,6 +62,17 @@ in `forge/versions/<version>/build/libs`.
 
 The build needs JDK 21 for the Gradle daemon (`gradle/gradle-daemon-jvm.properties`).
 
+Behavior that depends on a real server, such as command registration, argument parsing against registries, or
+production (SRG) names, is covered by the Forge integration targets. They need Docker:
+
+```bash
+./gradlew :integration-test:targets:forge-1.16.5:minecraftIntegrationTest
+./gradlew :integration-test:targets:forge-1.20.1:minecraftIntegrationTest
+```
+
+The test mod is in `integration-test/shared/forge` (see `integration-test/README.md`). When adding or changing a
+public argument class, add a case to its `ArgumentTest`; `:integration-test:test` fails when one is missing.
+
 ## Adding A Minecraft Version
 
 1. Add the version to `versions(...)` in the `stonecutter` block of
@@ -73,5 +84,8 @@ The build needs JDK 21 for the Gradle daemon (`gradle/gradle-daemon-jvm.properti
 4. Check the Java version selection in `forge/build.gradle.kts`.
 5. Compile every version and fix errors with conditional comments, adjusting
    existing boundaries when the new version shows they were wrong.
-6. Update the supported versions in `README.md` and
+6. Add the version to the test mod tree in `settings.gradle.kts`, create
+   `integration-test/shared/forge/versions/<version>/gradle.properties`, and add an
+   `integration-test/targets/forge-<version>` target registered in the `minecraftIntegrationTest` aggregate task.
+7. Update the supported versions in `README.md` and
    `docs/design/forge-version-support.md`.
