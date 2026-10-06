@@ -22,6 +22,7 @@ final class Arguments<C extends CommonCommandContext<?, ?>> {
     private DefaultPermission defaultPermissionOverride = null;
     private String permissionDescription = "";
     private CommandExecutor<C> executor = null;
+    private boolean executorSet = false;
 
     Arguments(CommonCommand<C, ?> owner,
               List<? extends CommonArgument<?, C, ?>> arguments,
@@ -73,12 +74,15 @@ final class Arguments<C extends CommonCommandContext<?, ?>> {
     void executor(CommandExecutor<C> executor) {
         // Keep the executor on the branch instead of the argument instance, so one argument instance can be reused
         // as the last argument of several branches without them overwriting each other's executor.
+        // A null executor is kept as an explicit choice so that it still overrides the argument's own executor and
+        // the branch falls back to the help action.
         this.executor = executor;
+        this.executorSet = true;
     }
 
     CommandExecutor<C> executorFor(CommonArgument<?, C, ?> argument) {
         boolean isLast = !arguments.isEmpty() && arguments.get(arguments.size() - 1) == argument;
-        if (isLast && executor != null) {
+        if (isLast && executorSet) {
             return executor;
         }
         return argument.executor();

@@ -106,7 +106,7 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
             // Exceptions escaping parsing, prerequisites or preprocess are not reported to the sender, so the handlers
             // get them before Brigadier propagates them to the platform.
             e.printStackTrace();
-            uncaughtExceptionHandlers.forEach(x -> x.uncaughtException(e, ctx));
+            notifyUncaughtExceptionHandlers(e, ctx);
             throw e;
         }
     }
@@ -122,8 +122,20 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
             e.printStackTrace();
             ctx.sendFailure("An unexpected error occurred trying to execute that command.");
             ctx.sendFailure("Check the console for details.");
-            uncaughtExceptionHandlers.forEach(x -> x.uncaughtException(e, ctx));
+            notifyUncaughtExceptionHandlers(e, ctx);
             return 0;
+        }
+    }
+
+    private void notifyUncaughtExceptionHandlers(Throwable e, C ctx) {
+        // A failing handler must neither keep the remaining handlers from running nor escape to the outer catch,
+        // which would notify every handler again with the handler's own exception.
+        for (UncaughtExceptionHandler<C> handler : uncaughtExceptionHandlers) {
+            try {
+                handler.uncaughtException(e, ctx);
+            } catch (Throwable t) {
+                t.printStackTrace();
+            }
         }
     }
 

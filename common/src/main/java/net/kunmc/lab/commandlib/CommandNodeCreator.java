@@ -21,6 +21,7 @@ final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U ext
     }
 
     public List<LiteralCommandNode<S>> build() {
+        validateUniqueLiterals(null, commands);
         return commands.stream()
                        .map(x -> toCommandNodes(x, List.of()))
                        .flatMap(Collection::stream)
@@ -50,16 +51,19 @@ final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U ext
         return nodes;
     }
 
-    private static void validateUniqueLiterals(String parentName, Collection<? extends CommonCommand<?, ?>> children) {
+    private static void validateUniqueLiterals(String parentName, Collection<? extends CommonCommand<?, ?>> commands) {
         // Brigadier silently merges sibling literals with the same name, which would make one command unreachable.
-        Set<String> literals = new HashSet<>();
-        for (CommonCommand<?, ?> child : children) {
+        // Repeating a name within one command, or adding the same command twice, merges identical nodes and is
+        // harmless, so only collisions between different commands are rejected.
+        Map<String, CommonCommand<?, ?>> owners = new HashMap<>();
+        for (CommonCommand<?, ?> command : commands) {
             List<String> names = new ArrayList<>();
-            names.add(child.name());
-            names.addAll(child.aliases());
+            names.add(command.name());
+            names.addAll(command.aliases());
             for (String name : names) {
-                if (!literals.add(name)) {
-                    throw new IllegalStateException("Duplicate child command name or alias '" + name + "' under '" + parentName + "'");
+                CommonCommand<?, ?> owner = owners.putIfAbsent(name, command);
+                if (owner != null && owner != command) {
+                    throw new IllegalStateException(parentName == null ? "Duplicate command name or alias '" + name + "'" : "Duplicate child command name or alias '" + name + "' under '" + parentName + "'");
                 }
             }
         }

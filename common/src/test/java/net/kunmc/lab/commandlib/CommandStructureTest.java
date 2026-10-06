@@ -2,6 +2,7 @@ package net.kunmc.lab.commandlib;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.kunmc.lab.commandlib.argument.*;
+import net.kunmc.lab.commandlib.command.CommandExecutor;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -27,6 +28,18 @@ class CommandStructureTest {
                          .messages()).containsExactly("number:x");
         assertThat(runner.execute("set true x")
                          .messages()).containsExactly("flag:x");
+    }
+
+    @Test
+    void branch_execute_null_overrides_argument_executor() throws Exception {
+        IntArg value = new IntArg("value").execute(ctx -> ctx.sendMessage("argument executor"));
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("set") {{
+            argument(value).execute((CommandExecutor<TestCommandContext>) null);
+        }});
+
+        assertThat(runner.execute("set 1")
+                         .messages()).doesNotContain("argument executor")
+                                     .isNotEmpty();
     }
 
     @Test
@@ -119,6 +132,31 @@ class CommandStructureTest {
 
         assertThatThrownBy(() -> new TestCommandRunner(command)).isInstanceOf(IllegalStateException.class)
                                                                 .hasMessageContaining("start");
+    }
+
+    @Test
+    void repeated_names_within_one_child_are_accepted() throws Exception {
+        TestCommand list = new TestCommand("list") {{
+            addAliases("list", "ls", "ls");
+            execute(ctx -> ctx.sendMessage("list"));
+        }};
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("game") {{
+            addChildren(list, list);
+        }});
+
+        assertThat(runner.execute("game ls")
+                         .messages()).containsExactly("list");
+    }
+
+    @Test
+    void duplicate_top_level_command_names_are_rejected_at_build() {
+        List<TestCommand> commands = List.of(new TestCommand("foo"), new TestCommand("bar") {{
+            addAliases("foo");
+        }});
+
+        assertThatThrownBy(() -> new CommandNodeCreator<>(commands, "test.command").build()).isInstanceOf(
+                                                                                                    IllegalStateException.class)
+                                                                                            .hasMessageContaining("foo");
     }
 
     @Test
@@ -285,6 +323,27 @@ class CommandStructureTest {
         runner.execute("boom 3");
 
         assertThat(handled).containsExactly("command:value=3", "argument:value=3");
+    }
+
+    @Test
+    void failing_uncaught_exception_handler_does_not_reach_other_handlers_twice() throws Exception {
+        List<String> handled = new ArrayList<>();
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("boom") {{
+            addUncaughtExceptionHandler((e, ctx) -> {
+                handled.add("first:" + e.getMessage());
+                throw new IllegalStateException("handler");
+            });
+            addUncaughtExceptionHandler((e, ctx) -> handled.add("second:" + e.getMessage()));
+            execute(ctx -> {
+                throw new IllegalStateException("bare");
+            });
+        }});
+
+        TestCommandContext ctx = runner.execute("boom");
+
+        assertThat(handled).containsExactly("first:bare", "second:bare");
+        assertThat(ctx.messages()).containsExactly("An unexpected error occurred trying to execute that command.",
+                                                   "Check the console for details.");
     }
 
     @Test

@@ -1,10 +1,12 @@
 package net.kunmc.lab.commandlib.exception;
 
+import com.mojang.brigadier.context.ParsedCommandNode;
 import com.mojang.brigadier.tree.ArgumentCommandNode;
 import net.kunmc.lab.commandlib.CommonCommandContext;
 import net.kunmc.lab.commandlib.PlatformAdapter;
 import net.kunmc.lab.commandlib.util.ChatColorUtil;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 
@@ -50,10 +52,7 @@ public class ArgumentParseException extends Exception {
                      .map(n -> n.getRange()
                                 .getStart())
                      // Without a matching node, cut the input before the incorrect token so that it is not shown twice.
-                     .orElseGet(() -> {
-                         int index = input.lastIndexOf(incorrectInput);
-                         return index >= 0 ? index : input.length();
-                     });
+                     .orElseGet(() -> incorrectTokenStart(ctx, input, incorrectInput));
 
         // Player input keeps the leading slash while console input does not; strip it only when present.
         int start = input.startsWith("/") ? 1 : 0;
@@ -62,6 +61,24 @@ public class ArgumentParseException extends Exception {
             str = "..." + str.substring(str.length() - 10);
         }
         return str;
+    }
+
+    private static int incorrectTokenStart(CommonCommandContext<?, ?> ctx, String input, String incorrectInput) {
+        // The incorrect token follows the nodes parsed so far, so search from their end. Searching the whole input
+        // would pick another occurrence of the same text.
+        List<? extends ParsedCommandNode<?>> nodes = ctx.getHandle()
+                                                       .getNodes();
+        int parsedEnd = nodes.isEmpty() ? 0 : Math.min(nodes.get(nodes.size() - 1)
+                                                            .getRange()
+                                                            .getEnd(), input.length());
+        if (incorrectInput.isEmpty()) {
+            return parsedEnd;
+        }
+        int index = input.indexOf(incorrectInput, parsedEnd);
+        if (index < 0) {
+            index = input.lastIndexOf(incorrectInput);
+        }
+        return index >= 0 ? index : parsedEnd;
     }
 
     public static <C extends CommonCommandContext<?, ?>> ArgumentParseException ofIncorrectInput(String argumentName,
