@@ -1,5 +1,6 @@
 package net.kunmc.lab.commandlib;
 
+import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
@@ -158,8 +159,9 @@ public class FakeSender {
      * Convenience method that returns sent messages as plain text with color codes stripped.
      */
     public List<String> getSentMessageTexts() {
+        // Some messages embed legacy section-sign codes inside their text, which toPlainText keeps.
         return sentMessages.stream()
-                           .map(c -> c.toPlainText())
+                           .map(c -> ChatColor.stripColor(c.toPlainText()))
                            .collect(Collectors.toList());
     }
 

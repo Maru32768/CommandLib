@@ -50,7 +50,11 @@ class OfflinePlayerArgumentTest {
             tester.execute("info nobody", sender);
         }
 
-        assertThat(sender.getSentMessageTexts()).isNotEmpty();
-        assertThat(sender.getSentMessageTexts()).doesNotContain("nobody");
+        assertThat(sender.getSentMessageTexts()).containsExactly("Incorrect argument for command",
+                                                                 "info nobody<--[HERE]");
+        assertThat(sender.getSentMessages()
+                         .get(0)
+                         .getColor()
+                         .getColor()).isEqualTo(new java.awt.Color(0xFF5555));
     }
 }

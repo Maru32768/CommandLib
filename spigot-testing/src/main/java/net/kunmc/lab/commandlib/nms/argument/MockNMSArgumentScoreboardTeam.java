@@ -1,6 +1,7 @@
 package net.kunmc.lab.commandlib.nms.argument;
 
 import com.mojang.brigadier.arguments.ArgumentType;
+import org.bukkit.Bukkit;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import net.kunmc.lab.commandlib.nms.world.MockNMSScoreboardTeam;
@@ -19,6 +20,12 @@ public class MockNMSArgumentScoreboardTeam extends NMSArgumentScoreboardTeam {
 
     @Override
     protected NMSScoreboardTeam parseImpl(CommandContext<?> ctx, String name) {
-        return new MockNMSScoreboardTeam(StringArgumentType.getString(ctx, name));
+        String teamName = StringArgumentType.getString(ctx, name);
+        if (Bukkit.getScoreboardManager()
+                  .getMainScoreboard()
+                  .getTeam(teamName) == null) {
+            throw MockArgumentTypes.resolveError("Unknown team '" + teamName + "'");
+        }
+        return new MockNMSScoreboardTeam(teamName);
     }
 }

@@ -1,13 +1,10 @@
 package net.kunmc.lab.commandlib.nms.argument;
 
 import com.mojang.brigadier.arguments.ArgumentType;
-import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
-import net.kunmc.lab.commandlib.CommandTester;
+import java.util.List;
 import net.kunmc.lab.commandlib.util.nms.argument.NMSArgumentEntities;
 import org.bukkit.entity.Entity;
-
-import java.util.List;
 
 public class MockNMSArgumentEntities extends NMSArgumentEntities {
     public MockNMSArgumentEntities() {
@@ -16,16 +13,11 @@ public class MockNMSArgumentEntities extends NMSArgumentEntities {
 
     @Override
     public ArgumentType<?> argument() {
-        return StringArgumentType.word();
+        return MockEntitySelector.type(false, false);
     }
 
     @Override
     protected List<Entity> parseImpl(CommandContext<?> ctx, String name) {
-        String entityName = StringArgumentType.getString(ctx, name);
-        Entity entity = CommandTester.getFakeEntity(entityName);
-        if (entity == null) {
-            throw new IllegalArgumentException("No fake entity registered with name: " + entityName + ". Call withFakePlayer() or withFakeEntity() before execute().");
-        }
-        return List.of(entity);
+        return MockEntitySelector.selectMany(ctx.getArgument(name, String.class));
     }
 }

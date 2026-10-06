@@ -1,6 +1,6 @@
 package net.kunmc.lab.commandlib.argument;
 
-import net.kunmc.lab.commandlib.Argument;
+import net.kunmc.lab.commandlib.CommonArgument;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -10,6 +10,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -32,9 +33,15 @@ class ArgumentCoverageTest {
      * Argument classes that intentionally have no standalone *Test class.
      * Document the reason when adding an entry here.
      */
-    private static final Set<Class<?>> EXCLUDED_ARGUMENTS = Set.of(
-            // LiteralArgument is a structural element (subcommand names), not a parsed value
-            LiteralArgument.class);
+    private static final Set<Class<?>> EXCLUDED_ARGUMENTS = Set.of();
+
+    @Test
+    void scan_includes_arguments_derived_from_common_implementations() throws Exception {
+        assertThat(findConcreteArgumentClasses()).contains(IntegerArgument.class,
+                                                           StringArgument.class,
+                                                           LiteralArgument.class,
+                                                           EnumArgument.class);
+    }
 
     @Test
     void all_argument_classes_have_a_test() {
@@ -105,11 +112,22 @@ class ArgumentCoverageTest {
         return result;
     }
 
+    private static Object location(Class<?> cls) {
+        return cls.getProtectionDomain()
+                  .getCodeSource()
+                  .getLocation();
+    }
+
     private void addIfConcreteArgument(String className, ClassLoader classLoader, List<Class<?>> result) {
         try {
             Class<?> cls = Class.forName(className, false, classLoader);
-            if (!Modifier.isAbstract(cls.getModifiers()) && Argument.class.isAssignableFrom(cls) && !EXCLUDED_ARGUMENTS.contains(
-                    cls)) {
+            // Many public arguments extend the common implementations rather than the platform Argument class, so
+            // the scan has to start from CommonArgument to include them.
+            boolean isPublicTopLevel = Modifier.isPublic(cls.getModifiers()) && cls.getEnclosingClass() == null;
+            // The common module uses the same package name; only the Spigot module's own classes need tests here.
+            boolean isSpigotClass = Objects.equals(location(cls), location(IntegerArgument.class));
+            if (isPublicTopLevel && isSpigotClass && !Modifier.isAbstract(cls.getModifiers()) && CommonArgument.class.isAssignableFrom(
+                    cls) && !EXCLUDED_ARGUMENTS.contains(cls)) {
                 result.add(cls);
             }
         } catch (ClassNotFoundException ignored) {

@@ -31,8 +31,12 @@ class GameModeArgumentTest {
             tester.execute("gamemode unknown", sender);
         }
 
-        assertThat(sender.getSentMessageTexts()).doesNotContain("unknown");
-        assertThat(sender.getSentMessageTexts()).isNotEmpty();
+        assertThat(sender.getSentMessageTexts()).containsExactly("Incorrect argument for command",
+                                                                 "gamemode unknown<--[HERE]");
+        assertThat(sender.getSentMessages()
+                         .get(0)
+                         .getColor()
+                         .getColor()).isEqualTo(new java.awt.Color(0xFF5555));
     }
 
     @Test

@@ -57,6 +57,13 @@ public class CommandTester implements AutoCloseable {
     }
 
     /**
+     * For use by mock NMS classes only. Returns the registered fake entities in registration order.
+     */
+    public static Collection<Entity> getFakeEntities() {
+        return List.copyOf(requireCurrent().fakeEntities.values());
+    }
+
+    /**
      * For use by mock NMS classes only.
      */
     public static World getFakeWorld(String key) {

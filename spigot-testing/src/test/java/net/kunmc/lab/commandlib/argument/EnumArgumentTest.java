@@ -42,7 +42,11 @@ class EnumArgumentTest {
             tester.execute("go up", sender);
         }
 
-        assertThat(sender.getSentMessageTexts()).isNotEmpty();
-        assertThat(sender.getSentMessageTexts()).doesNotContain("going NORTH");
+        assertThat(sender.getSentMessageTexts()).containsExactly("Incorrect argument for command",
+                                                                 "go up<--[HERE]");
+        assertThat(sender.getSentMessages()
+                         .get(0)
+                         .getColor()
+                         .getColor()).isEqualTo(new java.awt.Color(0xFF5555));
     }
 }

@@ -40,4 +40,26 @@ class TeamArgumentTest {
 
         assertThat(sender.getSentMessageTexts()).containsExactly("red");
     }
+
+    @Test
+    void unknown_team_sends_failure_message() {
+        FakeSender sender = FakeSender.player("Alice");
+        Scoreboard mockScoreboard = Mockito.mock(Scoreboard.class);
+        ScoreboardManager mockManager = Mockito.mock(ScoreboardManager.class);
+        Mockito.when(mockManager.getMainScoreboard())
+               .thenReturn(mockScoreboard);
+
+        try (MockedStatic<Bukkit> bukkit = Mockito.mockStatic(Bukkit.class);
+             CommandTester tester = new CommandTester(() -> new Command("team") {{
+                 argument(new TeamArgument("name")).execute((team, ctx) -> {
+                     ctx.sendMessage(team.getName());
+                 });
+             }}, "test.command")) {
+            bukkit.when(Bukkit::getScoreboardManager)
+                  .thenReturn(mockManager);
+            tester.execute("team blue", sender);
+        }
+
+        assertThat(sender.getSentMessageTexts()).containsExactly("Unknown team 'blue'");
+    }
 }

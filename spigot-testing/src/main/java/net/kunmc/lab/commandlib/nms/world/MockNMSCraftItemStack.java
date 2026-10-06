@@ -14,6 +14,10 @@ public class MockNMSCraftItemStack extends NMSCraftItemStack {
     public ItemStack asCraftMirror(NMSItemStack nms) {
         String name = ((MockNMSItemStack) nms).getMaterialName();
         Material material = Material.matchMaterial(name);
-        return new ItemStack(material != null ? material : Material.AIR);
+        if (material == null) {
+            // MockNMSArgumentItemStack rejects unknown items while parsing, so commands never reach this.
+            throw new IllegalArgumentException("Unknown item: " + name);
+        }
+        return new ItemStack(material);
     }
 }

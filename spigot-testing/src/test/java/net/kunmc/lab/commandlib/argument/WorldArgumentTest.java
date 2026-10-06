@@ -36,7 +36,11 @@ class WorldArgumentTest {
             tester.execute("tp commandlib:missing", sender);
         }
 
-        assertThat(sender.getSentMessageTexts()).isNotEmpty();
-        assertThat(sender.getSentMessageTexts()).doesNotContain("commandlib:missing");
+        assertThat(sender.getSentMessageTexts()).containsExactly("Incorrect argument for command",
+                                                                 "tp commandlib:missing<--[HERE]");
+        assertThat(sender.getSentMessages()
+                         .get(0)
+                         .getColor()
+                         .getColor()).isEqualTo(new java.awt.Color(0xFF5555));
     }
 }

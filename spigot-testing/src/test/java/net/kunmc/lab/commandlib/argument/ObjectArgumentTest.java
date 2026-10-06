@@ -39,7 +39,11 @@ class ObjectArgumentTest {
             tester.execute("give axe", sender);
         }
 
-        assertThat(sender.getSentMessageTexts()).isNotEmpty();
-        assertThat(sender.getSentMessageTexts()).doesNotContain("item=1");
+        assertThat(sender.getSentMessageTexts()).containsExactly("Incorrect argument for command",
+                                                                 "give axe<--[HERE]");
+        assertThat(sender.getSentMessages()
+                         .get(0)
+                         .getColor()
+                         .getColor()).isEqualTo(new java.awt.Color(0xFF5555));
     }
 }
