@@ -79,7 +79,17 @@ public final class CommandLib implements Listener {
             Objects.requireNonNull(command);
         }
 
-        enable();
+        try {
+            enable();
+        } catch (RuntimeException e) {
+            // The disable listener is not registered yet, so nothing else would remove what was added so far.
+            try {
+                unregister(false);
+            } catch (RuntimeException suppressed) {
+                e.addSuppressed(suppressed);
+            }
+            throw e;
+        }
         Bukkit.getPluginManager()
               .registerEvents(this, plugin);
         registerResourcesReloadListener();
@@ -154,9 +164,11 @@ public final class CommandLib implements Listener {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     private void enable() {
+        // Build first, so invalid commands are rejected before any permission is added to the server.
+        List<CommandNode<?>> nodes = new ArrayList<>(new CommandNodeCreator<>(commands, permissionPrefix).build());
         registerPermissions();
 
-        registeredCommands.addAll(new CommandNodeCreator<>(commands, permissionPrefix).build());
+        registeredCommands.addAll(nodes);
         try {
             Map<String, org.bukkit.command.Command> knownCommands = knownCommands();
             if (usesPaperCommandDispatcher()) {
