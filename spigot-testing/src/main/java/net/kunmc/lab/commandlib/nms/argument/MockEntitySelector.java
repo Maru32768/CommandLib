@@ -16,7 +16,8 @@ import java.util.stream.Collectors;
  *
  * <p>Supported input: a registered name, {@code @s} (the sender when it is an entity), {@code @p} and {@code @r}
  * (the first registered player), {@code @a} (all registered players) and {@code @e} (all registered entities).
- * Selector arguments such as {@code @e[type=zombie]} are not supported. Errors use the messages a server sends.
+ * Selector arguments such as {@code @e[type=zombie]} are not supported. Selectors matching nothing send the messages a
+ * server sends, while a name that was never registered throws {@link IllegalArgumentException}.
  */
 final class MockEntitySelector {
     static final String NO_ENTITY = "No entity was found";
@@ -69,8 +70,13 @@ final class MockEntitySelector {
             case "@e":
                 return registered;
             default:
+                // A server would report an unknown name as "No entity was found", but in a test it almost always means
+                // a missing fixture, so fail loudly with a hint instead of silently not running the executor.
                 Entity entity = CommandTester.getFakeEntity(input);
-                return entity == null ? List.of() : List.of(entity);
+                if (entity == null) {
+                    throw new IllegalArgumentException("No fake entity registered with name: " + input + ". Call withFakePlayer() or withFakeEntity() before execute().");
+                }
+                return List.of(entity);
         }
     }
 

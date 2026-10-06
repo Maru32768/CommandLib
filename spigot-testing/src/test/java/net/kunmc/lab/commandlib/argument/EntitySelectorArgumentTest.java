@@ -91,20 +91,27 @@ class EntitySelectorArgumentTest {
     }
 
     @Test
-    void missing_targets_send_failure_messages() {
+    void selectors_without_targets_send_failure_messages() {
         FakeSender admin = FakeSender.player("Admin");
 
         try (CommandTester tester = tester()) {
-            tester.execute("entity nobody", admin);
             tester.execute("entities @e", admin);
-            tester.execute("player nobody", admin);
             tester.execute("players @a", admin);
         }
 
-        assertThat(admin.getSentMessageTexts()).containsExactly("No entity was found",
-                                                                "No entity was found",
-                                                                "No player was found",
-                                                                "No player was found");
+        assertThat(admin.getSentMessageTexts()).containsExactly("No entity was found", "No player was found");
+    }
+
+    @Test
+    void unregistered_names_fail_with_fixture_hint() {
+        FakeSender admin = FakeSender.player("Admin");
+
+        try (CommandTester tester = tester()) {
+            assertThatThrownBy(() -> tester.execute("entity nobody", admin)).isInstanceOf(IllegalArgumentException.class)
+                                                                            .hasMessageContaining("withFakePlayer()");
+            assertThatThrownBy(() -> tester.execute("player nobody", admin)).isInstanceOf(IllegalArgumentException.class)
+                                                                            .hasMessageContaining("nobody");
+        }
     }
 
     @Test
