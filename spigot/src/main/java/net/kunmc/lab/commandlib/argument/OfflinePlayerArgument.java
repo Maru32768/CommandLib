@@ -13,7 +13,7 @@ import java.util.Objects;
 
 public class OfflinePlayerArgument extends Argument<OfflinePlayer, OfflinePlayerArgument> {
     public OfflinePlayerArgument(String name) {
-        super(name, StringArgumentType.string());
+        super(name, StringArgumentType.word());
 
         addSuggestionAction(sb -> {
             Arrays.stream(Bukkit.getOfflinePlayers())

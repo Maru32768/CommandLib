@@ -50,20 +50,18 @@ public final class PlatformAdapterImpl implements PlatformAdapter<Object, BaseCo
     }
 
     private ArgumentParseException convertTranslatableCommandSyntaxException(CommandSyntaxException e) {
+        // The key and arguments are resolved here, not in the lambda, so that a message without a translation key
+        // fails inside convertCommandSyntaxException and takes its fallback instead of failing when it is sent.
+        TranslatableComponent component;
         if (NMSChatMessage.isSupportedVersion()) {
             NMSChatMessage msg = NMSChatMessage.create(e.getRawMessage());
-            return new ArgumentParseException(ctx -> {
-                TranslatableComponent component = new TranslatableComponent(msg.getKey(), msg.getArgs());
-                ((CommandContext) ctx).sendFailure(component);
-            });
+            component = new TranslatableComponent(msg.getKey(), msg.getArgs());
+        } else {
+            NMSTranslatableContents contents = NMSIChatMutableComponent.create(e.getRawMessage())
+                                                                       .getContentsAsTranslatable();
+            component = new TranslatableComponent(contents.getKey(), contents.getArgs());
         }
-
-        NMSTranslatableContents contents = NMSIChatMutableComponent.create(e.getRawMessage())
-                                                                   .getContentsAsTranslatable();
-        return new ArgumentParseException(ctx -> {
-            TranslatableComponent component = new TranslatableComponent(contents.getKey(), contents.getArgs());
-            ((CommandContext) ctx).sendFailure(component);
-        });
+        return new ArgumentParseException(ctx -> ((CommandContext) ctx).sendFailure(component));
     }
 
     @Override

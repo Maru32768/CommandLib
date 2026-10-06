@@ -17,7 +17,7 @@ import java.util.UUID;
 
 public class UUIDArgument extends Argument<UUID, UUIDArgument> {
     public UUIDArgument(String name) {
-        super(name, StringArgumentType.string());
+        super(name, StringArgumentType.word());
 
         setSuggestionAction(sb -> {
             Map<UUID, String> uuidToNameMap = new HashMap<>();

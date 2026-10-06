@@ -11,8 +11,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class NMSArgumentNamespacedKey_v1_17_0 extends NMSArgumentNamespacedKey {
+    private static final Map<Class<?>, Method> GETTERS = new ConcurrentHashMap<>();
+
     public NMSArgumentNamespacedKey_v1_17_0() {
         super(null, "commands.arguments.ArgumentMinecraftKeyRegistered");
     }
@@ -26,14 +30,7 @@ public class NMSArgumentNamespacedKey_v1_17_0 extends NMSArgumentNamespacedKey {
     protected String parseImpl(CommandContext<?> ctx, String name) {
         // Every getter of this class takes (CommandContext, String) and the obfuscated name of the MinecraftKey
         // getter moved from "f" (1.17) to "e" (1.18+), so it is selected by its return type instead.
-        Method getter = Arrays.stream(clazz.getMethods())
-                              .filter(x -> Modifier.isStatic(x.getModifiers()))
-                              .filter(x -> x.getParameterCount() == 2 && x.getParameterTypes()[0] == CommandContext.class)
-                              .filter(x -> x.getReturnType()
-                                            .getSimpleName()
-                                            .equals("MinecraftKey"))
-                              .findFirst()
-                              .orElseThrow(() -> new MethodNotFoundException(new String[]{"MinecraftKey getter of " + clazz.getName()}));
+        Method getter = GETTERS.computeIfAbsent(clazz, NMSArgumentNamespacedKey_v1_17_0::findGetter);
         try {
             return getter.invoke(null, ctx, name)
                          .toString();
@@ -45,5 +42,16 @@ public class NMSArgumentNamespacedKey_v1_17_0 extends NMSArgumentNamespacedKey {
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static Method findGetter(Class<?> clazz) {
+        return Arrays.stream(clazz.getMethods())
+                     .filter(x -> Modifier.isStatic(x.getModifiers()))
+                     .filter(x -> x.getParameterCount() == 2 && x.getParameterTypes()[0] == CommandContext.class)
+                     .filter(x -> x.getReturnType()
+                                   .getSimpleName()
+                                   .equals("MinecraftKey"))
+                     .findFirst()
+                     .orElseThrow(() -> new MethodNotFoundException(new String[]{"MinecraftKey getter of " + clazz.getName()}));
     }
 }
