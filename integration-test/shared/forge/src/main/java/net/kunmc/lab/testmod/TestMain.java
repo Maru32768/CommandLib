@@ -33,7 +33,8 @@ public final class TestMain {
 
             List<TestBase> tests = List.of(new ArgumentTest(mainCommand, TEST_PLAYER_NAME),
                                            new ActorTest(mainCommand),
-                                           new SuggestionTest(mainCommand));
+                                           new SuggestionTest(mainCommand),
+                                           new CommandSyntaxExceptionTest(mainCommand));
             new HelpMessageTest(mainCommand);
             List<String> commands = tests.stream()
                                          .flatMap(x -> x.build()
