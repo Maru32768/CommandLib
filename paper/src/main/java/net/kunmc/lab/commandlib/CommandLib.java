@@ -66,7 +66,6 @@ public final class CommandLib implements Listener {
     private CommandDispatcher<CommandSourceStack> dispatcher;
     private final List<String> registeredCommandNames = new ArrayList<>();
     private final List<Permission> registeredPermissions = new ArrayList<>();
-    private boolean listenerRegistered;
     private boolean unregistered;
 
     private CommandLib(Plugin plugin, PluginRegistrationState registrationState) {
@@ -144,6 +143,8 @@ public final class CommandLib implements Listener {
                         instance.registrationState.registrationFailure);
             }
             instance.registrationState.dispatcher = dispatcher;
+            // Kept so that a COMMANDS event fired for another plugin re-adds it after /minecraft:reload.
+            instance.registrationState.registrations.add(registration);
             instance.registerDirectly(dispatcher, registration);
         }
 
@@ -257,9 +258,9 @@ public final class CommandLib implements Listener {
         LifecycleEventManager<Plugin> lifecycleManager = plugin.getLifecycleManager();
         try {
             lifecycleManager.registerEventHandler(LifecycleEvents.COMMANDS, event -> {
+                Commands registrar = event.registrar();
+                CommandDispatcher<CommandSourceStack> dispatcher = registrar.getDispatcher();
                 synchronized (state) {
-                    Commands registrar = event.registrar();
-                    CommandDispatcher<CommandSourceStack> dispatcher = registrar.getDispatcher();
                     serverDispatcher = dispatcher;
                     state.dispatcher = dispatcher;
 
@@ -269,6 +270,7 @@ public final class CommandLib implements Listener {
                         registration.instance.registerWithRegistrar(registrar, dispatcher, registration);
                     }
                 }
+                reregisterFallbackStates(state, dispatcher);
             });
             return true;
         } catch (IllegalStateException e) {
@@ -277,10 +279,33 @@ public final class CommandLib implements Listener {
         }
     }
 
-    private void registerDisableListener() {
-        if (listenerRegistered) {
-            return;
+    /**
+     * Plugins that registered after their initialization window have no COMMANDS handler of their own, so their
+     * commands are re-added to the fresh dispatcher whenever another plugin's handler observes a reload.
+     */
+    private static void reregisterFallbackStates(PluginRegistrationState owner,
+                                                 CommandDispatcher<CommandSourceStack> dispatcher) {
+        List<PluginRegistrationState> states;
+        synchronized (REGISTRATION_STATES) {
+            states = new ArrayList<>(REGISTRATION_STATES.values());
         }
+        for (PluginRegistrationState state : states) {
+            if (state == owner) {
+                continue;
+            }
+            synchronized (state) {
+                if (state.lifecycleHandlerRegistered || state.dispatcher == null || state.dispatcher == dispatcher) {
+                    continue;
+                }
+                state.dispatcher = dispatcher;
+                for (PendingRegistration registration : state.registrations) {
+                    registration.instance.addNodes(dispatcher, registration);
+                }
+            }
+        }
+    }
+
+    private void registerDisableListener() {
         // PluginManager#registerEvents rejects plugins that are not enabled yet, which is the case when register() is
         // called from the constructor or onLoad(), and a later COMMANDS lifecycle event may also fire before
         // onEnable(). Registering with the handler list directly works in every phase. PluginDisableEvent is fired
@@ -291,7 +316,6 @@ public final class CommandLib implements Listener {
                                   onPluginDisable((PluginDisableEvent) event);
                               }
                           }, EventPriority.NORMAL, plugin, false));
-        listenerRegistered = true;
     }
 
     private void registerWithRegistrar(Commands registrar,
@@ -306,14 +330,21 @@ public final class CommandLib implements Listener {
     }
 
     private void registerDirectly(CommandDispatcher<CommandSourceStack> dispatcher, PendingRegistration registration) {
-        this.dispatcher = dispatcher;
+        addNodes(dispatcher, registration);
+        Bukkit.getOnlinePlayers()
+              .forEach(Player::updateCommands);
+    }
+
+    private void addNodes(CommandDispatcher<CommandSourceStack> dispatcher, PendingRegistration registration) {
+        if (this.dispatcher != dispatcher) {
+            this.dispatcher = dispatcher;
+            registeredCommandNames.clear();
+        }
         for (LiteralCommandNode<CommandSourceStack> node : registration.buildNodes()) {
             dispatcher.getRoot()
                       .addChild(node);
             registeredCommandNames.add(node.getLiteral());
         }
-        Bukkit.getOnlinePlayers()
-              .forEach(Player::updateCommands);
     }
 
     private String namespacedName(String name) {

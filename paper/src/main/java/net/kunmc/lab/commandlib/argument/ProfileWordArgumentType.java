@@ -24,12 +24,8 @@ class ProfileWordArgumentType implements CustomArgumentType<String, PlayerProfil
 
     @Override
     public String parse(StringReader reader) {
-        int start = reader.getCursor();
-        while (reader.canRead() && reader.peek() != ' ') {
-            reader.skip();
-        }
-        return reader.getString()
-                     .substring(start, reader.getCursor());
+        return RawWordArgumentType.rawWord()
+                                  .parse(reader);
     }
 
     @Override

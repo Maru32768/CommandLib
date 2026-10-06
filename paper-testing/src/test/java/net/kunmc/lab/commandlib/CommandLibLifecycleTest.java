@@ -11,10 +11,13 @@ import io.papermc.paper.plugin.lifecycle.event.registrar.ReloadableRegistrarEven
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEventType;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
+import org.bukkit.event.EventException;
 import org.bukkit.event.Listener;
+import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.permissions.Permission;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
+import org.bukkit.plugin.RegisteredListener;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,13 +25,13 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @SuppressWarnings({"unchecked", "UnstableApiUsage"})
@@ -68,6 +71,9 @@ class CommandLibLifecycleTest {
 
     @AfterEach
     void tearDown() {
+        // CommandLib registers its disable listener on the static handler list, so remove it to keep tests isolated.
+        PluginDisableEvent.getHandlerList()
+                          .unregister(plugin);
         bukkit.close();
     }
 
@@ -87,24 +93,54 @@ class CommandLibLifecycleTest {
     }
 
     @Test
-    void disable_listener_is_registered_once_plugin_is_enabled() {
+    void disable_listener_is_registered_on_handler_list_before_enable() {
         when(plugin.isEnabled()).thenReturn(false);
+
         CommandLib.register(plugin, "test", helloCommand());
 
-        when(plugin.isEnabled()).thenReturn(true);
-        fireCommandsEvent();
-        fireCommandsEvent();
-
-        verify(pluginManager, times(1)).registerEvents(any(Listener.class), eq(plugin));
+        assertThat(disableListeners()).hasSize(1);
     }
 
     @Test
-    void registration_while_enabled_registers_disable_listener_immediately() {
+    void plugin_disable_event_unregisters_commands_and_listener() {
         when(plugin.isEnabled()).thenReturn(true);
-
         CommandLib.register(plugin, "test", helloCommand());
+        CommandDispatcher<CommandSourceStack> dispatcher = fireCommandsEvent();
 
-        verify(pluginManager, times(1)).registerEvents(any(Listener.class), eq(plugin));
+        callDisableEvent(mock(Plugin.class));
+        assertThat(dispatcher.getRoot()
+                             .getChild("hello")).isNotNull();
+
+        callDisableEvent(plugin);
+
+        assertThat(dispatcher.getRoot()
+                             .getChild("hello")).isNull();
+        verify(pluginManager, times(1)).removePermission(any(Permission.class));
+        assertThat(disableListeners()).isEmpty();
+    }
+
+    @Test
+    void fallback_registration_is_restored_after_reload() {
+        when(plugin.isEnabled()).thenReturn(true);
+        CommandLib.register(plugin, "test", helloCommand());
+        CommandDispatcher<CommandSourceStack> first = fireCommandsEvent();
+
+        Plugin latePlugin = latePlugin();
+        try {
+            CommandLib.register(latePlugin, "late", namedCommand("late"));
+            CommandDispatcher<CommandSourceStack> reloaded = fireCommandsEvent();
+            CommandLib.register(latePlugin, "late", namedCommand("later"));
+
+            assertThat(first.getRoot()
+                            .getChild("late")).isNotNull();
+            assertThat(reloaded.getRoot()
+                               .getChild("late")).isNotNull();
+            assertThat(reloaded.getRoot()
+                               .getChild("later")).isNotNull();
+        } finally {
+            PluginDisableEvent.getHandlerList()
+                              .unregister(latePlugin);
+        }
     }
 
     @Test
@@ -191,6 +227,39 @@ class CommandLibLifecycleTest {
 
         public void removeCommand(String name) {
             removed.add(name);
+        }
+    }
+
+    private Plugin latePlugin() {
+        LifecycleEventManager<Plugin> lifecycleManager = mock(LifecycleEventManager.class);
+        doThrow(new IllegalStateException("closed")).when(lifecycleManager)
+                                                    .registerEventHandler(any(LifecycleEventType.class),
+                                                                          any(LifecycleEventHandler.class));
+        Server server = plugin.getServer();
+        Plugin latePlugin = mock(Plugin.class);
+        when(latePlugin.getName()).thenReturn("LatePlugin");
+        when(latePlugin.getServer()).thenReturn(server);
+        when(latePlugin.getLifecycleManager()).thenReturn(lifecycleManager);
+        when(latePlugin.isEnabled()).thenReturn(true);
+        return latePlugin;
+    }
+
+    private List<RegisteredListener> disableListeners() {
+        return Arrays.stream(PluginDisableEvent.getHandlerList()
+                                               .getRegisteredListeners())
+                     .filter(x -> x.getPlugin() == plugin)
+                     .toList();
+    }
+
+    private static void callDisableEvent(Plugin disabled) {
+        PluginDisableEvent event = new PluginDisableEvent(disabled);
+        for (RegisteredListener listener : PluginDisableEvent.getHandlerList()
+                                                             .getRegisteredListeners()) {
+            try {
+                listener.callEvent(event);
+            } catch (EventException e) {
+                throw new AssertionError(e);
+            }
         }
     }
 
