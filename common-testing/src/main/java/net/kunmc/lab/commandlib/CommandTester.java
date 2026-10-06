@@ -60,7 +60,7 @@ public final class CommandTester implements AutoCloseable {
 
     public TestCommandContext executeAndGetContext(String input, FakeSender sender) {
         execute(input, sender);
-        return TestCommandContext.latest();
+        return TestCommandContext.takeLatestOnCurrentThread();
     }
 
     public CompletableFuture<Suggestions> suggestions(@NotNull String input, @NotNull FakeSender sender) {

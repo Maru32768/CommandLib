@@ -8,20 +8,31 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public final class TestCommandContext extends CommonCommandContext<FakeSender, String> {
-    private static final ThreadLocal<TestCommandContext> LATEST = new ThreadLocal<>();
+    // The thread-local copy lets CommandTester#executeAndGetContext return its own context when tests run in parallel,
+    // while latest() keeps returning contexts created on other threads, e.g. by an asynchronous execute call.
+    private static final ThreadLocal<TestCommandContext> LATEST_ON_THREAD = new ThreadLocal<>();
+    private static volatile TestCommandContext latest;
     private final List<String> messages = new ArrayList<>();
 
     TestCommandContext(com.mojang.brigadier.context.CommandContext<FakeSender> ctx) {
         super(ctx);
-        LATEST.set(this);
+        LATEST_ON_THREAD.set(this);
+        latest = this;
     }
 
     public static TestCommandContext latest() {
-        return LATEST.get();
+        return latest;
+    }
+
+    static TestCommandContext takeLatestOnCurrentThread() {
+        TestCommandContext ctx = LATEST_ON_THREAD.get();
+        LATEST_ON_THREAD.remove();
+        return ctx;
     }
 
     static void clearLatest() {
-        LATEST.remove();
+        LATEST_ON_THREAD.remove();
+        latest = null;
     }
 
     @Override

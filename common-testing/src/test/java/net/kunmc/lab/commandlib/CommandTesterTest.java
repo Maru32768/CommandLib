@@ -187,16 +187,20 @@ class CommandTesterTest {
     }
 
     @Test
-    void latest_context_is_isolated_per_thread() throws Exception {
+    void latest_context_includes_execution_on_another_thread() throws Exception {
         CommandTester tester = new CommandTester(new TestCommand("ping") {{
             execute(ctx -> ctx.sendMessage("pong"));
         }});
         TestCommandContext mainContext = tester.executeAndGetContext("ping", FakeSender.console());
 
-        Thread other = new Thread(() -> tester.execute("ping", FakeSender.console()));
+        TestCommandContext[] otherContext = new TestCommandContext[1];
+        Thread other = new Thread(() -> otherContext[0] = tester.executeAndGetContext("ping", FakeSender.console()));
         other.start();
         other.join();
 
-        assertThat(TestCommandContext.latest()).isSameAs(mainContext);
+        assertThat(mainContext).isNotNull();
+        assertThat(otherContext[0]).isNotNull()
+                                   .isNotSameAs(mainContext);
+        assertThat(TestCommandContext.latest()).isSameAs(otherContext[0]);
     }
 }
