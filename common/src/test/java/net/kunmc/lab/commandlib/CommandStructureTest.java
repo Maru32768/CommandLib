@@ -136,6 +136,19 @@ class CommandStructureTest {
     }
 
     @Test
+    void child_aliased_help_replaces_generated_help() throws Exception {
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("game") {{
+            addChildren(new TestCommand("info") {{
+                addAliases("help");
+                execute(ctx -> ctx.sendMessage("info"));
+            }});
+        }});
+
+        assertThat(runner.execute("game help")
+                         .messages()).containsExactly("info");
+    }
+
+    @Test
     void generated_help_literal_prints_usage() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("game") {{
             addChildren(new TestCommand("start") {{

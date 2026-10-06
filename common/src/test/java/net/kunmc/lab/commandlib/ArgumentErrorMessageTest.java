@@ -2,6 +2,7 @@ package net.kunmc.lab.commandlib;
 
 import net.kunmc.lab.commandlib.argument.CommonEnumArgument;
 import net.kunmc.lab.commandlib.argument.CommonStringArgument;
+import net.kunmc.lab.commandlib.exception.ArgumentParseException;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -109,5 +110,19 @@ class ArgumentErrorMessageTest {
         TestCommandContext ctx = runner.execute("dir up");
 
         assertThat(ctx.messages()).containsExactly("command.unknown.argument", "§7dir §c§nup§r" + HERE);
+    }
+
+    @Test
+    void incorrect_input_message_without_matching_node_shows_token_once() throws Exception {
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("go") {{
+            argument(new CommonStringArgument<>("label")).execute((label, ctx) -> {
+                ArgumentParseException.ofIncorrectInput("missing", ctx, label)
+                                      .sendMessage(ctx);
+            });
+        }});
+
+        TestCommandContext ctx = runner.execute("go bad");
+
+        assertThat(ctx.messages()).containsExactly("command.unknown.argument", "§7go §c§nbad§r" + HERE);
     }
 }

@@ -72,10 +72,13 @@ final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U ext
                                                              .isEmpty()) {
             return false;
         }
+        // A child named or aliased "help" replaces the generated help node; adding both would make Brigadier merge
+        // the two literals.
         return command.children()
                       .stream()
                       .noneMatch(x -> x.name()
-                                       .equals("help"));
+                                       .equals("help") || x.aliases()
+                                                           .contains("help"));
     }
 
     private LiteralCommandNode<S> createHelpNode(U command, HelpMessageAction<S, T, C, U> helpAction) {
@@ -138,22 +141,21 @@ final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U ext
                                                        x.size())) // Sort in descending order to handle variable-length arguments
                      .forEach(arguments -> {
                          List<Arguments<C>> executorArguments = appendArgument(inheritedArguments, arguments);
-                         Supplier<ArgumentCommandNode<S, ?>> argumentNodeSupplier = () -> {
-                             // Brigadier can attach literal nodes under an argument node. The executor still needs
-                             // the parent arguments, so child commands inherit the complete argument chain here.
-                             validateUniqueLiterals(command.name(), arguments.children());
-                             List<LiteralCommandNode<S>> childNodes = arguments.children()
-                                                                               .stream()
-                                                                               .map(x -> toCommandNodes(castCommand(x),
-                                                                                                        executorArguments))
-                                                                               .flatMap(Collection::stream)
-                                                                               .collect(Collectors.toList());
-                             return new ArgumentCommandNodeCreator<>(arguments,
-                                                                     executorArguments,
-                                                                     permissionPrefix).build(helpAction,
-                                                                                             command,
-                                                                                             childNodes);
-                         };
+                         // Brigadier can attach literal nodes under an argument node. The executor still needs the
+                         // parent arguments, so child commands inherit the complete argument chain here. The child
+                         // nodes are built once and shared by every argument node the supplier creates for options,
+                         // as alias nodes share the children of their target.
+                         validateUniqueLiterals(command.name(), arguments.children());
+                         List<LiteralCommandNode<S>> childNodes = arguments.children()
+                                                                           .stream()
+                                                                           .map(x -> toCommandNodes(castCommand(x),
+                                                                                                    executorArguments))
+                                                                           .flatMap(Collection::stream)
+                                                                           .collect(Collectors.toList());
+                         Supplier<ArgumentCommandNode<S, ?>> argumentNodeSupplier = () -> new ArgumentCommandNodeCreator<>(
+                                 arguments,
+                                 executorArguments,
+                                 permissionPrefix).build(helpAction, command, childNodes);
                          builder.then(argumentNodeSupplier.get());
                          createOptionCommands(command.options(), argumentNodeSupplier, bareRunner).forEach(builder::then);
                      });

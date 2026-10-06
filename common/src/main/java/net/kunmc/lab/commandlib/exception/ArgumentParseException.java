@@ -20,7 +20,7 @@ public class ArgumentParseException extends Exception {
         // been parsed yet and the message is never sent.
         return context -> {
             PlatformAdapter platformAdapter = PlatformAdapter.get();
-            String prefix = inputBefore(ctx, argumentName);
+            String prefix = inputBefore(ctx, argumentName, incorrectInput);
             CommonCommandContext c = context;
             c.sendComponent(platformAdapter.createTranslatableComponentBuilder("command.unknown.argument")
                                            .color(Objects.requireNonNull(ChatColorUtil.RED.getRGB()))
@@ -35,7 +35,7 @@ public class ArgumentParseException extends Exception {
         };
     }
 
-    private static String inputBefore(CommonCommandContext<?, ?> ctx, String argumentName) {
+    private static String inputBefore(CommonCommandContext<?, ?> ctx, String argumentName, String incorrectInput) {
         String input = ctx.getHandle()
                           .getInput();
         int end = ctx.getHandle()
@@ -49,7 +49,11 @@ public class ArgumentParseException extends Exception {
                      .findFirst()
                      .map(n -> n.getRange()
                                 .getStart())
-                     .orElse(input.length());
+                     // Without a matching node, cut the input before the incorrect token so that it is not shown twice.
+                     .orElseGet(() -> {
+                         int index = input.lastIndexOf(incorrectInput);
+                         return index >= 0 ? index : input.length();
+                     });
 
         // Player input keeps the leading slash while console input does not; strip it only when present.
         int start = input.startsWith("/") ? 1 : 0;
