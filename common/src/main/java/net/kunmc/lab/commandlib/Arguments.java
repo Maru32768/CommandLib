@@ -71,6 +71,11 @@ final class Arguments<C extends CommonCommandContext<?, ?>> {
         this.children.addAll(children);
     }
 
+    void removeChildrenFrom(int index) {
+        this.children.subList(index, this.children.size())
+                     .clear();
+    }
+
     void executor(CommandExecutor<C> executor) {
         // Keep the executor on the branch instead of the argument instance, so one argument instance can be reused
         // as the last argument of several branches without them overwriting each other's executor.

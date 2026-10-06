@@ -32,6 +32,7 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
     private Predicate<C> preprocess = ctx -> true;
     private CommandExecutor<C> executor;
     private final List<UncaughtExceptionHandler<C>> uncaughtExceptionHandlers = new ArrayList<>();
+    private static final Object ARGUMENT_NODE = new Object();
 
     protected CommonCommand(@NotNull String name) {
         Objects.requireNonNull(name);
@@ -68,7 +69,15 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
     public final void addChildren(@NotNull Collection<? extends T> children) {
         Objects.requireNonNull(children);
         validateChildren(children);
+        int size = this.children.size();
         this.children.addAll(children);
+        try {
+            validateNodeNames();
+        } catch (IllegalArgumentException e) {
+            this.children.subList(size, this.children.size())
+                         .clear();
+            throw e;
+        }
         setParentFor(children, null);
     }
 
@@ -98,7 +107,18 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
         for (String alias : aliases) {
             Objects.requireNonNull(alias);
         }
+        int size = this.aliases.size();
         this.aliases.addAll(aliases);
+        if (parent == null) {
+            return;
+        }
+        try {
+            ((CommonCommand<C, T>) parent).validateNodeNames();
+        } catch (IllegalArgumentException e) {
+            this.aliases.subList(size, this.aliases.size())
+                        .clear();
+            throw e;
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -143,8 +163,8 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
             throw new IllegalArgumentException("ArgumentBuilder must add at least one argument.");
         }
         Arguments<C> arguments = addArguments(builtArguments, List.of());
-        if (builtArguments.get(builtArguments.size() - 1)
-                          .executor() == null) {
+        if (builder.executor() != null && builtArguments.get(builtArguments.size() - 1)
+                                                        .executor() == null) {
             arguments.executor(builder.executor());
         }
         return new ArgumentBranch<>(delegateFor(arguments));
@@ -296,6 +316,12 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
         validateChildren(children);
         Arguments<C> argumentBranch = new Arguments<>(this, arguments, children);
         argumentsList.add(argumentBranch);
+        try {
+            validateNodeNames();
+        } catch (IllegalArgumentException e) {
+            argumentsList.remove(argumentsList.size() - 1);
+            throw e;
+        }
         setParentFor(children, argumentBranch);
         return argumentBranch;
     }
@@ -304,8 +330,80 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
         Objects.requireNonNull(arguments);
         Objects.requireNonNull(children);
         validateChildren(children);
+        int size = arguments.children()
+                            .size();
         arguments.addChildren(children);
+        try {
+            validateNodeNames();
+        } catch (IllegalArgumentException e) {
+            arguments.removeChildrenFrom(size);
+            throw e;
+        }
         setParentFor(children, arguments);
+    }
+
+    /**
+     * Rejects top-level commands whose names or aliases collide, which would make one of them unreachable.
+     */
+    static void validateUniqueNames(@NotNull Collection<? extends CommonCommand<?, ?>> commands) {
+        Map<String, Object> owners = new HashMap<>();
+        for (CommonCommand<?, ?> command : commands) {
+            registerLiterals(owners, command, null);
+        }
+    }
+
+    private void validateNodeNames() {
+        // Brigadier keys the literal and argument children of a node by name and silently merges children with the
+        // same name, which would make one of them unreachable. Argument nodes with the same name at the same position
+        // are the shared prefix of variable-length branches and merge on purpose, so only literals are checked.
+        Map<List<String>, Map<String, Object>> ownersByPath = new HashMap<>();
+        for (T child : children) {
+            registerLiterals(ownersByPath.computeIfAbsent(List.of(), x -> new HashMap<>()), child, name);
+        }
+        for (Arguments<C> arguments : argumentsList) {
+            List<String> path = new ArrayList<>();
+            arguments.stream()
+                     .forEach(argument -> {
+                         registerName(ownersByPath.computeIfAbsent(List.copyOf(path), x -> new HashMap<>()),
+                                      argument.name(),
+                                      ARGUMENT_NODE,
+                                      location(path));
+                         path.add(argument.name());
+                     });
+            for (CommonCommand<C, ?> child : arguments.children()) {
+                registerLiterals(ownersByPath.computeIfAbsent(List.copyOf(path), x -> new HashMap<>()),
+                                 child,
+                                 location(path));
+            }
+        }
+    }
+
+    private String location(List<String> argumentPath) {
+        if (argumentPath.isEmpty()) {
+            return name;
+        }
+        return name + " <" + String.join("> <", argumentPath) + ">";
+    }
+
+    private static void registerLiterals(Map<String, Object> owners, CommonCommand<?, ?> command, String location) {
+        // Repeating a name within one command, or adding the same command twice, merges identical nodes and is
+        // harmless, so only collisions between different owners are rejected.
+        registerName(owners, command.name(), command, location);
+        for (String alias : command.aliases) {
+            registerName(owners, alias, command, location);
+        }
+    }
+
+    private static void registerName(Map<String, Object> owners, String name, Object owner, String location) {
+        Object existing = owners.putIfAbsent(name, owner);
+        if (existing == null || existing == owner) {
+            return;
+        }
+        String suffix = location == null ? "" : " under '" + location + "'";
+        if (existing == ARGUMENT_NODE || owner == ARGUMENT_NODE) {
+            throw new IllegalArgumentException("Command name or alias '" + name + "' conflicts with an argument of the same name" + suffix);
+        }
+        throw new IllegalArgumentException((location == null ? "Duplicate command name or alias '" : "Duplicate child command name or alias '") + name + "'" + suffix);
     }
 
     private void validateArguments(@NotNull List<? extends CommonArgument<?, C, ?>> arguments) {

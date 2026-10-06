@@ -21,7 +21,7 @@ final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U ext
     }
 
     public List<LiteralCommandNode<S>> build() {
-        validateUniqueLiterals(null, commands);
+        CommonCommand.validateUniqueNames(commands);
         return commands.stream()
                        .map(x -> toCommandNodes(x, List.of()))
                        .flatMap(Collection::stream)
@@ -34,7 +34,6 @@ final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U ext
         LiteralCommandNode<S> node = toCommandNode(command, inheritedArguments, helpAction);
         nodes.add(node);
 
-        validateUniqueLiterals(command.name(), command.children());
         command.children()
                .forEach(x -> {
                    // Normal command children do not consume new arguments, so they must keep the same inherited
@@ -49,24 +48,6 @@ final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U ext
         nodes.addAll(createAliasCommands(command, node));
 
         return nodes;
-    }
-
-    private static void validateUniqueLiterals(String parentName, Collection<? extends CommonCommand<?, ?>> commands) {
-        // Brigadier silently merges sibling literals with the same name, which would make one command unreachable.
-        // Repeating a name within one command, or adding the same command twice, merges identical nodes and is
-        // harmless, so only collisions between different commands are rejected.
-        Map<String, CommonCommand<?, ?>> owners = new HashMap<>();
-        for (CommonCommand<?, ?> command : commands) {
-            List<String> names = new ArrayList<>();
-            names.add(command.name());
-            names.addAll(command.aliases());
-            for (String name : names) {
-                CommonCommand<?, ?> owner = owners.putIfAbsent(name, command);
-                if (owner != null && owner != command) {
-                    throw new IllegalStateException(parentName == null ? "Duplicate command name or alias '" + name + "'" : "Duplicate child command name or alias '" + name + "' under '" + parentName + "'");
-                }
-            }
-        }
     }
 
     private boolean shouldAddHelpChild(U command) {
@@ -149,7 +130,6 @@ final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U ext
                          // parent arguments, so child commands inherit the complete argument chain here. The child
                          // nodes are built once and shared by every argument node the supplier creates for options,
                          // as alias nodes share the children of their target.
-                         validateUniqueLiterals(command.name(), arguments.children());
                          List<LiteralCommandNode<S>> childNodes = arguments.children()
                                                                            .stream()
                                                                            .map(x -> toCommandNodes(castCommand(x),

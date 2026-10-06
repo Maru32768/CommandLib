@@ -57,6 +57,19 @@ class CommandStructureTest {
     }
 
     @Test
+    void argument_builder_branch_without_executor_keeps_argument_executor_set_later() throws Exception {
+        StrArg value = new StrArg("value");
+        TestCommand command = new TestCommand("set") {{
+            argument(builder -> builder.argument(value));
+        }};
+        value.execute(ctx -> ctx.sendMessage("argument executor"));
+        TestCommandRunner runner = new TestCommandRunner(command);
+
+        assertThat(runner.execute("set x")
+                         .messages()).containsExactly("argument executor");
+    }
+
+    @Test
     void argument_builder_branch_execute_overrides_builder_executor() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("sum") {{
             argument(builder -> {
@@ -113,25 +126,75 @@ class CommandStructureTest {
     }
 
     @Test
-    void duplicate_child_command_names_are_rejected_at_build() {
-        TestCommand command = new TestCommand("game") {{
-            addChildren(new TestCommand("start"), new TestCommand("start"));
-        }};
+    void duplicate_child_command_names_are_rejected_when_added() {
+        TestCommand command = new TestCommand("game");
 
-        assertThatThrownBy(() -> new TestCommandRunner(command)).isInstanceOf(IllegalStateException.class)
-                                                                .hasMessageContaining("start");
+        assertThatThrownBy(() -> command.addChildren(new TestCommand("start"),
+                                                     new TestCommand("start"))).isInstanceOf(IllegalArgumentException.class)
+                                                                               .hasMessageContaining("start");
+        assertThat(command.children()).isEmpty();
     }
 
     @Test
-    void child_alias_conflicting_with_sibling_name_is_rejected_at_build() {
+    void child_alias_conflicting_with_sibling_name_is_rejected_when_added() {
         TestCommand command = new TestCommand("game") {{
-            addChildren(new TestCommand("start"), new TestCommand("begin") {{
-                addAliases("start");
-            }});
+            addChildren(new TestCommand("start"));
+        }};
+        TestCommand begin = new TestCommand("begin") {{
+            addAliases("start");
         }};
 
-        assertThatThrownBy(() -> new TestCommandRunner(command)).isInstanceOf(IllegalStateException.class)
-                                                                .hasMessageContaining("start");
+        assertThatThrownBy(() -> command.addChildren(begin)).isInstanceOf(IllegalArgumentException.class)
+                                                            .hasMessageContaining("start");
+        assertThat(command.children()).extracting(CommonCommand::name)
+                                      .containsExactly("start");
+    }
+
+    @Test
+    void alias_added_after_child_was_added_is_checked_against_siblings() {
+        TestCommand begin = new TestCommand("begin");
+        new TestCommand("game") {{
+            addChildren(new TestCommand("start"), begin);
+        }};
+
+        assertThatThrownBy(() -> begin.addAliases("start")).isInstanceOf(IllegalArgumentException.class)
+                                                           .hasMessageContaining("start");
+        assertThat(begin.aliases()).isEmpty();
+    }
+
+    @Test
+    void child_name_conflicting_with_argument_name_is_rejected() {
+        TestCommand command = new TestCommand("game") {{
+            argument(new StrArg("target"));
+        }};
+
+        assertThatThrownBy(() -> command.addChildren(new TestCommand("target"))).isInstanceOf(IllegalArgumentException.class)
+                                                                                .hasMessageContaining("target");
+    }
+
+    @Test
+    void argument_children_of_branches_sharing_a_path_must_not_collide() {
+        TestCommand command = new TestCommand("game") {{
+            argument(new StrArg("target")).child(target -> new TestCommand("kick"));
+        }};
+
+        assertThatThrownBy(() -> command.argument(new StrArg("target"))
+                                        .child(target -> new TestCommand("kick"))).isInstanceOf(IllegalArgumentException.class)
+                                                                              .hasMessageContaining("kick")
+                                                                              .hasMessageContaining("game <target>");
+    }
+
+    @Test
+    void variable_length_branches_sharing_an_argument_prefix_are_accepted() throws Exception {
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("sum") {{
+            argument(new IntArg("a"), new IntArg("b")).execute((a, b, ctx) -> ctx.sendMessage(a + b));
+            argument(new IntArg("a")).execute((a, ctx) -> ctx.sendMessage(a));
+        }});
+
+        assertThat(runner.execute("sum 1 2")
+                         .messages()).containsExactly("3");
+        assertThat(runner.execute("sum 1")
+                         .messages()).containsExactly("1");
     }
 
     @Test
@@ -155,7 +218,7 @@ class CommandStructureTest {
         }});
 
         assertThatThrownBy(() -> new CommandNodeCreator<>(commands, "test.command").build()).isInstanceOf(
-                                                                                                    IllegalStateException.class)
+                                                                                                    IllegalArgumentException.class)
                                                                                             .hasMessageContaining("foo");
     }
 
