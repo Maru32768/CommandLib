@@ -1,10 +1,10 @@
 package net.kunmc.lab.commandlib.argument;
 
-import com.mojang.brigadier.arguments.StringArgumentType;
 import net.kunmc.lab.commandlib.Argument;
 import net.kunmc.lab.commandlib.CommandContext;
 import net.kunmc.lab.commandlib.exception.ArgumentParseException;
 import net.kunmc.lab.commandlib.util.StringUtil;
+import net.kunmc.lab.commandlib.util.bukkit.BukkitUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 
@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 public class UUIDsArgument extends Argument<List<UUID>, UUIDsArgument> {
     public UUIDsArgument(String name) {
-        super(name, StringArgumentType.word());
+        super(name, RawWordArgumentType.rawWord());
 
         setSuggestionAction(sb -> {
             String input = sb.getLatestInput();
@@ -77,7 +77,7 @@ public class UUIDsArgument extends Argument<List<UUID>, UUIDsArgument> {
             throw new ArgumentParseException(x -> x.sendFailure(s + " is invalid selector"));
         }
 
-        OfflinePlayer p = getOfflinePlayerByName(s);
+        OfflinePlayer p = BukkitUtil.getOfflinePlayerIfEverPlayed(s);
         if (p != null) {
             return List.of(p.getUniqueId());
         }
@@ -87,12 +87,5 @@ public class UUIDsArgument extends Argument<List<UUID>, UUIDsArgument> {
         } catch (IllegalArgumentException e) {
             throw new ArgumentParseException(x -> x.sendFailure(s + " is not found or not valid UUID"));
         }
-    }
-
-    private static OfflinePlayer getOfflinePlayerByName(String name) {
-        return Arrays.stream(Bukkit.getOfflinePlayers())
-                     .filter(x -> name.equals(x.getName()))
-                     .findFirst()
-                     .orElse(null);
     }
 }

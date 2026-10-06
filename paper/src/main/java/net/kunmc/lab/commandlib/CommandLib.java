@@ -65,6 +65,7 @@ public final class CommandLib implements Listener {
     private CommandDispatcher<CommandSourceStack> dispatcher;
     private final List<String> registeredCommandNames = new ArrayList<>();
     private final List<Permission> registeredPermissions = new ArrayList<>();
+    private boolean listenerRegistered;
     private boolean unregistered;
 
     private CommandLib(Plugin plugin, PluginRegistrationState registrationState) {
@@ -110,13 +111,17 @@ public final class CommandLib implements Listener {
         CommandLib instance = new CommandLib(plugin,
                                              REGISTRATION_STATES.computeIfAbsent(plugin,
                                                                                  ignored -> new PluginRegistrationState()));
-        Bukkit.getPluginManager()
-              .registerEvents(instance, plugin);
+        // Bukkit rejects listeners of plugins that are not enabled yet, which is the case when register() is called
+        // from the constructor or onLoad(). The listener is then registered from the COMMANDS lifecycle event.
+        instance.registerDisableListenerIfEnabled();
         instance.doRegisterPermissions(plugin, permissionPrefix, commands);
 
         PendingRegistration registration = new PendingRegistration(instance, commands, permissionPrefix);
         synchronized (instance.registrationState) {
             if (instance.registrationState.dispatcher != null) {
+                // Keep the registration so the lifecycle handler adds it again when /minecraft:reload rebuilds the
+                // dispatcher.
+                instance.registrationState.registrations.add(registration);
                 instance.registerDirectly(instance.registrationState.dispatcher, registration);
                 return instance;
             }
@@ -127,7 +132,7 @@ public final class CommandLib implements Listener {
             }
 
             if (instance.registrationState.lifecycleHandlerRegistered) {
-                instance.registrationState.pendingRegistrations.add(registration);
+                instance.registrationState.registrations.add(registration);
                 return instance;
             }
 
@@ -171,7 +176,7 @@ public final class CommandLib implements Listener {
         unregistered = true;
 
         synchronized (registrationState) {
-            registrationState.pendingRegistrations.removeIf(x -> x.instance == this);
+            registrationState.registrations.removeIf(x -> x.instance == this);
         }
 
         try {
@@ -205,6 +210,18 @@ public final class CommandLib implements Listener {
 
     @SuppressWarnings("unchecked")
     private static void removeFromNode(RootCommandNode<CommandSourceStack> root, String name) {
+        // Paper's dispatcher root mirrors the vanilla dispatcher and overrides its own removeCommand(String) to
+        // remove the node there as well. Editing the root's maps directly would leave the command executable.
+        try {
+            root.getClass()
+                .getMethod("removeCommand", String.class)
+                .invoke(root, name);
+            return;
+        } catch (NoSuchMethodException ignored) {
+            // Plain Brigadier (e.g. in tests) has no removeCommand.
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException("Failed to remove command " + name, e);
+        }
         ((Map<String, ?>) CHILDREN.get(root)).remove(name);
         ((Map<String, ?>) LITERALS.get(root)).remove(name);
         ((Map<String, ?>) ARGUMENTS.get(root)).remove(name);
@@ -248,10 +265,12 @@ public final class CommandLib implements Listener {
                     serverDispatcher = dispatcher;
                     state.dispatcher = dispatcher;
 
-                    for (PendingRegistration pending : state.pendingRegistrations) {
-                        pending.instance.registerWithRegistrar(registrar, dispatcher, pending);
+                    // The event fires at startup and again after /minecraft:reload with a fresh dispatcher, so every
+                    // active registration is added each time instead of only the pending ones.
+                    for (PendingRegistration registration : state.registrations) {
+                        registration.instance.registerDisableListenerIfEnabled();
+                        registration.instance.registerWithRegistrar(registrar, dispatcher, registration);
                     }
-                    state.pendingRegistrations.clear();
                 }
             });
             return true;
@@ -261,10 +280,20 @@ public final class CommandLib implements Listener {
         }
     }
 
+    private void registerDisableListenerIfEnabled() {
+        if (listenerRegistered || !plugin.isEnabled()) {
+            return;
+        }
+        Bukkit.getPluginManager()
+              .registerEvents(this, plugin);
+        listenerRegistered = true;
+    }
+
     private void registerWithRegistrar(Commands registrar,
                                        CommandDispatcher<CommandSourceStack> dispatcher,
                                        PendingRegistration registration) {
         this.dispatcher = dispatcher;
+        registeredCommandNames.clear();
         for (LiteralCommandNode<CommandSourceStack> node : registration.buildNodes()) {
             registrar.register(node, "");
             registeredCommandNames.add(node.getLiteral());
@@ -291,7 +320,7 @@ public final class CommandLib implements Listener {
         private boolean lifecycleHandlerRegistered;
         private IllegalStateException registrationFailure;
         private CommandDispatcher<CommandSourceStack> dispatcher;
-        private final List<PendingRegistration> pendingRegistrations = new ArrayList<>();
+        private final List<PendingRegistration> registrations = new ArrayList<>();
     }
 
     private static final class PendingRegistration {

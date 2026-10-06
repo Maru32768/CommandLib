@@ -1,10 +1,10 @@
 package net.kunmc.lab.commandlib.argument;
 
-import com.mojang.brigadier.arguments.StringArgumentType;
 import net.kunmc.lab.commandlib.Argument;
 import net.kunmc.lab.commandlib.CommandContext;
 import net.kunmc.lab.commandlib.exception.ArgumentParseException;
 import net.kunmc.lab.commandlib.util.StringUtil;
+import net.kunmc.lab.commandlib.util.bukkit.BukkitUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 
@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 
 public class OfflinePlayersArgument extends Argument<List<OfflinePlayer>, OfflinePlayersArgument> {
     public OfflinePlayersArgument(String name) {
-        super(name, StringArgumentType.word());
+        super(name, RawWordArgumentType.rawWord());
 
         addSuggestionAction(sb -> {
             String input = sb.getLatestInput();
@@ -69,10 +69,7 @@ public class OfflinePlayersArgument extends Argument<List<OfflinePlayer>, Offlin
             throw new ArgumentParseException(x -> x.sendFailure(s + " is invalid selector."));
         }
 
-        OfflinePlayer p = Arrays.stream(Bukkit.getOfflinePlayers())
-                                .filter(x -> s.equals(x.getName()))
-                                .findFirst()
-                                .orElse(null);
+        OfflinePlayer p = BukkitUtil.getOfflinePlayerIfEverPlayed(s);
         if (p == null) {
             throw ArgumentParseException.ofIncorrectInput(this.name(), ctx, s);
         }

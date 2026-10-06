@@ -1,10 +1,12 @@
 package net.kunmc.lab.commandlib;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.LiteralMessage;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
@@ -327,7 +329,19 @@ public final class CommandTester implements AutoCloseable {
     }
 
     private static <T> ArgumentType<T> word(Function<String, T> parser) {
-        return reader -> parser.apply(readUntilWhitespace(reader));
+        return reader -> {
+            int start = reader.getCursor();
+            String token = readUntilWhitespace(reader);
+            T value = parser.apply(token);
+            if (value == null) {
+                // Paper's registry and world arguments reject unknown values while parsing. Returning null here would
+                // let Brigadier fail with a NullPointerException instead.
+                reader.setCursor(start);
+                throw new SimpleCommandExceptionType(new LiteralMessage("Unknown value '" + token + "'")).createWithContext(
+                        reader);
+            }
+            return value;
+        };
     }
 
     private static String readUntilWhitespace(StringReader reader) {

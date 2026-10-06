@@ -20,7 +20,11 @@ public class WorldArgument extends Argument<World, WorldArgument> {
 
     @Override
     protected World parseImpl(CommandContext ctx) throws CommandSyntaxException, ArgumentParseException {
-        return ctx.getHandle()
-                  .getArgument(name(), World.class);
+        World world = ctx.getHandle()
+                         .getArgument(name(), World.class);
+        if (world == null) {
+            throw ArgumentParseException.ofIncorrectInput(name(), ctx, ctx.getInput(name()));
+        }
+        return world;
     }
 }

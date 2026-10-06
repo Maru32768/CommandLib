@@ -5,6 +5,7 @@ import net.kunmc.lab.commandlib.Argument;
 import net.kunmc.lab.commandlib.CommandContext;
 import net.kunmc.lab.commandlib.exception.ArgumentParseException;
 import net.kunmc.lab.commandlib.util.StringUtil;
+import net.kunmc.lab.commandlib.util.bukkit.BukkitUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 
@@ -19,12 +20,10 @@ public class UUIDArgument extends Argument<UUID, UUIDArgument> {
 
         setSuggestionAction(sb -> {
             Map<UUID, String> uuidToNameMap = new HashMap<>();
-            System.out.println(Arrays.toString(Bukkit.getOfflinePlayers()));
             Arrays.stream(Bukkit.getOfflinePlayers())
                   .filter(x -> filter(sb.getContext()).test(x.getUniqueId()))
                   .filter(x -> {
                       String input = sb.getLatestInput();
-                      System.out.println(x.getName() + " " + input);
                       if (input.isEmpty()) {
                           return true;
                       }
@@ -35,9 +34,7 @@ public class UUIDArgument extends Argument<UUID, UUIDArgument> {
                                                             .toString(), input);
                   })
                   .forEach(x -> uuidToNameMap.put(x.getUniqueId(), x.getName()));
-            System.out.println(uuidToNameMap);
             uuidToNameMap.forEach((k, v) -> {
-                System.out.println(k);
                 if (v == null) {
                     sb.suggest(k.toString());
                 } else {
@@ -56,7 +53,7 @@ public class UUIDArgument extends Argument<UUID, UUIDArgument> {
     protected UUID parseImpl(CommandContext ctx) throws ArgumentParseException {
         String s = StringArgumentType.getString(ctx.getHandle(), name());
 
-        OfflinePlayer p = getOfflinePlayerByName(s);
+        OfflinePlayer p = BukkitUtil.getOfflinePlayerIfEverPlayed(s);
         if (p != null) {
             return p.getUniqueId();
         }
@@ -66,12 +63,5 @@ public class UUIDArgument extends Argument<UUID, UUIDArgument> {
         } catch (IllegalArgumentException e) {
             throw new ArgumentParseException(x -> x.sendFailure(s + " is not found or not valid UUID"));
         }
-    }
-
-    private static OfflinePlayer getOfflinePlayerByName(String name) {
-        return Arrays.stream(Bukkit.getOfflinePlayers())
-                     .filter(x -> name.equals(x.getName()))
-                     .findFirst()
-                     .orElse(null);
     }
 }

@@ -149,7 +149,9 @@ public final class FakeSender {
         PlainTextComponentSerializer serializer = PlainTextComponentSerializer.plainText();
         List<String> result = new ArrayList<>();
         for (Component component : sentMessages) {
-            result.add(serializer.serialize(component));
+            // Some messages embed legacy section-sign codes inside their text, which the plain serializer keeps.
+            result.add(serializer.serialize(component)
+                                 .replaceAll("(?i)§[0-9A-FK-ORX]", ""));
         }
         return result;
     }

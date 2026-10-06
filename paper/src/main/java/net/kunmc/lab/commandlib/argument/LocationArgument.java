@@ -12,7 +12,8 @@ import org.bukkit.Location;
 @SuppressWarnings("UnstableApiUsage")
 public class LocationArgument extends Argument<Location, LocationArgument> {
     public LocationArgument(String name) {
-        super(name, ArgumentTypes.finePosition());
+        // Center integer x/z coordinates like vanilla commands and the Spigot implementation do (1 64 1 -> 1.5 64 1.5).
+        super(name, ArgumentTypes.finePosition(true));
     }
 
     @Override

@@ -33,6 +33,8 @@ class RawWordArgumentType implements CustomArgumentType<String, String> {
 
     @Override
     public ArgumentType<String> getNativeType() {
-        return StringArgumentType.word();
+        // A word would make clients flag selectors such as @p as invalid input. A greedy phrase is accepted by the
+        // client, while the server still reads a single token through parse().
+        return StringArgumentType.greedyString();
     }
 }

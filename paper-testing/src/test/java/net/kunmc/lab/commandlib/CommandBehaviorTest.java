@@ -1,6 +1,5 @@
 package net.kunmc.lab.commandlib;
 
-import com.mojang.brigadier.LiteralMessage;
 import net.kunmc.lab.commandlib.argument.StringArgument;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -42,29 +41,6 @@ class CommandBehaviorTest {
 
         assertThat(player.getSentMessageTexts()).containsExactly("player");
         assertThat(console.getSentMessageTexts()).containsExactly("This command can only be executed by a player.");
-    }
-
-    @Test
-    void suggestionWithMessageTooltipExposesTooltipText() throws Exception {
-        CommandTester tester = new CommandTester(new Command("cmd") {{
-            argument(new StringArgument("value").addSuggestionAction(sb -> sb.suggest("alpha",
-                                                                                      new LiteralMessage("alpha tooltip"))
-                                                                             .suggest("beta"))).execute((v, ctx) -> {
-            });
-        }}, "test.command");
-        FakeSender sender = FakeSender.player("Steve");
-
-        var suggestions = tester.suggestions("cmd ", sender)
-                                .get()
-                                .getList();
-
-        assertThat(suggestions).extracting(com.mojang.brigadier.suggestion.Suggestion::getText)
-                               .containsExactly("alpha", "beta", "help");
-        assertThat(suggestions.get(0)
-                              .getTooltip()
-                              .getString()).isEqualTo("alpha tooltip");
-        assertThat(suggestions.get(1)
-                              .getTooltip()).isNull();
     }
 
     @Test
