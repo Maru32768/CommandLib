@@ -23,6 +23,7 @@ dependencies {
 //    compileOnly(fileTree(mapOf("dir" to "../integration-test/targets/paper-1.19.4/test-plugin/", "include" to listOf("server/versions/1.19.4/paper*.jar", "server_mojmap/versions/1.19.4/paper*jar"))))
 
     testImplementation("org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT")
+    testImplementation("com.mojang:brigadier:1.0.18")
     testImplementation("org.junit.jupiter:junit-jupiter:5.8.1")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("org.assertj:assertj-core:3.25.1")

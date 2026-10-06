@@ -5,6 +5,8 @@ import net.kunmc.lab.commandlib.util.bukkit.MinecraftVersion;
 import net.kunmc.lab.commandlib.util.nms.exception.UnregisteredNMSClassException;
 
 import java.util.Deque;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -20,11 +22,10 @@ public class NMSClassRegistry {
         Objects.requireNonNull(lookUpClass);
         Objects.requireNonNull(targetClass);
 
-        Deque<RegisteredClass> deque = CLASS_TO_DEQUE_MAP.getOrDefault(lookUpClass, new ConcurrentLinkedDeque<>());
-        deque.addFirst(new RegisteredClass(targetClass,
-                                           new MinecraftVersion(lowerVersion),
-                                           new MinecraftVersion(upperVersion)));
-        CLASS_TO_DEQUE_MAP.put(lookUpClass, deque);
+        CLASS_TO_DEQUE_MAP.computeIfAbsent(lookUpClass, x -> new ConcurrentLinkedDeque<>())
+                          .addFirst(new RegisteredClass(targetClass,
+                                                        new MinecraftVersion(lowerVersion),
+                                                        new MinecraftVersion(upperVersion)));
     }
 
     public static <T extends Class<? extends NMSClass>> T findClass(T clazz) {
@@ -44,7 +45,17 @@ public class NMSClassRegistry {
         throw new UnregisteredNMSClassException(clazz + " is unregistered.");
     }
 
-    private static class RegisteredClass {
+    /**
+     * Returns the registered implementations of each look-up class, most recently registered first. Exposed for
+     * tests that check the version ranges for gaps and overlaps.
+     */
+    static Map<Class<? extends NMSClass>, List<RegisteredClass>> registrations() {
+        Map<Class<? extends NMSClass>, List<RegisteredClass>> result = new HashMap<>();
+        CLASS_TO_DEQUE_MAP.forEach((key, value) -> result.put(key, List.copyOf(value)));
+        return result;
+    }
+
+    static class RegisteredClass {
         public final Class<? extends NMSClass> clazz;
         public final MinecraftVersion lowerVersion;
         public final MinecraftVersion upperVersion;

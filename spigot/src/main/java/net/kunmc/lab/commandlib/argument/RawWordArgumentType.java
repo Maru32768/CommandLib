@@ -23,10 +23,20 @@ class RawWordArgumentType implements ArgumentType<String> {
             if (registered) {
                 return;
             }
-            registered = true;
+            // Mark as registered only after success. Otherwise a failed registration would let commands using this
+            // type reach the client command tree with an argument type the server cannot serialize.
             NMSArgumentTypeRegistrar.create()
                                     .registerAsGreedyString(RawWordArgumentType.class, RawWordArgumentType::rawWord);
+            registered = true;
         }
+    }
+
+    static boolean isRegistered() {
+        return registered;
+    }
+
+    static void resetRegistrationForTest() {
+        registered = false;
     }
 
     @Override

@@ -17,6 +17,6 @@ public class NMSArgumentMobEffect_v1_17_0 extends NMSArgumentMobEffect {
 
     @Override
     protected NMSMobEffectList parseImpl(CommandContext<?> ctx, String name) {
-        return NMSMobEffectList.create(invokeStaticMethod("getEffect", ctx, name));
+        return NMSMobEffectList.create(invokeStaticMethod("a", ctx, name));
     }
 }

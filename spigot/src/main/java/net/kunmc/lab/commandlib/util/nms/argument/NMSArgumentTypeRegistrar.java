@@ -110,30 +110,45 @@ public abstract class NMSArgumentTypeRegistrar extends MinecraftClass {
         }
         Class<?> entryClass = innerClasses[0];
 
-        Constructor<?> ctor = null;
-        for (Constructor<?> c : entryClass.getDeclaredConstructors()) {
-            int n = c.getParameterCount();
-            if (n == 4 || n == 3) {
-                ctor = c;
-                if (n == 4) {
-                    break;
-                }
+        // The entry constructor differs between versions: (Class, serializer, key[, extra]) up to 1.17 and
+        // (serializer, key) in 1.18. Arguments are assigned by parameter type so every shape is supported.
+        for (Constructor<?> ctor : entryClass.getDeclaredConstructors()) {
+            Object[] args = entryArguments(ctor.getParameterTypes(), argumentTypeClass, serializer, key);
+            if (args == null) {
+                continue;
+            }
+            ctor.setAccessible(true);
+            try {
+                return ctor.newInstance(args);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             }
         }
-        if (ctor == null) {
-            throw new IllegalStateException("No suitable entry constructor found");
+        throw new IllegalStateException("No suitable entry constructor found in " + entryClass.getName());
+    }
+
+    private static Object[] entryArguments(Class<?>[] parameterTypes,
+                                           Class<?> argumentTypeClass,
+                                           Object serializer,
+                                           Object key) {
+        Object[] args = new Object[parameterTypes.length];
+        boolean serializerAssigned = false;
+        boolean keyAssigned = false;
+        for (int i = 0; i < parameterTypes.length; i++) {
+            Class<?> type = parameterTypes[i];
+            if (type == Class.class) {
+                args[i] = argumentTypeClass;
+            } else if (!serializerAssigned && type.isInstance(serializer)) {
+                args[i] = serializer;
+                serializerAssigned = true;
+            } else if (!keyAssigned && type.isInstance(key)) {
+                args[i] = key;
+                keyAssigned = true;
+            } else if (type.isPrimitive()) {
+                return null;
+            }
         }
-        ctor.setAccessible(true);
-        try {
-            return ctor.getParameterCount() == 4 ? ctor.newInstance(argumentTypeClass,
-                                                                    serializer,
-                                                                    key,
-                                                                    null) : ctor.newInstance(argumentTypeClass,
-                                                                                             serializer,
-                                                                                             key);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        return serializerAssigned && keyAssigned ? args : null;
     }
 
     private static void writeGreedyPhrase(Object packetSerializer) throws Exception {

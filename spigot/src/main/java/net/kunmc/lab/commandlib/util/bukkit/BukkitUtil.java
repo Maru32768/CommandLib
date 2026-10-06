@@ -25,8 +25,9 @@ public class BukkitUtil {
                              return false;
                          }
 
+                         // Minecraft player names are case-insensitive.
                          return x.getName()
-                                 .equals(name);
+                                 .equalsIgnoreCase(name);
                      })
                      .findFirst()
                      .orElse(null);

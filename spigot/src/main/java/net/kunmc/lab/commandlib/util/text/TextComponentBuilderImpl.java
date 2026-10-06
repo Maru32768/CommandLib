@@ -26,7 +26,7 @@ public class TextComponentBuilderImpl extends TextComponentBuilder<BaseComponent
 
     @Override
     public TextComponentBuilderImpl append(BaseComponent component) {
-        component.addExtra(component);
+        this.component.addExtra(component);
         return this;
     }
 }

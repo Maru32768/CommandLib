@@ -7,7 +7,7 @@ import net.kunmc.lab.commandlib.util.nms.world.NMSMobEffectList;
 
 public class NMSArgumentMobEffect_v1_18_0 extends NMSArgumentMobEffect {
     public NMSArgumentMobEffect_v1_18_0() {
-        super(null, "commands.argument.ArgumentMobEffect");
+        super(null, "commands.arguments.ArgumentMobEffect");
     }
 
     @Override

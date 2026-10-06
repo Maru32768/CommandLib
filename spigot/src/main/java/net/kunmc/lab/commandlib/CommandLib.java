@@ -13,12 +13,15 @@ import org.bukkit.command.CommandMap;
 import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.command.defaults.BukkitCommand;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.permissions.Permissible;
 import org.bukkit.permissions.Permission;
+import org.bukkit.plugin.EventExecutor;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
@@ -78,6 +81,73 @@ public final class CommandLib implements Listener {
         enable();
         Bukkit.getPluginManager()
               .registerEvents(this, plugin);
+        registerResourcesReloadListener();
+    }
+
+    /**
+     * From 1.20.6 the commands are added straight to Paper's dispatcher, which /minecraft:reload replaces. Paper
+     * fires ServerResourcesReloadedEvent after re-syncing Bukkit commands, so the nodes are added again there. The
+     * event is Paper API, so it is registered reflectively.
+     */
+    @SuppressWarnings("unchecked")
+    private void registerResourcesReloadListener() {
+        if (!usesPaperCommandDispatcher()) {
+            return;
+        }
+        Class<? extends Event> eventClass;
+        try {
+            eventClass = (Class<? extends Event>) Class.forName("io.papermc.paper.event.server.ServerResourcesReloadedEvent");
+        } catch (ClassNotFoundException e) {
+            return;
+        }
+        EventExecutor executor = (listener, event) -> {
+            if (eventClass.isInstance(event)) {
+                ((CommandLib) listener).readdToPaperDispatcher();
+            }
+        };
+        Bukkit.getPluginManager()
+              .registerEvent(eventClass, this, EventPriority.MONITOR, executor, plugin);
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private void readdToPaperDispatcher() {
+        try {
+            Map<String, org.bukkit.command.Command> knownCommands = knownCommands();
+            for (CommandNode node : registeredCommands) {
+                addToPaperDispatcher(knownCommands, node);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        updatePlayerCommandsLater();
+    }
+
+    private static boolean usesPaperCommandDispatcher() {
+        return !new MinecraftVersion(BukkitUtil.getMinecraftVersion()).isLessThan(new MinecraftVersion("1.20.6"));
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Map<String, org.bukkit.command.Command> knownCommands() throws Exception {
+        CommandMap commandMap = ((CommandMap) NMSCraftServer.create()
+                                                            .getValue("commandMap"));
+        Field knownCommandsField = SimpleCommandMap.class.getDeclaredField("knownCommands");
+        knownCommandsField.setAccessible(true);
+        return ((Map<String, org.bukkit.command.Command>) knownCommandsField.get(commandMap));
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private static void addToPaperDispatcher(Map<String, org.bukkit.command.Command> knownCommands,
+                                             CommandNode node) throws Exception {
+        CommandDispatcher dispatcher = ((CommandDispatcher) knownCommands.getClass()
+                                                                         .getDeclaredMethod("getDispatcher")
+                                                                         .invoke(knownCommands));
+        RootCommandNode root = dispatcher.getRoot();
+        removeRegisteredCommand(root, knownCommands, node.getName());
+
+        CommandNode shadowBrigNode = (CommandNode) Class.forName("io.papermc.paper.command.brigadier.ShadowBrigNode")
+                                                        .getConstructor(CommandNode.class)
+                                                        .newInstance(node);
+        root.addChild(shadowBrigNode);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -116,17 +186,7 @@ public final class CommandLib implements Listener {
                         executeRunRoot.addChild(x);
                     }
                 } else {
-                    CommandDispatcher dispatcher = ((CommandDispatcher) knownCommands.getClass()
-                                                                                     .getDeclaredMethod("getDispatcher")
-                                                                                     .invoke(knownCommands));
-                    RootCommandNode root = dispatcher.getRoot();
-                    removeRegisteredCommand(root, knownCommands, x.getName());
-
-                    CommandNode shadowBrigNode = (CommandNode) Class.forName(
-                                                                            "io.papermc.paper.command.brigadier.ShadowBrigNode")
-                                                                    .getConstructor(CommandNode.class)
-                                                                    .newInstance(x);
-                    root.addChild(shadowBrigNode);
+                    addToPaperDispatcher(knownCommands, x);
                 }
             } catch (Exception e) {
                 throw new RuntimeException(e);

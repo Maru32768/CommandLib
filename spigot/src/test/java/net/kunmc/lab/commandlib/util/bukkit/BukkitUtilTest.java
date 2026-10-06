@@ -30,4 +30,35 @@ class BukkitUtilTest {
             }
         }
     }
+
+    @Test
+    void offline_player_lookup_ignores_case_and_players_without_name() {
+        org.bukkit.OfflinePlayer unnamed = Mockito.mock(org.bukkit.OfflinePlayer.class);
+        org.bukkit.OfflinePlayer steve = Mockito.mock(org.bukkit.OfflinePlayer.class);
+        Mockito.when(steve.getName())
+               .thenReturn("Steve");
+
+        try (MockedStatic<Bukkit> mockedStatic = Mockito.mockStatic(Bukkit.class)) {
+            mockedStatic.when(Bukkit::getOfflinePlayers)
+                        .thenReturn(new org.bukkit.OfflinePlayer[]{unnamed, steve});
+
+            Assertions.assertThat(BukkitUtil.getOfflinePlayerIfEverPlayed("steve"))
+                      .isSameAs(steve);
+            Assertions.assertThat(BukkitUtil.getOfflinePlayerIfEverPlayed("Steve"))
+                      .isSameAs(steve);
+            Assertions.assertThat(BukkitUtil.getOfflinePlayerIfEverPlayed("Alex"))
+                      .isNull();
+        }
+    }
+
+    @Test
+    void getMinecraftVersion_accepts_versions_with_suffixes() {
+        try (MockedStatic<Bukkit> mockedStatic = Mockito.mockStatic(Bukkit.class)) {
+            mockedStatic.when(Bukkit::getBukkitVersion)
+                        .thenReturn("1.21.4-R0.1-SNAPSHOT");
+
+            Assertions.assertThat(BukkitUtil.getMinecraftVersion())
+                      .isEqualTo("1.21.4");
+        }
+    }
 }

@@ -11,6 +11,7 @@ import org.bukkit.entity.Entity;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 public class NMSCommandListenerWrapper_v1_17_0 extends NMSCommandListenerWrapper {
     public NMSCommandListenerWrapper_v1_17_0(Object handle) {
@@ -22,7 +23,7 @@ public class NMSCommandListenerWrapper_v1_17_0 extends NMSCommandListenerWrapper
     }
 
     public Entity getBukkitEntity() {
-        Object entity = invokeMethod("getEntity");
+        Object entity = invokeGetter("Entity");
         if (entity == null) {
             return null;
         }
@@ -33,7 +34,7 @@ public class NMSCommandListenerWrapper_v1_17_0 extends NMSCommandListenerWrapper
 
     public World getBukkitWorld() {
         try {
-            Object nmsWorld = invokeMethod("getWorld", "e");
+            Object nmsWorld = invokeGetter("WorldServer");
             if (nmsWorld == null) {
                 return null;
             }
@@ -45,8 +46,32 @@ public class NMSCommandListenerWrapper_v1_17_0 extends NMSCommandListenerWrapper
     }
 
     public Location getBukkitLocation() {
-        NMSVec3D pos = NMSVec3D.create(invokeMethod("getPosition"));
+        NMSVec3D pos = NMSVec3D.create(invokeGetter("Vec3D"));
         World world = getBukkitWorld();
         return world != null && pos != null ? new Location(world, pos.x(), pos.y(), pos.z()) : null;
+    }
+
+    /**
+     * Invokes the no-argument getter returning the given Minecraft type. The obfuscated getter names move between
+     * releases (the level getter is getWorld in 1.17, e in 1.18 and f in 1.19), while each type has one plain getter.
+     * Getters declaring exceptions, such as the "entity or fail" variant, are skipped.
+     */
+    private Object invokeGetter(String returnTypeSimpleName) {
+        for (Method method : clazz.getMethods()) {
+            if (method.getParameterCount() != 0 || Modifier.isStatic(method.getModifiers()) || method.getExceptionTypes().length != 0) {
+                continue;
+            }
+            if (!method.getReturnType()
+                       .getSimpleName()
+                       .equals(returnTypeSimpleName)) {
+                continue;
+            }
+            try {
+                return method.invoke(getHandle());
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        throw new IllegalStateException("No getter returning " + returnTypeSimpleName + " in " + clazz.getName());
     }
 }

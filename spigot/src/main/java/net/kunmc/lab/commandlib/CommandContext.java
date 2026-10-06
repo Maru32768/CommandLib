@@ -95,7 +95,7 @@ public final class CommandContext extends CommonCommandContext<Object, BaseCompo
 
     @Override
     public void sendSuccess(@Nullable String message) {
-        sendSuccess(new TextComponent(message));
+        sendSuccess(new TextComponent(String.valueOf(message)));
     }
 
     public void sendSuccess(@NotNull BaseComponent component) {

@@ -22,10 +22,16 @@ public class TeamArgument extends Argument<Team, TeamArgument> {
 
     @Override
     protected Team parseImpl(CommandContext ctx) throws ArgumentParseException, CommandSyntaxException {
-        return Bukkit.getScoreboardManager()
-                     .getMainScoreboard()
-                     .getTeam(NMSArgumentScoreboardTeam.create()
-                                                       .parse(ctx.getHandle(), name())
-                                                       .getName());
+        String teamName = NMSArgumentScoreboardTeam.create()
+                                                   .parse(ctx.getHandle(), name())
+                                                   .getName();
+        Team team = Bukkit.getScoreboardManager()
+                          .getMainScoreboard()
+                          .getTeam(teamName);
+        if (team == null) {
+            // The NMS scoreboard knew the team, but it is not on the Bukkit main scoreboard (e.g. removed meanwhile).
+            throw ArgumentParseException.ofIncorrectInput(name(), ctx, teamName);
+        }
+        return team;
     }
 }

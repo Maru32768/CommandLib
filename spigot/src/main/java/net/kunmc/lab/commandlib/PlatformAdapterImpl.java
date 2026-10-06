@@ -38,6 +38,18 @@ public final class PlatformAdapterImpl implements PlatformAdapter<Object, BaseCo
 
     @Override
     public ArgumentParseException convertCommandSyntaxException(CommandSyntaxException e) {
+        try {
+            return convertTranslatableCommandSyntaxException(e);
+        } catch (RuntimeException ignored) {
+            // Exceptions thrown by custom argument types usually carry a plain Brigadier message (LiteralMessage) or a
+            // literal component, which have no translation key. Fall back to the message text instead of failing.
+            String message = e.getRawMessage()
+                              .getString();
+            return new ArgumentParseException(ctx -> ctx.sendFailure(message));
+        }
+    }
+
+    private ArgumentParseException convertTranslatableCommandSyntaxException(CommandSyntaxException e) {
         if (NMSChatMessage.isSupportedVersion()) {
             NMSChatMessage msg = NMSChatMessage.create(e.getRawMessage());
             return new ArgumentParseException(ctx -> {
