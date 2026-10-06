@@ -15,12 +15,13 @@ instructions.
 - `paper`: Paper-facing API using Paper official command/lifecycle API and
   Adventure components. Targets Paper 1.20.6+.
 - `spigot-testing`: test utilities for downstream plugins and this repository.
-- `forge-testing`: test utilities for downstream Forge mods, built per Minecraft
-  version like `forge`.
+- `modded-testing`: test utilities for downstream Forge / NeoForge mods, built
+  per loader and Minecraft version like `modded`.
 - `integration-test`: Minecraft integration tests. Current targets are
   Bukkit-compatible plugin fixtures; Forge fixtures may be added separately.
-- `forge`: Forge-facing integration. One shared source tree in `modded/src`
-  builds every supported Minecraft version (`:modded:forge-1.16.5`, `:modded:forge-1.20.1`)
+- `modded`: Forge- and NeoForge-facing integration. One shared source tree in
+  `modded/src` builds every supported loader and Minecraft version
+  (`:modded:forge-1.16.5`, `:modded:forge-1.20.1`, `:modded:neoforge-1.21.1`)
   through Stonecutter conditional comments and Architectury Loom. Read
   `docs/agents/modded.md` before editing it.
 - `sample`: sample usage.

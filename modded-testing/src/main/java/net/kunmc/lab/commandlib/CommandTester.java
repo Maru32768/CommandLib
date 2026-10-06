@@ -15,6 +15,12 @@ import org.jetbrains.annotations.NotNull;
 import org.mockito.Mockito;
 import org.mockito.MockedStatic;
 
+//? if >=1.20.5 {
+/*import net.minecraft.core.HolderLookup;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.data.registries.VanillaRegistries;
+*///?}
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -25,7 +31,10 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
-//? if >=1.17 {
+//? if neoforge {
+/*import net.neoforged.neoforge.common.util.flag.FeatureFlagLoader;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
+*///?} elif >=1.17 {
 import net.minecraftforge.network.NetworkHooks;
 import net.minecraftforge.server.ServerLifecycleHooks;
 //?} else
@@ -242,6 +251,11 @@ public final class CommandTester implements AutoCloseable {
         Mockito.when(server.getWorldData())
                .thenReturn(worldData);
         //?}
+        //? if >=1.20.5 {
+        /*RegistryAccess.Frozen registryAccess = MinecraftBootstrap.registryAccess();
+        Mockito.when(server.registryAccess())
+               .thenReturn(registryAccess);
+        *///?}
         return server;
     }
 
@@ -297,6 +311,27 @@ public final class CommandTester implements AutoCloseable {
 
     private static final class MinecraftBootstrap {
         private static boolean bootstrapped;
+        //? if >=1.20.5 {
+        /*private static RegistryAccess.Frozen registryAccess;
+
+        // The server's registries, including data-driven ones such as enchantments, built from vanilla's
+        // registry bootstrap code instead of loading the vanilla data pack.
+        private static synchronized RegistryAccess.Frozen registryAccess() {
+            if (registryAccess != null) {
+                return registryAccess;
+            }
+            HolderLookup.Provider vanilla = VanillaRegistries.createLookup();
+            RegistryAccess.Frozen access = Mockito.mock(RegistryAccess.Frozen.class, Mockito.CALLS_REAL_METHODS);
+            Mockito.doAnswer(invocation -> vanilla.lookup(invocation.getArgument(0)))
+                   .when(access)
+                   .lookup(Mockito.any());
+            Mockito.doAnswer(invocation -> vanilla.listRegistries())
+                   .when(access)
+                   .listRegistries();
+            registryAccess = access;
+            return access;
+        }
+        *///?}
 
         private static synchronized void ensureBootstrapped() {
             if (bootstrapped) {
@@ -304,7 +339,13 @@ public final class CommandTester implements AutoCloseable {
             }
             //? if >=1.19
             SharedConstants.tryDetectVersion();
-            //? if >=1.17 {
+            //? if neoforge {
+            /*// NeoForge's FeatureFlags patch loads modded feature flags from FML's mod list, which only exists in a
+            // real NeoForge launch. Tests only use vanilla feature flags, so skip it.
+            try (MockedStatic<FeatureFlagLoader> ignored = Mockito.mockStatic(FeatureFlagLoader.class)) {
+                Bootstrap.bootStrap();
+            }
+            *///?} elif >=1.17 {
             // Forge's Bootstrap patch initializes networking, whose event classes need FML's class transformer.
             // Commands do not use networking, so skip it outside a real Forge launch.
             try (MockedStatic<NetworkHooks> ignored = Mockito.mockStatic(NetworkHooks.class)) {

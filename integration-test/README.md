@@ -109,17 +109,20 @@ The aggregate task depends on per-target subprojects, so Gradle can run independ
 
 ## Forge Targets
 
-Forge targets (`forge-1.16.5`, `forge-1.20.1`) reuse the same runner, Docker image flow, and MCProtocolLib bot, but
+Forge targets (`forge-1.16.5`, `forge-1.20.1`) and the NeoForge target (`neoforge-1.21.1`) reuse the same runner, Docker image flow, and MCProtocolLib bot, but
 prepare the server differently:
 
 - The test mod lives in `integration-test/shared/modded` and is built in the main Gradle build as a Stonecutter tree
-  (`:integration-test:shared:modded-fixture:<minecraft-version>`), like the `forge` module. Conditional comments follow
+  (`:integration-test:shared:modded-fixture:<loader>-<minecraft-version>`, for example `forge-1.20.1` or
+  `neoforge-1.21.1`), like the `modded` module. Conditional comments follow
   `docs/agents/modded.md`.
-- `testModJar` bundles the published, SRG-remapped `:forge:<version>` jar together with `common` and `shared/core`.
+- `testModJar` bundles the published `:modded:<node>` jar (SRG-remapped for Forge) together with `common` and `shared/core`.
   The tests therefore run the same artifact downstream mods use, which catches bugs that only appear with production
   names.
 - `integration-test/gradle/forge-integration-target.gradle.kts` registers `prepareTestPlugin`. It downloads the Forge
-  installer, installs the server into `targets/forge-<version>/work/server`, and copies the test mod into `mods`.
+  or NeoForge installer (selected by `commandlib.integration.platform`), installs the server into
+  `targets/<target>/work/server`, and copies the test mod into `mods`. The NeoForge test mod ships
+  `META-INF/neoforge.mods.toml` instead of `mods.toml`.
 - The server is started with the target's `commandlib.integration.serverLaunchArgs` (an `@libraries/.../unix_args.txt`
   file for 1.17+, `-jar forge-<version>.jar` for 1.16.5).
 
@@ -130,6 +133,11 @@ Notes:
 
 - The 1.16.5 target runs Forge 36.2.42, the recommended build, which the library also compiles against. Older 36.2.x
   builds such as 36.2.20 crash on current Java 11 updates with `NoSuchMethodError` in `ManifestEntryVerifier`.
+- NeoForge pings a connecting client during the configuration phase and waits for the pong. MCProtocolLib does not
+  answer pings, so the bot replies to `ClientboundPingPacket` itself.
+- From Minecraft 1.20.3, a command performed while another command runs is queued until that command finishes. The
+  test mod therefore executes the test commands through Brigadier directly on 1.20.3+, so their results exist when
+  `runTests` collects them.
 - MCProtocolLib 1.16.5 cannot decode `brigadier:long`, so the `LongArgument` case is not registered on 1.16.5, the
   same as the Spigot fixture.
 

@@ -8,6 +8,11 @@ import java.util.stream.Collectors;
 //? if >=1.18 {
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+//?}
+//? if neoforge {
+/*import net.neoforged.neoforge.server.permission.nodes.PermissionNode;
+import net.neoforged.neoforge.server.permission.nodes.PermissionTypes;
+*///?} elif >=1.18 {
 import net.minecraftforge.server.permission.nodes.PermissionNode;
 import net.minecraftforge.server.permission.nodes.PermissionTypes;
 //?} else {

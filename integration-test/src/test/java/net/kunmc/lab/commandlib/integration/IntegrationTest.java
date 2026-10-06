@@ -431,6 +431,7 @@ class IntegrationTest {
     private static void registerPacketListener(Object session,
                                                Class<?> sessionClass,
                                                BotSession botSession) throws ReflectiveOperationException {
+        Method send = findSendMethod(sessionClass);
         // Find addListener(SessionListener) and determine the listener interface from its parameter type.
         Method addListener = null;
         Class<?> listenerInterface = null;
@@ -454,6 +455,7 @@ class IntegrationTest {
                                                       if (args.length == 2) {
                                                           // Modern MCProtocolLib: packetReceived(Session, Packet)
                                                           botSession.receivedPackets.add(args[1]);
+                                                          answerPing(session, send, args[1]);
                                                       } else if (args.length == 1) {
                                                           // Legacy MCProtocolLib (1.16.5): packetReceived(PacketReceivedEvent)
                                                           try {
@@ -482,6 +484,24 @@ class IntegrationTest {
                                                   return null;
                                               });
         addListener.invoke(session, proxy);
+    }
+
+    // Vanilla clients answer every ping with a pong, but MCProtocolLib does not. NeoForge pings a connecting client
+    // during the configuration phase and waits for the pong before letting it join.
+    private static void answerPing(Object session, Method send, Object packet) throws ReflectiveOperationException {
+        Class<?> packetClass = packet.getClass();
+        if (!packetClass.getSimpleName()
+                        .equals("ClientboundPingPacket")) {
+            return;
+        }
+        int id = (int) packetClass.getMethod("getId")
+                                  .invoke(packet);
+        String pongClassName = packetClass.getPackageName()
+                                          .replace(".clientbound", ".serverbound") + ".ServerboundPongPacket";
+        Object pong = Class.forName(pongClassName, true, packetClass.getClassLoader())
+                           .getConstructor(int.class)
+                           .newInstance(id);
+        send.invoke(session, pong);
     }
 
     private static boolean isDisconnectCallback(String methodName) {

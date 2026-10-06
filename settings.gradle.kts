@@ -23,11 +23,13 @@ stonecutter {
     create("modded") {
         version("forge-1.16.5", "1.16.5")
         version("forge-1.20.1", "1.20.1")
+        version("neoforge-1.21.1", "1.21.1")
         vcsVersion = "forge-1.20.1"
     }
     create("modded-testing") {
         version("forge-1.16.5", "1.16.5")
         version("forge-1.20.1", "1.20.1")
+        version("neoforge-1.21.1", "1.21.1")
         vcsVersion = "forge-1.20.1"
     }
 }
@@ -45,6 +47,7 @@ stonecutter {
     create(":integration-test:shared:modded-fixture") {
         version("forge-1.16.5", "1.16.5")
         version("forge-1.20.1", "1.20.1")
+        version("neoforge-1.21.1", "1.21.1")
         vcsVersion = "forge-1.20.1"
     }
 }
@@ -63,4 +66,5 @@ include(
     "integration-test:targets:paper-1.21.0",
     "integration-test:targets:forge-1.16.5",
     "integration-test:targets:forge-1.20.1",
+    "integration-test:targets:neoforge-1.21.1",
 )

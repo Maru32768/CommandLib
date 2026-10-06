@@ -3,9 +3,15 @@ package net.kunmc.lab.commandlib;
 import com.mojang.brigadier.tree.RootCommandNode;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.MinecraftServer;
+//? if neoforge {
+/*import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.server.permission.PermissionAPI;
+*///?} else {
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.server.permission.PermissionAPI;
+//?}
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -13,10 +19,17 @@ import java.util.Collection;
 import java.util.Collections;
 //? if >=1.18 {
 import net.minecraft.server.level.ServerPlayer;
+//? if neoforge {
+/*import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
+import net.neoforged.neoforge.server.permission.events.PermissionGatherEvent;
+import net.neoforged.neoforge.server.permission.nodes.PermissionNode;
+*///?} else {
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.server.ServerLifecycleHooks;
 import net.minecraftforge.server.permission.events.PermissionGatherEvent;
 import net.minecraftforge.server.permission.nodes.PermissionNode;
+//?}
 
 import java.util.List;
 import java.util.Map;
@@ -55,6 +68,9 @@ public final class CommandLib {
 
         // Always listen: RegisterCommandsEvent fires again on /reload and on every integrated server start,
         // and PermissionGatherEvent.Nodes may still be pending when the server object already exists.
+        //? if neoforge {
+        /*NeoForge.EVENT_BUS.register(this);
+        *///?} else
         MinecraftForge.EVENT_BUS.register(this);
 
         MinecraftServer server = ServerLifecycleHooks.getCurrentServer();

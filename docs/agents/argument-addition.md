@@ -4,11 +4,11 @@ Use this checklist whenever adding a public `*Argument` class.
 
 ## 1. Decide Platform Scope
 
-- Confirm the target modules: `common`, `spigot`, `paper`, `forge`, or a subset.
+- Confirm the target modules: `common`, `spigot`, `paper`, `modded` (Forge / NeoForge), or a subset.
 - Prefer a shared public concept only when the return type and accepted syntax are stable across platforms.
 - Keep Spigot-only NMS or Bukkit internals in `spigot`.
 - Use Paper official `ArgumentTypes` in `paper` when available.
-- Use Forge/Minecraft native argument types in `forge` when available.
+- Use Forge/Minecraft native argument types in `modded` when available.
 
 ## 2. Implement The Argument
 
@@ -52,7 +52,7 @@ Use this checklist whenever adding a public `*Argument` class.
 - Add an execution case to the matching integration fixture:
     - `integration-test/shared/spigot/.../ArgumentTest.java` for Spigot arguments.
     - `integration-test/shared/paper/.../ArgumentTest.java` for Paper arguments.
-    - `integration-test/shared/modded/.../ArgumentTest.java` for Forge arguments.
+    - `integration-test/shared/modded/.../ArgumentTest.java` for Forge / NeoForge arguments.
 - Keep the fixtures intentionally independent. It is acceptable to duplicate small cases when platform behavior is
   stable; use the shared core fixture only for platform-neutral result/reporting helpers.
 - `:integration-test:test` includes a lightweight coverage check that fails when a public Spigot, Paper, or Forge
@@ -83,8 +83,7 @@ Run focused checks for touched modules. Typical commands:
 ```bash
 ./gradlew :spigot:compileJava :spigot-testing:test
 ./gradlew :paper:compileJava :paper-testing:test
-./gradlew :modded:forge-1.16.5:compileJava
-./gradlew :modded:forge-1.20.1:compileJava
+./gradlew :modded:forge-1.16.5:compileJava :modded:forge-1.20.1:compileJava :modded:neoforge-1.21.1:compileJava
 ```
 
 For integration fixture source changes, compile representative fixtures:

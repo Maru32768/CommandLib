@@ -14,6 +14,7 @@ with ease.
 | **Spigot** | `spigot` | `1.16.5`, `1.17.1`, `1.18.2`, `1.19.2`, `1.19.4`, `1.20.1`, `1.20.4`, `1.20.5`, `1.20.6` | Tested on Paper servers. Expected to work on intermediate versions. Requires Java 11+. |
 | **Paper**  | `paper`  | `1.21.0`                                                   | Uses Paper official command/lifecycle API. Requires Java 21+. |
 | **Forge**  | `forge-<minecraft-version>` | `1.16.5`, `1.20.1`                             | Use the artifact that matches the target Minecraft version.   |
+| **NeoForge** | `neoforge-<minecraft-version>` | `1.21.1`                                   | Use the artifact that matches the target Minecraft version. Requires Java 21+. |
 | **Mohist** | `spigot` | `1.16.5`, `1.20.1`                                         | Works on Mohist since it's compatible with Spigot.            |
 
 ## Features
@@ -224,6 +225,40 @@ tasks.named<ShadowJar>("shadowJar") {
 
 </details>
 
+<details>
+<summary>NeoForge (Kotlin DSL)</summary>
+
+```kotlin
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
+plugins {
+    id("com.gradleup.shadow") version "8.3.5"
+}
+
+repositories {
+    maven { url = uri("https://jitpack.io") }
+}
+
+dependencies {
+    implementation("com.github.Maru32768.CommandLib:neoforge-1.21.1:latest.release")
+}
+
+val projectGroup = project.group.toString()
+val projectNameLower = project.name.lowercase()
+tasks.named<ShadowJar>("shadowJar") {
+    archiveFileName.set("${rootProject.name}-${project.version}.jar")
+    dependencies {
+        include(dependency("com.github.Maru32768.CommandLib:neoforge-1.21.1:.*"))
+    }
+    // Avoid package conflicts
+    relocate("net.kunmc.lab.commandlib", "$projectGroup.$projectNameLower.commandlib")
+}
+```
+
+> **Note:** NeoForge runs on Mojang names, so the shadow jar does not need a reobf step.
+
+</details>
+
 ## Testing Commands
 
 CommandLib provides command-level test utilities for downstream plugins.
@@ -234,14 +269,16 @@ dependencies {
     testImplementation("com.github.Maru32768.CommandLib:spigot-testing:latest.release")
     testImplementation("com.github.Maru32768.CommandLib:paper-testing:latest.release")
     testImplementation("com.github.Maru32768.CommandLib:forge-testing-1.20.1:latest.release")
+    testImplementation("com.github.Maru32768.CommandLib:neoforge-testing-1.21.1:latest.release")
 }
 ```
 
 Use `common-testing` for commands built against the platform-neutral `common`
 API, `spigot-testing` for commands built against the `spigot` artifact,
 `paper-testing` for commands built against the `paper` artifact, and
-`forge-testing-<minecraft-version>` for commands built against the matching
-`forge-<minecraft-version>` artifact. They provide
+`forge-testing-<minecraft-version>` / `neoforge-testing-<minecraft-version>` for
+commands built against the matching `forge-<minecraft-version>` /
+`neoforge-<minecraft-version>` artifact. They provide
 `CommandTester` and `FakeSender` so commands can be executed without a running
 Minecraft server. Use one testing artifact per test module; these artifacts
 share package-level helper names.
@@ -262,8 +299,8 @@ class Test {
 registry-backed argument paths for command-level tests. Paper lifecycle
 registration and real server registry behavior are covered by integration tests.
 
-`forge-testing` bootstraps Minecraft's registries, so vanilla argument types
-such as items, blocks, and effects parse for real. The server is a Mockito mock:
+`forge-testing` and `neoforge-testing` bootstrap Minecraft's registries, so vanilla
+argument types such as items, blocks, effects, and enchantments parse for real. The server is a Mockito mock:
 fake players added with `CommandTester#withPlayer` (and the executing player)
 are online, so player, entity, game profile, and UUID arguments resolve them by
 name. Worlds, scoreboards, and other server state are not available.
@@ -547,7 +584,7 @@ public final class TestPlugin extends JavaPlugin {
 ## Permissions
 
 CommandLib automatically generates and registers permission nodes for each command, subcommand, and argument branch.
-Bukkit uses Bukkit permissions. Forge uses Forge permission nodes.
+Bukkit uses Bukkit permissions. Forge and NeoForge use their permission node APIs.
 
 ### Permission Prefix
 
@@ -721,7 +758,8 @@ public final class ConfigCommand extends Command {
 CommandLib delegates permission checks to the platform permission system:
 
 - Bukkit: `CommandSender#hasPermission(permissionNode)`
-- Forge: `PermissionAPI.hasPermission(player, permissionNode)`
+- Forge / NeoForge: `PermissionAPI.getPermission(player, permissionNode)` (Forge 1.16.5:
+  `PermissionAPI.hasPermission(player, permissionNode)`)
 
 LuckPerms can provide those platform permissions. Configure the same generated or custom permission nodes in LuckPerms;
 CommandLib does not need additional LuckPerms-specific integration.

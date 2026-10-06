@@ -1,0 +1,9 @@
+modLoader="javafml"
+loaderVersion="[${forgeLoader},)"
+license="MIT"
+
+[[mods]]
+modId="commandlibtest"
+version="1.0.0"
+displayName="CommandLib Test Mod"
+description="Runs CommandLib integration test cases on a real NeoForge server."

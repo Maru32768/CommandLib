@@ -1,5 +1,5 @@
-// Forge test mod for the Docker-based integration tests. It is built once per Minecraft version with
-// Stonecutter, like the forge module, and bundles the published (SRG-remapped) CommandLib jars so the
+// Forge / NeoForge test mod for the Docker-based integration tests. It is built once per loader and Minecraft
+// version with Stonecutter, like the modded module, and bundles the published (SRG-remapped) CommandLib jars so the
 // tests exercise the same artifacts that downstream mods use.
 plugins {
     id("dev.architectury.loom") version "1.17.493"
@@ -10,10 +10,23 @@ plugins {
 group = "net.kunmc.lab.integration.forge"
 
 val minecraftVersion = sc.current.version
-val javaVersion = if (sc.current.parsed >= "1.17") 17 else 11
+val loader = property("loom.platform").toString()
+val javaVersion = when {
+    sc.current.parsed >= "1.20.5" -> 21
+    sc.current.parsed >= "1.17" -> 17
+    else -> 11
+}
+
+stonecutter {
+    constants.match(loader, "forge", "neoforge")
+}
 
 java {
     toolchain.languageVersion.set(JavaLanguageVersion.of(javaVersion))
+}
+
+repositories {
+    maven("https://maven.neoforged.net/releases/")
 }
 
 val bundled: Configuration by configurations.creating {
@@ -23,7 +36,11 @@ val bundled: Configuration by configurations.creating {
 dependencies {
     minecraft("com.mojang:minecraft:$minecraftVersion")
     mappings(loom.officialMojangMappings())
-    forge("net.minecraftforge:forge:$minecraftVersion-${property("deps.forge")}")
+    if (loader == "neoforge") {
+        "neoForge"("net.neoforged:neoforge:${property("deps.neoforge")}")
+    } else {
+        "forge"("net.minecraftforge:forge:$minecraftVersion-${property("deps.forge")}")
+    }
 
     compileOnly(project(":common"))
     compileOnly(project(path = ":modded:${sc.current.project}", configuration = "namedElements"))
@@ -38,7 +55,9 @@ val forgeLoaderVersion = property("deps.forgeLoader").toString()
 tasks.processResources {
     val properties = mapOf("forgeLoader" to forgeLoaderVersion)
     inputs.properties(properties)
-    filesMatching("META-INF/mods.toml") {
+    // NeoForge reads neoforge.mods.toml, Forge reads mods.toml.
+    exclude(if (loader == "neoforge") "META-INF/mods.toml" else "META-INF/neoforge.mods.toml")
+    filesMatching(listOf("META-INF/mods.toml", "META-INF/neoforge.mods.toml")) {
         expand(properties)
     }
 }

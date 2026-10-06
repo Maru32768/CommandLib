@@ -8,7 +8,9 @@ import net.kunmc.lab.commandlib.exception.ArgumentParseException;
 import net.kunmc.lab.commandlib.util.StringUtil;
 import net.minecraft.commands.arguments.GameProfileArgument;
 import net.minecraft.server.players.GameProfileCache;
-//? if >=1.17 {
+//? if neoforge {
+/*import net.neoforged.neoforge.server.ServerLifecycleHooks;
+*///?} elif >=1.17 {
 import net.minecraftforge.server.ServerLifecycleHooks;
 //?} else
 /*import net.minecraftforge.fml.server.ServerLifecycleHooks;*/

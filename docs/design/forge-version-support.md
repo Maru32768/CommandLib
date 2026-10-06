@@ -5,21 +5,33 @@ module beyond Minecraft 1.16.5.
 
 ## Current State
 
-Forge 1.16.5 and 1.20.1 are built from one shared source tree with
-[Stonecutter](https://stonecutter.kikugie.dev/) and Architectury Loom:
+Forge 1.16.5 and 1.20.1, and NeoForge 1.21.1, are built from one shared source
+tree with [Stonecutter](https://stonecutter.kikugie.dev/) and Architectury Loom:
 
-- `modded/src/main/java` is the only Forge source tree. Version-specific code is
-  selected with Stonecutter conditional comments (`//? if >=1.19 { ... }`).
-- `modded/versions/<minecraft-version>/gradle.properties` holds per-version
-  settings (`loom.platform=forge` and the Forge build in `deps.forge`).
+- The tree lives in `modded/` because it serves both loaders. Its nodes are
+  named `<loader>-<minecraft-version>`: `forge-1.16.5`, `forge-1.20.1`, and
+  `neoforge-1.21.1`.
+- `modded/src/main/java` is the only Forge / NeoForge source tree.
+  Version-specific code is selected with Stonecutter conditional comments
+  (`//? if >=1.19 { ... }`).
+- `modded/versions/<node>/gradle.properties` holds per-node settings
+  (`loom.platform` and the loader build in `deps.forge` / `deps.neoforge`).
 - `modded/build.gradle.kts` is the shared version template and
   `modded/stonecutter.gradle.kts` is the Stonecutter controller.
-- Gradle paths and artifact IDs are unchanged: `:modded:forge-1.16.5` publishes
-  `forge-1.16.5` and `:modded:forge-1.20.1` publishes `forge-1.20.1`.
+- Artifact IDs are unchanged by the tree layout: `:modded:forge-1.16.5`
+  publishes `forge-1.16.5` and `:modded:forge-1.20.1` publishes
+  `forge-1.20.1`.
 - All versions are written against official Mojang mappings, including 1.16.5.
   Loom remaps the built jars to SRG, so published jars keep the same public API
   and the same runtime member references as the previous ForgeGradle builds
   (verified by comparing `javap` output of both builds).
+- NeoForge is a node of the same tree (`neoforge-1.21.1`, Gradle path
+  `:modded:neoforge-1.21.1`, artifact `neoforge-1.21.1`). Loader differences use
+  the `forge` / `neoforge` Stonecutter constants. Most of them are package
+  renames; the main Minecraft-level difference is that 1.20.5+
+  `CommandBuildContext` is a `HolderLookup.Provider`, and 1.21+ enchantments are
+  a data-driven registry, so registry lookups resolve lazily against the running
+  server's `registryAccess()`.
 - Public API still exposes each Minecraft version's native types. The 1.16.5
   artifact keeps its `DefaultPermissionLevel` overloads and
   `FMLServerStartedEvent` registration; 1.20.1 uses `RegisterCommandsEvent` and
@@ -122,10 +134,10 @@ The published artifact strategy should be explicit:
 | `neoforge-*` | Separate artifact family. |
 
 Directory layout, Gradle path, and artifact names do not need to be identical.
-The preferred shape is:
+The current shape is:
 
 ```text
-source layout: forge/1.20.1
+source layout: modded/versions/forge-1.20.1   (shared source in modded/src)
 Gradle path:   :modded:forge-1.20.1
 artifactId:    forge-1.20.1
 ```
@@ -204,19 +216,20 @@ Recommended split:
 ## Stonecutter Workflow
 
 - Edit only `modded/src`. The committed state of that directory is the
-  `vcsVersion` (currently 1.20.1).
+  `vcsVersion` (currently `forge-1.20.1`).
 - Condition boundaries use the Minecraft version where the API actually
   changed when it is known (for example `>=1.19` for `Component.literal`,
   `>=1.19.3` for `Registries`, `>=1.19.4` for `BlockPos.containing`,
-  `>=1.18` for the Forge permission node API). Only 1.16.5 and 1.20.1 are built
-  today, so boundaries for versions in between are not verified yet; adding a
+  `>=1.18` for the Forge permission node API, `>=1.20.5` for
+  `CommandBuildContext` as a `HolderLookup.Provider`). Only 1.16.5, 1.20.1, and
+  1.21.1 are built today, so boundaries for versions in between are not verified yet; adding a
   version is expected to adjust some of them.
 - Java does not allow nested block comments, so code inside a conditional block
   must not contain `/* */` or Javadoc. Use `//` comments there.
-- Switching the active version in the IDE rewrites `modded/src` in place. Reset
+- Switching the active node in the IDE rewrites `modded/src` in place. Reset
   to the `vcsVersion` before committing.
-- Adding a Minecraft version means adding it to `versions(...)` in
-  `settings.gradle.kts`, creating `modded/versions/<version>/gradle.properties`,
+- Adding a node means adding `version("<loader>-<version>", "<version>")` in
+  `settings.gradle.kts`, creating `modded/versions/<node>/gradle.properties`,
   adding the artifact mapping in the root `build.gradle.kts`, and fixing
   compile errors with conditions.
 
@@ -244,6 +257,7 @@ Use compile checks as the first gate:
 ```text
 ./gradlew :modded:forge-1.16.5:compileJava
 ./gradlew :modded:forge-1.20.1:compileJava
+./gradlew :modded:neoforge-1.21.1:compileJava
 ```
 
 Then add fixture-level checks:

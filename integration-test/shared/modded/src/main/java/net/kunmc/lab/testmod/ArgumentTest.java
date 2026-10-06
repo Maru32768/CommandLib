@@ -5,10 +5,13 @@ import net.kunmc.lab.commandlib.CommandContext;
 import net.kunmc.lab.commandlib.CommonArgument;
 import net.kunmc.lab.commandlib.argument.*;
 import net.minecraft.core.particles.ParticleTypes;
+//? if >=1.21 {
+/*import net.minecraft.network.chat.contents.TranslatableContents;
+*///?} else
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.enchantment.Enchantments;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -50,13 +53,23 @@ public final class ArgumentTest extends TestBase {
         commands.add(check("effectArgument",
                            new EffectArgument("a"),
                            "minecraft:speed",
+                           //? if >=1.20.5 {
+                           /*x -> String.valueOf(x == MobEffects.MOVEMENT_SPEED.value()),
+                           *///?} else
                            x -> String.valueOf(x == MobEffects.MOVEMENT_SPEED),
                            "true"));
         commands.add(check("enchantmentArgument",
                            new EnchantmentArgument("a"),
                            "minecraft:sharpness",
+                           //? if >=1.21 {
+                           /*// Enchantments are data-driven, so Enchantments.SHARPNESS is only a registry key.
+                           x -> ((TranslatableContents) x.description()
+                                                         .getContents()).getKey(),
+                           "enchantment.minecraft.sharpness"));
+                           *///?} else {
                            x -> String.valueOf(x == Enchantments.SHARPNESS),
                            "true"));
+                           //?}
         commands.add(check("entitiesArgument", new EntitiesArgument("a"), "@a", ArgumentTest::entityNames, playerName));
         commands.add(check("entityArgument",
                            new EntityArgument("a"),

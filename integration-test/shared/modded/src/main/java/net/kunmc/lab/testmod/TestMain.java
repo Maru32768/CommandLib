@@ -1,5 +1,7 @@
 package net.kunmc.lab.testmod;
 
+//? if >=1.20.3
+/*import com.mojang.brigadier.exceptions.CommandSyntaxException;*/
 import net.kunmc.lab.commandlib.Command;
 import net.kunmc.lab.commandlib.CommandLib;
 import net.kunmc.lab.commandlib.DefaultPermission;
@@ -77,7 +79,17 @@ public final class TestMain {
         for (String command : commands) {
             LOGGER.info("Dispatching test command: " + command);
             try {
-                //? if >=1.19 {
+                //? if >=1.20.3 {
+                /*// Commands performed while another command runs are queued until it finishes, which is after the
+                // results below are collected, so execute them through Brigadier directly.
+                try {
+                    server.getCommands()
+                          .getDispatcher()
+                          .execute(command, console);
+                } catch (CommandSyntaxException e) {
+                    LOGGER.info("Test command was rejected: " + e.getMessage());
+                }
+                *///?} elif >=1.19 {
                 server.getCommands()
                       .performPrefixedCommand(console, command);
                 //?} else

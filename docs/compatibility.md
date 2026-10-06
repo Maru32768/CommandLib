@@ -36,8 +36,8 @@ CommandLib の長期目標は、Minecraft `1.16.5` から各リリース時点�
 | Folia | `Planned` | なし。 | scheduler、threading、command registration の安全性確認が必要。 |
 | Mohist | `Best effort` | integration fixture: `1.16.5`, `1.20.1`。README に tested version として記載あり。 | Bukkit compatibility 上で動かす方針。Forge side との干渉確認が必要。 |
 | Velocity | `Planned` | なし。 | proxy command model と Minecraft server command model の差分設計が必要。 |
-| Forge | `Best effort` | `forge` module。現在は Forge `1.16.5`。 | Forge 1.16.5 は現行実装あり。新しい Forge 系は未対応。 |
-| NeoForge | `Planned` | なし。 | Forge から分岐後の API 差分調査が必要。 |
+| Forge | `Best effort` | `modded` の Stonecutter tree の `forge-1.16.5` / `forge-1.20.1` node（artifact: `forge-1.16.5` / `forge-1.20.1`）。`forge-testing-<version>` と integration target あり。 | 上記以外の Forge version は未対応。 |
+| NeoForge | `Best effort` | `modded` の Stonecutter tree の `neoforge-1.21.1` node（artifact: `neoforge-1.21.1`）。`neoforge-testing-1.21.1` と integration target `neoforge-1.21.1` あり。 | Forge と同じソースを `//? if neoforge` で分岐。NeoForge 1.21.1 以外の version は未対応。 |
 | Fabric | `Planned` | なし。 | Fabric command registration と Brigadier integration の設計が必要。 |
 
 ## Version coverage

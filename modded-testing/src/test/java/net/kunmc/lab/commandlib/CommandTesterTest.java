@@ -2,8 +2,11 @@ package net.kunmc.lab.commandlib;
 
 import com.mojang.brigadier.suggestion.Suggestion;
 import net.kunmc.lab.commandlib.argument.*;
+//? if >=1.21
+/*import net.minecraft.network.chat.contents.TranslatableContents;*/
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.block.Blocks;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -142,7 +145,21 @@ class CommandTesterTest {
         @Test
         void effect() {
             assertThat(parse(new EffectArgument("a"), "minecraft:speed", FakeSender.console()))
+                    //? if >=1.20.5 {
+                    /*.isEqualTo(MobEffects.MOVEMENT_SPEED.value());
+                    *///?} else
                     .isEqualTo(MobEffects.MOVEMENT_SPEED);
+        }
+
+        @Test
+        void enchantment() {
+            Enchantment enchantment = parse(new EnchantmentArgument("a"), "minecraft:sharpness", FakeSender.console());
+            //? if >=1.21 {
+            /*String descriptionId = ((TranslatableContents) enchantment.description()
+                                                                     .getContents()).getKey();
+            *///?} else
+            String descriptionId = enchantment.getDescriptionId();
+            assertThat(descriptionId).isEqualTo("enchantment.minecraft.sharpness");
         }
 
         @Test
