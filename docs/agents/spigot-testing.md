@@ -45,7 +45,11 @@ follow the same sub-package as production.
 1. Create `MockNMSArgumentXxx extends NMSArgumentXxx` in `nms/argument/`.
 2. Add a public no-arg constructor that calls the production superclass with
    mock-safe values.
-3. Make `argument()` return a Brigadier-native type.
+3. Make `argument()` return an `ArgumentType` that accepts the same tokens as
+   the server, so tests can use production input such as `minecraft:stone` or
+   `@s`. Use a Brigadier-native type when it matches the server syntax.
+   Otherwise reuse the helpers in `MockArgumentTypes` (`token()`,
+   `resourceKey(...)`) or `MockEntitySelector.type(...)` for selectors.
 4. Implement `parseImpl()` using `CommandTester` static accessors when runtime
    state is needed.
 5. Register shared mocks in `CommandTester`'s default mock map. For a test-only
