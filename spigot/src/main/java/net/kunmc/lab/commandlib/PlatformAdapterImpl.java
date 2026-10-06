@@ -6,13 +6,19 @@ import net.kunmc.lab.commandlib.util.nms.chat.NMSChatMessage;
 import net.kunmc.lab.commandlib.util.nms.chat.NMSIChatMutableComponent;
 import net.kunmc.lab.commandlib.util.nms.chat.NMSTranslatableContents;
 import net.kunmc.lab.commandlib.util.nms.command.NMSCommandListenerWrapper;
+import net.kunmc.lab.commandlib.util.nms.exception.NMSClassNotAssignableException;
 import net.kunmc.lab.commandlib.util.text.TextComponentBuilderImpl;
 import net.kunmc.lab.commandlib.util.text.TranslatableComponentBuilderImpl;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TranslatableComponent;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 public final class PlatformAdapterImpl implements PlatformAdapter<Object, BaseComponent, CommandContext, Command> {
+    private static final Logger LOGGER = Logger.getLogger(PlatformAdapterImpl.class.getName());
+
     @Override
     public CommandContext createCommandContext(com.mojang.brigadier.context.CommandContext<Object> ctx) {
         return new CommandContext(ctx);
@@ -40,13 +46,28 @@ public final class PlatformAdapterImpl implements PlatformAdapter<Object, BaseCo
     public ArgumentParseException convertCommandSyntaxException(CommandSyntaxException e) {
         try {
             return convertTranslatableCommandSyntaxException(e);
-        } catch (RuntimeException ignored) {
+        } catch (RuntimeException conversionFailure) {
             // Exceptions thrown by custom argument types usually carry a plain Brigadier message (LiteralMessage) or a
-            // literal component, which have no translation key. Fall back to the message text instead of failing.
+            // literal component, which the NMS wrappers reject as not assignable. Anything else means the NMS bridge
+            // itself is broken on this version, so report it while still sending a readable message.
+            if (!hasCause(conversionFailure, NMSClassNotAssignableException.class)) {
+                LOGGER.log(Level.WARNING,
+                           "Failed to convert a CommandSyntaxException into a translatable message; sending its text instead.",
+                           conversionFailure);
+            }
             String message = e.getRawMessage()
                               .getString();
             return new ArgumentParseException(ctx -> ctx.sendFailure(message));
         }
+    }
+
+    private static boolean hasCause(Throwable throwable, Class<? extends Throwable> causeClass) {
+        for (Throwable t = throwable; t != null; t = t.getCause()) {
+            if (causeClass.isInstance(t)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private ArgumentParseException convertTranslatableCommandSyntaxException(CommandSyntaxException e) {

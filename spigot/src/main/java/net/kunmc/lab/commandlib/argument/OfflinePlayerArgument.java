@@ -5,6 +5,7 @@ import net.kunmc.lab.commandlib.Argument;
 import net.kunmc.lab.commandlib.CommandContext;
 import net.kunmc.lab.commandlib.exception.ArgumentParseException;
 import net.kunmc.lab.commandlib.util.StringUtil;
+import net.kunmc.lab.commandlib.util.bukkit.BukkitUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 
@@ -34,10 +35,10 @@ public class OfflinePlayerArgument extends Argument<OfflinePlayer, OfflinePlayer
     @Override
     protected OfflinePlayer parseImpl(CommandContext ctx) throws ArgumentParseException {
         String s = StringArgumentType.getString(ctx.getHandle(), name());
-        return Arrays.stream(Bukkit.getOfflinePlayers())
-                     .filter(x -> x.getName() != null && x.getName()
-                                                          .equalsIgnoreCase(s))
-                     .findFirst()
-                     .orElseThrow(() -> ArgumentParseException.ofIncorrectInput(this.name(), ctx, s));
+        OfflinePlayer player = BukkitUtil.getOfflinePlayerIfEverPlayed(s);
+        if (player == null) {
+            throw ArgumentParseException.ofIncorrectInput(this.name(), ctx, s);
+        }
+        return player;
     }
 }

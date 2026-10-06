@@ -11,13 +11,14 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.lang.reflect.Modifier;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public abstract class NMSClass {
+    private static final Map<List<Object>, Method> METHODS_BY_SIGNATURE = new ConcurrentHashMap<>();
     private final Object handle;
     protected final Class<?> clazz;
 
@@ -119,8 +120,45 @@ public abstract class NMSClass {
             throw new MethodNotFoundException(methodNames);
         }
 
+        return invoke(handle, method, args);
+    }
+
+    /**
+     * Invokes a method found by {@link #findMethodByReturnType} on the handle, or statically when the method is static.
+     */
+    protected final Object invokeFoundMethod(Method method, Object... args) {
+        return invoke(Modifier.isStatic(method.getModifiers()) ? null : handle, method, args);
+    }
+
+    /**
+     * Finds the public method of this class with the given return type and parameter types. Obfuscated method names
+     * move between releases while the signatures stay, so this selects a method by its signature instead. Callers
+     * resolve the return type through {@link NMSReflection} so that hybrid servers remapping class names find it too.
+     * Methods declaring no exceptions are preferred, so that "or fail" variants are chosen only when no plain getter
+     * exists.
+     */
+    protected final Method findMethodByReturnType(boolean isStatic, Class<?> returnType, Class<?>... parameterTypes) {
+        List<Object> key = List.of(clazz, isStatic, returnType, List.of(parameterTypes));
+        return METHODS_BY_SIGNATURE.computeIfAbsent(key, k -> {
+            Method found = Arrays.stream(clazz.getMethods())
+                                 .filter(x -> Modifier.isStatic(x.getModifiers()) == isStatic)
+                                 .filter(x -> x.getReturnType() == returnType)
+                                 .filter(x -> Arrays.equals(x.getParameterTypes(), parameterTypes))
+                                 .min(Comparator.comparingInt(x -> x.getExceptionTypes().length))
+                                 .orElseThrow(() -> new MethodNotFoundException(new String[]{String.format(
+                                         "%s method of %s returning %s with parameters %s",
+                                         isStatic ? "static" : "instance",
+                                         clazz.getName(),
+                                         returnType.getName(),
+                                         Arrays.toString(parameterTypes))}));
+            found.setAccessible(true);
+            return found;
+        });
+    }
+
+    private static Object invoke(Object target, Method method, Object... args) {
         try {
-            return method.invoke(handle, args);
+            return method.invoke(target, args);
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         } catch (InvocationTargetException e) {

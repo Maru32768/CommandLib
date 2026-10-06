@@ -13,6 +13,12 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.MockedStatic;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Handler;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -45,6 +51,56 @@ class CommandSyntaxExceptionConversionTest {
         verify(ctx, never()).sendFailure(any(BaseComponent.class));
     }
 
+    @Test
+    void plain_brigadier_message_is_not_reported_as_conversion_failure() {
+        List<LogRecord> records = captureWarnings(() -> convertAndSend(new SimpleCommandExceptionType(new LiteralMessage(
+                "custom failure")).create()));
+
+        assertThat(records).isEmpty();
+    }
+
+    @Test
+    void broken_translatable_conversion_is_reported_and_falls_back_to_text() {
+        CommandSyntaxException e = new SimpleCommandExceptionType(new BrokenChatMessage()).create();
+
+        CommandContext[] ctx = new CommandContext[1];
+        List<LogRecord> records = captureWarnings(() -> ctx[0] = convertAndSend(e));
+
+        verify(ctx[0]).sendFailure("broken.key");
+        assertThat(records).hasSize(1);
+        assertThat(records.get(0)
+                          .getThrown()).isNotNull();
+    }
+
+    private static List<LogRecord> captureWarnings(Runnable runnable) {
+        Logger logger = Logger.getLogger(PlatformAdapterImpl.class.getName());
+        List<LogRecord> records = new ArrayList<>();
+        Handler handler = new Handler() {
+            @Override
+            public void publish(LogRecord record) {
+                records.add(record);
+            }
+
+            @Override
+            public void flush() {
+            }
+
+            @Override
+            public void close() {
+            }
+        };
+        boolean useParentHandlers = logger.getUseParentHandlers();
+        logger.addHandler(handler);
+        logger.setUseParentHandlers(false);
+        try {
+            runnable.run();
+        } finally {
+            logger.removeHandler(handler);
+            logger.setUseParentHandlers(useParentHandlers);
+        }
+        return records;
+    }
+
     private static CommandContext convertAndSend(CommandSyntaxException e) {
         CommandContext ctx = mock(CommandContext.class);
         try (MockedStatic<BukkitUtil> bukkitUtil = mockStatic(BukkitUtil.class);
@@ -52,12 +108,31 @@ class CommandSyntaxExceptionConversionTest {
             bukkitUtil.when(BukkitUtil::getMinecraftVersion)
                       .thenReturn("1.16.5");
             reflection.when(() -> NMSReflection.findMinecraftClass(anyString(), any(String[].class)))
-                      .thenReturn(FakeChatMessage.class);
+                      .thenReturn(e.getRawMessage()
+                                   .getClass() == BrokenChatMessage.class ? BrokenChatMessage.class : FakeChatMessage.class);
 
             ArgumentParseException converted = new PlatformAdapterImpl().convertCommandSyntaxException(e);
             converted.sendMessage(ctx);
         }
         return ctx;
+    }
+
+    /**
+     * A {@code ChatMessage} stand-in whose arguments getter fails, as a broken NMS mapping would.
+     */
+    public static final class BrokenChatMessage implements Message {
+        public String getKey() {
+            return "broken.key";
+        }
+
+        public Object[] getArgs() {
+            throw new IllegalStateException("broken mapping");
+        }
+
+        @Override
+        public String getString() {
+            return "broken.key";
+        }
     }
 
     /**

@@ -26,6 +26,7 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -109,13 +110,9 @@ public final class CommandLib implements Listener {
               .registerEvent(eventClass, this, EventPriority.MONITOR, executor, plugin);
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     private void readdToPaperDispatcher() {
         try {
-            Map<String, org.bukkit.command.Command> knownCommands = knownCommands();
-            for (CommandNode node : registeredCommands) {
-                addToPaperDispatcher(knownCommands, node);
-            }
+            addToPaperDispatcher(knownCommands(), registeredCommands);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -135,19 +132,24 @@ public final class CommandLib implements Listener {
         return ((Map<String, org.bukkit.command.Command>) knownCommandsField.get(commandMap));
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    private static void addToPaperDispatcher(Map<String, org.bukkit.command.Command> knownCommands,
-                                             CommandNode node) throws Exception {
+    @SuppressWarnings("rawtypes")
+    private static RootCommandNode paperDispatcherRoot(Map<String, org.bukkit.command.Command> knownCommands) throws Exception {
         CommandDispatcher dispatcher = ((CommandDispatcher) knownCommands.getClass()
                                                                          .getDeclaredMethod("getDispatcher")
                                                                          .invoke(knownCommands));
-        RootCommandNode root = dispatcher.getRoot();
-        removeRegisteredCommand(root, knownCommands, node.getName());
+        return dispatcher.getRoot();
+    }
 
-        CommandNode shadowBrigNode = (CommandNode) Class.forName("io.papermc.paper.command.brigadier.ShadowBrigNode")
-                                                        .getConstructor(CommandNode.class)
-                                                        .newInstance(node);
-        root.addChild(shadowBrigNode);
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private static void addToPaperDispatcher(Map<String, org.bukkit.command.Command> knownCommands,
+                                             List<CommandNode<?>> nodes) throws Exception {
+        RootCommandNode root = paperDispatcherRoot(knownCommands);
+        Constructor<?> shadowBrigNode = Class.forName("io.papermc.paper.command.brigadier.ShadowBrigNode")
+                                             .getConstructor(CommandNode.class);
+        for (CommandNode<?> node : nodes) {
+            removeRegisteredCommand(root, knownCommands, node.getName());
+            root.addChild((CommandNode) shadowBrigNode.newInstance(node));
+        }
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -155,22 +157,17 @@ public final class CommandLib implements Listener {
         registerPermissions();
 
         registeredCommands.addAll(new CommandNodeCreator<>(commands, permissionPrefix).build());
-        registeredCommands.forEach(x -> {
-            try {
-                CommandMap commandMap = ((CommandMap) NMSCraftServer.create()
-                                                                    .getValue("commandMap"));
-                Field knownCommandsField = SimpleCommandMap.class.getDeclaredField("knownCommands");
-                knownCommandsField.setAccessible(true);
-                Map<String, org.bukkit.command.Command> knownCommands = ((Map<String, org.bukkit.command.Command>) knownCommandsField.get(
-                        commandMap));
-
-                if (new MinecraftVersion(BukkitUtil.getMinecraftVersion()).isLessThan(new MinecraftVersion("1.20.6"))) {
-                    NMSCommandDispatcher dispatcher = NMSCraftServer.create(plugin.getServer())
-                                                                    .getServer()
-                                                                    .getCommandDispatcher();
-                    RootCommandNode root = dispatcher.getBrigadier()
-                                                     .getRoot();
-
+        try {
+            Map<String, org.bukkit.command.Command> knownCommands = knownCommands();
+            if (usesPaperCommandDispatcher()) {
+                addToPaperDispatcher(knownCommands, registeredCommands);
+            } else {
+                NMSCommandDispatcher dispatcher = NMSCraftServer.create(plugin.getServer())
+                                                                .getServer()
+                                                                .getCommandDispatcher();
+                RootCommandNode root = dispatcher.getBrigadier()
+                                                 .getRoot();
+                for (CommandNode x : registeredCommands) {
                     removeRegisteredCommand(root, knownCommands, x.getName());
                     removeExecuteRunCommand(root, x.getName());
 
@@ -185,13 +182,11 @@ public final class CommandLib implements Listener {
                         removeCommand(executeRunRoot, x.getName());
                         executeRunRoot.addChild(x);
                     }
-                } else {
-                    addToPaperDispatcher(knownCommands, x);
                 }
-            } catch (Exception e) {
-                throw new RuntimeException(e);
             }
-        });
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
 
         updatePlayerCommandsLater();
     }
@@ -280,24 +275,14 @@ public final class CommandLib implements Listener {
         }.runTask(plugin);
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings("rawtypes")
     private void unregisterCommands() {
         try {
-            CommandMap commandMap = ((CommandMap) NMSCraftServer.create()
-                                                                .getValue("commandMap"));
-            Field knownCommandsField = SimpleCommandMap.class.getDeclaredField("knownCommands");
-            knownCommandsField.setAccessible(true);
-            Map<String, org.bukkit.command.Command> knownCommands = ((Map<String, org.bukkit.command.Command>) knownCommandsField.get(
-                    commandMap));
-
-            boolean usePaperCommandDispatcher = !new MinecraftVersion(BukkitUtil.getMinecraftVersion()).isLessThan(new MinecraftVersion(
-                    "1.20.6"));
+            Map<String, org.bukkit.command.Command> knownCommands = knownCommands();
+            boolean usePaperCommandDispatcher = usesPaperCommandDispatcher();
             RootCommandNode root;
             if (usePaperCommandDispatcher) {
-                CommandDispatcher dispatcher = ((CommandDispatcher) knownCommands.getClass()
-                                                                                 .getDeclaredMethod("getDispatcher")
-                                                                                 .invoke(knownCommands));
-                root = dispatcher.getRoot();
+                root = paperDispatcherRoot(knownCommands);
             } else {
                 root = NMSCraftServer.create(plugin.getServer())
                                      .getServer()
