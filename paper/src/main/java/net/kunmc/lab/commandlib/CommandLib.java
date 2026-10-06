@@ -10,13 +10,14 @@ import io.papermc.paper.plugin.lifecycle.event.LifecycleEventManager;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.RegisteredListener;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.invoke.MethodHandles;
@@ -111,9 +112,7 @@ public final class CommandLib implements Listener {
         CommandLib instance = new CommandLib(plugin,
                                              REGISTRATION_STATES.computeIfAbsent(plugin,
                                                                                  ignored -> new PluginRegistrationState()));
-        // Bukkit rejects listeners of plugins that are not enabled yet, which is the case when register() is called
-        // from the constructor or onLoad(). The listener is then registered from the COMMANDS lifecycle event.
-        instance.registerDisableListenerIfEnabled();
+        instance.registerDisableListener();
         instance.doRegisterPermissions(plugin, permissionPrefix, commands);
 
         PendingRegistration registration = new PendingRegistration(instance, commands, permissionPrefix);
@@ -159,7 +158,6 @@ public final class CommandLib implements Listener {
         unregister(true);
     }
 
-    @EventHandler
     private void onPluginDisable(PluginDisableEvent event) {
         if (!event.getPlugin()
                   .equals(plugin)) {
@@ -268,7 +266,6 @@ public final class CommandLib implements Listener {
                     // The event fires at startup and again after /minecraft:reload with a fresh dispatcher, so every
                     // active registration is added each time instead of only the pending ones.
                     for (PendingRegistration registration : state.registrations) {
-                        registration.instance.registerDisableListenerIfEnabled();
                         registration.instance.registerWithRegistrar(registrar, dispatcher, registration);
                     }
                 }
@@ -280,12 +277,20 @@ public final class CommandLib implements Listener {
         }
     }
 
-    private void registerDisableListenerIfEnabled() {
-        if (listenerRegistered || !plugin.isEnabled()) {
+    private void registerDisableListener() {
+        if (listenerRegistered) {
             return;
         }
-        Bukkit.getPluginManager()
-              .registerEvents(this, plugin);
+        // PluginManager#registerEvents rejects plugins that are not enabled yet, which is the case when register() is
+        // called from the constructor or onLoad(), and a later COMMANDS lifecycle event may also fire before
+        // onEnable(). Registering with the handler list directly works in every phase. PluginDisableEvent is fired
+        // before the plugin is marked disabled, so the listener still receives it.
+        PluginDisableEvent.getHandlerList()
+                          .register(new RegisteredListener(this, (listener, event) -> {
+                              if (event instanceof PluginDisableEvent) {
+                                  onPluginDisable((PluginDisableEvent) event);
+                              }
+                          }, EventPriority.NORMAL, plugin, false));
         listenerRegistered = true;
     }
 

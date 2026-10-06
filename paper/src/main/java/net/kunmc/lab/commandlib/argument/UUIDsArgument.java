@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 public class UUIDsArgument extends Argument<List<UUID>, UUIDsArgument> {
     public UUIDsArgument(String name) {
-        super(name, RawWordArgumentType.rawWord());
+        super(name, ProfileWordArgumentType.profileWord());
 
         setSuggestionAction(sb -> {
             String input = sb.getLatestInput();

@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 
 public class OfflinePlayersArgument extends Argument<List<OfflinePlayer>, OfflinePlayersArgument> {
     public OfflinePlayersArgument(String name) {
-        super(name, RawWordArgumentType.rawWord());
+        super(name, ProfileWordArgumentType.profileWord());
 
         addSuggestionAction(sb -> {
             String input = sb.getLatestInput();
