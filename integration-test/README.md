@@ -99,6 +99,11 @@ For example:
 :integration-test:targets:paper-1.20.4:minecraftIntegrationTest
 ```
 
+Bukkit-family targets: `paper-1.16.5`, `paper-1.17.1`, `paper-1.18.2`, `paper-1.19.2`, `paper-1.19.4`, `paper-1.20.1`,
+`paper-1.20.4`, `paper-1.20.5`, `paper-1.20.6`, `mohist-1.16.5`, `mohist-1.20.1` run the `spigot` module, and
+`paper-1.21.0` runs the `paper` module. There is no plain Spigot (CraftBukkit) target, because Spigot server jars
+are only produced by BuildTools.
+
 `minecraftIntegrationTest` is the aggregate task for all configured targets.
 The aggregate task depends on per-target subprojects, so Gradle can run independent targets in parallel by default.
 
@@ -208,7 +213,7 @@ For smaller Docker Desktop environments, reduce it:
 .\gradlew.bat :integration-test:minecraftIntegrationTest -Pcommandlib.minecraftIntegrationMaxParallel=1
 ```
 
-Mohist bootstrap is throttled separately and defaults to 2. Each Mohist target writes a target-specific bootstrap
+Mohist bootstrap is throttled separately and defaults to 4. Each Mohist target writes a target-specific bootstrap
 `server-port`, so bootstrap tasks can run in parallel when the local machine has enough CPU and memory.
 
 To reduce Mohist bootstrap concurrency:

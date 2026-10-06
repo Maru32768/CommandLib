@@ -4,6 +4,6 @@ extra["platform"] = "paper"
 extra["commandlibModule"] = "spigot"
 extra["minecraftServerVersion"] = "1.20.6"
 extra["serverJarDownloads"] =
-    "https://api.papermc.io/v2/projects/paper/versions/1.20.6/builds/151/downloads/paper-1.20.6-151.jar=>server/server.jar"
+    "https://fill-data.papermc.io/v1/objects/4b011f5adb5f6c72007686a223174fce82f31aeb4b34faf4652abc840b47e640/paper-1.20.6-151.jar=>server/server.jar"
 
 apply(from = "../../../shared/integration-test.gradle.kts")

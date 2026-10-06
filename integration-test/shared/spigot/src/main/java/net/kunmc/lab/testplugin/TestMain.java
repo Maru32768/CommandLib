@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 
 public class TestMain {
     private static final String TEST_PLAYER_NAME = "Maru32768";
+    private static final long RELOAD_WAIT_TICKS = 100L;
     private final Plugin plugin;
     private final Logger logger;
     private boolean errorOccurredOnRegister = false;
@@ -75,12 +76,14 @@ public class TestMain {
             CommandSyntaxExceptionTest commandSyntaxExceptionTest = new CommandSyntaxExceptionTest(mainCommand);
             RuntimePermissionTest runtimePermissionTest = new RuntimePermissionTest(mainCommand, plugin);
             SuggestionTest suggestionTest = new SuggestionTest(mainCommand);
+            ScenarioTest scenarioTest = new ScenarioTest(mainCommand, plugin, TEST_PLAYER_NAME);
             new HelpMessageTest(mainCommand); // registers helpMessageRoot for bot-side help message verification
             List<TestBase> tests = List.of(argumentTest,
                                            optionTest,
                                            commandSyntaxExceptionTest,
                                            runtimePermissionTest,
-                                           suggestionTest);
+                                           suggestionTest,
+                                           scenarioTest);
             List<String> commands = tests.stream()
                                          .flatMap(x -> x.build()
                                                         .stream())
@@ -95,6 +98,7 @@ public class TestMain {
 
                 Bukkit.getScheduler()
                       .runTaskLater(plugin, () -> {
+                          boolean waitingForReload = false;
                           try {
                               Scoreboard scoreboard = Bukkit.getScoreboardManager()
                                                             .getMainScoreboard();
@@ -111,14 +115,32 @@ public class TestMain {
                                   dispatchErrorHook.onCommandDispatchError(command, dispatchResult);
                               }
 
-                              consumer.accept(tests.stream()
-                                                   .flatMap(x -> x.results()
-                                                                  .stream())
-                                                   .collect(Collectors.toList()));
-
-                              tests.forEach(TestBase::clearResults);
+                              // /minecraft:reload rebuilds the command dispatcher. It runs last, and the probe waits
+                              // for the reload to finish before the results are written.
+                              logger.info("Reloading data packs to verify registered commands survive.");
+                              dispatchProbe.dispatch(Bukkit.getConsoleSender(), "minecraft:reload");
+                              waitingForReload = true;
+                              Bukkit.getScheduler()
+                                    .runTaskLater(plugin, () -> {
+                                        try {
+                                            String probe = MainCommand.NAME + " " + ScenarioTest.RELOAD_PROBE;
+                                            CommandDispatchResult dispatchResult = dispatchProbe.dispatch(Bukkit.getConsoleSender(),
+                                                                                                          probe);
+                                            tests.forEach(test -> test.hookCommandDispatchError(probe,
+                                                                                                dispatchResult));
+                                            consumer.accept(tests.stream()
+                                                                 .flatMap(x -> x.results()
+                                                                                .stream())
+                                                                 .collect(Collectors.toList()));
+                                            tests.forEach(TestBase::clearResults);
+                                        } finally {
+                                            running.set(false);
+                                        }
+                                    }, RELOAD_WAIT_TICKS);
                           } finally {
-                              running.set(false);
+                              if (!waitingForReload) {
+                                  running.set(false);
+                              }
                           }
                       }, 1L);
             };

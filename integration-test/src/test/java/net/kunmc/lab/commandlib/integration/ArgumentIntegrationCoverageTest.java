@@ -66,7 +66,7 @@ class ArgumentIntegrationCoverageTest {
                         .filter(path -> !path.getFileName()
                                              .toString()
                                              .equals("Argument.java"))
-                        .filter(path -> sourceContains(path, "public class "))
+                        .filter(this::declaresPublicConcreteClass)
                         .map(path -> path.getFileName()
                                          .toString()
                                          .replace(".java", ""))
@@ -74,10 +74,12 @@ class ArgumentIntegrationCoverageTest {
         }
     }
 
-    private boolean sourceContains(Path path, String needle) {
+    private boolean declaresPublicConcreteClass(Path path) {
         try {
-            return Files.readString(path)
-                        .contains(needle);
+            // Final classes are public arguments too; abstract ones cannot be instantiated by the fixtures.
+            return Pattern.compile("\\bpublic\\s+(?:final\\s+)?class\\s")
+                          .matcher(Files.readString(path))
+                          .find();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

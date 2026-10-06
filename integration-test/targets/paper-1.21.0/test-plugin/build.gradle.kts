@@ -4,6 +4,6 @@ extra["platform"] = "paper"
 extra["commandlibModule"] = "paper"
 extra["minecraftServerVersion"] = "1.21"
 extra["serverJarDownloads"] =
-    "https://api.papermc.io/v2/projects/paper/versions/1.21/builds/130/downloads/paper-1.21-130.jar=>server/server.jar"
+    "https://fill-data.papermc.io/v1/objects/ab9bb1afc3cea6978a0c03ce8448aa654fe8a9c4dddf341e7cbda1b0edaa73f5/paper-1.21-130.jar=>server/server.jar"
 
 apply(from = "../../../shared/integration-test.gradle.kts")

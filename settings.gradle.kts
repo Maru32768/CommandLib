@@ -47,6 +47,9 @@ stonecutter {
 include(
     "integration-test:targets:paper-1.16.5",
     "integration-test:targets:mohist-1.16.5",
+    "integration-test:targets:paper-1.17.1",
+    "integration-test:targets:paper-1.18.2",
+    "integration-test:targets:paper-1.19.2",
     "integration-test:targets:paper-1.19.4",
     "integration-test:targets:paper-1.20.1",
     "integration-test:targets:mohist-1.20.1",

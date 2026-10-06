@@ -11,6 +11,7 @@ import net.kunmc.lab.commandlib.argument.StringArgument;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class OptionTest extends TestBase {
     public OptionTest(Command command) {
@@ -133,57 +134,73 @@ public final class OptionTest extends TestBase {
         String name = getMethodName();
         String key = getKey();
 
-        putResult(new TestResult(key, TestStatus.SUCCEEDED, "Command was not executed."));
+        // The rejected input is dispatched first and a valid input second, so the result only succeeds when the
+        // command exists and the rejected input did not run it.
+        putResult(new TestResult(key, TestStatus.FAILED, "Valid control input was not executed."));
+        AtomicBoolean rejectedInputExecuted = new AtomicBoolean();
         command.addChildren(new Command(name) {{
             CommandOption<String, CommandContext> mode = option(Options.string("mode", 'm', "normal"));
             CommandOption<Integer, CommandContext> limit = option(Options.integer("limit", 'n', 10)
                                                                          .requires(mode, "parallel"));
 
             argument(new StringArgument("target", StringArgument.Type.WORD)).execute((target, ctx) -> {
-                putResult(new TestResult(key,
-                                         TestStatus.FAILED,
-                                         "Command was executed with mode=" + ctx.getOption(mode) + ", limit=" + ctx.getOption(
-                                                 limit)));
+                recordRejectedInputResult(key, target, rejectedInputExecuted,
+                                          "mode=" + ctx.getOption(mode) + ", limit=" + ctx.getOption(limit));
             });
         }});
 
-        return List.of(buildCommand(command, name + " -m normal -n 20 alex"));
+        return List.of(buildCommand(command, name + " -m normal -n 20 rejected"),
+                       buildCommand(command, name + " -m parallel -n 20 control"));
     }
 
     public List<String> valueOptionWithoutValue() {
         String name = getMethodName();
         String key = getKey();
 
-        putResult(new TestResult(key, TestStatus.SUCCEEDED, "Command was not executed."));
+        putResult(new TestResult(key, TestStatus.FAILED, "Valid control input was not executed."));
+        AtomicBoolean rejectedInputExecuted = new AtomicBoolean();
         command.addChildren(new Command(name) {{
             CommandOption<String, CommandContext> format = option(Options.string("format", 'F', "text"));
 
             argument(new StringArgument("target", StringArgument.Type.WORD)).execute((target, ctx) -> {
-                putResult(new TestResult(key,
-                                         TestStatus.FAILED,
-                                         "Command was executed with format=" + ctx.getOption(format)));
+                recordRejectedInputResult(key, target, rejectedInputExecuted, "format=" + ctx.getOption(format));
             });
+            execute(ctx -> recordRejectedInputResult(key, "rejected", rejectedInputExecuted, "without target"));
         }});
 
-        return List.of(buildCommand(command, name + " --format"));
+        return List.of(buildCommand(command, name + " --format"),
+                       buildCommand(command, name + " --format json control"));
     }
 
     public List<String> optionAfterArgument() {
         String name = getMethodName();
         String key = getKey();
 
-        putResult(new TestResult(key, TestStatus.SUCCEEDED, "Command was not executed."));
+        putResult(new TestResult(key, TestStatus.FAILED, "Valid control input was not executed."));
+        AtomicBoolean rejectedInputExecuted = new AtomicBoolean();
         command.addChildren(new Command(name) {{
             CommandOption<Boolean, CommandContext> force = option(Options.flag("force", 'f'));
 
             argument(new StringArgument("target", StringArgument.Type.WORD)).execute((target, ctx) -> {
-                putResult(new TestResult(key,
-                                         TestStatus.FAILED,
-                                         "Command was executed with force=" + ctx.getOption(force)));
+                recordRejectedInputResult(key, target, rejectedInputExecuted, "force=" + ctx.getOption(force));
             });
         }});
 
-        return List.of(buildCommand(command, name + " alex -f"));
+        return List.of(buildCommand(command, name + " rejected -f"),
+                       buildCommand(command, name + " -f control"));
     }
 
+    private void recordRejectedInputResult(String key,
+                                           String target,
+                                           AtomicBoolean rejectedInputExecuted,
+                                           String description) {
+        if (!"control".equals(target)) {
+            rejectedInputExecuted.set(true);
+            putResult(new TestResult(key, TestStatus.FAILED, "Rejected input was executed with " + description));
+            return;
+        }
+        if (!rejectedInputExecuted.get()) {
+            putResult(new TestResult(key, TestStatus.SUCCEEDED, "Rejected input was not executed."));
+        }
+    }
 }

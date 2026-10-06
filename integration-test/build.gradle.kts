@@ -37,6 +37,9 @@ tasks.register("minecraftIntegrationTest") {
     dependsOn(
         ":integration-test:targets:paper-1.16.5:minecraftIntegrationTest",
         ":integration-test:targets:mohist-1.16.5:minecraftIntegrationTest",
+        ":integration-test:targets:paper-1.17.1:minecraftIntegrationTest",
+        ":integration-test:targets:paper-1.18.2:minecraftIntegrationTest",
+        ":integration-test:targets:paper-1.19.2:minecraftIntegrationTest",
         ":integration-test:targets:paper-1.19.4:minecraftIntegrationTest",
         ":integration-test:targets:paper-1.20.1:minecraftIntegrationTest",
         ":integration-test:targets:mohist-1.20.1:minecraftIntegrationTest",

@@ -115,16 +115,34 @@ class IntegrationTest {
 
                 assertJUnitReportSucceeded(reportFile);
 
-                // Bot-side help message prefix check: send the help command and verify the response
-                // includes the correct usage prefix (not a wrong token like the argument name).
-                client.clearReceivedPackets();
-                client.sendCommand("commandlibtest helpMessageRoot");
-                Thread.sleep(1500);
-                client.assertNotDisconnected();
-                List<String> helpMessages = client.drainSystemMessages();
-                assertThat(helpMessages).as(
-                                                "Help message should contain 'commandlibtest helpMessageRoot' as usage prefix")
-                                        .anyMatch(m -> m.contains("commandlibtest helpMessageRoot"));
+                // Bot-side checks need the messages a player receives, which the console-driven report cannot see.
+                // Help message prefix: the usage must start with the typed command, not a token like an argument name.
+                assertBotReceives(client,
+                                  "commandlibtest helpMessageRoot",
+                                  "help usage prefix",
+                                  m -> m.contains("commandlibtest helpMessageRoot"));
+                // Invalid argument: the translated "incorrect argument" message points at the rejected token.
+                assertBotReceives(client,
+                                  "commandlibtest enumArgument not_a_material",
+                                  "incorrect argument message",
+                                  m -> m.contains("command.unknown.argument") || m.contains("Incorrect argument"));
+                // CommandSyntaxException thrown by an argument is converted into a failure message for the sender.
+                assertBotReceives(client,
+                                  "commandlibtest testConvertCommandSyntaxException true",
+                                  "converted CommandSyntaxException message",
+                                  m -> m.contains("argument.integer.big") || m.contains("Integer must not be more than"));
+                // A node with PermissionDefault.FALSE is not usable even by an operator.
+                List<String> deniedMessages = assertBotReceives(client,
+                                                                "commandlibtest deniedProbe",
+                                                                "unknown command message for a node without permission",
+                                                                // The parent command is usable, so Brigadier reports the
+                                                                // hidden child as an incorrect argument.
+                                                                m -> m.contains("command.unknown.command") || m.contains(
+                                                                        "command.unknown.argument") || m.contains(
+                                                                        "Unknown or incomplete command") || m.contains(
+                                                                        "Incorrect argument") || m.contains(
+                                                                        "Unknown command"));
+                assertThat(deniedMessages).noneMatch(m -> m.contains("deniedProbe executed"));
             } finally {
                 client.disconnect("Test completed");
             }
@@ -137,6 +155,29 @@ class IntegrationTest {
         assertThat(isPlayerJoinLog(
                 "[12:47:42 INFO]: Maru32768[/172.17.0.1:52648] logged in with entity id 127 at (-245.5, 63, 153.5)")).isTrue();
         assertThat(isPlayerJoinLog("[12:47:42 INFO]: OtherPlayer joined the game")).isFalse();
+    }
+
+    private static List<String> assertBotReceives(BotSession client,
+                                                  String command,
+                                                  String description,
+                                                  java.util.function.Predicate<String> expected) {
+        client.clearReceivedPackets();
+        client.sendCommand(command);
+        List<String> received = new ArrayList<>();
+        try {
+            Awaitility.await()
+                      .atMost(Duration.ofSeconds(10))
+                      .pollInterval(Duration.ofMillis(200))
+                      .until(() -> {
+                          client.assertNotDisconnected();
+                          received.addAll(client.drainSystemMessages());
+                          return received.stream()
+                                         .anyMatch(expected);
+                      });
+        } catch (org.awaitility.core.ConditionTimeoutException e) {
+            fail("Bot did not receive " + description + " for /" + command + ". Received: " + received);
+        }
+        return received;
     }
 
     private static void waitForPlayerJoin(GenericContainer<?> container, BotSession client) {
@@ -516,7 +557,9 @@ class IntegrationTest {
             for (Object packet : snapshot) {
                 String className = packet.getClass()
                                          .getName();
-                if (!className.contains("SystemChatPacket") && !className.contains("ServerChatPacket")) {
+                // 1.19+ uses SystemChatPacket, 1.17/1.18 use ClientboundChatPacket and 1.16.5 uses ServerChatPacket.
+                if (!className.contains("SystemChatPacket") && !className.contains("ServerChatPacket") && !className.endsWith(
+                        "ClientboundChatPacket")) {
                     continue;
                 }
                 // Try getContent() (1.19+) then getMessage() (1.16.5)
@@ -625,6 +668,14 @@ class IntegrationTest {
                 return signedCommandPacket;
             }
 
+            // Minecraft 1.17 and 1.18 send commands as chat text through the renamed serverbound chat packet.
+            Object chatPacket = tryCreateStringPacket(
+                    "com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundChatPacket",
+                    "/" + normalizedCommand);
+            if (chatPacket != null) {
+                return chatPacket;
+            }
+
             // Minecraft 1.16.5 predates the dedicated command packet. Commands are sent as chat text.
             return Class.forName("com.github.steveice10.mc.protocol.packet.ingame.client.ClientChatPacket")
                         .getConstructor(String.class)
@@ -643,23 +694,42 @@ class IntegrationTest {
 
         private Object tryCreateSignedCommandPacket(String className,
                                                     String command) throws ReflectiveOperationException {
+            Class<?> packetClass;
             try {
-                return Class.forName(className)
-                            .getConstructor(String.class,
-                                            long.class,
-                                            long.class,
-                                            java.util.List.class,
-                                            int.class,
-                                            BitSet.class)
-                            .newInstance(command,
-                                         System.currentTimeMillis(),
-                                         0L,
-                                         Collections.emptyList(),
-                                         0,
-                                         new BitSet());
-            } catch (ClassNotFoundException | NoSuchMethodException ignored) {
+                packetClass = Class.forName(className);
+            } catch (ClassNotFoundException ignored) {
                 return null;
             }
+            // The signed command packet changed its constructor between 1.19.x releases. An unsigned command only
+            // needs the command text, so every other parameter gets an empty default.
+            for (Constructor<?> constructor : packetClass.getConstructors()) {
+                Class<?>[] parameterTypes = constructor.getParameterTypes();
+                if (parameterTypes.length < 2 || parameterTypes[0] != String.class) {
+                    continue;
+                }
+                Object[] arguments = new Object[parameterTypes.length];
+                arguments[0] = command;
+                boolean timestampSet = false;
+                for (int i = 1; i < parameterTypes.length; i++) {
+                    Class<?> type = parameterTypes[i];
+                    if (type == long.class) {
+                        arguments[i] = timestampSet ? 0L : System.currentTimeMillis();
+                        timestampSet = true;
+                    } else if (type == int.class) {
+                        arguments[i] = 0;
+                    } else if (type == boolean.class) {
+                        arguments[i] = false;
+                    } else if (type == BitSet.class) {
+                        arguments[i] = new BitSet();
+                    } else if (java.util.List.class.isAssignableFrom(type)) {
+                        arguments[i] = Collections.emptyList();
+                    } else {
+                        arguments[i] = null;
+                    }
+                }
+                return constructor.newInstance(arguments);
+            }
+            return null;
         }
 
         void disconnect(String reason) {

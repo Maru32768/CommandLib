@@ -11,7 +11,7 @@ with ease.
 
 | Platform   | Artifact | Tested Versions                                            | Notes                                                         |
 |------------|----------|------------------------------------------------------------|---------------------------------------------------------------|
-| **Spigot** | `spigot` | `1.16.5`, `1.19.4`, `1.20.1`, `1.20.4`, `1.20.6`, `1.21.0` | Expected to work on intermediate versions. Requires Java 11+. |
+| **Spigot** | `spigot` | `1.16.5`, `1.17.1`, `1.18.2`, `1.19.2`, `1.19.4`, `1.20.1`, `1.20.4`, `1.20.5`, `1.20.6` | Tested on Paper servers. Expected to work on intermediate versions. Requires Java 11+. |
 | **Paper**  | `paper`  | `1.21.0`                                                   | Uses Paper official command/lifecycle API. Requires Java 21+. |
 | **Forge**  | `forge-<minecraft-version>` | `1.16.5`, `1.20.1`                             | Use the artifact that matches the target Minecraft version.   |
 | **Mohist** | `spigot` | `1.16.5`, `1.20.1`                                         | Works on Mohist since it's compatible with Spigot.            |
