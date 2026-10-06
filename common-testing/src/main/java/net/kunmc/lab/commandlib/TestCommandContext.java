@@ -8,20 +8,20 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public final class TestCommandContext extends CommonCommandContext<FakeSender, String> {
-    private static TestCommandContext latest;
+    private static final ThreadLocal<TestCommandContext> LATEST = new ThreadLocal<>();
     private final List<String> messages = new ArrayList<>();
 
     TestCommandContext(com.mojang.brigadier.context.CommandContext<FakeSender> ctx) {
         super(ctx);
-        latest = this;
+        LATEST.set(this);
     }
 
     public static TestCommandContext latest() {
-        return latest;
+        return LATEST.get();
     }
 
     static void clearLatest() {
-        latest = null;
+        LATEST.remove();
     }
 
     @Override

@@ -7,6 +7,7 @@ import net.kunmc.lab.commandlib.exception.ArgumentParseException;
 import net.kunmc.lab.commandlib.util.StringUtil;
 
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.Objects;
 
 public class CommonEnumArgument<T extends Enum<T>, C extends CommonCommandContext<?, ?>, SELF extends CommonEnumArgument<T, C, SELF>> extends CommonArgument<T, C, SELF> {
@@ -19,7 +20,7 @@ public class CommonEnumArgument<T extends Enum<T>, C extends CommonCommandContex
             Arrays.stream(clazz.getEnumConstants())
                   .filter(filter(sb.getContext()))
                   .map(Enum::name)
-                  .map(String::toLowerCase)
+                  .map(x -> x.toLowerCase(Locale.ROOT))
                   .filter(x -> sb.getLatestInput()
                                  .isEmpty() || StringUtil.containsIgnoreCase(x, sb.getLatestInput()))
                   .forEach(sb::suggest);

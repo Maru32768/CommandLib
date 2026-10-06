@@ -6,6 +6,7 @@ import com.mojang.brigadier.tree.ArgumentCommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.kunmc.lab.commandlib.command.CommandExecutor;
 import net.kunmc.lab.commandlib.suggestion.SuggestionBuilder;
+import net.kunmc.lab.commandlib.util.UncaughtExceptionHandler;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -90,10 +91,17 @@ final class ArgumentCommandNodeCreator<S, T, C extends CommonCommandContext<S, T
                                              parent.prerequisite(),
                                              helpAction,
                                              parent.preprocess(),
-                                             argument.executor(),
-                                             argument.uncaughtExceptionHandlers()));
+                                             arguments.executorFor(argument),
+                                             uncaughtExceptionHandlers(parent, argument)));
 
         return builder;
+    }
+
+    private List<UncaughtExceptionHandler<C>> uncaughtExceptionHandlers(CommonCommand<C, ?> parent,
+                                                                     CommonArgument<?, C, ?> argument) {
+        List<UncaughtExceptionHandler<C>> handlers = new ArrayList<>(parent.uncaughtExceptionHandlers());
+        handlers.addAll(argument.uncaughtExceptionHandlers());
+        return handlers;
     }
 
     private List<ArgumentCommandNode<S, ?>> toCommandNodes(CommandExecutor<C> helpAction, CommonCommand<C, ?> parent) {

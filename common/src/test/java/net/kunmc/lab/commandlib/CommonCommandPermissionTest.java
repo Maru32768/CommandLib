@@ -200,7 +200,52 @@ class CommonCommandPermissionTest {
 
         TestCommandContext ctx = execute(runner, "config");
 
+        assertThat(ctx.messages()).anyMatch(x -> x.contains("Usage:"));
         assertThat(ctx.messages()).noneMatch(x -> x.contains("Restricted key"));
+        assertThat(ctx.messages()).noneMatch(x -> x.contains("You do not have permission"));
+    }
+
+    @Test
+    void bare_command_does_not_require_argument_branch_permission() {
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("config") {{
+            execute(ctx -> ctx.sendMessage("bare"));
+            argument(new CommonStringArgument<>("key")).permission("custom.config.key")
+                                                       .execute((key, ctx) -> ctx.sendMessage(key));
+        }}, new TestCommandSource("test.command.config"));
+
+        TestCommandContext ctx = execute(runner, "config");
+
+        assertThat(ctx.messages()).containsExactly("bare");
+    }
+
+    @Test
+    void bare_command_does_not_require_any_of_multiple_argument_branch_permissions() {
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("config") {{
+            execute(ctx -> ctx.sendMessage("bare"));
+            argument(new CommonStringArgument<>("key")).permission("custom.config.key")
+                                                       .execute((key, ctx) -> ctx.sendMessage(key));
+            argument(new CommonStringArgument<>("key"),
+                     new CommonStringArgument<>("value")).permission("custom.config.key.value")
+                                                         .execute((key, value, ctx) -> ctx.sendMessage(value));
+        }}, new TestCommandSource("test.command.config"));
+
+        TestCommandContext ctx = execute(runner, "config");
+
+        assertThat(ctx.messages()).containsExactly("bare");
+    }
+
+    @Test
+    void option_only_input_does_not_require_argument_branch_permission() {
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("config") {{
+            CommandOption<Boolean, TestCommandContext> force = option(Options.flag("force", 'f'));
+            execute(ctx -> ctx.sendMessage("force=" + ctx.getOption(force)));
+            argument(new CommonStringArgument<>("key")).permission("custom.config.key")
+                                                       .execute((key, ctx) -> ctx.sendMessage(key));
+        }}, new TestCommandSource("test.command.config"));
+
+        TestCommandContext ctx = execute(runner, "config -f");
+
+        assertThat(ctx.messages()).containsExactly("force=true");
     }
 
     private TestCommandContext execute(TestCommandRunner runner, String input) {
@@ -219,5 +264,118 @@ class CommonCommandPermissionTest {
         StrArg(String name) {
             super(name);
         }
+    }
+
+    @Test
+    void command_permission_node_can_be_overridden() {
+        TestCommand command = new TestCommand("game") {{
+            permission("custom.game", DefaultPermission.ALL, "Play the game");
+        }};
+
+        PermissionConfig config = command.permissionConfig("test.command");
+
+        assertThat(config.node()).isEqualTo("custom.game");
+        assertThat(config.defaultPermission()).isEqualTo(DefaultPermission.ALL);
+        assertThat(config.description()).isEqualTo("Play the game");
+    }
+
+    @Test
+    void grandchild_permission_node_includes_every_ancestor() {
+        TestCommand command = new TestCommand("game") {{
+            addChildren(new TestCommand("team") {{
+                addChildren(new TestCommand("join") {{
+                }});
+            }});
+        }};
+
+        assertThat(command.permissionConfigs("test.command")).extracting(PermissionConfig::node)
+                                                             .containsExactly("test.command.game",
+                                                                              "test.command.game.team",
+                                                                              "test.command.game.team.join");
+    }
+
+    @Test
+    void child_command_without_permission_is_hidden_from_suggestions_and_help() throws Exception {
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("game") {{
+            addChildren(new TestCommand("start") {{
+                description("Start the game");
+                execute(ctx -> ctx.sendMessage("start"));
+            }}, new TestCommand("stop") {{
+                description("Stop the game");
+                execute(ctx -> ctx.sendMessage("stop"));
+            }});
+        }}, new TestCommandSource("test.command.game", "test.command.game.start"));
+
+        assertThat(runner.visibleChildren("game")).containsExactlyInAnyOrder("start", "help");
+        assertThatThrownBy(() -> runner.execute("game stop")).isInstanceOf(CommandSyntaxException.class);
+
+        TestCommandContext help = execute(runner, "game");
+        assertThat(help.messages()).anyMatch(x -> x.contains("Start the game"))
+                                   .noneMatch(x -> x.contains("Stop the game"));
+    }
+
+    @Test
+    void command_without_permission_is_not_executable() {
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("game") {{
+            execute(ctx -> ctx.sendMessage("game"));
+        }}, new TestCommandSource());
+
+        assertThatThrownBy(() -> runner.execute("game")).isInstanceOf(CommandSyntaxException.class);
+        assertThat(runner.visibleChildren()).isEmpty();
+    }
+
+    @Test
+    void alias_requires_permission_of_original_command() {
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("game") {{
+            addAliases("g");
+            execute(ctx -> ctx.sendMessage("game"));
+        }}, new TestCommandSource());
+
+        assertThatThrownBy(() -> runner.execute("g")).isInstanceOf(CommandSyntaxException.class);
+    }
+
+    @Test
+    void generated_help_literal_requires_command_permission() {
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("game") {{
+            addChildren(new TestCommand("start") {{
+                permission(DefaultPermission.ALL);
+                execute(ctx -> ctx.sendMessage("start"));
+            }});
+        }}, new TestCommandSource("test.command.game.start"));
+
+        assertThatThrownBy(() -> runner.execute("game help")).isInstanceOf(CommandSyntaxException.class);
+    }
+
+    @Test
+    void dynamic_description_is_evaluated_per_sender() throws Exception {
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("game") {{
+            addChildren(new TestCommand("start") {{
+                description(ctx -> "Start as " + ctx.getActor()
+                                                    .getName());
+                execute(ctx -> ctx.sendMessage("start"));
+            }});
+        }});
+
+        assertThat(execute(runner, "game").messages()).anyMatch(x -> x.contains("Start as test"));
+    }
+
+    @Test
+    void argument_child_without_permission_is_hidden_from_help() throws Exception {
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("config") {{
+            permission(DefaultPermission.ALL);
+            argument(new CommonStringArgument<>("key")).permission(DefaultPermission.ALL)
+                                                       .child(new TestCommand("get") {{
+                                                           description("Get value");
+                                                           execute(ctx -> ctx.sendMessage("get"));
+                                                       }}, new TestCommand("reset") {{
+                                                           description("Reset value");
+                                                           execute(ctx -> ctx.sendMessage("reset"));
+                                                       }});
+        }}, new TestCommandSource("test.command.config", "test.command.config.key", "test.command.config.get"));
+
+        TestCommandContext help = execute(runner, "config");
+
+        assertThat(help.messages()).anyMatch(x -> x.contains("Get value"))
+                                   .noneMatch(x -> x.contains("Reset value"));
     }
 }

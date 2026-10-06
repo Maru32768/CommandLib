@@ -138,7 +138,15 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
     public final ArgumentBranch<C, T> argument(@NotNull Consumer<ArgumentBuilder<C>> buildArguments) {
         ArgumentBuilder<C> builder = new ArgumentBuilder<>();
         buildArguments.accept(builder);
-        Arguments<C> arguments = addArguments(builder.build(), List.of());
+        List<CommonArgument<?, C, ?>> builtArguments = builder.build();
+        if (builtArguments.isEmpty()) {
+            throw new IllegalArgumentException("ArgumentBuilder must add at least one argument.");
+        }
+        Arguments<C> arguments = addArguments(builtArguments, List.of());
+        if (builtArguments.get(builtArguments.size() - 1)
+                          .executor() == null) {
+            arguments.executor(builder.executor());
+        }
         return new ArgumentBranch<>(delegateFor(arguments));
     }
 

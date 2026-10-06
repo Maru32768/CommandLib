@@ -21,7 +21,7 @@ public final class FakeSender implements CommandActor {
     }
 
     public static FakeSender player(String name, UUID uniqueId) {
-        return new FakeSender(name, uniqueId, CommandActorType.PLAYER, false, false, Set.of(), Set.of(), null);
+        return new FakeSender(name, uniqueId, CommandActorType.PLAYER, false, true, Set.of(), Set.of(), null);
     }
 
     public static FakeSender console() {

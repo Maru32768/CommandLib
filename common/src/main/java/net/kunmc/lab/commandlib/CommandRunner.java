@@ -70,7 +70,7 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
                 validateOptions(ctx);
             } catch (ArgumentParseException e) {
                 e.sendMessage(ctx);
-                return 1;
+                return 0;
             }
 
             for (Arguments<C> arguments : argumentsList) {
@@ -83,7 +83,7 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
                     arguments.parse(ctx);
                 } catch (ArgumentParseException e) {
                     e.sendMessage(ctx);
-                    return 1;
+                    return 0;
                 }
             }
             try {
@@ -103,6 +103,8 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
 
             return executeWithStackTrace(ctx, executor);
         } catch (Throwable e) {
+            // Exceptions escaping parsing, prerequisites or preprocess are not reported to the sender, so the handlers
+            // get them before Brigadier propagates them to the platform.
             e.printStackTrace();
             uncaughtExceptionHandlers.forEach(x -> x.uncaughtException(e, ctx));
             throw e;
@@ -120,6 +122,7 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
             e.printStackTrace();
             ctx.sendFailure("An unexpected error occurred trying to execute that command.");
             ctx.sendFailure("Check the console for details.");
+            uncaughtExceptionHandlers.forEach(x -> x.uncaughtException(e, ctx));
             return 0;
         }
     }

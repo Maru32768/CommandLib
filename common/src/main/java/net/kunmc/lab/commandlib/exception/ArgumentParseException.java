@@ -1,6 +1,6 @@
 package net.kunmc.lab.commandlib.exception;
 
-import com.mojang.brigadier.context.StringRange;
+import com.mojang.brigadier.tree.ArgumentCommandNode;
 import net.kunmc.lab.commandlib.CommonCommandContext;
 import net.kunmc.lab.commandlib.PlatformAdapter;
 import net.kunmc.lab.commandlib.util.ChatColorUtil;
@@ -16,31 +16,16 @@ public class ArgumentParseException extends Exception {
             String argumentName,
             C ctx,
             String incorrectInput) {
-        String input = ctx.getHandle()
-                          .getInput();
-        StringRange range = ctx.getHandle()
-                               .getNodes()
-                               .stream()
-                               .filter(n -> n.getNode()
-                                             .getName()
-                                             .equals(argumentName))
-                               .findFirst()
-                               .orElseThrow(IllegalStateException::new)
-                               .getRange();
-        PlatformAdapter platformAdapter = PlatformAdapter.get();
-
-        String str = input.substring(1, range.getStart());
-        if (str.length() > 10) {
-            str = "..." + str.substring(str.length() - 10);
-        }
-
-        String finalStr = str;
+        // Resolve the context lazily: validators also run while suggesting, where the argument node may not have
+        // been parsed yet and the message is never sent.
         return context -> {
+            PlatformAdapter platformAdapter = PlatformAdapter.get();
+            String prefix = inputBefore(ctx, argumentName);
             CommonCommandContext c = context;
             c.sendComponent(platformAdapter.createTranslatableComponentBuilder("command.unknown.argument")
                                            .color(Objects.requireNonNull(ChatColorUtil.RED.getRGB()))
                                            .build());
-            c.sendComponent(platformAdapter.createTextComponentBuilder(ChatColorUtil.GRAY + finalStr + ChatColorUtil.RED + ChatColorUtil.UNDERLINE + incorrectInput + ChatColorUtil.RESET)
+            c.sendComponent(platformAdapter.createTextComponentBuilder(ChatColorUtil.GRAY + prefix + ChatColorUtil.RED + ChatColorUtil.UNDERLINE + incorrectInput + ChatColorUtil.RESET)
                                            .append(platformAdapter.createTranslatableComponentBuilder(
                                                                           "command.context.here")
                                                                   .italic()
@@ -48,6 +33,31 @@ public class ArgumentParseException extends Exception {
                                                                   .build())
                                            .build());
         };
+    }
+
+    private static String inputBefore(CommonCommandContext<?, ?> ctx, String argumentName) {
+        String input = ctx.getHandle()
+                          .getInput();
+        int end = ctx.getHandle()
+                     .getNodes()
+                     .stream()
+                     // A literal such as the command itself may share the argument's name.
+                     .filter(n -> n.getNode() instanceof ArgumentCommandNode)
+                     .filter(n -> n.getNode()
+                                   .getName()
+                                   .equals(argumentName))
+                     .findFirst()
+                     .map(n -> n.getRange()
+                                .getStart())
+                     .orElse(input.length());
+
+        // Player input keeps the leading slash while console input does not; strip it only when present.
+        int start = input.startsWith("/") ? 1 : 0;
+        String str = input.substring(Math.min(start, end), end);
+        if (str.length() > 10) {
+            str = "..." + str.substring(str.length() - 10);
+        }
+        return str;
     }
 
     public static <C extends CommonCommandContext<?, ?>> ArgumentParseException ofIncorrectInput(String argumentName,

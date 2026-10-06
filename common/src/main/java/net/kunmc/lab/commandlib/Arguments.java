@@ -21,6 +21,7 @@ final class Arguments<C extends CommonCommandContext<?, ?>> {
     private String permissionNodeOverride = null;
     private DefaultPermission defaultPermissionOverride = null;
     private String permissionDescription = "";
+    private CommandExecutor<C> executor = null;
 
     Arguments(CommonCommand<C, ?> owner,
               List<? extends CommonArgument<?, C, ?>> arguments,
@@ -70,12 +71,17 @@ final class Arguments<C extends CommonCommandContext<?, ?>> {
     }
 
     void executor(CommandExecutor<C> executor) {
-        if (arguments.isEmpty()) {
-            return;
-        }
+        // Keep the executor on the branch instead of the argument instance, so one argument instance can be reused
+        // as the last argument of several branches without them overwriting each other's executor.
+        this.executor = executor;
+    }
 
-        CommonArgument<?, C, ?> last = arguments.get(arguments.size() - 1);
-        last.execute(executor);
+    CommandExecutor<C> executorFor(CommonArgument<?, C, ?> argument) {
+        boolean isLast = !arguments.isEmpty() && arguments.get(arguments.size() - 1) == argument;
+        if (isLast && executor != null) {
+            return executor;
+        }
+        return argument.executor();
     }
 
     void description(String description) {

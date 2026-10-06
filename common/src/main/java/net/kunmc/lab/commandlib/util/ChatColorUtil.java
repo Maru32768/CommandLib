@@ -48,7 +48,8 @@ public class ChatColorUtil {
             if (color == null) {
                 return null;
             }
-            return color.getRGB();
+            // Color#getRGB includes the alpha channel; callers expect a plain 0xRRGGBB value.
+            return color.getRGB() & 0xFFFFFF;
         }
 
         @Override

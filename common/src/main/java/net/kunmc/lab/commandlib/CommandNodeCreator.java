@@ -33,6 +33,7 @@ final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U ext
         LiteralCommandNode<S> node = toCommandNode(command, inheritedArguments, helpAction);
         nodes.add(node);
 
+        validateUniqueLiterals(command.name(), command.children());
         command.children()
                .forEach(x -> {
                    // Normal command children do not consume new arguments, so they must keep the same inherited
@@ -47,6 +48,21 @@ final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U ext
         nodes.addAll(createAliasCommands(command, node));
 
         return nodes;
+    }
+
+    private static void validateUniqueLiterals(String parentName, Collection<? extends CommonCommand<?, ?>> children) {
+        // Brigadier silently merges sibling literals with the same name, which would make one command unreachable.
+        Set<String> literals = new HashSet<>();
+        for (CommonCommand<?, ?> child : children) {
+            List<String> names = new ArrayList<>();
+            names.add(child.name());
+            names.addAll(child.aliases());
+            for (String name : names) {
+                if (!literals.add(name)) {
+                    throw new IllegalStateException("Duplicate child command name or alias '" + name + "' under '" + parentName + "'");
+                }
+            }
+        }
     }
 
     private boolean shouldAddHelpChild(U command) {
@@ -102,24 +118,30 @@ final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U ext
             return builder.build();
         }
 
+        // Input that stops at the command literal (optionally followed by options only) consumes no branch, so its
+        // runner must not check or parse any branch of this command. Using a branch runner here would require that
+        // branch's permission for a bare "/command" call.
+        CommandRunner<S, C> bareRunner = new CommandRunner<>(platformAdapter,
+                                                             command,
+                                                             permissionPrefix,
+                                                             inheritedArguments,
+                                                             command.options(),
+                                                             command.prerequisite(),
+                                                             helpAction,
+                                                             command.preprocess(),
+                                                             command.executor(),
+                                                             command.uncaughtExceptionHandlers());
+        builder.executes(bareRunner);
+
         argumentsList.stream()
                      .sorted((x, y) -> Integer.compare(y.size(),
                                                        x.size())) // Sort in descending order to handle variable-length arguments
                      .forEach(arguments -> {
                          List<Arguments<C>> executorArguments = appendArgument(inheritedArguments, arguments);
-                         CommandRunner<S, C> executor = new CommandRunner<>(platformAdapter,
-                                                                            command,
-                                                                            permissionPrefix,
-                                                                            executorArguments,
-                                                                            command.options(),
-                                                                            command.prerequisite(),
-                                                                            helpAction,
-                                                                            command.preprocess(),
-                                                                            command.executor(),
-                                                                            command.uncaughtExceptionHandlers());
                          Supplier<ArgumentCommandNode<S, ?>> argumentNodeSupplier = () -> {
                              // Brigadier can attach literal nodes under an argument node. The executor still needs
                              // the parent arguments, so child commands inherit the complete argument chain here.
+                             validateUniqueLiterals(command.name(), arguments.children());
                              List<LiteralCommandNode<S>> childNodes = arguments.children()
                                                                                .stream()
                                                                                .map(x -> toCommandNodes(castCommand(x),
@@ -132,9 +154,8 @@ final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U ext
                                                                                              command,
                                                                                              childNodes);
                          };
-                         builder.then(argumentNodeSupplier.get())
-                                .executes(executor);
-                         createOptionCommands(command.options(), argumentNodeSupplier, executor).forEach(builder::then);
+                         builder.then(argumentNodeSupplier.get());
+                         createOptionCommands(command.options(), argumentNodeSupplier, bareRunner).forEach(builder::then);
                      });
 
         return builder.build();

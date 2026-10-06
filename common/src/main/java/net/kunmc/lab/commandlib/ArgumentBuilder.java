@@ -28,13 +28,11 @@ public final class ArgumentBuilder<C extends CommonCommandContext<?, ?>> {
         this.executor = executor;
     }
 
+    CommandExecutor<C> executor() {
+        return executor;
+    }
+
     List<CommonArgument<?, C, ?>> build() {
-        if (!arguments.isEmpty()) {
-            CommonArgument<?, C, ?> last = arguments.get(arguments.size() - 1);
-            if (last.executor() == null) {
-                last.execute(executor);
-            }
-        }
-        return arguments;
+        return List.copyOf(arguments);
     }
 }
