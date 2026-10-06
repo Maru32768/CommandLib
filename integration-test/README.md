@@ -116,15 +116,19 @@ prepare the server differently:
   (`:integration-test:shared:modded-fixture:<loader>-<minecraft-version>`, for example `forge-1.20.1` or
   `neoforge-1.21.1`), like the `modded` module. Conditional comments follow
   `docs/agents/modded.md`.
-- `testModJar` bundles the published `:modded:<node>` jar (SRG-remapped for Forge) together with `common` and `shared/core`.
+- `testModJar` bundles the published `:modded:<node>` jar (SRG-remapped for Forge, Mojang names for NeoForge) together with `common` and `shared/core`.
   The tests therefore run the same artifact downstream mods use, which catches bugs that only appear with production
   names.
 - `integration-test/gradle/forge-integration-target.gradle.kts` registers `prepareTestPlugin`. It downloads the Forge
   or NeoForge installer (selected by `commandlib.integration.platform`), installs the server into
   `targets/<target>/work/server`, and copies the test mod into `mods`. The NeoForge test mod ships
   `META-INF/neoforge.mods.toml` instead of `mods.toml`.
-- The server is started with the target's `commandlib.integration.serverLaunchArgs` (an `@libraries/.../unix_args.txt`
-  file for 1.17+, `-jar forge-<version>.jar` for 1.16.5).
+- The loader build is read from `modded/versions/<node>/gradle.properties`, so the server runs the build the
+  CommandLib jars are compiled against. The server is started with arguments derived from it (an
+  `@libraries/.../unix_args.txt` file for 1.17+ and NeoForge, `-jar forge-<version>.jar` for 1.16.5).
+- Test commands are performed through `Commands#performPrefixedCommand`, like typed commands. On 1.20.3+ commands
+  performed during another command are queued, so the report is written by a `reportTests` command queued after
+  them.
 
 Test cases run from the server console source while the bot is online, and cover every public Forge argument
 (enforced by `ArgumentIntegrationCoverageTest`) plus `CommandActor` behavior.

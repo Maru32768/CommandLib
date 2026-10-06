@@ -16,9 +16,15 @@ import org.mockito.Mockito;
 import org.mockito.MockedStatic;
 
 //? if >=1.20.5 {
-/*import net.minecraft.core.HolderLookup;
+/*import com.mojang.serialization.Lifecycle;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.MappedRegistry;
+import net.minecraft.core.RegistrationInfo;
+import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.registries.VanillaRegistries;
+import net.minecraft.resources.ResourceKey;
 *///?}
 
 import java.util.ArrayList;
@@ -46,12 +52,13 @@ import net.minecraft.world.level.storage.WorldData;
 /*import net.minecraftforge.server.permission.PermissionAPI;*/
 
 /**
- * Runs CommandLib Forge commands without a Minecraft server.
+ * Runs CommandLib Forge / NeoForge commands without a Minecraft server.
  *
  * <p>Minecraft's registries are bootstrapped once per JVM, so vanilla argument types such as items, blocks, and
- * effects parse for real. The server is a Mockito mock whose player list contains the fake players added with
- * {@link #withPlayer(FakeSender)} and the player executing each command, so player and entity arguments resolve those
- * players by name. Permission nodes are answered by the executing {@link FakeSender}.</p>
+ * effects parse for real. On 1.20.5+ the server's {@code registryAccess()} also contains the data-driven registries
+ * such as enchantments, built from vanilla's registry bootstrap code. Tags are not loaded. The server is a Mockito
+ * mock whose player list contains the fake players added with {@link #withPlayer(FakeSender)} and the player executing
+ * each command, so player and entity arguments resolve those players by name. Permission nodes are answered by the executing {@link FakeSender}.</p>
  */
 public final class CommandTester implements AutoCloseable {
     private final CommandDispatcher<CommandSourceStack> dispatcher = new CommandDispatcher<>();
@@ -320,16 +327,23 @@ public final class CommandTester implements AutoCloseable {
             if (registryAccess != null) {
                 return registryAccess;
             }
+            List<Registry<?>> registries = new ArrayList<>();
+            BuiltInRegistries.REGISTRY.forEach(registries::add);
             HolderLookup.Provider vanilla = VanillaRegistries.createLookup();
-            RegistryAccess.Frozen access = Mockito.mock(RegistryAccess.Frozen.class, Mockito.CALLS_REAL_METHODS);
-            Mockito.doAnswer(invocation -> vanilla.lookup(invocation.getArgument(0)))
-                   .when(access)
-                   .lookup(Mockito.any());
-            Mockito.doAnswer(invocation -> vanilla.listRegistries())
-                   .when(access)
-                   .listRegistries();
-            registryAccess = access;
-            return access;
+            vanilla.listRegistries()
+                   .filter(key -> !BuiltInRegistries.REGISTRY.containsKey(key.location()))
+                   .forEach(key -> registries.add(copy(vanilla.lookupOrThrow(key))));
+            registryAccess = new RegistryAccess.ImmutableRegistryAccess(registries).freeze();
+            return registryAccess;
+        }
+
+        @SuppressWarnings("unchecked")
+        private static <T> Registry<T> copy(HolderLookup.RegistryLookup<T> lookup) {
+            MappedRegistry<T> registry = new MappedRegistry<>((ResourceKey<? extends Registry<T>>) lookup.key(),
+                                                              Lifecycle.stable());
+            lookup.listElements()
+                  .forEach(holder -> registry.register(holder.key(), holder.value(), RegistrationInfo.BUILT_IN));
+            return registry.freeze();
         }
         *///?}
 

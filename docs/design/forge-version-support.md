@@ -15,7 +15,9 @@ tree with [Stonecutter](https://stonecutter.kikugie.dev/) and Architectury Loom:
   Version-specific code is selected with Stonecutter conditional comments
   (`//? if >=1.19 { ... }`).
 - `modded/versions/<node>/gradle.properties` holds per-node settings
-  (`loom.platform` and the loader build in `deps.forge` / `deps.neoforge`).
+  (`loom.platform` and the loader build in `deps.forge` / `deps.neoforge`). The
+  testing artifact, the integration test mod and the integration server read
+  the loader build from there.
 - `modded/build.gradle.kts` is the shared version template and
   `modded/stonecutter.gradle.kts` is the Stonecutter controller.
 - Artifact IDs are unchanged by the tree layout: `:modded:forge-1.16.5`
@@ -31,7 +33,9 @@ tree with [Stonecutter](https://stonecutter.kikugie.dev/) and Architectury Loom:
   renames; the main Minecraft-level difference is that 1.20.5+
   `CommandBuildContext` is a `HolderLookup.Provider`, and 1.21+ enchantments are
   a data-driven registry, so registry lookups resolve lazily against the running
-  server's `registryAccess()`.
+  server's `registryAccess()`. On 1.20.5+ `EnchantmentArgument` and
+  `EffectArgument` return the registry `Holder`, which the Minecraft APIs that
+  apply enchantments and effects take there.
 - Public API still exposes each Minecraft version's native types. The 1.16.5
   artifact keeps its `DefaultPermissionLevel` overloads and
   `FMLServerStartedEvent` registration; 1.20.1 uses `RegisterCommandsEvent` and

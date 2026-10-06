@@ -2,13 +2,15 @@ package net.kunmc.lab.commandlib.argument;
 
 //? if >=1.19.3 {
 import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.flag.FeatureElement;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.flag.FeatureFlags;
 //? if neoforge {
@@ -16,9 +18,15 @@ import net.minecraft.world.flag.FeatureFlags;
 *///?} else
 import net.minecraftforge.server.ServerLifecycleHooks;
 //? if >=1.20.5 {
-/*import java.util.Optional;
-import java.util.stream.Stream;
+/*import com.mojang.serialization.Lifecycle;
+import net.minecraft.resources.RegistryDataLoader;
+
+import java.util.Set;
+import java.util.stream.Collectors;
 *///?}
+
+import java.util.Optional;
+import java.util.stream.Stream;
 
 // Argument types are created when a command is declared, which may be before the server exists.
 // This context resolves registries and applies the running server's enabled feature flags
@@ -32,17 +40,32 @@ final class BuiltInCommandBuildContext implements CommandBuildContext {
     }
 
     //? if >=1.20.5 {
-    /*@Override
+    /*// Data-driven registries such as enchantments only exist in the server's registries.
+    private static final Set<ResourceKey<? extends Registry<?>>> DATA_DRIVEN =
+            Stream.concat(RegistryDataLoader.WORLDGEN_REGISTRIES.stream(), RegistryDataLoader.DIMENSION_REGISTRIES.stream())
+                  .map(RegistryDataLoader.RegistryData::key)
+                  .collect(Collectors.toSet());
+
+    @Override
     public Stream<ResourceKey<? extends Registry<?>>> listRegistries() {
-        return registries().listRegistries();
+        Stream<ResourceKey<? extends Registry<?>>> keys = Stream.concat(BUILT_IN.listRegistries(), DATA_DRIVEN.stream());
+        MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+        if (server != null) {
+            keys = Stream.concat(keys,
+                                 server.registryAccess()
+                                       .listRegistries());
+        }
+        return keys.distinct();
     }
 
     @Override
     public <T> Optional<HolderLookup.RegistryLookup<T>> lookup(ResourceKey<? extends Registry<? extends T>> key) {
+        if (listRegistries().noneMatch(key::equals)) {
+            return Optional.empty();
+        }
         return Optional.of(new LazyRegistryLookup<>(key));
     }
 
-    // Data-driven registries such as enchantments only exist in the server's registries.
     private static HolderLookup.Provider registries() {
         MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
         if (server == null) {
@@ -52,8 +75,10 @@ final class BuiltInCommandBuildContext implements CommandBuildContext {
     }
 
     // Argument types look up their registry when they are created, so resolve it again on every use.
+    // The resolved lookup is reused while the registries and the enabled feature flags stay the same.
     private static final class LazyRegistryLookup<T> implements HolderLookup.RegistryLookup.Delegate<T> {
         private final ResourceKey<? extends Registry<? extends T>> key;
+        private volatile Resolved<T> resolved;
 
         private LazyRegistryLookup(ResourceKey<? extends Registry<? extends T>> key) {
             this.key = key;
@@ -66,28 +91,106 @@ final class BuiltInCommandBuildContext implements CommandBuildContext {
 
         @Override
         public HolderLookup.RegistryLookup<T> parent() {
-            return filterByEnabledFeatures(key, registries().lookupOrThrow(key));
+            HolderLookup.Provider registries = registries();
+            FeatureFlagSet flags = enabledFeatures();
+            Resolved<T> current = resolved;
+            if (current == null || current.registries() != registries || !current.flags()
+                                                                                 .equals(flags)) {
+                // Without a server, data-driven registries are missing, so parsing fails with an unknown element.
+                HolderLookup.RegistryLookup<T> lookup = CommandBuildContext.simple(registries, flags)
+                                                                           .<T>lookup(key)
+                                                                           .orElseGet(() -> new EmptyRegistryLookup<>(key));
+                current = new Resolved<>(registries, flags, lookup);
+                resolved = current;
+            }
+            return current.lookup();
         }
     }
 
-    private static <T> HolderLookup.RegistryLookup<T> filterByEnabledFeatures(ResourceKey<? extends Registry<? extends T>> key,
-                                                                              HolderLookup.RegistryLookup<T> lookup) {
+    private record Resolved<T>(HolderLookup.Provider registries,
+                               FeatureFlagSet flags,
+                               HolderLookup.RegistryLookup<T> lookup) {
+    }
+
+    private record EmptyRegistryLookup<T>(ResourceKey<? extends Registry<? extends T>> key)
+            implements HolderLookup.RegistryLookup<T> {
+        @Override
+        public Lifecycle registryLifecycle() {
+            return Lifecycle.stable();
+        }
+
+        @Override
+        public Stream<Holder.Reference<T>> listElements() {
+            return Stream.empty();
+        }
+
+        @Override
+        public Stream<HolderSet.Named<T>> listTags() {
+            return Stream.empty();
+        }
+
+        @Override
+        public Optional<Holder.Reference<T>> get(ResourceKey<T> key) {
+            return Optional.empty();
+        }
+
+        @Override
+        public Optional<HolderSet.Named<T>> get(TagKey<T> key) {
+            return Optional.empty();
+        }
+    }
     *///?} else {
     @Override
     public <T> HolderLookup<T> holderLookup(ResourceKey<? extends Registry<T>> key) {
-        return filterByEnabledFeatures(key,
-                                       BUILT_IN.registryOrThrow(key)
-                                               .asLookup());
+        return new LazyHolderLookup<>(BUILT_IN.registryOrThrow(key)
+                                              .asLookup());
     }
 
-    private static <T> HolderLookup<T> filterByEnabledFeatures(ResourceKey<? extends Registry<? extends T>> key,
-                                                               HolderLookup.RegistryLookup<T> lookup) {
-    //?}
-        if (!FeatureElement.FILTERED_REGISTRIES.contains(key)) {
-            return lookup;
+    // Argument types look up their registry when they are created, so filter it again on every use.
+    // The filtered lookup is reused while the enabled feature flags stay the same.
+    private static final class LazyHolderLookup<T> implements HolderLookup<T> {
+        private final HolderLookup.RegistryLookup<T> registry;
+        private volatile Filtered<T> filtered;
+
+        private LazyHolderLookup(HolderLookup.RegistryLookup<T> registry) {
+            this.registry = registry;
         }
-        return lookup.filterElements(x -> ((FeatureElement) x).isEnabled(enabledFeatures()));
+
+        private HolderLookup<T> current() {
+            FeatureFlagSet flags = enabledFeatures();
+            Filtered<T> current = filtered;
+            if (current == null || !current.flags()
+                                           .equals(flags)) {
+                current = new Filtered<>(flags, registry.filterFeatures(flags));
+                filtered = current;
+            }
+            return current.lookup();
+        }
+
+        @Override
+        public Stream<Holder.Reference<T>> listElements() {
+            return current().listElements();
+        }
+
+        @Override
+        public Stream<HolderSet.Named<T>> listTags() {
+            return current().listTags();
+        }
+
+        @Override
+        public Optional<Holder.Reference<T>> get(ResourceKey<T> key) {
+            return current().get(key);
+        }
+
+        @Override
+        public Optional<HolderSet.Named<T>> get(TagKey<T> key) {
+            return current().get(key);
+        }
     }
+
+    private record Filtered<T>(FeatureFlagSet flags, HolderLookup<T> lookup) {
+    }
+    //?}
 
     private static FeatureFlagSet enabledFeatures() {
         MinecraftServer server = ServerLifecycleHooks.getCurrentServer();

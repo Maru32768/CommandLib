@@ -1,32 +1,19 @@
 // Forge / NeoForge test mod for the Docker-based integration tests. It is built once per loader and Minecraft
-// version with Stonecutter, like the modded module, and bundles the published (SRG-remapped) CommandLib jars so the
-// tests exercise the same artifacts that downstream mods use.
+// version with Stonecutter, like the modded module, and bundles the published CommandLib jars (remapped to SRG on
+// Forge, Mojang names on NeoForge) so the tests exercise the same artifacts that downstream mods use.
 plugins {
     id("dev.architectury.loom") version "1.17.493"
 }
 
 // The version projects are named like the modded module's (<loader>-<minecraft version>), so a distinct group keeps
 // Gradle from treating :modded:<node> and this project as the same module.
-group = "net.kunmc.lab.integration.forge"
+group = "net.kunmc.lab.integration.modded"
 
-val minecraftVersion = sc.current.version
-val loader = property("loom.platform").toString()
-val javaVersion = when {
-    sc.current.parsed >= "1.20.5" -> 21
-    sc.current.parsed >= "1.17" -> 17
-    else -> 11
-}
+apply(from = rootProject.file("gradle/modded-node.gradle.kts"))
+val loader = extra["modded.loader"].toString()
 
 stonecutter {
     constants.match(loader, "forge", "neoforge")
-}
-
-java {
-    toolchain.languageVersion.set(JavaLanguageVersion.of(javaVersion))
-}
-
-repositories {
-    maven("https://maven.neoforged.net/releases/")
 }
 
 val bundled: Configuration by configurations.creating {
@@ -34,14 +21,6 @@ val bundled: Configuration by configurations.creating {
 }
 
 dependencies {
-    minecraft("com.mojang:minecraft:$minecraftVersion")
-    mappings(loom.officialMojangMappings())
-    if (loader == "neoforge") {
-        "neoForge"("net.neoforged:neoforge:${property("deps.neoforge")}")
-    } else {
-        "forge"("net.minecraftforge:forge:$minecraftVersion-${property("deps.forge")}")
-    }
-
     compileOnly(project(":common"))
     compileOnly(project(path = ":modded:${sc.current.project}", configuration = "namedElements"))
     compileOnly(project(":integration-test:shared:core"))

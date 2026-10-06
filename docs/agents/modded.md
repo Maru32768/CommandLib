@@ -11,6 +11,7 @@ one shared source tree with Stonecutter and Architectury Loom:
 | `modded/build.gradle.kts`                          | Version template, evaluated once per node.                          |
 | `modded/stonecutter.gradle.kts`                    | Stonecutter controller. Holds the active node.                      |
 | `modded/versions/<node>/gradle.properties`         | Per-node settings (`loom.platform`, `deps.forge` / `deps.neoforge`). |
+| `gradle/modded-node.gradle.kts`                    | Shared node setup (Java version, Minecraft, mappings, loader) for every modded tree. |
 | `modded/versions/<node>/build/generated/...`       | Generated per-node sources. Never edit these.                       |
 
 Nodes are named `<loader>-<minecraft-version>` (for example `forge-1.20.1`,
@@ -79,7 +80,8 @@ were working on, and run the `modded-testing` tests:
 `CommandTester`, `FakeSender`). It is a Stonecutter tree like `modded`, with the same nodes and conditional comment
 rules. It bootstraps Minecraft's registries and mocks the server, Forge's `NetworkHooks` during bootstrap (NeoForge:
 `FeatureFlagLoader`, which needs FML's mod list), and the permission lookup while a command executes. On 1.20.5+ the
-mocked server's `registryAccess()` is built with `VanillaRegistries.createLookup()`, so data-driven registries such as
+mocked server's `registryAccess()` holds the built-in registries plus copies of the data-driven ones built by
+`VanillaRegistries.createLookup()` (no tags are loaded), so data-driven registries such as
 enchantments resolve.
 
 When a change can affect the public API or published jars, also run
@@ -107,17 +109,20 @@ public argument class, add a case to its `ArgumentTest`; `:integration-test:test
    the test mod tree).
 2. Create `modded/versions/<node>/gradle.properties` with
    `loom.platform=forge` and `deps.forge=<forge build>`, or
-   `loom.platform=neoforge` and `deps.neoforge=<neoforge build>`.
+   `loom.platform=neoforge` and `deps.neoforge=<neoforge build>`. This is the
+   only place the loader build is written: `gradle/modded-node.gradle.kts` and
+   the integration target read it from there.
 3. Add the project to `publishedArtifactIds` and `publishedProjectPaths` in the
    root `build.gradle.kts`.
-4. Check the Java version selection in `modded/build.gradle.kts`.
+4. Check the Java version selection in `gradle/modded-node.gradle.kts`.
 5. Compile every node and fix errors with conditional comments, adjusting
    existing boundaries when the new version shows they were wrong.
-6. Create `modded-testing/versions/<node>/gradle.properties` and add the project
-   to the root publication lists.
+6. Create `modded-testing/versions/<node>/gradle.properties` (only
+   `loom.platform`, which Loom reads per project) and add the project to the
+   root publication lists.
 7. Create `integration-test/shared/modded/versions/<node>/gradle.properties`
-   (also with `deps.forgeLoader`, the mod loader version range lower bound), and
-   add an `integration-test/targets/<node>` target registered in the
+   (`loom.platform` and `deps.forgeLoader`, the mod loader version range lower
+   bound), and add an `integration-test/targets/<node>` target registered in the
    `minecraftIntegrationTest` aggregate task.
 8. Update the supported versions in `README.md` and
    `docs/design/forge-version-support.md`.

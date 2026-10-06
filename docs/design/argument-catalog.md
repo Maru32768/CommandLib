@@ -98,8 +98,8 @@
 | `BlockPosArgument` | `Implemented` | block position。 |
 | `BlockStateArgument` | `Implemented` | block state input。 |
 | `ItemStackArgument` | `Implemented` | Forge `ItemStack`。 |
-| `EnchantmentArgument` | `Implemented` | Forge enchantment。 |
-| `EffectArgument` | `Implemented` | Forge effect。 |
+| `EnchantmentArgument` | `Implemented` | Forge enchantment。1.20.5+ は `Holder<Enchantment>`。 |
+| `EffectArgument` | `Implemented` | Forge effect。1.20.5+ は `Holder<MobEffect>`。 |
 | `ParticleArgument` | `Implemented` | Forge particle data。 |
 | `TeamArgument` | `Implemented` | Forge scoreboard team。 |
 | `GameProfileArgument` | `Implemented` | game profile list。 |

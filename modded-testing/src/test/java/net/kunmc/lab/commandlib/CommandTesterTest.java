@@ -2,10 +2,13 @@ package net.kunmc.lab.commandlib;
 
 import com.mojang.brigadier.suggestion.Suggestion;
 import net.kunmc.lab.commandlib.argument.*;
-//? if >=1.21
-/*import net.minecraft.network.chat.contents.TranslatableContents;*/
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.item.Items;
+//? if >=1.20.5 {
+/*import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.world.item.enchantment.Enchantments;
+*///?}
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.block.Blocks;
 import org.junit.jupiter.api.Nested;
@@ -146,21 +149,39 @@ class CommandTesterTest {
         void effect() {
             assertThat(parse(new EffectArgument("a"), "minecraft:speed", FakeSender.console()))
                     //? if >=1.20.5 {
-                    /*.isEqualTo(MobEffects.MOVEMENT_SPEED.value());
+                    /*.isSameAs(MobEffects.MOVEMENT_SPEED);
                     *///?} else
                     .isEqualTo(MobEffects.MOVEMENT_SPEED);
         }
 
         @Test
         void enchantment() {
+            //? if >=1.20.5 {
+            /*assertThat(parse(new EnchantmentArgument("a"), "minecraft:sharpness", FakeSender.console())
+                               .is(Enchantments.SHARPNESS)).isTrue();
+            *///?} else {
             Enchantment enchantment = parse(new EnchantmentArgument("a"), "minecraft:sharpness", FakeSender.console());
-            //? if >=1.21 {
-            /*String descriptionId = ((TranslatableContents) enchantment.description()
-                                                                     .getContents()).getKey();
-            *///?} else
-            String descriptionId = enchantment.getDescriptionId();
-            assertThat(descriptionId).isEqualTo("enchantment.minecraft.sharpness");
+            assertThat(enchantment.getDescriptionId()).isEqualTo("enchantment.minecraft.sharpness");
+            //?}
         }
+
+        //? if >=1.20.5 {
+        /*@Test
+        void registry_access_resolves_data_driven_registries() {
+            AtomicReference<Holder<Enchantment>> result = new AtomicReference<>();
+            try (CommandTester tester = new CommandTester(new Command("arg") {{
+                execute(ctx -> result.set(ctx.getHandle()
+                                             .getSource()
+                                             .registryAccess()
+                                             .registryOrThrow(Registries.ENCHANTMENT)
+                                             .getHolderOrThrow(Enchantments.SHARPNESS)));
+            }}, "test")) {
+                tester.execute("arg", FakeSender.console());
+            }
+            assertThat(result.get()
+                             .is(Enchantments.SHARPNESS)).isTrue();
+        }
+        *///?}
 
         @Test
         void block_state() {

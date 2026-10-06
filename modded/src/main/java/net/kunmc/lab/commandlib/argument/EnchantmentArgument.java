@@ -10,8 +10,15 @@ import net.minecraft.commands.arguments.ResourceArgument;
 import net.minecraft.core.registries.Registries;
 //?} else
 /*import net.minecraft.commands.arguments.ItemEnchantmentArgument;*/
+//? if >=1.20.5
+/*import net.minecraft.core.Holder;*/
 import net.minecraft.world.item.enchantment.Enchantment;
 
+// On 1.20.5+ the parsed value is the registry holder: enchantments are data-driven there, and the APIs that apply
+// them (ItemStack#enchant, EnchantmentHelper) take a Holder<Enchantment>.
+//? if >=1.20.5 {
+/*public class EnchantmentArgument extends Argument<Holder<Enchantment>, EnchantmentArgument> {
+*///?} else
 public class EnchantmentArgument extends Argument<Enchantment, EnchantmentArgument> {
     public EnchantmentArgument(String name) {
         //? if >=1.19.3 {
@@ -20,19 +27,37 @@ public class EnchantmentArgument extends Argument<Enchantment, EnchantmentArgume
         /*super(name, ItemEnchantmentArgument.enchantment());*/
     }
 
+    //? if >=1.20.5 {
+    /*@Override
+    @SuppressWarnings("unchecked")
+    public Holder<Enchantment> cast(Object parsedArgument) {
+        return ((Holder<Enchantment>) parsedArgument);
+    }
+
+    @Override
+    protected Holder<Enchantment> parseImpl(CommandContext ctx) throws ArgumentParseException, CommandSyntaxException {
+        return ResourceArgument.getEnchantment(ctx.getHandle(), name());
+    }
+    *///?} elif >=1.19.3 {
     @Override
     public Enchantment cast(Object parsedArgument) {
         return ((Enchantment) parsedArgument);
     }
 
     @Override
-    //? if >=1.19.3 {
     protected Enchantment parseImpl(CommandContext ctx) throws ArgumentParseException, CommandSyntaxException {
         return ResourceArgument.getEnchantment(ctx.getHandle(), name())
                                .value();
-    //?} else {
-    /*protected Enchantment parseImpl(CommandContext ctx) throws ArgumentParseException {
-        return ItemEnchantmentArgument.getEnchantment(ctx.getHandle(), name());
-    *///?}
     }
+    //?} else {
+    /*@Override
+    public Enchantment cast(Object parsedArgument) {
+        return ((Enchantment) parsedArgument);
+    }
+
+    @Override
+    protected Enchantment parseImpl(CommandContext ctx) throws ArgumentParseException {
+        return ItemEnchantmentArgument.getEnchantment(ctx.getHandle(), name());
+    }
+    *///?}
 }

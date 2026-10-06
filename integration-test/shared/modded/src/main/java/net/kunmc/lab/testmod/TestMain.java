@@ -1,7 +1,5 @@
 package net.kunmc.lab.testmod;
 
-//? if >=1.20.3
-/*import com.mojang.brigadier.exceptions.CommandSyntaxException;*/
 import net.kunmc.lab.commandlib.Command;
 import net.kunmc.lab.commandlib.CommandLib;
 import net.kunmc.lab.commandlib.DefaultPermission;
@@ -27,6 +25,7 @@ public final class TestMain {
     static final String TEST_PLAYER_NAME = "Maru32768";
     static final String TEST_TEAM_NAME = "test";
     private static final Logger LOGGER = LogManager.getLogger(TestMain.class);
+    private static final String REPORT_COMMAND = MainCommand.NAME + " reportTests";
 
     public void register() {
         try {
@@ -43,6 +42,8 @@ public final class TestMain {
                                                         .stream())
                                          .collect(Collectors.toList());
 
+            List<TestResult> dispatchErrors = new ArrayList<>();
+
             mainCommand.addChildren(new Command("runTests") {{
                 permission(DefaultPermission.ALL);
                 execute(ctx -> {
@@ -52,9 +53,30 @@ public final class TestMain {
                         return;
                     }
                     try {
-                        runTests(ctx.getSender()
-                                    .getServer(), tests, commands);
+                        MinecraftServer server = ctx.getSender()
+                                                    .getServer();
+                        runTests(server, commands, dispatchErrors);
+                        // On 1.20.3+ commands performed while another command runs are queued until it finishes.
+                        // The report command is queued after the test commands, so it collects the results once
+                        // they have all run. Older versions perform each command immediately.
+                        perform(server, server.createCommandSourceStack(), REPORT_COMMAND);
+                    } catch (Throwable e) {
+                        running.set(false);
+                        throw e;
+                    }
+                });
+            }});
+            mainCommand.addChildren(new Command("reportTests") {{
+                permission(DefaultPermission.ALL);
+                execute(ctx -> {
+                    if (!running.get()) {
+                        LOGGER.info("No CommandLib test run to report.");
+                        return;
+                    }
+                    try {
+                        reportTests(tests, dispatchErrors);
                     } finally {
+                        dispatchErrors.clear();
                         running.set(false);
                     }
                 });
@@ -67,7 +89,7 @@ public final class TestMain {
         }
     }
 
-    private static void runTests(MinecraftServer server, List<TestBase> tests, List<String> commands) {
+    private static void runTests(MinecraftServer server, List<String> commands, List<TestResult> dispatchErrors) {
         Scoreboard scoreboard = server.getScoreboard();
         if (scoreboard.getPlayerTeam(TEST_TEAM_NAME) == null) {
             scoreboard.addPlayerTeam(TEST_TEAM_NAME);
@@ -75,32 +97,28 @@ public final class TestMain {
 
         LOGGER.info("Executing CommandLib test cases.");
         CommandSourceStack console = server.createCommandSourceStack();
-        List<TestResult> dispatchErrors = new ArrayList<>();
         for (String command : commands) {
             LOGGER.info("Dispatching test command: " + command);
             try {
-                //? if >=1.20.3 {
-                /*// Commands performed while another command runs are queued until it finishes, which is after the
-                // results below are collected, so execute them through Brigadier directly.
-                try {
-                    server.getCommands()
-                          .getDispatcher()
-                          .execute(command, console);
-                } catch (CommandSyntaxException e) {
-                    LOGGER.info("Test command was rejected: " + e.getMessage());
-                }
-                *///?} elif >=1.19 {
-                server.getCommands()
-                      .performPrefixedCommand(console, command);
-                //?} else
-                /*server.getCommands().performCommand(console, command);*/
+                perform(server, console, command);
             } catch (Throwable e) {
                 dispatchErrors.add(new TestResult("Dispatch." + command,
                                                   TestStatus.FAILED,
                                                   ExceptionUtil.stackTraceToString(e)));
             }
         }
+    }
 
+    // Runs the command through the same pipeline as a typed command.
+    private static void perform(MinecraftServer server, CommandSourceStack source, String command) {
+        //? if >=1.19 {
+        server.getCommands()
+              .performPrefixedCommand(source, command);
+        //?} else
+        /*server.getCommands().performCommand(source, command);*/
+    }
+
+    private static void reportTests(List<TestBase> tests, List<TestResult> dispatchErrors) {
         List<TestResult> results = tests.stream()
                                         .flatMap(x -> x.results()
                                                        .stream())

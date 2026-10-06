@@ -2,9 +2,12 @@
  * Prepares a Forge or NeoForge integration-test target. Apply it before integration-test-target.gradle.kts:
  *
  *   extra["commandlib.integration.platform"] = "forge"    // or "neoforge"
- *   extra["commandlib.integration.forgeVersion"] = "1.20.1-47.4.10"    // NeoForge: "21.1.256"
  *   apply(from = "../../gradle/forge-integration-target.gradle.kts")
  *   apply(from = "../../gradle/integration-test-target.gradle.kts")
+ *
+ * The target is named like the modded node (<loader>-<minecraft version>). The loader build is read from
+ * modded/versions/<node>/gradle.properties, so the server runs the same build the CommandLib jars are compiled
+ * against, and the server launch arguments are derived from it.
  *
  * It registers prepareTestPlugin, which installs the server with the loader's official installer and copies
  * the test mod built by :integration-test:shared:modded-fixture:<loader>-<minecraft version> into the mods directory.
@@ -14,10 +17,28 @@
 import java.net.URI
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
+import java.util.Properties
 
 val loader = extra["commandlib.integration.platform"].toString()
-val forgeVersion = extra["commandlib.integration.forgeVersion"].toString()
 val forgeMinecraftVersion = extra["commandlib.integration.minecraftVersion"].toString()
+val nodeProperties = Properties().apply {
+    rootProject.file("modded/versions/$loader-$forgeMinecraftVersion/gradle.properties")
+        .reader()
+        .use { load(it) }
+}
+val forgeVersion = if (loader == "neoforge") {
+    nodeProperties.getProperty("deps.neoforge")
+} else {
+    "$forgeMinecraftVersion-${nodeProperties.getProperty("deps.forge")}"
+}
+// Forge 1.17+ and NeoForge installers write an argument file; older Forge installers write a server jar.
+if (!extra.has("commandlib.integration.serverLaunchArgs")) {
+    extra["commandlib.integration.serverLaunchArgs"] = when {
+        loader == "neoforge" -> "@libraries/net/neoforged/neoforge/$forgeVersion/unix_args.txt"
+        forgeMinecraftVersion.split('.')[1].toInt() < 17 -> "-jar forge-$forgeVersion.jar"
+        else -> "@libraries/net/minecraftforge/forge/$forgeVersion/unix_args.txt"
+    }
+}
 val installerUrl = if (loader == "neoforge") {
     "https://maven.neoforged.net/releases/net/neoforged/neoforge/$forgeVersion/neoforge-$forgeVersion-installer.jar"
 } else {

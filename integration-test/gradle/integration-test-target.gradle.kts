@@ -28,6 +28,10 @@ repositories {
     }
 }
 
+// Targets are named like the modded nodes (<loader>-<minecraft version>), so a distinct group keeps Gradle from
+// treating :modded:<node> and the target as the same module.
+group = "net.kunmc.lab.integration.target"
+
 val targetName = project.name
 val targetPlatform = extra["commandlib.integration.platform"].toString()
 val minecraftVersion = extra["commandlib.integration.minecraftVersion"].toString()

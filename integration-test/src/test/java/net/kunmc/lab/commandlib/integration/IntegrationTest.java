@@ -329,9 +329,10 @@ class IntegrationTest {
                                        .newInstance(TEST_PLAYER_NAME);
         Object session = createLegacySession(container, protocolClass, protocol);
         Class<?> sessionClass = session.getClass();
+        BotSession botSession = createBotSession(session, sessionClass);
         sessionClass.getMethod("connect", boolean.class)
                     .invoke(session, false);
-        return createBotSession(session, sessionClass);
+        return botSession;
     }
 
     private static Object createLegacySession(GenericContainer<?> container,
@@ -366,9 +367,10 @@ class IntegrationTest {
         Class<?> sessionClass = Class.forName("org.geysermc.mcprotocollib.network.tcp.TcpClientSession");
         Constructor<?> constructor = findSessionConstructor(sessionClass, protocolClass);
         Object session = constructor.newInstance(container.getHost(), container.getMappedPort(25565), protocol);
+        BotSession botSession = createBotSession(session, sessionClass);
         sessionClass.getMethod("connect", boolean.class)
                     .invoke(session, false);
-        return createBotSession(session, sessionClass);
+        return botSession;
     }
 
     private static Constructor<?> findSessionConstructor(Class<?> sessionClass, Class<?> protocolClass) {
@@ -418,6 +420,7 @@ class IntegrationTest {
         throw new IllegalStateException("Unable to find a compatible PacketLib Client constructor for " + clientClass.getName());
     }
 
+    // The listener must be registered before connecting, so packets sent during login are not missed.
     private static BotSession createBotSession(Object session,
                                                Class<?> sessionClass) throws ReflectiveOperationException {
         Method isConnected = sessionClass.getMethod("isConnected");
@@ -431,7 +434,6 @@ class IntegrationTest {
     private static void registerPacketListener(Object session,
                                                Class<?> sessionClass,
                                                BotSession botSession) throws ReflectiveOperationException {
-        Method send = findSendMethod(sessionClass);
         // Find addListener(SessionListener) and determine the listener interface from its parameter type.
         Method addListener = null;
         Class<?> listenerInterface = null;
@@ -455,7 +457,7 @@ class IntegrationTest {
                                                       if (args.length == 2) {
                                                           // Modern MCProtocolLib: packetReceived(Session, Packet)
                                                           botSession.receivedPackets.add(args[1]);
-                                                          answerPing(session, send, args[1]);
+                                                          botSession.answerPing(args[1]);
                                                       } else if (args.length == 1) {
                                                           // Legacy MCProtocolLib (1.16.5): packetReceived(PacketReceivedEvent)
                                                           try {
@@ -484,24 +486,6 @@ class IntegrationTest {
                                                   return null;
                                               });
         addListener.invoke(session, proxy);
-    }
-
-    // Vanilla clients answer every ping with a pong, but MCProtocolLib does not. NeoForge pings a connecting client
-    // during the configuration phase and waits for the pong before letting it join.
-    private static void answerPing(Object session, Method send, Object packet) throws ReflectiveOperationException {
-        Class<?> packetClass = packet.getClass();
-        if (!packetClass.getSimpleName()
-                        .equals("ClientboundPingPacket")) {
-            return;
-        }
-        int id = (int) packetClass.getMethod("getId")
-                                  .invoke(packet);
-        String pongClassName = packetClass.getPackageName()
-                                          .replace(".clientbound", ".serverbound") + ".ServerboundPongPacket";
-        Object pong = Class.forName(pongClassName, true, packetClass.getClassLoader())
-                           .getConstructor(int.class)
-                           .newInstance(id);
-        send.invoke(session, pong);
     }
 
     private static boolean isDisconnectCallback(String methodName) {
@@ -637,6 +621,39 @@ class IntegrationTest {
             if (connectedOnce && !isConnected()) {
                 fail(reason != null ? reason : "MCProtocolLib session disconnected before the integration test completed.");
             }
+        }
+
+        // Vanilla clients answer every ping with a pong, but MCProtocolLib does not. NeoForge pings a connecting
+        // client during the configuration phase and waits for the pong before letting it join.
+        void answerPing(Object packet) {
+            Class<?> packetClass = packet.getClass();
+            if (!packetClass.getSimpleName()
+                            .equals("ClientboundPingPacket")) {
+                return;
+            }
+            try {
+                int id = (int) findAccessor(packetClass, "getId", "id").invoke(packet);
+                String pongClassName = packetClass.getPackageName()
+                                                  .replace(".clientbound", ".serverbound") + ".ServerboundPongPacket";
+                Object pong = Class.forName(pongClassName, true, packetClass.getClassLoader())
+                                   .getConstructor(int.class)
+                                   .newInstance(id);
+                sendMethod.invoke(delegate, pong);
+            } catch (ReflectiveOperationException e) {
+                String reason = "Failed to answer " + packetClass.getName() + " with a pong: " + e;
+                disconnectionReason.compareAndSet(null, reason);
+                throw new IllegalStateException(reason, e);
+            }
+        }
+
+        private static Method findAccessor(Class<?> type, String... names) throws NoSuchMethodException {
+            for (String name : names) {
+                try {
+                    return type.getMethod(name);
+                } catch (NoSuchMethodException ignored) {
+                }
+            }
+            throw new NoSuchMethodException(type.getName() + " has none of " + Arrays.toString(names));
         }
 
         void sendCommand(String command) {

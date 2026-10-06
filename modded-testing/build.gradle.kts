@@ -7,36 +7,18 @@ plugins {
 // root build.
 group = "net.kunmc.lab.modded-testing"
 
-val minecraftVersion = sc.current.version
-val loader = property("loom.platform").toString()
-val javaVersion = when {
-    sc.current.parsed >= "1.20.5" -> 21
-    sc.current.parsed >= "1.17" -> 17
-    else -> 11
-}
+apply(from = rootProject.file("gradle/modded-node.gradle.kts"))
+val loader = extra["modded.loader"].toString()
 
 stonecutter {
     constants.match(loader, "forge", "neoforge")
 }
 
-java {
-    toolchain.languageVersion.set(JavaLanguageVersion.of(javaVersion))
-}
-
 repositories {
     mavenCentral()
-    maven("https://maven.neoforged.net/releases/")
 }
 
 dependencies {
-    minecraft("com.mojang:minecraft:$minecraftVersion")
-    mappings(loom.officialMojangMappings())
-    if (loader == "neoforge") {
-        "neoForge"("net.neoforged:neoforge:${property("deps.neoforge")}")
-    } else {
-        "forge"("net.minecraftforge:forge:$minecraftVersion-${property("deps.forge")}")
-    }
-
     api(project(path = ":modded:${sc.current.project}", configuration = "namedElements"))
     api("org.mockito:mockito-core:5.11.0")
 
