@@ -16,16 +16,19 @@ rootProject.name = "CommandLib"
 include("spigot", "paper")
 include("common")
 include("common-testing", "spigot-testing", "paper-testing")
-include("forge")
-include("forge-testing")
+// Forge and NeoForge share one source tree. Nodes are named <loader>-<minecraft version>.
+include("modded")
+include("modded-testing")
 stonecutter {
-    create("forge") {
-        versions("1.16.5", "1.20.1")
-        vcsVersion = "1.20.1"
+    create("modded") {
+        version("forge-1.16.5", "1.16.5")
+        version("forge-1.20.1", "1.20.1")
+        vcsVersion = "forge-1.20.1"
     }
-    create("forge-testing") {
-        versions("1.16.5", "1.20.1")
-        vcsVersion = "1.20.1"
+    create("modded-testing") {
+        version("forge-1.16.5", "1.16.5")
+        version("forge-1.20.1", "1.20.1")
+        vcsVersion = "forge-1.20.1"
     }
 }
 include("integration-test")
@@ -36,12 +39,13 @@ include(
 )
 project(":integration-test:shared:spigot-fixture").projectDir = file("integration-test/shared/spigot")
 project(":integration-test:shared:paper-fixture").projectDir = file("integration-test/shared/paper")
-include("integration-test:shared:forge-fixture")
-project(":integration-test:shared:forge-fixture").projectDir = file("integration-test/shared/forge")
+include("integration-test:shared:modded-fixture")
+project(":integration-test:shared:modded-fixture").projectDir = file("integration-test/shared/modded")
 stonecutter {
-    create(":integration-test:shared:forge-fixture") {
-        versions("1.16.5", "1.20.1")
-        vcsVersion = "1.20.1"
+    create(":integration-test:shared:modded-fixture") {
+        version("forge-1.16.5", "1.16.5")
+        version("forge-1.20.1", "1.20.1")
+        vcsVersion = "forge-1.20.1"
     }
 }
 include(

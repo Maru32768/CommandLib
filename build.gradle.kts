@@ -4,10 +4,10 @@ allprojects {
 }
 
 val publishedArtifactIds = mapOf(
-    ":forge:1.16.5" to "forge-1.16.5",
-    ":forge:1.20.1" to "forge-1.20.1",
-    ":forge-testing:1.16.5" to "forge-testing-1.16.5",
-    ":forge-testing:1.20.1" to "forge-testing-1.20.1",
+    ":modded:forge-1.16.5" to "forge-1.16.5",
+    ":modded:forge-1.20.1" to "forge-1.20.1",
+    ":modded-testing:forge-1.16.5" to "forge-testing-1.16.5",
+    ":modded-testing:forge-1.20.1" to "forge-testing-1.20.1",
 )
 
 val publishedProjectPaths = setOf(
@@ -17,10 +17,10 @@ val publishedProjectPaths = setOf(
     ":spigot-testing",
     ":paper",
     ":paper-testing",
-    ":forge:1.16.5",
-    ":forge:1.20.1",
-    ":forge-testing:1.16.5",
-    ":forge-testing:1.20.1",
+    ":modded:forge-1.16.5",
+    ":modded:forge-1.20.1",
+    ":modded-testing:forge-1.16.5",
+    ":modded-testing:forge-1.20.1",
 )
 
 subprojects {

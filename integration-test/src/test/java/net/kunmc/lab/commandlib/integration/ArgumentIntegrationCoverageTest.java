@@ -31,11 +31,11 @@ class ArgumentIntegrationCoverageTest {
     }
 
     @Test
-    void forge_public_arguments_have_integration_cases() throws IOException {
+    void modded_public_arguments_have_integration_cases() throws IOException {
         Path rootDir = Path.of(System.getProperty("commandlib.rootDir", "."));
         assertIntegrationCases(rootDir,
-                               "forge",
-                               "integration-test/shared/forge/src/main/java/net/kunmc/lab/testmod/ArgumentTest.java");
+                               "modded",
+                               "integration-test/shared/modded/src/main/java/net/kunmc/lab/testmod/ArgumentTest.java");
     }
 
     private void assertIntegrationCases(Path rootDir, String moduleName) throws IOException {

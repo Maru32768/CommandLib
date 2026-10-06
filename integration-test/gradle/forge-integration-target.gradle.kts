@@ -6,7 +6,7 @@
  *   apply(from = "../../gradle/integration-test-target.gradle.kts")
  *
  * It registers prepareTestPlugin, which installs the Forge server with the official installer and copies
- * the test mod built by :integration-test:shared:forge-fixture:<minecraft version> into the mods directory.
+ * the test mod built by :integration-test:shared:modded-fixture:forge-<minecraft version> into the mods directory.
  * The shared target script then uses that task instead of building a nested test-plugin project.
  */
 
@@ -29,7 +29,7 @@ val forgeInstaller =layout.buildDirectory.file("forge/forge-$forgeVersion-instal
 val forgeJavaLauncher = extensions.getByType<JavaToolchainService>()
     .launcherFor { languageVersion.set(JavaLanguageVersion.of(forgeJavaVersion)) }
 
-val fixturePath = ":integration-test:shared:forge-fixture:$forgeMinecraftVersion"
+val fixturePath = ":integration-test:shared:modded-fixture:forge-$forgeMinecraftVersion"
 evaluationDependsOn(fixturePath)
 val testModJar = project(fixturePath).tasks.named<Jar>("testModJar")
 

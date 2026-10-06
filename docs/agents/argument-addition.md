@@ -52,7 +52,7 @@ Use this checklist whenever adding a public `*Argument` class.
 - Add an execution case to the matching integration fixture:
     - `integration-test/shared/spigot/.../ArgumentTest.java` for Spigot arguments.
     - `integration-test/shared/paper/.../ArgumentTest.java` for Paper arguments.
-    - `integration-test/shared/forge/.../ArgumentTest.java` for Forge arguments.
+    - `integration-test/shared/modded/.../ArgumentTest.java` for Forge arguments.
 - Keep the fixtures intentionally independent. It is acceptable to duplicate small cases when platform behavior is
   stable; use the shared core fixture only for platform-neutral result/reporting helpers.
 - `:integration-test:test` includes a lightweight coverage check that fails when a public Spigot, Paper, or Forge
@@ -83,8 +83,8 @@ Run focused checks for touched modules. Typical commands:
 ```bash
 ./gradlew :spigot:compileJava :spigot-testing:test
 ./gradlew :paper:compileJava :paper-testing:test
-./gradlew :forge:1.16.5:compileJava
-./gradlew :forge:1.20.1:compileJava
+./gradlew :modded:forge-1.16.5:compileJava
+./gradlew :modded:forge-1.20.1:compileJava
 ```
 
 For integration fixture source changes, compile representative fixtures:

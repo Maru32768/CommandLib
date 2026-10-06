@@ -66,7 +66,7 @@ Shared fixture code is split by responsibility:
 integration-test/shared/core
 integration-test/shared/spigot
 integration-test/shared/paper
-integration-test/shared/forge
+integration-test/shared/modded
 ```
 
 `shared/core` is limited to platform-neutral result and report helpers so the Forge test mod can reuse it
@@ -112,9 +112,9 @@ The aggregate task depends on per-target subprojects, so Gradle can run independ
 Forge targets (`forge-1.16.5`, `forge-1.20.1`) reuse the same runner, Docker image flow, and MCProtocolLib bot, but
 prepare the server differently:
 
-- The test mod lives in `integration-test/shared/forge` and is built in the main Gradle build as a Stonecutter tree
-  (`:integration-test:shared:forge-fixture:<minecraft-version>`), like the `forge` module. Conditional comments follow
-  `docs/agents/forge.md`.
+- The test mod lives in `integration-test/shared/modded` and is built in the main Gradle build as a Stonecutter tree
+  (`:integration-test:shared:modded-fixture:<minecraft-version>`), like the `forge` module. Conditional comments follow
+  `docs/agents/modded.md`.
 - `testModJar` bundles the published, SRG-remapped `:forge:<version>` jar together with `common` and `shared/core`.
   The tests therefore run the same artifact downstream mods use, which catches bugs that only appear with production
   names.

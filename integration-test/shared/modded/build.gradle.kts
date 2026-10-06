@@ -5,8 +5,8 @@ plugins {
     id("dev.architectury.loom") version "1.17.493"
 }
 
-// The version projects are named after the Minecraft version like the forge module's, so a distinct group keeps
-// Gradle from treating :forge:<version> and this project as the same module.
+// The version projects are named like the modded module's (<loader>-<minecraft version>), so a distinct group keeps
+// Gradle from treating :modded:<node> and this project as the same module.
 group = "net.kunmc.lab.integration.forge"
 
 val minecraftVersion = sc.current.version
@@ -26,10 +26,10 @@ dependencies {
     forge("net.minecraftforge:forge:$minecraftVersion-${property("deps.forge")}")
 
     compileOnly(project(":common"))
-    compileOnly(project(path = ":forge:$minecraftVersion", configuration = "namedElements"))
+    compileOnly(project(path = ":modded:${sc.current.project}", configuration = "namedElements"))
     compileOnly(project(":integration-test:shared:core"))
 
-    bundled(project(":forge:$minecraftVersion"))
+    bundled(project(":modded:${sc.current.project}"))
     bundled(project(":integration-test:shared:core"))
 }
 
@@ -47,7 +47,7 @@ tasks.processResources {
 val testModJar = tasks.register<Jar>("testModJar") {
     group = "build"
     description = "Builds the test mod jar with the remapped CommandLib jars bundled in."
-    archiveFileName.set("TestMod-forge-$minecraftVersion.jar")
+    archiveFileName.set("TestMod-${sc.current.project}.jar")
     destinationDirectory.set(layout.buildDirectory.dir("test-mod"))
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 

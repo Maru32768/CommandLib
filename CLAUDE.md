@@ -7,7 +7,7 @@ For repository maintenance, bug fixes, tests, and implementation work, read:
 - `docs/agents/repository.md`
 - `docs/agents/testing.md`
 - `docs/agents/spigot-testing.md` when touching `spigot-testing`
-- `docs/agents/forge.md` when touching `forge`
+- `docs/agents/modded.md` when touching `modded`
 - `docs/agents/argument-addition.md` when adding or changing public argument classes
 
 Do not treat `.claude/skills/commandlib` as repository-maintenance instructions.
