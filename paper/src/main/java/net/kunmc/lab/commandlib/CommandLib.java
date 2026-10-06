@@ -108,7 +108,7 @@ public final class CommandLib implements Listener {
             throw new IllegalArgumentException("permissionPrefix must not be empty");
         }
         commands.forEach(Objects::requireNonNull);
-        CommonCommand.validateUniqueNames(commands);
+        CommandNameValidator.validateTopLevel(commands);
 
         CommandLib instance = new CommandLib(plugin,
                                              REGISTRATION_STATES.computeIfAbsent(plugin,
