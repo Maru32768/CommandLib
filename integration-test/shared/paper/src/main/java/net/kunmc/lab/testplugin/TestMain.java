@@ -148,7 +148,22 @@ public class TestMain {
                               poll[0] = Bukkit.getScheduler()
                                               .runTaskTimer(plugin, () -> {
                                                   waitedTicks[0] += RELOAD_POLL_TICKS;
-                                                  boolean reloaded = reloadWatcher.reloaded();
+                                                  boolean reloaded;
+                                                  try {
+                                                      reloaded = reloadWatcher.reloaded();
+                                                  } catch (RuntimeException e) {
+                                                      // Without this the timer would keep failing and the results
+                                                      // would never be written.
+                                                      poll[0].cancel();
+                                                      logger.log(Level.SEVERE, "Failed to check reload completion", e);
+                                                      try {
+                                                          scenarioTest.failReloadProbe(
+                                                                  "Failed to check whether /minecraft:reload finished: " + e);
+                                                      } finally {
+                                                          finish.run();
+                                                      }
+                                                      return;
+                                                  }
                                                   if (!reloaded && waitedTicks[0] < RELOAD_TIMEOUT_TICKS) {
                                                       return;
                                                   }
