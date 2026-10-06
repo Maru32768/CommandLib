@@ -13,6 +13,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scoreboard.Scoreboard;
 
 import java.nio.file.Files;
@@ -27,7 +28,8 @@ import java.util.stream.Collectors;
 
 public class TestMain {
     private static final String TEST_PLAYER_NAME = "Maru32768";
-    private static final long RELOAD_WAIT_TICKS = 100L;
+    private static final long RELOAD_POLL_TICKS = 5L;
+    private static final long RELOAD_TIMEOUT_TICKS = 20L * 120;
     private final Plugin plugin;
     private final Logger logger;
     private boolean errorOccurredOnRegister = false;
@@ -118,25 +120,55 @@ public class TestMain {
                               // /minecraft:reload rebuilds the command dispatcher. It runs last, and the probe waits
                               // for the reload to finish before the results are written.
                               logger.info("Reloading data packs to verify registered commands survive.");
-                              dispatchProbe.dispatch(Bukkit.getConsoleSender(), "minecraft:reload");
+                              ReloadWatcher reloadWatcher = new ReloadWatcher();
+                              CommandDispatchResult reloadResult = dispatchProbe.dispatch(Bukkit.getConsoleSender(),
+                                                                                          "minecraft:reload");
+                              Runnable finish = () -> {
+                                  try {
+                                      consumer.accept(tests.stream()
+                                                           .flatMap(x -> x.results()
+                                                                          .stream())
+                                                           .collect(Collectors.toList()));
+                                      tests.forEach(TestBase::clearResults);
+                                  } finally {
+                                      running.set(false);
+                                  }
+                              };
+                              if (!reloadResult.succeeded()) {
+                                  scenarioTest.failReloadProbe("/minecraft:reload failed.\n" + reloadResult.describe(
+                                          "minecraft:reload"));
+                                  finish.run();
+                                  return;
+                              }
                               waitingForReload = true;
-                              Bukkit.getScheduler()
-                                    .runTaskLater(plugin, () -> {
-                                        try {
-                                            String probe = MainCommand.NAME + " " + ScenarioTest.RELOAD_PROBE;
-                                            CommandDispatchResult dispatchResult = dispatchProbe.dispatch(Bukkit.getConsoleSender(),
-                                                                                                          probe);
-                                            tests.forEach(test -> test.hookCommandDispatchError(probe,
-                                                                                                dispatchResult));
-                                            consumer.accept(tests.stream()
-                                                                 .flatMap(x -> x.results()
-                                                                                .stream())
-                                                                 .collect(Collectors.toList()));
-                                            tests.forEach(TestBase::clearResults);
-                                        } finally {
-                                            running.set(false);
-                                        }
-                                    }, RELOAD_WAIT_TICKS);
+                              // The reload is applied asynchronously, so the probe waits until the reloaded resources
+                              // are in place; probing earlier would hit the old dispatcher and pass without checking.
+                              long[] waitedTicks = {0};
+                              BukkitTask[] poll = new BukkitTask[1];
+                              poll[0] = Bukkit.getScheduler()
+                                              .runTaskTimer(plugin, () -> {
+                                                  waitedTicks[0] += RELOAD_POLL_TICKS;
+                                                  boolean reloaded = reloadWatcher.reloaded();
+                                                  if (!reloaded && waitedTicks[0] < RELOAD_TIMEOUT_TICKS) {
+                                                      return;
+                                                  }
+                                                  poll[0].cancel();
+                                                  try {
+                                                      if (reloaded) {
+                                                          String probe = MainCommand.NAME + " " + ScenarioTest.RELOAD_PROBE;
+                                                          CommandDispatchResult dispatchResult = dispatchProbe.dispatch(
+                                                                  Bukkit.getConsoleSender(),
+                                                                  probe);
+                                                          tests.forEach(test -> test.hookCommandDispatchError(probe,
+                                                                                                              dispatchResult));
+                                                      } else {
+                                                          scenarioTest.failReloadProbe(
+                                                                  "/minecraft:reload did not finish within " + RELOAD_TIMEOUT_TICKS + " ticks.");
+                                                      }
+                                                  } finally {
+                                                      finish.run();
+                                                  }
+                                              }, RELOAD_POLL_TICKS, RELOAD_POLL_TICKS);
                           } finally {
                               if (!waitingForReload) {
                                   running.set(false);

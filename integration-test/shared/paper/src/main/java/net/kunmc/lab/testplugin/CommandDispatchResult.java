@@ -18,6 +18,10 @@ public final class CommandDispatchResult {
         this.logMessages = Collections.unmodifiableList(new ArrayList<>(logMessages));
     }
 
+    public boolean succeeded() {
+        return dispatched && throwable == null;
+    }
+
     public String describe(String commandLine) {
         List<String> lines = new ArrayList<>();
         lines.add("Command: " + commandLine);

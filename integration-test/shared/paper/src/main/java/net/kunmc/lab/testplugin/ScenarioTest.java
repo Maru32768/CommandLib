@@ -156,8 +156,19 @@ public final class ScenarioTest extends TestBase {
         }});
     }
 
+    /**
+     * Records why the reload probe could not be dispatched, such as a failed or unfinished reload.
+     */
+    public void failReloadProbe(String message) {
+        putResult(new TestResult(reloadProbeKey(), TestStatus.FAILED, message));
+    }
+
+    private String reloadProbeKey() {
+        return getClass().getSimpleName() + "." + RELOAD_PROBE;
+    }
+
     private void reloadProbe() {
-        String key = getClass().getSimpleName() + "." + RELOAD_PROBE;
+        String key = reloadProbeKey();
 
         putResult(new TestResult(key, TestStatus.FAILED, "Command was not executed after /minecraft:reload."));
         command.addChildren(new Command(RELOAD_PROBE) {{
