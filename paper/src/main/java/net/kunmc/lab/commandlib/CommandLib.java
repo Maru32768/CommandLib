@@ -23,6 +23,7 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 import java.util.*;
+import java.util.logging.Level;
 
 /**
  * Entry point for registering CommandLib commands on Paper 1.21.0+.
@@ -107,31 +108,44 @@ public final class CommandLib implements Listener {
             throw new IllegalArgumentException("permissionPrefix must not be empty");
         }
         commands.forEach(Objects::requireNonNull);
+        CommonCommand.validateUniqueNames(commands);
 
         CommandLib instance = new CommandLib(plugin,
                                              REGISTRATION_STATES.computeIfAbsent(plugin,
                                                                                  ignored -> new PluginRegistrationState()));
         instance.registerDisableListener();
-        instance.doRegisterPermissions(plugin, permissionPrefix, commands);
+        try {
+            instance.doRegister(commands, permissionPrefix);
+        } catch (RuntimeException e) {
+            // Leave nothing behind for a registration that never took effect, so the permissions and the disable
+            // listener do not leak and a later reload does not try to add it again.
+            instance.unregister(false);
+            throw e;
+        }
+        return instance;
+    }
 
-        PendingRegistration registration = new PendingRegistration(instance, commands, permissionPrefix);
-        synchronized (instance.registrationState) {
-            if (instance.registrationState.dispatcher != null) {
+    private void doRegister(Collection<? extends Command> commands, String permissionPrefix) {
+        doRegisterPermissions(plugin, permissionPrefix, commands);
+
+        PendingRegistration registration = new PendingRegistration(this, commands, permissionPrefix);
+        synchronized (registrationState) {
+            if (registrationState.dispatcher != null) {
                 // Keep the registration so the lifecycle handler adds it again when /minecraft:reload rebuilds the
                 // dispatcher.
-                instance.registrationState.registrations.add(registration);
-                instance.registerDirectly(instance.registrationState.dispatcher, registration);
-                return instance;
+                registrationState.registrations.add(registration);
+                registerDirectly(registrationState.dispatcher, registration);
+                return;
             }
 
-            if (!instance.registrationState.lifecycleHandlerRegistered && tryRegisterLifecycleHandler(plugin,
-                                                                                                      instance.registrationState)) {
-                instance.registrationState.lifecycleHandlerRegistered = true;
+            if (!registrationState.lifecycleHandlerRegistered && tryRegisterLifecycleHandler(plugin,
+                                                                                             registrationState)) {
+                registrationState.lifecycleHandlerRegistered = true;
             }
 
-            if (instance.registrationState.lifecycleHandlerRegistered) {
-                instance.registrationState.registrations.add(registration);
-                return instance;
+            if (registrationState.lifecycleHandlerRegistered) {
+                registrationState.registrations.add(registration);
+                return;
             }
 
             // The initialization window has already passed for this plugin, so the lifecycle
@@ -140,15 +154,13 @@ public final class CommandLib implements Listener {
             if (dispatcher == null) {
                 throw new IllegalStateException(
                         "CommandLib.register() was called after Paper's command registration phase, " + "but no dispatcher is cached yet. Ensure at least one CommandLib.register() call " + "is made during plugin initialization.",
-                        instance.registrationState.registrationFailure);
+                        registrationState.registrationFailure);
             }
-            instance.registrationState.dispatcher = dispatcher;
+            registrationState.dispatcher = dispatcher;
             // Kept so that a COMMANDS event fired for another plugin re-adds it after /minecraft:reload.
-            instance.registrationState.registrations.add(registration);
-            instance.registerDirectly(dispatcher, registration);
+            registrationState.registrations.add(registration);
+            registerDirectly(dispatcher, registration);
         }
-
-        return instance;
     }
 
     /**
@@ -182,8 +194,14 @@ public final class CommandLib implements Listener {
             if (dispatcher != null) {
                 RootCommandNode<CommandSourceStack> root = dispatcher.getRoot();
                 for (String name : registeredCommandNames) {
-                    removeFromNode(root, name);
-                    removeFromNode(root, namespacedName(name));
+                    // Keep going so that one failure does not leave the remaining commands and the permissions
+                    // registered, since unregister() cannot be retried.
+                    try {
+                        removeFromNode(root, name);
+                    } catch (RuntimeException e) {
+                        plugin.getLogger()
+                              .log(Level.WARNING, "Failed to remove command " + name, e);
+                    }
                 }
                 dispatcher = null;
                 registeredCommandNames.clear();
@@ -267,7 +285,13 @@ public final class CommandLib implements Listener {
                     // The event fires at startup and again after /minecraft:reload with a fresh dispatcher, so every
                     // active registration is added each time instead of only the pending ones.
                     for (PendingRegistration registration : state.registrations) {
-                        registration.instance.registerWithRegistrar(registrar, dispatcher, registration);
+                        // Paper only logs an exception thrown from this handler, so one failing registration must
+                        // not keep the others from being added.
+                        try {
+                            registration.instance.registerWithRegistrar(registrar, dispatcher, registration);
+                        } catch (RuntimeException e) {
+                            registration.instance.logRegistrationFailure(e);
+                        }
                     }
                 }
                 reregisterFallbackStates(state, dispatcher);
@@ -299,7 +323,11 @@ public final class CommandLib implements Listener {
                 }
                 state.dispatcher = dispatcher;
                 for (PendingRegistration registration : state.registrations) {
-                    registration.instance.addNodes(dispatcher, registration);
+                    try {
+                        registration.instance.addNodes(dispatcher, registration);
+                    } catch (RuntimeException e) {
+                        registration.instance.logRegistrationFailure(e);
+                    }
                 }
             }
         }
@@ -324,9 +352,15 @@ public final class CommandLib implements Listener {
         this.dispatcher = dispatcher;
         registeredCommandNames.clear();
         for (LiteralCommandNode<CommandSourceStack> node : registration.buildNodes()) {
-            registrar.register(node, "");
-            registeredCommandNames.add(node.getLiteral());
+            // Record the labels Paper actually registered. It adds the namespaced label as well, and may skip a label
+            // owned by another plugin, which unregister() must then leave alone.
+            registeredCommandNames.addAll(registrar.register(node, ""));
         }
+    }
+
+    private void logRegistrationFailure(RuntimeException e) {
+        plugin.getLogger()
+              .log(Level.SEVERE, "Failed to register commands", e);
     }
 
     private void registerDirectly(CommandDispatcher<CommandSourceStack> dispatcher, PendingRegistration registration) {
@@ -345,11 +379,6 @@ public final class CommandLib implements Listener {
                       .addChild(node);
             registeredCommandNames.add(node.getLiteral());
         }
-    }
-
-    private String namespacedName(String name) {
-        return plugin.getName()
-                     .toLowerCase(Locale.ROOT) + ":" + name;
     }
 
     private static final class PluginRegistrationState {

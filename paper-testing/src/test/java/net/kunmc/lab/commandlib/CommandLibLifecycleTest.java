@@ -1,6 +1,7 @@
 package net.kunmc.lab.commandlib;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
@@ -24,12 +25,11 @@ import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.logging.Logger;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
@@ -37,6 +37,7 @@ import static org.mockito.Mockito.*;
 @SuppressWarnings({"unchecked", "UnstableApiUsage"})
 class CommandLibLifecycleTest {
     private final List<LifecycleEventHandler<ReloadableRegistrarEvent<Commands>>> handlers = new ArrayList<>();
+    private final Set<String> foreignLabels = new HashSet<>();
     private MockedStatic<Bukkit> bukkit;
     private PluginManager pluginManager;
     private Plugin plugin;
@@ -56,6 +57,7 @@ class CommandLibLifecycleTest {
 
         plugin = mock(Plugin.class);
         when(plugin.getName()).thenReturn("TestPlugin");
+        when(plugin.getLogger()).thenReturn(Logger.getLogger("TestPlugin"));
         when(plugin.getServer()).thenReturn(server);
         when(plugin.getLifecycleManager()).thenReturn(lifecycleManager);
 
@@ -216,7 +218,96 @@ class CommandLibLifecycleTest {
 
         lib.unregister();
 
-        assertThat(root.removed).containsExactly("hello", "testplugin:hello");
+        assertThat(root.removed).containsExactlyInAnyOrder("hello", "testplugin:hello");
+    }
+
+    @Test
+    void unregister_leaves_labels_paper_did_not_register_for_this_plugin() {
+        when(plugin.isEnabled()).thenReturn(true);
+        foreignLabels.add("hello");
+        CommandLib lib = CommandLib.register(plugin, "test", helloCommand());
+        MirrorRoot root = new MirrorRoot();
+        fireCommandsEvent(new CommandDispatcher<>(root));
+
+        lib.unregister();
+
+        assertThat(root.removed).containsExactly("testplugin:hello");
+    }
+
+    @Test
+    void unregister_continues_after_a_command_fails_to_be_removed() {
+        when(plugin.isEnabled()).thenReturn(true);
+        CommandLib lib = CommandLib.register(plugin, "test", helloCommand());
+        MirrorRoot root = new MirrorRoot();
+        root.failing.add("hello");
+        fireCommandsEvent(new CommandDispatcher<>(root));
+
+        lib.unregister();
+
+        assertThat(root.removed).containsExactly("testplugin:hello");
+        verify(pluginManager, times(1)).removePermission(any(Permission.class));
+        assertThat(disableListeners()).isEmpty();
+    }
+
+    @Test
+    void duplicate_top_level_names_are_rejected_before_anything_is_registered() {
+        when(plugin.isEnabled()).thenReturn(true);
+
+        assertThatThrownBy(() -> CommandLib.register(plugin, "test", helloCommand(), new Command("hi") {{
+            addAliases("hello");
+        }})).isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("hello");
+        verify(pluginManager, never()).addPermission(any(Permission.class));
+        assertThat(disableListeners()).isEmpty();
+    }
+
+    @Test
+    void failed_runtime_registration_is_cleaned_up_and_not_restored_by_reload() {
+        when(plugin.isEnabled()).thenReturn(true);
+        CommandLib.register(plugin, "test", helloCommand());
+        RejectingRoot root = new RejectingRoot("broken");
+        fireCommandsEvent(new CommandDispatcher<>(root));
+
+        assertThatThrownBy(() -> CommandLib.register(plugin, "test", namedCommand("broken"))).isInstanceOf(
+                IllegalStateException.class);
+        verify(pluginManager, times(1)).removePermission(any(Permission.class));
+
+        CommandDispatcher<CommandSourceStack> reloaded = fireCommandsEvent();
+
+        assertThat(reloaded.getRoot()
+                           .getChild("hello")).isNotNull();
+        assertThat(reloaded.getRoot()
+                           .getChild("broken")).isNull();
+    }
+
+    @Test
+    void failing_registration_does_not_block_others_in_commands_event() {
+        when(plugin.isEnabled()).thenReturn(false);
+        CommandLib.register(plugin, "test", namedCommand("broken"));
+        CommandLib.register(plugin, "test", helloCommand());
+        RejectingRoot root = new RejectingRoot("broken");
+
+        CommandDispatcher<CommandSourceStack> dispatcher = fireCommandsEvent(new CommandDispatcher<>(root));
+
+        assertThat(dispatcher.getRoot()
+                             .getChild("hello")).isNotNull();
+    }
+
+    public static final class RejectingRoot extends RootCommandNode<CommandSourceStack> {
+        private final String rejected;
+
+        public RejectingRoot(String rejected) {
+            this.rejected = rejected;
+        }
+
+        @Override
+        public void addChild(CommandNode<CommandSourceStack> node) {
+            if (node.getName()
+                    .equals(rejected)) {
+                throw new IllegalStateException("rejected " + rejected);
+            }
+            super.addChild(node);
+        }
     }
 
     /**
@@ -224,8 +315,12 @@ class CommandLibLifecycleTest {
      */
     public static final class MirrorRoot extends RootCommandNode<CommandSourceStack> {
         private final List<String> removed = new ArrayList<>();
+        private final Set<String> failing = new HashSet<>();
 
         public void removeCommand(String name) {
+            if (failing.contains(name)) {
+                throw new IllegalStateException("cannot remove " + name);
+            }
             removed.add(name);
         }
     }
@@ -271,9 +366,14 @@ class CommandLibLifecycleTest {
         Commands registrar = mock(Commands.class);
         when(registrar.getDispatcher()).thenReturn(dispatcher);
         when(registrar.register(any(LiteralCommandNode.class), anyString())).thenAnswer(invocation -> {
+            LiteralCommandNode<CommandSourceStack> node = invocation.getArgument(0);
             dispatcher.getRoot()
-                      .addChild(invocation.getArgument(0));
-            return Set.of();
+                      .addChild(node);
+            // Like Paper, report the plain and namespaced labels unless the plain one belongs to another plugin.
+            if (foreignLabels.contains(node.getLiteral())) {
+                return Set.of("testplugin:" + node.getLiteral());
+            }
+            return Set.of(node.getLiteral(), "testplugin:" + node.getLiteral());
         });
         ReloadableRegistrarEvent<Commands> event = mock(ReloadableRegistrarEvent.class);
         when(event.registrar()).thenReturn(registrar);
