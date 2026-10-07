@@ -83,6 +83,12 @@ val serverLaunchArgs = if (extra.has("commandlib.integration.serverLaunchArgs"))
     "-jar $serverJarName"
 }
 val isBukkitPlatform = targetPlatform == "paper" || targetPlatform == "mohist"
+// CommandLib module that the nested test-plugin build inlines. It must match commandlibModule in that build.
+val commandlibModule = if (extra.has("commandlib.integration.commandlibModule")) {
+    extra["commandlib.integration.commandlibModule"].toString()
+} else {
+    "spigot"
+}
 val reportFileName = "TEST-commandlib-$minecraftVersion-$targetPlatform.xml"
 
 val mcProtocol = configurations.named("mcProtocol")
@@ -146,6 +152,10 @@ val javaToolchains = extensions.getByType<JavaToolchainService>()
 // A target can register its own prepareTestPlugin task before applying this script, for example to install a
 // Forge server and copy the test mod built in this Gradle build. Otherwise the nested test-plugin build runs.
 val prepareTask = if ("prepareTestPlugin" in tasks.names) tasks.named("prepareTestPlugin") else tasks.register<Exec>("prepareTestPlugin") {
+    if (commandlibModule == "spigot") {
+        // The nested build bundles the typed NMS jars from spigot/build/typed-nms.
+        dependsOn(":spigot:collectTypedNms")
+    }
     val hasWrapperJar = testPluginDir.resolve("gradle/wrapper/gradle-wrapper.jar").isFile
 
     workingDir(if (hasWrapperJar) testPluginDir else rootProject.projectDir)

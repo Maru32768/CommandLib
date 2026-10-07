@@ -27,6 +27,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -199,6 +200,24 @@ class NMSClassRegistryTest {
                 UnregisteredNMSClassException.class);
     }
 
+    @ParameterizedTest
+    @CsvSource({"1.16.5, TypedLookUpReflection",
+                "1.20.3, TypedLookUpTyped",
+                "1.20.4, TypedLookUpTyped",
+                "1.20.5, TypedLookUpReflection"})
+    void find_class_prefers_typed_implementation_within_its_range_and_falls_back_when_absent(String version,
+                                                                                              String expectedClass) {
+        TypedLookUp.register();
+
+        try (MockedStatic<BukkitUtil> bukkitUtil = Mockito.mockStatic(BukkitUtil.class)) {
+            bukkitUtil.when(BukkitUtil::getMinecraftVersion)
+                      .thenReturn(version);
+
+            assertThat(NMSClassRegistry.findClass(TypedLookUp.class)
+                                       .getSimpleName()).isEqualTo(expectedClass);
+        }
+    }
+
     @Test
     void implementations_are_registered_under_their_look_up_class() {
         assertThat(NMSClassRegistry.registrations()
@@ -279,5 +298,35 @@ class NMSClassRegistryTest {
         UnregisteredLookUp() {
             super(null, Object.class);
         }
+    }
+
+    abstract static class TypedLookUp extends NMSClass {
+        private static final AtomicBoolean REGISTERED = new AtomicBoolean();
+
+        TypedLookUp() {
+            super(null, Object.class);
+        }
+
+        /**
+         * Registers once with the full range, so the range check above still sees exactly one reflection
+         * implementation whichever test runs first.
+         */
+        static void register() {
+            if (!REGISTERED.compareAndSet(false, true)) {
+                return;
+            }
+            NMSClassRegistry.register(TypedLookUp.class, TypedLookUpReflection.class, "1.16.0", "9.9.9");
+            NMSClassRegistry.registerTyped(TypedLookUp.class, TypedLookUpTyped.class.getName(), "1.20.3", "1.20.4");
+            NMSClassRegistry.registerTyped(TypedLookUp.class,
+                                           "net.kunmc.lab.commandlib.nms.missing.TypedLookUpMissing",
+                                           "1.16.4",
+                                           "1.16.5");
+        }
+    }
+
+    static class TypedLookUpReflection extends TypedLookUp {
+    }
+
+    static class TypedLookUpTyped extends TypedLookUp {
     }
 }

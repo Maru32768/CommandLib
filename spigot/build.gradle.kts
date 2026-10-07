@@ -17,10 +17,7 @@ dependencies {
     api(project(":common"))
     compileOnly("org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT")
     compileOnlyApi("org.jetbrains:annotations:16.0.2")
-//    compileOnly("com.destroystokyo.paper:paper-api:1.16.5-R0.1-SNAPSHOT")
     compileOnly("com.mojang:brigadier:1.0.18")
-//    compileOnly(fileTree(mapOf("dir" to "../integration-test/targets/paper-1.16.5/test-plugin/", "include" to listOf("server/cache/patched*.jar"))))
-//    compileOnly(fileTree(mapOf("dir" to "../integration-test/targets/paper-1.19.4/test-plugin/", "include" to listOf("server/versions/1.19.4/paper*.jar", "server_mojmap/versions/1.19.4/paper*jar"))))
 
     testImplementation("org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT")
     testImplementation("com.mojang:brigadier:1.0.18")
@@ -33,4 +30,35 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+    // The real-jar NMS resolver test reads the server jar that BuildTools installs for :nms:spigot-1.16.5.
+    systemProperty("commandlib.nmsTestJar.1_16_5",
+                   File(System.getProperty("maven.repo.local") ?: "${System.getProperty("user.home")}/.m2/repository",
+                        "org/spigotmc/spigot/1.16.5-R0.1-SNAPSHOT/spigot-1.16.5-R0.1-SNAPSHOT.jar").absolutePath)
+}
+
+// Typed NMS implementations compiled in the :nms modules are bundled into the spigot jar. NMSClassRegistry looks
+// them up by class name, so the jar still works with the reflection implementations when they are left out.
+val typedNms by configurations.creating {
+    isCanBeConsumed = false
+    isCanBeResolved = true
+    isTransitive = false
+}
+
+dependencies {
+    rootProject.subprojects
+        .filter { it.parent?.path == ":nms" }
+        .forEach { typedNms(project(it.path, "nmsElements")) }
+}
+
+val collectTypedNms by tasks.registering(Sync::class) {
+    description = "Collects the typed NMS jars bundled into the spigot jar."
+    from(typedNms)
+    into(layout.buildDirectory.dir("typed-nms"))
+}
+
+tasks.named<Jar>("jar") {
+    // Only the classes: each module jar also carries the LICENSE that this jar already has.
+    from(typedNms.elements.map { files -> files.map { zipTree(it.asFile) } }) {
+        include("net/kunmc/lab/commandlib/nms/**")
+    }
 }

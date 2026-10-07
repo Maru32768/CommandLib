@@ -1,0 +1,29 @@
+package commandlib.nms
+
+import org.gradle.api.provider.Property
+
+abstract class SpigotNmsExtension {
+    /** Minecraft version passed to BuildTools as `--rev`, such as `1.20.4`. */
+    abstract val minecraftVersion: Property<String>
+
+    /**
+     * Compiles against the Mojang-mapped server jar and remaps the built jar to Spigot names. Required from 1.17,
+     * where the Spigot-mapped server jar keeps obfuscated member names.
+     */
+    abstract val remapped: Property<Boolean>
+}
+
+/** Java release that BuildTools needs to build the given Minecraft version. */
+internal fun buildToolsJavaVersion(minecraftVersion: String): Int {
+    val parts = minecraftVersion.split(".").map { it.toIntOrNull() ?: 0 }
+    val major = parts.getOrElse(0) { 0 }
+    val minor = parts.getOrElse(1) { 0 }
+    val patch = parts.getOrElse(2) { 0 }
+    return when {
+        major > 1 -> 25
+        minor < 17 -> 8
+        minor == 17 -> 16
+        minor < 20 || (minor == 20 && patch < 5) -> 17
+        else -> 21
+    }
+}

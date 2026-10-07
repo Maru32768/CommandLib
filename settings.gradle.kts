@@ -14,6 +14,12 @@ plugins {
 
 rootProject.name = "CommandLib"
 include("spigot", "paper")
+// Typed NMS modules bundled into :spigot. They need BuildTools or a paperweight dev bundle, so
+// -Pcommandlib.typedNms=false leaves them out and :spigot uses only the reflection implementations.
+val typedNmsModules = listOf("spigot-1.16.5", "spigot-1.20.4", "paper-1.20.6")
+if (providers.gradleProperty("commandlib.typedNms").orNull != "false") {
+    typedNmsModules.forEach { include("nms:$it") }
+}
 include("common")
 include("common-testing", "spigot-testing", "paper-testing")
 // Forge and NeoForge share one source tree. Nodes are named <loader>-<minecraft version>.

@@ -53,10 +53,9 @@ class NMSClassResolverTest {
     }
 
     @Test
-    void loads_real_legacy_nms_and_craftbukkit_classes_from_patched_server_jar_when_available() throws Exception {
-        Path jarPath = resolveJarPath("COMMANDLIB_NMS_TEST_JAR_1_16_5",
-                                      "integration-test/targets/paper-1.16.5/test-plugin/server/cache/patched_1.16.5.jar");
-        if (!Files.exists(jarPath)) {
+    void loads_real_legacy_nms_and_craftbukkit_classes_from_spigot_server_jar_when_available() throws Exception {
+        Path jarPath = resolveJarPath("COMMANDLIB_NMS_TEST_JAR_1_16_5", "commandlib.nmsTestJar.1_16_5");
+        if (jarPath == null || !Files.exists(jarPath)) {
             return;
         }
 
@@ -72,24 +71,20 @@ class NMSClassResolverTest {
         }
     }
 
-    private static Path resolveJarPath(String envName, String relativeFallback) {
+    /**
+     * Returns the server jar named by the environment variable, or else the Spigot jar that BuildTools installs into
+     * the local Maven repository, which the build passes as a system property.
+     */
+    private static Path resolveJarPath(String envName, String propertyName) {
         String envValue = System.getenv(envName);
         if (envValue != null && !envValue.isBlank()) {
             return Paths.get(envValue);
         }
-        Path cwd = Paths.get("")
-                        .toAbsolutePath();
-        Path direct = cwd.resolve(relativeFallback)
-                         .normalize();
-        if (Files.exists(direct)) {
-            return direct;
+        String propertyValue = System.getProperty(propertyName);
+        if (propertyValue != null && !propertyValue.isBlank()) {
+            return Paths.get(propertyValue);
         }
-        Path parent = cwd.getParent();
-        if (parent != null) {
-            return parent.resolve(relativeFallback)
-                         .normalize();
-        }
-        return direct;
+        return null;
     }
 
     private static final class MapBackedClassLoader extends ClassLoader {

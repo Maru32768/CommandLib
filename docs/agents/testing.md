@@ -18,6 +18,16 @@ Compile checks:
 ./gradlew :spigot-testing:compileJava
 ```
 
+Typed NMS modules run BuildTools on the first build of each Spigot version and
+set up the paperweight dev bundle (see `docs/agents/nms-build.md`):
+
+```bash
+./gradlew :nms:spigot-1.16.5:assemble :nms:spigot-1.20.4:assemble :nms:paper-1.20.6:assemble
+```
+
+Pass `-Pcommandlib.typedNms=false` to leave them out when the change does not
+touch NMS.
+
 Forge / NeoForge changes must compile every node, because code for nodes
 other than the active one is only type-checked when that node compiles (see
 `docs/agents/modded.md`):

@@ -12,6 +12,10 @@ instructions.
 - `common`: shared command model, arguments, options, parsing, and utilities.
 - `spigot`: Spigot-facing API, registration, Bukkit argument types, and NMS
   bridges.
+- `nms`: typed NMS implementations bundled into the `spigot` jar, compiled
+  against Spigot jars from BuildTools or Paper dev bundles. `buildSrc` holds the
+  BuildTools and remapping build logic. Read `docs/agents/nms-build.md` before
+  editing them.
 - `paper`: Paper-facing API using Paper official command/lifecycle API and
   Adventure components. Targets Paper 1.20.6+.
 - `spigot-testing`: test utilities for downstream plugins and this repository.

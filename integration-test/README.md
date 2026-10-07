@@ -145,34 +145,20 @@ Notes:
 - MCProtocolLib 1.16.5 cannot decode `brigadier:long`, so the `LongArgument` case is not registered on 1.16.5, the
   same as the Spigot fixture.
 
-## Generated NMS Jars
+## Typed NMS Jars
 
-Some Bukkit-compatible tests need a real server jar that contains NMS and CraftBukkit classes.
-The downloadable server launcher jar is not always that jar.
+Targets that run the `spigot` module bundle the typed NMS jars that `:spigot:collectTypedNms` writes to
+`spigot/build/typed-nms`, as the published spigot jar does. `prepareTestPlugin` depends on that task, so the first run
+of a Bukkit-family target may run BuildTools (see `docs/agents/nms-build.md`).
 
-Current Bukkit-compatible fixture projects expose `generatePatchedJar` for this purpose.
-The task starts the downloaded server once when the expected generated jar is missing, then validates that the
-distribution-specific jar path exists.
-
-Paper has two known layouts:
-
-- Paper `1.17.2` and older: `server/cache/patched_<version>.jar`
-- Paper `1.18` and newer: `server/versions/<version>/paper-<version>.jar`
-
-Mohist does not follow Paper's single-path convention consistently.
-When a Mohist target needs generated NMS jars, configure `nmsJarPaths` explicitly in that target fixture's
-`build.gradle.kts`.
-For example, Mohist `1.20.1` splits server and CraftBukkit classes across Forge-generated jars, so the fixture checks
-both generated jar paths.
-
-The `spigot` module's NMS resolver tests can optionally load a generated jar.
-The default fallback path for the legacy resolver test is:
+The `spigot` module's NMS resolver test loads the Spigot 1.16.5 server jar that BuildTools installs into the local Maven
+repository:
 
 ```text
-integration-test/targets/paper-1.16.5/test-plugin/server/cache/patched_1.16.5.jar
+~/.m2/repository/org/spigotmc/spigot/1.16.5-R0.1-SNAPSHOT/spigot-1.16.5-R0.1-SNAPSHOT.jar
 ```
 
-`COMMANDLIB_NMS_TEST_JAR_1_16_5` can override that path.
+`COMMANDLIB_NMS_TEST_JAR_1_16_5` can override that path. The test is skipped when the jar is missing.
 
 ## Mohist Constraint
 
