@@ -11,8 +11,11 @@ public class NMSCraftParticle_v1_20_2 extends NMSCraftParticle {
     }
 
     public Particle toBukkit(NMSParticleParam nms) {
+        // minecraftToBukkit takes the particle type. Only simple particles are their own options, so the options are
+        // converted to their type first.
+        NMSParticle particle = nms.getParticle();
         return ((Particle) invokeStaticMethod(new String[]{"minecraftToBukkit"},
-                                              new Class<?>[]{NMSParticle.create(null).getFoundClass()},
-                                              nms.getHandle()));
+                                              new Class<?>[]{particle.getFoundClass()},
+                                              particle.getHandle()));
     }
 }

@@ -12,6 +12,7 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.Keyed;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.Particle;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
 
@@ -58,6 +59,7 @@ public final class ArgumentTest extends TestBase {
         commands.addAll(offlinePlayersArgument());
         commands.addAll(objectiveArgument());
         commands.addAll(particleArgument());
+        commands.addAll(dustParticleArgument());
         commands.addAll(playerArgument());
         commands.addAll(playersArgument());
         commands.addAll(potionEffectArgument());
@@ -205,6 +207,29 @@ public final class ArgumentTest extends TestBase {
         }});
 
         return List.of(buildCommand(command, name + " minecraft:flame"));
+    }
+
+    /**
+     * Dust takes options, so its particle options are not the particle type itself as they are for flame.
+     */
+    public List<String> dustParticleArgument() {
+        String name = getMethodName();
+        String key = getKey();
+
+        putCommandNotExecutedResult(key);
+        command.addChildren(new Command(name) {{
+            argument(new ParticleArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
+                putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
+            })).execute((a, ctx) -> {
+                putResult(key, String.valueOf(a.getDataType() == Particle.DustOptions.class), "true");
+            });
+        }});
+
+        // Particle options are written as SNBT from 1.20.5.
+        String input = isLessThan(BukkitUtil.getMinecraftVersion(), "1.20.5")
+                       ? "minecraft:dust 1 0 0 1"
+                       : "minecraft:dust{color:[1.0,0.0,0.0],scale:1.0}";
+        return List.of(buildCommand(command, name + " " + input));
     }
 
     public List<String> entitiesArgument() {
