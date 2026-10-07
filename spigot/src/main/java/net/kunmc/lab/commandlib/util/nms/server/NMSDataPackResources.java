@@ -33,5 +33,13 @@ public abstract class NMSDataPackResources extends MinecraftClass {
         NMSClassRegistry.register(NMSDataPackResources.class, NMSDataPackResources_v1_20_4.class, "1.20.4", "1.20.4");
         NMSClassRegistry.register(NMSDataPackResources.class, NMSDataPackResources_v1_20_5.class, "1.20.5", "1.20.5");
         NMSClassRegistry.register(NMSDataPackResources.class, NMSDataPackResources_v1_20_6.class, "1.20.6", "9.9.9");
+        NMSClassRegistry.registerTyped(NMSDataPackResources.class,
+                                       "net.kunmc.lab.commandlib.nms.paper_1_20_6_spigot.NMSDataPackResources_paper_1_20_6",
+                                       "1.20.6",
+                                       "1.20.6");
+        NMSClassRegistry.registerTyped(NMSDataPackResources.class,
+                                       "net.kunmc.lab.commandlib.nms.paper_1_20_6.NMSDataPackResources_paper_1_20_6",
+                                       "1.20.6",
+                                       "1.20.6");
     }
 }

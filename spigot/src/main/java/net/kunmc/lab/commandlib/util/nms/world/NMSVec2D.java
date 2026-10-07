@@ -22,5 +22,13 @@ public abstract class NMSVec2D extends MinecraftClass {
 
     static {
         NMSClassRegistry.register(NMSVec2D.class, NMSVec2D_v1_20_5.class, "1.20.5", "9.9.9");
+        NMSClassRegistry.registerTyped(NMSVec2D.class,
+                                       "net.kunmc.lab.commandlib.nms.paper_1_20_6_spigot.NMSVec2D_paper_1_20_6",
+                                       "1.20.5",
+                                       "1.20.6");
+        NMSClassRegistry.registerTyped(NMSVec2D.class,
+                                       "net.kunmc.lab.commandlib.nms.paper_1_20_6.NMSVec2D_paper_1_20_6",
+                                       "1.20.5",
+                                       "1.20.6");
     }
 }

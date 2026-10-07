@@ -22,9 +22,9 @@ public class NMSArgumentPlayer_spigot_1_16_5 extends NMSArgumentPlayer {
     @Override
     @SuppressWarnings("unchecked")
     protected Player parseImpl(CommandContext<?> ctx, String name) {
+        CommandContext<CommandListenerWrapper> context = (CommandContext<CommandListenerWrapper>) ctx;
         try {
-            return ArgumentEntity.e((CommandContext<CommandListenerWrapper>) ctx, name)
-                                 .getBukkitEntity();
+            return ArgumentEntity.e(context, name).getBukkitEntity();
         } catch (CommandSyntaxException e) {
             throw new UncheckedCommandSyntaxException(e);
         }

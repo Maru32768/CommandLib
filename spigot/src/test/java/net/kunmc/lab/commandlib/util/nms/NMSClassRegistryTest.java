@@ -12,6 +12,7 @@ import net.kunmc.lab.commandlib.util.nms.command.NMSCommandListenerWrapper;
 import net.kunmc.lab.commandlib.util.nms.command.v1_20_5.NMSCommandListenerWrapper_v1_20_5;
 import net.kunmc.lab.commandlib.util.nms.command.v1_20_6.NMSCommandListenerWrapper_v1_20_6;
 import net.kunmc.lab.commandlib.util.nms.exception.UnregisteredNMSClassException;
+import net.kunmc.lab.commandlib.util.nms.mismatchedprobe.MismatchedTypedLookUp;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -34,7 +35,7 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-class NMSClassRegistryTest {
+public class NMSClassRegistryTest {
     private static final List<String> RELEASED_VERSIONS = List.of("1.16",
                                                                   "1.16.1",
                                                                   "1.16.2",
@@ -204,8 +205,9 @@ class NMSClassRegistryTest {
     @CsvSource({"1.16.5, TypedLookUpReflection",
                 "1.20.3, TypedLookUpTyped",
                 "1.20.4, TypedLookUpTyped",
-                "1.20.5, TypedLookUpReflection"})
-    void find_class_prefers_typed_implementation_within_its_range_and_falls_back_when_absent(String version,
+                "1.20.5, TypedLookUpReflection",
+                "1.20.6, TypedLookUpReflection"})
+    void find_class_prefers_typed_implementation_within_its_range_and_falls_back_when_absent_or_mismatched(String version,
                                                                                               String expectedClass) {
         TypedLookUp.register();
 
@@ -300,10 +302,10 @@ class NMSClassRegistryTest {
         }
     }
 
-    abstract static class TypedLookUp extends NMSClass {
+    public abstract static class TypedLookUp extends NMSClass {
         private static final AtomicBoolean REGISTERED = new AtomicBoolean();
 
-        TypedLookUp() {
+        protected TypedLookUp() {
             super(null, Object.class);
         }
 
@@ -321,6 +323,10 @@ class NMSClassRegistryTest {
                                            "net.kunmc.lab.commandlib.nms.missing.TypedLookUpMissing",
                                            "1.16.4",
                                            "1.16.5");
+            NMSClassRegistry.registerTyped(TypedLookUp.class,
+                                           MismatchedTypedLookUp.class.getName(),
+                                           "1.20.6",
+                                           "1.20.6");
         }
     }
 

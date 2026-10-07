@@ -89,29 +89,51 @@ class SpigotNmsPlugin : Plugin<Project> {
             val remapMojangToObf = tasks.register<SpigotRemapTask>("remapMojangToObf") {
                 inputJar.set(jar.flatMap { it.archiveFile })
                 outputJar.set(layout.buildDirectory.file("remap/${project.name}-obf.jar"))
-                mappingFile.set(mappingFile(spigotVersion, "maps-mojang@txt"))
+                mappingFiles.from(mappingFile(mavenLocalDirectory, spigotVersion, "maps-mojang.txt"))
                 inheritanceJars.from(configurations.named("compileClasspath"))
                 reverse.set(true)
             }
             val remapObfToSpigot = tasks.register<SpigotRemapTask>("remapObfToSpigot") {
                 inputJar.set(remapMojangToObf.flatMap { it.outputJar })
                 outputJar.set(layout.buildDirectory.file("remap/${project.name}-spigot.jar"))
-                mappingFile.set(mappingFile(spigotVersion, "maps-spigot@csrg"))
+                mappingFiles.from(mappingFile(mavenLocalDirectory, spigotVersion, "maps-spigot.csrg"))
                 inheritanceJars.from(configurations.named("compileClasspath"))
                 reverse.set(false)
             }
-            artifacts.add("nmsElements", remapObfToSpigot.flatMap { it.outputJar })
+            var finalRemap = remapObfToSpigot
+            if (hasSpigotMemberMappings(extension.minecraftVersion.get())) {
+                // Spigot renamed methods up to 1.17 in a second step; fields keep obfuscated names on the server. The
+                // method mappings use Spigot class names, so the Spigot-named server jar provides the class hierarchy.
+                finalRemap = tasks.register<SpigotRemapTask>("remapSpigotMembers") {
+                    inputJar.set(remapObfToSpigot.flatMap { it.outputJar })
+                    outputJar.set(layout.buildDirectory.file("remap/${project.name}-spigot-members.jar"))
+                    mappingFiles.from(mappingFile(mavenLocalDirectory, spigotVersion, "maps-spigot-members.csrg"))
+                    inheritanceJars.from(spigotVersion.map { version ->
+                        mavenLocalDirectory.resolve("org/spigotmc/spigot/$version/spigot-$version.jar")
+                    })
+                    reverse.set(false)
+                }
+            }
+            artifacts.add("nmsElements", finalRemap.flatMap { it.outputJar })
             tasks.named("assemble") {
-                dependsOn(remapObfToSpigot)
+                dependsOn(finalRemap)
             }
         }
     }
 
-    private fun Project.mappingFile(spigotVersion: Provider<String>, classifierAndExtension: String): Provider<RegularFile> =
+    /**
+     * The mappings that `installSpigot` installs. They are read from the local Maven repository directly, because
+     * resolving them as a dependency happens while Gradle builds the task graph, before `installSpigot` runs.
+     */
+    private fun Project.mappingFile(
+        mavenLocalDirectory: File,
+        spigotVersion: Provider<String>,
+        classifierAndExtension: String,
+    ): Provider<RegularFile> =
         layout.file(spigotVersion.map { version ->
-            configurations.detachedConfiguration(
-                dependencies.create("org.spigotmc:minecraft-server:$version:$classifierAndExtension")
-            ).singleFile
+            mavenLocalDirectory.resolve(
+                "org/spigotmc/minecraft-server/$version/minecraft-server-$version-$classifierAndExtension"
+            )
         })
 
     private companion object {

@@ -22,9 +22,9 @@ public class NMSArgumentPlayer_paper_1_20_6 extends NMSArgumentPlayer {
     @Override
     @SuppressWarnings("unchecked")
     protected Player parseImpl(CommandContext<?> ctx, String name) {
+        CommandContext<CommandSourceStack> context = (CommandContext<CommandSourceStack>) ctx;
         try {
-            return EntityArgument.getPlayer((CommandContext<CommandSourceStack>) ctx, name)
-                                 .getBukkitEntity();
+            return EntityArgument.getPlayer(context, name).getBukkitEntity();
         } catch (CommandSyntaxException e) {
             throw new UncheckedCommandSyntaxException(e);
         }

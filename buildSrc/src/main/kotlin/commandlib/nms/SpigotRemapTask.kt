@@ -12,7 +12,7 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Classpath
 import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
@@ -31,9 +31,10 @@ abstract class SpigotRemapTask : DefaultTask() {
     @get:OutputFile
     abstract val outputJar: RegularFileProperty
 
-    @get:InputFile
+    /** Mapping files loaded in order into one mapping. */
+    @get:InputFiles
     @get:PathSensitive(PathSensitivity.NONE)
-    abstract val mappingFile: RegularFileProperty
+    abstract val mappingFiles: ConfigurableFileCollection
 
     @get:Classpath
     abstract val inheritanceJars: ConfigurableFileCollection
@@ -44,7 +45,9 @@ abstract class SpigotRemapTask : DefaultTask() {
     @TaskAction
     fun remap() {
         val mapping = JarMapping()
-        mapping.loadMappings(mappingFile.get().asFile.absolutePath, reverse.get(), false, null, null)
+        mappingFiles.files.forEach {
+            mapping.loadMappings(it.absolutePath, reverse.get(), false, null, null)
+        }
 
         val provider = JointProvider()
         val inheritance = inheritanceJars.files

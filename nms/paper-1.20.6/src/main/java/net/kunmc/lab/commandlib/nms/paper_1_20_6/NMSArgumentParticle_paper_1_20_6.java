@@ -1,0 +1,26 @@
+package net.kunmc.lab.commandlib.nms.paper_1_20_6;
+
+import com.mojang.brigadier.arguments.ArgumentType;
+import com.mojang.brigadier.context.CommandContext;
+import net.kunmc.lab.commandlib.util.nms.argument.NMSArgumentParticle;
+import net.kunmc.lab.commandlib.util.nms.core.NMSParticleParam;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.arguments.ParticleArgument;
+
+public class NMSArgumentParticle_paper_1_20_6 extends NMSArgumentParticle {
+    public NMSArgumentParticle_paper_1_20_6() {
+        super(null, "commands.arguments.ParticleArgument");
+    }
+
+    @Override
+    public ArgumentType<?> argument() {
+        return ParticleArgument.particle(BuildContexts.current());
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    protected NMSParticleParam parseImpl(CommandContext<?> ctx, String name) {
+        CommandContext<CommandSourceStack> context = (CommandContext<CommandSourceStack>) ctx;
+        return NMSParticleParam.create(ParticleArgument.getParticle(context, name));
+    }
+}

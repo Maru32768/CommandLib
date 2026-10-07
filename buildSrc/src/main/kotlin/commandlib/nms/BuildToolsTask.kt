@@ -95,6 +95,9 @@ abstract class BuildToolsTask : DefaultTask() {
             required += spigot.resolve("spigot-$version-remapped-mojang.jar")
             required += server.resolve("minecraft-server-$version-maps-mojang.txt")
             required += server.resolve("minecraft-server-$version-maps-spigot.csrg")
+            if (hasSpigotMemberMappings(minecraftVersion.get())) {
+                required += server.resolve("minecraft-server-$version-maps-spigot-members.csrg")
+            }
         }
         return required.filterNot(File::isFile)
     }

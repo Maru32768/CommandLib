@@ -27,3 +27,9 @@ internal fun buildToolsJavaVersion(minecraftVersion: String): Int {
         else -> 21
     }
 }
+
+/** Spigot renamed methods with its own mappings up to 1.17 and keeps obfuscated member names after. */
+internal fun hasSpigotMemberMappings(minecraftVersion: String): Boolean {
+    val parts = minecraftVersion.split(".").map { it.toIntOrNull() ?: 0 }
+    return parts.getOrElse(0) { 0 } == 1 && parts.getOrElse(1) { 0 } < 18
+}

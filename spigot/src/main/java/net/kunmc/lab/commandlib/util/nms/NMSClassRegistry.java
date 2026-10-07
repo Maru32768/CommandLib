@@ -4,6 +4,7 @@ import net.kunmc.lab.commandlib.util.bukkit.BukkitUtil;
 import net.kunmc.lab.commandlib.util.bukkit.MinecraftVersion;
 import net.kunmc.lab.commandlib.util.nms.exception.UnregisteredNMSClassException;
 
+import java.lang.reflect.Method;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
@@ -17,6 +18,7 @@ public class NMSClassRegistry {
     private static final Map<Class<? extends NMSClass>, Deque<RegisteredClass>> CLASS_TO_DEQUE_MAP = new ConcurrentHashMap<>();
     private static final Map<Class<? extends NMSClass>, Deque<TypedRegistration>> TYPED_REGISTRATIONS = new ConcurrentHashMap<>();
     private static final Map<String, Optional<Class<?>>> TYPED_CLASSES = new ConcurrentHashMap<>();
+    private static final Map<String, Boolean> MAPPING_PROBES = new ConcurrentHashMap<>();
 
     public static <T extends NMSClass> void register(Class<T> lookUpClass,
                                                      Class<? extends T> targetClass,
@@ -64,7 +66,7 @@ public class NMSClassRegistry {
                     continue;
                 }
                 Optional<Class<?>> found = loadTypedClass(registration.className, clazz);
-                if (found.isPresent() && clazz.isAssignableFrom(found.get())) {
+                if (found.isPresent() && clazz.isAssignableFrom(found.get()) && matchesMappings(found.get())) {
                     return ((T) found.get());
                 }
             }
@@ -87,6 +89,36 @@ public class NMSClassRegistry {
                 return Optional.of(Class.forName(x, false, lookUpClass.getClassLoader()));
             } catch (ClassNotFoundException | LinkageError e) {
                 return Optional.empty();
+            }
+        });
+    }
+
+    /**
+     * Paper remaps a plugin from Spigot names to Mojang names from 1.20.5 unless the plugin declares Mojang mappings,
+     * so a typed module for those versions ships one package per mapping. Each package has a {@code MappingProbe}
+     * whose static {@code matches()} tells whether its classes match the mapping the server loaded this plugin with.
+     * Packages without a probe always match.
+     */
+    private static boolean matchesMappings(Class<?> typedClass) {
+        String packageName = typedClass.getName()
+                                       .substring(0,
+                                                  typedClass.getName()
+                                                            .lastIndexOf('.'));
+        return MAPPING_PROBES.computeIfAbsent(packageName, x -> {
+            Class<?> probe;
+            try {
+                probe = Class.forName(x + ".MappingProbe", true, typedClass.getClassLoader());
+            } catch (ClassNotFoundException e) {
+                return true;
+            } catch (LinkageError e) {
+                return false;
+            }
+            try {
+                Method matches = probe.getDeclaredMethod("matches");
+                matches.setAccessible(true);
+                return Boolean.TRUE.equals(matches.invoke(null));
+            } catch (ReflectiveOperationException | LinkageError e) {
+                return false;
             }
         });
     }

@@ -16,7 +16,16 @@ rootProject.name = "CommandLib"
 include("spigot", "paper")
 // Typed NMS modules bundled into :spigot. They need BuildTools or a paperweight dev bundle, so
 // -Pcommandlib.typedNms=false leaves them out and :spigot uses only the reflection implementations.
-val typedNmsModules = listOf("spigot-1.16.5", "spigot-1.20.4", "paper-1.20.6")
+val typedNmsModules = listOf(
+    "spigot-1.16.5",
+    "spigot-1.17.1",
+    "spigot-1.18.2",
+    "spigot-1.19.2",
+    "spigot-1.19.4",
+    "spigot-1.20.1",
+    "spigot-1.20.4",
+    "paper-1.20.6",
+)
 if (providers.gradleProperty("commandlib.typedNms").orNull != "false") {
     typedNmsModules.forEach { include("nms:$it") }
 }
