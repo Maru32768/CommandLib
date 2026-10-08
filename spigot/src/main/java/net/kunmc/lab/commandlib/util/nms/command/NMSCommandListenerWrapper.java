@@ -47,41 +47,8 @@ public abstract class NMSCommandListenerWrapper extends MinecraftClass {
                                   NMSCommandListenerWrapper_v1_20_6.class,
                                   "1.20.6",
                                   "9.9.9");
-        NMSClassRegistry.registerTyped(NMSCommandListenerWrapper.class,
-                                       "net.kunmc.lab.commandlib.nms.paper_1_20_6_spigot.NMSCommandListenerWrapper_paper_1_20_6",
-                                       "1.20.6",
-                                       "1.20.6");
-        NMSClassRegistry.registerTyped(NMSCommandListenerWrapper.class,
-                                       "net.kunmc.lab.commandlib.nms.spigot_1_20_1.NMSCommandListenerWrapper_spigot_1_20_1",
-                                       "1.20.1",
-                                       "1.20.1");
-        NMSClassRegistry.registerTyped(NMSCommandListenerWrapper.class,
-                                       "net.kunmc.lab.commandlib.nms.spigot_1_19_4.NMSCommandListenerWrapper_spigot_1_19_4",
-                                       "1.19.4",
-                                       "1.19.4");
-        NMSClassRegistry.registerTyped(NMSCommandListenerWrapper.class,
-                                       "net.kunmc.lab.commandlib.nms.spigot_1_19_2.NMSCommandListenerWrapper_spigot_1_19_2",
-                                       "1.19.2",
-                                       "1.19.2");
-        NMSClassRegistry.registerTyped(NMSCommandListenerWrapper.class,
-                                       "net.kunmc.lab.commandlib.nms.spigot_1_18_2.NMSCommandListenerWrapper_spigot_1_18_2",
-                                       "1.18.2",
-                                       "1.18.2");
-        NMSClassRegistry.registerTyped(NMSCommandListenerWrapper.class,
-                                       "net.kunmc.lab.commandlib.nms.spigot_1_17_1.NMSCommandListenerWrapper_spigot_1_17_1",
-                                       "1.17.1",
-                                       "1.17.1");
-        NMSClassRegistry.registerTyped(NMSCommandListenerWrapper.class,
-                                       "net.kunmc.lab.commandlib.nms.paper_1_20_6.NMSCommandListenerWrapper_paper_1_20_6",
-                                       "1.20.6",
-                                       "1.20.6");
-        NMSClassRegistry.registerTyped(NMSCommandListenerWrapper.class,
-                                       "net.kunmc.lab.commandlib.nms.spigot_1_20_4.NMSCommandListenerWrapper_spigot_1_20_4",
-                                       "1.20.4",
-                                       "1.20.4");
-        NMSClassRegistry.registerTyped(NMSCommandListenerWrapper.class,
-                                       "net.kunmc.lab.commandlib.nms.spigot_1_16_5.NMSCommandListenerWrapper_spigot_1_16_5",
-                                       "1.16.4",
-                                       "1.16.5");
+        // 1.20.5 differs from the 1.20.6 dev bundle the Paper module compiles against, so it stays on reflection.
+        NMSClassRegistry.registerTyped(NMSCommandListenerWrapper.class, "1.16.0", "1.20.4");
+        NMSClassRegistry.registerTyped(NMSCommandListenerWrapper.class, "1.20.6", "9.9.9");
     }
 }

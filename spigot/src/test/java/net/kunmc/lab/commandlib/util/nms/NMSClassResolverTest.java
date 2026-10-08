@@ -1,6 +1,7 @@
 package net.kunmc.lab.commandlib.util.nms;
 
 import net.kunmc.lab.commandlib.util.nms.exception.NMSClassNotFoundException;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 
 import java.net.URL;
@@ -55,9 +56,8 @@ class NMSClassResolverTest {
     @Test
     void loads_real_legacy_nms_and_craftbukkit_classes_from_spigot_server_jar_when_available() throws Exception {
         Path jarPath = resolveJarPath("COMMANDLIB_NMS_TEST_JAR_1_16_5", "commandlib.nmsTestJar.1_16_5");
-        if (jarPath == null || !Files.exists(jarPath)) {
-            return;
-        }
+        Assumptions.assumeTrue(jarPath != null && Files.exists(jarPath),
+                               "The Spigot 1.16.5 server jar is not installed; run :nms:spigot-1.16.5:installSpigot");
 
         try (URLClassLoader classLoader = new URLClassLoader(new URL[]{jarPath.toUri().toURL()}, null)) {
             NMSClassResolver resolver = new NMSClassResolver(classLoader,

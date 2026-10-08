@@ -35,17 +35,6 @@ public abstract class NMSChatMessage extends MinecraftClass {
         NMSClassRegistry.register(NMSChatMessage.class, NMSChatMessage_v1_16_0.class, "1.16.0", "1.16.5");
         NMSClassRegistry.register(NMSChatMessage.class, NMSChatMessage_v1_17_0.class, "1.17.0", "1.17.1");
         NMSClassRegistry.register(NMSChatMessage.class, NMSChatMessage_v1_18_0.class, "1.18.0", "1.18.2");
-        NMSClassRegistry.registerTyped(NMSChatMessage.class,
-                                       "net.kunmc.lab.commandlib.nms.spigot_1_18_2.NMSChatMessage_spigot_1_18_2",
-                                       "1.18.2",
-                                       "1.18.2");
-        NMSClassRegistry.registerTyped(NMSChatMessage.class,
-                                       "net.kunmc.lab.commandlib.nms.spigot_1_17_1.NMSChatMessage_spigot_1_17_1",
-                                       "1.17.1",
-                                       "1.17.1");
-        NMSClassRegistry.registerTyped(NMSChatMessage.class,
-                                       "net.kunmc.lab.commandlib.nms.spigot_1_16_5.NMSChatMessage_spigot_1_16_5",
-                                       "1.16.4",
-                                       "1.16.5");
+        NMSClassRegistry.registerTyped(NMSChatMessage.class);
     }
 }

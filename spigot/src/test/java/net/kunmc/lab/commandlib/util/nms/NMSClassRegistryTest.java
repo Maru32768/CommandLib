@@ -13,6 +13,7 @@ import net.kunmc.lab.commandlib.util.nms.command.v1_20_5.NMSCommandListenerWrapp
 import net.kunmc.lab.commandlib.util.nms.command.v1_20_6.NMSCommandListenerWrapper_v1_20_6;
 import net.kunmc.lab.commandlib.util.nms.exception.UnregisteredNMSClassException;
 import net.kunmc.lab.commandlib.util.nms.mismatchedprobe.MismatchedTypedLookUp;
+import net.kunmc.lab.commandlib.util.nms.unlinkable.UnlinkableTypedLookUp;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -203,11 +204,12 @@ public class NMSClassRegistryTest {
 
     @ParameterizedTest
     @CsvSource({"1.16.5, TypedLookUpReflection",
+                "1.18.2, TypedLookUpReflection",
                 "1.20.3, TypedLookUpTyped",
                 "1.20.4, TypedLookUpTyped",
                 "1.20.5, TypedLookUpReflection",
                 "1.20.6, TypedLookUpReflection"})
-    void find_class_prefers_typed_implementation_within_its_range_and_falls_back_when_absent_or_mismatched(String version,
+    void find_class_prefers_typed_implementation_within_its_range_and_falls_back_when_absent_mismatched_or_unlinkable(String version,
                                                                                               String expectedClass) {
         TypedLookUp.register();
 
@@ -216,6 +218,24 @@ public class NMSClassRegistryTest {
                       .thenReturn(version);
 
             assertThat(NMSClassRegistry.findClass(TypedLookUp.class)
+                                       .getSimpleName()).isEqualTo(expectedClass);
+        }
+    }
+
+    @ParameterizedTest
+    @CsvSource({"1.20.4, DerivedLookUp_spigot_1_20_4",
+                "1.20.5, DerivedLookUpReflection",
+                "1.20.6, DerivedLookUp_paper_1_20_6",
+                "1.21.4, DerivedLookUpReflection"})
+    void typed_registration_derives_class_names_from_modules_and_narrows_their_ranges(String version,
+                                                                                      String expectedClass) {
+        DerivedLookUp.register();
+
+        try (MockedStatic<BukkitUtil> bukkitUtil = Mockito.mockStatic(BukkitUtil.class)) {
+            bukkitUtil.when(BukkitUtil::getMinecraftVersion)
+                      .thenReturn(version);
+
+            assertThat(NMSClassRegistry.findClass(DerivedLookUp.class)
                                        .getSimpleName()).isEqualTo(expectedClass);
         }
     }
@@ -327,7 +347,31 @@ public class NMSClassRegistryTest {
                                            MismatchedTypedLookUp.class.getName(),
                                            "1.20.6",
                                            "1.20.6");
+            NMSClassRegistry.registerTyped(TypedLookUp.class,
+                                           UnlinkableTypedLookUp.class.getName(),
+                                           "1.18.2",
+                                           "1.18.2");
         }
+    }
+
+    public abstract static class DerivedLookUp extends NMSClass {
+        private static final AtomicBoolean REGISTERED = new AtomicBoolean();
+
+        protected DerivedLookUp() {
+            super(null, Object.class);
+        }
+
+        static void register() {
+            if (!REGISTERED.compareAndSet(false, true)) {
+                return;
+            }
+            NMSClassRegistry.register(DerivedLookUp.class, DerivedLookUpReflection.class, "1.16.0", "9.9.9");
+            NMSClassRegistry.registerTyped(DerivedLookUp.class, "1.16.0", "1.20.4");
+            NMSClassRegistry.registerTyped(DerivedLookUp.class, "1.20.6", "9.9.9");
+        }
+    }
+
+    static class DerivedLookUpReflection extends DerivedLookUp {
     }
 
     static class TypedLookUpReflection extends TypedLookUp {

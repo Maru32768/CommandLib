@@ -38,9 +38,14 @@ The `commandlib.spigot-nms` plugin in `buildSrc` adds `org.spigotmc:spigot` from
 lacks the jars (and, for remapped modules, the `minecraft-server` mappings):
 
 - BuildTools.jar and its working directory live in `<gradle user home>/caches/commandlib-buildtools`. Runs are
-  serialized because they share that directory.
+  serialized because they share that directory. BuildTools.jar is downloaded again before each run, and the cached
+  jar is used when the download fails.
+- The local Maven repository is found as Maven finds it: `-Dmaven.repo.local`, then `<localRepository>` in
+  `~/.m2/settings.xml` or `$M2_HOME/conf/settings.xml`, then `~/.m2/repository`. BuildTools gets it through
+  `MAVEN_OPTS`.
 - The Java toolchain follows the Minecraft version: 8 before 1.17, 16 for 1.17, 17 up to 1.20.4, and 21 after.
-- A BuildTools run takes several minutes and needs network access. Later builds reuse `~/.m2`.
+- A BuildTools run takes several minutes and needs network access. Later builds reuse the local Maven repository,
+  and the BuildTools JDK is resolved only when BuildTools runs.
 - `-Pcommandlib.buildToolsUrl=<url>` overrides the BuildTools download URL.
 - To prepare a machine ahead of time, run `./gradlew installSpigot`, which runs the task in every module.
 
@@ -52,22 +57,25 @@ reflection implementations, which is enough for work that does not touch NMS.
 - Each module exposes its final jar through the `nmsElements` configuration. `:spigot` bundles every `nms:*` project
   into its jar, and `:spigot:collectTypedNms` copies the same jars to `spigot/build/typed-nms` for the integration-test
   plugins, which inline the spigot sources instead of using the jar.
-- `:spigot` never references typed classes directly. Register them by class name next to the reflection registrations:
+- `:spigot` never references typed classes directly. `NMSClassRegistry.TYPED_MODULES` lists each module's package
+  and the versions its server jar matches, and the wrapper registers its typed classes next to the reflection
+  registrations:
 
   ```java
-  NMSClassRegistry.registerTyped(NMSArgumentPlayer.class,
-                                 "net.kunmc.lab.commandlib.nms.spigot_1_20_4.NMSArgumentPlayer_spigot_1_20_4",
-                                 "1.20.4",
-                                 "1.20.4");
+  NMSClassRegistry.registerTyped(NMSArgumentPlayer.class);
   ```
 
-  `findClass` loads the class only on a server inside the range, because the class may target a newer Java release
-  than older servers run. It prefers the typed class and falls back to the reflection implementation when the class
-  is missing, as in `:spigot:test` and `spigot-testing`.
-- Register a typed class only for the versions its server jar matches. Obfuscated names differ between releases, so a
-  Spigot-remapped module is registered for its own release only. Paper modules keep Mojang names and cover the
-  releases their reflection counterparts cover.
-- `findClass` skips a typed class whose package has a `MappingProbe` whose `matches()` returns false.
+  That registers `net.kunmc.lab.commandlib.nms.<module>.NMSArgumentPlayer_<module>` for every module. Pass a version
+  range to leave some versions on reflection, such as `registerTyped(NMSDataPackResources.class, "1.20.6", "9.9.9")`.
+- Obfuscated names differ between releases, so a Spigot-remapped module covers its own release only. Paper modules
+  keep Mojang names and cover the releases their reflection counterparts cover.
+- `findClass` loads the class only on a server inside the range, because the class may target a newer Java release
+  than older servers run. It prefers the typed class and falls back to the reflection implementation when:
+  - the class is missing, as in `:spigot:test` and `spigot-testing`, or for a wrapper the module does not implement;
+  - its package has a `MappingProbe` whose `matches()` returns false or throws a `LinkageError`;
+  - `TypedClassLinkage` finds a class, field or method in its constant pool, or in the classes it uses from its own
+    package, that the server lacks. This covers servers that differ from the compiled jar, such as Spigot 1.20.5-1.20.6
+    for the Mojang-named Paper classes, forks, and hybrid servers.
 - Typed classes extend the abstract `NMS*` wrapper, so the reflection implementations and mocks keep working.
 
 ## Adding A Module Or Implementation
@@ -78,8 +86,9 @@ reflection implementations, which is enough for work that does not touch NMS.
 2. Put classes in `net.kunmc.lab.commandlib.nms.<module>`, named `<NMSWrapper>_<module>` with dots replaced by
    underscores, such as `NMSArgumentPlayer_spigot_1_20_4`. The nearest existing module is the best starting point:
    the classes of the Mojang-named modules differ only where the Minecraft API changed.
-3. Register the class with `registerTyped` in the wrapper's static block. For a Paper module, also register the
-   `<package>_spigot` copy and give the module a `MappingProbe` like `nms/paper-1.20.6`.
+3. Add the module to `TYPED_MODULES` in `NMSClassRegistry`. For a Paper module, also add the `<package>_spigot`
+   package and give the module a `MappingProbe` like `nms/paper-1.20.6`. A new wrapper calls `registerTyped` in its
+   static block.
 4. Verify with `./gradlew :nms:<module>:assemble :spigot:jar :spigot:test` and, when the behavior needs a server, the
    matching `:integration-test:targets:<target>:minecraftIntegrationTest`.
 

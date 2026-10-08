@@ -19,6 +19,24 @@ public class NMSClassRegistry {
     private static final Map<Class<? extends NMSClass>, Deque<TypedRegistration>> TYPED_REGISTRATIONS = new ConcurrentHashMap<>();
     private static final Map<String, Optional<Class<?>>> TYPED_CLASSES = new ConcurrentHashMap<>();
     private static final Map<String, Boolean> MAPPING_PROBES = new ConcurrentHashMap<>();
+    private static final String TYPED_PACKAGE_PREFIX = "net.kunmc.lab.commandlib.nms.";
+    /**
+     * The typed NMS modules bundled into the spigot jar (see {@code docs/agents/nms-build.md}): the package under
+     * {@code net.kunmc.lab.commandlib.nms}, the module name its classes carry as a suffix, and the Minecraft versions
+     * its server jar matches. A Paper module has a second package for its reobfuscated classes.
+     */
+    private static final List<TypedModule> TYPED_MODULES = List.of(new TypedModule("spigot_1_16_5", "1.16.4", "1.16.5"),
+                                                                   new TypedModule("spigot_1_17_1", "1.17.1", "1.17.1"),
+                                                                   new TypedModule("spigot_1_18_2", "1.18.2", "1.18.2"),
+                                                                   new TypedModule("spigot_1_19_2", "1.19.2", "1.19.2"),
+                                                                   new TypedModule("spigot_1_19_4", "1.19.4", "1.19.4"),
+                                                                   new TypedModule("spigot_1_20_1", "1.20.1", "1.20.1"),
+                                                                   new TypedModule("spigot_1_20_4", "1.20.4", "1.20.4"),
+                                                                   new TypedModule("paper_1_20_6", "1.20.5", "1.20.6"),
+                                                                   new TypedModule("paper_1_20_6_spigot",
+                                                                                   "paper_1_20_6",
+                                                                                   "1.20.5",
+                                                                                   "1.20.6"));
 
     public static <T extends NMSClass> void register(Class<T> lookUpClass,
                                                      Class<? extends T> targetClass,
@@ -37,7 +55,8 @@ public class NMSClassRegistry {
      * Registers an implementation that a typed NMS module compiles against a real server jar (see
      * {@code docs/agents/nms-build.md}). The class is looked up by name only on a server within the range, because it
      * may target a newer Java release than the server runs. A typed implementation takes precedence over the
-     * reflection implementations, which are used when the class is not on the classpath.
+     * reflection implementations, which are used when the class is not on the classpath or refers to a class or
+     * member the server lacks.
      */
     public static <T extends NMSClass> void registerTyped(Class<T> lookUpClass,
                                                           String targetClassName,
@@ -50,6 +69,38 @@ public class NMSClassRegistry {
                            .addFirst(new TypedRegistration(targetClassName,
                                                            new MinecraftVersion(lowerVersion),
                                                            new MinecraftVersion(upperVersion)));
+    }
+
+    /**
+     * Registers the typed implementations of the look-up class in every typed NMS module, named
+     * {@code net.kunmc.lab.commandlib.nms.<module>.<LookUpClass>_<module>}. A module without the class falls back to
+     * the reflection implementations.
+     */
+    public static <T extends NMSClass> void registerTyped(Class<T> lookUpClass) {
+        registerTyped(lookUpClass, "0.0.0", "9.9.9");
+    }
+
+    /**
+     * Registers the typed implementations of the look-up class in the typed NMS modules for the given versions. Each
+     * module's range is narrowed to them, and a module outside them is skipped.
+     */
+    public static <T extends NMSClass> void registerTyped(Class<T> lookUpClass,
+                                                          String lowerVersion,
+                                                          String upperVersion) {
+        Objects.requireNonNull(lookUpClass);
+        MinecraftVersion lower = new MinecraftVersion(lowerVersion);
+        MinecraftVersion upper = new MinecraftVersion(upperVersion);
+        for (TypedModule module : TYPED_MODULES) {
+            MinecraftVersion moduleLower = module.lowerVersion.compareTo(lower) < 0 ? lower : module.lowerVersion;
+            MinecraftVersion moduleUpper = module.upperVersion.compareTo(upper) > 0 ? upper : module.upperVersion;
+            if (moduleUpper.compareTo(moduleLower) < 0) {
+                continue;
+            }
+            String className = TYPED_PACKAGE_PREFIX + module.packageName + "." + lookUpClass.getSimpleName() + "_"
+                    + module.moduleName;
+            TYPED_REGISTRATIONS.computeIfAbsent(lookUpClass, x -> new ConcurrentLinkedDeque<>())
+                               .addFirst(new TypedRegistration(className, moduleLower, moduleUpper));
+        }
     }
 
     public static <T extends Class<? extends NMSClass>> T findClass(T clazz) {
@@ -66,7 +117,8 @@ public class NMSClassRegistry {
                     continue;
                 }
                 Optional<Class<?>> found = loadTypedClass(registration.className, clazz);
-                if (found.isPresent() && clazz.isAssignableFrom(found.get()) && matchesMappings(found.get())) {
+                if (found.isPresent() && clazz.isAssignableFrom(found.get()) && matchesMappings(found.get())
+                        && TypedClassLinkage.isLinkable(found.get())) {
                     return ((T) found.get());
                 }
             }
@@ -172,6 +224,24 @@ public class NMSClassRegistry {
             result = 31 * result + (upperVersion != null ? upperVersion.hashCode() : 0);
             result = 31 * result + (clazz != null ? clazz.hashCode() : 0);
             return result;
+        }
+    }
+
+    private static class TypedModule {
+        private final String packageName;
+        private final String moduleName;
+        private final MinecraftVersion lowerVersion;
+        private final MinecraftVersion upperVersion;
+
+        private TypedModule(String moduleName, String lowerVersion, String upperVersion) {
+            this(moduleName, moduleName, lowerVersion, upperVersion);
+        }
+
+        private TypedModule(String packageName, String moduleName, String lowerVersion, String upperVersion) {
+            this.packageName = packageName;
+            this.moduleName = moduleName;
+            this.lowerVersion = new MinecraftVersion(lowerVersion);
+            this.upperVersion = new MinecraftVersion(upperVersion);
         }
     }
 

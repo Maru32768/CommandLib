@@ -46,30 +46,7 @@ public abstract class NMSHolder extends MinecraftClass {
                                       NMSHolder_v1_20_5.NMSReference_v1_20_5.class,
                                       "1.20.5",
                                       "9.9.9");
-            NMSClassRegistry.registerTyped(NMSReference.class,
-                                           "net.kunmc.lab.commandlib.nms.paper_1_20_6_spigot.NMSReference_paper_1_20_6",
-                                           "1.20.5",
-                                           "1.20.6");
-            NMSClassRegistry.registerTyped(NMSReference.class,
-                                           "net.kunmc.lab.commandlib.nms.spigot_1_20_1.NMSReference_spigot_1_20_1",
-                                           "1.20.1",
-                                           "1.20.1");
-            NMSClassRegistry.registerTyped(NMSReference.class,
-                                           "net.kunmc.lab.commandlib.nms.spigot_1_19_4.NMSReference_spigot_1_19_4",
-                                           "1.19.4",
-                                           "1.19.4");
-            NMSClassRegistry.registerTyped(NMSReference.class,
-                                           "net.kunmc.lab.commandlib.nms.spigot_1_19_2.NMSReference_spigot_1_19_2",
-                                           "1.19.2",
-                                           "1.19.2");
-            NMSClassRegistry.registerTyped(NMSReference.class,
-                                           "net.kunmc.lab.commandlib.nms.paper_1_20_6.NMSReference_paper_1_20_6",
-                                           "1.20.5",
-                                           "1.20.6");
-            NMSClassRegistry.registerTyped(NMSReference.class,
-                                           "net.kunmc.lab.commandlib.nms.spigot_1_20_4.NMSReference_spigot_1_20_4",
-                                           "1.20.4",
-                                           "1.20.4");
+            NMSClassRegistry.registerTyped(NMSReference.class);
         }
     }
 }
