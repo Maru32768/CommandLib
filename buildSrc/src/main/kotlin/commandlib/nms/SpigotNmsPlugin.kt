@@ -5,10 +5,7 @@ import org.gradle.api.Project
 import org.gradle.api.file.RegularFile
 import org.gradle.api.plugins.JavaLibraryPlugin
 import org.gradle.api.provider.Provider
-import org.gradle.jvm.toolchain.JavaLanguageVersion
-import org.gradle.jvm.toolchain.JavaToolchainService
 import org.gradle.kotlin.dsl.create
-import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.register
 import org.gradle.api.tasks.bundling.Jar
@@ -43,23 +40,8 @@ class SpigotNmsPlugin : Plugin<Project> {
         project.repositories.maven { url = project.uri("https://libraries.minecraft.net") }
         project.repositories.mavenCentral()
 
-        val buildToolsService = project.gradle.sharedServices.registerIfAbsent(
-            "commandlibBuildTools",
-            BuildToolsService::class.java,
-        ) {
-            maxParallelUsages.set(1)
-        }
-        val javaToolchains = project.extensions.getByType<JavaToolchainService>()
-        val installSpigot = project.tasks.register<BuildToolsTask>("installSpigot") {
-            usesService(buildToolsService)
-            minecraftVersion.set(extension.minecraftVersion)
+        val installSpigot = project.registerBuildTools("installSpigot", extension.minecraftVersion) {
             remapped.set(extension.remapped)
-            javaLauncher.set(javaToolchains.launcherFor {
-                languageVersion.set(extension.minecraftVersion.map { JavaLanguageVersion.of(buildToolsJavaVersion(it)) })
-            })
-            buildToolsUrl.set(project.providers.gradleProperty("commandlib.buildToolsUrl").orElse(BUILD_TOOLS_URL))
-            buildToolsDirectory.set(File(project.gradle.gradleUserHomeDir, "caches/commandlib-buildtools"))
-            this.mavenLocalDirectory.set(mavenLocalDirectory)
         }
         project.tasks.named("compileJava") {
             dependsOn(installSpigot)
@@ -134,8 +116,4 @@ class SpigotNmsPlugin : Plugin<Project> {
             )
         })
 
-    private companion object {
-        const val BUILD_TOOLS_URL =
-            "https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar"
-    }
 }

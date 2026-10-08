@@ -13,8 +13,8 @@ abstract class SpigotNmsExtension {
     abstract val remapped: Property<Boolean>
 }
 
-/** Java release that BuildTools needs to build the given Minecraft version. */
-internal fun buildToolsJavaVersion(minecraftVersion: String): Int {
+/** Java release that BuildTools needs to build the given Minecraft version, and that the server runs on. */
+fun buildToolsJavaVersion(minecraftVersion: String): Int {
     val parts = minecraftVersion.split(".").map { it.toIntOrNull() ?: 0 }
     val major = parts.getOrElse(0) { 0 }
     val minor = parts.getOrElse(1) { 0 }

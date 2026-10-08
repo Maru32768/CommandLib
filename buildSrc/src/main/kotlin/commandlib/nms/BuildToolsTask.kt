@@ -2,6 +2,7 @@ package commandlib.nms
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.services.BuildService
 import org.gradle.api.services.BuildServiceParameters
@@ -23,8 +24,9 @@ abstract class BuildToolsService : BuildService<BuildServiceParameters.None>
 
 /**
  * Installs `org.spigotmc:spigot` for one Minecraft version into the local Maven repository by running
- * [BuildTools](https://www.spigotmc.org/wiki/buildtools/). Nothing runs when the artifacts are installed already,
- * so only the first build of a version pays for BuildTools.
+ * [BuildTools](https://www.spigotmc.org/wiki/buildtools/), and copies the runnable server jar to [serverJar] when it is
+ * set. Nothing runs when the artifacts are installed already, so only the first build of a version pays for
+ * BuildTools.
  */
 @DisableCachingByDefault(because = "Installs into the local Maven repository")
 abstract class BuildToolsTask : DefaultTask() {
@@ -47,6 +49,10 @@ abstract class BuildToolsTask : DefaultTask() {
     @get:Internal
     abstract val mavenLocalDirectory: DirectoryProperty
 
+    /** Where to copy the runnable Spigot server jar, for the integration tests. */
+    @get:Internal
+    abstract val serverJar: RegularFileProperty
+
     @get:Inject
     abstract val execOperations: ExecOperations
 
@@ -58,7 +64,7 @@ abstract class BuildToolsTask : DefaultTask() {
     @TaskAction
     fun install() {
         if (missingArtifacts().isEmpty()) {
-            didWork = false
+            didWork = copyServerJar()
             return
         }
 
@@ -87,6 +93,22 @@ abstract class BuildToolsTask : DefaultTask() {
         if (stillMissing.isNotEmpty()) {
             error("BuildTools finished but did not install: ${stillMissing.joinToString()}")
         }
+        copyServerJar()
+    }
+
+    /** BuildTools leaves the server jar in its working directory, named after the version. */
+    private fun builtServerJar(): File =
+        buildToolsDirectory.get().asFile.resolve("work/spigot-${minecraftVersion.get()}.jar")
+
+    private fun copyServerJar(): Boolean {
+        val destination = serverJar.orNull?.asFile ?: return false
+        val source = builtServerJar()
+        if (destination.isFile && destination.length() == source.length()) {
+            return false
+        }
+        destination.parentFile.mkdirs()
+        Files.copy(source.toPath(), destination.toPath(), StandardCopyOption.REPLACE_EXISTING)
+        return true
     }
 
     private fun missingArtifacts(): List<File> {
@@ -102,6 +124,9 @@ abstract class BuildToolsTask : DefaultTask() {
             if (hasSpigotMemberMappings(minecraftVersion.get())) {
                 required += server.resolve("minecraft-server-$version-maps-spigot-members.csrg")
             }
+        }
+        if (serverJar.isPresent) {
+            required += builtServerJar()
         }
         return required.filterNot(File::isFile)
     }

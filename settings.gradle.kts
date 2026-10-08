@@ -82,4 +82,5 @@ include(
     "integration-test:targets:forge-1.16.5",
     "integration-test:targets:forge-1.20.1",
     "integration-test:targets:neoforge-1.21.1",
+    "integration-test:targets:spigot-1.20.4",
 )

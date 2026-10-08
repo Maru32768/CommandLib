@@ -50,6 +50,7 @@ tasks.register("minecraftIntegrationTest") {
         ":integration-test:targets:forge-1.16.5:minecraftIntegrationTest",
         ":integration-test:targets:forge-1.20.1:minecraftIntegrationTest",
         ":integration-test:targets:neoforge-1.21.1:minecraftIntegrationTest",
+        ":integration-test:targets:spigot-1.20.4:minecraftIntegrationTest",
     )
 }
 

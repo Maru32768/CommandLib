@@ -1,3 +1,4 @@
+import commandlib.nms.registerBuildTools
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -82,7 +83,7 @@ val serverLaunchArgs = if (extra.has("commandlib.integration.serverLaunchArgs"))
 } else {
     "-jar $serverJarName"
 }
-val isBukkitPlatform = targetPlatform == "paper" || targetPlatform == "mohist"
+val isBukkitPlatform = targetPlatform == "paper" || targetPlatform == "mohist" || targetPlatform == "spigot"
 val reportFileName = "TEST-commandlib-$minecraftVersion-$targetPlatform.xml"
 
 val mcProtocol = configurations.named("mcProtocol")
@@ -190,6 +191,19 @@ val prepareTask = if ("prepareTestPlugin" in tasks.names) tasks.named("prepareTe
                 "downloadServerJar",
             )
         }
+    }
+}
+
+// Spigot server jars are only produced by BuildTools, so a Spigot target builds its own. The run also installs the
+// artifacts the typed NMS module of the same version compiles against.
+if (targetPlatform == "spigot") {
+    val spigotVersion = minecraftVersion
+    val buildSpigotServer = registerBuildTools("buildSpigotServer", provider { spigotVersion }) {
+        remapped.set(!spigotVersion.startsWith("1.16"))
+        serverJar.set(testPluginDir.resolve("$serverDirectory/$serverJarName"))
+    }
+    prepareTask.configure {
+        dependsOn(buildSpigotServer)
     }
 }
 

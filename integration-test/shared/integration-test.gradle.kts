@@ -26,17 +26,18 @@ import java.nio.file.Files
  *
  * - javaVersion: Java toolchain version as a stringified integer.
  *
- * - platform: Runtime server family. Current values: "paper", "mohist".
+ * - platform: Runtime server family. Current values: "paper", "mohist", "spigot".
  *   This describes the server executable, not the CommandLib module.
  *   - "mohist" uses a Mohist server jar but compiles against spigot module sources.
  *   - "paper" uses a Paper server jar and compiles against spigot module sources by default.
+ *   - "spigot" uses the Spigot server jar that the root build's buildSpigotServer task builds with BuildTools.
  *
  * - minecraftServerVersion:
  *   Minecraft version of the server, used to pick plugin downloads such as PlugManX. This is
  *   separate from the API dependency because some fixtures intentionally use names such as
  *   test-plugin-1.21.0 while Paper stores jars under 1.21.
  *
- * - serverJarDownloads:
+ * - serverJarDownloads (required unless platform is "spigot"):
  *   Format: "<url>=><relative path>" entries joined by "|".
  *   Example:
  *   "https://.../paper.jar=>server/server.jar|https://.../paper-mojmap.jar=>server_mojmap/server.jar"
@@ -130,7 +131,11 @@ val testPluginSuite: String = project.optionalStringProperty("testPluginSuite")
 require(testPluginSuite == "spigot" || testPluginSuite == "paper") {
     "Unsupported testPluginSuite: $testPluginSuite"
 }
-val serverJarDownloads = project.requiredListProperty("serverJarDownloads")
+val serverJarDownloads = if (platform == "spigot") {
+    project.optionalListProperty("serverJarDownloads")
+} else {
+    project.requiredListProperty("serverJarDownloads")
+}
 val copyTargets = project.optionalListProperty("copyTargets").ifEmpty { listOf("server/plugins") }
 val includeProtocolLib = project.optionalBooleanProperty("includeProtocolLib")
 val autoReloaderJarDownloadUrl = providers.gradleProperty("autoReloaderJarDownloadUrl")
@@ -152,6 +157,10 @@ repositories {
         url = uri("https://repo.papermc.io/repository/maven-public/")
     }
     maven {
+        name = "spigotmc-repo"
+        url = uri("https://hub.spigotmc.org/nexus/content/repositories/snapshots/")
+    }
+    maven {
         name = "sonatype"
         url = uri("https://oss.sonatype.org/content/groups/public/")
     }
@@ -161,6 +170,8 @@ repositories {
 dependencies {
     platformDependencies.forEach { add("compileOnly", it) }
     add("compileOnly", "com.mojang:brigadier:1.0.18")
+    // paper-api brings these annotations along, spigot-api does not.
+    add("compileOnly", "org.jetbrains:annotations:16.0.2")
     if (commandlibModule == "spigot") {
         add("implementation", fileTree("../../../../spigot/build/typed-nms") { include("*.jar") })
     }

@@ -101,8 +101,12 @@ For example:
 
 Bukkit-family targets: `paper-1.16.5`, `paper-1.17.1`, `paper-1.18.2`, `paper-1.19.2`, `paper-1.19.4`, `paper-1.20.1`,
 `paper-1.20.4`, `paper-1.20.5`, `paper-1.20.6`, `mohist-1.16.5`, `mohist-1.20.1` run the `spigot` module, and
-`paper-1.21.0` runs the `paper` module. There is no plain Spigot (CraftBukkit) target, because Spigot server jars
-are only produced by BuildTools.
+`paper-1.21.0` runs the `paper` module.
+
+Spigot targets (`spigot-<version>`) run the `spigot` module on a plain Spigot server. Spigot server jars are only
+produced by BuildTools, so the target's `buildSpigotServer` task runs it (through the same BuildTools setup as the typed
+NMS modules, see `docs/agents/nms-build.md`) and copies the jar to `test-plugin/server/server.jar`. The first run of a
+version takes several minutes.
 
 `minecraftIntegrationTest` is the aggregate task for all configured targets.
 The aggregate task depends on per-target subprojects, so Gradle can run independent targets in parallel by default.
