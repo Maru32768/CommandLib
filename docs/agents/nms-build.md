@@ -12,6 +12,7 @@ CommandAPI's build layout:
 |--------------------------------------------|--------------------------------------------------------------|-----------------------------|------------------------------|
 | `nms:spigot-1.16.5`                        | `org.spigotmc:spigot:1.16.5-R0.1-SNAPSHOT` (BuildTools)      | Spigot                      | Spigot / Paper 1.16.4-1.16.5 |
 | `nms:spigot-<version>` (1.17.1 to 1.20.4)  | same artifact, `remapped-mojang` classifier (BuildTools)     | Spigot (remapped)           | Spigot / Paper `<version>`   |
+| `nms:spigot-1.20.6`, `nms:spigot-1.21.1`   | same artifact, `remapped-mojang` classifier (BuildTools)     | Spigot (remapped)           | Spigot 1.20.6, 1.21-1.21.1   |
 | `nms:paper-1.20.6`                         | paperweight userdev dev bundle `1.20.6-R0.1-SNAPSHOT`        | Mojang, and Spigot (reobf)  | Paper 1.20.5-1.20.6          |
 
 - Up to 1.16.5 the Spigot-mapped server jar names members readably, so the module compiles against it directly.
@@ -19,6 +20,11 @@ CommandAPI's build layout:
   `SpigotRemapTask` remaps the built jar with SpecialSource: Mojang to obfuscated (`maps-mojang`, reversed), then
   obfuscated to Spigot (`maps-spigot`). For 1.17 a third step applies `maps-spigot-members`, because Spigot still
   renamed methods then (fields keep obfuscated names on the server).
+- `NMSClassRegistry.TYPED_MODULES` has the exact ranges. A module can cover the releases of one CraftBukkit revision
+  that BuildTools cannot build on their own (Spigot published no 1.20 or 1.21, so `spigot-1.20.1` and
+  `spigot-1.21.1` cover them), as long as an integration target shows `TypedNmsTest` passing there.
+- Spigot support ends at 1.21.1. From 1.21.3 Bukkit's `Attribute`, `Biome` and `Sound` are registry interfaces, which
+  the spigot module's enum-based arguments do not support (see `docs/roadmap.md`).
 - From 1.20.5 Paper runs with Mojang names, which is what the reflection implementations for 1.20.5+ already assume.
   Those modules use paperweight userdev. Paper still remaps a plugin from Spigot names to Mojang names when the plugin
   does not declare Mojang mappings in its manifest, and CommandLib is shaded into plugins of both kinds. Some Spigot

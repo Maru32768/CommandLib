@@ -129,6 +129,11 @@ annotation API / Kotlin DSL の `@Optional` や default args はこの土台の�
 - `[ ]` runtime diagnostics command を追加する。
 - `[ ]` example plugin collection を整備する。
 - `[ ]` documentation site を作る。
+- `[ ]` Spigot 1.21.3 以降に対応する。Bukkit の `Attribute` / `Biome` / `Sound` が registry-backed interface になり、
+  spigot module の `AttributeArgument` / `BiomeArgument` / `SoundArgument`（`EnumArgument` 継承）が動かない。Bukkit
+  `Registry` を使う実装に作り直し（入力は Paper 版と同じ NamespacedKey、public API の破壊的変更）、その上で 1.21.3 以降の
+  CraftBukkit revision ごとに typed NMS module と Spigot target を追加する。Spigot 26.x は難読化がなく再マップ不要だが
+  Java 25 が必要。
 - `[ ]` CI を整備する。typed NMS module（`nms/*`）は初回 build で BuildTools を version ごとに実行し（1 version あたり
   10 分前後）、paperweight の dev bundle も取得するため、`~/.m2` の Spigot artifact と paperweight cache を CI 間で
   保持する方法を決める。cache がない job や PR では `-Pcommandlib.typedNms=false` で reflection 実装だけを build する

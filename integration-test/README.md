@@ -99,9 +99,11 @@ For example:
 :integration-test:targets:paper-1.20.4:minecraftIntegrationTest
 ```
 
-Bukkit-family targets: `paper-1.16.5`, `paper-1.17.1`, `paper-1.18.2`, `paper-1.19.2`, `paper-1.19.4`, `paper-1.20.1`,
-`paper-1.20.4`, `paper-1.20.5`, `paper-1.20.6`, `mohist-1.16.5`, `mohist-1.20.1` run the `spigot` module, and
-`paper-1.21.0` runs the `paper` module.
+Bukkit-family targets: `paper-1.16.5`, `paper-1.17.1`, `paper-1.18`, `paper-1.18.1`, `paper-1.18.2`, `paper-1.19`,
+`paper-1.19.1`, `paper-1.19.2`, `paper-1.19.3`, `paper-1.19.4`, `paper-1.20`, `paper-1.20.1`, `paper-1.20.2`,
+`paper-1.20.4`, `paper-1.20.5`, `paper-1.20.6`, `mohist-1.16.5`, `mohist-1.20.1`, `spigot-1.20.4`, `spigot-1.20.6` and
+`spigot-1.21.1` run the `spigot` module, and `paper-1.21.0` runs the `paper` module. Minecraft 1.17 has no target,
+because no MCProtocolLib release speaks its protocol.
 
 Spigot targets (`spigot-<version>`) run the `spigot` module on a plain Spigot server. Spigot server jars are only
 produced by BuildTools, so the target's `buildSpigotServer` task runs it (through the same BuildTools setup as the typed

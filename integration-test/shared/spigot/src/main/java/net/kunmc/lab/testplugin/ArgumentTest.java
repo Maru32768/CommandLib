@@ -108,7 +108,7 @@ public final class ArgumentTest extends TestBase {
             });
         }});
 
-        return List.of(buildCommand(command, name + " " + registryInput("generic_max_health", "generic.max_health")));
+        return List.of(buildCommand(command, name + " " + registryInput(org.bukkit.attribute.Attribute.class, "generic_max_health", "generic.max_health")));
     }
 
     public List<String> blockDataArgument() {
@@ -434,8 +434,12 @@ public final class ArgumentTest extends TestBase {
         return !"1.16.5".equals(BukkitUtil.getMinecraftVersion());
     }
 
-    private String registryInput(String legacyName, String registryName) {
-        return isLessThan(BukkitUtil.getMinecraftVersion(), "1.21.0") ? legacyName : registryName;
+    /**
+     * The input for a Bukkit type that was an enum and became registry-backed during 1.21. Spigot made the change in a
+     * later release than the one Paper's API did, so the type itself decides.
+     */
+    private String registryInput(Class<?> type, String legacyName, String registryName) {
+        return type.isEnum() ? legacyName : registryName;
     }
 
     private boolean isLessThan(String version, String other) {
@@ -684,7 +688,7 @@ public final class ArgumentTest extends TestBase {
             });
         }});
 
-        return List.of(buildCommand(command, name + " " + registryInput("block_anvil_land", "block.anvil.land")));
+        return List.of(buildCommand(command, name + " " + registryInput(org.bukkit.Sound.class, "block_anvil_land", "block.anvil.land")));
     }
 
     public List<String> stringArgument() {

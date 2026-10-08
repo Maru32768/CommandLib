@@ -32,6 +32,7 @@ val typedNmsModules = listOf(
     "spigot-1.20.2",
     "spigot-1.20.4",
     "spigot-1.20.6",
+    "spigot-1.21.1",
     "paper-1.20.6",
 )
 val typedNmsSelection = providers.gradleProperty("commandlib.typedNms").orNull
@@ -105,4 +106,5 @@ include(
     "integration-test:targets:paper-1.19.3",
     "integration-test:targets:paper-1.20",
     "integration-test:targets:paper-1.20.2",
+    "integration-test:targets:spigot-1.21.1",
 )

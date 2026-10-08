@@ -59,6 +59,7 @@ tasks.register("minecraftIntegrationTest") {
         ":integration-test:targets:paper-1.19.3:minecraftIntegrationTest",
         ":integration-test:targets:paper-1.20:minecraftIntegrationTest",
         ":integration-test:targets:paper-1.20.2:minecraftIntegrationTest",
+        ":integration-test:targets:spigot-1.21.1:minecraftIntegrationTest",
     )
 }
 
