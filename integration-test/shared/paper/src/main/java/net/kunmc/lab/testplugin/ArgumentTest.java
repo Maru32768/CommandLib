@@ -12,6 +12,7 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.Keyed;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.Particle;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
 
@@ -58,6 +59,7 @@ public final class ArgumentTest extends TestBase {
         commands.addAll(offlinePlayersArgument());
         commands.addAll(objectiveArgument());
         commands.addAll(particleArgument());
+        commands.addAll(dustParticleArgument());
         commands.addAll(playerArgument());
         commands.addAll(playersArgument());
         commands.addAll(potionEffectArgument());
@@ -205,6 +207,25 @@ public final class ArgumentTest extends TestBase {
         }});
 
         return List.of(buildCommand(command, name + " minecraft:flame"));
+    }
+
+    /**
+     * Dust is a particle type with options, unlike flame. Paper's particle argument takes the type key only.
+     */
+    public List<String> dustParticleArgument() {
+        String name = getMethodName();
+        String key = getKey();
+
+        putCommandNotExecutedResult(key);
+        command.addChildren(new Command(name) {{
+            argument(new ParticleArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
+                putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
+            })).execute((a, ctx) -> {
+                putResult(key, String.valueOf(a.getDataType() == Particle.DustOptions.class), "true");
+            });
+        }});
+
+        return List.of(buildCommand(command, name + " minecraft:dust"));
     }
 
     public List<String> entitiesArgument() {
