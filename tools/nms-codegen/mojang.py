@@ -13,10 +13,16 @@ def ver(text):
 
 SPIGOT_TARGETS = {
     "1.17.1": "v1_17_R1",
+    "1.18": "v1_18_R1",
+    "1.18.1": "v1_18_R1",
     "1.18.2": "v1_18_R2",
+    "1.19": "v1_19_R1",
+    "1.19.1": "v1_19_R1",
     "1.19.2": "v1_19_R1",
+    "1.19.3": "v1_19_R2",
     "1.19.4": "v1_19_R3",
     "1.20.1": "v1_20_R1",
+    "1.20.2": "v1_20_R2",
     "1.20.4": "v1_20_R3",
     "1.20.6": "v1_20_R4",
 }
@@ -92,6 +98,8 @@ HAS_BUILD_CONTEXT = V >= (1, 19)
 HAS_RESOURCE_ARGUMENT = V >= (1, 19, 3)
 HAS_COMPONENT_CONTENTS = V >= (1, 19)
 HAS_MINECRAFT_TO_BUKKIT = V >= (1, 20, 4)
+# CraftParticle switched to minecraftToBukkit earlier than the other Craft* converters.
+HAS_PARTICLE_MINECRAFT_TO_BUKKIT = V >= (1, 20, 2)
 
 wrappers = []
 CTX = "CommandContext<CommandSourceStack>"
@@ -400,7 +408,7 @@ w("NMSCraftParticle", ('''    public NMSCraftParticle_SUFFIX() {
     public Particle toBukkit(NMSParticleParam nms) {
         return CraftParticle.CONVERSION;
     }
-''').replace("CONVERSION", "minecraftToBukkit(((ParticleOptions) nms.getHandle()).getType())" if HAS_MINECRAFT_TO_BUKKIT
+''').replace("CONVERSION", "minecraftToBukkit(((ParticleOptions) nms.getHandle()).getType())" if HAS_PARTICLE_MINECRAFT_TO_BUKKIT
                  else "toBukkit((ParticleOptions) nms.getHandle())"), ["net.minecraft.core.particles.ParticleOptions", f"{CB}.CraftParticle", "org.bukkit.Particle"])
 
 w("NMSCraftServer", '''    public NMSCraftServer_SUFFIX(Server handle) {

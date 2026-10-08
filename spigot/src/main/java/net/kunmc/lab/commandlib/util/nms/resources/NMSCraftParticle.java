@@ -21,8 +21,8 @@ public abstract class NMSCraftParticle extends CraftBukkitClass {
     public abstract Particle toBukkit(NMSParticleParam nms);
 
     static {
-        NMSClassRegistry.register(NMSCraftParticle.class, NMSCraftParticle_v1_16_0.class, "1.16.0", "1.20.3");
-        NMSClassRegistry.register(NMSCraftParticle.class, NMSCraftParticle_v1_20_2.class, "1.20.4", "9.9.9");
+        NMSClassRegistry.register(NMSCraftParticle.class, NMSCraftParticle_v1_16_0.class, "1.16.0", "1.20.1");
+        NMSClassRegistry.register(NMSCraftParticle.class, NMSCraftParticle_v1_20_2.class, "1.20.2", "9.9.9");
         NMSClassRegistry.registerTyped(NMSCraftParticle.class);
     }
 }

@@ -52,6 +52,13 @@ tasks.register("minecraftIntegrationTest") {
         ":integration-test:targets:neoforge-1.21.1:minecraftIntegrationTest",
         ":integration-test:targets:spigot-1.20.4:minecraftIntegrationTest",
         ":integration-test:targets:spigot-1.20.6:minecraftIntegrationTest",
+        ":integration-test:targets:paper-1.18:minecraftIntegrationTest",
+        ":integration-test:targets:paper-1.18.1:minecraftIntegrationTest",
+        ":integration-test:targets:paper-1.19:minecraftIntegrationTest",
+        ":integration-test:targets:paper-1.19.1:minecraftIntegrationTest",
+        ":integration-test:targets:paper-1.19.3:minecraftIntegrationTest",
+        ":integration-test:targets:paper-1.20:minecraftIntegrationTest",
+        ":integration-test:targets:paper-1.20.2:minecraftIntegrationTest",
     )
 }
 

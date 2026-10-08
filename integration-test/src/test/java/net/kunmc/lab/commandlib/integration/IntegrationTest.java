@@ -760,6 +760,9 @@ class IntegrationTest {
                         arguments[i] = new BitSet();
                     } else if (java.util.List.class.isAssignableFrom(type)) {
                         arguments[i] = Collections.emptyList();
+                    } else if (java.util.Map.class.isAssignableFrom(type)) {
+                        // MCProtocolLib 1.19-1 writes the argument signatures without a null check.
+                        arguments[i] = Collections.emptyMap();
                     } else {
                         arguments[i] = null;
                     }
