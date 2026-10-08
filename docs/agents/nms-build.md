@@ -83,9 +83,11 @@ reflection implementations, which is enough for work that does not touch NMS.
 1. For a new version, add `nms/<platform>-<version>/build.gradle.kts` like the existing modules and add the name to
    `typedNmsModules` in `settings.gradle.kts`. Use `spigotNms { remapped.set(true) }` from 1.17 and paperweight from
    1.20.5. Set the Java toolchain the server jar needs.
-2. Put classes in `net.kunmc.lab.commandlib.nms.<module>`, named `<NMSWrapper>_<module>` with dots replaced by
-   underscores, such as `NMSArgumentPlayer_spigot_1_20_4`. The nearest existing module is the best starting point:
-   the classes of the Mojang-named modules differ only where the Minecraft API changed.
+2. Generate the classes with `tools/nms-codegen` (see its README): add the module to `MODULES` in `generate.py`, and
+   for a Mojang-named Spigot module its CraftBukkit package to `SPIGOT_TARGETS` in `mojang.py`, then run
+   `uv run generate.py <module>`. Classes go to `net.kunmc.lab.commandlib.nms.<module>`, named `<NMSWrapper>_<module>`
+   with dots replaced by underscores, such as `NMSArgumentPlayer_spigot_1_20_4`. Where the Minecraft API changed,
+   add a version flag in `mojang.py` rather than editing the generated classes, which a regeneration overwrites.
 3. Add the module to `TYPED_MODULES` in `NMSClassRegistry`. For a Paper module, also add the `<package>_spigot`
    package and give the module a `MappingProbe` like `nms/paper-1.20.6`. A new wrapper calls `registerTyped` in its
    static block.
