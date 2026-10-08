@@ -7,7 +7,6 @@ import org.gradle.api.services.BuildService
 import org.gradle.api.services.BuildServiceParameters
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
-import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.TaskAction
 import org.gradle.jvm.toolchain.JavaLauncher
 import org.gradle.process.ExecOperations
@@ -16,6 +15,7 @@ import java.io.File
 import java.net.URI
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
+import java.util.jar.JarFile
 import javax.inject.Inject
 
 /** Serializes BuildTools runs, because they share one working directory. */
@@ -34,7 +34,8 @@ abstract class BuildToolsTask : DefaultTask() {
     @get:Input
     abstract val remapped: Property<Boolean>
 
-    @get:Nested
+    /** Resolved only when BuildTools runs, so an installed version needs no extra JDK. */
+    @get:Internal
     abstract val javaLauncher: Property<JavaLauncher>
 
     @get:Input
@@ -63,9 +64,7 @@ abstract class BuildToolsTask : DefaultTask() {
 
         val directory = buildToolsDirectory.get().asFile
         val buildToolsJar = directory.resolve("BuildTools.jar")
-        if (!buildToolsJar.isFile) {
-            downloadBuildTools(buildToolsJar)
-        }
+        updateBuildTools(buildToolsJar)
 
         val workDirectory = directory.resolve("work").apply { mkdirs() }
         val buildToolsArgs = mutableListOf("-jar", buildToolsJar.absolutePath, "--rev", minecraftVersion.get())
@@ -73,10 +72,15 @@ abstract class BuildToolsTask : DefaultTask() {
             buildToolsArgs += "--remapped"
         }
         logger.lifecycle("Running BuildTools for Spigot ${minecraftVersion.get()}. This takes several minutes.")
+        val repository = mavenLocalDirectory.get().asFile
         execOperations.exec {
             workingDir = workDirectory
             executable = javaLauncher.get().executablePath.asFile.absolutePath
             args(buildToolsArgs)
+            // BuildTools installs with its own Maven, which would not see a maven.repo.local given to this build.
+            // BuildTools sets -Xmx1024M only when MAVEN_OPTS is unset, so keep that default.
+            val mavenOpts = System.getenv("MAVEN_OPTS") ?: "-Xmx1024M"
+            environment("MAVEN_OPTS", "$mavenOpts -Dmaven.repo.local=${repository.absolutePath}")
         }
 
         val stillMissing = missingArtifacts()
@@ -102,13 +106,32 @@ abstract class BuildToolsTask : DefaultTask() {
         return required.filterNot(File::isFile)
     }
 
-    private fun downloadBuildTools(destination: File) {
+    /**
+     * Downloads BuildTools before each run, because a new Minecraft version can need a newer one than the cached jar.
+     * Runs are rare, and BuildTools needs network access anyway. The cached jar is kept when the download fails.
+     */
+    private fun updateBuildTools(destination: File) {
         destination.parentFile.mkdirs()
         val temporary = File(destination.parentFile, "${destination.name}.part")
-        logger.lifecycle("Downloading BuildTools from ${buildToolsUrl.get()}")
-        URI(buildToolsUrl.get()).toURL()
-            .openStream()
-            .use { Files.copy(it, temporary.toPath(), StandardCopyOption.REPLACE_EXISTING) }
-        Files.move(temporary.toPath(), destination.toPath(), StandardCopyOption.REPLACE_EXISTING)
+        val url = buildToolsUrl.get()
+        logger.lifecycle("Downloading BuildTools from $url")
+        try {
+            val connection = URI(url).toURL().openConnection().apply {
+                connectTimeout = 30_000
+                readTimeout = 60_000
+            }
+            connection.getInputStream().use { Files.copy(it, temporary.toPath(), StandardCopyOption.REPLACE_EXISTING) }
+            // SpigotMC publishes no checksum for BuildTools.jar, so this only rejects a truncated download or an
+            // error page. The download itself goes over HTTPS.
+            val mainClass = JarFile(temporary).use { it.manifest?.mainAttributes?.getValue("Main-Class") }
+            check(mainClass != null) { "$url is not an executable jar" }
+            Files.move(temporary.toPath(), destination.toPath(), StandardCopyOption.REPLACE_EXISTING)
+        } catch (e: Exception) {
+            temporary.delete()
+            if (!destination.isFile) {
+                throw e
+            }
+            logger.warn("Could not download BuildTools ({}); using the cached jar.", e.toString())
+        }
     }
 }

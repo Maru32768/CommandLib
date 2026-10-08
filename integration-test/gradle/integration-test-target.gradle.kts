@@ -83,12 +83,6 @@ val serverLaunchArgs = if (extra.has("commandlib.integration.serverLaunchArgs"))
     "-jar $serverJarName"
 }
 val isBukkitPlatform = targetPlatform == "paper" || targetPlatform == "mohist"
-// CommandLib module that the nested test-plugin build inlines. It must match commandlibModule in that build.
-val commandlibModule = if (extra.has("commandlib.integration.commandlibModule")) {
-    extra["commandlib.integration.commandlibModule"].toString()
-} else {
-    "spigot"
-}
 val reportFileName = "TEST-commandlib-$minecraftVersion-$targetPlatform.xml"
 
 val mcProtocol = configurations.named("mcProtocol")
@@ -149,9 +143,17 @@ val dockerImageName = "commandlib-it-${targetName.lowercase()}:latest"
 val isWindows = System.getProperty("os.name").startsWith("Windows", ignoreCase = true)
 val javaToolchains = extensions.getByType<JavaToolchainService>()
 
+// CommandLib module that the nested test-plugin build inlines. That build also runs on its own, so it keeps the
+// setting and this build reads it from there.
+val commandlibModule = testPluginDir.resolve("build.gradle.kts")
+    .takeIf { it.isFile }
+    ?.readText()
+    ?.let { Regex("""extra\["commandlibModule"]\s*=\s*"([^"]+)"""").find(it)?.groupValues?.get(1) }
+
 // A target can register its own prepareTestPlugin task before applying this script, for example to install a
 // Forge server and copy the test mod built in this Gradle build. Otherwise the nested test-plugin build runs.
 val prepareTask = if ("prepareTestPlugin" in tasks.names) tasks.named("prepareTestPlugin") else tasks.register<Exec>("prepareTestPlugin") {
+    requireNotNull(commandlibModule) { "${testPluginDir.resolve("build.gradle.kts")} does not set commandlibModule" }
     if (commandlibModule == "spigot") {
         // The nested build bundles the typed NMS jars from spigot/build/typed-nms.
         dependsOn(":spigot:collectTypedNms")

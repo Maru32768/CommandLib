@@ -30,9 +30,7 @@ class SpigotNmsPlugin : Plugin<Project> {
         extension.remapped.convention(false)
         val spigotVersion = extension.minecraftVersion.map { "$it-R0.1-SNAPSHOT" }
 
-        val mavenLocalDirectory = System.getProperty("maven.repo.local")
-            ?.let(::File)
-            ?: File(System.getProperty("user.home"), ".m2/repository")
+        val mavenLocalDirectory = mavenLocalRepository()
         project.repositories.mavenLocal {
             content { includeGroup("org.spigotmc") }
             metadataSources {

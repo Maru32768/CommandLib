@@ -32,7 +32,7 @@ tasks.test {
     useJUnitPlatform()
     // The real-jar NMS resolver test reads the server jar that BuildTools installs for :nms:spigot-1.16.5.
     systemProperty("commandlib.nmsTestJar.1_16_5",
-                   File(System.getProperty("maven.repo.local") ?: "${System.getProperty("user.home")}/.m2/repository",
+                   File(commandlib.nms.mavenLocalRepository(),
                         "org/spigotmc/spigot/1.16.5-R0.1-SNAPSHOT/spigot-1.16.5-R0.1-SNAPSHOT.jar").absolutePath)
 }
 

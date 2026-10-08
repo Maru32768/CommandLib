@@ -28,6 +28,7 @@ val typedPackage = "net/kunmc/lab/commandlib/nms/paper_1_20_6"
 
 val writeSpigotPackageMapping by tasks.registering {
     val mapping = layout.buildDirectory.file("remap/spigot-package.srg")
+    inputs.property("typedPackage", typedPackage)
     outputs.file(mapping)
     doLast {
         mapping.get().asFile.writeText("PK: $typedPackage ${typedPackage}_spigot\n")
