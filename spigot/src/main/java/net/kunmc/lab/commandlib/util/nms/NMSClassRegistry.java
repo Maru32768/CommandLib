@@ -32,6 +32,7 @@ public class NMSClassRegistry {
                                                                    new TypedModule("spigot_1_19_4", "1.19.4", "1.19.4"),
                                                                    new TypedModule("spigot_1_20_1", "1.20.1", "1.20.1"),
                                                                    new TypedModule("spigot_1_20_4", "1.20.4", "1.20.4"),
+                                                                   new TypedModule("spigot_1_20_6", "1.20.6", "1.20.6"),
                                                                    new TypedModule("paper_1_20_6", "1.20.5", "1.20.6"),
                                                                    new TypedModule("paper_1_20_6_spigot",
                                                                                    "paper_1_20_6",

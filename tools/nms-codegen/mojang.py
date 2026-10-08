@@ -18,6 +18,7 @@ SPIGOT_TARGETS = {
     "1.19.4": "v1_19_R3",
     "1.20.1": "v1_20_R1",
     "1.20.4": "v1_20_R3",
+    "1.20.6": "v1_20_R4",
 }
 platform, version = TARGET.split("-")
 V = ver(version)
@@ -427,7 +428,21 @@ w("NMSDedicatedServer", f'''    public NMSDedicatedServer_SUFFIX(Object handle) 
     }}
 ''', ["net.minecraft.server.dedicated.DedicatedServer"])
 
-# ReloadableServerResources.commandBuildContext is private on Spigot, so 1.20.4 keeps the reflection implementation.
+# ReloadableServerResources.commandBuildContext is private on Spigot. Up to 1.20.4 the reflection implementation reads
+# it; from 1.20.5, whose reflection implementation assumes Paper, a context is built from public API.
+if V >= (1, 20, 5) and not PAPER:
+    w("NMSDataPackResources", f'''    public NMSDataPackResources_SUFFIX(Object handle) {{
+        super(handle, "{NAMES["ReloadableServerResources"]}");
+    }}
+
+    @Override
+    public NMSCommandBuildContext getCommandBuildContext() {{
+        MinecraftServer server = MinecraftServer.getServer();
+        return NMSCommandBuildContext.create(CommandBuildContext.simple(server.registryAccess(),
+                                                                        server.getWorldData()
+                                                                              .enabledFeatures()));
+    }}
+''', ["net.minecraft.commands.CommandBuildContext", "net.minecraft.server.MinecraftServer"])
 if PAPER:
     w("NMSDataPackResources", f'''    public NMSDataPackResources_SUFFIX(Object handle) {{
         super(handle, "{NAMES["ReloadableServerResources"]}");
@@ -542,6 +557,17 @@ if "Vec2" in NAMES:
     }}
 ''', ["net.minecraft.world.phys.Vec2"])
 
+# Wrappers that only hold a handle look their class up by name. From 1.20.5 the reflection implementations use Paper's
+# Mojang names, which Spigot does not have, so the Spigot modules provide the Spigot names.
+if V >= (1, 20, 5) and not PAPER:
+    for wrapper, class_name in [("NMSMobEffectList", "world.effect.MobEffectList"),
+                                ("NMSIBlockData", "world.level.block.state.IBlockData"),
+                                ("NMSParticle", "core.particles.Particle")]:
+        w(wrapper, f'''    public {wrapper}_SUFFIX(Object handle) {{
+        super(handle, "{class_name}");
+    }}
+''')
+
 HELPER_PACKAGE = module_package(M)
 if HAS_BUILD_CONTEXT:
     write_source(M, HELPER_PACKAGE, "BuildContexts", f"""package {HELPER_PACKAGE};
@@ -562,6 +588,29 @@ final class BuildContexts {{
                                                    .getDataPackResources()
                                                    .getCommandBuildContext()
                                                    .getHandle();
+    }}
+}}
+""")
+
+if V >= (1, 20, 5) and not PAPER:
+    write_source(M, HELPER_PACKAGE, "MappingProbe", f"""package {HELPER_PACKAGE};
+
+/**
+ * Tells NMSClassRegistry whether this package runs on Spigot. Paper shares the version range from 1.20.5, and its
+ * remapper translates the Spigot names in this package's bytecode, but not the Spigot class names that the wrappers
+ * look up by string. So the package matches only where the Spigot name MobEffectList is a class.
+ */
+final class MappingProbe {{
+    private MappingProbe() {{
+    }}
+
+    static boolean matches() {{
+        try {{
+            Class.forName("net.minecraft.world.effect.MobEffectList", false, MappingProbe.class.getClassLoader());
+            return true;
+        }} catch (ClassNotFoundException e) {{
+            return false;
+        }}
     }}
 }}
 """)

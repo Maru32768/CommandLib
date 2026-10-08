@@ -19,6 +19,7 @@ MODULES = [
     "spigot-1.19.4",
     "spigot-1.20.1",
     "spigot-1.20.4",
+    "spigot-1.20.6",
     "paper-1.20.6",
 ]
 

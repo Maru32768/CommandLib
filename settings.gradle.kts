@@ -15,7 +15,8 @@ plugins {
 rootProject.name = "CommandLib"
 include("spigot", "paper")
 // Typed NMS modules bundled into :spigot. They need BuildTools or a paperweight dev bundle, so
-// -Pcommandlib.typedNms=false leaves them out and :spigot uses only the reflection implementations.
+// -Pcommandlib.typedNms=false leaves them out and :spigot uses only the reflection implementations, and
+// -Pcommandlib.typedNms=spigot-1.20.4,paper-1.20.6 includes only the listed modules.
 val typedNmsModules = listOf(
     "spigot-1.16.5",
     "spigot-1.17.1",
@@ -24,11 +25,18 @@ val typedNmsModules = listOf(
     "spigot-1.19.4",
     "spigot-1.20.1",
     "spigot-1.20.4",
+    "spigot-1.20.6",
     "paper-1.20.6",
 )
-if (providers.gradleProperty("commandlib.typedNms").orNull != "false") {
-    typedNmsModules.forEach { include("nms:$it") }
+val typedNmsSelection = providers.gradleProperty("commandlib.typedNms").orNull
+val includedTypedNmsModules = when (typedNmsSelection) {
+    null, "true" -> typedNmsModules
+    "false" -> emptyList()
+    else -> typedNmsSelection.split(",").map(String::trim).onEach {
+        require(it in typedNmsModules) { "Unknown typed NMS module in commandlib.typedNms: $it" }
+    }
 }
+includedTypedNmsModules.forEach { include("nms:$it") }
 include("common")
 include("common-testing", "spigot-testing", "paper-testing")
 // Forge and NeoForge share one source tree. Nodes are named <loader>-<minecraft version>.
@@ -83,4 +91,5 @@ include(
     "integration-test:targets:forge-1.20.1",
     "integration-test:targets:neoforge-1.21.1",
     "integration-test:targets:spigot-1.20.4",
+    "integration-test:targets:spigot-1.20.6",
 )

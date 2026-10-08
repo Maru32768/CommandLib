@@ -80,12 +80,15 @@ public class TestMain {
             SuggestionTest suggestionTest = new SuggestionTest(mainCommand);
             ScenarioTest scenarioTest = new ScenarioTest(mainCommand, plugin, TEST_PLAYER_NAME);
             new HelpMessageTest(mainCommand); // registers helpMessageRoot for bot-side help message verification
+            // Runs after the other tests, whose commands initialize the NMS wrappers it inspects.
+            TypedNmsTest typedNmsTest = new TypedNmsTest(mainCommand);
             List<TestBase> tests = List.of(argumentTest,
                                            optionTest,
                                            commandSyntaxExceptionTest,
                                            runtimePermissionTest,
                                            suggestionTest,
-                                           scenarioTest);
+                                           scenarioTest,
+                                           typedNmsTest);
             List<String> commands = tests.stream()
                                          .flatMap(x -> x.build()
                                                         .stream())

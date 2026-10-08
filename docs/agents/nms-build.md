@@ -29,7 +29,14 @@ CommandAPI's build layout:
 
 Typed classes cover every wrapper that calls NMS members. Wrappers that only hold a handle (`NMSItemStack`,
 `NMSEnchantment`, `NMSParticle`, ...) and `NMSArgumentTypeRegistrar`, which edits private registry maps, stay on
-reflection. On Spigot, `NMSDataPackResources` also stays on reflection because the build context field is private.
+reflection. On Spigot up to 1.20.4, `NMSDataPackResources` also stays on reflection because the build context field is
+private.
+
+The reflection implementations for 1.20.5 and later assume Paper's Mojang names, so on Spigot 1.20.5+ the typed
+modules are the only working path. Those modules also cover `NMSDataPackResources` (built from public API) and the
+handle wrappers whose Spigot class names differ (`NMSMobEffectList`, `NMSIBlockData`, `NMSParticle`). Their
+`MappingProbe` matches only on Spigot: Paper shares the version range and its remapper translates Spigot names in
+bytecode, but not the class names these wrappers look up by string.
 
 ## BuildTools
 
@@ -50,7 +57,9 @@ lacks the jars (and, for remapped modules, the `minecraft-server` mappings):
 - To prepare a machine ahead of time, run `./gradlew installSpigot`, which runs the task in every module.
 
 `-Pcommandlib.typedNms=false` leaves every `nms:*` project out of the build. The spigot jar then contains only the
-reflection implementations, which is enough for work that does not touch NMS.
+reflection implementations, which is enough for work that does not touch NMS. A comma-separated list, such as
+`-Pcommandlib.typedNms=spigot-1.20.4,paper-1.20.6`, includes only those modules, for example while BuildTools has not
+run for the others.
 
 ## Bundling And Lookup
 
@@ -94,4 +103,6 @@ reflection implementations, which is enough for work that does not touch NMS.
 4. Verify with `./gradlew :nms:<module>:assemble :spigot:jar :spigot:test` and, when the behavior needs a server, the
    matching `:integration-test:targets:<target>:minecraftIntegrationTest`.
 
-Keep the reflection implementation for a version until the typed one is covered by the integration test for it.
+Keep the reflection implementation for a version until the typed one is covered by the integration test for it. The
+Spigot suite's `TypedNmsTest` fails when a wrapper has a typed class for the server version, in a package whose probe
+matches, but `findClass` falls back to reflection, so a silently rejected typed class does not pass unnoticed.

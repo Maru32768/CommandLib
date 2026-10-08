@@ -129,8 +129,20 @@ public final class CommandLib implements Listener {
         updatePlayerCommandsLater();
     }
 
+    /**
+     * Paper replaces the Bukkit command map with one backed by its Brigadier dispatcher from 1.20.6. Spigot keeps the
+     * vanilla dispatcher, which takes commands through the NMS bridge as before.
+     */
     private static boolean usesPaperCommandDispatcher() {
-        return !new MinecraftVersion(BukkitUtil.getMinecraftVersion()).isLessThan(new MinecraftVersion("1.20.6"));
+        if (new MinecraftVersion(BukkitUtil.getMinecraftVersion()).isLessThan(new MinecraftVersion("1.20.6"))) {
+            return false;
+        }
+        try {
+            Class.forName("io.papermc.paper.command.brigadier.ShadowBrigNode");
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
     }
 
     @SuppressWarnings("unchecked")
