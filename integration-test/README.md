@@ -109,8 +109,8 @@ Spigot targets (`spigot-<version>`) run the `spigot` module on a plain Spigot se
 produced by BuildTools, so the target's `buildSpigotServer` task runs it (through the same BuildTools setup as the typed
 NMS modules, see `docs/agents/nms-build.md`) and copies the jar to `test-plugin/server/server.jar`. BuildTools resolves
 1.20.5 and 1.21 to the build of the following hotfix release, so those targets set the Spigot build number of the last
-build of their release in `commandlib.integration.buildToolsRevision`. The first run of a
-version takes several minutes.
+build of their release in `commandlib.integration.buildToolsRevision`. BuildTools also installs the remapped
+artifacts only for a version that has a typed NMS module. The first run of a version takes several minutes.
 
 `minecraftIntegrationTest` is the aggregate task for all configured targets.
 The aggregate task depends on per-target subprojects, so Gradle can run independent targets in parallel by default.

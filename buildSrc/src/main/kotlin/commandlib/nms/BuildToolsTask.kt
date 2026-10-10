@@ -29,8 +29,8 @@ abstract class BuildToolsService : BuildService<BuildServiceParameters.None>
 /**
  * Installs `org.spigotmc:spigot` for one Minecraft version into the local Maven repository by running
  * [BuildTools](https://www.spigotmc.org/wiki/buildtools/), and copies the runnable server jar to [serverJar] when it is
- * set. Nothing runs when the artifacts are installed already, so only the first build of a version pays for
- * BuildTools.
+ * set. Nothing runs when the artifacts of the revision are installed already, so only the first build of a version
+ * pays for BuildTools.
  */
 @DisableCachingByDefault(because = "Installs into the local Maven repository")
 abstract class BuildToolsTask : DefaultTask() {
@@ -75,27 +75,24 @@ abstract class BuildToolsTask : DefaultTask() {
 
     @TaskAction
     fun install() {
-        if (missingArtifacts().isEmpty()) {
-            didWork = copyServerJar()
-            return
-        }
-
         val directory = buildToolsDirectory.get().asFile.apply { mkdirs() }
         // Another Gradle process, such as an IDE sync next to a command-line build, may run BuildTools in the same
-        // directory. The lock is released when the channel closes, and by the OS when a process dies.
+        // directory. BuildTools writes the server jar in place as its last step, so checking the artifacts and copying
+        // the jar hold the lock too. The lock is released when the channel closes, and by the OS when a process dies.
         RandomAccessFile(directory.resolve("buildtools.lock"), "rw").channel.use { channel ->
             val lock = channel.tryLock() ?: run {
                 logger.lifecycle("Waiting for another Gradle process to finish running BuildTools in $directory")
                 channel.lock()
             }
             lock.use {
-                // The other process may have installed the artifacts while this one waited.
-                if (missingArtifacts().isNotEmpty()) {
+                var ranBuildTools = false
+                if (!isInstalled()) {
                     runBuildTools(directory)
+                    ranBuildTools = true
                 }
+                didWork = copyServerJar() || ranBuildTools
             }
         }
-        copyServerJar()
     }
 
     private fun runBuildTools(directory: File) {
@@ -115,23 +112,46 @@ abstract class BuildToolsTask : DefaultTask() {
             args(buildToolsArgs)
             // BuildTools sets -Xmx1024M only when MAVEN_OPTS is unset, so keep that default.
             val mavenOpts = System.getenv("MAVEN_OPTS") ?: "-Xmx1024M"
-            environment("MAVEN_OPTS", mavenOpts + repositoryOption(repository))
+            environment("MAVEN_OPTS", mavenOpts + repositoryOption(repository, mavenOpts))
         }
 
         val stillMissing = missingArtifacts()
         if (stillMissing.isNotEmpty()) {
             error("BuildTools finished but did not install: ${stillMissing.joinToString()}")
         }
+        revisionRecord().apply { parentFile.mkdirs() }.writeText(revision.get())
     }
+
+    /**
+     * Whether the artifacts are installed, built from [revision]. A revision that an earlier run recorded and that
+     * differs means another build of the release, which BuildTools replaces. Artifacts installed before runs recorded
+     * their revision are taken to match, and the revision is recorded for them.
+     */
+    private fun isInstalled(): Boolean {
+        if (missingArtifacts().isNotEmpty()) {
+            return false
+        }
+        val record = revisionRecord()
+        if (!record.isFile) {
+            record.parentFile.mkdirs()
+            record.writeText(revision.get())
+            return true
+        }
+        return record.readText().trim() == revision.get()
+    }
+
+    private fun revisionRecord(): File =
+        buildToolsDirectory.get().asFile.resolve("revisions/spigot-${minecraftVersion.get()}.txt")
 
     /**
      * BuildTools installs with its own Maven, which finds the repository in `~/.m2/settings.xml` or at `~/.m2/repository`
      * but would not see a `maven.repo.local` given to this build or `$M2_HOME/conf/settings.xml`. The option goes
      * through `MAVEN_OPTS`, which the `mvn` shell script splits on whitespace, so only `mvn.cmd` can take a quoted path
-     * with spaces.
+     * with spaces. It is left out only for the repository Maven finds by itself, and only when the inherited
+     * `MAVEN_OPTS` names no repository, because the last `-Dmaven.repo.local` wins.
      */
-    private fun repositoryOption(repository: File): String {
-        if (repository.absoluteFile == userMavenRepository().absoluteFile) {
+    private fun repositoryOption(repository: File, mavenOpts: String): String {
+        if (repository.absoluteFile == userMavenRepository().absoluteFile && !mavenOpts.contains("maven.repo.local")) {
             return ""
         }
         val path = repository.absolutePath
@@ -149,14 +169,25 @@ abstract class BuildToolsTask : DefaultTask() {
     private fun builtServerJar(): File =
         buildToolsDirectory.get().asFile.resolve("work/spigot-${minecraftVersion.get()}.jar")
 
+    /**
+     * Copies the server jar with its modification time, so a copy with the same size and time is taken to be current
+     * without reading either jar.
+     */
     private fun copyServerJar(): Boolean {
         val destination = serverJar.orNull?.asFile ?: return false
         val source = builtServerJar()
-        if (destination.isFile && Files.mismatch(source.toPath(), destination.toPath()) == -1L) {
+        if (destination.isFile && destination.length() == source.length() &&
+            destination.lastModified() == source.lastModified()
+        ) {
             return false
         }
         destination.parentFile.mkdirs()
-        Files.copy(source.toPath(), destination.toPath(), StandardCopyOption.REPLACE_EXISTING)
+        Files.copy(
+            source.toPath(),
+            destination.toPath(),
+            StandardCopyOption.REPLACE_EXISTING,
+            StandardCopyOption.COPY_ATTRIBUTES,
+        )
         return true
     }
 

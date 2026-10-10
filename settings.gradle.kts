@@ -23,10 +23,13 @@ val typedNmsModules = file("nms").listFiles()
     .map { it.name }
     .sorted()
 // NMSClassRegistry only looks up modules listed in the table that tools/nms-codegen/generate.py writes.
-val typedNmsTable = file("spigot/src/main/java/net/kunmc/lab/commandlib/util/nms/TypedNmsModules.java").readText()
+val typedNmsTable = Regex("""new NMSClassRegistry\.TypedModule\("([^"]+)"""")
+    .findAll(file("spigot/src/main/java/net/kunmc/lab/commandlib/util/nms/TypedNmsModules.java").readText())
+    .map { it.groupValues[1] }
+    .toSet()
 typedNmsModules.forEach {
     val modulePackage = it.replace("-", "_").replace(".", "_")
-    require("TypedModule(\"$modulePackage\"" in typedNmsTable) {
+    require(modulePackage in typedNmsTable) {
         "nms/$it is missing from TypedNmsModules. Add it to MODULES in tools/nms-codegen/generate.py and regenerate."
     }
 }
