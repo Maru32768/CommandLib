@@ -25,3 +25,11 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
 }
+
+// The tests run against the classes of :spigot instead of its jar, which bundles the typed NMS modules and would run
+// BuildTools for every supported Spigot version. CommandTester stubs NMSClassRegistry, so the tests never load them.
+configurations.testRuntimeClasspath {
+    attributes {
+        attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, objects.named(LibraryElements.CLASSES))
+    }
+}
