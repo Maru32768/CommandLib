@@ -17,6 +17,8 @@ atlassian-ide-plugin.xml
 
 # Compiled class file
 *.class
+# Test resources named like class files that are deliberately not valid ones
+!spigot/src/test/resources/**/*.class
 
 # Log file
 *.log

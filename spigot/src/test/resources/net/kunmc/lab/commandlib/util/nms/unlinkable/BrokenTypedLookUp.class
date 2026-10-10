@@ -1,0 +1,1 @@
+Not a class file. NMSClassRegistryTest registers it as a typed class, so loading it fails with a ClassFormatError.

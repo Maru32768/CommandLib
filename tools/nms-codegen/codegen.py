@@ -72,7 +72,7 @@ def register(wrappers):
     """
     Makes sure each wrapper, such as NMSArgumentDimension or NMSHolder.NMSReference, registers its typed classes.
     NMSClassRegistry derives the class names from its module table, so one registerTyped call per wrapper covers every
-    module. A wrapper that already calls registerTyped, possibly with a version range, is left alone.
+    module. A wrapper that already calls registerTyped is left alone.
     """
     for wrapper in dict.fromkeys(wrappers):
         outer = wrapper.split(".")[0]

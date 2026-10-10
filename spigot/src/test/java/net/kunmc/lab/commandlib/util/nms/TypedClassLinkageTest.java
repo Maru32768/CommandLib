@@ -1,6 +1,8 @@
 package net.kunmc.lab.commandlib.util.nms;
 
 import net.kunmc.lab.commandlib.util.nms.access.AccessTarget;
+import net.kunmc.lab.commandlib.util.nms.access.ConstructorTarget;
+import net.kunmc.lab.commandlib.util.nms.access.OpenFields;
 import net.kunmc.lab.commandlib.util.nms.hybrid.HybridClassLoader;
 import net.kunmc.lab.commandlib.util.nms.unlinkable.UnlinkableTypedLookUp;
 import org.junit.jupiter.api.Test;
@@ -103,6 +105,50 @@ class TypedClassLinkageTest {
         assertThat(TypedClassLinkage.isLinkable(caller)).isTrue();
     }
 
+    @Test
+    void inaccessible_class_named_only_in_attributes_does_not_prevent_linking() {
+        assertThat(TypedClassLinkage.isLinkable(HiddenCaller.class)).isTrue();
+    }
+
+    @Test
+    void protected_superclass_constructor_in_another_package_is_linkable() {
+        assertThat(TypedClassLinkage.isLinkable(ProtectedSub.class)).isTrue();
+    }
+
+    @Test
+    void package_private_superclass_constructor_in_another_package_is_reported() throws Exception {
+        byte[] bytes = replace(classFile(ProtectedSub.class), "(I)V", "(C)V");
+
+        assertThatThrownBy(() -> TypedClassLinkage.checkReferences(bytes,
+                                                                   ProtectedSub.class)).isInstanceOf(
+                TypedClassLinkage.NoSuchMemberException.class);
+    }
+
+    @Test
+    void superclass_constructor_resolves_without_its_other_constructors() throws Exception {
+        // BrokenConstructorBase has another constructor whose signature names a class the loader lacks, which
+        // reflecting over all its constructors would fail on.
+        Class<?> sub = Class.forName("net.kunmc.lab.commandlib.util.nms.hybrid.sub.BrokenConstructorSub",
+                                     false,
+                                     new HybridClassLoader());
+
+        assertThat(TypedClassLinkage.isLinkable(sub)).isTrue();
+    }
+
+    @Test
+    void writes_to_fields_of_other_classes_and_own_final_fields_are_linkable() {
+        assertThat(TypedClassLinkage.isLinkable(FieldWriter.class)).isTrue();
+    }
+
+    @Test
+    void write_to_final_field_of_another_class_is_reported() throws Exception {
+        byte[] bytes = replace(classFile(FieldWriter.class), "OpenFields", "ShutFields");
+
+        assertThatThrownBy(() -> TypedClassLinkage.checkReferences(bytes,
+                                                                   FieldWriter.class)).isInstanceOf(
+                TypedClassLinkage.NoSuchMemberException.class);
+    }
+
     private static byte[] classFile(Class<?> clazz) throws IOException {
         try (InputStream in = clazz.getResourceAsStream(clazz.getName()
                                                              .substring(clazz.getName()
@@ -158,6 +204,31 @@ class TypedClassLinkageTest {
             AccessTarget.publicMethod();
             int[] copy = new int[]{target.linkedField}.clone();
             return LinkedTarget.linkedMethod(copy[0]);
+        }
+    }
+
+    static class HiddenCaller {
+        Object run() {
+            return AccessTarget.hidden();
+        }
+    }
+
+    static class ProtectedSub extends ConstructorTarget {
+        ProtectedSub() {
+            super(1);
+        }
+    }
+
+    static class FieldWriter {
+        private final int own;
+
+        FieldWriter() {
+            own = 1;
+        }
+
+        void write(OpenFields fields) {
+            fields.instance = own;
+            OpenFields.value = own;
         }
     }
 }

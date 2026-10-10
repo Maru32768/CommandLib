@@ -9,4 +9,15 @@ public class AccessTarget {
 
     private static void hiddenMethod() {
     }
+
+    /**
+     * Returns a class that callers cannot access, which their class files still name in {@code InnerClasses}.
+     */
+    @SuppressWarnings("ClassEscapesDefinedScope")
+    public static Hidden hidden() {
+        return new Hidden();
+    }
+
+    static class Hidden {
+    }
 }

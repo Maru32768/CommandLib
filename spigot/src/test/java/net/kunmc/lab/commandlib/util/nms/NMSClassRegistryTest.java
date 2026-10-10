@@ -221,12 +221,12 @@ public class NMSClassRegistryTest {
     }
 
     @ParameterizedTest
-    @CsvSource({"1.20.4, DerivedLookUp_spigot_1_20_4",
-                "1.20.5, DerivedLookUpReflection",
+    @CsvSource({"1.20.3, DerivedLookUpReflection",
+                "1.20.4, DerivedLookUp_spigot_1_20_4",
+                "1.20.5, DerivedLookUp_paper_1_20_6",
                 "1.20.6, DerivedLookUp_paper_1_20_6",
                 "1.21.4, DerivedLookUpReflection"})
-    void typed_registration_derives_class_names_from_modules_and_narrows_their_ranges(String version,
-                                                                                      String expectedClass) {
+    void typed_registration_derives_class_names_from_modules(String version, String expectedClass) {
         DerivedLookUp.register();
 
         try (MockedStatic<BukkitUtil> bukkitUtil = Mockito.mockStatic(BukkitUtil.class)) {
@@ -235,6 +235,22 @@ public class NMSClassRegistryTest {
 
             assertThat(NMSClassRegistry.findClass(DerivedLookUp.class)
                                        .getSimpleName()).isEqualTo(expectedClass);
+        }
+    }
+
+    @Test
+    void typed_fallbacks_report_a_typed_class_that_fails_to_load() {
+        LoadFailureLookUp.register();
+
+        try (MockedStatic<BukkitUtil> bukkitUtil = Mockito.mockStatic(BukkitUtil.class)) {
+            bukkitUtil.when(BukkitUtil::getMinecraftVersion)
+                      .thenReturn("1.20.4");
+
+            assertThat(NMSClassRegistry.typedFallbacks()).filteredOn(x -> x.startsWith("LoadFailureLookUp "))
+                                                         .singleElement()
+                                                         .asString()
+                                                         .startsWith("LoadFailureLookUp -> LoadFailureLookUpReflection "
+                                                                             + "(BrokenTypedLookUp: java.lang.ClassFormatError");
         }
     }
 
@@ -364,12 +380,35 @@ public class NMSClassRegistryTest {
                 return;
             }
             NMSClassRegistry.register(DerivedLookUp.class, DerivedLookUpReflection.class, "1.16.0", "9.9.9");
-            NMSClassRegistry.registerTyped(DerivedLookUp.class, "1.16.0", "1.20.4");
-            NMSClassRegistry.registerTyped(DerivedLookUp.class, "1.20.6", "9.9.9");
+            NMSClassRegistry.registerTyped(DerivedLookUp.class);
         }
     }
 
     static class DerivedLookUpReflection extends DerivedLookUp {
+    }
+
+    public abstract static class LoadFailureLookUp extends NMSClass {
+        private static final AtomicBoolean REGISTERED = new AtomicBoolean();
+
+        protected LoadFailureLookUp() {
+            super(null, Object.class);
+        }
+
+        static void register() {
+            if (!REGISTERED.compareAndSet(false, true)) {
+                return;
+            }
+            NMSClassRegistry.register(LoadFailureLookUp.class, LoadFailureLookUpReflection.class, "1.16.0", "9.9.9");
+            // A test resource with the class file name but other content, so test discovery, which only scans the
+            // compiled test classes, does not load it.
+            NMSClassRegistry.registerTyped(LoadFailureLookUp.class,
+                                           "net.kunmc.lab.commandlib.util.nms.unlinkable.BrokenTypedLookUp",
+                                           "1.20.4",
+                                           "1.20.4");
+        }
+    }
+
+    static class LoadFailureLookUpReflection extends LoadFailureLookUp {
     }
 
     static class TypedLookUpReflection extends TypedLookUp {

@@ -5,9 +5,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandleInfo;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -29,17 +30,46 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * <p>The check covers the class and the classes it uses from the same package:
  * <ul>
- *     <li>It links each class without initializing it, so the verifier rejects a server class that no longer has
- *     the supertype the bytecode assigns it to.</li>
- *     <li>It reads the constant pool and the instructions that use each field and method reference, and resolves the
- *     member through a {@link MethodHandles.Lookup} of the class with the instruction's kind: instance or static,
- *     virtual, special or interface. A lookup resolves only that member, checks access as the bytecode would, and
- *     initializes no class.</li>
+ *     <li>It links each class without initializing it. HotSpot verifies a class when it links it, which rejects a
+ *     server class that is no longer a subclass of the class the bytecode assigns it to. The verifier treats
+ *     interface types as {@code Object}, though, and a JVM with verification turned off checks no supertypes, so a
+ *     server class that dropped an interface still fails at command time.</li>
+ *     <li>It reads the instructions, and resolves each class they use and each field and method reference through a
+ *     {@link MethodHandles.Lookup} of the class with the instruction's kind: instance or static, virtual, special or
+ *     interface. A lookup resolves only that member, checks access as the bytecode would, and initializes no class.
+ *     Class references that only attributes such as {@code InnerClasses} name are never resolved by the JVM, so
+ *     they are skipped.</li>
  * </ul>
  */
 final class TypedClassLinkage {
     /** Why each checked class does not link, or an empty string when it links. */
     private static final Map<String, String> FAILURES = new ConcurrentHashMap<>();
+    /*
+     * Servers that remap a plugin from Spigot names also rewrite its calls to these Lookup methods, to map the member
+     * name as a Spigot name. Whether the class files read here need that depends on the server: Paper remaps the
+     * plugin jar itself, so its class files already have the server's names, and a Mojang name can be the Spigot name
+     * of another member; Mohist remaps the classes as it defines them, so the class files keep the Spigot names. A
+     * member is therefore resolved through these method handles, which no server rewrites, and when that fails,
+     * through a plain call that the server may rewrite.
+     */
+    private static final MethodHandle FIND_GETTER = lookupMethod("findGetter", Class.class, String.class, Class.class);
+    private static final MethodHandle FIND_STATIC_GETTER = lookupMethod("findStaticGetter",
+                                                                        Class.class,
+                                                                        String.class,
+                                                                        Class.class);
+    private static final MethodHandle FIND_VIRTUAL = lookupMethod("findVirtual",
+                                                                  Class.class,
+                                                                  String.class,
+                                                                  MethodType.class);
+    private static final MethodHandle FIND_STATIC = lookupMethod("findStatic",
+                                                                 Class.class,
+                                                                 String.class,
+                                                                 MethodType.class);
+    private static final MethodHandle FIND_SPECIAL = lookupMethod("findSpecial",
+                                                                  Class.class,
+                                                                  String.class,
+                                                                  MethodType.class,
+                                                                  Class.class);
     // Reference kinds of CONSTANT_MethodHandle (JVMS 4.4.8), also used for the instructions with the same meaning.
     private static final int GET_FIELD = 1;
     private static final int GET_STATIC = 2;
@@ -52,6 +82,43 @@ final class TypedClassLinkage {
     private static final int INVOKE_INTERFACE = 9;
 
     private TypedClassLinkage() {
+    }
+
+    private static MethodHandle lookupMethod(String name, Class<?>... parameterTypes) {
+        try {
+            return MethodHandles.publicLookup()
+                                .unreflect(MethodHandles.Lookup.class.getMethod(name, parameterTypes));
+        } catch (ReflectiveOperationException e) {
+            throw new ExceptionInInitializerError(e);
+        }
+    }
+
+    /**
+     * Resolves a member through the method handle of a Lookup method, and when that fails, through the plain call,
+     * which a server that remaps the plugin may rewrite.
+     */
+    private static MethodHandle find(Finder plainCall,
+                                     MethodHandle lookupMethod,
+                                     Object... arguments) throws ReflectiveOperationException {
+        try {
+            return (MethodHandle) lookupMethod.invokeWithArguments(arguments);
+        } catch (ReflectiveOperationException e) {
+            try {
+                return plainCall.find();
+            } catch (ReflectiveOperationException rewritten) {
+                e.addSuppressed(rewritten);
+                throw e;
+            }
+        } catch (RuntimeException | Error e) {
+            throw e;
+        } catch (Throwable e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    @FunctionalInterface
+    private interface Finder {
+        MethodHandle find() throws ReflectiveOperationException;
     }
 
     static boolean isLinkable(Class<?> typedClass) {
@@ -87,9 +154,18 @@ final class TypedClassLinkage {
                 Class<?> clazz = Class.forName(className, false, loader);
                 // HotSpot links, and so verifies, a class before it reflects its members, without initializing it.
                 clazz.getDeclaredConstructors();
-                for (String referenced : checkReferences(bytes, clazz)) {
-                    if (referenced.startsWith(packagePrefix) && referenced.indexOf('.', packagePrefix.length()) < 0) {
-                        pending.add(referenced);
+                List<String> referenced = new ArrayList<>(checkReferences(bytes, clazz));
+                // Inherited methods run the code of the supertypes, which the instructions may not name.
+                if (clazz.getSuperclass() != null) {
+                    referenced.add(clazz.getSuperclass()
+                                        .getName());
+                }
+                for (Class<?> anInterface : clazz.getInterfaces()) {
+                    referenced.add(anInterface.getName());
+                }
+                for (String name : referenced) {
+                    if (name.startsWith(packagePrefix) && name.indexOf('.', packagePrefix.length()) < 0) {
+                        pending.add(name);
                     }
                 }
             }
@@ -119,7 +195,7 @@ final class TypedClassLinkage {
 
     /**
      * Resolves the references in a class file as the given class, which the class file defines, and returns the names
-     * of the classes it refers to.
+     * of the classes whose references it uses.
      */
     static List<String> checkReferences(byte[] classFile,
                                         Class<?> lookupClass) throws IOException, ReflectiveOperationException, NoSuchMemberException {
@@ -130,18 +206,26 @@ final class TypedClassLinkage {
         List<String> classNames = new ArrayList<>();
         for (int i = 1; i < file.tags.length; i++) {
             if (file.tags[i] == 7) {
+                // The JVM resolves, and checks access to, only the classes that instructions and exception handlers
+                // use. Attributes such as InnerClasses may name classes the class cannot access.
+                if (!file.usedClasses.get(i)) {
+                    continue;
+                }
                 Class<?> clazz = resolveInternalName(file.utf8[file.first[i]], loader);
                 if (clazz != null) {
                     lookup.accessClass(clazz);
                     classNames.add(clazz.getName());
                 }
             } else if (file.tags[i] == 9 || file.tags[i] == 10 || file.tags[i] == 11) {
+                // A reference that no instruction or method handle uses never resolves; javac does not emit one.
+                BitSet kinds = file.kinds.get(i);
                 String ownerName = file.utf8[file.first[file.first[i]]];
                 // An array type, as in a clone call on an array, only has the members of Object.
-                if (ownerName.startsWith("[")) {
+                if (kinds == null || ownerName.startsWith("[")) {
                     continue;
                 }
                 Class<?> owner = resolveInternalName(ownerName, loader);
+                classNames.add(owner.getName());
                 int nameAndType = file.second[i];
                 String name = file.utf8[file.first[nameAndType]];
                 String descriptor = file.utf8[file.second[nameAndType]];
@@ -149,8 +233,6 @@ final class TypedClassLinkage {
                 if (file.tags[i] != 9 && owner.isInterface() != (file.tags[i] == 11)) {
                     throw new NoSuchMemberException(owner.getName() + "." + name + descriptor);
                 }
-                // A reference that no instruction or method handle uses never resolves; javac does not emit one.
-                BitSet kinds = file.kinds.getOrDefault(i, new BitSet());
                 for (int kind = kinds.nextSetBit(0); kind >= 0; kind = kinds.nextSetBit(kind + 1)) {
                     try {
                         resolve(lookup, kind, owner, name, descriptor);
@@ -173,39 +255,96 @@ final class TypedClassLinkage {
         MethodType type = methodType(descriptor, loader);
         switch (kind) {
             case GET_FIELD:
-            case PUT_FIELD:
-                // A setter lookup rejects final fields, which the class writes in its own constructor, so a write
-                // resolves like a read.
-                lookup.findGetter(owner, name, type.returnType());
+                getter(lookup, owner, name, type.returnType());
                 return;
             case GET_STATIC:
+                staticGetter(lookup, owner, name, type.returnType());
+                return;
+            case PUT_FIELD:
+                checkWritable(lookup, getter(lookup, owner, name, type.returnType()));
+                return;
             case PUT_STATIC:
-                lookup.findStaticGetter(owner, name, type.returnType());
+                checkWritable(lookup, staticGetter(lookup, owner, name, type.returnType()));
                 return;
             case INVOKE_VIRTUAL:
             case INVOKE_INTERFACE:
-                lookup.findVirtual(owner, name, type);
+                find(() -> lookup.findVirtual(owner, name, type), FIND_VIRTUAL, lookup, owner, name, type);
                 return;
             case INVOKE_STATIC:
-                lookup.findStatic(owner, name, type);
+                find(() -> lookup.findStatic(owner, name, type), FIND_STATIC, lookup, owner, name, type);
                 return;
             case INVOKE_SPECIAL:
             case NEW_INVOKE_SPECIAL:
-                if (!name.equals("<init>")) {
-                    lookup.findSpecial(owner, name, type, lookup.lookupClass());
-                } else if (owner == lookup.lookupClass()
-                                          .getSuperclass()) {
-                    // super(...) may call a protected constructor, which a lookup only allows within the package.
-                    Constructor<?> constructor = owner.getDeclaredConstructor(type.parameterArray());
-                    if (Modifier.isPrivate(constructor.getModifiers())) {
-                        throw new IllegalAccessException(constructor.toString());
-                    }
+                if (name.equals("<init>")) {
+                    resolveConstructor(lookup, owner, type);
                 } else {
-                    lookup.findConstructor(owner, type);
+                    Class<?> caller = lookup.lookupClass();
+                    find(() -> lookup.findSpecial(owner, name, type, caller),
+                         FIND_SPECIAL,
+                         lookup,
+                         owner,
+                         name,
+                         type,
+                         caller);
                 }
                 return;
             default:
                 throw new IllegalArgumentException("Unknown reference kind " + kind);
+        }
+    }
+
+    private static MethodHandle getter(MethodHandles.Lookup lookup,
+                                       Class<?> owner,
+                                       String name,
+                                       Class<?> type) throws ReflectiveOperationException {
+        return find(() -> lookup.findGetter(owner, name, type), FIND_GETTER, lookup, owner, name, type);
+    }
+
+    private static MethodHandle staticGetter(MethodHandles.Lookup lookup,
+                                             Class<?> owner,
+                                             String name,
+                                             Class<?> type) throws ReflectiveOperationException {
+        return find(() -> lookup.findStaticGetter(owner, name, type), FIND_STATIC_GETTER, lookup, owner, name, type);
+    }
+
+    /**
+     * Rejects a write to a final field of another class, which the JVM rejects. A setter lookup would also reject the
+     * final fields that the class writes in its own constructor.
+     */
+    private static void checkWritable(MethodHandles.Lookup lookup,
+                                      MethodHandle getter) throws IllegalAccessException {
+        MethodHandleInfo field = lookup.revealDirect(getter);
+        if (Modifier.isFinal(field.getModifiers()) && field.getDeclaringClass() != lookup.lookupClass()) {
+            throw new IllegalAccessException("write to final field " + field);
+        }
+    }
+
+    /**
+     * Resolves a constructor for {@code new} or a {@code this(...)} or {@code super(...)} call. A lookup checks a
+     * constructor as {@code new} uses it, which a protected constructor of the superclass in another package fails,
+     * although {@code super(...)} may call it. Only that case reads the constructor's modifiers, through a lookup in
+     * the superclass, so no other constructor is resolved.
+     */
+    private static void resolveConstructor(MethodHandles.Lookup lookup,
+                                           Class<?> owner,
+                                           MethodType type) throws ReflectiveOperationException {
+        try {
+            lookup.findConstructor(owner, type);
+        } catch (IllegalAccessException e) {
+            if (owner != lookup.lookupClass()
+                               .getSuperclass()) {
+                throw e;
+            }
+            MethodHandles.Lookup ownerLookup;
+            try {
+                ownerLookup = MethodHandles.privateLookupIn(owner, MethodHandles.lookup());
+            } catch (IllegalAccessException notOpen) {
+                throw e;
+            }
+            MethodHandleInfo constructor = ownerLookup.revealDirect(ownerLookup.findConstructor(owner, type));
+            if (!Modifier.isProtected(constructor.getModifiers())) {
+                throw e;
+            }
         }
     }
 
@@ -285,8 +424,8 @@ final class TypedClassLinkage {
     }
 
     /**
-     * The constant pool of a class file, and the reference kinds that its instructions and method handle constants
-     * use each field and method reference with.
+     * The constant pool of a class file, the reference kinds that its instructions and method handle constants use
+     * each field and method reference with, and the constants that instructions and exception handlers use as classes.
      */
     private static final class ClassFile {
         private final int[] tags;
@@ -294,6 +433,8 @@ final class TypedClassLinkage {
         private final int[] second;
         private final String[] utf8;
         private final Map<Integer, BitSet> kinds = new HashMap<>();
+        /** Indexes of constants that instructions and exception handlers use; only class constants matter. */
+        private final BitSet usedClasses = new BitSet();
 
         private ClassFile(int count) {
             tags = new int[count];
@@ -366,7 +507,8 @@ final class TypedClassLinkage {
         }
 
         /**
-         * Reads the fields or the methods, and the instructions in each method's Code attribute.
+         * Reads the fields or the methods, and the instructions and exception handlers in each method's Code
+         * attribute.
          */
         private void readMembers(DataInputStream in) throws IOException {
             int count = in.readUnsignedShort();
@@ -383,6 +525,12 @@ final class TypedClassLinkage {
                         byte[] instructions = new byte[code.readInt()];
                         code.readFully(instructions);
                         readInstructions(instructions);
+                        int handlers = code.readUnsignedShort();
+                        for (int k = 0; k < handlers; k++) {
+                            code.skipBytes(6);
+                            // The catch type, or 0 for a handler of every exception.
+                            usedClasses.set(code.readUnsignedShort());
+                        }
                     }
                 }
             }
@@ -395,6 +543,21 @@ final class TypedClassLinkage {
                 int kind = referenceKind(opcode);
                 if (kind != 0) {
                     use(((code[pc + 1] & 0xFF) << 8) | (code[pc + 2] & 0xFF), kind);
+                }
+                switch (opcode) {
+                    case 0x12: // ldc
+                        usedClasses.set(code[pc + 1] & 0xFF);
+                        break;
+                    case 0x13: // ldc_w
+                    case 0xBB: // new
+                    case 0xBD: // anewarray
+                    case 0xC0: // checkcast
+                    case 0xC1: // instanceof
+                    case 0xC5: // multianewarray
+                        usedClasses.set(((code[pc + 1] & 0xFF) << 8) | (code[pc + 2] & 0xFF));
+                        break;
+                    default:
+                        break;
                 }
                 pc += instructionLength(code, pc, opcode);
             }

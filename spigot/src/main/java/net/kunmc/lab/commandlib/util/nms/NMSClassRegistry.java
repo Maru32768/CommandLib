@@ -14,16 +14,17 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.stream.Collectors;
 
 public class NMSClassRegistry {
     private static final Map<Class<? extends NMSClass>, Deque<RegisteredClass>> CLASS_TO_DEQUE_MAP = new ConcurrentHashMap<>();
     private static final Map<Class<? extends NMSClass>, Deque<TypedRegistration>> TYPED_REGISTRATIONS = new ConcurrentHashMap<>();
     private static final Map<String, Optional<Class<?>>> TYPED_CLASSES = new ConcurrentHashMap<>();
+    /** Why a typed class that is on the classpath failed to load, such as a class file for a newer Java release. */
+    private static final Map<String, String> TYPED_LOAD_FAILURES = new ConcurrentHashMap<>();
     private static final Map<String, Boolean> MAPPING_PROBES = new ConcurrentHashMap<>();
     /**
      * The implementation each look-up class resolved to, with the server version it was resolved for. Registrations
-     * happen in the wrappers' static initializers, so a registration clears it.
+     * happen in the wrappers' static initializers, so a registration clears the entry of its look-up class.
      */
     private static final Map<Class<? extends NMSClass>, Resolution> RESOLVED = new ConcurrentHashMap<>();
     private static final String TYPED_PACKAGE_PREFIX = "net.kunmc.lab.commandlib.nms.";
@@ -39,7 +40,7 @@ public class NMSClassRegistry {
                           .addFirst(new RegisteredClass(targetClass,
                                                         new MinecraftVersion(lowerVersion),
                                                         new MinecraftVersion(upperVersion)));
-        RESOLVED.clear();
+        RESOLVED.remove(lookUpClass);
     }
 
     /**
@@ -60,42 +61,26 @@ public class NMSClassRegistry {
                            .addFirst(new TypedRegistration(targetClassName,
                                                            new MinecraftVersion(lowerVersion),
                                                            new MinecraftVersion(upperVersion)));
-        RESOLVED.clear();
+        RESOLVED.remove(lookUpClass);
     }
 
     /**
      * Registers the typed implementations of the look-up class in every typed NMS module, named
-     * {@code net.kunmc.lab.commandlib.nms.<module>.<LookUpClass>_<module>}. A module without the class falls back to
-     * the reflection implementations.
+     * {@code net.kunmc.lab.commandlib.nms.<module>.<LookUpClass>_<module>}, for the module's versions or the narrower
+     * versions its table entry gives the wrapper. A module without the class falls back to the reflection
+     * implementations.
      */
     public static <T extends NMSClass> void registerTyped(Class<T> lookUpClass) {
-        registerTyped(lookUpClass, "0.0.0", "9.9.9");
-    }
-
-    /**
-     * Registers the typed implementations of the look-up class in the typed NMS modules for the given versions. Each
-     * module's range is narrowed to them, and a module outside them is skipped.
-     */
-    public static <T extends NMSClass> void registerTyped(Class<T> lookUpClass,
-                                                          String lowerVersion,
-                                                          String upperVersion) {
         Objects.requireNonNull(lookUpClass);
-        MinecraftVersion lower = new MinecraftVersion(lowerVersion);
-        MinecraftVersion upper = new MinecraftVersion(upperVersion);
         for (TypedModule module : TypedNmsModules.MODULES) {
-            MinecraftVersion[] moduleVersions = module.wrapperVersions.getOrDefault(lookUpClass.getSimpleName(),
-                                                                                    new MinecraftVersion[]{module.lowerVersion, module.upperVersion});
-            MinecraftVersion moduleLower = moduleVersions[0].compareTo(lower) < 0 ? lower : moduleVersions[0];
-            MinecraftVersion moduleUpper = moduleVersions[1].compareTo(upper) > 0 ? upper : moduleVersions[1];
-            if (moduleUpper.compareTo(moduleLower) < 0) {
-                continue;
-            }
+            MinecraftVersion[] versions = module.wrapperVersions.getOrDefault(lookUpClass.getSimpleName(),
+                                                                              new MinecraftVersion[]{module.lowerVersion, module.upperVersion});
             String className = TYPED_PACKAGE_PREFIX + module.packageName + "." + lookUpClass.getSimpleName() + "_"
                     + module.moduleName;
             TYPED_REGISTRATIONS.computeIfAbsent(lookUpClass, x -> new ConcurrentLinkedDeque<>())
-                               .addFirst(new TypedRegistration(className, moduleLower, moduleUpper));
+                               .addFirst(new TypedRegistration(className, versions[0], versions[1]));
         }
-        RESOLVED.clear();
+        RESOLVED.remove(lookUpClass);
     }
 
     @SuppressWarnings("unchecked")
@@ -151,39 +136,58 @@ public class NMSClassRegistry {
 
     /**
      * Returns the look-up classes that have a typed class meant for this server, but resolve to another
-     * implementation, each as {@code <look-up class> -> <resolved class> (<why each typed class does not link>)}. Only wrappers initialized so far are
-     * registered. The integration tests use it, because the fallback to reflection hides a typed class that does not
-     * link from every other test.
+     * implementation, each as {@code <look-up class> -> <resolved class> (<why each typed class is not used>)}. A typed
+     * class is meant for the server when the version is in its range, it is on the classpath and its package matches
+     * the plugin's mappings; one that fails to load or does not extend the look-up class counts too. Only wrappers
+     * initialized so far are registered. The integration tests use it, because the fallback to reflection hides a
+     * typed class that does not link from every other test.
      */
     public static List<String> typedFallbacks() {
         MinecraftVersion version = new MinecraftVersion(BukkitUtil.getMinecraftVersion());
         List<String> fallbacks = new ArrayList<>();
         TYPED_REGISTRATIONS.forEach((lookUpClass, registrations) -> {
-            List<Class<?>> expected = registrations.stream()
-                                                   .map(x -> applicableTypedClass(x, lookUpClass, version))
-                                                   .flatMap(Optional::stream)
-                                                   .collect(Collectors.toList());
-            if (expected.isEmpty()) {
+            List<String> reasons = new ArrayList<>();
+            for (TypedRegistration registration : registrations) {
+                if (!version.isWithin(registration.lowerVersion, registration.upperVersion)) {
+                    continue;
+                }
+                Optional<Class<?>> typed = loadTypedClass(registration.className, lookUpClass);
+                String name = registration.className.substring(registration.className.lastIndexOf('.') + 1);
+                String loadFailure = TYPED_LOAD_FAILURES.get(registration.className);
+                if (loadFailure != null) {
+                    reasons.add(name + ": " + loadFailure);
+                } else if (typed.isPresent() && !lookUpClass.isAssignableFrom(typed.get())) {
+                    reasons.add(name + ": does not extend " + lookUpClass.getName());
+                } else if (typed.isPresent() && matchesMappings(typed.get())) {
+                    reasons.add(name + ": " + TypedClassLinkage.failure(typed.get()));
+                }
+            }
+            if (reasons.isEmpty()) {
                 return;
             }
             Class<?> resolved = findClass(lookUpClass);
             if (!resolved.getName()
                          .startsWith(TYPED_PACKAGE_PREFIX)) {
-                String reasons = expected.stream()
-                                         .map(x -> x.getSimpleName() + ": " + TypedClassLinkage.failure(x))
-                                         .collect(Collectors.joining("; "));
-                fallbacks.add(lookUpClass.getSimpleName() + " -> " + resolved.getSimpleName() + " (" + reasons + ")");
+                fallbacks.add(lookUpClass.getSimpleName() + " -> " + resolved.getSimpleName() + " ("
+                                      + String.join("; ", reasons) + ")");
             }
         });
         fallbacks.sort(String::compareTo);
         return fallbacks;
     }
 
+    /**
+     * The typed class, or empty when it is not on the classpath or fails to load. A load failure is kept for
+     * {@link #typedFallbacks()}.
+     */
     private static Optional<Class<?>> loadTypedClass(String className, Class<?> lookUpClass) {
         return TYPED_CLASSES.computeIfAbsent(className, x -> {
             try {
                 return Optional.of(Class.forName(x, false, lookUpClass.getClassLoader()));
-            } catch (ClassNotFoundException | LinkageError e) {
+            } catch (ClassNotFoundException e) {
+                return Optional.empty();
+            } catch (LinkageError e) {
+                TYPED_LOAD_FAILURES.put(x, e.toString());
                 return Optional.empty();
             }
         });
