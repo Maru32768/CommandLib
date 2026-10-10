@@ -4,14 +4,15 @@ Typed classes for Spigot 1.16.5, which compiles against the Spigot-mapped server
 """
 from codegen import register, write
 
-M = "spigot-1.16.5"
-NMS = "net.minecraft.server.v1_16_R3"
-CB = "org.bukkit.craftbukkit.v1_16_R3"
+M = MODULE  # noqa: F821 - set by generate.py
+SUFFIX = M.replace("-", "_").replace(".", "_")
+NMS = "net.minecraft.server." + CRAFTBUKKIT  # noqa: F821 - set by generate.py
+CB = "org.bukkit.craftbukkit." + CRAFTBUKKIT  # noqa: F821
 wrappers = []
 
 
 def w(wrapper, body, imports=()):
-    write(M, wrapper, body, imports)
+    write(M, wrapper, body.replace("SUFFIX", SUFFIX), imports)
     wrappers.append(wrapper)
 
 
@@ -28,7 +29,7 @@ def arg(wrapper, nms_class, class_name, ret, argument, parse, extra_imports=(), 
         }}"""
     else:
         parse_body = cast + f"        {parse}"
-    body = f'''    public {wrapper}_spigot_1_16_5() {{
+    body = f'''    public {wrapper}_SUFFIX() {{
         super(null, "{class_name}");
     }}
 
@@ -81,7 +82,7 @@ arg("NMSArgumentTile", "ArgumentTile", "ArgumentTile", "NMSArgumentTileLocation"
 arg("NMSArgumentVec3D", "ArgumentVec3", "ArgumentVec3", "NMSVec3D", "ArgumentVec3.a()",
     c("return NMSVec3D.create(ArgumentVec3.a(CTX, name));"))
 
-w("NMSArgumentProfile", '''    public NMSArgumentProfile_spigot_1_16_5() {
+w("NMSArgumentProfile", '''    public NMSArgumentProfile_SUFFIX() {
         super(null, "ArgumentProfile");
     }
 
@@ -96,7 +97,7 @@ w("NMSArgumentProfile", '''    public NMSArgumentProfile_spigot_1_16_5() {
     }
 ''', [f"{NMS}.ArgumentProfile"])
 
-w("NMSArgumentPredicateItemStack", '''    public NMSArgumentPredicateItemStack_spigot_1_16_5(Object handle) {
+w("NMSArgumentPredicateItemStack", '''    public NMSArgumentPredicateItemStack_SUFFIX(Object handle) {
         super(handle, "ArgumentPredicateItemStack");
     }
 
@@ -110,7 +111,7 @@ w("NMSArgumentPredicateItemStack", '''    public NMSArgumentPredicateItemStack_s
     }
 ''', [f"{NMS}.ArgumentPredicateItemStack"])
 
-w("NMSArgumentTileLocation", '''    public NMSArgumentTileLocation_spigot_1_16_5(Object handle) {
+w("NMSArgumentTileLocation", '''    public NMSArgumentTileLocation_SUFFIX(Object handle) {
         super(handle, "ArgumentTileLocation");
     }
 
@@ -120,7 +121,7 @@ w("NMSArgumentTileLocation", '''    public NMSArgumentTileLocation_spigot_1_16_5
     }
 ''', [f"{NMS}.ArgumentTileLocation"])
 
-w("NMSChatMessage", '''    public NMSChatMessage_spigot_1_16_5(Message handle) {
+w("NMSChatMessage", '''    public NMSChatMessage_SUFFIX(Message handle) {
         super(handle, "ChatMessage");
     }
 
@@ -135,7 +136,7 @@ w("NMSChatMessage", '''    public NMSChatMessage_spigot_1_16_5(Message handle) {
     }
 ''', [f"{NMS}.ChatMessage", "com.mojang.brigadier.Message"])
 
-w("NMSCommandDispatcher", '''    public NMSCommandDispatcher_spigot_1_16_5(Object handle) {
+w("NMSCommandDispatcher", '''    public NMSCommandDispatcher_SUFFIX(Object handle) {
         super(handle, "CommandDispatcher");
     }
 
@@ -145,7 +146,7 @@ w("NMSCommandDispatcher", '''    public NMSCommandDispatcher_spigot_1_16_5(Objec
     }
 ''', [f"{NMS}.CommandDispatcher"])
 
-w("NMSCommandListenerWrapper", '''    public NMSCommandListenerWrapper_spigot_1_16_5(Object handle) {
+w("NMSCommandListenerWrapper", '''    public NMSCommandListenerWrapper_SUFFIX(Object handle) {
         super(handle, "CommandListenerWrapper");
     }
 
@@ -167,25 +168,24 @@ w("NMSCommandListenerWrapper", '''    public NMSCommandListenerWrapper_spigot_1_
     }
 
     @Override
-    public Location getBukkitLocation() {
-        Vec3D pos = wrapper().getPosition();
+    protected NMSVec3D getPosition() {
+        Vec3D position = wrapper().getPosition();
+        return position != null ? NMSVec3D.create(position) : null;
+    }
+
+    @Override
+    protected NMSVec2D getRotation() {
         Vec2F rotation = wrapper().i();
-        World world = getBukkitWorld();
-        return world != null && pos != null ? new Location(world,
-                                                           pos.x,
-                                                           pos.y,
-                                                           pos.z,
-                                                           rotation != null ? rotation.j : 0.0F,
-                                                           rotation != null ? rotation.i : 0.0F) : null;
+        return rotation != null ? NMSVec2D.create(rotation) : null;
     }
 
     private CommandListenerWrapper wrapper() {
         return (CommandListenerWrapper) getHandle();
     }
 ''', [f"{NMS}.CommandListenerWrapper", f"{NMS}.Entity", f"{NMS}.Vec2F", f"{NMS}.Vec3D", f"{NMS}.WorldServer",
-      "org.bukkit.Location", "org.bukkit.World", "org.bukkit.command.CommandSender"])
+      "org.bukkit.World", "org.bukkit.command.CommandSender"])
 
-w("NMSVanillaCommandWrapper", '''    public NMSVanillaCommandWrapper_spigot_1_16_5() {
+w("NMSVanillaCommandWrapper", '''    public NMSVanillaCommandWrapper_SUFFIX() {
         super(null, "command.VanillaCommandWrapper");
     }
 
@@ -198,7 +198,7 @@ w("NMSVanillaCommandWrapper", '''    public NMSVanillaCommandWrapper_spigot_1_16
 ''', [f"{NMS}.CommandDispatcher", f"{NMS}.CommandListenerWrapper", f"{CB}.command.VanillaCommandWrapper",
       "com.mojang.brigadier.tree.CommandNode", "org.bukkit.command.defaults.BukkitCommand"])
 
-w("NMSParticleParam", '''    public NMSParticleParam_spigot_1_16_5(Object handle) {
+w("NMSParticleParam", '''    public NMSParticleParam_SUFFIX(Object handle) {
         super(handle, "ParticleParam");
     }
 
@@ -208,7 +208,7 @@ w("NMSParticleParam", '''    public NMSParticleParam_spigot_1_16_5(Object handle
     }
 ''', [f"{NMS}.ParticleParam"])
 
-w("NMSCraftParticle", '''    public NMSCraftParticle_spigot_1_16_5() {
+w("NMSCraftParticle", '''    public NMSCraftParticle_SUFFIX() {
         super(null, "CraftParticle");
     }
 
@@ -218,7 +218,7 @@ w("NMSCraftParticle", '''    public NMSCraftParticle_spigot_1_16_5() {
     }
 ''', [f"{NMS}.ParticleParam", f"{CB}.CraftParticle", "org.bukkit.Particle"])
 
-w("NMSCraftServer", '''    public NMSCraftServer_spigot_1_16_5(Server handle) {
+w("NMSCraftServer", '''    public NMSCraftServer_SUFFIX(Server handle) {
         super(handle, "CraftServer");
     }
 
@@ -228,7 +228,7 @@ w("NMSCraftServer", '''    public NMSCraftServer_spigot_1_16_5(Server handle) {
     }
 ''', [f"{CB}.CraftServer", "org.bukkit.Server"])
 
-w("NMSDedicatedServer", '''    public NMSDedicatedServer_spigot_1_16_5(Object handle) {
+w("NMSDedicatedServer", '''    public NMSDedicatedServer_SUFFIX(Object handle) {
         super(handle, "DedicatedServer");
     }
 
@@ -243,7 +243,7 @@ w("NMSDedicatedServer", '''    public NMSDedicatedServer_spigot_1_16_5(Object ha
     }
 ''', [f"{NMS}.DedicatedServer"])
 
-w("NMSCraftBlockData", '''    public NMSCraftBlockData_spigot_1_16_5() {
+w("NMSCraftBlockData", '''    public NMSCraftBlockData_SUFFIX() {
         super(null, "block.data.CraftBlockData");
     }
 
@@ -253,7 +253,7 @@ w("NMSCraftBlockData", '''    public NMSCraftBlockData_spigot_1_16_5() {
     }
 ''', [f"{NMS}.IBlockData", f"{CB}.block.data.CraftBlockData", "org.bukkit.block.data.BlockData"])
 
-w("NMSCraftEnchantment", '''    public NMSCraftEnchantment_spigot_1_16_5() {
+w("NMSCraftEnchantment", '''    public NMSCraftEnchantment_SUFFIX() {
         super(null, "enchantments.CraftEnchantment");
     }
 
@@ -263,7 +263,7 @@ w("NMSCraftEnchantment", '''    public NMSCraftEnchantment_spigot_1_16_5() {
     }
 ''', [f"{CB}.enchantments.CraftEnchantment", "org.bukkit.enchantments.Enchantment"])
 
-w("NMSCraftItemStack", '''    public NMSCraftItemStack_spigot_1_16_5() {
+w("NMSCraftItemStack", '''    public NMSCraftItemStack_SUFFIX() {
         super(null, "inventory.CraftItemStack");
     }
 
@@ -273,11 +273,11 @@ w("NMSCraftItemStack", '''    public NMSCraftItemStack_spigot_1_16_5() {
     }
 ''', [f"{NMS}.ItemStack", f"{CB}.inventory.CraftItemStack"])
 
-w("NMSCraftPotionEffectType", '''    public NMSCraftPotionEffectType_spigot_1_16_5() {
+w("NMSCraftPotionEffectType", '''    public NMSCraftPotionEffectType_SUFFIX() {
         this(null);
     }
 
-    public NMSCraftPotionEffectType_spigot_1_16_5(Object handle) {
+    public NMSCraftPotionEffectType_SUFFIX(Object handle) {
         super(handle, "potion.CraftPotionEffectType");
     }
 
@@ -287,7 +287,7 @@ w("NMSCraftPotionEffectType", '''    public NMSCraftPotionEffectType_spigot_1_16
     }
 ''', [f"{NMS}.MobEffectList", f"{CB}.potion.CraftPotionEffectType", "org.bukkit.potion.PotionEffectType"])
 
-w("NMSEntity", '''    public NMSEntity_spigot_1_16_5(Object handle) {
+w("NMSEntity", '''    public NMSEntity_SUFFIX(Object handle) {
         super(handle, "Entity");
     }
 
@@ -297,7 +297,7 @@ w("NMSEntity", '''    public NMSEntity_spigot_1_16_5(Object handle) {
     }
 ''', [f"{NMS}.Entity"])
 
-w("NMSScoreboardTeam", '''    public NMSScoreboardTeam_spigot_1_16_5(Object handle) {
+w("NMSScoreboardTeam", '''    public NMSScoreboardTeam_SUFFIX(Object handle) {
         super(handle, "ScoreboardTeam");
     }
 
@@ -307,7 +307,7 @@ w("NMSScoreboardTeam", '''    public NMSScoreboardTeam_spigot_1_16_5(Object hand
     }
 ''', [f"{NMS}.ScoreboardTeam"])
 
-w("NMSVec3D", '''    public NMSVec3D_spigot_1_16_5(Object handle) {
+w("NMSVec3D", '''    public NMSVec3D_SUFFIX(Object handle) {
         super(handle, "Vec3D");
     }
 
@@ -328,7 +328,7 @@ w("NMSVec3D", '''    public NMSVec3D_spigot_1_16_5(Object handle) {
 ''', [f"{NMS}.Vec3D"])
 
 # Vec2F keeps the obfuscated field names i (x) and j (y) in the Spigot-mapped jar.
-w("NMSVec2D", '''    public NMSVec2D_spigot_1_16_5(Object handle) {
+w("NMSVec2D", '''    public NMSVec2D_SUFFIX(Object handle) {
         super(handle, "Vec2F");
     }
 

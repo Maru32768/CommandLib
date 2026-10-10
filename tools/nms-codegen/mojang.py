@@ -271,7 +271,7 @@ w("NMSCommandDispatcher", f'''    public NMSCommandDispatcher_SUFFIX(Object hand
     }}
 ''', ["net.minecraft.commands.Commands", "com.mojang.brigadier.CommandDispatcher"])
 
-# Matches CraftBukkit's CommandSourceStack.getBukkitLocation, which also carries the rotation.
+# NMSCommandListenerWrapper builds the location, with the rotation, from the position and rotation.
 w("NMSCommandListenerWrapper", f'''    public NMSCommandListenerWrapper_SUFFIX(Object handle) {{
         super(handle, "{NAMES["CommandSourceStack"]}");
     }}
@@ -294,23 +294,22 @@ w("NMSCommandListenerWrapper", f'''    public NMSCommandListenerWrapper_SUFFIX(O
     }}
 
     @Override
-    public Location getBukkitLocation() {{
-        Vec3 pos = source().getPosition();
+    protected NMSVec3D getPosition() {{
+        Vec3 position = source().getPosition();
+        return position != null ? NMSVec3D.create(position) : null;
+    }}
+
+    @Override
+    protected NMSVec2D getRotation() {{
         Vec2 rotation = source().getRotation();
-        World world = getBukkitWorld();
-        return world != null && pos != null ? new Location(world,
-                                                           pos.x,
-                                                           pos.y,
-                                                           pos.z,
-                                                           rotation != null ? rotation.y : 0.0F,
-                                                           rotation != null ? rotation.x : 0.0F) : null;
+        return rotation != null ? NMSVec2D.create(rotation) : null;
     }}
 
     private CommandSourceStack source() {{
         return (CommandSourceStack) getHandle();
     }}
 ''', [CSS, "net.minecraft.server.level.ServerLevel", "net.minecraft.world.entity.Entity", "net.minecraft.world.phys.Vec2",
-      "net.minecraft.world.phys.Vec3", "org.bukkit.Location", "org.bukkit.World", "org.bukkit.command.CommandSender"])
+      "net.minecraft.world.phys.Vec3", "org.bukkit.World", "org.bukkit.command.CommandSender"])
 
 w("NMSVanillaCommandWrapper", '''    public NMSVanillaCommandWrapper_SUFFIX() {
         super(null, "command.VanillaCommandWrapper");

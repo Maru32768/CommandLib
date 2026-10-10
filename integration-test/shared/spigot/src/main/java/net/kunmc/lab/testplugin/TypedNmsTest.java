@@ -32,6 +32,9 @@ public class TypedNmsTest extends TestBase {
         command.addChildren(new Command(name) {{
             execute(ctx -> {
                 try {
+                    // Only wrappers initialized so far are registered, and no other test reads the source's
+                    // location, which initializes the position and rotation wrappers.
+                    ctx.getLocation();
                     putResult(key, String.valueOf(NMSClassRegistry.typedFallbacks()), "[]");
                 } catch (RuntimeException e) {
                     putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));

@@ -1,12 +1,13 @@
 package net.kunmc.lab.commandlib.nms.spigot_1_16_5;
 
 import net.kunmc.lab.commandlib.util.nms.command.NMSCommandListenerWrapper;
+import net.kunmc.lab.commandlib.util.nms.world.NMSVec2D;
+import net.kunmc.lab.commandlib.util.nms.world.NMSVec3D;
 import net.minecraft.server.v1_16_R3.CommandListenerWrapper;
 import net.minecraft.server.v1_16_R3.Entity;
 import net.minecraft.server.v1_16_R3.Vec2F;
 import net.minecraft.server.v1_16_R3.Vec3D;
 import net.minecraft.server.v1_16_R3.WorldServer;
-import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 
@@ -33,16 +34,15 @@ public class NMSCommandListenerWrapper_spigot_1_16_5 extends NMSCommandListenerW
     }
 
     @Override
-    public Location getBukkitLocation() {
-        Vec3D pos = wrapper().getPosition();
+    protected NMSVec3D getPosition() {
+        Vec3D position = wrapper().getPosition();
+        return position != null ? NMSVec3D.create(position) : null;
+    }
+
+    @Override
+    protected NMSVec2D getRotation() {
         Vec2F rotation = wrapper().i();
-        World world = getBukkitWorld();
-        return world != null && pos != null ? new Location(world,
-                                                           pos.x,
-                                                           pos.y,
-                                                           pos.z,
-                                                           rotation != null ? rotation.j : 0.0F,
-                                                           rotation != null ? rotation.i : 0.0F) : null;
+        return rotation != null ? NMSVec2D.create(rotation) : null;
     }
 
     private CommandListenerWrapper wrapper() {

@@ -6,7 +6,6 @@ import net.kunmc.lab.commandlib.util.nms.world.NMSEntity;
 import net.kunmc.lab.commandlib.util.nms.world.NMSVec2D;
 import net.kunmc.lab.commandlib.util.nms.world.NMSVec3D;
 import net.kunmc.lab.commandlib.util.reflection.ReflectionUtil;
-import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
@@ -46,17 +45,16 @@ public class NMSCommandListenerWrapper_v1_17_0 extends NMSCommandListenerWrapper
         }
     }
 
-    public Location getBukkitLocation() {
-        NMSVec3D pos = NMSVec3D.create(invokeGetter("world.phys.Vec3D"));
+    @Override
+    protected NMSVec3D getPosition() {
+        Object position = invokeGetter("world.phys.Vec3D");
+        return position != null ? NMSVec3D.create(position) : null;
+    }
+
+    @Override
+    protected NMSVec2D getRotation() {
         Object rotation = invokeGetter("world.phys.Vec2F");
-        NMSVec2D rot = rotation != null ? NMSVec2D.create(rotation) : null;
-        World world = getBukkitWorld();
-        return world != null && pos != null ? new Location(world,
-                                                           pos.x(),
-                                                           pos.y(),
-                                                           pos.z(),
-                                                           rot != null ? rot.y() : 0.0F,
-                                                           rot != null ? rot.x() : 0.0F) : null;
+        return rotation != null ? NMSVec2D.create(rotation) : null;
     }
 
     /**

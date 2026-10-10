@@ -22,7 +22,8 @@ public abstract class NMSVec2D extends MinecraftClass {
     public abstract float y();
 
     static {
-        // Spigot keeps the obfuscated field names i (x) and j (y) up to 1.20.4.
+        // Vec2F has the obfuscated field names i (x) and j (y) on Spigot, and on Paper up to 1.20.4. From 1.20.5
+        // Paper has the Mojang names, which the reflection implementation assumes; Spigot 1.20.5+ uses typed classes.
         NMSClassRegistry.register(NMSVec2D.class, NMSVec2D_v1_16_0.class, "1.16.0", "1.16.5");
         NMSClassRegistry.register(NMSVec2D.class, NMSVec2D_v1_17_0.class, "1.17.0", "1.20.4");
         NMSClassRegistry.register(NMSVec2D.class, NMSVec2D_v1_20_5.class, "1.20.5", "9.9.9");
