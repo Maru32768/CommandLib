@@ -21,7 +21,7 @@ final class TypedNmsModules {
             new NMSClassRegistry.TypedModule("spigot_1_20_1", "1.20", "1.20.1"),
             new NMSClassRegistry.TypedModule("spigot_1_20_2", "1.20.2", "1.20.2"),
             new NMSClassRegistry.TypedModule("spigot_1_20_4", "1.20.4", "1.20.4"),
-            new NMSClassRegistry.TypedModule("spigot_1_20_6", "1.20.6", "1.20.6"),
+            new NMSClassRegistry.TypedModule("spigot_1_20_6", "1.20.5", "1.20.6"),
             new NMSClassRegistry.TypedModule("spigot_1_21_1", "1.21", "1.21.1"),
             new NMSClassRegistry.TypedModule("paper_1_20_6", "1.20.5", "1.20.6")
                     .withWrapperVersions("NMSDataPackResources", "1.20.6", "1.20.6"),

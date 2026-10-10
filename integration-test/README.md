@@ -101,13 +101,15 @@ For example:
 
 Bukkit-family targets: `paper-1.16.5`, `paper-1.17.1`, `paper-1.18`, `paper-1.18.1`, `paper-1.18.2`, `paper-1.19`,
 `paper-1.19.1`, `paper-1.19.2`, `paper-1.19.3`, `paper-1.19.4`, `paper-1.20`, `paper-1.20.1`, `paper-1.20.2`,
-`paper-1.20.4`, `paper-1.20.5`, `paper-1.20.6`, `mohist-1.16.5`, `mohist-1.20.1`, `spigot-1.20.4`, `spigot-1.20.6` and
-`spigot-1.21.1` run the `spigot` module, and `paper-1.21.0` runs the `paper` module. Minecraft 1.17 has no target,
+`paper-1.20.4`, `paper-1.20.5`, `paper-1.20.6`, `mohist-1.16.5`, `mohist-1.20.1`, `spigot-1.20.4`, `spigot-1.20.5`,
+`spigot-1.20.6`, `spigot-1.21` and `spigot-1.21.1` run the `spigot` module, and `paper-1.21.0` runs the `paper` module. Minecraft 1.17 has no target,
 because no MCProtocolLib release speaks its protocol.
 
 Spigot targets (`spigot-<version>`) run the `spigot` module on a plain Spigot server. Spigot server jars are only
 produced by BuildTools, so the target's `buildSpigotServer` task runs it (through the same BuildTools setup as the typed
-NMS modules, see `docs/agents/nms-build.md`) and copies the jar to `test-plugin/server/server.jar`. The first run of a
+NMS modules, see `docs/agents/nms-build.md`) and copies the jar to `test-plugin/server/server.jar`. BuildTools resolves
+1.20.5 and 1.21 to the build of the following hotfix release, so those targets set the Spigot build number of the last
+build of their release in `commandlib.integration.buildToolsRevision`. The first run of a
 version takes several minutes.
 
 `minecraftIntegrationTest` is the aggregate task for all configured targets.

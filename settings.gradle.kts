@@ -102,4 +102,6 @@ include(
     "integration-test:targets:paper-1.20",
     "integration-test:targets:paper-1.20.2",
     "integration-test:targets:spigot-1.21.1",
+    "integration-test:targets:spigot-1.20.5",
+    "integration-test:targets:spigot-1.21",
 )

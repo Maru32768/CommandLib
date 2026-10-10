@@ -196,9 +196,17 @@ val prepareTask = if ("prepareTestPlugin" in tasks.names) tasks.named("prepareTe
 
 // Spigot server jars are only produced by BuildTools, so a Spigot target builds its own. The run also installs the
 // artifacts the typed NMS module of the same version compiles against.
+// A target for a release that BuildTools now resolves to a later build, such as 1.21, sets the Spigot build number in
+// commandlib.integration.buildToolsRevision.
 if (targetPlatform == "spigot") {
     val spigotVersion = minecraftVersion
+    val buildToolsRevision = if (extra.has("commandlib.integration.buildToolsRevision")) {
+        extra["commandlib.integration.buildToolsRevision"].toString()
+    } else {
+        spigotVersion
+    }
     val buildSpigotServer = registerBuildTools("buildSpigotServer", provider { spigotVersion }) {
+        revision.set(buildToolsRevision)
         remapped.set(!spigotVersion.startsWith("1.16"))
         serverJar.set(testPluginDir.resolve("$serverDirectory/$serverJarName"))
     }

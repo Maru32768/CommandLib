@@ -43,7 +43,7 @@ MODULES = {
     "spigot-1.20.1": Module("1.20", "1.20.1", "v1_20_R1"),
     "spigot-1.20.2": Module("1.20.2", "1.20.2", "v1_20_R2"),
     "spigot-1.20.4": Module("1.20.4", "1.20.4", "v1_20_R3"),
-    "spigot-1.20.6": Module("1.20.6", "1.20.6", "v1_20_R4"),
+    "spigot-1.20.6": Module("1.20.5", "1.20.6", "v1_20_R4"),
     "spigot-1.21.1": Module("1.21", "1.21.1", "v1_21_R1"),
     "paper-1.20.6": Module("1.20.5", "1.20.6",
                            # PaperCommands, which the class uses, is new in Paper 1.20.6.
