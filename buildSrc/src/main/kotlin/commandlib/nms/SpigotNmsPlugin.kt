@@ -25,6 +25,7 @@ class SpigotNmsPlugin : Plugin<Project> {
 
         val extension = project.extensions.create<SpigotNmsExtension>("spigotNms")
         extension.remapped.convention(false)
+        extension.buildToolsRevision.convention(extension.minecraftVersion)
         val spigotVersion = extension.minecraftVersion.map { "$it-R0.1-SNAPSHOT" }
 
         val mavenLocalDirectory = mavenLocalRepository()
@@ -41,6 +42,7 @@ class SpigotNmsPlugin : Plugin<Project> {
         project.repositories.mavenCentral()
 
         val installSpigot = project.registerBuildTools("installSpigot", extension.minecraftVersion) {
+            revision.set(extension.buildToolsRevision)
             remapped.set(extension.remapped)
         }
         project.tasks.named("compileJava") {

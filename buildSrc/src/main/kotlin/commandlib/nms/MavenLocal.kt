@@ -11,14 +11,18 @@ import javax.xml.parsers.DocumentBuilderFactory
 fun mavenLocalRepository(): File {
     System.getProperty("maven.repo.local")?.takeIf { it.isNotBlank() }?.let { return File(it) }
     val userHome = System.getProperty("user.home")
-    val settingsFiles = listOfNotNull(
-        File(userHome, ".m2/settings.xml"),
-        System.getenv("M2_HOME")?.let { File(it, "conf/settings.xml") },
-    )
-    for (settings in settingsFiles) {
-        localRepository(settings)?.let { return File(it) }
-    }
+    localRepository(File(userHome, ".m2/settings.xml"))?.let { return File(it) }
+    System.getenv("M2_HOME")?.let { home -> localRepository(File(home, "conf/settings.xml"))?.let { return File(it) } }
     return File(userHome, ".m2/repository")
+}
+
+/**
+ * The repository a Maven installation of its own finds, such as the one BuildTools downloads: `<localRepository>` in
+ * `~/.m2/settings.xml`, then `~/.m2/repository`.
+ */
+internal fun userMavenRepository(): File {
+    val userHome = System.getProperty("user.home")
+    return localRepository(File(userHome, ".m2/settings.xml"))?.let(::File) ?: File(userHome, ".m2/repository")
 }
 
 private fun localRepository(settings: File): String? {

@@ -13,13 +13,17 @@ import org.gradle.jvm.toolchain.JavaLauncher
 import org.gradle.process.ExecOperations
 import org.gradle.work.DisableCachingByDefault
 import java.io.File
+import java.io.RandomAccessFile
 import java.net.URI
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import java.util.jar.JarFile
 import javax.inject.Inject
 
-/** Serializes BuildTools runs, because they share one working directory. */
+/**
+ * Serializes the BuildTools tasks of one build, because they share one working directory. [BuildToolsTask] also locks
+ * the directory against other Gradle processes.
+ */
 abstract class BuildToolsService : BuildService<BuildServiceParameters.None>
 
 /**
@@ -30,8 +34,16 @@ abstract class BuildToolsService : BuildService<BuildServiceParameters.None>
  */
 @DisableCachingByDefault(because = "Installs into the local Maven repository")
 abstract class BuildToolsTask : DefaultTask() {
+    /** Minecraft version of the artifacts BuildTools installs, such as `1.21`. */
     @get:Input
     abstract val minecraftVersion: Property<String>
+
+    /**
+     * Passed to BuildTools as `--rev`. Defaults to [minecraftVersion]. A Spigot build number selects a release whose
+     * version name BuildTools now resolves to a later build, such as 1.21, which resolves to the 1.21.1 build.
+     */
+    @get:Input
+    abstract val revision: Property<String>
 
     @get:Input
     abstract val remapped: Property<Boolean>
@@ -68,12 +80,30 @@ abstract class BuildToolsTask : DefaultTask() {
             return
         }
 
-        val directory = buildToolsDirectory.get().asFile
+        val directory = buildToolsDirectory.get().asFile.apply { mkdirs() }
+        // Another Gradle process, such as an IDE sync next to a command-line build, may run BuildTools in the same
+        // directory. The lock is released when the channel closes, and by the OS when a process dies.
+        RandomAccessFile(directory.resolve("buildtools.lock"), "rw").channel.use { channel ->
+            val lock = channel.tryLock() ?: run {
+                logger.lifecycle("Waiting for another Gradle process to finish running BuildTools in $directory")
+                channel.lock()
+            }
+            lock.use {
+                // The other process may have installed the artifacts while this one waited.
+                if (missingArtifacts().isNotEmpty()) {
+                    runBuildTools(directory)
+                }
+            }
+        }
+        copyServerJar()
+    }
+
+    private fun runBuildTools(directory: File) {
         val buildToolsJar = directory.resolve("BuildTools.jar")
         updateBuildTools(buildToolsJar)
 
         val workDirectory = directory.resolve("work").apply { mkdirs() }
-        val buildToolsArgs = mutableListOf("-jar", buildToolsJar.absolutePath, "--rev", minecraftVersion.get())
+        val buildToolsArgs = mutableListOf("-jar", buildToolsJar.absolutePath, "--rev", revision.get())
         if (remapped.get()) {
             buildToolsArgs += "--remapped"
         }
@@ -83,17 +113,36 @@ abstract class BuildToolsTask : DefaultTask() {
             workingDir = workDirectory
             executable = javaLauncher.get().executablePath.asFile.absolutePath
             args(buildToolsArgs)
-            // BuildTools installs with its own Maven, which would not see a maven.repo.local given to this build.
             // BuildTools sets -Xmx1024M only when MAVEN_OPTS is unset, so keep that default.
             val mavenOpts = System.getenv("MAVEN_OPTS") ?: "-Xmx1024M"
-            environment("MAVEN_OPTS", "$mavenOpts -Dmaven.repo.local=${repository.absolutePath}")
+            environment("MAVEN_OPTS", mavenOpts + repositoryOption(repository))
         }
 
         val stillMissing = missingArtifacts()
         if (stillMissing.isNotEmpty()) {
             error("BuildTools finished but did not install: ${stillMissing.joinToString()}")
         }
-        copyServerJar()
+    }
+
+    /**
+     * BuildTools installs with its own Maven, which finds the repository in `~/.m2/settings.xml` or at `~/.m2/repository`
+     * but would not see a `maven.repo.local` given to this build or `$M2_HOME/conf/settings.xml`. The option goes
+     * through `MAVEN_OPTS`, which the `mvn` shell script splits on whitespace, so only `mvn.cmd` can take a quoted path
+     * with spaces.
+     */
+    private fun repositoryOption(repository: File): String {
+        if (repository.absoluteFile == userMavenRepository().absoluteFile) {
+            return ""
+        }
+        val path = repository.absolutePath
+        if (path.none(Char::isWhitespace)) {
+            return " -Dmaven.repo.local=$path"
+        }
+        check(System.getProperty("os.name").startsWith("Windows", ignoreCase = true)) {
+            "BuildTools cannot install into $path, because MAVEN_OPTS cannot carry a path with spaces outside Windows. " +
+                "Set <localRepository> in ~/.m2/settings.xml or use a local Maven repository without spaces."
+        }
+        return " \"-Dmaven.repo.local=$path\""
     }
 
     /** BuildTools leaves the server jar in its working directory, named after the version. */
@@ -103,7 +152,7 @@ abstract class BuildToolsTask : DefaultTask() {
     private fun copyServerJar(): Boolean {
         val destination = serverJar.orNull?.asFile ?: return false
         val source = builtServerJar()
-        if (destination.isFile && destination.length() == source.length()) {
+        if (destination.isFile && Files.mismatch(source.toPath(), destination.toPath()) == -1L) {
             return false
         }
         destination.parentFile.mkdirs()

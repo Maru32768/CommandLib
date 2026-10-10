@@ -3,8 +3,14 @@ package commandlib.nms
 import org.gradle.api.provider.Property
 
 abstract class SpigotNmsExtension {
-    /** Minecraft version passed to BuildTools as `--rev`, such as `1.20.4`. */
+    /** Minecraft version of the server jar, such as `1.20.4`. */
     abstract val minecraftVersion: Property<String>
+
+    /**
+     * Passed to BuildTools as `--rev`. Defaults to [minecraftVersion]. Set a Spigot build number for a release that
+     * BuildTools now resolves to a later build, such as 1.21, which resolves to the 1.21.1 build.
+     */
+    abstract val buildToolsRevision: Property<String>
 
     /**
      * Compiles against the Mojang-mapped server jar and remaps the built jar to Spigot names. Required from 1.17,

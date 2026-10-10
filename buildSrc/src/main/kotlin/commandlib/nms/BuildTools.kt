@@ -29,6 +29,7 @@ fun Project.registerBuildTools(
     return tasks.register<BuildToolsTask>(name) {
         usesService(service)
         this.minecraftVersion.set(minecraftVersion)
+        revision.convention(minecraftVersion)
         remapped.convention(false)
         javaLauncher.set(javaToolchains.launcherFor {
             languageVersion.set(minecraftVersion.map { JavaLanguageVersion.of(buildToolsJavaVersion(it)) })
