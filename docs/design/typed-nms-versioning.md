@@ -8,8 +8,9 @@ that CI can compile a typed `1.16.5` NMS implementation reliably.
 
 Status: implemented for the versions with integration targets. `buildSrc` runs
 BuildTools and remaps with SpecialSource, and the `nms/*` modules (Spigot
-1.16.5, 1.17.1, 1.18.2, 1.19.2, 1.19.4, 1.20.1, 1.20.4 and Paper 1.20.6)
-compile the NMS wrappers against real server jars. The jars are bundled into
+releases from 1.16.5 to 1.21.1 and Paper 1.20.6, listed in
+`tools/nms-codegen/generate.py`) compile the NMS wrappers against real server
+jars. The jars are bundled into
 `spigot` and looked up by class name through `NMSClassRegistry.registerTyped`,
 with the reflection implementations as the fallback for every other version. See `docs/agents/nms-build.md`. The bridge interface and module
 layout proposed below are not adopted; the typed classes extend the existing
