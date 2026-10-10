@@ -48,6 +48,7 @@ if not PAPER:
         "Entity": "world.entity.Entity",
         "PlayerTeam": "world.scores.ScoreboardTeam",
         "Vec3": "world.phys.Vec3D",
+        "Vec2": "world.phys.Vec2F",
     }
 else:
     CB = "org.bukkit.craftbukkit"
@@ -270,8 +271,8 @@ w("NMSCommandDispatcher", f'''    public NMSCommandDispatcher_SUFFIX(Object hand
     }}
 ''', ["net.minecraft.commands.Commands", "com.mojang.brigadier.CommandDispatcher"])
 
-if TARGET == "spigot-1.20.4":
-    w("NMSCommandListenerWrapper", f'''    public NMSCommandListenerWrapper_SUFFIX(Object handle) {{
+# Matches CraftBukkit's CommandSourceStack.getBukkitLocation, which also carries the rotation.
+w("NMSCommandListenerWrapper", f'''    public NMSCommandListenerWrapper_SUFFIX(Object handle) {{
         super(handle, "{NAMES["CommandSourceStack"]}");
     }}
 
@@ -295,49 +296,21 @@ if TARGET == "spigot-1.20.4":
     @Override
     public Location getBukkitLocation() {{
         Vec3 pos = source().getPosition();
-        World world = getBukkitWorld();
-        return world != null && pos != null ? new Location(world, pos.x, pos.y, pos.z) : null;
-    }}
-
-    private CommandSourceStack source() {{
-        return (CommandSourceStack) getHandle();
-    }}
-''', [CSS, "net.minecraft.server.level.ServerLevel", "net.minecraft.world.entity.Entity", "net.minecraft.world.phys.Vec3",
-      "org.bukkit.Location", "org.bukkit.World", "org.bukkit.command.CommandSender"])
-else:
-    w("NMSCommandListenerWrapper", f'''    public NMSCommandListenerWrapper_SUFFIX(Object handle) {{
-        super(handle, "{NAMES["CommandSourceStack"]}");
-    }}
-
-    @Override
-    public CommandSender getBukkitSender() {{
-        return source().getBukkitSender();
-    }}
-
-    @Override
-    public org.bukkit.entity.Entity getBukkitEntity() {{
-        Entity entity = source().getEntity();
-        return entity != null ? entity.getBukkitEntity() : null;
-    }}
-
-    @Override
-    public World getBukkitWorld() {{
-        return source().getLevel()
-                       .getWorld();
-    }}
-
-    @Override
-    public Location getBukkitLocation() {{
-        Vec3 pos = source().getPosition();
         Vec2 rotation = source().getRotation();
-        return new Location(getBukkitWorld(), pos.x, pos.y, pos.z, rotation.y, rotation.x);
+        World world = getBukkitWorld();
+        return world != null && pos != null ? new Location(world,
+                                                           pos.x,
+                                                           pos.y,
+                                                           pos.z,
+                                                           rotation != null ? rotation.y : 0.0F,
+                                                           rotation != null ? rotation.x : 0.0F) : null;
     }}
 
     private CommandSourceStack source() {{
         return (CommandSourceStack) getHandle();
     }}
-''', [CSS, "net.minecraft.world.entity.Entity", "net.minecraft.world.phys.Vec2", "net.minecraft.world.phys.Vec3",
-      "org.bukkit.Location", "org.bukkit.World", "org.bukkit.command.CommandSender"])
+''', [CSS, "net.minecraft.server.level.ServerLevel", "net.minecraft.world.entity.Entity", "net.minecraft.world.phys.Vec2",
+      "net.minecraft.world.phys.Vec3", "org.bukkit.Location", "org.bukkit.World", "org.bukkit.command.CommandSender"])
 
 w("NMSVanillaCommandWrapper", '''    public NMSVanillaCommandWrapper_SUFFIX() {
         super(null, "command.VanillaCommandWrapper");
@@ -537,8 +510,7 @@ w("NMSVec3D", f'''    public NMSVec3D_SUFFIX(Object handle) {{
     }}
 ''', ["net.minecraft.world.phys.Vec3"])
 
-if "Vec2" in NAMES:
-    w("NMSVec2D", f'''    public NMSVec2D_SUFFIX(Object handle) {{
+w("NMSVec2D", f'''    public NMSVec2D_SUFFIX(Object handle) {{
         super(handle, "{NAMES["Vec2"]}");
     }}
 

@@ -47,8 +47,6 @@ public abstract class NMSCommandListenerWrapper extends MinecraftClass {
                                   NMSCommandListenerWrapper_v1_20_6.class,
                                   "1.20.6",
                                   "9.9.9");
-        // 1.20.5 differs from the 1.20.6 dev bundle the Paper module compiles against, so it stays on reflection.
-        NMSClassRegistry.registerTyped(NMSCommandListenerWrapper.class, "1.16.0", "1.20.4");
-        NMSClassRegistry.registerTyped(NMSCommandListenerWrapper.class, "1.20.6", "9.9.9");
+        NMSClassRegistry.registerTyped(NMSCommandListenerWrapper.class);
     }
 }

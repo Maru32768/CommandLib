@@ -83,9 +83,7 @@ public class NMSClassRegistryTest {
                                                                        "NMSReloadableResources",
                                                                        new String[]{"1.19.0", "9.9.9"},
                                                                        "NMSTranslatableContents",
-                                                                       new String[]{"1.19.0", "9.9.9"},
-                                                                       "NMSVec2D",
-                                                                       new String[]{"1.20.5", "9.9.9"});
+                                                                       new String[]{"1.19.0", "9.9.9"});
 
     /**
      * Packages under {@code net.minecraft} that the version-specific implementations may reference. A misspelled

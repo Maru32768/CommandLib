@@ -4,6 +4,7 @@ import net.kunmc.lab.commandlib.util.nms.command.NMSCommandListenerWrapper;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -34,8 +35,14 @@ public class NMSCommandListenerWrapper_spigot_1_20_4 extends NMSCommandListenerW
     @Override
     public Location getBukkitLocation() {
         Vec3 pos = source().getPosition();
+        Vec2 rotation = source().getRotation();
         World world = getBukkitWorld();
-        return world != null && pos != null ? new Location(world, pos.x, pos.y, pos.z) : null;
+        return world != null && pos != null ? new Location(world,
+                                                           pos.x,
+                                                           pos.y,
+                                                           pos.z,
+                                                           rotation != null ? rotation.y : 0.0F,
+                                                           rotation != null ? rotation.x : 0.0F) : null;
     }
 
     private CommandSourceStack source() {

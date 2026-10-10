@@ -3,6 +3,7 @@ package net.kunmc.lab.commandlib.nms.spigot_1_16_5;
 import net.kunmc.lab.commandlib.util.nms.command.NMSCommandListenerWrapper;
 import net.minecraft.server.v1_16_R3.CommandListenerWrapper;
 import net.minecraft.server.v1_16_R3.Entity;
+import net.minecraft.server.v1_16_R3.Vec2F;
 import net.minecraft.server.v1_16_R3.Vec3D;
 import net.minecraft.server.v1_16_R3.WorldServer;
 import org.bukkit.Location;
@@ -34,8 +35,14 @@ public class NMSCommandListenerWrapper_spigot_1_16_5 extends NMSCommandListenerW
     @Override
     public Location getBukkitLocation() {
         Vec3D pos = wrapper().getPosition();
+        Vec2F rotation = wrapper().i();
         World world = getBukkitWorld();
-        return world != null && pos != null ? new Location(world, pos.x, pos.y, pos.z) : null;
+        return world != null && pos != null ? new Location(world,
+                                                           pos.x,
+                                                           pos.y,
+                                                           pos.z,
+                                                           rotation != null ? rotation.j : 0.0F,
+                                                           rotation != null ? rotation.i : 0.0F) : null;
     }
 
     private CommandListenerWrapper wrapper() {

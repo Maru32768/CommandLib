@@ -169,15 +169,21 @@ w("NMSCommandListenerWrapper", '''    public NMSCommandListenerWrapper_spigot_1_
     @Override
     public Location getBukkitLocation() {
         Vec3D pos = wrapper().getPosition();
+        Vec2F rotation = wrapper().i();
         World world = getBukkitWorld();
-        return world != null && pos != null ? new Location(world, pos.x, pos.y, pos.z) : null;
+        return world != null && pos != null ? new Location(world,
+                                                           pos.x,
+                                                           pos.y,
+                                                           pos.z,
+                                                           rotation != null ? rotation.j : 0.0F,
+                                                           rotation != null ? rotation.i : 0.0F) : null;
     }
 
     private CommandListenerWrapper wrapper() {
         return (CommandListenerWrapper) getHandle();
     }
-''', [f"{NMS}.CommandListenerWrapper", f"{NMS}.Entity", f"{NMS}.Vec3D", f"{NMS}.WorldServer", "org.bukkit.Location",
-      "org.bukkit.World", "org.bukkit.command.CommandSender"])
+''', [f"{NMS}.CommandListenerWrapper", f"{NMS}.Entity", f"{NMS}.Vec2F", f"{NMS}.Vec3D", f"{NMS}.WorldServer",
+      "org.bukkit.Location", "org.bukkit.World", "org.bukkit.command.CommandSender"])
 
 w("NMSVanillaCommandWrapper", '''    public NMSVanillaCommandWrapper_spigot_1_16_5() {
         super(null, "command.VanillaCommandWrapper");
@@ -320,6 +326,22 @@ w("NMSVec3D", '''    public NMSVec3D_spigot_1_16_5(Object handle) {
         return ((Vec3D) getHandle()).z;
     }
 ''', [f"{NMS}.Vec3D"])
+
+# Vec2F keeps the obfuscated field names i (x) and j (y) in the Spigot-mapped jar.
+w("NMSVec2D", '''    public NMSVec2D_spigot_1_16_5(Object handle) {
+        super(handle, "Vec2F");
+    }
+
+    @Override
+    public float x() {
+        return ((Vec2F) getHandle()).i;
+    }
+
+    @Override
+    public float y() {
+        return ((Vec2F) getHandle()).j;
+    }
+''', [f"{NMS}.Vec2F"])
 
 register(wrappers)
 print(f"{M}: {len(wrappers)} classes")
