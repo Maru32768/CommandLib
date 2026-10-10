@@ -14,27 +14,22 @@ plugins {
 
 rootProject.name = "CommandLib"
 include("spigot", "paper")
-// Typed NMS modules bundled into :spigot. They need BuildTools or a paperweight dev bundle, so
-// -Pcommandlib.typedNms=false leaves them out and :spigot uses only the reflection implementations, and
+// Typed NMS modules bundled into :spigot, one per directory under nms/. They need BuildTools or a paperweight dev
+// bundle, so -Pcommandlib.typedNms=false leaves them out and :spigot uses only the reflection implementations, and
 // -Pcommandlib.typedNms=spigot-1.20.4,paper-1.20.6 includes only the listed modules.
-val typedNmsModules = listOf(
-    "spigot-1.16.5",
-    "spigot-1.17.1",
-    "spigot-1.18",
-    "spigot-1.18.1",
-    "spigot-1.18.2",
-    "spigot-1.19",
-    "spigot-1.19.1",
-    "spigot-1.19.2",
-    "spigot-1.19.3",
-    "spigot-1.19.4",
-    "spigot-1.20.1",
-    "spigot-1.20.2",
-    "spigot-1.20.4",
-    "spigot-1.20.6",
-    "spigot-1.21.1",
-    "paper-1.20.6",
-)
+val typedNmsModules = file("nms").listFiles()
+    .orEmpty()
+    .filter { it.resolve("build.gradle.kts").isFile }
+    .map { it.name }
+    .sorted()
+// NMSClassRegistry only looks up modules listed in the table that tools/nms-codegen/generate.py writes.
+val typedNmsTable = file("spigot/src/main/java/net/kunmc/lab/commandlib/util/nms/TypedNmsModules.java").readText()
+typedNmsModules.forEach {
+    val modulePackage = it.replace("-", "_").replace(".", "_")
+    require("TypedModule(\"$modulePackage\"" in typedNmsTable) {
+        "nms/$it is missing from TypedNmsModules. Add it to MODULES in tools/nms-codegen/generate.py and regenerate."
+    }
+}
 val typedNmsSelection = providers.gradleProperty("commandlib.typedNms").orNull
 val includedTypedNmsModules = when (typedNmsSelection) {
     null, "true" -> typedNmsModules

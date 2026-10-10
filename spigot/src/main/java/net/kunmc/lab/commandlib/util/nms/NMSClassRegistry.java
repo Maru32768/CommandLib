@@ -5,6 +5,7 @@ import net.kunmc.lab.commandlib.util.bukkit.MinecraftVersion;
 import net.kunmc.lab.commandlib.util.nms.exception.UnregisteredNMSClassException;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
@@ -13,38 +14,19 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.stream.Collectors;
 
 public class NMSClassRegistry {
     private static final Map<Class<? extends NMSClass>, Deque<RegisteredClass>> CLASS_TO_DEQUE_MAP = new ConcurrentHashMap<>();
     private static final Map<Class<? extends NMSClass>, Deque<TypedRegistration>> TYPED_REGISTRATIONS = new ConcurrentHashMap<>();
     private static final Map<String, Optional<Class<?>>> TYPED_CLASSES = new ConcurrentHashMap<>();
     private static final Map<String, Boolean> MAPPING_PROBES = new ConcurrentHashMap<>();
-    private static final String TYPED_PACKAGE_PREFIX = "net.kunmc.lab.commandlib.nms.";
     /**
-     * The typed NMS modules bundled into the spigot jar (see {@code docs/agents/nms-build.md}): the package under
-     * {@code net.kunmc.lab.commandlib.nms}, the module name its classes carry as a suffix, and the Minecraft versions
-     * its server jar matches. A Paper module has a second package for its reobfuscated classes.
+     * The implementation each look-up class resolved to, with the server version it was resolved for. Registrations
+     * happen in the wrappers' static initializers, so a registration clears it.
      */
-    private static final List<TypedModule> TYPED_MODULES = List.of(new TypedModule("spigot_1_16_5", "1.16.4", "1.16.5"),
-                                                                   new TypedModule("spigot_1_17_1", "1.17.1", "1.17.1"),
-                                                                   new TypedModule("spigot_1_18", "1.18", "1.18"),
-                                                                   new TypedModule("spigot_1_18_1", "1.18.1", "1.18.1"),
-                                                                   new TypedModule("spigot_1_18_2", "1.18.2", "1.18.2"),
-                                                                   new TypedModule("spigot_1_19", "1.19", "1.19"),
-                                                                   new TypedModule("spigot_1_19_1", "1.19.1", "1.19.1"),
-                                                                   new TypedModule("spigot_1_19_2", "1.19.2", "1.19.2"),
-                                                                   new TypedModule("spigot_1_19_3", "1.19.3", "1.19.3"),
-                                                                   new TypedModule("spigot_1_19_4", "1.19.4", "1.19.4"),
-                                                                   new TypedModule("spigot_1_20_1", "1.20", "1.20.1"),
-                                                                   new TypedModule("spigot_1_20_2", "1.20.2", "1.20.2"),
-                                                                   new TypedModule("spigot_1_20_4", "1.20.4", "1.20.4"),
-                                                                   new TypedModule("spigot_1_20_6", "1.20.6", "1.20.6"),
-                                                                   new TypedModule("spigot_1_21_1", "1.21", "1.21.1"),
-                                                                   new TypedModule("paper_1_20_6", "1.20.5", "1.20.6"),
-                                                                   new TypedModule("paper_1_20_6_spigot",
-                                                                                   "paper_1_20_6",
-                                                                                   "1.20.5",
-                                                                                   "1.20.6"));
+    private static final Map<Class<? extends NMSClass>, Resolution> RESOLVED = new ConcurrentHashMap<>();
+    private static final String TYPED_PACKAGE_PREFIX = "net.kunmc.lab.commandlib.nms.";
 
     public static <T extends NMSClass> void register(Class<T> lookUpClass,
                                                      Class<? extends T> targetClass,
@@ -57,6 +39,7 @@ public class NMSClassRegistry {
                           .addFirst(new RegisteredClass(targetClass,
                                                         new MinecraftVersion(lowerVersion),
                                                         new MinecraftVersion(upperVersion)));
+        RESOLVED.clear();
     }
 
     /**
@@ -77,6 +60,7 @@ public class NMSClassRegistry {
                            .addFirst(new TypedRegistration(targetClassName,
                                                            new MinecraftVersion(lowerVersion),
                                                            new MinecraftVersion(upperVersion)));
+        RESOLVED.clear();
     }
 
     /**
@@ -98,9 +82,11 @@ public class NMSClassRegistry {
         Objects.requireNonNull(lookUpClass);
         MinecraftVersion lower = new MinecraftVersion(lowerVersion);
         MinecraftVersion upper = new MinecraftVersion(upperVersion);
-        for (TypedModule module : TYPED_MODULES) {
-            MinecraftVersion moduleLower = module.lowerVersion.compareTo(lower) < 0 ? lower : module.lowerVersion;
-            MinecraftVersion moduleUpper = module.upperVersion.compareTo(upper) > 0 ? upper : module.upperVersion;
+        for (TypedModule module : TypedNmsModules.MODULES) {
+            MinecraftVersion[] moduleVersions = module.wrapperVersions.getOrDefault(lookUpClass.getSimpleName(),
+                                                                                    new MinecraftVersion[]{module.lowerVersion, module.upperVersion});
+            MinecraftVersion moduleLower = moduleVersions[0].compareTo(lower) < 0 ? lower : moduleVersions[0];
+            MinecraftVersion moduleUpper = moduleVersions[1].compareTo(upper) > 0 ? upper : moduleVersions[1];
             if (moduleUpper.compareTo(moduleLower) < 0) {
                 continue;
             }
@@ -109,25 +95,31 @@ public class NMSClassRegistry {
             TYPED_REGISTRATIONS.computeIfAbsent(lookUpClass, x -> new ConcurrentLinkedDeque<>())
                                .addFirst(new TypedRegistration(className, moduleLower, moduleUpper));
         }
+        RESOLVED.clear();
     }
 
+    @SuppressWarnings("unchecked")
     public static <T extends Class<? extends NMSClass>> T findClass(T clazz) {
-        Deque<RegisteredClass> deque = CLASS_TO_DEQUE_MAP.get(clazz);
-        Deque<TypedRegistration> typedDeque = TYPED_REGISTRATIONS.get(clazz);
-        if (deque == null && typedDeque == null) {
+        if (!CLASS_TO_DEQUE_MAP.containsKey(clazz) && !TYPED_REGISTRATIONS.containsKey(clazz)) {
             throw new UnregisteredNMSClassException(clazz + " is unregistered.");
         }
+        String version = BukkitUtil.getMinecraftVersion();
+        Resolution resolution = RESOLVED.get(clazz);
+        if (resolution == null || !resolution.version.equals(version)) {
+            resolution = new Resolution(version, resolve(clazz, new MinecraftVersion(version)));
+            RESOLVED.put(clazz, resolution);
+        }
+        return (T) resolution.clazz;
+    }
 
-        MinecraftVersion version = new MinecraftVersion(BukkitUtil.getMinecraftVersion());
+    private static Class<?> resolve(Class<? extends NMSClass> clazz, MinecraftVersion version) {
+        Deque<RegisteredClass> deque = CLASS_TO_DEQUE_MAP.get(clazz);
+        Deque<TypedRegistration> typedDeque = TYPED_REGISTRATIONS.get(clazz);
         if (typedDeque != null) {
             for (TypedRegistration registration : typedDeque) {
-                if (!version.isWithin(registration.lowerVersion, registration.upperVersion)) {
-                    continue;
-                }
-                Optional<Class<?>> found = loadTypedClass(registration.className, clazz);
-                if (found.isPresent() && clazz.isAssignableFrom(found.get()) && matchesMappings(found.get())
-                        && TypedClassLinkage.isLinkable(found.get())) {
-                    return ((T) found.get());
+                Optional<Class<?>> typed = applicableTypedClass(registration, clazz, version);
+                if (typed.isPresent() && TypedClassLinkage.isLinkable(typed.get())) {
+                    return typed.get();
                 }
             }
         }
@@ -135,12 +127,56 @@ public class NMSClassRegistry {
         if (deque != null) {
             for (RegisteredClass registeredClass : deque) {
                 if (version.isWithin(registeredClass.lowerVersion, registeredClass.upperVersion)) {
-                    return ((T) registeredClass.clazz);
+                    return registeredClass.clazz;
                 }
             }
         }
 
         throw new UnregisteredNMSClassException(clazz + " is unregistered.");
+    }
+
+    /**
+     * The typed class of the registration when the server version is in its range, the class is on the classpath and
+     * its package matches the mappings the plugin was loaded with. Whether it links is checked separately.
+     */
+    private static Optional<Class<?>> applicableTypedClass(TypedRegistration registration,
+                                                           Class<? extends NMSClass> lookUpClass,
+                                                           MinecraftVersion version) {
+        if (!version.isWithin(registration.lowerVersion, registration.upperVersion)) {
+            return Optional.empty();
+        }
+        return loadTypedClass(registration.className, lookUpClass).filter(lookUpClass::isAssignableFrom)
+                                                                  .filter(NMSClassRegistry::matchesMappings);
+    }
+
+    /**
+     * Returns the look-up classes that have a typed class meant for this server, but resolve to another
+     * implementation, each as {@code <look-up class> -> <resolved class> (<why each typed class does not link>)}. Only wrappers initialized so far are
+     * registered. The integration tests use it, because the fallback to reflection hides a typed class that does not
+     * link from every other test.
+     */
+    public static List<String> typedFallbacks() {
+        MinecraftVersion version = new MinecraftVersion(BukkitUtil.getMinecraftVersion());
+        List<String> fallbacks = new ArrayList<>();
+        TYPED_REGISTRATIONS.forEach((lookUpClass, registrations) -> {
+            List<Class<?>> expected = registrations.stream()
+                                                   .map(x -> applicableTypedClass(x, lookUpClass, version))
+                                                   .flatMap(Optional::stream)
+                                                   .collect(Collectors.toList());
+            if (expected.isEmpty()) {
+                return;
+            }
+            Class<?> resolved = findClass(lookUpClass);
+            if (!resolved.getName()
+                         .startsWith(TYPED_PACKAGE_PREFIX)) {
+                String reasons = expected.stream()
+                                         .map(x -> x.getSimpleName() + ": " + TypedClassLinkage.failure(x))
+                                         .collect(Collectors.joining("; "));
+                fallbacks.add(lookUpClass.getSimpleName() + " -> " + resolved.getSimpleName() + " (" + reasons + ")");
+            }
+        });
+        fallbacks.sort(String::compareTo);
+        return fallbacks;
     }
 
     private static Optional<Class<?>> loadTypedClass(String className, Class<?> lookUpClass) {
@@ -235,21 +271,46 @@ public class NMSClassRegistry {
         }
     }
 
-    private static class TypedModule {
+    /**
+     * A typed NMS module: the package under {@code net.kunmc.lab.commandlib.nms}, the module name its classes carry as
+     * a suffix, the Minecraft versions its server jar matches, and narrower versions for wrappers whose class needs a
+     * later release. {@link TypedNmsModules} lists them.
+     */
+    static final class TypedModule {
         private final String packageName;
         private final String moduleName;
         private final MinecraftVersion lowerVersion;
         private final MinecraftVersion upperVersion;
+        private final Map<String, MinecraftVersion[]> wrapperVersions = new HashMap<>();
 
-        private TypedModule(String moduleName, String lowerVersion, String upperVersion) {
+        TypedModule(String moduleName, String lowerVersion, String upperVersion) {
             this(moduleName, moduleName, lowerVersion, upperVersion);
         }
 
-        private TypedModule(String packageName, String moduleName, String lowerVersion, String upperVersion) {
+        TypedModule(String packageName, String moduleName, String lowerVersion, String upperVersion) {
             this.packageName = packageName;
             this.moduleName = moduleName;
             this.lowerVersion = new MinecraftVersion(lowerVersion);
             this.upperVersion = new MinecraftVersion(upperVersion);
+        }
+
+        /**
+         * Narrows the versions of the wrapper with the given simple name, such as {@code NMSDataPackResources}.
+         */
+        TypedModule withWrapperVersions(String wrapper, String lowerVersion, String upperVersion) {
+            wrapperVersions.put(wrapper,
+                                new MinecraftVersion[]{new MinecraftVersion(lowerVersion), new MinecraftVersion(upperVersion)});
+            return this;
+        }
+    }
+
+    private static final class Resolution {
+        private final String version;
+        private final Class<?> clazz;
+
+        private Resolution(String version, Class<?> clazz) {
+            this.version = version;
+            this.clazz = clazz;
         }
     }
 

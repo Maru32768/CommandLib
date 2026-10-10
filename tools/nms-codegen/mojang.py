@@ -5,35 +5,20 @@ build) and Paper 1.20.5 and later. Run as `generate.py <module>`, for example `g
 from codegen import module_package, register, write, write_source
 
 TARGET = MODULE  # noqa: F821 - set by generate.py
+CRAFTBUKKIT_PACKAGE = CRAFTBUKKIT  # noqa: F821 - set by generate.py, None for Paper
 
 
 def ver(text):
     return tuple(int(x) for x in text.split("."))
 
 
-SPIGOT_TARGETS = {
-    "1.17.1": "v1_17_R1",
-    "1.18": "v1_18_R1",
-    "1.18.1": "v1_18_R1",
-    "1.18.2": "v1_18_R2",
-    "1.19": "v1_19_R1",
-    "1.19.1": "v1_19_R1",
-    "1.19.2": "v1_19_R1",
-    "1.19.3": "v1_19_R2",
-    "1.19.4": "v1_19_R3",
-    "1.20.1": "v1_20_R1",
-    "1.20.2": "v1_20_R2",
-    "1.20.4": "v1_20_R3",
-    "1.20.6": "v1_20_R4",
-    "1.21.1": "v1_21_R1",
-}
 platform, version = TARGET.split("-")
 V = ver(version)
 M = TARGET
 SUFFIX = TARGET.replace("-", "_").replace(".", "_")
 PAPER = platform == "paper"
 if not PAPER:
-    CB = "org.bukkit.craftbukkit." + SPIGOT_TARGETS[version]
+    CB = "org.bukkit.craftbukkit." + CRAFTBUKKIT_PACKAGE
     # Spigot names that MinecraftClass looks up at runtime on a Spigot-mapped server.
     NAMES = {
         "DimensionArgument": "commands.arguments.ArgumentDimension",
