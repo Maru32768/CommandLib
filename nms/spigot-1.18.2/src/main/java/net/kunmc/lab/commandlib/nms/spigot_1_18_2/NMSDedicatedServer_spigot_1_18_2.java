@@ -17,6 +17,6 @@ public class NMSDedicatedServer_spigot_1_18_2 extends NMSDedicatedServer {
 
     @Override
     public NMSDataPackResources getDataPackResources() {
-        return NMSDataPackResources.create(((DedicatedServer) getHandle()).resources);
+        return NMSDataPackResources.create(((DedicatedServer) getHandle()).resources.managers());
     }
 }

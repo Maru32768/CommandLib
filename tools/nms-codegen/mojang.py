@@ -83,6 +83,8 @@ else:
 HAS_BUILD_CONTEXT = V >= (1, 19)
 HAS_RESOURCE_ARGUMENT = V >= (1, 19, 3)
 HAS_COMPONENT_CONTENTS = V >= (1, 19)
+# MinecraftServer.resources holds the ReloadableResources record from 1.18.2 and the ServerResources before.
+HAS_RELOADABLE_RESOURCES = V >= (1, 18, 2)
 HAS_MINECRAFT_TO_BUKKIT = V >= (1, 20, 4)
 # CraftParticle switched to minecraftToBukkit earlier than the other Craft* converters.
 HAS_PARTICLE_MINECRAFT_TO_BUKKIT = V >= (1, 20, 2)
@@ -418,7 +420,7 @@ w("NMSDedicatedServer", f'''    public NMSDedicatedServer_SUFFIX(Object handle) 
 
     @Override
     public NMSDataPackResources getDataPackResources() {{
-        return NMSDataPackResources.create(((DedicatedServer) getHandle()).{"resources.managers()" if V >= (1, 19) else "resources"});
+        return NMSDataPackResources.create(((DedicatedServer) getHandle()).{"resources.managers()" if HAS_RELOADABLE_RESOURCES else "resources"});
     }}
 ''', ["net.minecraft.server.dedicated.DedicatedServer"])
 
