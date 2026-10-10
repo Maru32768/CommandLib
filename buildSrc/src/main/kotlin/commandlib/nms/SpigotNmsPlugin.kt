@@ -4,11 +4,13 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.file.RegularFile
 import org.gradle.api.plugins.JavaLibraryPlugin
+import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.provider.Provider
 import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.register
 import org.gradle.api.tasks.bundling.Jar
+import org.gradle.api.tasks.compile.JavaCompile
 import java.io.File
 
 /**
@@ -48,6 +50,11 @@ class SpigotNmsPlugin : Plugin<Project> {
         project.tasks.named("compileJava") {
             dependsOn(installSpigot)
         }
+        project.tasks.withType(JavaCompile::class.java).configureEach {
+            options.release.set(extension.minecraftVersion.map(::typedNmsRelease))
+        }
+        // The server jar and its libraries need the toolchain's Java release, not the one the classes target.
+        project.extensions.getByType(JavaPluginExtension::class.java).disableAutoTargetJvm()
 
         project.dependencies.addProvider(
             "compileOnly",

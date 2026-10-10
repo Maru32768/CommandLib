@@ -34,6 +34,17 @@ fun buildToolsJavaVersion(minecraftVersion: String): Int {
     }
 }
 
+/**
+ * Java release that the typed NMS classes for the given Minecraft version target. The spigot jar bundles them, and a
+ * plugin's shading tool has to read every class in it, so they target the oldest release that compiles: the spigot
+ * module's Java 11 up to 1.16.5, and Java 16 after, whose server classes include records. The toolchain still follows
+ * [buildToolsJavaVersion] to read the server jar.
+ */
+fun typedNmsRelease(minecraftVersion: String): Int {
+    val parts = minecraftVersion.split(".").map { it.toIntOrNull() ?: 0 }
+    return if (parts.getOrElse(0) { 0 } == 1 && parts.getOrElse(1) { 0 } < 17) 11 else 16
+}
+
 /** Spigot renamed methods with its own mappings up to 1.17 and keeps obfuscated member names after. */
 internal fun hasSpigotMemberMappings(minecraftVersion: String): Boolean {
     val parts = minecraftVersion.split(".").map { it.toIntOrNull() ?: 0 }

@@ -15,8 +15,15 @@ repositories {
     }
 }
 
+// The classes target an older Java release than the dev bundle needs, for the shading tools of plugins that bundle the
+// spigot jar (see typedNmsRelease).
 configure<JavaPluginExtension> {
     toolchain.languageVersion.set(JavaLanguageVersion.of(21))
+    disableAutoTargetJvm()
+}
+
+tasks.withType<JavaCompile>().configureEach {
+    options.release.set(commandlib.nms.typedNmsRelease("1.20.6"))
 }
 
 dependencies {
