@@ -61,13 +61,15 @@ lacks the jars (and, for remapped modules, the `minecraft-server` mappings):
 
 - BuildTools.jar and its working directory live in `<gradle user home>/caches/commandlib-buildtools`. Runs share that
   directory, so a build service serializes them within a build and a file lock (`buildtools.lock`) across Gradle
-  processes. BuildTools.jar is downloaded again before each run, and the cached jar is used when the download fails.
+  processes. The lock also covers checking the artifacts and copying a target's server jar, which BuildTools writes
+  in place. BuildTools.jar is downloaded again before each run, and the cached jar is used when the download fails.
 - The local Maven repository is found as Maven finds it: `-Dmaven.repo.local`, then `<localRepository>` in
   `~/.m2/settings.xml` or `$M2_HOME/conf/settings.xml`, then `~/.m2/repository`. BuildTools' own Maven finds the
-  user settings and the default by itself; any other repository goes through `MAVEN_OPTS`, which cannot carry a
-  path with spaces outside Windows.
-- `spigotNms { buildToolsRevision.set("4289") }` passes a Spigot build number to BuildTools instead of the version,
-  for a release that BuildTools resolves to a later build.
+  user settings and the default by itself unless the inherited `MAVEN_OPTS` names a repository; otherwise the
+  repository goes through `MAVEN_OPTS`, which cannot carry a path with spaces outside Windows.
+- Each run records the BuildTools revision (`revisions/spigot-<version>.txt` in the BuildTools directory). An
+  integration target that changes `commandlib.integration.buildToolsRevision` runs BuildTools again; artifacts
+  installed before the record existed are taken to match.
 - The Java toolchain follows the Minecraft version: 8 before 1.17, 16 for 1.17, 17 up to 1.20.4, and 21 after.
 - A BuildTools run takes several minutes and needs network access. Later builds reuse the local Maven repository,
   and the BuildTools JDK is resolved only when BuildTools runs.
@@ -92,22 +94,30 @@ run for the others.
   NMSClassRegistry.registerTyped(NMSArgumentPlayer.class);
   ```
 
-  That registers `net.kunmc.lab.commandlib.nms.<module>.NMSArgumentPlayer_<module>` for every module. Pass a version
-  range to leave some versions on reflection for every module. When only one module's class needs a later release
-  than the module's lower version, narrow it in the module table instead (`wrapper_versions`): the Paper module's
-  `NMSDataPackResources` uses `PaperCommands`, which Paper 1.20.5 lacks, so it runs on 1.20.6 only.
-- Obfuscated names differ between releases, so a Spigot-remapped module covers its own release only. Paper modules
-  keep Mojang names and cover the releases their reflection counterparts cover.
+  That registers `net.kunmc.lab.commandlib.nms.<module>.NMSArgumentPlayer_<module>` for every module, for the
+  module's versions. When one module's class needs a later release than the module's lower version, narrow it in the
+  module table (`wrapper_versions`): the Paper module's `NMSDataPackResources` uses `PaperCommands`, which Paper
+  1.20.5 lacks, so it runs on 1.20.6 only.
+- Obfuscated names usually differ between releases, so a Spigot-remapped module covers its own release, plus the
+  other releases of its CraftBukkit revision whose mappings remap it to the same classes and whose integration target
+  passes `TypedNmsTest` (see Overview). Paper modules keep Mojang names and cover the releases their reflection
+  counterparts cover.
 - `findClass` loads the class only on a server inside the range, because the class may target a newer Java release
   than older servers run. It prefers the typed class and falls back to the reflection implementation when:
   - the class is missing, as in `:spigot:test` and `spigot-testing`, or for a wrapper the module does not implement;
   - its package has a `MappingProbe` whose `matches()` returns false or throws a `LinkageError`;
   - `TypedClassLinkage` finds that the class, or a class it uses from its own package, does not link on the server.
-    It links each class without initializing it, so the verifier checks the supertypes the bytecode relies on, and
-    resolves each field and method reference through a `MethodHandles.Lookup` of the class with the kind of the
-    instruction that uses it (instance or static, virtual, special or interface). A lookup checks access and resolves
-    only that member. This covers servers that differ from the compiled jar, such as Spigot 1.20.5-1.20.6 for the
-    Mojang-named Paper classes, forks, and hybrid servers.
+    It links each class without initializing it, so HotSpot's verifier rejects a server class that is no longer a
+    subclass of the class the bytecode assigns it to. The verifier treats interfaces as `Object`, and a JVM without
+    verification checks no supertypes, so a server class that dropped an interface still fails at command time.
+    It then resolves each class the instructions use, and each field and method reference through a
+    `MethodHandles.Lookup` of the class with the kind of the instruction that uses it (instance or static, virtual,
+    special or interface; a write also rejects a final field of another class). A lookup checks access and resolves
+    only that member. Servers that remap the plugin rewrite its `Lookup` calls to map member names as Spigot names,
+    which Mohist's class files, read with Spigot names, need, and Paper's, already remapped, do not. So each lookup
+    goes through a method handle, which no server rewrites, and on failure through the plain call. This covers servers
+    that differ from the compiled jar, such as Spigot 1.20.5-1.20.6 for the Mojang-named Paper classes, forks, and
+    hybrid servers.
 - `findClass` caches the class it resolves for each look-up class and server version.
 - Typed classes extend the abstract `NMS*` wrapper, so the reflection implementations and mocks keep working.
 
@@ -130,4 +140,5 @@ run for the others.
 Keep the reflection implementation for a version until the typed one is covered by the integration test for it. The
 Spigot suite's `TypedNmsTest` fails when a wrapper has a typed class for the server version, in a package whose probe
 matches, but `findClass` falls back to reflection (`NMSClassRegistry.typedFallbacks()`), so a silently rejected typed class
-does not pass unnoticed.
+does not pass unnoticed. A typed class that fails to load, such as one built for a newer Java release than the server
+runs, counts too. Only wrappers initialized so far are checked, so the test also reads the command source's location.
