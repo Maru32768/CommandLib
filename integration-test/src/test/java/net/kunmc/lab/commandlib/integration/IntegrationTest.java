@@ -96,7 +96,7 @@ class IntegrationTest {
                           });
 
                 waitForPlayerJoin(container, client);
-                waitForStableConnection(client, Duration.ofSeconds(3));
+                waitForCommandTree(client);
 
                 // Send a tab-complete request before runTests so the server-side suggestion action
                 // fires and captures getLatestInput() before verifySuggestionCapture runs. The server runs the
@@ -206,20 +206,22 @@ class IntegrationTest {
         return line.contains("joined the game") || line.contains("logged in with entity id");
     }
 
-    private static void waitForStableConnection(BotSession client, Duration duration) {
-        long deadline = System.nanoTime() + duration.toNanos();
-        while (System.nanoTime() < deadline) {
-            client.assertNotDisconnected();
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                Thread.currentThread()
-                      .interrupt();
-                throw new IllegalStateException("Interrupted while waiting for the MCProtocolLib session to stabilize.",
-                                                e);
-            }
+    // A client that cannot decode the command tree, such as an MCProtocolLib release that lacks one of its argument
+    // types, is disconnected right after joining. Waiting for the tree makes that disconnect fail here instead of in a
+    // later step.
+    private static void waitForCommandTree(BotSession client) {
+        try {
+            Awaitility.await()
+                      .atMost(Duration.ofSeconds(30))
+                      .pollInterval(Duration.ofMillis(100))
+                      .until(() -> {
+                          client.assertNotDisconnected();
+                          // 1.16.5 and 1.17.1 use ServerDeclareCommandsPacket.
+                          return client.hasReceived("ClientboundCommandsPacket", "ServerDeclareCommandsPacket");
+                      });
+        } catch (org.awaitility.core.ConditionTimeoutException e) {
+            fail("The bot did not receive the command tree after joining.");
         }
-        client.assertNotDisconnected();
     }
 
     private static void waitForSuggestionResponse(BotSession client) {
@@ -229,13 +231,8 @@ class IntegrationTest {
                       .pollInterval(Duration.ofMillis(100))
                       .until(() -> {
                           client.assertNotDisconnected();
-                          return client.receivedPackets.stream()
-                                                       .map(packet -> packet.getClass()
-                                                                            .getSimpleName())
-                                                       // 1.16.5 uses ServerTabCompletePacket.
-                                                       .anyMatch(name -> name.equals(
-                                                               "ClientboundCommandSuggestionsPacket") || name.equals(
-                                                               "ServerTabCompletePacket"));
+                          // 1.16.5 and 1.17.1 use ServerTabCompletePacket.
+                          return client.hasReceived("ClientboundCommandSuggestionsPacket", "ServerTabCompletePacket");
                       });
         } catch (org.awaitility.core.ConditionTimeoutException e) {
             // The fixture reports a missing capture itself, with a clearer message than a timeout here.
@@ -585,6 +582,13 @@ class IntegrationTest {
             this.isConnectedMethod = isConnectedMethod;
             this.sendMethod = sendMethod;
             this.disconnectMethod = disconnectMethod;
+        }
+
+        boolean hasReceived(String... packetSimpleNames) {
+            List<String> names = List.of(packetSimpleNames);
+            return receivedPackets.stream()
+                                  .anyMatch(packet -> names.contains(packet.getClass()
+                                                                           .getSimpleName()));
         }
 
         void clearReceivedPackets() {
