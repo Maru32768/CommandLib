@@ -155,6 +155,21 @@ class TypedClassLinkageTest {
                 TypedClassLinkage.NoSuchMemberException.class);
     }
 
+    @Test
+    void class_with_switches_and_wide_instructions_is_linkable() {
+        assertThat(TypedClassLinkage.isLinkable(SwitchCaller.class)).isTrue();
+    }
+
+    @Test
+    void missing_method_after_switches_and_wide_instructions_is_reported() throws Exception {
+        // Reported only when the instruction lengths of the switches and wide iinc before the call are read right.
+        byte[] bytes = replace(classFile(SwitchCaller.class), "linkedMethod", "missedMethod");
+
+        assertThatThrownBy(() -> TypedClassLinkage.checkReferences(bytes,
+                                                                   SwitchCaller.class)).isInstanceOf(
+                TypedClassLinkage.NoSuchMemberException.class);
+    }
+
     private static byte[] classFile(Class<?> clazz) throws IOException {
         try (InputStream in = clazz.getResourceAsStream(clazz.getName()
                                                              .substring(clazz.getName()
@@ -210,6 +225,54 @@ class TypedClassLinkageTest {
             AccessTarget.publicMethod();
             int[] copy = new int[]{target.linkedField}.clone();
             return LinkedTarget.linkedMethod(copy[0]);
+        }
+    }
+
+    static class SwitchCaller {
+        Object run(int value, String key) {
+            int total = value;
+            // tableswitch
+            switch (value) {
+                case 1:
+                    total += 2;
+                    break;
+                case 2:
+                    total += 3;
+                    break;
+                case 3:
+                    total += 5;
+                    break;
+                default:
+                    break;
+            }
+            // lookupswitch
+            switch (value) {
+                case 1:
+                    total += 7;
+                    break;
+                case 1000:
+                    total += 11;
+                    break;
+                case 100000:
+                    total += 13;
+                    break;
+                default:
+                    break;
+            }
+            // lookupswitch on the hash code, then tableswitch
+            switch (key) {
+                case "a":
+                    total += 17;
+                    break;
+                case "b":
+                    total += 19;
+                    break;
+                default:
+                    break;
+            }
+            // wide iinc
+            total += 1000;
+            return LinkedTarget.linkedMethod(total);
         }
     }
 
