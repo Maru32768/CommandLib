@@ -324,14 +324,28 @@ class CommonArgumentEdgeCaseTest {
     }
 
     @Test
-    void set_suggestion_action_null_clears_all_suggestions() {
+    void clear_suggestion_actions_clears_all_suggestions() {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("pick") {{
             argument(new StrArg("value").addSuggestionAction(sb -> sb.suggest("alpha"))
-                                        .setSuggestionAction(null)).execute((value, ctx) -> {
+                                        .clearSuggestionActions()).execute((value, ctx) -> {
             });
         }});
 
         assertThat(runner.suggest("pick ")).containsExactly("help");
+    }
+
+    @Test
+    void set_suggestion_action_rejects_null_and_keeps_existing_actions() {
+        StrArg arg = new StrArg("value").addSuggestionAction(sb -> sb.suggest("alpha"));
+
+        assertThatThrownBy(() -> arg.setSuggestionAction(null)).isInstanceOf(NullPointerException.class)
+                                                               .hasMessageContaining("clearSuggestionActions()");
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("pick") {{
+            argument(arg).execute((value, ctx) -> {
+            });
+        }});
+
+        assertThat(runner.suggest("pick ")).contains("alpha");
     }
 
     @Test

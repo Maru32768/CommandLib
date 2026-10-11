@@ -49,11 +49,11 @@ public abstract class CommonArgument<T, C extends CommonCommandContext<?, ?>, SE
     }
 
     @SuppressWarnings("unchecked")
-    public final SELF setSuggestionAction(@Nullable SuggestionAction<C> suggestionAction) {
+    public final SELF setSuggestionAction(@NotNull SuggestionAction<C> suggestionAction) {
+        Objects.requireNonNull(suggestionAction,
+                               "suggestionAction must not be null; use clearSuggestionActions() to remove all suggestions");
         this.suggestionActions.clear();
-        if (suggestionAction != null) {
-            this.suggestionActions.add(ArgumentSuggestionAction.custom(suggestionAction));
-        }
+        this.suggestionActions.add(ArgumentSuggestionAction.custom(suggestionAction));
         return (SELF) this;
     }
 
