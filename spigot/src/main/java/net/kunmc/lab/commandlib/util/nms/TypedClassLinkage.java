@@ -23,9 +23,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Checks that every class, field and method a typed NMS class refers to resolves on the running server the way the
- * JVM would resolve it, so {@link NMSClassRegistry} can fall back to the reflection implementation instead of failing
- * with a {@link LinkageError} at command time. The JVM resolves those references lazily, so loading the class alone
- * does not tell. A server inside a typed range can still differ from the jar the class was compiled against, such as
+ * JVM would resolve it, so {@link NMSClassRegistry} can try the next module, or report the wrapper as unavailable,
+ * instead of failing with a {@link LinkageError} at command time. The JVM resolves those references lazily, so loading
+ * the class alone does not tell. A server inside a typed range can still differ from the jar the class was compiled against, such as
  * Spigot 1.20.5-1.20.6 for the Mojang-named Paper classes, a fork, or a hybrid server.
  *
  * <p>The check covers the class and the classes it uses from the same package:

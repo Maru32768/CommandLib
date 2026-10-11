@@ -38,8 +38,7 @@ public abstract class NMSCommandListenerWrapper extends NMSClass {
 
     /**
      * The position of the source in its world, with its rotation as the yaw and pitch, or null without a world or a
-     * position. The reflection implementations find the rotation by type and obfuscated field names, so a server where
-     * that fails still gets the position, without the rotation.
+     * position.
      */
     public Location getBukkitLocation() {
         World world = getBukkitWorld();
@@ -47,18 +46,9 @@ public abstract class NMSCommandListenerWrapper extends NMSClass {
         if (world == null || position == null) {
             return null;
         }
-        float yaw = 0.0F;
-        float pitch = 0.0F;
-        try {
-            NMSVec2D rotation = getRotation();
-            if (rotation != null) {
-                yaw = rotation.y();
-                pitch = rotation.x();
-            }
-        } catch (RuntimeException e) {
-            yaw = 0.0F;
-            pitch = 0.0F;
-        }
+        NMSVec2D rotation = getRotation();
+        float yaw = rotation != null ? rotation.y() : 0.0F;
+        float pitch = rotation != null ? rotation.x() : 0.0F;
         return new Location(world, position.x(), position.y(), position.z(), yaw, pitch);
     }
 }
