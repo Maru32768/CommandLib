@@ -766,12 +766,27 @@ CommandLib does not need additional LuckPerms-specific integration.
 
 ## Claude Code Skill
 
-A Claude Code skill is available at `.claude/skills/commandlib/`. It loads the CommandLib API from your Gradle source
-cache and generates or explains code on demand.
+A Claude Code skill is available as the `commandlib` plugin in this repository's plugin marketplace
+(`plugins/commandlib/`). It loads the CommandLib API from your Gradle source cache and generates or explains code on
+demand.
 
 ### Setup
 
-1. Copy the `.claude/skills/commandlib/` directory to your project's `.claude/skills/` directory.
+1. Add this repository as a plugin marketplace and install the plugin, inside Claude Code:
+
+```
+/plugin marketplace add Maru32768/CommandLib
+/plugin install commandlib@commandlib
+```
+
+Or from your shell:
+
+```bash
+claude plugin marketplace add Maru32768/CommandLib
+claude plugin install commandlib@commandlib
+```
+
+Run `/plugin marketplace update commandlib` to pick up newer versions of the skill.
 
 2. Download sources via Gradle so the skill has something to read:
 
@@ -784,12 +799,12 @@ Or in IntelliJ: **View > Tool Windows > Gradle > Download Sources**.
 ### Usage
 
 ```
-/commandlib <request>
+/commandlib:commandlib <request>
 ```
 
 ```
-/commandlib I want a command that sends a message to a player. Args: player and string. Permission: myplugin.message
-/commandlib プレイヤーにメッセージを送るコマンドを作りたい。引数はプレイヤーと文字列、権限は myplugin.message
+/commandlib:commandlib I want a command that sends a message to a player. Args: player and string. Permission: myplugin.message
+/commandlib:commandlib プレイヤーにメッセージを送るコマンドを作りたい。引数はプレイヤーと文字列、権限は myplugin.message
 ```
 
 ## Sample Projects

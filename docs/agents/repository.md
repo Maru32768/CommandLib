@@ -3,7 +3,7 @@
 ## Scope
 
 This document is for agents editing the CommandLib repository itself. The
-Claude Code skill under `.claude/skills/commandlib` is for downstream library
+Claude Code skill under `plugins/commandlib/skills/commandlib` is for downstream library
 users and should not be used as the main source of repository maintenance
 instructions.
 
@@ -51,5 +51,5 @@ does not depend on Bukkit APIs. Keep Bukkit and NMS-specific behavior in
 ## Public Usage Patterns
 
 When writing examples or tests that represent downstream user code, prefer the
-same patterns documented in `.claude/skills/commandlib/references/patterns.md`.
+same patterns documented in `plugins/commandlib/skills/commandlib/references/patterns.md`.
 Those patterns are user-facing API guidance, not repository architecture rules.

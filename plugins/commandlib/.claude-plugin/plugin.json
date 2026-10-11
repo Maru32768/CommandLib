@@ -1,0 +1,12 @@
+{
+  "name": "commandlib",
+  "version": "0.17.2",
+  "description": "Generate, test, or explain code that uses the CommandLib Minecraft command library",
+  "author": {
+    "name": "Maru32768"
+  },
+  "homepage": "https://github.com/Maru32768/CommandLib",
+  "repository": "https://github.com/Maru32768/CommandLib",
+  "license": "MIT",
+  "keywords": ["minecraft", "spigot", "paper", "forge", "neoforge", "commands"]
+}

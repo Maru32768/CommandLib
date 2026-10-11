@@ -11,7 +11,7 @@ For repository maintenance, bug fixes, tests, and implementation work, read:
 - `docs/agents/nms-build.md` when touching `nms`, `buildSrc`, or typed NMS registrations
 - `docs/agents/argument-addition.md` when adding or changing public argument classes
 
-Do not treat `.claude/skills/commandlib` as repository-maintenance instructions.
+Do not treat `plugins/commandlib` (the Claude Code plugin) as repository-maintenance instructions.
 That skill is for downstream library users who want to generate or understand
 CommandLib usage code.
 

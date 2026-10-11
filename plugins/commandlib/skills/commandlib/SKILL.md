@@ -1,6 +1,6 @@
 ---
 name: commandlib
-description: Generate, test, or explain code that uses the CommandLib library in a Bukkit plugin. Usage: /commandlib <request>
+description: Generate, test, or explain code that uses the CommandLib library in a Bukkit plugin. Usage: /commandlib:commandlib <request>
 allowed-tools: Bash Read Glob Grep
 ---
 
@@ -16,16 +16,16 @@ the user explicitly asks for downstream usage examples.
 
 Read the relevant references before generating code:
 
-- `.claude/skills/commandlib/references/user-guide.md`
-- `.claude/skills/commandlib/references/patterns.md`
-- `.claude/skills/commandlib/references/testing.md`
+- `${CLAUDE_SKILL_DIR}/references/user-guide.md`
+- `${CLAUDE_SKILL_DIR}/references/patterns.md`
+- `${CLAUDE_SKILL_DIR}/references/testing.md`
 
 ## Step 2 - Extract CommandLib sources when needed
 
 Run the extraction script:
 
 ```bash
-bash .claude/skills/commandlib/scripts/extract-sources.sh
+bash "${CLAUDE_SKILL_DIR}/scripts/extract-sources.sh"
 ```
 
 The script prints one of:

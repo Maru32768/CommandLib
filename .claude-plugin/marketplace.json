@@ -1,0 +1,14 @@
+{
+  "name": "commandlib",
+  "description": "Claude Code plugins for the CommandLib Minecraft command library",
+  "owner": {
+    "name": "Maru32768"
+  },
+  "plugins": [
+    {
+      "name": "commandlib",
+      "source": "./plugins/commandlib",
+      "description": "Generate, test, or explain code that uses CommandLib"
+    }
+  ]
+}
