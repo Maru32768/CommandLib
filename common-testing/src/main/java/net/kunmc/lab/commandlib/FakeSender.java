@@ -46,11 +46,7 @@ public final class FakeSender implements CommandActor {
         return new Builder("Console", null, CommandActorType.CONSOLE, true);
     }
 
-    /**
-     * @deprecated Use {@link #playerBuilder(String)} or {@link #consoleBuilder()}.
-     */
-    @Deprecated
-    public FakeSender(String name,
+    private FakeSender(String name,
                       UUID uniqueId,
                       CommandActorType type,
                       boolean operator,
