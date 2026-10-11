@@ -63,8 +63,10 @@ lacks the jars (and, for remapped modules, the `minecraft-server` mappings):
 
 - BuildTools.jar and its working directory live in `<gradle user home>/caches/commandlib-buildtools`. Runs share that
   directory, so a build service serializes them within a build and a file lock (`buildtools.lock`) across Gradle
-  processes. The lock also covers checking the artifacts and copying a target's server jar, which BuildTools writes
-  in place. BuildTools.jar is downloaded again before each run, and the cached jar is used when the download fails.
+  processes. Processes with different Gradle user homes share the local Maven repository, so a run also locks
+  `org/spigotmc/.commandlib-buildtools.lock` there, before the directory lock. The locks also cover checking the
+  artifacts and copying a target's server jar, which BuildTools writes in place. BuildTools.jar is downloaded again
+  before each run, and the cached jar is used when the download fails.
 - The local Maven repository is found as Maven finds it: `-Dmaven.repo.local`, then `<localRepository>` in
   `~/.m2/settings.xml` or `$M2_HOME/conf/settings.xml`, then `~/.m2/repository`. BuildTools' own Maven finds the
   user settings and the default by itself unless the inherited `MAVEN_OPTS` names a repository; otherwise the

@@ -77,14 +77,12 @@ abstract class BuildToolsTask : DefaultTask() {
     fun install() {
         val directory = buildToolsDirectory.get().asFile.apply { mkdirs() }
         // Another Gradle process, such as an IDE sync next to a command-line build, may run BuildTools in the same
-        // directory. BuildTools writes the server jar in place as its last step, so checking the artifacts and copying
-        // the jar hold the lock too. The lock is released when the channel closes, and by the OS when a process dies.
-        RandomAccessFile(directory.resolve("buildtools.lock"), "rw").channel.use { channel ->
-            val lock = channel.tryLock() ?: run {
-                logger.lifecycle("Waiting for another Gradle process to finish running BuildTools in $directory")
-                channel.lock()
-            }
-            lock.use {
+        // directory, or, with another Gradle user home, install into the same local Maven repository. So a run locks
+        // both, always the repository first. BuildTools writes the server jar in place as its last step, so checking
+        // the artifacts and copying the jar hold the locks too.
+        val repositoryLock = mavenLocalDirectory.get().asFile.resolve("org/spigotmc/.commandlib-buildtools.lock")
+        withFileLock(repositoryLock) {
+            withFileLock(directory.resolve("buildtools.lock")) {
                 var ranBuildTools = false
                 if (!isInstalled()) {
                     runBuildTools(directory)
@@ -92,6 +90,18 @@ abstract class BuildToolsTask : DefaultTask() {
                 }
                 didWork = copyServerJar() || ranBuildTools
             }
+        }
+    }
+
+    /** Runs [action] holding a lock on [file], which closing the channel releases, and the OS when a process dies. */
+    private fun withFileLock(file: File, action: () -> Unit) {
+        file.parentFile.mkdirs()
+        RandomAccessFile(file, "rw").channel.use { channel ->
+            val lock = channel.tryLock() ?: run {
+                logger.lifecycle("Waiting for another Gradle process to finish running BuildTools ($file)")
+                channel.lock()
+            }
+            lock.use { action() }
         }
     }
 
