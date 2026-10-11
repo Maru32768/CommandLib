@@ -375,10 +375,18 @@ public final class CommandLib implements Listener {
             registeredCommandNames.clear();
         }
         for (LiteralCommandNode<CommandSourceStack> node : registration.buildNodes()) {
-            dispatcher.getRoot()
-                      .addChild(node);
+            replaceChild(dispatcher.getRoot(), node);
             registeredCommandNames.add(node.getLiteral());
         }
+    }
+
+    /**
+     * Brigadier merges a node into an existing child of the same name, which keeps that child's requirement and
+     * children, so the existing command is removed first.
+     */
+    static void replaceChild(RootCommandNode<CommandSourceStack> root, LiteralCommandNode<CommandSourceStack> node) {
+        removeFromNode(root, node.getLiteral());
+        root.addChild(node);
     }
 
     private static final class PluginRegistrationState {
