@@ -86,8 +86,10 @@ class IntegrationTest {
 
             BotSession client = connectBot(container);
             try {
+                // Timeouts are generous because several servers may start at once; the waits end as soon as their
+                // condition holds.
                 Awaitility.await()
-                          .atMost(Duration.ofSeconds(30))
+                          .atMost(Duration.ofSeconds(60))
                           .until(() -> {
                               client.assertNotDisconnected();
                               return client.isConnected();
@@ -97,23 +99,27 @@ class IntegrationTest {
                 waitForStableConnection(client, Duration.ofSeconds(3));
 
                 // Send a tab-complete request before runTests so the server-side suggestion action
-                // fires and captures getLatestInput() before verifySuggestionCapture runs.
+                // fires and captures getLatestInput() before verifySuggestionCapture runs. The server runs the
+                // action before it answers, so the response means the input has been captured.
                 client.sendTabCompleteRequest(1, "/commandlibtest suggestionCapture abc");
-                Thread.sleep(300);
-                client.assertNotDisconnected();
+                waitForSuggestionResponse(client);
 
                 client.sendCommand("commandlibtest runTests");
 
+                // The fixture waits up to 120 seconds for /minecraft:reload, so this has to wait longer.
+                // The report is read once it parses, since it may be seen while it is still being written.
+                AtomicReference<Document> report = new AtomicReference<>();
                 Awaitility.await()
-                          .atMost(Duration.ofMinutes(2))
+                          .atMost(Duration.ofMinutes(5))
                           .pollInterval(Duration.ofSeconds(1))
                           .until(() -> {
                               client.assertNotDisconnected();
-                              return Files.exists(reportFile) && Files.size(reportFile) > 0;
+                              report.set(tryParseReport(reportFile));
+                              return report.get() != null;
                           });
                 client.assertNotDisconnected();
 
-                assertJUnitReportSucceeded(reportFile);
+                assertJUnitReportSucceeded(reportFile, report.get());
 
                 // Bot-side checks need the messages a player receives, which the console-driven report cannot see.
                 // Help message prefix: the usage must start with the typed command, not a token like an argument name.
@@ -166,7 +172,7 @@ class IntegrationTest {
         List<String> received = new ArrayList<>();
         try {
             Awaitility.await()
-                      .atMost(Duration.ofSeconds(10))
+                      .atMost(Duration.ofSeconds(30))
                       .pollInterval(Duration.ofMillis(200))
                       .until(() -> {
                           client.assertNotDisconnected();
@@ -182,7 +188,7 @@ class IntegrationTest {
 
     private static void waitForPlayerJoin(GenericContainer<?> container, BotSession client) {
         Awaitility.await()
-                  .atMost(Duration.ofSeconds(30))
+                  .atMost(Duration.ofSeconds(60))
                   .pollInterval(Duration.ofMillis(500))
                   .until(() -> {
                       client.assertNotDisconnected();
@@ -216,10 +222,41 @@ class IntegrationTest {
         client.assertNotDisconnected();
     }
 
-    private static void assertJUnitReportSucceeded(Path reportFile) throws ParserConfigurationException, IOException, SAXException {
-        Document report = DocumentBuilderFactory.newInstance()
-                                                .newDocumentBuilder()
-                                                .parse(reportFile.toFile());
+    private static void waitForSuggestionResponse(BotSession client) {
+        try {
+            Awaitility.await()
+                      .atMost(Duration.ofSeconds(30))
+                      .pollInterval(Duration.ofMillis(100))
+                      .until(() -> {
+                          client.assertNotDisconnected();
+                          return client.receivedPackets.stream()
+                                                       .map(packet -> packet.getClass()
+                                                                            .getSimpleName())
+                                                       // 1.16.5 uses ServerTabCompletePacket.
+                                                       .anyMatch(name -> name.equals(
+                                                               "ClientboundCommandSuggestionsPacket") || name.equals(
+                                                               "ServerTabCompletePacket"));
+                      });
+        } catch (org.awaitility.core.ConditionTimeoutException e) {
+            // The fixture reports a missing capture itself, with a clearer message than a timeout here.
+            LOGGER.warn("No command suggestion response arrived; continuing with runTests.");
+        }
+    }
+
+    private static Document tryParseReport(Path reportFile) throws ParserConfigurationException, IOException {
+        if (!Files.exists(reportFile) || Files.size(reportFile) == 0) {
+            return null;
+        }
+        try {
+            return DocumentBuilderFactory.newInstance()
+                                         .newDocumentBuilder()
+                                         .parse(reportFile.toFile());
+        } catch (SAXException e) {
+            return null;
+        }
+    }
+
+    private static void assertJUnitReportSucceeded(Path reportFile, Document report) {
         Element testSuite = report.getDocumentElement();
         int tests = Integer.parseInt(testSuite.getAttribute("tests"));
         int failures = Integer.parseInt(testSuite.getAttribute("failures"));
