@@ -58,6 +58,8 @@ Use this checklist whenever adding a public `*Argument` class.
 - `:integration-test:test` includes a lightweight coverage check that fails when a public Spigot, Paper, or Forge
   argument class is missing from the matching integration fixture. Add an explicit exclusion there only when a
   real-server case is intentionally not applicable.
+- The same check fails when a public Spigot argument class has no Paper class of the same name. Paper-only arguments
+  are allowed.
 - The integration case should:
     - register the argument,
     - execute a real command with representative input,

@@ -38,6 +38,20 @@ class ArgumentIntegrationCoverageTest {
                                "integration-test/shared/modded/src/main/java/dev/marulabs/testmod/ArgumentTest.java");
     }
 
+    @Test
+    void paper_has_every_spigot_argument() throws IOException {
+        // Switching platform must not take arguments away; Paper-only arguments are allowed on top.
+        Path rootDir = Path.of(System.getProperty("commandlib.rootDir", "."));
+        Set<String> paperArguments = publicArgumentClassNames(rootDir.resolve(
+                "paper/src/main/java/net/kunmc/lab/commandlib/argument"));
+        Set<String> missing = new java.util.TreeSet<>(publicArgumentClassNames(rootDir.resolve(
+                "spigot/src/main/java/net/kunmc/lab/commandlib/argument")));
+        missing.removeAll(paperArguments);
+
+        assertThat(missing).as("Implement these Spigot arguments in paper too")
+                           .isEmpty();
+    }
+
     private void assertIntegrationCases(Path rootDir, String moduleName) throws IOException {
         assertIntegrationCases(rootDir,
                                moduleName,
