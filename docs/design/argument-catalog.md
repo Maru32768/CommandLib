@@ -101,7 +101,7 @@ This document summarizes the current state of CommandLib's built-in arguments an
 | `EnchantmentArgument` | `Implemented` | Forge enchantment. 1.20.5+ uses `Holder<Enchantment>`. |
 | `EffectArgument` | `Implemented` | Forge effect. 1.20.5+ uses `Holder<MobEffect>`. |
 | `ParticleArgument` | `Implemented` | Forge particle data. |
-| `TeamArgument` | `Implemented` | Forge scoreboard team. |
+| `TeamArgument` | `Implemented` | Forge / NeoForge scoreboard `PlayerTeam`. `scoreboard(Supplier<Scoreboard>)` picks the scoreboard to look teams up in on each parse and suggestion (defaults to the server scoreboard). |
 | `GameProfileArgument` | `Implemented` | game profile list. |
 | `ResourceLocationArgument` | `Implemented` | Minecraft `ResourceLocation`. The namespace defaults to `minecraft`. |
 
