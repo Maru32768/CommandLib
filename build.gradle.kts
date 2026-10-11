@@ -1,3 +1,4 @@
+import net.ltgt.gradle.errorprone.CheckSeverity
 import net.ltgt.gradle.errorprone.errorprone
 
 plugins {
@@ -196,6 +197,7 @@ configure(subprojects.filter { it.path in errorProneProjectPaths }) {
 
     dependencies {
         "errorprone"("com.google.errorprone:error_prone_core:2.50.0")
+        "errorprone"("com.uber.nullaway:nullaway:0.14.2")
     }
 
     val toolchainVersion = the<JavaPluginExtension>().toolchain.languageVersion
@@ -206,5 +208,11 @@ configure(subprojects.filter { it.path in errorProneProjectPaths }) {
         javaCompiler.set(errorProneCompiler)
         options.release.set(toolchainVersion.map { it.asInt() })
         options.errorprone.disableWarningsInGeneratedCode.set(true)
+        // Tests pass null on purpose, so NullAway checks only the main sources. It warns until the missing @Nullable
+        // annotations it reports are added.
+        options.errorprone.check("NullAway", if (name == "compileJava") CheckSeverity.WARN else CheckSeverity.OFF)
+        options.errorprone.option("NullAway:AnnotatedPackages", "net.kunmc.lab.commandlib")
+        // javac stops listing warnings at 100 by default.
+        options.compilerArgs.addAll(listOf("-Xmaxwarns", "10000"))
     }
 }
