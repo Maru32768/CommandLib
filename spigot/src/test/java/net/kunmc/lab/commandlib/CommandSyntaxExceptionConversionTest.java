@@ -6,7 +6,8 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.kunmc.lab.commandlib.exception.ArgumentParseException;
 import net.kunmc.lab.commandlib.util.bukkit.BukkitUtil;
-import net.kunmc.lab.commandlib.util.nms.NMSReflection;
+import net.kunmc.lab.commandlib.util.nms.NMSClassRegistry;
+import net.kunmc.lab.commandlib.util.nms.chat.NMSChatMessage;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TranslatableComponent;
 import org.junit.jupiter.api.Test;
@@ -21,7 +22,6 @@ import java.util.logging.Logger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 class CommandSyntaxExceptionConversionTest {
@@ -104,12 +104,11 @@ class CommandSyntaxExceptionConversionTest {
     private static CommandContext convertAndSend(CommandSyntaxException e) {
         CommandContext ctx = mock(CommandContext.class);
         try (MockedStatic<BukkitUtil> bukkitUtil = mockStatic(BukkitUtil.class);
-             MockedStatic<NMSReflection> reflection = mockStatic(NMSReflection.class)) {
+             MockedStatic<NMSClassRegistry> registry = mockStatic(NMSClassRegistry.class)) {
             bukkitUtil.when(BukkitUtil::getMinecraftVersion)
                       .thenReturn("1.16.5");
-            reflection.when(() -> NMSReflection.findMinecraftClass(anyString(), any(String[].class)))
-                      .thenReturn(e.getRawMessage()
-                                   .getClass() == BrokenChatMessage.class ? BrokenChatMessage.class : FakeChatMessage.class);
+            registry.when(() -> NMSClassRegistry.findClass(NMSChatMessage.class))
+                    .thenAnswer(x -> TestChatMessage.class);
 
             ArgumentParseException converted = new PlatformAdapterImpl().convertCommandSyntaxException(e);
             converted.sendMessage(ctx);
@@ -118,9 +117,35 @@ class CommandSyntaxExceptionConversionTest {
     }
 
     /**
+     * Stands in for the typed NMSChatMessage of 1.16, reading the stand-ins of the 1.16 {@code ChatMessage} component.
+     * A message of another class, such as a LiteralMessage, is not assignable, as on a server.
+     */
+    public static final class TestChatMessage extends NMSChatMessage {
+        public TestChatMessage(Message handle) {
+            super(handle, ChatMessage.class);
+        }
+
+        @Override
+        public String getKey() {
+            return ((ChatMessage) getHandle()).getKey();
+        }
+
+        @Override
+        public Object[] getArgs() {
+            return ((ChatMessage) getHandle()).getArgs();
+        }
+    }
+
+    interface ChatMessage extends Message {
+        String getKey();
+
+        Object[] getArgs();
+    }
+
+    /**
      * A {@code ChatMessage} stand-in whose arguments getter fails, as a broken NMS mapping would.
      */
-    public static final class BrokenChatMessage implements Message {
+    public static final class BrokenChatMessage implements ChatMessage {
         public String getKey() {
             return "broken.key";
         }
@@ -138,7 +163,7 @@ class CommandSyntaxExceptionConversionTest {
     /**
      * Stands in for the 1.16 {@code ChatMessage} component, which exposes its key and arguments.
      */
-    public static final class FakeChatMessage implements Message {
+    public static final class FakeChatMessage implements ChatMessage {
         private final String key;
         private final Object[] args;
 

@@ -12,7 +12,7 @@ import net.minecraft.core.registries.Registries;
 
 public class NMSArgumentEnchantment_spigot_1_19_3 extends NMSArgumentEnchantment {
     public NMSArgumentEnchantment_spigot_1_19_3() {
-        super(null, "commands.arguments.ResourceArgument");
+        super(null, ResourceArgument.class);
     }
 
     @Override

@@ -2,18 +2,17 @@
 Typed classes for Spigot 1.16.5, which compiles against the Spigot-mapped server jar. Run as
 `generate.py spigot-1.16.5`.
 """
-from codegen import register, write
+from codegen import write, write_class_list
 
 M = MODULE  # noqa: F821 - set by generate.py
 SUFFIX = M.replace("-", "_").replace(".", "_")
 NMS = "net.minecraft.server." + CRAFTBUKKIT  # noqa: F821 - set by generate.py
 CB = "org.bukkit.craftbukkit." + CRAFTBUKKIT  # noqa: F821
-wrappers = []
+classes = []
 
 
 def w(wrapper, body, imports=()):
-    write(M, wrapper, body.replace("SUFFIX", SUFFIX), imports)
-    wrappers.append(wrapper)
+    classes.append(write(M, wrapper, body.replace("SUFFIX", SUFFIX), imports))
 
 
 CTX = "CommandContext<CommandListenerWrapper>"
@@ -30,7 +29,7 @@ def arg(wrapper, nms_class, class_name, ret, argument, parse, extra_imports=(), 
     else:
         parse_body = cast + f"        {parse}"
     body = f'''    public {wrapper}_SUFFIX() {{
-        super(null, "{class_name}");
+        super(null, {class_name}.class);
     }}
 
     @Override
@@ -83,7 +82,7 @@ arg("NMSArgumentVec3D", "ArgumentVec3", "ArgumentVec3", "NMSVec3D", "ArgumentVec
     c("return NMSVec3D.create(ArgumentVec3.a(CTX, name));"))
 
 w("NMSArgumentProfile", '''    public NMSArgumentProfile_SUFFIX() {
-        super(null, "ArgumentProfile");
+        super(null, ArgumentProfile.class);
     }
 
     @Override
@@ -98,7 +97,7 @@ w("NMSArgumentProfile", '''    public NMSArgumentProfile_SUFFIX() {
 ''', [f"{NMS}.ArgumentProfile"])
 
 w("NMSArgumentPredicateItemStack", '''    public NMSArgumentPredicateItemStack_SUFFIX(Object handle) {
-        super(handle, "ArgumentPredicateItemStack");
+        super(handle, ArgumentPredicateItemStack.class);
     }
 
     @Override
@@ -112,7 +111,7 @@ w("NMSArgumentPredicateItemStack", '''    public NMSArgumentPredicateItemStack_S
 ''', [f"{NMS}.ArgumentPredicateItemStack"])
 
 w("NMSArgumentTileLocation", '''    public NMSArgumentTileLocation_SUFFIX(Object handle) {
-        super(handle, "ArgumentTileLocation");
+        super(handle, ArgumentTileLocation.class);
     }
 
     @Override
@@ -122,7 +121,7 @@ w("NMSArgumentTileLocation", '''    public NMSArgumentTileLocation_SUFFIX(Object
 ''', [f"{NMS}.ArgumentTileLocation"])
 
 w("NMSChatMessage", '''    public NMSChatMessage_SUFFIX(Message handle) {
-        super(handle, "ChatMessage");
+        super(handle, ChatMessage.class);
     }
 
     @Override
@@ -137,7 +136,7 @@ w("NMSChatMessage", '''    public NMSChatMessage_SUFFIX(Message handle) {
 ''', [f"{NMS}.ChatMessage", "com.mojang.brigadier.Message"])
 
 w("NMSCommandDispatcher", '''    public NMSCommandDispatcher_SUFFIX(Object handle) {
-        super(handle, "CommandDispatcher");
+        super(handle, CommandDispatcher.class);
     }
 
     @Override
@@ -147,7 +146,7 @@ w("NMSCommandDispatcher", '''    public NMSCommandDispatcher_SUFFIX(Object handl
 ''', [f"{NMS}.CommandDispatcher"])
 
 w("NMSCommandListenerWrapper", '''    public NMSCommandListenerWrapper_SUFFIX(Object handle) {
-        super(handle, "CommandListenerWrapper");
+        super(handle, CommandListenerWrapper.class);
     }
 
     @Override
@@ -186,7 +185,7 @@ w("NMSCommandListenerWrapper", '''    public NMSCommandListenerWrapper_SUFFIX(Ob
       "org.bukkit.World", "org.bukkit.command.CommandSender"])
 
 w("NMSVanillaCommandWrapper", '''    public NMSVanillaCommandWrapper_SUFFIX() {
-        super(null, "command.VanillaCommandWrapper");
+        super(null, VanillaCommandWrapper.class);
     }
 
     @Override
@@ -199,7 +198,7 @@ w("NMSVanillaCommandWrapper", '''    public NMSVanillaCommandWrapper_SUFFIX() {
       "com.mojang.brigadier.tree.CommandNode", "org.bukkit.command.defaults.BukkitCommand"])
 
 w("NMSParticleParam", '''    public NMSParticleParam_SUFFIX(Object handle) {
-        super(handle, "ParticleParam");
+        super(handle, ParticleParam.class);
     }
 
     @Override
@@ -209,7 +208,7 @@ w("NMSParticleParam", '''    public NMSParticleParam_SUFFIX(Object handle) {
 ''', [f"{NMS}.ParticleParam"])
 
 w("NMSCraftParticle", '''    public NMSCraftParticle_SUFFIX() {
-        super(null, "CraftParticle");
+        super(null, CraftParticle.class);
     }
 
     @Override
@@ -219,17 +218,22 @@ w("NMSCraftParticle", '''    public NMSCraftParticle_SUFFIX() {
 ''', [f"{NMS}.ParticleParam", f"{CB}.CraftParticle", "org.bukkit.Particle"])
 
 w("NMSCraftServer", '''    public NMSCraftServer_SUFFIX(Server handle) {
-        super(handle, "CraftServer");
+        super(handle, CraftServer.class);
     }
 
     @Override
     public NMSDedicatedServer getServer() {
         return NMSDedicatedServer.create(((CraftServer) getHandle()).getServer());
     }
-''', [f"{CB}.CraftServer", "org.bukkit.Server"])
+
+    @Override
+    public SimpleCommandMap getCommandMap() {
+        return ((CraftServer) getHandle()).getCommandMap();
+    }
+''', [f"{CB}.CraftServer", "org.bukkit.Server", "org.bukkit.command.SimpleCommandMap"])
 
 w("NMSDedicatedServer", '''    public NMSDedicatedServer_SUFFIX(Object handle) {
-        super(handle, "DedicatedServer");
+        super(handle, DedicatedServer.class);
     }
 
     @Override
@@ -244,7 +248,7 @@ w("NMSDedicatedServer", '''    public NMSDedicatedServer_SUFFIX(Object handle) {
 ''', [f"{NMS}.DedicatedServer"])
 
 w("NMSCraftBlockData", '''    public NMSCraftBlockData_SUFFIX() {
-        super(null, "block.data.CraftBlockData");
+        super(null, CraftBlockData.class);
     }
 
     @Override
@@ -254,7 +258,7 @@ w("NMSCraftBlockData", '''    public NMSCraftBlockData_SUFFIX() {
 ''', [f"{NMS}.IBlockData", f"{CB}.block.data.CraftBlockData", "org.bukkit.block.data.BlockData"])
 
 w("NMSCraftEnchantment", '''    public NMSCraftEnchantment_SUFFIX() {
-        super(null, "enchantments.CraftEnchantment");
+        super(null, CraftEnchantment.class);
     }
 
     @Override
@@ -264,7 +268,7 @@ w("NMSCraftEnchantment", '''    public NMSCraftEnchantment_SUFFIX() {
 ''', [f"{CB}.enchantments.CraftEnchantment", "org.bukkit.enchantments.Enchantment"])
 
 w("NMSCraftItemStack", '''    public NMSCraftItemStack_SUFFIX() {
-        super(null, "inventory.CraftItemStack");
+        super(null, CraftItemStack.class);
     }
 
     @Override
@@ -278,7 +282,7 @@ w("NMSCraftPotionEffectType", '''    public NMSCraftPotionEffectType_SUFFIX() {
     }
 
     public NMSCraftPotionEffectType_SUFFIX(Object handle) {
-        super(handle, "potion.CraftPotionEffectType");
+        super(handle, CraftPotionEffectType.class);
     }
 
     @Override
@@ -288,7 +292,7 @@ w("NMSCraftPotionEffectType", '''    public NMSCraftPotionEffectType_SUFFIX() {
 ''', [f"{NMS}.MobEffectList", f"{CB}.potion.CraftPotionEffectType", "org.bukkit.potion.PotionEffectType"])
 
 w("NMSEntity", '''    public NMSEntity_SUFFIX(Object handle) {
-        super(handle, "Entity");
+        super(handle, Entity.class);
     }
 
     @Override
@@ -298,7 +302,7 @@ w("NMSEntity", '''    public NMSEntity_SUFFIX(Object handle) {
 ''', [f"{NMS}.Entity"])
 
 w("NMSScoreboardTeam", '''    public NMSScoreboardTeam_SUFFIX(Object handle) {
-        super(handle, "ScoreboardTeam");
+        super(handle, ScoreboardTeam.class);
     }
 
     @Override
@@ -308,7 +312,7 @@ w("NMSScoreboardTeam", '''    public NMSScoreboardTeam_SUFFIX(Object handle) {
 ''', [f"{NMS}.ScoreboardTeam"])
 
 w("NMSVec3D", '''    public NMSVec3D_SUFFIX(Object handle) {
-        super(handle, "Vec3D");
+        super(handle, Vec3D.class);
     }
 
     @Override
@@ -329,7 +333,7 @@ w("NMSVec3D", '''    public NMSVec3D_SUFFIX(Object handle) {
 
 # Vec2F keeps the obfuscated field names i (x) and j (y) in the Spigot-mapped jar.
 w("NMSVec2D", '''    public NMSVec2D_SUFFIX(Object handle) {
-        super(handle, "Vec2F");
+        super(handle, Vec2F.class);
     }
 
     @Override
@@ -343,5 +347,45 @@ w("NMSVec2D", '''    public NMSVec2D_SUFFIX(Object handle) {
     }
 ''', [f"{NMS}.Vec2F"])
 
-register(wrappers)
-print(f"{M}: {len(wrappers)} classes")
+
+
+def handle(wrapper, nms_class):
+    """A wrapper that only holds a handle of the given class."""
+    w(wrapper, f'''    public {wrapper}_SUFFIX(Object handle) {{
+        super(handle, {nms_class}.class);
+    }}
+''', [f"{NMS}.{nms_class}"])
+
+
+handle("NMSEnchantment", "Enchantment")
+handle("NMSIBlockData", "IBlockData")
+handle("NMSItemStack", "ItemStack")
+handle("NMSMobEffectList", "MobEffectList")
+handle("NMSParticle", "Particle")
+
+# ArgumentRegistry keeps its map of argument serializers in a private field, which the wrapper finds by content.
+w("NMSArgumentTypeRegistrar", '''    public NMSArgumentTypeRegistrar_SUFFIX() {
+        super(ArgumentRegistry.class);
+    }
+
+    @Override
+    public <T extends ArgumentType<?>> void registerAsGreedyString(Class<T> argumentTypeClass, Supplier<T> factory) {
+        registerInArgumentRegistry(argumentTypeClass,
+                                   factory,
+                                   ArgumentSerializer.class,
+                                   new MinecraftKey("brigadier:string"));
+    }
+''', [f"{NMS}.ArgumentRegistry", f"{NMS}.ArgumentSerializer", f"{NMS}.MinecraftKey"])
+
+w("NMSDataPackResources", '''    public NMSDataPackResources_SUFFIX(Object handle) {
+        super(handle, DataPackResources.class);
+    }
+
+    @Override
+    public NMSCommandBuildContext getCommandBuildContext() {
+        throw new UnsupportedOperationException();
+    }
+''', [f"{NMS}.DataPackResources"])
+
+write_class_list(M, classes)
+print(f"{M}: {len(classes)} classes")

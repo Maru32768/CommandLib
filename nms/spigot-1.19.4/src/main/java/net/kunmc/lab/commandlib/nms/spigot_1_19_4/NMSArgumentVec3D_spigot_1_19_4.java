@@ -9,7 +9,7 @@ import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 
 public class NMSArgumentVec3D_spigot_1_19_4 extends NMSArgumentVec3D {
     public NMSArgumentVec3D_spigot_1_19_4() {
-        super(null, "commands.arguments.coordinates.ArgumentVec3");
+        super(null, Vec3Argument.class);
     }
 
     @Override

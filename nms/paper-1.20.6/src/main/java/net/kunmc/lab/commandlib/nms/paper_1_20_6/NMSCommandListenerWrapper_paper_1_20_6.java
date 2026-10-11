@@ -13,7 +13,7 @@ import org.bukkit.command.CommandSender;
 
 public class NMSCommandListenerWrapper_paper_1_20_6 extends NMSCommandListenerWrapper {
     public NMSCommandListenerWrapper_paper_1_20_6(Object handle) {
-        super(handle, "commands.CommandSourceStack");
+        super(handle, CommandSourceStack.class);
     }
 
     @Override

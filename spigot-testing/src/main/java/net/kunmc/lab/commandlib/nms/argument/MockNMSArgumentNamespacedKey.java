@@ -6,7 +6,7 @@ import net.kunmc.lab.commandlib.util.nms.argument.NMSArgumentNamespacedKey;
 
 public class MockNMSArgumentNamespacedKey extends NMSArgumentNamespacedKey {
     public MockNMSArgumentNamespacedKey() {
-        super(null, "Mock");
+        super(null, Object.class);
     }
 
     @Override

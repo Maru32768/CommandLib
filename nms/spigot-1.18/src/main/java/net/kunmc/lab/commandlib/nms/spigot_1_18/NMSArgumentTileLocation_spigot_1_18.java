@@ -6,7 +6,7 @@ import net.minecraft.commands.arguments.blocks.BlockInput;
 
 public class NMSArgumentTileLocation_spigot_1_18 extends NMSArgumentTileLocation {
     public NMSArgumentTileLocation_spigot_1_18(Object handle) {
-        super(handle, "commands.arguments.blocks.ArgumentTileLocation");
+        super(handle, BlockInput.class);
     }
 
     @Override

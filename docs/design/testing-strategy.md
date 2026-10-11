@@ -42,12 +42,13 @@ try (CommandTester tester = new CommandTester(command, "myplugin.cmd")) {
 
 ### NMS スタブの仕組み
 
-`CommandTester` のコンストラクタで 2 つの static mock を張る。
+`CommandTester` のコンストラクタで static mock を張る。
 
 | Mock 対象 | 効果 |
 |---|---|
-| `NMSReflection` | `findMinecraftClass` / `findCraftBukkitClass` を全て `Object.class` 返しにする |
 | `NMSClassRegistry.findClass()` | デフォルト `UnsupportedOperationException`。引数ごとに Mock 実装クラスを返すよう上書き |
+
+Mock 実装クラスは包む server class として `Object.class` を渡す。
 
 `NMSClassRegistry` のスタブで差し替えられる Mock 実装クラスは `spigot-test` に置く。
 各 Mock クラスは対応する `NMSClass` サブクラスを extends し、実 NMS を使わずに引数 parse・値返却を実装する。

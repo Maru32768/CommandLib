@@ -7,7 +7,7 @@ import org.bukkit.craftbukkit.inventory.CraftItemStack;
 
 public class NMSCraftItemStack_paper_1_20_6 extends NMSCraftItemStack {
     public NMSCraftItemStack_paper_1_20_6() {
-        super(null, "inventory.CraftItemStack");
+        super(null, CraftItemStack.class);
     }
 
     @Override

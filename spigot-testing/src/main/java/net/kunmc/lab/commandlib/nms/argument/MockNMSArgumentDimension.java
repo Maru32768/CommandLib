@@ -8,7 +8,7 @@ import org.bukkit.World;
 
 public class MockNMSArgumentDimension extends NMSArgumentDimension {
     public MockNMSArgumentDimension() {
-        super(null, "Mock");
+        super(null, Object.class);
     }
 
     @Override

@@ -8,7 +8,7 @@ import org.bukkit.craftbukkit.v1_20_R3.CraftParticle;
 
 public class NMSCraftParticle_spigot_1_20_4 extends NMSCraftParticle {
     public NMSCraftParticle_spigot_1_20_4() {
-        super(null, "CraftParticle");
+        super(null, CraftParticle.class);
     }
 
     @Override

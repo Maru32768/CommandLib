@@ -8,7 +8,7 @@ public class MockNMSArgumentTileLocation extends NMSArgumentTileLocation {
     private final String materialName;
 
     public MockNMSArgumentTileLocation(String materialName) {
-        super(null, "Mock");
+        super(null, Object.class);
         this.materialName = materialName;
     }
 

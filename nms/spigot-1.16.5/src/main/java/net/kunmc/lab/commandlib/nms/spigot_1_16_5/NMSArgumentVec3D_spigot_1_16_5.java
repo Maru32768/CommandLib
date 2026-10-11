@@ -11,7 +11,7 @@ import net.minecraft.server.v1_16_R3.CommandListenerWrapper;
 
 public class NMSArgumentVec3D_spigot_1_16_5 extends NMSArgumentVec3D {
     public NMSArgumentVec3D_spigot_1_16_5() {
-        super(null, "ArgumentVec3");
+        super(null, ArgumentVec3.class);
     }
 
     @Override

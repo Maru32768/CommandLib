@@ -12,7 +12,7 @@ import net.minecraft.core.registries.Registries;
 
 public class NMSArgumentMobEffect_spigot_1_19_4 extends NMSArgumentMobEffect {
     public NMSArgumentMobEffect_spigot_1_19_4() {
-        super(null, "commands.arguments.ResourceArgument");
+        super(null, ResourceArgument.class);
     }
 
     @Override

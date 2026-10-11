@@ -6,7 +6,7 @@ import net.minecraft.core.particles.ParticleOptions;
 
 public class NMSParticleParam_paper_1_20_6 extends NMSParticleParam {
     public NMSParticleParam_paper_1_20_6(Object handle) {
-        super(handle, "core.particles.ParticleOptions");
+        super(handle, ParticleOptions.class);
     }
 
     @Override

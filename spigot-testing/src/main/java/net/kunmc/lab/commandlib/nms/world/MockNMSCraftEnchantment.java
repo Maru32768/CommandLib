@@ -8,7 +8,7 @@ import org.bukkit.enchantments.Enchantment;
 
 public class MockNMSCraftEnchantment extends NMSCraftEnchantment {
     public MockNMSCraftEnchantment() {
-        super(null, "Mock");
+        super(null, Object.class);
     }
 
     @Override

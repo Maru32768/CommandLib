@@ -5,7 +5,7 @@ import net.minecraft.world.scores.PlayerTeam;
 
 public class NMSScoreboardTeam_spigot_1_20_4 extends NMSScoreboardTeam {
     public NMSScoreboardTeam_spigot_1_20_4(Object handle) {
-        super(handle, "world.scores.ScoreboardTeam");
+        super(handle, PlayerTeam.class);
     }
 
     @Override

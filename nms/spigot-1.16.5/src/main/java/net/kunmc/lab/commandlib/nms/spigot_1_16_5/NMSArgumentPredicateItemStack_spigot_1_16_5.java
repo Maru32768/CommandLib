@@ -8,7 +8,7 @@ import net.minecraft.server.v1_16_R3.ArgumentPredicateItemStack;
 
 public class NMSArgumentPredicateItemStack_spigot_1_16_5 extends NMSArgumentPredicateItemStack {
     public NMSArgumentPredicateItemStack_spigot_1_16_5(Object handle) {
-        super(handle, "ArgumentPredicateItemStack");
+        super(handle, ArgumentPredicateItemStack.class);
     }
 
     @Override

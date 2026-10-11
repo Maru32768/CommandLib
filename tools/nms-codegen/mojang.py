@@ -1,8 +1,8 @@
 """
-Typed classes for the modules compiled with Mojang names: Spigot 1.17.1 and later (remapped to Spigot names by the
+Typed classes for the modules compiled with Mojang names: Spigot 1.17 and later (remapped to Spigot names by the
 build) and Paper 1.20.5 and later. Run as `generate.py <module>`, for example `generate.py spigot-1.20.4`.
 """
-from codegen import module_package, register, write, write_source
+from codegen import module_package, write, write_class_list, write_source
 
 TARGET = MODULE  # noqa: F821 - set by generate.py
 CRAFTBUKKIT_PACKAGE = CRAFTBUKKIT  # noqa: F821 - set by generate.py, None for Paper
@@ -17,88 +17,38 @@ V = ver(version)
 M = TARGET
 SUFFIX = TARGET.replace("-", "_").replace(".", "_")
 PAPER = platform == "paper"
-if not PAPER:
-    CB = "org.bukkit.craftbukkit." + CRAFTBUKKIT_PACKAGE
-    # Spigot names that MinecraftClass looks up at runtime on a Spigot-mapped server.
-    NAMES = {
-        "DimensionArgument": "commands.arguments.ArgumentDimension",
-        "ResourceArgument": "commands.arguments.ResourceArgument",
-        "ItemEnchantmentArgument": "commands.arguments.ArgumentEnchantment",
-        "MobEffectArgument": "commands.arguments.ArgumentMobEffect",
-        "EntityArgument": "commands.arguments.ArgumentEntity",
-        "ItemArgument": "commands.arguments.item.ArgumentItemStack",
-        "ResourceLocationArgument": "commands.arguments.ArgumentMinecraftKeyRegistered",
-        "ParticleArgument": "commands.arguments.ArgumentParticle",
-        "GameProfileArgument": "commands.arguments.ArgumentProfile",
-        "TeamArgument": "commands.arguments.ArgumentScoreboardTeam",
-        "BlockStateArgument": "commands.arguments.blocks.ArgumentTile",
-        "Vec3Argument": "commands.arguments.coordinates.ArgumentVec3",
-        "ItemInput": "commands.arguments.item.ArgumentPredicateItemStack",
-        "BlockInput": "commands.arguments.blocks.ArgumentTileLocation",
-        "TranslatableComponent": "network.chat.ChatMessage",
-        "MutableComponent": "network.chat.IChatMutableComponent",
-        "TranslatableContents": "network.chat.contents.TranslatableContents",
-        "Commands": "commands.CommandDispatcher",
-        "CommandSourceStack": "commands.CommandListenerWrapper",
-        "Holder$Reference": "core.Holder$c",
-        "ParticleOptions": "core.particles.ParticleParam",
-        "Registries": "core.registries.Registries",
-        "ReloadableServerResources": "server.DataPackResources",
-        "DedicatedServer": "server.dedicated.DedicatedServer",
-        "Entity": "world.entity.Entity",
-        "PlayerTeam": "world.scores.ScoreboardTeam",
-        "Vec3": "world.phys.Vec3D",
-        "Vec2": "world.phys.Vec2F",
-    }
-else:
-    CB = "org.bukkit.craftbukkit"
-    NAMES = {
-        "DimensionArgument": "commands.arguments.DimensionArgument",
-        "ResourceArgument": "commands.arguments.ResourceArgument",
-        "EntityArgument": "commands.arguments.EntityArgument",
-        "ItemArgument": "commands.arguments.item.ItemArgument",
-        "ResourceLocationArgument": "commands.arguments.ResourceLocationArgument",
-        "ParticleArgument": "commands.arguments.ParticleArgument",
-        "GameProfileArgument": "commands.arguments.GameProfileArgument",
-        "TeamArgument": "commands.arguments.TeamArgument",
-        "BlockStateArgument": "commands.arguments.blocks.BlockStateArgument",
-        "Vec3Argument": "commands.arguments.coordinates.Vec3Argument",
-        "ItemInput": "commands.arguments.item.ItemInput",
-        "BlockInput": "commands.arguments.blocks.BlockInput",
-        "MutableComponent": "network.chat.MutableComponent",
-        "TranslatableContents": "network.chat.contents.TranslatableContents",
-        "Commands": "commands.Commands",
-        "CommandSourceStack": "commands.CommandSourceStack",
-        "Holder$Reference": "core.Holder$Reference",
-        "ParticleOptions": "core.particles.ParticleOptions",
-        "Registries": "core.registries.Registries",
-        "ReloadableServerResources": "server.ReloadableServerResources",
-        "DedicatedServer": "server.dedicated.DedicatedServer",
-        "Entity": "world.entity.Entity",
-        "PlayerTeam": "world.scores.PlayerTeam",
-        "Vec3": "world.phys.Vec3",
-        "Vec2": "world.phys.Vec2",
-    }
+CB = "org.bukkit.craftbukkit" if PAPER else "org.bukkit.craftbukkit." + CRAFTBUKKIT_PACKAGE
 
 # API changes between the supported releases.
 HAS_BUILD_CONTEXT = V >= (1, 19)
 HAS_RESOURCE_ARGUMENT = V >= (1, 19, 3)
 HAS_COMPONENT_CONTENTS = V >= (1, 19)
+# ArgumentTypeInfos replaced ArgumentTypes, the registry of argument serializers, in 1.19.
+HAS_ARGUMENT_TYPE_INFOS = V >= (1, 19)
 # MinecraftServer.resources holds the ReloadableResources record from 1.18.2 and the ServerResources before.
 HAS_RELOADABLE_RESOURCES = V >= (1, 18, 2)
-HAS_MINECRAFT_TO_BUKKIT = V >= (1, 20, 4)
+# CraftBukkit revision v1_20_R3, shared by 1.20.3 and 1.20.4, added the minecraftToBukkit converters.
+HAS_MINECRAFT_TO_BUKKIT = V >= (1, 20, 3)
 # CraftParticle switched to minecraftToBukkit earlier than the other Craft* converters.
 HAS_PARTICLE_MINECRAFT_TO_BUKKIT = V >= (1, 20, 2)
+# Spigot keeps the build context of ReloadableServerResources in a private field. From 1.20.5 the modules build one from
+# public API instead, as the reflection implementation for Paper, whose names those releases already used, did.
+BUILDS_CONTEXT_FROM_PUBLIC_API = V >= (1, 20, 5)
 
-wrappers = []
+classes = []
 CTX = "CommandContext<CommandSourceStack>"
 CSS = "net.minecraft.commands.CommandSourceStack"
 ARGS = "net.minecraft.commands.arguments"
+RESOURCES = "net.minecraft.server.ReloadableServerResources" if HAS_RELOADABLE_RESOURCES \
+    else "net.minecraft.server.ServerResources"
 
 
 def w(wrapper, body, imports=()):
-    write(M, wrapper, body.replace("SUFFIX", SUFFIX), imports)
-    wrappers.append(wrapper)
+    classes.append(write(M, wrapper, body.replace("SUFFIX", SUFFIX), imports))
+
+
+def simple(name):
+    return name.split(".")[-1]
 
 
 def arg(wrapper, nms, ret, argument, parse, imports=(), throws=True):
@@ -114,7 +64,7 @@ def arg(wrapper, nms, ret, argument, parse, imports=(), throws=True):
         parse_body = cast + f"        {parse}"
     argument_body = f"        return {argument};"
     body = f'''    public {wrapper}_SUFFIX() {{
-        super(null, "{NAMES[nms.split('.')[-1]]}");
+        super(null, {simple(nms)}.class);
     }}
 
     @Override
@@ -129,6 +79,14 @@ def arg(wrapper, nms, ret, argument, parse, imports=(), throws=True):
     }}
 '''
     w(wrapper, body, [f"net.minecraft.{nms}", CSS, *imports])
+
+
+def handle(wrapper, nms):
+    """A wrapper that only holds a handle of the given class."""
+    w(wrapper, f'''    public {wrapper}_SUFFIX(Object handle) {{
+        super(handle, {simple(nms)}.class);
+    }}
+''', [nms])
 
 
 arg("NMSArgumentDimension", "commands.arguments.DimensionArgument", "World", "DimensionArgument.dimension()",
@@ -151,7 +109,8 @@ arg("NMSArgumentEntities", "commands.arguments.EntityArgument", "List<org.bukkit
 arg("NMSArgumentEntity", "commands.arguments.EntityArgument", "org.bukkit.entity.Entity", "EntityArgument.entity()",
     "return EntityArgument.getEntity(CTX, name).getBukkitEntity();")
 arg("NMSArgumentItemStack", "commands.arguments.item.ItemArgument", "NMSArgumentPredicateItemStack",
-    "ItemArgument.item(BuildContexts.current())" if HAS_BUILD_CONTEXT else "ItemArgument.item()", "return NMSArgumentPredicateItemStack.create(ItemArgument.getItem(CTX, name));",
+    "ItemArgument.item(BuildContexts.current())" if HAS_BUILD_CONTEXT else "ItemArgument.item()",
+    "return NMSArgumentPredicateItemStack.create(ItemArgument.getItem(CTX, name));",
     throws=False)
 if HAS_RESOURCE_ARGUMENT:
     arg("NMSArgumentMobEffect", "commands.arguments.ResourceArgument", "NMSMobEffectList",
@@ -165,7 +124,8 @@ else:
 arg("NMSArgumentNamespacedKey", "commands.arguments.ResourceLocationArgument", "String",
     "ResourceLocationArgument.id()", "return ResourceLocationArgument.getId(CTX, name).toString();", throws=False)
 arg("NMSArgumentParticle", "commands.arguments.ParticleArgument", "NMSParticleParam",
-    "ParticleArgument.particle(BuildContexts.current())" if HAS_RESOURCE_ARGUMENT else "ParticleArgument.particle()", "return NMSParticleParam.create(ParticleArgument.getParticle(CTX, name));",
+    "ParticleArgument.particle(BuildContexts.current())" if HAS_RESOURCE_ARGUMENT else "ParticleArgument.particle()",
+    "return NMSParticleParam.create(ParticleArgument.getParticle(CTX, name));",
     throws=False)
 arg("NMSArgumentPlayer", "commands.arguments.EntityArgument", "Player", "EntityArgument.player()",
     "return EntityArgument.getPlayer(CTX, name).getBukkitEntity();", ["org.bukkit.entity.Player"])
@@ -181,138 +141,168 @@ arg("NMSArgumentTile", "commands.arguments.blocks.BlockStateArgument", "NMSArgum
 arg("NMSArgumentVec3D", "commands.arguments.coordinates.Vec3Argument", "NMSVec3D", "Vec3Argument.vec3()",
     "return NMSVec3D.create(Vec3Argument.getVec3(CTX, name));", throws=False)
 
-w("NMSArgumentProfile", f'''    public NMSArgumentProfile_SUFFIX() {{
-        super(null, "{NAMES["GameProfileArgument"]}");
-    }}
+w("NMSArgumentProfile", '''    public NMSArgumentProfile_SUFFIX() {
+        super(null, GameProfileArgument.class);
+    }
 
     @Override
-    public ArgumentType<?> argument() {{
+    public ArgumentType<?> argument() {
         return GameProfileArgument.gameProfile();
-    }}
+    }
 
     @Override
-    protected Object parseImpl(CommandContext<?> ctx, String name) {{
+    protected Object parseImpl(CommandContext<?> ctx, String name) {
         throw new UnsupportedOperationException();
-    }}
+    }
 ''', [f"{ARGS}.GameProfileArgument"])
 
-w("NMSArgumentPredicateItemStack", f'''    public NMSArgumentPredicateItemStack_SUFFIX(Object handle) {{
-        super(handle, "{NAMES["ItemInput"]}");
-    }}
+w("NMSArgumentPredicateItemStack", '''    public NMSArgumentPredicateItemStack_SUFFIX(Object handle) {
+        super(handle, ItemInput.class);
+    }
 
     @Override
-    public NMSItemStack createItemStack(int amount, boolean checkOverStack) {{
-        try {{
+    public NMSItemStack createItemStack(int amount, boolean checkOverStack) {
+        try {
             return NMSItemStack.create(((ItemInput) getHandle()).createItemStack(amount, checkOverStack));
-        }} catch (CommandSyntaxException e) {{
+        } catch (CommandSyntaxException e) {
             throw new UncheckedCommandSyntaxException(e);
-        }}
-    }}
+        }
+    }
 ''', [f"{ARGS}.item.ItemInput"])
 
-w("NMSArgumentTileLocation", f'''    public NMSArgumentTileLocation_SUFFIX(Object handle) {{
-        super(handle, "{NAMES["BlockInput"]}");
-    }}
+w("NMSArgumentTileLocation", '''    public NMSArgumentTileLocation_SUFFIX(Object handle) {
+        super(handle, BlockInput.class);
+    }
 
     @Override
-    public NMSIBlockData getBlockData() {{
+    public NMSIBlockData getBlockData() {
         return NMSIBlockData.create(((BlockInput) getHandle()).getState());
-    }}
+    }
 ''', [f"{ARGS}.blocks.BlockInput"])
 
-if HAS_COMPONENT_CONTENTS:
-    w("NMSIChatMutableComponent", f'''    public NMSIChatMutableComponent_SUFFIX(Object handle) {{
-        super(handle, "{NAMES["MutableComponent"]}");
-    }}
+# The registries keep their map of argument serializers in a private field, which the wrapper finds by content.
+if HAS_ARGUMENT_TYPE_INFOS:
+    w("NMSArgumentTypeRegistrar", '''    public NMSArgumentTypeRegistrar_SUFFIX() {
+        super(ArgumentTypeInfos.class);
+    }
 
     @Override
-    public NMSTranslatableContents getContentsAsTranslatable() {{
-        return NMSTranslatableContents.create(((MutableComponent) getHandle()).getContents());
-    }}
-    ''', ["net.minecraft.network.chat.MutableComponent"])
-
-    w("NMSTranslatableContents", f'''    public NMSTranslatableContents_SUFFIX(Object handle) {{
-        super(handle, "{NAMES["TranslatableContents"]}");
-    }}
-
-    @Override
-    public String getKey() {{
-        return ((TranslatableContents) getHandle()).getKey();
-    }}
-
-    @Override
-    public Object[] getArgs() {{
-        return ((TranslatableContents) getHandle()).getArgs();
-    }}
-    ''', ["net.minecraft.network.chat.contents.TranslatableContents"])
+    public <T extends ArgumentType<?>> void registerAsGreedyString(Class<T> argumentTypeClass, Supplier<T> factory) {
+        registerInArgumentTypeInfos(argumentTypeClass, ArgumentTypeInfo.class);
+    }
+''', ["net.minecraft.commands.synchronization.ArgumentTypeInfo",
+      "net.minecraft.commands.synchronization.ArgumentTypeInfos"])
 else:
-    w("NMSChatMessage", f'''    public NMSChatMessage_SUFFIX(Message handle) {{
-        super(handle, "{NAMES["TranslatableComponent"]}");
-    }}
+    w("NMSArgumentTypeRegistrar", '''    public NMSArgumentTypeRegistrar_SUFFIX() {
+        super(ArgumentTypes.class);
+    }
 
     @Override
-    public String getKey() {{
+    public <T extends ArgumentType<?>> void registerAsGreedyString(Class<T> argumentTypeClass, Supplier<T> factory) {
+        registerInArgumentRegistry(argumentTypeClass,
+                                   factory,
+                                   ArgumentSerializer.class,
+                                   new ResourceLocation("brigadier:string"));
+    }
+''', ["net.minecraft.commands.synchronization.ArgumentSerializer",
+      "net.minecraft.commands.synchronization.ArgumentTypes", "net.minecraft.resources.ResourceLocation"])
+
+if HAS_COMPONENT_CONTENTS:
+    w("NMSIChatMutableComponent", '''    public NMSIChatMutableComponent_SUFFIX(Object handle) {
+        super(handle, MutableComponent.class);
+    }
+
+    @Override
+    public NMSTranslatableContents getContentsAsTranslatable() {
+        return NMSTranslatableContents.create(((MutableComponent) getHandle()).getContents());
+    }
+''', ["net.minecraft.network.chat.MutableComponent"])
+
+    w("NMSTranslatableContents", '''    public NMSTranslatableContents_SUFFIX(Object handle) {
+        super(handle, TranslatableContents.class);
+    }
+
+    @Override
+    public String getKey() {
+        return ((TranslatableContents) getHandle()).getKey();
+    }
+
+    @Override
+    public Object[] getArgs() {
+        return ((TranslatableContents) getHandle()).getArgs();
+    }
+''', ["net.minecraft.network.chat.contents.TranslatableContents"])
+else:
+    w("NMSChatMessage", '''    public NMSChatMessage_SUFFIX(Message handle) {
+        super(handle, TranslatableComponent.class);
+    }
+
+    @Override
+    public String getKey() {
         return ((TranslatableComponent) getHandle()).getKey();
-    }}
+    }
 
     @Override
-    public Object[] getArgs() {{
+    public Object[] getArgs() {
         return ((TranslatableComponent) getHandle()).getArgs();
-    }}
+    }
 ''', ["net.minecraft.network.chat.TranslatableComponent", "com.mojang.brigadier.Message"])
 
-w("NMSCommandDispatcher", f'''    public NMSCommandDispatcher_SUFFIX(Object handle) {{
-        super(handle, "{NAMES["Commands"]}");
-    }}
+if HAS_BUILD_CONTEXT:
+    handle("NMSCommandBuildContext", "net.minecraft.commands.CommandBuildContext")
+
+w("NMSCommandDispatcher", '''    public NMSCommandDispatcher_SUFFIX(Object handle) {
+        super(handle, Commands.class);
+    }
 
     @Override
-    public CommandDispatcher<?> getBrigadier() {{
+    public CommandDispatcher<?> getBrigadier() {
         return ((Commands) getHandle()).getDispatcher();
-    }}
+    }
 ''', ["net.minecraft.commands.Commands", "com.mojang.brigadier.CommandDispatcher"])
 
 # NMSCommandListenerWrapper builds the location, with the rotation, from the position and rotation.
-w("NMSCommandListenerWrapper", f'''    public NMSCommandListenerWrapper_SUFFIX(Object handle) {{
-        super(handle, "{NAMES["CommandSourceStack"]}");
-    }}
+w("NMSCommandListenerWrapper", '''    public NMSCommandListenerWrapper_SUFFIX(Object handle) {
+        super(handle, CommandSourceStack.class);
+    }
 
     @Override
-    public CommandSender getBukkitSender() {{
+    public CommandSender getBukkitSender() {
         return source().getBukkitSender();
-    }}
+    }
 
     @Override
-    public org.bukkit.entity.Entity getBukkitEntity() {{
+    public org.bukkit.entity.Entity getBukkitEntity() {
         Entity entity = source().getEntity();
         return entity != null ? entity.getBukkitEntity() : null;
-    }}
+    }
 
     @Override
-    public World getBukkitWorld() {{
+    public World getBukkitWorld() {
         ServerLevel level = source().getLevel();
         return level != null ? level.getWorld() : null;
-    }}
+    }
 
     @Override
-    protected NMSVec3D getPosition() {{
+    protected NMSVec3D getPosition() {
         Vec3 position = source().getPosition();
         return position != null ? NMSVec3D.create(position) : null;
-    }}
+    }
 
     @Override
-    protected NMSVec2D getRotation() {{
+    protected NMSVec2D getRotation() {
         Vec2 rotation = source().getRotation();
         return rotation != null ? NMSVec2D.create(rotation) : null;
-    }}
+    }
 
-    private CommandSourceStack source() {{
+    private CommandSourceStack source() {
         return (CommandSourceStack) getHandle();
-    }}
+    }
 ''', [CSS, "net.minecraft.server.level.ServerLevel", "net.minecraft.world.entity.Entity", "net.minecraft.world.phys.Vec2",
       "net.minecraft.world.phys.Vec3", "org.bukkit.World", "org.bukkit.command.CommandSender"])
 
 w("NMSVanillaCommandWrapper", '''    public NMSVanillaCommandWrapper_SUFFIX() {
-        super(null, "command.VanillaCommandWrapper");
+        super(null, VanillaCommandWrapper.class);
     }
 
     @Override
@@ -323,66 +313,47 @@ w("NMSVanillaCommandWrapper", '''    public NMSVanillaCommandWrapper_SUFFIX() {
 ''', ["net.minecraft.commands.Commands", CSS, f"{CB}.command.VanillaCommandWrapper",
       "com.mojang.brigadier.tree.CommandNode", "org.bukkit.command.defaults.BukkitCommand"])
 
-if HAS_COMPONENT_CONTENTS:
-    w("NMSHolder.NMSReference", f'''    public NMSReference_SUFFIX(Object handle) {{
-        super(handle, "{NAMES["Holder$Reference"]}");
-    }}
+handle("NMSParticle", "net.minecraft.core.particles.ParticleType")
+
+w("NMSParticleParam", '''    public NMSParticleParam_SUFFIX(Object handle) {
+        super(handle, ParticleOptions.class);
+    }
 
     @Override
-    public Object value() {{
-        return ((Holder.Reference<?>) getHandle()).value();
-    }}
-    ''', ["net.minecraft.core.Holder", "net.kunmc.lab.commandlib.util.nms.core.NMSHolder"])
-
-w("NMSParticleParam", f'''    public NMSParticleParam_SUFFIX(Object handle) {{
-        super(handle, "{NAMES["ParticleOptions"]}");
-    }}
-
-    @Override
-    public NMSParticle getParticle() {{
+    public NMSParticle getParticle() {
         return NMSParticle.create(((ParticleOptions) getHandle()).getType());
-    }}
+    }
 ''', ["net.minecraft.core.particles.ParticleOptions"])
 
-if HAS_RESOURCE_ARGUMENT:
-    w("NMSRegistries", f'''    public NMSRegistries_SUFFIX() {{
-        super(null, "{NAMES["Registries"]}");
-    }}
-
-    @Override
-    public NMSResourceKey enchantment() {{
-        return NMSResourceKey.create(Registries.ENCHANTMENT);
-    }}
-
-    @Override
-    public NMSResourceKey mobEffect() {{
-        return NMSResourceKey.create(Registries.MOB_EFFECT);
-    }}
-    ''', ["net.minecraft.core.registries.Registries"])
-
 w("NMSCraftParticle", ('''    public NMSCraftParticle_SUFFIX() {
-        super(null, "CraftParticle");
+        super(null, CraftParticle.class);
     }
 
     @Override
     public Particle toBukkit(NMSParticleParam nms) {
         return CraftParticle.CONVERSION;
     }
-''').replace("CONVERSION", "minecraftToBukkit(((ParticleOptions) nms.getHandle()).getType())" if HAS_PARTICLE_MINECRAFT_TO_BUKKIT
-                 else "toBukkit((ParticleOptions) nms.getHandle())"), ["net.minecraft.core.particles.ParticleOptions", f"{CB}.CraftParticle", "org.bukkit.Particle"])
+''').replace("CONVERSION", "minecraftToBukkit(((ParticleOptions) nms.getHandle()).getType())"
+             if HAS_PARTICLE_MINECRAFT_TO_BUKKIT else "toBukkit((ParticleOptions) nms.getHandle())"),
+  ["net.minecraft.core.particles.ParticleOptions", f"{CB}.CraftParticle", "org.bukkit.Particle"])
 
 w("NMSCraftServer", '''    public NMSCraftServer_SUFFIX(Server handle) {
-        super(handle, "CraftServer");
+        super(handle, CraftServer.class);
     }
 
     @Override
     public NMSDedicatedServer getServer() {
         return NMSDedicatedServer.create(((CraftServer) getHandle()).getServer());
     }
-''', [f"{CB}.CraftServer", "org.bukkit.Server"])
+
+    @Override
+    public SimpleCommandMap getCommandMap() {
+        return ((CraftServer) getHandle()).getCommandMap();
+    }
+''', [f"{CB}.CraftServer", "org.bukkit.Server", "org.bukkit.command.SimpleCommandMap"])
 
 w("NMSDedicatedServer", f'''    public NMSDedicatedServer_SUFFIX(Object handle) {{
-        super(handle, "{NAMES["DedicatedServer"]}");
+        super(handle, DedicatedServer.class);
     }}
 
     @Override
@@ -396,34 +367,54 @@ w("NMSDedicatedServer", f'''    public NMSDedicatedServer_SUFFIX(Object handle) 
     }}
 ''', ["net.minecraft.server.dedicated.DedicatedServer"])
 
-# ReloadableServerResources.commandBuildContext is private on Spigot. Up to 1.20.4 the reflection implementation reads
-# it; from 1.20.5, whose reflection implementation assumes Paper, a context is built from public API.
-if V >= (1, 20, 5) and not PAPER:
-    w("NMSDataPackResources", f'''    public NMSDataPackResources_SUFFIX(Object handle) {{
-        super(handle, "{NAMES["ReloadableServerResources"]}");
-    }}
+if BUILDS_CONTEXT_FROM_PUBLIC_API:
+    w("NMSDataPackResources", '''    public NMSDataPackResources_SUFFIX(Object handle) {
+        super(handle, ReloadableServerResources.class);
+    }
 
     @Override
-    public NMSCommandBuildContext getCommandBuildContext() {{
+    public NMSCommandBuildContext getCommandBuildContext() {
         MinecraftServer server = MinecraftServer.getServer();
         return NMSCommandBuildContext.create(CommandBuildContext.simple(server.registryAccess(),
                                                                         server.getWorldData()
                                                                               .enabledFeatures()));
-    }}
-''', ["net.minecraft.commands.CommandBuildContext", "net.minecraft.server.MinecraftServer"])
-if PAPER:
+    }
+''', [RESOURCES, "net.minecraft.commands.CommandBuildContext", "net.minecraft.server.MinecraftServer"])
+elif HAS_BUILD_CONTEXT:
+    # The field type is CommandBuildContext up to 1.19.2 and its subtype CommandBuildContext.Configurable after.
+    w("NMSDataPackResources", '''    public NMSDataPackResources_SUFFIX(Object handle) {
+        super(handle, ReloadableServerResources.class);
+    }
+
+    @Override
+    public NMSCommandBuildContext getCommandBuildContext() {
+        // ReloadableServerResources keeps the build context in a private field.
+        for (Field field : ReloadableServerResources.class.getDeclaredFields()) {
+            if (CommandBuildContext.class.isAssignableFrom(field.getType())) {
+                try {
+                    field.setAccessible(true);
+                    return NMSCommandBuildContext.create(field.get(getHandle()));
+                } catch (IllegalAccessException e) {
+                    throw new IllegalStateException(e);
+                }
+            }
+        }
+        throw new IllegalStateException("ReloadableServerResources has no CommandBuildContext field");
+    }
+''', [RESOURCES, "net.minecraft.commands.CommandBuildContext", "java.lang.reflect.Field"])
+else:
     w("NMSDataPackResources", f'''    public NMSDataPackResources_SUFFIX(Object handle) {{
-        super(handle, "{NAMES["ReloadableServerResources"]}");
+        super(handle, {simple(RESOURCES)}.class);
     }}
 
     @Override
     public NMSCommandBuildContext getCommandBuildContext() {{
-        return NMSCommandBuildContext.create(PaperCommands.INSTANCE.getBuildContext());
+        throw new UnsupportedOperationException();
     }}
-''', ["io.papermc.paper.command.brigadier.PaperCommands"])
+''', [RESOURCES])
 
 w("NMSCraftBlockData", '''    public NMSCraftBlockData_SUFFIX() {
-        super(null, "block.data.CraftBlockData");
+        super(null, CraftBlockData.class);
     }
 
     @Override
@@ -434,17 +425,18 @@ w("NMSCraftBlockData", '''    public NMSCraftBlockData_SUFFIX() {
       "org.bukkit.block.data.BlockData"])
 
 w("NMSCraftEnchantment", ('''    public NMSCraftEnchantment_SUFFIX() {
-        super(null, "enchantments.CraftEnchantment");
+        super(null, CraftEnchantment.class);
     }
 
     @Override
     public Enchantment createInstance(NMSEnchantment nms) {
         return CONVERSION((net.minecraft.world.item.enchantment.Enchantment) nms.getHandle());
     }
-''').replace("CONVERSION", "CraftEnchantment.minecraftToBukkit" if HAS_MINECRAFT_TO_BUKKIT else "new CraftEnchantment"), [f"{CB}.enchantments.CraftEnchantment", "org.bukkit.enchantments.Enchantment"])
+''').replace("CONVERSION", "CraftEnchantment.minecraftToBukkit" if HAS_MINECRAFT_TO_BUKKIT else "new CraftEnchantment"),
+  [f"{CB}.enchantments.CraftEnchantment", "org.bukkit.enchantments.Enchantment"])
 
 w("NMSCraftItemStack", '''    public NMSCraftItemStack_SUFFIX() {
-        super(null, "inventory.CraftItemStack");
+        super(null, CraftItemStack.class);
     }
 
     @Override
@@ -458,7 +450,7 @@ w("NMSCraftPotionEffectType", ('''    public NMSCraftPotionEffectType_SUFFIX() {
     }
 
     public NMSCraftPotionEffectType_SUFFIX(Object handle) {
-        super(handle, "potion.CraftPotionEffectType");
+        super(handle, CraftPotionEffectType.class);
     }
 
     @Override
@@ -466,74 +458,69 @@ w("NMSCraftPotionEffectType", ('''    public NMSCraftPotionEffectType_SUFFIX() {
         return CONVERSION((MobEffect) nms.getHandle());
     }
 ''').replace("CONVERSION",
-              "CraftPotionEffectType.minecraftToBukkit" if HAS_MINECRAFT_TO_BUKKIT else "new CraftPotionEffectType"), ["net.minecraft.world.effect.MobEffect", f"{CB}.potion.CraftPotionEffectType",
-      "org.bukkit.potion.PotionEffectType"])
+             "CraftPotionEffectType.minecraftToBukkit" if HAS_MINECRAFT_TO_BUKKIT else "new CraftPotionEffectType"),
+  ["net.minecraft.world.effect.MobEffect", f"{CB}.potion.CraftPotionEffectType", "org.bukkit.potion.PotionEffectType"])
 
-w("NMSEntity", f'''    public NMSEntity_SUFFIX(Object handle) {{
-        super(handle, "{NAMES["Entity"]}");
-    }}
+handle("NMSEnchantment", "net.minecraft.world.item.enchantment.Enchantment")
+
+w("NMSEntity", '''    public NMSEntity_SUFFIX(Object handle) {
+        super(handle, Entity.class);
+    }
 
     @Override
-    public org.bukkit.entity.Entity getBukkitEntity() {{
+    public org.bukkit.entity.Entity getBukkitEntity() {
         return ((Entity) getHandle()).getBukkitEntity();
-    }}
+    }
 ''', ["net.minecraft.world.entity.Entity"])
 
-w("NMSScoreboardTeam", f'''    public NMSScoreboardTeam_SUFFIX(Object handle) {{
-        super(handle, "{NAMES["PlayerTeam"]}");
-    }}
+handle("NMSIBlockData", "net.minecraft.world.level.block.state.BlockState")
+handle("NMSItemStack", "net.minecraft.world.item.ItemStack")
+handle("NMSMobEffectList", "net.minecraft.world.effect.MobEffect")
+
+w("NMSScoreboardTeam", '''    public NMSScoreboardTeam_SUFFIX(Object handle) {
+        super(handle, PlayerTeam.class);
+    }
 
     @Override
-    public String getName() {{
+    public String getName() {
         return ((PlayerTeam) getHandle()).getName();
-    }}
+    }
 ''', ["net.minecraft.world.scores.PlayerTeam"])
 
-w("NMSVec3D", f'''    public NMSVec3D_SUFFIX(Object handle) {{
-        super(handle, "{NAMES["Vec3"]}");
-    }}
+w("NMSVec3D", '''    public NMSVec3D_SUFFIX(Object handle) {
+        super(handle, Vec3.class);
+    }
 
     @Override
-    public double x() {{
+    public double x() {
         return ((Vec3) getHandle()).x;
-    }}
+    }
 
     @Override
-    public double y() {{
+    public double y() {
         return ((Vec3) getHandle()).y;
-    }}
+    }
 
     @Override
-    public double z() {{
+    public double z() {
         return ((Vec3) getHandle()).z;
-    }}
+    }
 ''', ["net.minecraft.world.phys.Vec3"])
 
-w("NMSVec2D", f'''    public NMSVec2D_SUFFIX(Object handle) {{
-        super(handle, "{NAMES["Vec2"]}");
-    }}
+w("NMSVec2D", '''    public NMSVec2D_SUFFIX(Object handle) {
+        super(handle, Vec2.class);
+    }
 
     @Override
-    public float x() {{
+    public float x() {
         return ((Vec2) getHandle()).x;
-    }}
+    }
 
     @Override
-    public float y() {{
+    public float y() {
         return ((Vec2) getHandle()).y;
-    }}
+    }
 ''', ["net.minecraft.world.phys.Vec2"])
-
-# Wrappers that only hold a handle look their class up by name. From 1.20.5 the reflection implementations use Paper's
-# Mojang names, which Spigot does not have, so the Spigot modules provide the Spigot names.
-if V >= (1, 20, 5) and not PAPER:
-    for wrapper, class_name in [("NMSMobEffectList", "world.effect.MobEffectList"),
-                                ("NMSIBlockData", "world.level.block.state.IBlockData"),
-                                ("NMSParticle", "core.particles.Particle")]:
-        w(wrapper, f'''    public {wrapper}_SUFFIX(Object handle) {{
-        super(handle, "{class_name}");
-    }}
-''')
 
 HELPER_PACKAGE = module_package(M)
 if HAS_BUILD_CONTEXT:
@@ -563,9 +550,9 @@ if V >= (1, 20, 5) and not PAPER:
     write_source(M, HELPER_PACKAGE, "MappingProbe", f"""package {HELPER_PACKAGE};
 
 /**
- * Tells NMSClassRegistry whether this package runs on Spigot. Paper shares the version range from 1.20.5, and its
- * remapper translates the Spigot names in this package's bytecode, but not the Spigot class names that the wrappers
- * look up by string. So the package matches only where the Spigot name MobEffectList is a class.
+ * Tells NMSClassRegistry whether this package runs on Spigot. Paper shares the version range from 1.20.5 and has
+ * modules of its own, which the integration tests run there, so this package matches only where the Spigot name
+ * MobEffectList is a class.
  */
 final class MappingProbe {{
     private MappingProbe() {{
@@ -594,8 +581,8 @@ import org.bukkit.craftbukkit.CraftServer;
  * Mojang name of MobEffectInstance. So the Mojang-named package sees MobEffect only when the plugin is not remapped,
  * and the reobfuscated package, which refers to the Spigot name MobEffectList, only when it is.
  *
- * <p>Spigot 1.20.5-1.20.6 also has a class named MobEffect, but keeps CraftBukkit in a versioned package. Loading the
- * unversioned CraftServer then throws NoClassDefFoundError, which NMSClassRegistry treats as not matching.
+ * <p>Spigot 1.20.5 and later also have a class named MobEffect, but keep CraftBukkit in a versioned package. Loading
+ * the unversioned CraftServer then throws NoClassDefFoundError, which NMSClassRegistry treats as not matching.
  */
 final class MappingProbe {{
     private MappingProbe() {{
@@ -608,5 +595,5 @@ final class MappingProbe {{
 }}
 """)
 
-register(wrappers)
-print(f"{M}: {len(wrappers)} classes")
+write_class_list(M, classes)
+print(f"{M}: {len(classes)} classes")

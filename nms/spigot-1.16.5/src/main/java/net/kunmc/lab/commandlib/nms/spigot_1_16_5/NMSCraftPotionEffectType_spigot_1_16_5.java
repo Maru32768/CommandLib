@@ -12,7 +12,7 @@ public class NMSCraftPotionEffectType_spigot_1_16_5 extends NMSCraftPotionEffect
     }
 
     public NMSCraftPotionEffectType_spigot_1_16_5(Object handle) {
-        super(handle, "potion.CraftPotionEffectType");
+        super(handle, CraftPotionEffectType.class);
     }
 
     @Override

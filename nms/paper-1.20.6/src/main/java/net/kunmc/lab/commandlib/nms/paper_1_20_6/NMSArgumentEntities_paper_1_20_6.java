@@ -12,7 +12,7 @@ import net.minecraft.commands.arguments.EntityArgument;
 
 public class NMSArgumentEntities_paper_1_20_6 extends NMSArgumentEntities {
     public NMSArgumentEntities_paper_1_20_6() {
-        super(null, "commands.arguments.EntityArgument");
+        super(null, EntityArgument.class);
     }
 
     @Override

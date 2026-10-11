@@ -8,7 +8,7 @@ import net.minecraft.commands.arguments.ResourceLocationArgument;
 
 public class NMSArgumentNamespacedKey_spigot_1_19_1 extends NMSArgumentNamespacedKey {
     public NMSArgumentNamespacedKey_spigot_1_19_1() {
-        super(null, "commands.arguments.ArgumentMinecraftKeyRegistered");
+        super(null, ResourceLocationArgument.class);
     }
 
     @Override

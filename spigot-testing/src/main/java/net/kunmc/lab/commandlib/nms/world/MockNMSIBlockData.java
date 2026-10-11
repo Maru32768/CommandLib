@@ -6,7 +6,7 @@ public class MockNMSIBlockData extends NMSIBlockData {
     private final String materialName;
 
     public MockNMSIBlockData(String materialName) {
-        super(null, "Mock");
+        super(null, Object.class);
         this.materialName = materialName;
     }
 

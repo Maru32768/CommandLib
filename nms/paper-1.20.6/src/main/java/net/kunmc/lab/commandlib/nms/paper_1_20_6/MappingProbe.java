@@ -9,8 +9,8 @@ import org.bukkit.craftbukkit.CraftServer;
  * Mojang name of MobEffectInstance. So the Mojang-named package sees MobEffect only when the plugin is not remapped,
  * and the reobfuscated package, which refers to the Spigot name MobEffectList, only when it is.
  *
- * <p>Spigot 1.20.5-1.20.6 also has a class named MobEffect, but keeps CraftBukkit in a versioned package. Loading the
- * unversioned CraftServer then throws NoClassDefFoundError, which NMSClassRegistry treats as not matching.
+ * <p>Spigot 1.20.5 and later also have a class named MobEffect, but keep CraftBukkit in a versioned package. Loading
+ * the unversioned CraftServer then throws NoClassDefFoundError, which NMSClassRegistry treats as not matching.
  */
 final class MappingProbe {
     private MappingProbe() {

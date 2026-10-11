@@ -9,7 +9,7 @@ import net.minecraft.commands.arguments.ParticleArgument;
 
 public class NMSArgumentParticle_spigot_1_19_2 extends NMSArgumentParticle {
     public NMSArgumentParticle_spigot_1_19_2() {
-        super(null, "commands.arguments.ArgumentParticle");
+        super(null, ParticleArgument.class);
     }
 
     @Override

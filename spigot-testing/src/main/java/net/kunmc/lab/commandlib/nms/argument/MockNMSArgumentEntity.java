@@ -7,7 +7,7 @@ import org.bukkit.entity.Entity;
 
 public class MockNMSArgumentEntity extends NMSArgumentEntity {
     public MockNMSArgumentEntity() {
-        super(null, "Mock");
+        super(null, Object.class);
     }
 
     @Override

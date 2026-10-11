@@ -5,7 +5,7 @@ import net.minecraft.world.entity.Entity;
 
 public class NMSEntity_spigot_1_21_1 extends NMSEntity {
     public NMSEntity_spigot_1_21_1(Object handle) {
-        super(handle, "world.entity.Entity");
+        super(handle, Entity.class);
     }
 
     @Override

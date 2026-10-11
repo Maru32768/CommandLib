@@ -10,7 +10,7 @@ import org.bukkit.enchantments.Enchantment;
 
 public class MockNMSArgumentEnchantment extends NMSArgumentEnchantment {
     public MockNMSArgumentEnchantment() {
-        super(null, "Mock");
+        super(null, Object.class);
     }
 
     @Override

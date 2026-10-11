@@ -11,7 +11,7 @@ import org.bukkit.World;
 
 public class NMSArgumentDimension_paper_1_20_6 extends NMSArgumentDimension {
     public NMSArgumentDimension_paper_1_20_6() {
-        super(null, "commands.arguments.DimensionArgument");
+        super(null, DimensionArgument.class);
     }
 
     @Override

@@ -10,7 +10,7 @@ import net.kunmc.lab.commandlib.util.nms.world.NMSVec3D;
 
 public class MockNMSArgumentVec3D extends NMSArgumentVec3D {
     public MockNMSArgumentVec3D() {
-        super(null, "Mock");
+        super(null, Object.class);
     }
 
     @Override

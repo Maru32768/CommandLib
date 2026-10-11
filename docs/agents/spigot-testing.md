@@ -9,16 +9,15 @@ execution can be tested without a running Minecraft server.
 ## How NMS Is Bypassed
 
 CommandLib's `spigot` module depends on NMS, the version-specific Minecraft
-internals. `CommandTester` keeps two static mocks alive for the lifetime of a
+internals. `CommandTester` keeps a static mock alive for the lifetime of a
 tester instance:
 
-| Mock                                 | Purpose                                                                                                                  |
-|--------------------------------------|--------------------------------------------------------------------------------------------------------------------------|
-| `mockStatic(NMSReflection.class)`    | `findMinecraftClass()` returns `Object.class`, making the `MinecraftClass` constructor chain work without a real server. |
-| `mockStatic(NMSClassRegistry.class)` | `findClass(X.class)` returns the corresponding `MockNMS...` class instead of the real version-specific implementation.   |
+| Mock                                 | Purpose                                                                                                                |
+|--------------------------------------|------------------------------------------------------------------------------------------------------------------------|
+| `mockStatic(NMSClassRegistry.class)` | `findClass(X.class)` returns the corresponding `MockNMS...` class instead of the typed class of a typed NMS module.    |
 
-`CommandTester` implements `AutoCloseable` and tears down both mocks in
-`close()`. Tests should use try-with-resources. Mockito static mocks are scoped
+The mocks pass `Object.class` as the wrapped server class. `CommandTester`
+implements `AutoCloseable` and tears down the mock in `close()`. Tests should use try-with-resources. Mockito static mocks are scoped
 to the thread that created them, so independent `CommandTester` instances may
 run concurrently on different test threads.
 

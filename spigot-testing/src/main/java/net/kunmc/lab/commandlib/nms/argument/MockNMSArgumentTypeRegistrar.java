@@ -7,17 +7,7 @@ import java.util.function.Supplier;
 
 public class MockNMSArgumentTypeRegistrar extends NMSArgumentTypeRegistrar {
     public MockNMSArgumentTypeRegistrar() {
-        super("Mock");
-    }
-
-    @Override
-    protected Class<?> serializerInterface() {
-        return Runnable.class;
-    }
-
-    @Override
-    protected Object brigadierStringKey() {
-        return null;
+        super(Object.class);
     }
 
     @Override

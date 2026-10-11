@@ -8,7 +8,7 @@ public class MockNMSArgumentPredicateItemStack extends NMSArgumentPredicateItemS
     private final String materialName;
 
     public MockNMSArgumentPredicateItemStack(String materialName) {
-        super(null, "Mock");
+        super(null, Object.class);
         this.materialName = materialName;
     }
 

@@ -13,7 +13,6 @@ import net.kunmc.lab.commandlib.nms.world.MockNMSCraftItemStack;
 import net.kunmc.lab.commandlib.nms.world.MockNMSCraftPotionEffectType;
 import net.kunmc.lab.commandlib.util.nms.NMSClass;
 import net.kunmc.lab.commandlib.util.nms.NMSClassRegistry;
-import net.kunmc.lab.commandlib.util.nms.NMSReflection;
 import net.kunmc.lab.commandlib.util.nms.argument.*;
 import net.kunmc.lab.commandlib.util.nms.command.NMSCommandListenerWrapper;
 import net.kunmc.lab.commandlib.util.nms.resources.NMSCraftParticle;
@@ -81,7 +80,6 @@ public class CommandTester implements AutoCloseable {
         return sender;
     }
 
-    private final MockedStatic<NMSReflection> nmsReflectionMock;
     private final MockedStatic<NMSClassRegistry> nmsRegistryMock;
 
     public static Builder builder() {
@@ -121,12 +119,6 @@ public class CommandTester implements AutoCloseable {
         }
 
         current.set(this);
-
-        nmsReflectionMock = Mockito.mockStatic(NMSReflection.class);
-        nmsReflectionMock.when(() -> NMSReflection.findMinecraftClass(Mockito.anyString(), Mockito.any()))
-                         .thenReturn(Object.class);
-        nmsReflectionMock.when(() -> NMSReflection.findCraftBukkitClass(Mockito.anyString()))
-                         .thenReturn(Object.class);
 
         nmsRegistryMock = Mockito.mockStatic(NMSClassRegistry.class);
         nmsRegistryMock.when(() -> NMSClassRegistry.findClass(Mockito.any()))
@@ -222,7 +214,6 @@ public class CommandTester implements AutoCloseable {
     @Override
     public void close() {
         nmsRegistryMock.close();
-        nmsReflectionMock.close();
         if (current.get() == this) {
             current.remove();
         }

@@ -7,7 +7,7 @@ import org.bukkit.enchantments.Enchantment;
 
 public class NMSCraftEnchantment_spigot_1_18_2 extends NMSCraftEnchantment {
     public NMSCraftEnchantment_spigot_1_18_2() {
-        super(null, "enchantments.CraftEnchantment");
+        super(null, CraftEnchantment.class);
     }
 
     @Override

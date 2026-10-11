@@ -6,7 +6,7 @@ import net.minecraft.commands.Commands;
 
 public class NMSCommandDispatcher_spigot_1_19_1 extends NMSCommandDispatcher {
     public NMSCommandDispatcher_spigot_1_19_1(Object handle) {
-        super(handle, "commands.CommandDispatcher");
+        super(handle, Commands.class);
     }
 
     @Override

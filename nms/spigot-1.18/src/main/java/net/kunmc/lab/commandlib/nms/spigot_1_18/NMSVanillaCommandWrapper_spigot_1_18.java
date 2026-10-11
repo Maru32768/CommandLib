@@ -10,7 +10,7 @@ import org.bukkit.craftbukkit.v1_18_R1.command.VanillaCommandWrapper;
 
 public class NMSVanillaCommandWrapper_spigot_1_18 extends NMSVanillaCommandWrapper {
     public NMSVanillaCommandWrapper_spigot_1_18() {
-        super(null, "command.VanillaCommandWrapper");
+        super(null, VanillaCommandWrapper.class);
     }
 
     @Override

@@ -8,7 +8,7 @@ import net.minecraft.server.v1_16_R3.CommandListenerWrapper;
 
 public class NMSArgumentNamespacedKey_spigot_1_16_5 extends NMSArgumentNamespacedKey {
     public NMSArgumentNamespacedKey_spigot_1_16_5() {
-        super(null, "ArgumentMinecraftKeyRegistered");
+        super(null, ArgumentMinecraftKeyRegistered.class);
     }
 
     @Override

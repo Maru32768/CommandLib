@@ -8,7 +8,7 @@ import org.bukkit.Particle;
 
 public class MockNMSCraftParticle extends NMSCraftParticle {
     public MockNMSCraftParticle() {
-        super(null, "Mock");
+        super(null, Object.class);
     }
 
     @Override

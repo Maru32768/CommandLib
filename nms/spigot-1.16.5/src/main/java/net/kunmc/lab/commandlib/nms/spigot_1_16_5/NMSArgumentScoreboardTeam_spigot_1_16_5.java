@@ -11,7 +11,7 @@ import net.minecraft.server.v1_16_R3.CommandListenerWrapper;
 
 public class NMSArgumentScoreboardTeam_spigot_1_16_5 extends NMSArgumentScoreboardTeam {
     public NMSArgumentScoreboardTeam_spigot_1_16_5() {
-        super(null, "ArgumentScoreboardTeam");
+        super(null, ArgumentScoreboardTeam.class);
     }
 
     @Override

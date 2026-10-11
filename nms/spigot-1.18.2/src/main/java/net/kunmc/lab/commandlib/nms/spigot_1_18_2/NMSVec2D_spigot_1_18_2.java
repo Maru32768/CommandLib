@@ -5,7 +5,7 @@ import net.minecraft.world.phys.Vec2;
 
 public class NMSVec2D_spigot_1_18_2 extends NMSVec2D {
     public NMSVec2D_spigot_1_18_2(Object handle) {
-        super(handle, "world.phys.Vec2F");
+        super(handle, Vec2.class);
     }
 
     @Override

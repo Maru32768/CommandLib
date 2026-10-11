@@ -7,7 +7,7 @@ import org.bukkit.potion.PotionEffectType;
 
 public class MockNMSCraftPotionEffectType extends NMSCraftPotionEffectType {
     public MockNMSCraftPotionEffectType() {
-        super(null, "Mock");
+        super(null, Object.class);
     }
 
     @Override

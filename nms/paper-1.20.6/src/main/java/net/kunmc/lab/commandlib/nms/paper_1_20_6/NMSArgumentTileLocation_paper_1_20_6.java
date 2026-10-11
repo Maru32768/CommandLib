@@ -6,7 +6,7 @@ import net.minecraft.commands.arguments.blocks.BlockInput;
 
 public class NMSArgumentTileLocation_paper_1_20_6 extends NMSArgumentTileLocation {
     public NMSArgumentTileLocation_paper_1_20_6(Object handle) {
-        super(handle, "commands.arguments.blocks.BlockInput");
+        super(handle, BlockInput.class);
     }
 
     @Override

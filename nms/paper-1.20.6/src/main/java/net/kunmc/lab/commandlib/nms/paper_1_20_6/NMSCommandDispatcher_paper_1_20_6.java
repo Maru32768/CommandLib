@@ -6,7 +6,7 @@ import net.minecraft.commands.Commands;
 
 public class NMSCommandDispatcher_paper_1_20_6 extends NMSCommandDispatcher {
     public NMSCommandDispatcher_paper_1_20_6(Object handle) {
-        super(handle, "commands.Commands");
+        super(handle, Commands.class);
     }
 
     @Override

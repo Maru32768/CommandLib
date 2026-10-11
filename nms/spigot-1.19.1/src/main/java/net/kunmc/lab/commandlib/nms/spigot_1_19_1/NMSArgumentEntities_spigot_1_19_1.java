@@ -12,7 +12,7 @@ import net.minecraft.commands.arguments.EntityArgument;
 
 public class NMSArgumentEntities_spigot_1_19_1 extends NMSArgumentEntities {
     public NMSArgumentEntities_spigot_1_19_1() {
-        super(null, "commands.arguments.ArgumentEntity");
+        super(null, EntityArgument.class);
     }
 
     @Override

@@ -11,7 +11,7 @@ import net.minecraft.server.v1_16_R3.CommandListenerWrapper;
 
 public class NMSArgumentMobEffect_spigot_1_16_5 extends NMSArgumentMobEffect {
     public NMSArgumentMobEffect_spigot_1_16_5() {
-        super(null, "ArgumentMobEffect");
+        super(null, ArgumentMobEffect.class);
     }
 
     @Override

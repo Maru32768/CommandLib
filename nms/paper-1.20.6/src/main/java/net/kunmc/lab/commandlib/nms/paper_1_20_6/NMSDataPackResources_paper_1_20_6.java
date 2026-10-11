@@ -1,16 +1,21 @@
 package net.kunmc.lab.commandlib.nms.paper_1_20_6;
 
-import io.papermc.paper.command.brigadier.PaperCommands;
 import net.kunmc.lab.commandlib.util.nms.command.NMSCommandBuildContext;
 import net.kunmc.lab.commandlib.util.nms.server.NMSDataPackResources;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.ReloadableServerResources;
 
 public class NMSDataPackResources_paper_1_20_6 extends NMSDataPackResources {
     public NMSDataPackResources_paper_1_20_6(Object handle) {
-        super(handle, "server.ReloadableServerResources");
+        super(handle, ReloadableServerResources.class);
     }
 
     @Override
     public NMSCommandBuildContext getCommandBuildContext() {
-        return NMSCommandBuildContext.create(PaperCommands.INSTANCE.getBuildContext());
+        MinecraftServer server = MinecraftServer.getServer();
+        return NMSCommandBuildContext.create(CommandBuildContext.simple(server.registryAccess(),
+                                                                        server.getWorldData()
+                                                                              .enabledFeatures()));
     }
 }

@@ -7,6 +7,12 @@ abstract class SpigotNmsExtension {
     abstract val minecraftVersion: Property<String>
 
     /**
+     * Passed to BuildTools as `--rev`. Defaults to [minecraftVersion]. Set the Spigot build number of the last build of
+     * a release that BuildTools now resolves to the following hotfix build, such as 1.20.3, which resolves to 1.20.4.
+     */
+    abstract val buildToolsRevision: Property<String>
+
+    /**
      * Compiles against the Mojang-mapped server jar and remaps the built jar to Spigot names. Required from 1.17,
      * where the Spigot-mapped server jar keeps obfuscated member names.
      */

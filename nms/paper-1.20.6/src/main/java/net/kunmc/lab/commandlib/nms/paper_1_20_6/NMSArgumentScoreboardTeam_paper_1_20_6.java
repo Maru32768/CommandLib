@@ -11,7 +11,7 @@ import net.minecraft.commands.arguments.TeamArgument;
 
 public class NMSArgumentScoreboardTeam_paper_1_20_6 extends NMSArgumentScoreboardTeam {
     public NMSArgumentScoreboardTeam_paper_1_20_6() {
-        super(null, "commands.arguments.TeamArgument");
+        super(null, TeamArgument.class);
     }
 
     @Override

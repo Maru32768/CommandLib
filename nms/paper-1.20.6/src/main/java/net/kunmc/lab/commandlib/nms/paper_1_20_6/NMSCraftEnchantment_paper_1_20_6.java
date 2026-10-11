@@ -7,7 +7,7 @@ import org.bukkit.enchantments.Enchantment;
 
 public class NMSCraftEnchantment_paper_1_20_6 extends NMSCraftEnchantment {
     public NMSCraftEnchantment_paper_1_20_6() {
-        super(null, "enchantments.CraftEnchantment");
+        super(null, CraftEnchantment.class);
     }
 
     @Override

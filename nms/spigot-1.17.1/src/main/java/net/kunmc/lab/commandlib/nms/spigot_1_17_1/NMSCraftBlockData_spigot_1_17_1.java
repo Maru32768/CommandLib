@@ -8,7 +8,7 @@ import org.bukkit.craftbukkit.v1_17_R1.block.data.CraftBlockData;
 
 public class NMSCraftBlockData_spigot_1_17_1 extends NMSCraftBlockData {
     public NMSCraftBlockData_spigot_1_17_1() {
-        super(null, "block.data.CraftBlockData");
+        super(null, CraftBlockData.class);
     }
 
     @Override

@@ -9,7 +9,7 @@ import net.minecraft.commands.arguments.blocks.BlockStateArgument;
 
 public class NMSArgumentTile_paper_1_20_6 extends NMSArgumentTile {
     public NMSArgumentTile_paper_1_20_6() {
-        super(null, "commands.arguments.blocks.BlockStateArgument");
+        super(null, BlockStateArgument.class);
     }
 
     @Override

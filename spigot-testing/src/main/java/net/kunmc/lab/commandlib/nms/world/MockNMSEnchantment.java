@@ -6,7 +6,7 @@ public class MockNMSEnchantment extends NMSEnchantment {
     private final String mockName;
 
     public MockNMSEnchantment(String mockName) {
-        super(null, "Mock");
+        super(null, Object.class);
         this.mockName = mockName;
     }
 

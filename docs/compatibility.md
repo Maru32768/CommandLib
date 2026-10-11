@@ -47,16 +47,18 @@ CommandLib は `1.16.5` から最新安定版までのサポートを目標に�
 | Minecraft version | Current evidence | Target |
 |---|---|---|
 | `1.16.5` | Bukkit fixture、Mohist fixture、Forge module。 | Core supported baseline。 |
-| `1.17.x` | Paper `1.17.1` fixture、typed NMS module。`1.17` は MCProtocolLib が未対応のため fixture なし。 | `1.17.1` は Tested。 |
+| `1.17.x` | Paper `1.17.1` fixture、typed NMS module（`1.17`、`1.17.1`）。`1.17` は MCProtocolLib が 1.17 の protocol に未対応のため fixture なし（module のコンパイルのみで確認）。 | `1.17.1` は Tested、`1.17` は Supported。 |
 | `1.18.x` | Paper `1.18` / `1.18.1` / `1.18.2` fixture、typed NMS module。 | Tested。 |
 | `1.19.x` | Paper `1.19`〜`1.19.4` fixture、typed NMS module。 | Tested。 |
 | `1.20` / `1.20.1` | Paper fixture、Mohist `1.20.1` fixture、typed NMS module（`1.20` は `1.20.1` の module）。 | Tested。 |
 | `1.20.2` | Paper fixture、typed NMS module。 | Tested。 |
+| `1.20.3` | Spigot fixture、typed NMS module。Paper 1.20.3 は存在しない。 | Tested。 |
 | `1.20.4` | Paper / Spigot fixture、typed NMS module。 | Tested。 |
-| `1.20.5` | Paper fixture、typed NMS module（Paper）。Spigot 1.20.5 は存在しない。 | Tested。 |
+| `1.20.5` | Paper / Spigot fixture、typed NMS module。 | Tested。 |
 | `1.20.6` | Paper / Spigot fixture、typed NMS module。Paper 1.20.6+ registration path がある。 | Tested。Paper official API path の候補。 |
-| `1.21` / `1.21.1` | Paper `1.21.0` fixture（paper module）、Spigot `1.21.1` fixture、typed NMS module（Spigot）。 | Tested。 |
-| Spigot `1.21.3+` | 未対応。`Attribute` / `Biome` / `Sound` が registry interface になり、spigot module の引数が動かない。 | roadmap 参照。 |
+| `1.21` / `1.21.1` | Paper `1.21.0` fixture（paper module）、Paper `1.21.1` fixture（spigot module）、Spigot `1.21` / `1.21.1` fixture、typed NMS module。 | Tested。 |
+| spigot module の `1.21.2+` | 未対応。`Attribute` / `Biome` / `Sound` が registry interface になり、spigot module の引数が動かない。typed NMS module もないため NMS を使う引数は `NMSClassNotFoundException` になる。Paper では paper module を使う。 | roadmap 参照。 |
+| spigot module の `1.16.3` 以前 | 未対応。typed NMS module がない。 | 対応予定なし。 |
 | latest stable | 未固定。 | 各 release 時点の最新安定版を追従対象にする。 |
 
 ## Support policy

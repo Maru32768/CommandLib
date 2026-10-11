@@ -7,7 +7,7 @@ import org.bukkit.entity.Player;
 
 public class MockNMSArgumentPlayer extends NMSArgumentPlayer {
     public MockNMSArgumentPlayer() {
-        super(null, "Mock");
+        super(null, Object.class);
     }
 
     @Override

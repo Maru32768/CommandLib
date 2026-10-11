@@ -9,6 +9,7 @@ import java.util.List;
 final class TypedNmsModules {
     static final List<NMSClassRegistry.TypedModule> MODULES = List.of(
             new NMSClassRegistry.TypedModule("spigot_1_16_5", "1.16.4", "1.16.5"),
+            new NMSClassRegistry.TypedModule("spigot_1_17", "1.17", "1.17"),
             new NMSClassRegistry.TypedModule("spigot_1_17_1", "1.17.1", "1.17.1"),
             new NMSClassRegistry.TypedModule("spigot_1_18", "1.18", "1.18"),
             new NMSClassRegistry.TypedModule("spigot_1_18_1", "1.18.1", "1.18.1"),
@@ -20,13 +21,14 @@ final class TypedNmsModules {
             new NMSClassRegistry.TypedModule("spigot_1_19_4", "1.19.4", "1.19.4"),
             new NMSClassRegistry.TypedModule("spigot_1_20_1", "1.20", "1.20.1"),
             new NMSClassRegistry.TypedModule("spigot_1_20_2", "1.20.2", "1.20.2"),
+            new NMSClassRegistry.TypedModule("spigot_1_20_3", "1.20.3", "1.20.3"),
             new NMSClassRegistry.TypedModule("spigot_1_20_4", "1.20.4", "1.20.4"),
             new NMSClassRegistry.TypedModule("spigot_1_20_6", "1.20.5", "1.20.6"),
             new NMSClassRegistry.TypedModule("spigot_1_21_1", "1.21", "1.21.1"),
-            new NMSClassRegistry.TypedModule("paper_1_20_6", "1.20.5", "1.20.6")
-                    .withWrapperVersions("NMSDataPackResources", "1.20.6", "1.20.6"),
-            new NMSClassRegistry.TypedModule("paper_1_20_6_spigot", "paper_1_20_6", "1.20.5", "1.20.6")
-                    .withWrapperVersions("NMSDataPackResources", "1.20.6", "1.20.6"));
+            new NMSClassRegistry.TypedModule("paper_1_20_6", "1.20.5", "1.20.6"),
+            new NMSClassRegistry.TypedModule("paper_1_20_6_spigot", "1.20.5", "1.20.6"),
+            new NMSClassRegistry.TypedModule("paper_1_21_1", "1.21", "1.21.1"),
+            new NMSClassRegistry.TypedModule("paper_1_21_1_spigot", "1.21", "1.21.1"));
 
     private TypedNmsModules() {
     }

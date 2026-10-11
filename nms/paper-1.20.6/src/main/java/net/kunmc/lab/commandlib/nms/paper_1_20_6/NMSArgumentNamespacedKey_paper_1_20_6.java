@@ -8,7 +8,7 @@ import net.minecraft.commands.arguments.ResourceLocationArgument;
 
 public class NMSArgumentNamespacedKey_paper_1_20_6 extends NMSArgumentNamespacedKey {
     public NMSArgumentNamespacedKey_paper_1_20_6() {
-        super(null, "commands.arguments.ResourceLocationArgument");
+        super(null, ResourceLocationArgument.class);
     }
 
     @Override

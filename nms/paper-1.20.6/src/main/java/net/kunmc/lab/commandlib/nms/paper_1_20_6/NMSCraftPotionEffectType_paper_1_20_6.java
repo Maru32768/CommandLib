@@ -12,7 +12,7 @@ public class NMSCraftPotionEffectType_paper_1_20_6 extends NMSCraftPotionEffectT
     }
 
     public NMSCraftPotionEffectType_paper_1_20_6(Object handle) {
-        super(handle, "potion.CraftPotionEffectType");
+        super(handle, CraftPotionEffectType.class);
     }
 
     @Override

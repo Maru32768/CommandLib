@@ -10,7 +10,7 @@ import org.bukkit.craftbukkit.command.VanillaCommandWrapper;
 
 public class NMSVanillaCommandWrapper_paper_1_20_6 extends NMSVanillaCommandWrapper {
     public NMSVanillaCommandWrapper_paper_1_20_6() {
-        super(null, "command.VanillaCommandWrapper");
+        super(null, VanillaCommandWrapper.class);
     }
 
     @Override

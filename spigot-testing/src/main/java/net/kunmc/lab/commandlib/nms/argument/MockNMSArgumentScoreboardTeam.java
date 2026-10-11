@@ -10,7 +10,7 @@ import net.kunmc.lab.commandlib.util.nms.world.NMSScoreboardTeam;
 
 public class MockNMSArgumentScoreboardTeam extends NMSArgumentScoreboardTeam {
     public MockNMSArgumentScoreboardTeam() {
-        super(null, "Mock");
+        super(null, Object.class);
     }
 
     @Override

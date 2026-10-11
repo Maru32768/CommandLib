@@ -6,7 +6,7 @@ import net.kunmc.lab.commandlib.util.nms.argument.NMSArgumentProfile;
 
 public class MockNMSArgumentProfile extends NMSArgumentProfile {
     public MockNMSArgumentProfile() {
-        super(null, "Mock");
+        super(null, Object.class);
     }
 
     @Override

@@ -9,7 +9,7 @@ import net.minecraft.commands.arguments.ItemEnchantmentArgument;
 
 public class NMSArgumentEnchantment_spigot_1_18_2 extends NMSArgumentEnchantment {
     public NMSArgumentEnchantment_spigot_1_18_2() {
-        super(null, "commands.arguments.ArgumentEnchantment");
+        super(null, ItemEnchantmentArgument.class);
     }
 
     @Override

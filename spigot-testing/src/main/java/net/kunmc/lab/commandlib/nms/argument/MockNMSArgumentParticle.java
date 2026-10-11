@@ -9,7 +9,7 @@ import org.bukkit.Particle;
 
 public class MockNMSArgumentParticle extends NMSArgumentParticle {
     public MockNMSArgumentParticle() {
-        super(null, "Mock");
+        super(null, Object.class);
     }
 
     @Override

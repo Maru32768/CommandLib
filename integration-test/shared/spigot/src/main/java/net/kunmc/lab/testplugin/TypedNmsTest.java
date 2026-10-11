@@ -10,9 +10,8 @@ import net.kunmc.lab.commandlib.util.nms.NMSClassRegistry;
 import java.util.List;
 
 /**
- * Checks that the typed NMS classes bundled for this server version are the ones NMSClassRegistry selects. The registry
- * falls back to the reflection implementations when a typed class does not link or does not match the plugin's
- * mappings, so the other tests pass either way; this test fails when that fallback hides a broken typed class.
+ * Checks that every class of the typed NMS modules for this server version links. A wrapper that no test reaches would
+ * otherwise only fail when a command first uses it.
  */
 public class TypedNmsTest extends TestBase {
     public TypedNmsTest(Command command) {
@@ -21,10 +20,10 @@ public class TypedNmsTest extends TestBase {
 
     @Override
     public List<String> build() {
-        return typedNmsClassesAreSelected();
+        return everyTypedNmsClassLinks();
     }
 
-    public List<String> typedNmsClassesAreSelected() {
+    public List<String> everyTypedNmsClassLinks() {
         String name = getMethodName();
         String key = getKey();
 
@@ -32,10 +31,7 @@ public class TypedNmsTest extends TestBase {
         command.addChildren(new Command(name) {{
             execute(ctx -> {
                 try {
-                    // Only wrappers initialized so far are registered, and no other test reads the source's
-                    // location, which initializes the position and rotation wrappers.
-                    ctx.getLocation();
-                    putResult(key, String.valueOf(NMSClassRegistry.typedFallbacks()), "[]");
+                    putResult(key, String.valueOf(NMSClassRegistry.unavailableClasses()), "[]");
                 } catch (RuntimeException e) {
                     putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
                 }

@@ -1,11 +1,11 @@
 package net.kunmc.lab.commandlib.util.nms;
 
+import net.kunmc.lab.commandlib.nms.registry_unlinkable.UnlinkableTypedLookUp;
 import net.kunmc.lab.commandlib.util.nms.access.AccessTarget;
 import net.kunmc.lab.commandlib.util.nms.access.ConstructorTarget;
 import net.kunmc.lab.commandlib.util.nms.access.OpenFields;
 import net.kunmc.lab.commandlib.util.nms.access.ReflectiveCaller;
 import net.kunmc.lab.commandlib.util.nms.hybrid.HybridClassLoader;
-import net.kunmc.lab.commandlib.util.nms.unlinkable.UnlinkableTypedLookUp;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;

@@ -11,7 +11,7 @@ import org.bukkit.World;
 
 public class NMSArgumentDimension_spigot_1_19_3 extends NMSArgumentDimension {
     public NMSArgumentDimension_spigot_1_19_3() {
-        super(null, "commands.arguments.ArgumentDimension");
+        super(null, DimensionArgument.class);
     }
 
     @Override

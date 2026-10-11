@@ -6,7 +6,7 @@ public class MockNMSMobEffectList extends NMSMobEffectList {
     private final String mockName;
 
     public MockNMSMobEffectList(String mockName) {
-        super(null, "Mock");
+        super(null, Object.class);
         this.mockName = mockName;
     }
 

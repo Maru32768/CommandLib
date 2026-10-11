@@ -8,7 +8,7 @@ import org.bukkit.craftbukkit.block.data.CraftBlockData;
 
 public class NMSCraftBlockData_paper_1_20_6 extends NMSCraftBlockData {
     public NMSCraftBlockData_paper_1_20_6() {
-        super(null, "block.data.CraftBlockData");
+        super(null, CraftBlockData.class);
     }
 
     @Override

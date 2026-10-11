@@ -11,7 +11,7 @@ import org.bukkit.entity.Entity;
 
 public class MockNMSCommandListenerWrapper extends NMSCommandListenerWrapper {
     public MockNMSCommandListenerWrapper(Object handle) {
-        super(handle, "Mock");
+        super(handle, Object.class);
     }
 
     @Override

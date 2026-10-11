@@ -12,7 +12,7 @@ import net.minecraft.core.registries.Registries;
 
 public class NMSArgumentMobEffect_paper_1_20_6 extends NMSArgumentMobEffect {
     public NMSArgumentMobEffect_paper_1_20_6() {
-        super(null, "commands.arguments.ResourceArgument");
+        super(null, ResourceArgument.class);
     }
 
     @Override

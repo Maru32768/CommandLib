@@ -9,7 +9,7 @@ import net.minecraft.commands.arguments.item.ItemArgument;
 
 public class NMSArgumentItemStack_spigot_1_20_4 extends NMSArgumentItemStack {
     public NMSArgumentItemStack_spigot_1_20_4() {
-        super(null, "commands.arguments.item.ArgumentItemStack");
+        super(null, ItemArgument.class);
     }
 
     @Override

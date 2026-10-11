@@ -26,7 +26,8 @@ set up the paperweight dev bundle (see `docs/agents/nms-build.md`):
 ```
 
 Pass `-Pcommandlib.typedNms=false` to leave them out when the change does not
-touch NMS.
+need the spigot jar, such as `:spigot:test` or `spigot-testing`. The jar then
+has no NMS implementations, so it does not work on a server.
 
 Forge / NeoForge changes must compile every node, because code for nodes
 other than the active one is only type-checked when that node compiles (see

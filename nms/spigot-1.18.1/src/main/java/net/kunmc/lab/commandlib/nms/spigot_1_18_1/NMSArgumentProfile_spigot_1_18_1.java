@@ -7,7 +7,7 @@ import net.minecraft.commands.arguments.GameProfileArgument;
 
 public class NMSArgumentProfile_spigot_1_18_1 extends NMSArgumentProfile {
     public NMSArgumentProfile_spigot_1_18_1() {
-        super(null, "commands.arguments.ArgumentProfile");
+        super(null, GameProfileArgument.class);
     }
 
     @Override

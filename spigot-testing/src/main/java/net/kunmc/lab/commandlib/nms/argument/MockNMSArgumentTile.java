@@ -8,7 +8,7 @@ import org.bukkit.Material;
 
 public class MockNMSArgumentTile extends NMSArgumentTile {
     public MockNMSArgumentTile() {
-        super(null, "Mock");
+        super(null, Object.class);
     }
 
     @Override

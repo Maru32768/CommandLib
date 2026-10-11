@@ -8,7 +8,7 @@ import org.bukkit.Material;
 
 public class MockNMSArgumentItemStack extends NMSArgumentItemStack {
     public MockNMSArgumentItemStack() {
-        super(null, "Mock");
+        super(null, Object.class);
     }
 
     @Override

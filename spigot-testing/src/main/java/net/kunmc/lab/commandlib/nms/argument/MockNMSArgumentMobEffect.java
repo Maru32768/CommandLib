@@ -9,7 +9,7 @@ import org.bukkit.potion.PotionEffectType;
 
 public class MockNMSArgumentMobEffect extends NMSArgumentMobEffect {
     public MockNMSArgumentMobEffect() {
-        super(null, "Mock");
+        super(null, Object.class);
     }
 
     @Override

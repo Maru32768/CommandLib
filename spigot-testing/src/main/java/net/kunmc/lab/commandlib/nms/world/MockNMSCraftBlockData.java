@@ -7,7 +7,7 @@ import org.bukkit.block.data.BlockData;
 
 public class MockNMSCraftBlockData extends NMSCraftBlockData {
     public MockNMSCraftBlockData() {
-        super(null, "Mock");
+        super(null, Object.class);
     }
 
     @Override

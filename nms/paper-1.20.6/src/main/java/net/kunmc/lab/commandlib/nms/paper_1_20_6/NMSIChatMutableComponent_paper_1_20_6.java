@@ -6,7 +6,7 @@ import net.minecraft.network.chat.MutableComponent;
 
 public class NMSIChatMutableComponent_paper_1_20_6 extends NMSIChatMutableComponent {
     public NMSIChatMutableComponent_paper_1_20_6(Object handle) {
-        super(handle, "network.chat.MutableComponent");
+        super(handle, MutableComponent.class);
     }
 
     @Override

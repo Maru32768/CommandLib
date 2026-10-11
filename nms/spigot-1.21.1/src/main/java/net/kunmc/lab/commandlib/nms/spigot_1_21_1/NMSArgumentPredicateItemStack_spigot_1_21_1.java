@@ -8,7 +8,7 @@ import net.minecraft.commands.arguments.item.ItemInput;
 
 public class NMSArgumentPredicateItemStack_spigot_1_21_1 extends NMSArgumentPredicateItemStack {
     public NMSArgumentPredicateItemStack_spigot_1_21_1(Object handle) {
-        super(handle, "commands.arguments.item.ArgumentPredicateItemStack");
+        super(handle, ItemInput.class);
     }
 
     @Override

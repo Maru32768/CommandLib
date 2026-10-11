@@ -9,7 +9,7 @@ import net.minecraft.server.v1_16_R3.CommandListenerWrapper;
 
 public class NMSArgumentParticle_spigot_1_16_5 extends NMSArgumentParticle {
     public NMSArgumentParticle_spigot_1_16_5() {
-        super(null, "ArgumentParticle");
+        super(null, ArgumentParticle.class);
     }
 
     @Override

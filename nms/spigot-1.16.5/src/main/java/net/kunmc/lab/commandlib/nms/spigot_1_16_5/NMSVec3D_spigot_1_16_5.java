@@ -5,7 +5,7 @@ import net.minecraft.server.v1_16_R3.Vec3D;
 
 public class NMSVec3D_spigot_1_16_5 extends NMSVec3D {
     public NMSVec3D_spigot_1_16_5(Object handle) {
-        super(handle, "Vec3D");
+        super(handle, Vec3D.class);
     }
 
     @Override

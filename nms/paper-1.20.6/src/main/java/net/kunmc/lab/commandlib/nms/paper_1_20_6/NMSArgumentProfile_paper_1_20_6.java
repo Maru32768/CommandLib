@@ -7,7 +7,7 @@ import net.minecraft.commands.arguments.GameProfileArgument;
 
 public class NMSArgumentProfile_paper_1_20_6 extends NMSArgumentProfile {
     public NMSArgumentProfile_paper_1_20_6() {
-        super(null, "commands.arguments.GameProfileArgument");
+        super(null, GameProfileArgument.class);
     }
 
     @Override

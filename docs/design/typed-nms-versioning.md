@@ -6,15 +6,16 @@ Spigot NMS bridge to a CommandAPI-like typed NMS module design.
 The target is not an immediate rewrite. The practical first step is to prove
 that CI can compile a typed `1.16.5` NMS implementation reliably.
 
-Status: implemented for the versions with integration targets. `buildSrc` runs
-BuildTools and remaps with SpecialSource, and the `nms/*` modules (Spigot
-releases from 1.16.5 to 1.21.1 and Paper 1.20.6, listed in
+Status: implemented, and the reflection implementations are removed. `buildSrc`
+runs BuildTools and remaps with SpecialSource, and the `nms/*` modules (Spigot
+releases from 1.16.4 to 1.21.1 and Paper 1.20.5 to 1.21.1, listed in
 `tools/nms-codegen/generate.py`) compile the NMS wrappers against real server
-jars. The jars are bundled into
-`spigot` and looked up by class name through `NMSClassRegistry.registerTyped`,
-with the reflection implementations as the fallback for every other version. See `docs/agents/nms-build.md`. The bridge interface and module
-layout proposed below are not adopted; the typed classes extend the existing
-`NMS*` wrappers instead.
+jars. The jars are bundled into `spigot`, and `NMSClassRegistry` finds each
+wrapper's class in the class list each module generates. A version without a
+module has no NMS implementation. See `docs/agents/nms-build.md`. The bridge
+interface and module layout proposed below are not adopted; the typed classes
+extend the existing `NMS*` wrappers instead. The sections below describe the
+design as proposed.
 
 ## Background
 

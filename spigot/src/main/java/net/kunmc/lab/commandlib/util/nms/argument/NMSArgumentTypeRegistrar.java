@@ -3,11 +3,8 @@ package net.kunmc.lab.commandlib.util.nms.argument;
 import com.google.gson.JsonObject;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
-import net.kunmc.lab.commandlib.util.nms.MinecraftClass;
+import net.kunmc.lab.commandlib.util.nms.NMSClass;
 import net.kunmc.lab.commandlib.util.nms.NMSClassRegistry;
-import net.kunmc.lab.commandlib.util.nms.argument.v1_16_0.NMSArgumentTypeRegistrar_v1_16_0;
-import net.kunmc.lab.commandlib.util.nms.argument.v1_17_0.NMSArgumentTypeRegistrar_v1_17_0;
-import net.kunmc.lab.commandlib.util.nms.argument.v1_19_0.NMSArgumentTypeRegistrar_v1_19_0;
 import net.kunmc.lab.commandlib.util.reflection.ReflectionUtil;
 
 import java.lang.reflect.Constructor;
@@ -23,10 +20,14 @@ import java.util.function.Supplier;
  *
  * <p>Only the Class→Entry map is updated, not the Key→Entry map, so the client never
  * sees an unknown key; it deserializes the node using the standard brigadier:string path.
+ *
+ * <p>The registries keep that map in a private field, so the typed classes pass the registry class and the classes
+ * the map's entries use, and the helpers here find the map by its content: {@link #registerInArgumentRegistry} up to
+ * 1.18.2 and {@link #registerInArgumentTypeInfos} from 1.19.
  */
-public abstract class NMSArgumentTypeRegistrar extends MinecraftClass {
-    public NMSArgumentTypeRegistrar(String className) {
-        super(null, className);  // clazz = the NMS registry class for this version
+public abstract class NMSArgumentTypeRegistrar extends NMSClass {
+    public NMSArgumentTypeRegistrar(Class<?> registryClass) {
+        super(null, registryClass);
     }
 
     public static NMSArgumentTypeRegistrar create() {
@@ -35,34 +36,34 @@ public abstract class NMSArgumentTypeRegistrar extends MinecraftClass {
     }
 
     /**
-     * Returns the NMS serializer interface class for this version.
-     */
-    protected abstract Class<?> serializerInterface();
-
-    /**
-     * Creates an NMS MinecraftKey / ResourceLocation for "brigadier:string".
-     */
-    protected abstract Object brigadierStringKey();
-
-    /**
      * Registers {@code argumentTypeClass} in the NMS Class→Entry map so it is
      * serialized to clients as {@code brigadier:string GREEDY_PHRASE}.
      */
+    public abstract <T extends ArgumentType<?>> void registerAsGreedyString(Class<T> argumentTypeClass,
+                                                                            Supplier<T> factory);
+
+    /**
+     * Registers the type in the {@code ArgumentRegistry} (Mojang name {@code ArgumentTypes}) of 1.16 to 1.18.2, with a
+     * serializer that writes {@code GREEDY_PHRASE}.
+     *
+     * @param serializerInterface the {@code ArgumentSerializer} interface
+     * @param brigadierStringKey  the {@code MinecraftKey} / {@code ResourceLocation} {@code brigadier:string}
+     */
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public <T extends ArgumentType<?>> void registerAsGreedyString(Class<T> argumentTypeClass, Supplier<T> factory) {
+    protected final <T extends ArgumentType<?>> void registerInArgumentRegistry(Class<T> argumentTypeClass,
+                                                                                Supplier<T> factory,
+                                                                                Class<?> serializerInterface,
+                                                                                Object brigadierStringKey) {
         Map classToEntryMap = findClassToEntryMap();
         if (classToEntryMap == null) {
-            throw new IllegalStateException("Could not find NMS argument-type Class→Entry map in " + clazz.getName());
+            throw new IllegalStateException("Could not find NMS argument-type Class→Entry map in " + serverClass.getName());
         }
         if (classToEntryMap.containsKey(argumentTypeClass)) {
             return;
         }
 
-        Class<?> serializerIface = serializerInterface();
-        Object key = brigadierStringKey();
-
         Object greedySerializer = Proxy.newProxyInstance(argumentTypeClass.getClassLoader(),
-                                                         new Class[]{serializerIface},
+                                                         new Class[]{serializerInterface},
                                                          (proxy, method, args) -> {
                                                              if (args == null || args.length == 0) {
                                                                  return null;
@@ -81,13 +82,13 @@ public abstract class NMSArgumentTypeRegistrar extends MinecraftClass {
                                                              return null;
                                                          });
 
-        Object entry = createEntry(argumentTypeClass, greedySerializer, key);
+        Object entry = createEntry(argumentTypeClass, greedySerializer, brigadierStringKey);
         classToEntryMap.put(argumentTypeClass, entry);
     }
 
     @SuppressWarnings({"rawtypes"})
     private Map findClassToEntryMap() {
-        for (Field f : clazz.getDeclaredFields()) {
+        for (Field f : serverClass.getDeclaredFields()) {
             if (!Map.class.isAssignableFrom(f.getType())) {
                 continue;
             }
@@ -104,7 +105,7 @@ public abstract class NMSArgumentTypeRegistrar extends MinecraftClass {
     }
 
     private Object createEntry(Class<?> argumentTypeClass, Object serializer, Object key) {
-        Class<?>[] innerClasses = clazz.getDeclaredClasses();
+        Class<?>[] innerClasses = serverClass.getDeclaredClasses();
         if (innerClasses.length == 0) {
             throw new IllegalStateException("NMS registry class has no inner entry class");
         }
@@ -151,6 +152,69 @@ public abstract class NMSArgumentTypeRegistrar extends MinecraftClass {
         return serializerAssigned && keyAssigned ? args : null;
     }
 
+    /**
+     * Registers the type in the {@code ArgumentTypeInfos} of 1.19 and later. Its map holds {@code ArgumentTypeInfo}
+     * instances directly, so the type gets a proxy whose {@code unpack()} returns the {@code GREEDY_PHRASE} template of
+     * the string serializer. The template's own {@code type()} points back to the vanilla serializer, so the registry
+     * lookup and the network write proceed through the vanilla path with no unknown key.
+     *
+     * @param argumentTypeInfoInterface the {@code ArgumentTypeInfo} interface
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    protected final void registerInArgumentTypeInfos(Class<?> argumentTypeClass, Class<?> argumentTypeInfoInterface) {
+        Map byClassMap = findClassToEntryMap();
+        if (byClassMap == null) {
+            throw new IllegalStateException("Could not find NMS argument-type Class→ArgumentTypeInfo map in "
+                                                    + serverClass.getName());
+        }
+        if (byClassMap.containsKey(argumentTypeClass)) {
+            return;
+        }
+
+        // The string ArgumentTypeInfo already in the map, and its inner Template class.
+        Object stringSerializer = byClassMap.get(StringArgumentType.class);
+        Class<?>[] innerClasses = stringSerializer.getClass()
+                                                  .getDeclaredClasses();
+        if (innerClasses.length == 0) {
+            throw new IllegalStateException("Could not find Template inner class in " + stringSerializer.getClass()
+                                                                                                        .getName());
+        }
+        Class<?> templateClass = innerClasses[0];
+
+        // Inner-class constructor takes the outer instance as first parameter.
+        Constructor<?> templateCtor = null;
+        for (Constructor<?> c : templateClass.getDeclaredConstructors()) {
+            if (c.getParameterCount() == 2 && c.getParameterTypes()[1] == StringArgumentType.StringType.class) {
+                templateCtor = c;
+                break;
+            }
+        }
+        if (templateCtor == null) {
+            throw new IllegalStateException("Could not find Template(outer, StringType) constructor in "
+                                                    + templateClass.getName());
+        }
+        templateCtor.setAccessible(true);
+        Object greedyTemplate;
+        try {
+            greedyTemplate = templateCtor.newInstance(stringSerializer, StringArgumentType.StringType.GREEDY_PHRASE);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to create GREEDY_PHRASE template", e);
+        }
+
+        // Match unpack() by signature (1 arg of ArgumentType), not method name, because servers with obfuscated names
+        // give other methods of the interface the same name.
+        Object proxy = Proxy.newProxyInstance(argumentTypeClass.getClassLoader(),
+                                              new Class[]{argumentTypeInfoInterface},
+                                              (p, method, args) -> {
+                                                  if (args != null && args.length == 1 && args[0] instanceof ArgumentType) {
+                                                      return greedyTemplate;
+                                                  }
+                                                  return null;
+                                              });
+
+        byClassMap.put(argumentTypeClass, proxy);
+    }
+
     private static void writeGreedyPhrase(Object packetSerializer) throws Exception {
         for (Method m : packetSerializer.getClass()
                                         .getMethods()) {
@@ -159,20 +223,5 @@ public abstract class NMSArgumentTypeRegistrar extends MinecraftClass {
                 return;
             }
         }
-    }
-
-    static {
-        NMSClassRegistry.register(NMSArgumentTypeRegistrar.class,
-                                  NMSArgumentTypeRegistrar_v1_16_0.class,
-                                  "1.16.0",
-                                  "1.16.5");
-        NMSClassRegistry.register(NMSArgumentTypeRegistrar.class,
-                                  NMSArgumentTypeRegistrar_v1_17_0.class,
-                                  "1.17.0",
-                                  "1.18.9");
-        NMSClassRegistry.register(NMSArgumentTypeRegistrar.class,
-                                  NMSArgumentTypeRegistrar_v1_19_0.class,
-                                  "1.19.0",
-                                  "9.9.9");
     }
 }

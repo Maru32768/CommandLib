@@ -7,7 +7,7 @@ import org.bukkit.inventory.ItemStack;
 
 public class MockNMSCraftItemStack extends NMSCraftItemStack {
     public MockNMSCraftItemStack() {
-        super(null, "Mock");
+        super(null, Object.class);
     }
 
     @Override

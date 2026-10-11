@@ -1,0 +1,2 @@
+Not a class file. The registry_broken module of NMSClassRegistryTest lists it, so loading it fails with a
+ClassFormatError.

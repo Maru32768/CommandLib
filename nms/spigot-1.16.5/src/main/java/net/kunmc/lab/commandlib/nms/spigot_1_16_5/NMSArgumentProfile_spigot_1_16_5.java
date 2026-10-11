@@ -7,7 +7,7 @@ import net.minecraft.server.v1_16_R3.ArgumentProfile;
 
 public class NMSArgumentProfile_spigot_1_16_5 extends NMSArgumentProfile {
     public NMSArgumentProfile_spigot_1_16_5() {
-        super(null, "ArgumentProfile");
+        super(null, ArgumentProfile.class);
     }
 
     @Override

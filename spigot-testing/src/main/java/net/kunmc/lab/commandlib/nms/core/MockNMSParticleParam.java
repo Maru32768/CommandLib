@@ -7,7 +7,7 @@ public class MockNMSParticleParam extends NMSParticleParam {
     private final String mockName;
 
     public MockNMSParticleParam(String mockName) {
-        super(null, "Mock");
+        super(null, Object.class);
         this.mockName = mockName;
     }
 

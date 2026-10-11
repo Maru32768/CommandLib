@@ -7,7 +7,7 @@ import org.bukkit.craftbukkit.v1_20_R1.inventory.CraftItemStack;
 
 public class NMSCraftItemStack_spigot_1_20_1 extends NMSCraftItemStack {
     public NMSCraftItemStack_spigot_1_20_1() {
-        super(null, "inventory.CraftItemStack");
+        super(null, CraftItemStack.class);
     }
 
     @Override

@@ -101,15 +101,18 @@ For example:
 
 Bukkit-family targets: `paper-1.16.5`, `paper-1.17.1`, `paper-1.18`, `paper-1.18.1`, `paper-1.18.2`, `paper-1.19`,
 `paper-1.19.1`, `paper-1.19.2`, `paper-1.19.3`, `paper-1.19.4`, `paper-1.20`, `paper-1.20.1`, `paper-1.20.2`,
-`paper-1.20.4`, `paper-1.20.5`, `paper-1.20.6`, `mohist-1.16.5`, `mohist-1.20.1`, `spigot-1.20.4`, `spigot-1.20.5`,
-`spigot-1.20.6`, `spigot-1.21` and `spigot-1.21.1` run the `spigot` module, and `paper-1.21.0` runs the `paper` module. Minecraft 1.17 has no target,
-because no MCProtocolLib release speaks its protocol.
+`paper-1.20.4`, `paper-1.20.5`, `paper-1.20.6`, `paper-1.21.1`, `mohist-1.16.5`, `mohist-1.20.1`, `spigot-1.20.3`,
+`spigot-1.20.4`, `spigot-1.20.5`, `spigot-1.20.6`, `spigot-1.21` and `spigot-1.21.1` run the `spigot` module, and
+`paper-1.21.0` runs the `paper` module.
+
+Minecraft 1.17 has no target: no MCProtocolLib release speaks its protocol (755), and a 1.17 server rejects the 1.17.1
+bot (756). The `nms:spigot-1.17` module is only checked by its compilation (see `docs/agents/nms-build.md`).
 
 Spigot targets (`spigot-<version>`) run the `spigot` module on a plain Spigot server. Spigot server jars are only
 produced by BuildTools, so the target's `buildSpigotServer` task runs it (through the same BuildTools setup as the typed
 NMS modules, see `docs/agents/nms-build.md`) and copies the jar to `test-plugin/server/server.jar`. BuildTools resolves
-1.20.5 and 1.21 to the build of the following hotfix release, so those targets set the Spigot build number of the last
-build of their release in `commandlib.integration.buildToolsRevision`. BuildTools also installs the remapped
+1.20.3, 1.20.5 and 1.21 to the build of the following hotfix release, so those targets set the Spigot build number of
+the last build of their release in `commandlib.integration.buildToolsRevision`. BuildTools also installs the remapped
 artifacts only for a version that has a typed NMS module. The first run of a version takes several minutes.
 
 `minecraftIntegrationTest` is the aggregate task for all configured targets.
@@ -156,17 +159,10 @@ Notes:
 ## Typed NMS Jars
 
 Targets that run the `spigot` module bundle the typed NMS jars that `:spigot:collectTypedNms` writes to
-`spigot/build/typed-nms`, as the published spigot jar does. `prepareTestPlugin` depends on that task, so the first run
-of a Bukkit-family target may run BuildTools (see `docs/agents/nms-build.md`).
-
-The `spigot` module's NMS resolver test loads the Spigot 1.16.5 server jar that BuildTools installs into the local Maven
-repository:
-
-```text
-~/.m2/repository/org/spigotmc/spigot/1.16.5-R0.1-SNAPSHOT/spigot-1.16.5-R0.1-SNAPSHOT.jar
-```
-
-`COMMANDLIB_NMS_TEST_JAR_1_16_5` can override that path. The test is skipped when the jar is missing.
+`spigot/build/typed-nms`, as the published spigot jar does. They are the only NMS implementations, so
+`prepareTestPlugin` depends on that task, and the first run of a Bukkit-family target may run BuildTools (see
+`docs/agents/nms-build.md`). The Spigot suite's `TypedNmsTest` checks that every typed class for the server version
+links.
 
 ## Mohist Constraint
 

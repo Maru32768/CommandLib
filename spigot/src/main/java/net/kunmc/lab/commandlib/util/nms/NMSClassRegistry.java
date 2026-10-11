@@ -2,193 +2,168 @@ package net.kunmc.lab.commandlib.util.nms;
 
 import net.kunmc.lab.commandlib.util.bukkit.BukkitUtil;
 import net.kunmc.lab.commandlib.util.bukkit.MinecraftVersion;
-import net.kunmc.lab.commandlib.util.nms.exception.UnregisteredNMSClassException;
+import net.kunmc.lab.commandlib.util.nms.exception.NMSClassNotFoundException;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedDeque;
 
-public class NMSClassRegistry {
-    private static final Map<Class<? extends NMSClass>, Deque<RegisteredClass>> CLASS_TO_DEQUE_MAP = new ConcurrentHashMap<>();
-    private static final Map<Class<? extends NMSClass>, Deque<TypedRegistration>> TYPED_REGISTRATIONS = new ConcurrentHashMap<>();
-    private static final Map<String, Optional<Class<?>>> TYPED_CLASSES = new ConcurrentHashMap<>();
-    /** Why a typed class that is on the classpath failed to load, such as a class file for a newer Java release. */
-    private static final Map<String, String> TYPED_LOAD_FAILURES = new ConcurrentHashMap<>();
-    private static final Map<String, Boolean> MAPPING_PROBES = new ConcurrentHashMap<>();
-    /**
-     * The implementation each look-up class resolved to, with the server version it was resolved for. Registrations
-     * happen in the wrappers' static initializers, so a registration clears the entry of its look-up class.
-     */
-    private static final Map<Class<? extends NMSClass>, Resolution> RESOLVED = new ConcurrentHashMap<>();
+/**
+ * Finds the implementation of each NMS wrapper in the typed NMS modules bundled into the spigot jar (see
+ * {@code docs/agents/nms-build.md}). {@link TypedNmsModules} lists each module's package and the Minecraft versions
+ * its server jar matches, and each module lists its classes in {@code <package>.TypedNmsClasses}. A class implements
+ * the wrapper it extends.
+ *
+ * <p>A module's classes are loaded only on a server inside its versions, because they may target a newer Java release
+ * than older servers run. Of the modules for the server's version, the first one whose package matches the plugin's
+ * mappings and whose class links on the server provides the implementation.
+ */
+public final class NMSClassRegistry {
     private static final String TYPED_PACKAGE_PREFIX = "net.kunmc.lab.commandlib.nms.";
+    private static final NMSClassRegistry DEFAULT = new NMSClassRegistry(TypedNmsModules.MODULES);
 
-    public static <T extends NMSClass> void register(Class<T> lookUpClass,
-                                                     Class<? extends T> targetClass,
-                                                     String lowerVersion,
-                                                     String upperVersion) {
-        Objects.requireNonNull(lookUpClass);
-        Objects.requireNonNull(targetClass);
+    private final List<TypedModule> modules;
+    private final Map<String, ModuleClasses> moduleClasses = new ConcurrentHashMap<>();
+    private final Map<String, Boolean> mappingProbes = new ConcurrentHashMap<>();
+    /**
+     * The implementation each wrapper resolved to, with the server version it was resolved for.
+     */
+    private final Map<Class<?>, Resolution> resolved = new ConcurrentHashMap<>();
 
-        CLASS_TO_DEQUE_MAP.computeIfAbsent(lookUpClass, x -> new ConcurrentLinkedDeque<>())
-                          .addFirst(new RegisteredClass(targetClass,
-                                                        new MinecraftVersion(lowerVersion),
-                                                        new MinecraftVersion(upperVersion)));
-        RESOLVED.remove(lookUpClass);
+    NMSClassRegistry(List<TypedModule> modules) {
+        this.modules = List.copyOf(modules);
     }
 
     /**
-     * Registers an implementation that a typed NMS module compiles against a real server jar (see
-     * {@code docs/agents/nms-build.md}). The class is looked up by name only on a server within the range, because it
-     * may target a newer Java release than the server runs. A typed implementation takes precedence over the
-     * reflection implementations, which are used when the class is not on the classpath or refers to a class or
-     * member the server lacks.
+     * Returns the implementation of the wrapper for the running server.
+     *
+     * @throws NMSClassNotFoundException when no typed NMS module provides a usable implementation
      */
-    public static <T extends NMSClass> void registerTyped(Class<T> lookUpClass,
-                                                          String targetClassName,
-                                                          String lowerVersion,
-                                                          String upperVersion) {
-        Objects.requireNonNull(lookUpClass);
-        Objects.requireNonNull(targetClassName);
-
-        TYPED_REGISTRATIONS.computeIfAbsent(lookUpClass, x -> new ConcurrentLinkedDeque<>())
-                           .addFirst(new TypedRegistration(targetClassName,
-                                                           new MinecraftVersion(lowerVersion),
-                                                           new MinecraftVersion(upperVersion)));
-        RESOLVED.remove(lookUpClass);
+    public static <T extends Class<? extends NMSClass>> T findClass(T lookUpClass) {
+        return DEFAULT.find(lookUpClass, BukkitUtil.getMinecraftVersion());
     }
 
     /**
-     * Registers the typed implementations of the look-up class in every typed NMS module, named
-     * {@code net.kunmc.lab.commandlib.nms.<module>.<LookUpClass>_<module>}, for the module's versions or the narrower
-     * versions its table entry gives the wrapper. A module without the class falls back to the reflection
-     * implementations.
+     * Returns why each wrapper that a typed NMS module for the running server implements has no usable implementation,
+     * as {@code <wrapper> has no ...}, or why no module matches. Empty when every wrapper resolves. The integration
+     * tests use it to check every class of the modules, including the wrappers no test reaches.
      */
-    public static <T extends NMSClass> void registerTyped(Class<T> lookUpClass) {
-        Objects.requireNonNull(lookUpClass);
-        for (TypedModule module : TypedNmsModules.MODULES) {
-            MinecraftVersion[] versions = module.wrapperVersions.getOrDefault(lookUpClass.getSimpleName(),
-                                                                              new MinecraftVersion[]{module.lowerVersion, module.upperVersion});
-            String className = TYPED_PACKAGE_PREFIX + module.packageName + "." + lookUpClass.getSimpleName() + "_"
-                    + module.moduleName;
-            TYPED_REGISTRATIONS.computeIfAbsent(lookUpClass, x -> new ConcurrentLinkedDeque<>())
-                               .addFirst(new TypedRegistration(className, versions[0], versions[1]));
-        }
-        RESOLVED.remove(lookUpClass);
+    public static List<String> unavailableClasses() {
+        return DEFAULT.unavailable(BukkitUtil.getMinecraftVersion());
     }
 
     @SuppressWarnings("unchecked")
-    public static <T extends Class<? extends NMSClass>> T findClass(T clazz) {
-        if (!CLASS_TO_DEQUE_MAP.containsKey(clazz) && !TYPED_REGISTRATIONS.containsKey(clazz)) {
-            throw new UnregisteredNMSClassException(clazz + " is unregistered.");
-        }
-        String version = BukkitUtil.getMinecraftVersion();
-        Resolution resolution = RESOLVED.get(clazz);
-        if (resolution == null || !resolution.version.equals(version)) {
-            resolution = new Resolution(version, resolve(clazz, new MinecraftVersion(version)));
-            RESOLVED.put(clazz, resolution);
-        }
-        return (T) resolution.clazz;
+    <T extends Class<? extends NMSClass>> T find(T lookUpClass, String version) {
+        return (T) resolution(lookUpClass, version);
     }
 
-    private static Class<?> resolve(Class<? extends NMSClass> clazz, MinecraftVersion version) {
-        Deque<RegisteredClass> deque = CLASS_TO_DEQUE_MAP.get(clazz);
-        Deque<TypedRegistration> typedDeque = TYPED_REGISTRATIONS.get(clazz);
-        if (typedDeque != null) {
-            for (TypedRegistration registration : typedDeque) {
-                Optional<Class<?>> typed = applicableTypedClass(registration, clazz, version);
-                if (typed.isPresent() && TypedClassLinkage.isLinkable(typed.get())) {
-                    return typed.get();
-                }
+    List<String> unavailable(String version) {
+        MinecraftVersion minecraftVersion = new MinecraftVersion(version);
+        List<String> problems = new ArrayList<>();
+        Set<Class<?>> lookUpClasses = new TreeSet<>(Comparator.comparing(Class::getName));
+        boolean matched = false;
+        for (TypedModule module : modulesFor(minecraftVersion)) {
+            if (!matchesMappings(module)) {
+                continue;
+            }
+            matched = true;
+            ModuleClasses classes = classes(module);
+            if (classes.failure != null) {
+                problems.add(module.packageName + ": " + classes.failure);
+            } else {
+                lookUpClasses.addAll(classes.byLookUpClass.keySet());
             }
         }
-
-        if (deque != null) {
-            for (RegisteredClass registeredClass : deque) {
-                if (version.isWithin(registeredClass.lowerVersion, registeredClass.upperVersion)) {
-                    return registeredClass.clazz;
-                }
-            }
+        if (!matched) {
+            problems.add("No typed NMS module matches Minecraft " + version);
         }
-
-        throw new UnregisteredNMSClassException(clazz + " is unregistered.");
-    }
-
-    /**
-     * The typed class of the registration when the server version is in its range, the class is on the classpath and
-     * its package matches the mappings the plugin was loaded with. Whether it links is checked separately.
-     */
-    private static Optional<Class<?>> applicableTypedClass(TypedRegistration registration,
-                                                           Class<? extends NMSClass> lookUpClass,
-                                                           MinecraftVersion version) {
-        if (!version.isWithin(registration.lowerVersion, registration.upperVersion)) {
-            return Optional.empty();
-        }
-        return loadTypedClass(registration.className, lookUpClass).filter(lookUpClass::isAssignableFrom)
-                                                                  .filter(NMSClassRegistry::matchesMappings);
-    }
-
-    /**
-     * Returns the look-up classes that have a typed class meant for this server, but resolve to another
-     * implementation, each as {@code <look-up class> -> <resolved class> (<why each typed class is not used>)}. A typed
-     * class is meant for the server when the version is in its range, it is on the classpath and its package matches
-     * the plugin's mappings; one that fails to load or does not extend the look-up class counts too. Only wrappers
-     * initialized so far are registered. The integration tests use it, because the fallback to reflection hides a
-     * typed class that does not link from every other test.
-     */
-    public static List<String> typedFallbacks() {
-        MinecraftVersion version = new MinecraftVersion(BukkitUtil.getMinecraftVersion());
-        List<String> fallbacks = new ArrayList<>();
-        TYPED_REGISTRATIONS.forEach((lookUpClass, registrations) -> {
-            List<String> reasons = new ArrayList<>();
-            for (TypedRegistration registration : registrations) {
-                if (!version.isWithin(registration.lowerVersion, registration.upperVersion)) {
-                    continue;
-                }
-                Optional<Class<?>> typed = loadTypedClass(registration.className, lookUpClass);
-                String name = registration.className.substring(registration.className.lastIndexOf('.') + 1);
-                String loadFailure = TYPED_LOAD_FAILURES.get(registration.className);
-                if (loadFailure != null) {
-                    reasons.add(name + ": " + loadFailure);
-                } else if (typed.isPresent() && !lookUpClass.isAssignableFrom(typed.get())) {
-                    reasons.add(name + ": does not extend " + lookUpClass.getName());
-                } else if (typed.isPresent() && matchesMappings(typed.get())) {
-                    reasons.add(name + ": " + TypedClassLinkage.failure(typed.get()));
-                }
-            }
-            if (reasons.isEmpty()) {
-                return;
-            }
-            Class<?> resolved = findClass(lookUpClass);
-            if (!resolved.getName()
-                         .startsWith(TYPED_PACKAGE_PREFIX)) {
-                fallbacks.add(lookUpClass.getSimpleName() + " -> " + resolved.getSimpleName() + " ("
-                                      + String.join("; ", reasons) + ")");
-            }
-        });
-        fallbacks.sort(String::compareTo);
-        return fallbacks;
-    }
-
-    /**
-     * The typed class, or empty when it is not on the classpath or fails to load. A load failure is kept for
-     * {@link #typedFallbacks()}.
-     */
-    private static Optional<Class<?>> loadTypedClass(String className, Class<?> lookUpClass) {
-        return TYPED_CLASSES.computeIfAbsent(className, x -> {
+        for (Class<?> lookUpClass : lookUpClasses) {
             try {
-                return Optional.of(Class.forName(x, false, lookUpClass.getClassLoader()));
+                resolution(lookUpClass, version);
+            } catch (NMSClassNotFoundException e) {
+                problems.add(e.getMessage());
+            }
+        }
+        return problems;
+    }
+
+    private Class<?> resolution(Class<?> lookUpClass, String version) {
+        Resolution resolution = resolved.get(lookUpClass);
+        if (resolution == null || !resolution.version.equals(version)) {
+            resolution = new Resolution(version, resolve(lookUpClass, version));
+            resolved.put(lookUpClass, resolution);
+        }
+        return resolution.clazz;
+    }
+
+    private Class<?> resolve(Class<?> lookUpClass, String version) {
+        List<TypedModule> candidates = modulesFor(new MinecraftVersion(version));
+        if (candidates.isEmpty()) {
+            throw new NMSClassNotFoundException(String.format("%s has no implementation for Minecraft %s: no typed NMS "
+                                                                      + "module supports this version",
+                                                              lookUpClass.getSimpleName(),
+                                                              version));
+        }
+
+        List<String> reasons = new ArrayList<>();
+        for (TypedModule module : candidates) {
+            if (!matchesMappings(module)) {
+                reasons.add(module.packageName + ": its mappings do not match the plugin");
+                continue;
+            }
+            ModuleClasses classes = classes(module);
+            if (classes.failure != null) {
+                reasons.add(module.packageName + ": " + classes.failure);
+                continue;
+            }
+            Class<?> typed = classes.byLookUpClass.get(lookUpClass);
+            if (typed == null) {
+                reasons.add(module.packageName + ": no implementation");
+            } else if (!TypedClassLinkage.isLinkable(typed)) {
+                reasons.add(module.packageName + ": " + TypedClassLinkage.failure(typed));
+            } else {
+                return typed;
+            }
+        }
+        throw new NMSClassNotFoundException(String.format("%s has no implementation for Minecraft %s (%s)",
+                                                          lookUpClass.getSimpleName(),
+                                                          version,
+                                                          String.join("; ", reasons)));
+    }
+
+    private List<TypedModule> modulesFor(MinecraftVersion version) {
+        List<TypedModule> result = new ArrayList<>();
+        for (TypedModule module : modules) {
+            if (version.isWithin(module.lowerVersion, module.upperVersion)) {
+                result.add(module);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * The classes {@code <package>.TypedNmsClasses} lists, by the wrapper each extends. Listing them loads them, but
+     * neither links nor initializes them, so a class that refers to members the server lacks still loads.
+     */
+    private ModuleClasses classes(TypedModule module) {
+        return moduleClasses.computeIfAbsent(module.packageName, x -> {
+            String listName = TYPED_PACKAGE_PREFIX + x + ".TypedNmsClasses";
+            try {
+                Class<?> list = Class.forName(listName, true, NMSClassRegistry.class.getClassLoader());
+                Map<Class<?>, Class<?>> byLookUpClass = new HashMap<>();
+                for (Object typed : (List<?>) list.getMethod("classes")
+                                                  .invoke(null)) {
+                    byLookUpClass.put(((Class<?>) typed).getSuperclass(), (Class<?>) typed);
+                }
+                return new ModuleClasses(byLookUpClass, null);
             } catch (ClassNotFoundException e) {
-                return Optional.empty();
-            } catch (LinkageError e) {
-                TYPED_LOAD_FAILURES.put(x, e.toString());
-                return Optional.empty();
+                return new ModuleClasses(Map.of(), "the module is not in this jar");
+            } catch (InvocationTargetException e) {
+                return new ModuleClasses(Map.of(), e.getCause()
+                                                    .toString());
+            } catch (ReflectiveOperationException | LinkageError e) {
+                return new ModuleClasses(Map.of(), e.toString());
             }
         });
     }
@@ -199,15 +174,13 @@ public class NMSClassRegistry {
      * whose static {@code matches()} tells whether its classes match the mapping the server loaded this plugin with.
      * Packages without a probe always match.
      */
-    private static boolean matchesMappings(Class<?> typedClass) {
-        String packageName = typedClass.getName()
-                                       .substring(0,
-                                                  typedClass.getName()
-                                                            .lastIndexOf('.'));
-        return MAPPING_PROBES.computeIfAbsent(packageName, x -> {
+    private boolean matchesMappings(TypedModule module) {
+        return mappingProbes.computeIfAbsent(module.packageName, x -> {
             Class<?> probe;
             try {
-                probe = Class.forName(x + ".MappingProbe", true, typedClass.getClassLoader());
+                probe = Class.forName(TYPED_PACKAGE_PREFIX + x + ".MappingProbe",
+                                      true,
+                                      NMSClassRegistry.class.getClassLoader());
             } catch (ClassNotFoundException e) {
                 return true;
             } catch (LinkageError e) {
@@ -224,87 +197,28 @@ public class NMSClassRegistry {
     }
 
     /**
-     * Returns the registered implementations of each look-up class, most recently registered first. Exposed for
-     * tests that check the version ranges for gaps and overlaps.
-     */
-    static Map<Class<? extends NMSClass>, List<RegisteredClass>> registrations() {
-        Map<Class<? extends NMSClass>, List<RegisteredClass>> result = new HashMap<>();
-        CLASS_TO_DEQUE_MAP.forEach((key, value) -> result.put(key, List.copyOf(value)));
-        return result;
-    }
-
-    static class RegisteredClass {
-        public final Class<? extends NMSClass> clazz;
-        public final MinecraftVersion lowerVersion;
-        public final MinecraftVersion upperVersion;
-
-        private RegisteredClass(Class<? extends NMSClass> clazz,
-                                MinecraftVersion lowerVersion,
-                                MinecraftVersion upperVersion) {
-            this.clazz = clazz;
-            this.lowerVersion = lowerVersion;
-            this.upperVersion = upperVersion;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
-
-            RegisteredClass that = (RegisteredClass) o;
-
-            if (!Objects.equals(lowerVersion, that.lowerVersion)) {
-                return false;
-            }
-            if (!Objects.equals(upperVersion, that.upperVersion)) {
-                return false;
-            }
-            return Objects.equals(clazz, that.clazz);
-        }
-
-        @Override
-        public int hashCode() {
-            int result = lowerVersion != null ? lowerVersion.hashCode() : 0;
-            result = 31 * result + (upperVersion != null ? upperVersion.hashCode() : 0);
-            result = 31 * result + (clazz != null ? clazz.hashCode() : 0);
-            return result;
-        }
-    }
-
-    /**
-     * A typed NMS module: the package under {@code net.kunmc.lab.commandlib.nms}, the module name its classes carry as
-     * a suffix, the Minecraft versions its server jar matches, and narrower versions for wrappers whose class needs a
-     * later release. {@link TypedNmsModules} lists them.
+     * A typed NMS module: the package under {@code net.kunmc.lab.commandlib.nms} and the Minecraft versions its server
+     * jar matches. {@link TypedNmsModules} lists them.
      */
     static final class TypedModule {
         private final String packageName;
-        private final String moduleName;
         private final MinecraftVersion lowerVersion;
         private final MinecraftVersion upperVersion;
-        private final Map<String, MinecraftVersion[]> wrapperVersions = new HashMap<>();
 
-        TypedModule(String moduleName, String lowerVersion, String upperVersion) {
-            this(moduleName, moduleName, lowerVersion, upperVersion);
-        }
-
-        TypedModule(String packageName, String moduleName, String lowerVersion, String upperVersion) {
+        TypedModule(String packageName, String lowerVersion, String upperVersion) {
             this.packageName = packageName;
-            this.moduleName = moduleName;
             this.lowerVersion = new MinecraftVersion(lowerVersion);
             this.upperVersion = new MinecraftVersion(upperVersion);
         }
+    }
 
-        /**
-         * Narrows the versions of the wrapper with the given simple name, such as {@code NMSDataPackResources}.
-         */
-        TypedModule withWrapperVersions(String wrapper, String lowerVersion, String upperVersion) {
-            wrapperVersions.put(wrapper,
-                                new MinecraftVersion[]{new MinecraftVersion(lowerVersion), new MinecraftVersion(upperVersion)});
-            return this;
+    private static final class ModuleClasses {
+        private final Map<Class<?>, Class<?>> byLookUpClass;
+        private final String failure;
+
+        private ModuleClasses(Map<Class<?>, Class<?>> byLookUpClass, String failure) {
+            this.byLookUpClass = byLookUpClass;
+            this.failure = failure;
         }
     }
 
@@ -315,18 +229,6 @@ public class NMSClassRegistry {
         private Resolution(String version, Class<?> clazz) {
             this.version = version;
             this.clazz = clazz;
-        }
-    }
-
-    private static class TypedRegistration {
-        private final String className;
-        private final MinecraftVersion lowerVersion;
-        private final MinecraftVersion upperVersion;
-
-        private TypedRegistration(String className, MinecraftVersion lowerVersion, MinecraftVersion upperVersion) {
-            this.className = className;
-            this.lowerVersion = lowerVersion;
-            this.upperVersion = upperVersion;
         }
     }
 }

@@ -4,10 +4,11 @@ import net.kunmc.lab.commandlib.util.nms.command.NMSCommandBuildContext;
 import net.kunmc.lab.commandlib.util.nms.server.NMSDataPackResources;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.ReloadableServerResources;
 
 public class NMSDataPackResources_spigot_1_21_1 extends NMSDataPackResources {
     public NMSDataPackResources_spigot_1_21_1(Object handle) {
-        super(handle, "server.DataPackResources");
+        super(handle, ReloadableServerResources.class);
     }
 
     @Override

@@ -147,8 +147,8 @@ public final class CommandLib implements Listener {
 
     @SuppressWarnings("unchecked")
     private static Map<String, org.bukkit.command.Command> knownCommands() throws Exception {
-        CommandMap commandMap = ((CommandMap) NMSCraftServer.create()
-                                                            .getValue("commandMap"));
+        CommandMap commandMap = NMSCraftServer.create()
+                                              .getCommandMap();
         Field knownCommandsField = SimpleCommandMap.class.getDeclaredField("knownCommands");
         knownCommandsField.setAccessible(true);
         return ((Map<String, org.bukkit.command.Command>) knownCommandsField.get(commandMap));

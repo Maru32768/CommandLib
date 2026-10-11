@@ -58,7 +58,7 @@
 | Adventure / MiniMessage             | `[ ]` | なし。                                                                                                                                     | rich help、hover、click、component output。                                    |
 | Public testing framework            | `[~]` | `spigot-test` module と repository tests がある。`CommandTester` / `FakeSender` / NMS mock クラス群を整備済み。                                        | downstream guide、JUnit extension、assertion utilities、Builder パターン化。        |
 | Multi-version integration tests     | `[~]` | `integration-test` aggregator と Spigot / Mohist fixtures（1.16.5〜1.21.0）がある。                                                             | CI matrix、`IntegrationTarget` への platform フィールド追加、result docs、test kit 化。  |
-| NMS Reflection test strategy        | `[~]` | `CommandTester` が `Mockito.mockStatic` で `NMSClassRegistry` / `NMSReflection` をスタブし、軽量な Mock 実装クラス方式で NMS なしテストを実現している。                 | `CommandTester` Builder パターン化、新引数追加時の Mock + Test セット作成ルール整備。              |
+| NMS Reflection test strategy        | `[~]` | `CommandTester` が `Mockito.mockStatic` で `NMSClassRegistry` をスタブし、軽量な Mock 実装クラス方式で NMS なしテストを実現している。                 | `CommandTester` Builder パターン化、新引数追加時の Mock + Test セット作成ルール整備。              |
 | Documentation                       | `[~]` | README と design docs がある。                                                                                                               | compatibility、arguments、suggestions、permissions、migration、troubleshooting。 |
 | Migration guides                    | `[ ]` | なし。                                                                                                                                     | CommandAPI、Cloud、Lamp、ACF からの移行 guide。                                     |
 | Runtime diagnostics                 | `[ ]` | なし。                                                                                                                                     | command tree、permissions、platform capability report。                       |
@@ -136,8 +136,8 @@ annotation API / Kotlin DSL の `@Optional` や default args はこの土台の�
   Java 25 が必要。
 - `[ ]` CI を整備する。typed NMS module（`nms/*`）は初回 build で BuildTools を version ごとに実行し（1 version あたり
   10 分前後）、paperweight の dev bundle も取得するため、`~/.m2` の Spigot artifact と paperweight cache を CI 間で
-  保持する方法を決める。cache がない job や PR では `-Pcommandlib.typedNms=false` で reflection 実装だけを build する
-  ことも検討する。integration test の CI matrix もここで扱う。
+  保持する方法を決める。cache がない job や PR では `-Pcommandlib.typedNms=false` で module を外して unit test だけを
+  実行することも検討する（その spigot jar は NMS 実装を持たないので配布しない）。integration test の CI matrix もここで扱う。
 - `[?]` （優先度低・候補）config-driven customization。server admin が YAML 等で command 名、alias、無効化、message を
   再コンパイルなしで上書きできるようにする。需要を見て採否を決める。
 
@@ -432,8 +432,8 @@ CommandLib は、この repository 自体だけでなく downstream plugin autho
 #### テスト層の方針
 
 - **Layer 1 (unit)**: `spigot:test` / `common:test` — NMS 非依存ロジックを検証。
-- **Layer 2 (command-level)**: `spigot-test` の `CommandTester` — `Mockito.mockStatic` で `NMSClassRegistry` /
-  `NMSReflection` をスタブし、実 NMS なしでコマンド parse・実行を検証。CommandAPI の「実 NMS + `Bootstrap.bootStrap()` +
+- **Layer 2 (command-level)**: `spigot-test` の `CommandTester` — `Mockito.mockStatic` で `NMSClassRegistry` を
+  スタブし、実 NMS なしでコマンド parse・実行を検証。CommandAPI の「実 NMS + `Bootstrap.bootStrap()` +
   Mockito スパイ」方式は採用しない。
 - **Layer 3 (integration)**: `integration-test` — Testcontainers + 実 Minecraft サーバー + MCProtocolLib で E2E 検証。
 

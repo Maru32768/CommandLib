@@ -5,7 +5,7 @@ import net.minecraft.server.v1_16_R3.Vec2F;
 
 public class NMSVec2D_spigot_1_16_5 extends NMSVec2D {
     public NMSVec2D_spigot_1_16_5(Object handle) {
-        super(handle, "Vec2F");
+        super(handle, Vec2F.class);
     }
 
     @Override

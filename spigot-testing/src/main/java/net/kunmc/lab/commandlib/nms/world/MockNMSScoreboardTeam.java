@@ -6,7 +6,7 @@ public class MockNMSScoreboardTeam extends NMSScoreboardTeam {
     private final String name;
 
     public MockNMSScoreboardTeam(String name) {
-        super(null, "Mock");
+        super(null, Object.class);
         this.name = name;
     }
 

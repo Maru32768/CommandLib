@@ -13,7 +13,7 @@ import org.bukkit.entity.Player;
 
 public class NMSArgumentPlayers_spigot_1_16_5 extends NMSArgumentPlayers {
     public NMSArgumentPlayers_spigot_1_16_5() {
-        super(null, "ArgumentEntity");
+        super(null, ArgumentEntity.class);
     }
 
     @Override

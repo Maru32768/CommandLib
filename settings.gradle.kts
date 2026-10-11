@@ -15,8 +15,8 @@ plugins {
 rootProject.name = "CommandLib"
 include("spigot", "paper")
 // Typed NMS modules bundled into :spigot, one per directory under nms/. They need BuildTools or a paperweight dev
-// bundle, so -Pcommandlib.typedNms=false leaves them out and :spigot uses only the reflection implementations, and
-// -Pcommandlib.typedNms=spigot-1.20.4,paper-1.20.6 includes only the listed modules.
+// bundle, so -Pcommandlib.typedNms=false leaves them out for work that does not need the spigot jar, which then has
+// no NMS implementations, and -Pcommandlib.typedNms=spigot-1.20.4,paper-1.20.6 includes only the listed modules.
 val typedNmsModules = file("nms").listFiles()
     .orEmpty()
     .filter { it.resolve("build.gradle.kts").isFile }
@@ -107,4 +107,6 @@ include(
     "integration-test:targets:spigot-1.21.1",
     "integration-test:targets:spigot-1.20.5",
     "integration-test:targets:spigot-1.21",
+    "integration-test:targets:spigot-1.20.3",
+    "integration-test:targets:paper-1.21.1",
 )

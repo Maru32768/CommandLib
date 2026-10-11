@@ -1,9 +1,10 @@
 package net.kunmc.lab.commandlib.nms.spigot_1_20_6;
 
 import net.kunmc.lab.commandlib.util.nms.core.NMSParticle;
+import net.minecraft.core.particles.ParticleType;
 
 public class NMSParticle_spigot_1_20_6 extends NMSParticle {
     public NMSParticle_spigot_1_20_6(Object handle) {
-        super(handle, "core.particles.Particle");
+        super(handle, ParticleType.class);
     }
 }

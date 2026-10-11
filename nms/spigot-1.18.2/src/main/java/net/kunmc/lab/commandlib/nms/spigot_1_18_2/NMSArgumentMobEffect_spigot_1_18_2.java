@@ -9,7 +9,7 @@ import net.minecraft.commands.arguments.MobEffectArgument;
 
 public class NMSArgumentMobEffect_spigot_1_18_2 extends NMSArgumentMobEffect {
     public NMSArgumentMobEffect_spigot_1_18_2() {
-        super(null, "commands.arguments.ArgumentMobEffect");
+        super(null, MobEffectArgument.class);
     }
 
     @Override

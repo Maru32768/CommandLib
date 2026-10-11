@@ -9,7 +9,7 @@ import net.minecraft.server.v1_16_R3.CommandListenerWrapper;
 
 public class NMSArgumentTile_spigot_1_16_5 extends NMSArgumentTile {
     public NMSArgumentTile_spigot_1_16_5() {
-        super(null, "ArgumentTile");
+        super(null, ArgumentTile.class);
     }
 
     @Override

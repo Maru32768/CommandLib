@@ -13,7 +13,7 @@ import org.bukkit.command.CommandSender;
 
 public class NMSCommandListenerWrapper_spigot_1_16_5 extends NMSCommandListenerWrapper {
     public NMSCommandListenerWrapper_spigot_1_16_5(Object handle) {
-        super(handle, "CommandListenerWrapper");
+        super(handle, CommandListenerWrapper.class);
     }
 
     @Override

@@ -30,14 +30,10 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
-    // The real-jar NMS resolver test reads the server jar that BuildTools installs for :nms:spigot-1.16.5.
-    systemProperty("commandlib.nmsTestJar.1_16_5",
-                   File(commandlib.nms.mavenLocalRepository(),
-                        "org/spigotmc/spigot/1.16.5-R0.1-SNAPSHOT/spigot-1.16.5-R0.1-SNAPSHOT.jar").absolutePath)
 }
 
-// Typed NMS implementations compiled in the :nms modules are bundled into the spigot jar. NMSClassRegistry looks
-// them up by class name, so the jar still works with the reflection implementations when they are left out.
+// The typed NMS implementations compiled in the :nms modules are bundled into the spigot jar. They are the only NMS
+// implementations, so a jar built with some modules left out (-Pcommandlib.typedNms) lacks the versions they cover.
 val typedNms by configurations.creating {
     isCanBeConsumed = false
     isCanBeResolved = true
@@ -62,3 +58,4 @@ tasks.named<Jar>("jar") {
         include("net/kunmc/lab/commandlib/nms/**")
     }
 }
+

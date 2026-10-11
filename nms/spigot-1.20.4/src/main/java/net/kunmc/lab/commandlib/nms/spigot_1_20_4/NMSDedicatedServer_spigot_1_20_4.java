@@ -7,7 +7,7 @@ import net.minecraft.server.dedicated.DedicatedServer;
 
 public class NMSDedicatedServer_spigot_1_20_4 extends NMSDedicatedServer {
     public NMSDedicatedServer_spigot_1_20_4(Object handle) {
-        super(handle, "server.dedicated.DedicatedServer");
+        super(handle, DedicatedServer.class);
     }
 
     @Override

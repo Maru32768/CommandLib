@@ -11,7 +11,7 @@ import net.minecraft.commands.arguments.TeamArgument;
 
 public class NMSArgumentScoreboardTeam_spigot_1_19_3 extends NMSArgumentScoreboardTeam {
     public NMSArgumentScoreboardTeam_spigot_1_19_3() {
-        super(null, "commands.arguments.ArgumentScoreboardTeam");
+        super(null, TeamArgument.class);
     }
 
     @Override

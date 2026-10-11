@@ -8,7 +8,7 @@ import org.bukkit.craftbukkit.CraftParticle;
 
 public class NMSCraftParticle_paper_1_20_6 extends NMSCraftParticle {
     public NMSCraftParticle_paper_1_20_6() {
-        super(null, "CraftParticle");
+        super(null, CraftParticle.class);
     }
 
     @Override

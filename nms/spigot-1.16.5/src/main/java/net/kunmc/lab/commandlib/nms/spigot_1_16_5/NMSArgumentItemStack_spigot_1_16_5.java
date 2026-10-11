@@ -9,7 +9,7 @@ import net.minecraft.server.v1_16_R3.CommandListenerWrapper;
 
 public class NMSArgumentItemStack_spigot_1_16_5 extends NMSArgumentItemStack {
     public NMSArgumentItemStack_spigot_1_16_5() {
-        super(null, "ArgumentItemStack");
+        super(null, ArgumentItemStack.class);
     }
 
     @Override

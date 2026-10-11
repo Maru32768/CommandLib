@@ -9,7 +9,7 @@ import net.minecraft.commands.arguments.blocks.BlockStateArgument;
 
 public class NMSArgumentTile_spigot_1_19_3 extends NMSArgumentTile {
     public NMSArgumentTile_spigot_1_19_3() {
-        super(null, "commands.arguments.blocks.ArgumentTile");
+        super(null, BlockStateArgument.class);
     }
 
     @Override

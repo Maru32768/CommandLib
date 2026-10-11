@@ -6,7 +6,7 @@ import net.minecraft.network.chat.MutableComponent;
 
 public class NMSIChatMutableComponent_spigot_1_20_4 extends NMSIChatMutableComponent {
     public NMSIChatMutableComponent_spigot_1_20_4(Object handle) {
-        super(handle, "network.chat.IChatMutableComponent");
+        super(handle, MutableComponent.class);
     }
 
     @Override

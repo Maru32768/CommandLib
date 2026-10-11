@@ -6,7 +6,7 @@ import net.minecraft.network.chat.TranslatableComponent;
 
 public class NMSChatMessage_spigot_1_18 extends NMSChatMessage {
     public NMSChatMessage_spigot_1_18(Message handle) {
-        super(handle, "network.chat.ChatMessage");
+        super(handle, TranslatableComponent.class);
     }
 
     @Override

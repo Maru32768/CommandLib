@@ -13,7 +13,7 @@ import org.bukkit.entity.Player;
 
 public class NMSArgumentPlayers_paper_1_20_6 extends NMSArgumentPlayers {
     public NMSArgumentPlayers_paper_1_20_6() {
-        super(null, "commands.arguments.EntityArgument");
+        super(null, EntityArgument.class);
     }
 
     @Override
