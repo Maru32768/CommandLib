@@ -48,6 +48,12 @@ does not depend on Bukkit APIs. Keep Bukkit and NMS-specific behavior in
 - For Bukkit/NMS behavior, check both the public wrapper and the mock/test
   support paths before changing constructor or registry behavior.
 
+## Documentation Language
+
+Design notes under `docs/design` are written in English. Temporary working
+documents such as `docs/roadmap.md` and `docs/compatibility.md` are written in
+Japanese.
+
 ## Public Usage Patterns
 
 When writing examples or tests that represent downstream user code, prefer the

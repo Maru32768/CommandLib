@@ -1,109 +1,109 @@
 # Argument Catalog
 
-この文書は、CommandLib の built-in argument の現状と、CommandAPI / Paper command API と比較した不足を整理する。
+This document summarizes the current state of CommandLib's built-in arguments and the gaps compared with CommandAPI and the Paper command API.
 
-## Status の定義
+## Status definitions
 
-| Status | 意味 |
+| Status | Meaning |
 |---|---|
-| `Implemented` | public argument class が存在する。 |
-| `Partial` | 近い argument はあるが、型、platform、version、または挙動が不足している。 |
-| `Missing` | built-in argument として未実装。 |
-| `Needs design` | 実装前に API shape または platform 差分の設計が必要。 |
+| `Implemented` | A public argument class exists. |
+| `Partial` | A similar argument exists, but the type, platform, version, or behavior falls short. |
+| `Missing` | Not implemented as a built-in argument. |
+| `Needs design` | The API shape or platform differences must be designed before implementation. |
 
-## 現在の CommandLib argument
+## Current CommandLib arguments
 
 ### Common
 
-`common` には platform 非依存の基礎 argument がある。
+`common` contains the platform-independent base arguments.
 
 | Argument | Status | Notes |
 |---|---:|---|
-| `CommonBooleanArgument` | `Implemented` | Bukkit / Forge の `BooleanArgument` の基礎。 |
-| `CommonIntegerArgument` | `Implemented` | min / max 対応。 |
-| `CommonLongArgument` | `Implemented` | min / max 対応。 |
-| `CommonFloatArgument` | `Implemented` | min / max 対応。 |
-| `CommonDoubleArgument` | `Implemented` | min / max 対応。 |
-| `CommonStringArgument` | `Implemented` | `WORD`, `PHRASE_QUOTED`, `PHRASE`。 |
-| `CommonLiteralArgument` | `Implemented` | literal node。 |
-| `CommonEnumArgument` | `Implemented` | Java enum。 |
-| `CommonObjectArgument` | `Implemented` | custom object mapping。 |
-| `CommonNameableObjectArgument` | `Implemented` | named object mapping。 |
+| `CommonBooleanArgument` | `Implemented` | Base for the Bukkit / Forge `BooleanArgument`. |
+| `CommonIntegerArgument` | `Implemented` | Supports min / max. |
+| `CommonLongArgument` | `Implemented` | Supports min / max. |
+| `CommonFloatArgument` | `Implemented` | Supports min / max. |
+| `CommonDoubleArgument` | `Implemented` | Supports min / max. |
+| `CommonStringArgument` | `Implemented` | `WORD`, `PHRASE_QUOTED`, `PHRASE`. |
+| `CommonLiteralArgument` | `Implemented` | literal node. |
+| `CommonEnumArgument` | `Implemented` | Java enum. |
+| `CommonObjectArgument` | `Implemented` | custom object mapping. |
+| `CommonNameableObjectArgument` | `Implemented` | named object mapping. |
 
-### Bukkit / Spigot / Paper 現行
-
-| Argument | Status | Notes |
-|---|---:|---|
-| `BooleanArgument` | `Implemented` | common backed。 |
-| `IntegerArgument` | `Implemented` | common backed。 |
-| `LongArgument` | `Implemented` | common backed。 |
-| `FloatArgument` | `Implemented` | common backed。 |
-| `DoubleArgument` | `Implemented` | common backed。 |
-| `StringArgument` | `Implemented` | word / quoted phrase / greedy phrase。 |
-| `LiteralArgument` | `Implemented` | common backed。 |
-| `EnumArgument` | `Implemented` | Java enum。 |
-| `ObjectArgument` | `Implemented` | custom object mapping。 |
-| `NameableObjectArgument` | `Implemented` | named object mapping。 |
-| `UnparsedArgument` | `Implemented` | raw unparsed string。 |
-| `PlayerArgument` | `Implemented` | single Bukkit player。 |
-| `PlayersArgument` | `Implemented` | multiple Bukkit players。 |
-| `EntityArgument` | `Implemented` | single Bukkit entity。 |
-| `EntitiesArgument` | `Implemented` | multiple Bukkit entities。 |
-| `OfflinePlayerArgument` | `Implemented` | Bukkit offline player。 |
-| `OfflinePlayersArgument` | `Implemented` | multiple offline players。 |
-| `UUIDArgument` | `Implemented` | UUID or player lookup behavior。 |
-| `UUIDsArgument` | `Implemented` | multiple UUIDs / selector path。 |
-| `LocationArgument` | `Implemented` | Bukkit `Location`。 |
-| `WorldArgument` | `Implemented` | Bukkit / Paper `World`。Spigot は NMS `ArgumentDimension`、Paper は `ArgumentTypes.world()`。 |
-| `BiomeArgument` | `Implemented` | Bukkit / Paper `Biome`。Spigot は enum argument、Paper は native registry argument。 |
-| `BlockDataArgument` | `Implemented` | Bukkit `BlockData`。 |
-| `ItemStackArgument` | `Implemented` | Bukkit `ItemStack`。 |
-| `EnchantmentArgument` | `Implemented` | Bukkit `Enchantment`。 |
-| `PotionEffectArgument` | `Implemented` | Bukkit `PotionEffect` / effect handling。 |
-| `ParticleArgument` | `Implemented` | Bukkit particle data。 |
-| `TeamArgument` | `Implemented` | Bukkit scoreboard team。`scoreboard(Supplier<Scoreboard>)` で parse / suggestion ごとに参照する scoreboard を指定可能（省略時は main scoreboard）。 |
-| `NamespacedKeyArgument` | `Implemented` | Bukkit `NamespacedKey`。namespace 省略時は `minecraft`。 |
-| `SoundArgument` | `Implemented` | Bukkit / Paper `Sound` enum。 |
-| `EntityTypeArgument` | `Implemented` | Bukkit / Paper `EntityType` enum。 |
-| `AttributeArgument` | `Implemented` | Bukkit / Paper `Attribute` enum。 |
-| `AdvancementArgument` | `Implemented` | Bukkit / Paper `Advancement` lookup by `NamespacedKey`。 |
-| `LootTableArgument` | `Implemented` | Bukkit / Paper `LootTable` lookup by `NamespacedKey`。 |
-| `RecipeArgument` | `Implemented` | Bukkit / Paper `Recipe` lookup by `NamespacedKey`。 |
-| `ObjectiveArgument` | `Implemented` | Bukkit / Paper scoreboard objective lookup by name。 |
-| `ScoreboardDisplaySlotArgument` | `Implemented` | Bukkit / Paper `DisplaySlot` enum。 |
-| `ChatColorArgument` | `Implemented` | Bukkit / Paper legacy `ChatColor` enum。 |
-
-### Forge 現行
+### Bukkit / Spigot / Paper (current)
 
 | Argument | Status | Notes |
 |---|---:|---|
-| `BooleanArgument` | `Implemented` | common backed。 |
-| `IntegerArgument` | `Implemented` | common backed。 |
-| `LongArgument` | `Implemented` | common backed。 |
-| `FloatArgument` | `Implemented` | common backed。 |
-| `DoubleArgument` | `Implemented` | common backed。 |
-| `StringArgument` | `Implemented` | word / quoted phrase / greedy phrase。 |
-| `LiteralArgument` | `Implemented` | common backed。 |
-| `EnumArgument` | `Implemented` | Java enum。 |
-| `ObjectArgument` | `Implemented` | custom object mapping。 |
-| `NameableObjectArgument` | `Implemented` | named object mapping。 |
-| `UnparsedArgument` | `Implemented` | raw unparsed string。 |
-| `PlayerArgument` | `Implemented` | single Forge server player。 |
-| `PlayersArgument` | `Implemented` | multiple Forge server players。 |
-| `EntityArgument` | `Implemented` | single Forge entity。 |
-| `EntitiesArgument` | `Implemented` | multiple Forge entities。 |
-| `UUIDArgument` | `Implemented` | UUID or player lookup behavior。 |
-| `UUIDsArgument` | `Implemented` | multiple UUIDs / selector path。 |
-| `LocationArgument` | `Implemented` | Forge / Minecraft position。 |
-| `BlockPosArgument` | `Implemented` | block position。 |
-| `BlockStateArgument` | `Implemented` | block state input。 |
-| `ItemStackArgument` | `Implemented` | Forge `ItemStack`。 |
-| `EnchantmentArgument` | `Implemented` | Forge enchantment。1.20.5+ は `Holder<Enchantment>`。 |
-| `EffectArgument` | `Implemented` | Forge effect。1.20.5+ は `Holder<MobEffect>`。 |
-| `ParticleArgument` | `Implemented` | Forge particle data。 |
-| `TeamArgument` | `Implemented` | Forge scoreboard team。 |
-| `GameProfileArgument` | `Implemented` | game profile list。 |
-| `ResourceLocationArgument` | `Implemented` | Minecraft `ResourceLocation`。namespace 省略時は `minecraft`。 |
+| `BooleanArgument` | `Implemented` | common backed. |
+| `IntegerArgument` | `Implemented` | common backed. |
+| `LongArgument` | `Implemented` | common backed. |
+| `FloatArgument` | `Implemented` | common backed. |
+| `DoubleArgument` | `Implemented` | common backed. |
+| `StringArgument` | `Implemented` | word / quoted phrase / greedy phrase. |
+| `LiteralArgument` | `Implemented` | common backed. |
+| `EnumArgument` | `Implemented` | Java enum. |
+| `ObjectArgument` | `Implemented` | custom object mapping. |
+| `NameableObjectArgument` | `Implemented` | named object mapping. |
+| `UnparsedArgument` | `Implemented` | raw unparsed string. |
+| `PlayerArgument` | `Implemented` | single Bukkit player. |
+| `PlayersArgument` | `Implemented` | multiple Bukkit players. |
+| `EntityArgument` | `Implemented` | single Bukkit entity. |
+| `EntitiesArgument` | `Implemented` | multiple Bukkit entities. |
+| `OfflinePlayerArgument` | `Implemented` | Bukkit offline player. |
+| `OfflinePlayersArgument` | `Implemented` | multiple offline players. |
+| `UUIDArgument` | `Implemented` | UUID or player lookup behavior. |
+| `UUIDsArgument` | `Implemented` | multiple UUIDs / selector path. |
+| `LocationArgument` | `Implemented` | Bukkit `Location`. |
+| `WorldArgument` | `Implemented` | Bukkit / Paper `World`. Spigot uses NMS `ArgumentDimension`; Paper uses `ArgumentTypes.world()`. |
+| `BiomeArgument` | `Implemented` | Bukkit / Paper `Biome`. Spigot uses an enum argument; Paper uses a native registry argument. |
+| `BlockDataArgument` | `Implemented` | Bukkit `BlockData`. |
+| `ItemStackArgument` | `Implemented` | Bukkit `ItemStack`. |
+| `EnchantmentArgument` | `Implemented` | Bukkit `Enchantment`. |
+| `PotionEffectArgument` | `Implemented` | Bukkit `PotionEffect` / effect handling. |
+| `ParticleArgument` | `Implemented` | Bukkit particle data. |
+| `TeamArgument` | `Implemented` | Bukkit scoreboard team. `scoreboard(Supplier<Scoreboard>)` selects the scoreboard looked up on each parse / suggestion (defaults to the main scoreboard). |
+| `NamespacedKeyArgument` | `Implemented` | Bukkit `NamespacedKey`. The namespace defaults to `minecraft`. |
+| `SoundArgument` | `Implemented` | Bukkit / Paper `Sound` enum. |
+| `EntityTypeArgument` | `Implemented` | Bukkit / Paper `EntityType` enum. |
+| `AttributeArgument` | `Implemented` | Bukkit / Paper `Attribute` enum. |
+| `AdvancementArgument` | `Implemented` | Bukkit / Paper `Advancement` lookup by `NamespacedKey`. |
+| `LootTableArgument` | `Implemented` | Bukkit / Paper `LootTable` lookup by `NamespacedKey`. |
+| `RecipeArgument` | `Implemented` | Bukkit / Paper `Recipe` lookup by `NamespacedKey`. |
+| `ObjectiveArgument` | `Implemented` | Bukkit / Paper scoreboard objective lookup by name. |
+| `ScoreboardDisplaySlotArgument` | `Implemented` | Bukkit / Paper `DisplaySlot` enum. |
+| `ChatColorArgument` | `Implemented` | Bukkit / Paper legacy `ChatColor` enum. |
+
+### Forge (current)
+
+| Argument | Status | Notes |
+|---|---:|---|
+| `BooleanArgument` | `Implemented` | common backed. |
+| `IntegerArgument` | `Implemented` | common backed. |
+| `LongArgument` | `Implemented` | common backed. |
+| `FloatArgument` | `Implemented` | common backed. |
+| `DoubleArgument` | `Implemented` | common backed. |
+| `StringArgument` | `Implemented` | word / quoted phrase / greedy phrase. |
+| `LiteralArgument` | `Implemented` | common backed. |
+| `EnumArgument` | `Implemented` | Java enum. |
+| `ObjectArgument` | `Implemented` | custom object mapping. |
+| `NameableObjectArgument` | `Implemented` | named object mapping. |
+| `UnparsedArgument` | `Implemented` | raw unparsed string. |
+| `PlayerArgument` | `Implemented` | single Forge server player. |
+| `PlayersArgument` | `Implemented` | multiple Forge server players. |
+| `EntityArgument` | `Implemented` | single Forge entity. |
+| `EntitiesArgument` | `Implemented` | multiple Forge entities. |
+| `UUIDArgument` | `Implemented` | UUID or player lookup behavior. |
+| `UUIDsArgument` | `Implemented` | multiple UUIDs / selector path. |
+| `LocationArgument` | `Implemented` | Forge / Minecraft position. |
+| `BlockPosArgument` | `Implemented` | block position. |
+| `BlockStateArgument` | `Implemented` | block state input. |
+| `ItemStackArgument` | `Implemented` | Forge `ItemStack`. |
+| `EnchantmentArgument` | `Implemented` | Forge enchantment. 1.20.5+ uses `Holder<Enchantment>`. |
+| `EffectArgument` | `Implemented` | Forge effect. 1.20.5+ uses `Holder<MobEffect>`. |
+| `ParticleArgument` | `Implemented` | Forge particle data. |
+| `TeamArgument` | `Implemented` | Forge scoreboard team. |
+| `GameProfileArgument` | `Implemented` | game profile list. |
+| `ResourceLocationArgument` | `Implemented` | Minecraft `ResourceLocation`. The namespace defaults to `minecraft`. |
 
 ## Competitive coverage
 
@@ -159,7 +159,7 @@
 | namespaced key | `Implemented` | Yes | Yes | Done |
 | resource key | `Missing` | Paper-specific | Yes | P1 |
 | generic registry resource | `Missing` | Partial via typed args | Yes | P1 |
-| biome | `Implemented` | Spigot は enum argument。Paper は native registry argument。 | Yes | Done |
+| biome | `Implemented` | Spigot uses an enum argument. Paper uses a native registry argument. | Yes | Done |
 | loot table | `Implemented` | Yes | Registry | Done |
 | recipe | `Implemented` | Yes | Registry | Done |
 | sound | `Implemented` | Yes | Registry / key | Done |
@@ -174,9 +174,9 @@
 | objective criteria | `Missing` | Yes | Yes | P1 |
 | scoreboard display slot | `Implemented` | Yes | Yes | Done |
 | math operation | `Missing` | Yes | Brigadier support | P2 |
-| game mode | `Implemented` | Spigot は `EnumArgument<GameMode>` ラッパー。Paper は `ArgumentTypes.gameMode()` ネイティブ実装。 | Yes | Done |
-| entity type | `Implemented` | Bukkit / Paper enum argument。 | Yes | Done |
-| attribute | `Implemented` | Bukkit / Paper enum argument。 | Yes | Done |
+| game mode | `Implemented` | Spigot wraps `EnumArgument<GameMode>`. Paper uses the native `ArgumentTypes.gameMode()`. | Yes | Done |
+| entity type | `Implemented` | Bukkit / Paper enum argument. | Yes | Done |
+| attribute | `Implemented` | Bukkit / Paper enum argument. | Yes | Done |
 
 ### Chat / Adventure / text component
 
@@ -214,48 +214,48 @@
 
 ### P1: parity blockers
 
-- `[x]` `NamespacedKeyArgument` / `ResourceLocationArgument`。
-- Generic registry-backed arguments。
-- `[x]` `BiomeArgument`。
-- `[x]` `SoundArgument`。
-- `[x]` `AdvancementArgument`。
-- `[x]` `LootTableArgument`。
-- `[x]` `RecipeArgument`。
-- `[x]` `EntityTypeArgument`。
-- `[x]` `AttributeArgument`。
-- `[x]` `ObjectiveArgument`。
-- `ObjectiveCriteriaArgument`。
-- `ScoreHolderArgument`。
-- `BlockPredicateArgument`。
-- `ItemStackPredicateArgument`。
-- `NBTCompoundArgument` / `SNBTArgument`。
-- `TimeArgument`。
-- `AngleArgument` / `RotationArgument`。
-- Paper `ComponentArgument`。
-- Paper `SignedMessageArgument`。
+- `[x]` `NamespacedKeyArgument` / `ResourceLocationArgument`.
+- Generic registry-backed arguments.
+- `[x]` `BiomeArgument`.
+- `[x]` `SoundArgument`.
+- `[x]` `AdvancementArgument`.
+- `[x]` `LootTableArgument`.
+- `[x]` `RecipeArgument`.
+- `[x]` `EntityTypeArgument`.
+- `[x]` `AttributeArgument`.
+- `[x]` `ObjectiveArgument`.
+- `ObjectiveCriteriaArgument`.
+- `ScoreHolderArgument`.
+- `BlockPredicateArgument`.
+- `ItemStackPredicateArgument`.
+- `NBTCompoundArgument` / `SNBTArgument`.
+- `TimeArgument`.
+- `AngleArgument` / `RotationArgument`.
+- Paper `ComponentArgument`.
+- Paper `SignedMessageArgument`.
 
 ### P2: developer experience
 
-- `ListArgument`。
-- `MapArgument`。
-- `MultiLiteralArgument`。
-- `CommandArgument`。
-- `[x]` `ChatColorArgument`。
-- `NamedTextColorArgument`。
-- `StyleArgument`。
-- `[x]` `ScoreboardDisplaySlotArgument`。
-- `MathOperationArgument`。
-- Optional / default argument helpers。
-- Alias-aware enum argument。
+- `ListArgument`.
+- `MapArgument`.
+- `MultiLiteralArgument`.
+- `CommandArgument`.
+- `[x]` `ChatColorArgument`.
+- `NamedTextColorArgument`.
+- `StyleArgument`.
+- `[x]` `ScoreboardDisplaySlotArgument`.
+- `MathOperationArgument`.
+- Optional / default argument helpers.
+- Alias-aware enum argument.
 
 ### P3: platform-specific expansion
 
-- Paper `HeightMapArgument`。
-- Paper `TemplateMirrorArgument`。
-- Paper `TemplateRotationArgument`。
-- Folia-safe async suggestion argument behavior。
-- Velocity command argument equivalents。
-- NeoForge / Fabric registry argument equivalents。
+- Paper `HeightMapArgument`.
+- Paper `TemplateMirrorArgument`.
+- Paper `TemplateRotationArgument`.
+- Folia-safe async suggestion argument behavior.
+- Velocity command argument equivalents.
+- NeoForge / Fabric registry argument equivalents.
 
 ## Design notes
 

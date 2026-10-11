@@ -1,48 +1,48 @@
 # Module Structure
 
-この文書は、GA 前に CommandLib の module / artifact 構成を整理するための設計メモである。
+This document is a design note for organizing CommandLib's module / artifact layout before GA.
 
-## 前提
+## Assumptions
 
-現行実装は、すでに `common` / `bukkit` / `forge` にかなり分離されている。ここからさらに大きく `common` へ移動できるものは多くない。
+The current implementation is already fairly well separated into `common` / `bukkit` / `forge`. Not much more can be moved into `common` from here.
 
-重要な前提:
+Key assumptions:
 
-- 現在の `bukkit` module は、実質的には **Spigot 互換実装** である。
-- Paper 上でも動かすことを考慮しているが、設計の主軸は Bukkit/Spigot compatibility である。
-- NMS util は Spigot / old Paper を支える compatibility layer であり、一部 Paper も考慮している。
-- `common` と platform modules の責務分離はすでに進んでいるため、GA 前 module split の主目的は追加抽象化ではない。
-- GA 前 module split の主目的は、artifact 名と platform contract を確定することである。
+- The current `bukkit` module is effectively a **Spigot-compatible implementation**.
+- Running on Paper is taken into account, but the design is centered on Bukkit/Spigot compatibility.
+- The NMS util is a compatibility layer that supports Spigot / old Paper, with some consideration for Paper.
+- Responsibilities are already separated between `common` and the platform modules, so the main goal of the pre-GA module split is not more abstraction.
+- The main goal of the pre-GA module split is to settle the artifact names and platform contracts.
 
-## 現状
+## Current State
 
-| Module | 現状 |
+| Module | Current state |
 |---|---|
-| `common` | platform 非依存の command model、argument、options、permissions、help、Brigadier tree construction。 |
-| `spigot` | Spigot 互換を主軸にした Bukkit-family implementation。NMS bridge、Bungee `BaseComponent` message path、Paper 1.20.6+ 向け考慮を含む。 |
-| `forge` | Forge 1.16.5 向け implementation。Forge permission、Minecraft `ITextComponent` message path を含む。 |
-| `spigot-test` | Bukkit-family command testing utilities。 |
-| `integration-test` | Bukkit / Paper / Mohist の multi-version integration fixtures。 |
-| `sample` | sample plugin / mod。 |
+| `common` | Platform-independent command model, arguments, options, permissions, help, and Brigadier tree construction. |
+| `spigot` | Bukkit-family implementation centered on Spigot compatibility. Includes the NMS bridge, the Bungee `BaseComponent` message path, and considerations for Paper 1.20.6+. |
+| `forge` | Implementation for Forge 1.16.5. Includes Forge permissions and the Minecraft `ITextComponent` message path. |
+| `spigot-test` | Bukkit-family command testing utilities. |
+| `integration-test` | Multi-version integration fixtures for Bukkit / Paper / Mohist. |
+| `sample` | Sample plugin / mod. |
 
 ## Goals
 
-- GA 前に platform-specific artifact 境界を確定する。
-- 現行 `bukkit` module を `spigot` module へ rename / move する。
-- `bukkit` artifact は GA 前に削除する。
-- Paper module は Spigot 実装の延長ではなく、Paper 公式 API と Adventure component を前提に新設する。
-- NMS fallback はまず `spigot` 側に置く。
-- Paper 側で NMS fallback が必要な場合だけ、用途を限定して Paper module に持つ。
-- `common` への追加移動は原則行わない。明らかに platform-neutral な新機能が出た場合だけ検討する。
-- Forge / NeoForge / Fabric / Velocity / Folia を追加しやすい artifact 構成にする。
+- Settle the platform-specific artifact boundaries before GA.
+- Rename / move the current `bukkit` module to a `spigot` module.
+- Remove the `bukkit` artifact before GA.
+- Create the Paper module from scratch on top of the official Paper API and Adventure components, rather than as an extension of the Spigot implementation.
+- Put the NMS fallback in `spigot` first.
+- Keep an NMS fallback in the Paper module only when Paper needs one, and only for limited purposes.
+- As a rule, do not move more code into `common`. Consider it only when a clearly platform-neutral new feature appears.
+- Make the artifact layout easy to extend with Forge / NeoForge / Fabric / Velocity / Folia.
 
 ## Non-Goals
 
-- `common` をさらに大きくすることを module split の目的にしない。
-- Spigot 互換のための legacy behavior を Paper module に持ち込まない。
-- Paper-only API を Spigot module に持ち込まない。
-- `bukkit` artifact を GA 後に残さない。
-- すべての platform support を module split と同時に完成させることを前提にしない。
+- Making `common` bigger is not a goal of the module split.
+- Do not bring legacy behavior kept for Spigot compatibility into the Paper module.
+- Do not bring Paper-only APIs into the Spigot module.
+- Do not keep the `bukkit` artifact after GA.
+- Do not assume every platform is fully supported at the same time as the module split.
 
 ## Target Module Layout
 
@@ -50,9 +50,9 @@
 
 | Module | Published | Role |
 |---|---:|---|
-| `common` | Yes | 既存の platform-neutral command model。大規模な追加移動はしない。 |
+| `common` | Yes | The existing platform-neutral command model. No large-scale moves into it. |
 
-`common` に残すもの:
+What stays in `common`:
 
 - `CommonCommand`
 - `CommonArgument`
@@ -64,9 +64,9 @@
 - exception model
 - platform-neutral suggestion model
 
-`common` に入れないもの:
+What does not go into `common`:
 
-- Bukkit / Spigot / Paper / Forge / Fabric / Velocity type
+- Bukkit / Spigot / Paper / Forge / Fabric / Velocity types
 - platform command registration
 - platform permission registration
 - platform message component implementation
@@ -77,37 +77,37 @@
 
 | Module | Published | Role |
 |---|---:|---|
-| `spigot` | Yes | 現行 `bukkit` module の移行先。Bukkit/Spigot API compatibility を基準にする。 |
-| `paper` | Yes | Paper 公式 command API、lifecycle API、Adventure component を基準にした新規 implementation。 |
-| `folia` | Yes | Folia threading / scheduler model に合わせた Paper-family implementation。`paper` runtime mode にするか別 artifact にするかは要設計。 |
-| `mohist` | Maybe | Mohist 固有差分が大きい場合に追加する。まずは `spigot` compatibility と integration test で扱う。 |
-| `forge` | Yes | 現行 Forge module を維持しつつ、新 version support に備える。 |
-| `neoforge` | Yes | NeoForge 向け implementation。Forge との差分を分離する。 |
-| `fabric` | Yes | Fabric command registration / Brigadier integration 向け implementation。 |
+| `spigot` | Yes | Successor of the current `bukkit` module. Based on Bukkit/Spigot API compatibility. |
+| `paper` | Yes | New implementation based on the official Paper command API, lifecycle API, and Adventure components. |
+| `folia` | Yes | Paper-family implementation adapted to the Folia threading / scheduler model. Whether it becomes a `paper` runtime mode or a separate artifact needs design. |
+| `mohist` | Maybe | Added if Mohist-specific differences are large. For now, handled through `spigot` compatibility and integration tests. |
+| `forge` | Yes | Keep the current Forge module while preparing for new version support. |
+| `neoforge` | Yes | Implementation for NeoForge. Keeps differences from Forge separate. |
+| `fabric` | Yes | Implementation for Fabric command registration / Brigadier integration. |
 
 ### Proxy Platforms
 
 | Module | Published | Role |
 |---|---:|---|
-| `velocity` | Yes | Velocity proxy command implementation。server-side command model と同じ API に載せるかは要設計。 |
+| `velocity` | Yes | Velocity proxy command implementation. Whether it shares the same API as the server-side command model needs design. |
 
 ### Test Modules
 
 | Module | Published | Role |
 |---|---:|---|
-| `common-test` | Maybe | common parser / tree / help / option test helpers。 |
-| `spigot-test` | Yes | 現行 `bukkit-test` の移行先候補。Spigot/Bukkit command testing utilities。 |
-| `paper-testing` | Yes | Paper command API / Adventure / lifecycle 対応の testing utilities。 |
-| `forge-test` | Yes | Forge command testing utilities。 |
-| `integration-test` | No | multi-platform integration test aggregator。 |
+| `common-test` | Maybe | common parser / tree / help / option test helpers. |
+| `spigot-test` | Yes | Candidate successor of the current `bukkit-test`. Spigot/Bukkit command testing utilities. |
+| `paper-testing` | Yes | Testing utilities supporting the Paper command API / Adventure / lifecycle. |
+| `forge-test` | Yes | Forge command testing utilities. |
+| `integration-test` | No | Multi-platform integration test aggregator. |
 
-testing module は module split 後に再設計する。Forge、Paper、Folia も testing 対象になるため、現時点で `bukkit-test` 前提の public testing guide を固定しない。
+The testing modules will be redesigned after the module split. Forge, Paper, and Folia will also be testing targets, so the public testing guide should not be fixed around `bukkit-test` at this point.
 
 ### Removed Module
 
 | Module | Published | Role |
 |---|---:|---|
-| `bukkit` | No | 現行暫定 module。`spigot` へ rename / move した後、GA 前に削除する。 |
+| `bukkit` | No | Current interim module. Removed before GA after being renamed / moved to `spigot`. |
 
 ## Dependency Direction
 
@@ -134,11 +134,11 @@ integration-test -> platform modules
 
 Rules:
 
-- platform modules depend on `common`; `common` depends on no platform module。
-- `spigot` is the successor of the current `bukkit` module。
-- `paper` should not depend on `spigot` if that would import Spigot-first registration, message, or NMS assumptions。
-- shared code should move to `common` only when it is truly platform-neutral。
-- Bukkit-family-specific shared code should stay duplicated initially if extracting it would blur platform contracts。
+- platform modules depend on `common`; `common` depends on no platform module.
+- `spigot` is the successor of the current `bukkit` module.
+- `paper` should not depend on `spigot` if that would import Spigot-first registration, message, or NMS assumptions.
+- shared code should move to `common` only when it is truly platform-neutral.
+- Bukkit-family-specific shared code should stay duplicated initially if extracting it would blur platform contracts.
 
 ## Artifact Names
 
@@ -156,7 +156,7 @@ Rules:
 | `paper-testing` | `paper-testing` |
 | `forge-test` | `forge-test` |
 
-No `bukkit` artifact is published for GA。
+No `bukkit` artifact is published for GA.
 
 ## Public API Shape
 
@@ -171,12 +171,12 @@ The `spigot` artifact should preserve the current Bukkit-family public API shape
 
 Responsibilities:
 
-- Bukkit/Spigot command registration。
-- Bukkit permission registration。
-- Bukkit sender/context bridge。
-- NMS fallback for `1.16.5+` where no official API exists。
-- legacy text / Bungee `BaseComponent` compatibility where needed。
-- old Paper compatibility as long as it is compatible with Spigot-oriented behavior。
+- Bukkit/Spigot command registration.
+- Bukkit permission registration.
+- Bukkit sender/context bridge.
+- NMS fallback for `1.16.5+` where no official API exists.
+- legacy text / Bungee `BaseComponent` compatibility where needed.
+- old Paper compatibility as long as it is compatible with Spigot-oriented behavior.
 
 ### Paper
 
@@ -184,16 +184,16 @@ The `paper` artifact should provide the same high-level command model, but shoul
 
 Responsibilities:
 
-- Paper official command API / lifecycle registration。
-- Adventure component message path。
-- Paper registry-backed arguments。
-- Paper-specific predicates / Adventure arguments。
-- Paper-native suggestion behavior。
-- NMS fallback only where Paper official APIs do not cover the required behavior。
+- Paper official command API / lifecycle registration.
+- Adventure component message path.
+- Paper registry-backed arguments.
+- Paper-specific predicates / Adventure arguments.
+- Paper-native suggestion behavior.
+- NMS fallback only where Paper official APIs do not cover the required behavior.
 
 ### Forge / NeoForge / Fabric
 
-Each modded platform module should expose the same command model where practical, while using platform-native registration, permission, message, and registry APIs。
+Each modded platform module should expose the same command model where practical, while using platform-native registration, permission, message, and registry APIs.
 
 ## Migration Model
 
@@ -215,41 +215,41 @@ The split is primarily:
 
 ### Step 1: rename current Bukkit implementation to Spigot
 
-- Add `spigot` module。
-- Move current `bukkit` source into `spigot` with minimal behavior changes。
-- Keep package names stable unless conflicts require otherwise。
-- Update published projects from `bukkit` to `spigot`。
-- Update samples and README dependency snippets。
+- Add `spigot` module.
+- Move current `bukkit` source into `spigot` with minimal behavior changes.
+- Keep package names stable unless conflicts require otherwise.
+- Update published projects from `bukkit` to `spigot`.
+- Update samples and README dependency snippets.
 
 ### Step 2: remove Bukkit artifact
 
-- Remove `bukkit` from `settings.gradle.kts`。
-- Remove `bukkit` from publishing。
-- Update docs to stop referencing `bukkit` as an artifact。
-- Keep “Bukkit API compatibility” as a concept under the `spigot` artifact, not as an artifact name。
+- Remove `bukkit` from `settings.gradle.kts`.
+- Remove `bukkit` from publishing.
+- Update docs to stop referencing `bukkit` as an artifact.
+- Keep “Bukkit API compatibility” as a concept under the `spigot` artifact, not as an artifact name.
 
 ### Step 3: create Paper module
 
-- Add `paper` module。
-- Start with the same public model as `spigot` where useful。
-- Implement registration through Paper official APIs。
-- Use Adventure component as the standard message path。
-- Add Paper-specific argument and suggestion behavior。
-- Decide explicitly which NMS utilities, if any, Paper still needs。
+- Add `paper` module.
+- Start with the same public model as `spigot` where useful.
+- Implement registration through Paper official APIs.
+- Use Adventure component as the standard message path.
+- Add Paper-specific argument and suggestion behavior.
+- Decide explicitly which NMS utilities, if any, Paper still needs.
 
 ### Step 4: redesign testing modules
 
-- Rename or replace `bukkit-test` with `spigot-test`。
-- Add `paper-testing` after Paper module behavior is defined。
-- Add `forge-test` when Forge testing requirements are clear。
-- Update integration fixtures to declare whether they test `spigot`, `paper`, or `mohist` behavior。
+- Rename or replace `bukkit-test` with `spigot-test`.
+- Add `paper-testing` after Paper module behavior is defined.
+- Add `forge-test` when Forge testing requirements are clear.
+- Update integration fixtures to declare whether they test `spigot`, `paper`, or `mohist` behavior.
 
 ### Step 5: update migration docs
 
-- Add pre-GA migration notes from `bukkit` artifact to `spigot` / `paper`。
-- Update compatibility docs with artifact names。
-- Update argument catalog platform columns。
-- Update README install snippets。
+- Add pre-GA migration notes from `bukkit` artifact to `spigot` / `paper`.
+- Update compatibility docs with artifact names.
+- Update argument catalog platform columns.
+- Update README install snippets.
 
 ## Open Questions
 
@@ -264,11 +264,11 @@ The split is primarily:
 
 Before GA:
 
-- `bukkit` module has been renamed/moved to `spigot`。
-- `bukkit` artifact is removed。
-- `paper` module exists。
-- README no longer recommends `bukkit` as an artifact。
-- platform-specific examples exist for Spigot and Paper。
-- compatibility docs list artifact names per platform。
-- integration fixtures target explicit platform artifacts。
-- module dependency graph follows the direction rules in this document。
+- `bukkit` module has been renamed/moved to `spigot`.
+- `bukkit` artifact is removed.
+- `paper` module exists.
+- README no longer recommends `bukkit` as an artifact.
+- platform-specific examples exist for Spigot and Paper.
+- compatibility docs list artifact names per platform.
+- integration fixtures target explicit platform artifacts.
+- module dependency graph follows the direction rules in this document.
