@@ -29,7 +29,6 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public final class CommandLib implements Listener {
     private final Plugin plugin;
@@ -315,17 +314,44 @@ public final class CommandLib implements Listener {
                                      .getRoot();
             }
 
-            for (String s : registeredCommands.stream()
-                                              .map(CommandNode::getName)
-                                              .collect(Collectors.toList())) {
-                removeRegisteredCommand(root, knownCommands, s);
+            for (CommandNode<?> node : registeredCommands) {
+                removeRegisteredCommand(root, knownCommands, node.getName());
 
                 if (!usePaperCommandDispatcher) {
-                    removeExecuteRunCommand(root, s);
+                    removeExecuteRunCommand(root, node.getName());
+                    removeMinecraftNamespacedCommand(root, knownCommands, node);
                 }
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * When the server finishes loading, CraftBukkit adds every child of the vanilla dispatcher to the command map as
+     * "minecraft:&lt;name&gt;". Commands registered during startup are children of it then, so that label is removed
+     * as well. Only a wrapper of this node is removed, so the label of another command stays.
+     */
+    static void removeMinecraftNamespacedCommand(RootCommandNode<?> root,
+                                                 Map<String, org.bukkit.command.Command> knownCommands,
+                                                 CommandNode<?> node) throws Exception {
+        String label = "minecraft:" + node.getName();
+        org.bukkit.command.Command command = knownCommands.get(label);
+        if (command == null || wrappedVanillaCommand(command) != node) {
+            return;
+        }
+        knownCommands.remove(label);
+        removeCommand(root, label);
+    }
+
+    private static Object wrappedVanillaCommand(org.bukkit.command.Command command) throws IllegalAccessException {
+        try {
+            // VanillaCommandWrapper#vanillaCommand is public CraftBukkit API, which keeps its name on every version.
+            return command.getClass()
+                          .getField("vanillaCommand")
+                          .get(command);
+        } catch (NoSuchFieldException e) {
+            return null;
         }
     }
 
