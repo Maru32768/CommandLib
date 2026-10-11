@@ -1,6 +1,6 @@
 ---
 name: commandlib
-description: Generate, test, or explain code that uses the CommandLib library in a Bukkit plugin. Usage: /commandlib:commandlib <request>
+description: Generate, test, or explain code that uses the CommandLib library in a Spigot/Paper plugin or Forge/NeoForge mod. Usage: /commandlib:commandlib <request>
 allowed-tools: Bash Read Glob Grep
 ---
 
@@ -22,10 +22,11 @@ Read the relevant references before generating code:
 
 ## Step 2 - Extract CommandLib sources when needed
 
-Run the extraction script:
+Run the extraction script, passing the CommandLib artifact the user's project
+depends on (`spigot`, `paper`, `forge-1.20.1`, ...; defaults to `spigot`):
 
 ```bash
-bash "${CLAUDE_SKILL_DIR}/scripts/extract-sources.sh"
+bash "${CLAUDE_SKILL_DIR}/scripts/extract-sources.sh" spigot
 ```
 
 The script prints one of:
@@ -41,20 +42,20 @@ If extracted JAR, use `/tmp/commandlib-sources/` as the base path. If
 Read the files relevant to the user's request. Common public API files include:
 
 - `README.md`
-- `bukkit/src/main/java/net/kunmc/lab/commandlib/CommandLib.java`
-- `bukkit/src/main/java/net/kunmc/lab/commandlib/Command.java`
-- `bukkit/src/main/java/net/kunmc/lab/commandlib/CommandContext.java`
+- `spigot/src/main/java/net/kunmc/lab/commandlib/CommandLib.java`
+- `spigot/src/main/java/net/kunmc/lab/commandlib/Command.java`
+- `spigot/src/main/java/net/kunmc/lab/commandlib/CommandContext.java`
 - `common/src/main/java/net/kunmc/lab/commandlib/CommonCommand.java`
 - `common/src/main/java/net/kunmc/lab/commandlib/DefaultPermission.java`
 - `common/src/main/java/net/kunmc/lab/commandlib/CommandOption.java`
 - `common/src/main/java/net/kunmc/lab/commandlib/Options.java`
-- `common/src/main/java/net/kunmc/lab/commandlib/AbstractArgumentBuilder.java`
 - `common/src/main/java/net/kunmc/lab/commandlib/branch/ArgumentBranch.java`
-- `bukkit/src/main/java/net/kunmc/lab/commandlib/ArgumentBuilder.java`
+- `common/src/main/java/net/kunmc/lab/commandlib/ArgumentBuilder.java`
 - `common/src/main/java/net/kunmc/lab/commandlib/CommonArgument.java`
-- `bukkit/src/main/java/net/kunmc/lab/commandlib/argument/`
+- `spigot/src/main/java/net/kunmc/lab/commandlib/argument/`
 
-For extracted JAR sources, map those paths to the extracted package layout.
+Paper and Forge/NeoForge projects use `paper/` or `modded/` in place of
+`spigot/`. For extracted JAR sources, map those paths to the extracted package layout.
 
 ## Step 4 - Respond to the request
 
