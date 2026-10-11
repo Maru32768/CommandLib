@@ -59,3 +59,18 @@ tasks.named<Jar>("jar") {
     }
 }
 
+// A jar without some modules has no NMS implementation for their versions, so it must not be published.
+val missingTypedNms = rootProject.file("nms")
+    .listFiles()
+    .orEmpty()
+    .filter { it.resolve("build.gradle.kts").isFile && rootProject.findProject(":nms:${it.name}") == null }
+    .map { it.name }
+    .sorted()
+tasks.withType<AbstractPublishToMaven>().configureEach {
+    doFirst {
+        check(missingTypedNms.isEmpty()) {
+            "The spigot jar lacks the typed NMS modules $missingTypedNms, which -Pcommandlib.typedNms left out. " +
+                "Publish without that property."
+        }
+    }
+}

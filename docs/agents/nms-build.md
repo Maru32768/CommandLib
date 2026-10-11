@@ -82,7 +82,8 @@ lacks the jars (and, for remapped modules, the `minecraft-server` mappings):
 runs. The spigot jar then has no NMS implementations and does not work on a server, so this is only for work that
 does not need the jar: `:spigot:test`, `spigot-testing` and the other modules. A comma-separated list, such as
 `-Pcommandlib.typedNms=spigot-1.20.4,paper-1.20.6`, includes only those modules, for example to run the integration
-targets of those versions while BuildTools has not run for the others.
+targets of those versions while BuildTools has not run for the others. The spigot publish tasks fail while any module
+is left out.
 
 ## Bundling And Lookup
 
