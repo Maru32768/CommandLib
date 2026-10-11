@@ -314,11 +314,12 @@ fun downloadIfMissing(urlString: String, outputFile: File) {
     }
 
     outputFile.parentFile.mkdirs()
+    // Download next to the target and move it into place, so an interrupted download is not kept as the jar.
+    val partFile = File(outputFile.parentFile, outputFile.name + ".part")
     URL(urlString).openStream().use { input ->
-        outputFile.outputStream().use { output ->
-            input.copyTo(output)
-        }
+        Files.copy(input, partFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING)
     }
+    Files.move(partFile.toPath(), outputFile.toPath(), java.nio.file.StandardCopyOption.ATOMIC_MOVE)
 }
 
 fun getMainClassFQDN(projectPath: java.nio.file.Path): String {
