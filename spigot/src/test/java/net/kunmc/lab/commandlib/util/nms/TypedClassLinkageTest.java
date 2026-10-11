@@ -3,6 +3,7 @@ package net.kunmc.lab.commandlib.util.nms;
 import net.kunmc.lab.commandlib.util.nms.access.AccessTarget;
 import net.kunmc.lab.commandlib.util.nms.access.ConstructorTarget;
 import net.kunmc.lab.commandlib.util.nms.access.OpenFields;
+import net.kunmc.lab.commandlib.util.nms.access.ReflectiveCaller;
 import net.kunmc.lab.commandlib.util.nms.hybrid.HybridClassLoader;
 import net.kunmc.lab.commandlib.util.nms.unlinkable.UnlinkableTypedLookUp;
 import org.junit.jupiter.api.Test;
@@ -18,6 +19,11 @@ class TypedClassLinkageTest {
     @Test
     void class_whose_references_resolve_is_linkable() {
         assertThat(TypedClassLinkage.isLinkable(Caller.class)).isTrue();
+    }
+
+    @Test
+    void class_calling_caller_sensitive_jdk_methods_is_linkable() {
+        assertThat(TypedClassLinkage.isLinkable(ReflectiveCaller.class)).isTrue();
     }
 
     @Test

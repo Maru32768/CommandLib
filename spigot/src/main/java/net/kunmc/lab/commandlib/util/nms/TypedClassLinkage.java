@@ -226,6 +226,12 @@ final class TypedClassLinkage {
                 }
                 Class<?> owner = resolveInternalName(ownerName, loader);
                 classNames.add(owner.getName());
+                // The check is for servers that differ from the jar a class was compiled against, not for the JDK,
+                // whose members the class's release has. A lookup also cannot resolve the JDK's caller-sensitive
+                // methods, such as Class.getDeclaredFields, from Java 17, where privateLookupIn drops ORIGINAL access.
+                if (isJdkClass(owner)) {
+                    continue;
+                }
                 int nameAndType = file.second[i];
                 String name = file.utf8[file.first[nameAndType]];
                 String descriptor = file.utf8[file.second[nameAndType]];
@@ -243,6 +249,11 @@ final class TypedClassLinkage {
             }
         }
         return classNames;
+    }
+
+    private static boolean isJdkClass(Class<?> clazz) {
+        ClassLoader loader = clazz.getClassLoader();
+        return loader == null || loader == ClassLoader.getPlatformClassLoader();
     }
 
     private static void resolve(MethodHandles.Lookup lookup,
