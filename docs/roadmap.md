@@ -55,7 +55,7 @@
 | Kotlin DSL                          | `[ ]` | なし。                                                                                                                                     | Kotlin-first builder、default args、coroutine suggestions。                   |
 | Java builder API                    | `[ ]` | 現状は subclass / initializer / fluent API 中心。                                                                                             | explicit builder style。                                                    |
 | Localization / captions             | `[ ]` | なし。                                                                                                                                     | locale-aware help / errors / suggestions。                                  |
-| Adventure / MiniMessage             | `[ ]` | なし。                                                                                                                                     | rich help、hover、click、component output。                                    |
+| Adventure / MiniMessage             | `[~]` | 内部用の `TextComponentBuilder` 系と `sendMessageWithOption`（色 + hover text）が public で露出している。                                              | platform 非依存の rich text 値型、rich help、click。方針案: [`docs/design/rich-text-messages.md`](design/rich-text-messages.md)。 |
 | Public testing framework            | `[~]` | `spigot-test` module と repository tests がある。`CommandTester` / `FakeSender` / NMS mock クラス群を整備済み。                                        | downstream guide、JUnit extension、assertion utilities、Builder パターン化。        |
 | Multi-version integration tests     | `[~]` | `integration-test` aggregator と Spigot / Mohist fixtures（1.16.5〜1.21.0）がある。                                                             | CI matrix、`IntegrationTarget` への platform フィールド追加、result docs、test kit 化。  |
 | NMS Reflection test strategy        | `[~]` | `CommandTester` が `Mockito.mockStatic` で `NMSClassRegistry` をスタブし、軽量な Mock 実装クラス方式で NMS なしテストを実現している。                 | `CommandTester` Builder パターン化、新引数追加時の Mock + Test セット作成ルール整備。              |
@@ -116,7 +116,8 @@ annotation API / Kotlin DSL の `@Optional` や default args はこの土台の�
 - `[~]` Velocity support 方針を決める。方針案は [11. Platform Architecture](#11-platform-architecture) を参照。
 - `[x]` Architectury Loom + Stonecutter の PoC として、`forge:1.16.5` と `forge:1.20.1` を単一ソースから build する。
 - `[ ]` mod loader 系 module を `minecraft`（MC version 依存・loader 非依存）と `loader/*`（loader 依存）に分割する。
-- `[ ]` sender / message abstraction（Adventure と vanilla `Component` の差分吸収）を Velocity 着手前に設計する。
+- `[~]` sender / message abstraction（Adventure と vanilla `Component` の差分吸収）を Velocity 着手前に設計する。
+  message 側の方針案は [`docs/design/rich-text-messages.md`](design/rich-text-messages.md)。
 - `[ ]` public API の binary compatibility check（japicmp 等）を CI に追加する。
 - `[ ]` downstream mod 向けに JarJar / `include()` と shade + relocate の推奨方針を決めて docs に書く。
 - `[ ]` capability-based registration に移行する。
