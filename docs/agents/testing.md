@@ -48,3 +48,10 @@ Run them only when the touched behavior requires it or the user asks for it:
 When adding or fixing command behavior, prefer narrow tests around parsing,
 execution, options, permissions, and suggestions. Use `spigot-testing` utilities
 for command-level Bukkit tests when a full server is not needed.
+
+## Static Analysis
+
+Error Prone runs inside `compileJava` / `compileTestJava` of `common`, `spigot`, `paper` and their `-testing`
+modules, so the compile checks above also run it. Its compiler is JDK 21 with `--release` set to the module's toolchain
+version. Fix an error rather than suppressing it; suppress with `@SuppressWarnings("<CheckName>")` only at a site that
+does it on purpose.

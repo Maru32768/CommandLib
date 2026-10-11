@@ -153,7 +153,7 @@ final class TypedClassLinkage {
                 }
                 Class<?> clazz = Class.forName(className, false, loader);
                 // HotSpot links, and so verifies, a class before it reflects its members, without initializing it.
-                clazz.getDeclaredConstructors();
+                Object unused = clazz.getDeclaredConstructors();
                 List<String> referenced = new ArrayList<>(checkReferences(bytes, clazz));
                 // Inherited methods run the code of the supertypes, which the instructions may not name.
                 if (clazz.getSuperclass() != null) {

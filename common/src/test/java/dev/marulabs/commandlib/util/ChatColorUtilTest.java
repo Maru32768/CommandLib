@@ -25,9 +25,7 @@ class ChatColorUtilTest {
     }
 
     @Test
-    void colors_with_same_code_are_equal() {
-        assertThat(ChatColorUtil.RED).isEqualTo(ChatColorUtil.RED)
-                                     .isNotEqualTo(ChatColorUtil.DARK_RED)
-                                     .hasSameHashCodeAs(ChatColorUtil.RED);
+    void colors_with_different_codes_are_not_equal() {
+        assertThat(ChatColorUtil.RED).isNotEqualTo(ChatColorUtil.DARK_RED);
     }
 }

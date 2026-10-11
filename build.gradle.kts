@@ -1,5 +1,8 @@
+import net.ltgt.gradle.errorprone.errorprone
+
 plugins {
     id("com.diffplug.spotless") version "8.10.3"
+    id("net.ltgt.errorprone") version "5.1.1" apply false
 }
 
 allprojects {
@@ -174,5 +177,34 @@ class DoubleBraceInitialization : com.diffplug.spotless.FormatterFunc, java.io.S
             i++
         }
         return lines.joinToString("\n")
+    }
+}
+
+// Error Prone checks the Bukkit-side modules. The typed NMS modules and the modded nodes build with their own
+// toolchains and plugins, so they are left out.
+val errorProneProjectPaths = setOf(
+    ":common",
+    ":common-testing",
+    ":spigot",
+    ":spigot-testing",
+    ":paper",
+    ":paper-testing",
+)
+
+configure(subprojects.filter { it.path in errorProneProjectPaths }) {
+    apply(plugin = "net.ltgt.errorprone")
+
+    dependencies {
+        "errorprone"("com.google.errorprone:error_prone_core:2.50.0")
+    }
+
+    val toolchainVersion = the<JavaPluginExtension>().toolchain.languageVersion
+    val errorProneCompiler = the<JavaToolchainService>().compilerFor { languageVersion.set(JavaLanguageVersion.of(21)) }
+    tasks.withType<JavaCompile>().configureEach {
+        // Error Prone runs only on JDK 21+. --release keeps the bytecode and the JDK API at the module's toolchain
+        // version, which tests and javadoc still use.
+        javaCompiler.set(errorProneCompiler)
+        options.release.set(toolchainVersion.map { it.asInt() })
+        options.errorprone.disableWarningsInGeneratedCode.set(true)
     }
 }
