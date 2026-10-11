@@ -30,6 +30,20 @@ class MyCommandTest {
 }
 ```
 
+`FakeSender.player(...)` and `FakeSender.console()` grant every permission. Use
+`FakeSender.playerBuilder(name)` or `FakeSender.consoleBuilder()` to set several
+attributes at once:
+
+```java
+FakeSender sender = FakeSender.playerBuilder("Alice")
+                              .uniqueId(uuid)
+                              .locale("ja_jp")
+                              .op(false)
+                              .permissions("myplugin.command.mycmd")
+                              .denyPermissions("myplugin.command.mycmd.admin")
+                              .build();
+```
+
 ## NMS-backed Arguments
 
 This section applies to `spigot-testing`.

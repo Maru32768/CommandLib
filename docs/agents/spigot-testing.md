@@ -87,5 +87,10 @@ declaration order. Declare static Bukkit mocks before `CommandTester` so
 as MockBukkit's `PlayerMock`. `MockNMSCommandListenerWrapper` derives Bukkit
 entity, world, and location from the sender when it implements `Entity`.
 
+`FakeSender` is created with `player(...)` / `console()` plus withers, or with
+`playerBuilder(name)` / `consoleBuilder()`. The other testing modules
+(`common-testing`, `paper-testing`, `modded-testing`) expose the same entry
+points; keep them consistent when changing one.
+
 `FakeSender` preserves sent `BaseComponent` values and exposes plain text with
 color stripped through `getSentMessageTexts()`.

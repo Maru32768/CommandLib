@@ -10,7 +10,9 @@ import org.jetbrains.annotations.NotNull;
 import org.mockito.Mockito;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -58,6 +60,20 @@ public final class FakeSender {
                .sendMessage(Mockito.any(Component.class));
 
         return fakeSender;
+    }
+
+    /**
+     * Creates a builder for a non-operator player that has every permission.
+     */
+    public static Builder playerBuilder(@NotNull String name) {
+        return new Builder(false, name, false);
+    }
+
+    /**
+     * Creates a builder for the console, which is an operator and has every permission.
+     */
+    public static Builder consoleBuilder() {
+        return new Builder(true, "Console", true);
     }
 
     private FakeSender(CommandSender commandSender) {
@@ -154,5 +170,85 @@ public final class FakeSender {
                                  .replaceAll("(?i)§[0-9A-FK-ORX]", ""));
         }
         return result;
+    }
+
+    public static final class Builder {
+        private final boolean console;
+        private String name;
+        private UUID uniqueId;
+        private String locale;
+        private boolean op;
+        private Set<String> permissions;
+        private final Set<String> deniedPermissions = new HashSet<>();
+
+        private Builder(boolean console, String name, boolean op) {
+            this.console = console;
+            this.name = name;
+            this.op = op;
+        }
+
+        public Builder name(@NotNull String name) {
+            this.name = name;
+            return this;
+        }
+
+        /**
+         * Sets the player's UUID. {@link #build()} throws for the console, like {@link FakeSender#uniqueId(UUID)}.
+         */
+        public Builder uniqueId(@NotNull UUID uniqueId) {
+            this.uniqueId = uniqueId;
+            return this;
+        }
+
+        /**
+         * Sets the player's locale. {@link #build()} throws for the console, like {@link FakeSender#locale(String)}.
+         */
+        public Builder locale(@NotNull String locale) {
+            this.locale = locale;
+            return this;
+        }
+
+        public Builder op(boolean op) {
+            this.op = op;
+            return this;
+        }
+
+        /**
+         * Grants only the given permission nodes, replacing any earlier call.
+         */
+        public Builder permissions(@NotNull String... permissions) {
+            this.permissions = Set.of(permissions);
+            return this;
+        }
+
+        /**
+         * Denies the given permission nodes. Calls accumulate, and denied nodes win over {@link #permissions}.
+         */
+        public Builder denyPermissions(@NotNull String... permissions) {
+            deniedPermissions.addAll(Arrays.asList(permissions));
+            return this;
+        }
+
+        public FakeSender build() {
+            FakeSender sender = console ? console() : player(name);
+            sender.name(name)
+                  .op(op);
+            if (uniqueId != null) {
+                sender.uniqueId(uniqueId);
+            }
+            if (locale != null) {
+                sender.locale(locale);
+            }
+            if (permissions != null || !deniedPermissions.isEmpty()) {
+                Set<String> granted = permissions;
+                Set<String> denied = Set.copyOf(deniedPermissions);
+                Mockito.when(sender.commandSender.hasPermission(Mockito.anyString()))
+                       .thenAnswer(invocation -> {
+                           String permission = invocation.getArgument(0);
+                           return !denied.contains(permission) && (granted == null || granted.contains(permission));
+                       });
+            }
+            return sender;
+        }
     }
 }

@@ -128,6 +128,49 @@ class CommandTesterTest {
     }
 
     @Nested
+    class Builders {
+        @Test
+        void player_builder_sets_every_attribute() {
+            AtomicReference<String> result = new AtomicReference<>();
+            try (CommandTester tester = new CommandTester(new Command("whoami") {{
+                execute(ctx -> result.set(ctx.getActor()
+                                             .getName() + "," + ctx.getActor()
+                                                                  .getUniqueId()
+                                                                  .orElse(null)));
+            }}, "test")) {
+                UUID uuid = UUID.randomUUID();
+                FakeSender sender = FakeSender.playerBuilder("Alex")
+                                              .name("Steve")
+                                              .uniqueId(uuid)
+                                              .op(true)
+                                              .permissions("test.whoami", "a.b")
+                                              .denyPermissions("a.b")
+                                              .build();
+                tester.execute("whoami", sender);
+
+                assertThat(result.get()).isEqualTo("Steve," + uuid);
+                assertThat(sender.isPlayer()).isTrue();
+                assertThat(sender.isOp()).isTrue();
+                assertThat(sender.hasPermission("a.b")).isFalse();
+                assertThat(sender.hasPermission("c.d")).isFalse();
+            }
+        }
+
+        @Test
+        void console_builder_denies_listed_permissions_only() {
+            FakeSender sender = FakeSender.consoleBuilder()
+                                          .denyPermissions("a.b")
+                                          .build();
+
+            assertThat(sender.getName()).isEqualTo("Server");
+            assertThat(sender.isPlayer()).isFalse();
+            assertThat(sender.isOp()).isTrue();
+            assertThat(sender.hasPermission("a.b")).isFalse();
+            assertThat(sender.hasPermission("c.d")).isTrue();
+        }
+    }
+
+    @Nested
     class Arguments {
         private <T> T parse(CommonArgument<T, CommandContext, ?> argument, String input, FakeSender sender) {
             AtomicReference<T> result = new AtomicReference<>();

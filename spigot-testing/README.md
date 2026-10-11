@@ -80,6 +80,8 @@ class HealCommandTest {
   ordering. They expose the same package-level testing API names, such as `CommandTester` and `FakeSender`.
 - `FakeSender.player()` and `FakeSender.console()` grant all permissions by default. Use `permissions(...)` or Mockito
   stubbing on `asSender()` when testing permission-denied behavior.
+- `FakeSender.playerBuilder(name)` and `FakeSender.consoleBuilder()` set the name, UUID, locale, operator flag, and
+  granted and denied permissions in one place; denied nodes win over granted ones.
 - `getSentMessages()` returns Bungee `BaseComponent` values. Use `getSentMessageTexts()` for plain-text assertions and
   `getSentMessageLegacyTexts()` when color codes matter.
 - `requirePlayer()` and `requireConsole()` work with `FakeSender`; `FakeSender.player()` passes `instanceof Player`

@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -47,6 +48,44 @@ class CommandTesterTest {
         void sent_messages_are_empty_before_execution() {
             assertThat(FakeSender.player("Steve")
                                  .getSentMessages()).isEmpty();
+        }
+
+        @Test
+        void player_builder_sets_every_attribute() {
+            UUID uuid = UUID.randomUUID();
+            FakeSender sender = FakeSender.playerBuilder("Alex")
+                                          .name("Steve")
+                                          .uniqueId(uuid)
+                                          .locale("ja_jp")
+                                          .op(true)
+                                          .permissions("a.b", "c.d")
+                                          .denyPermissions("c.d")
+                                          .build();
+            Player player = (Player) sender.asSender();
+
+            assertThat(player.getName()).isEqualTo("Steve");
+            assertThat(player.getUniqueId()).isEqualTo(uuid);
+            assertThat(player.getLocale()).isEqualTo("ja_jp");
+            assertThat(player.isOp()).isTrue();
+            assertThat(player.hasPermission("a.b")).isTrue();
+            assertThat(player.hasPermission("c.d")).isFalse();
+            assertThat(player.hasPermission("e.f")).isFalse();
+        }
+
+        @Test
+        void console_builder_denies_listed_permissions_only() {
+            FakeSender sender = FakeSender.consoleBuilder()
+                                          .denyPermissions("a.b")
+                                          .build();
+
+            assertThat(sender.asSender()).isInstanceOf(ConsoleCommandSender.class);
+            assertThat(sender.getName()).isEqualTo("Console");
+            assertThat(sender.asSender()
+                             .isOp()).isTrue();
+            assertThat(sender.asSender()
+                             .hasPermission("a.b")).isFalse();
+            assertThat(sender.asSender()
+                             .hasPermission("c.d")).isTrue();
         }
     }
 

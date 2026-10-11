@@ -92,6 +92,55 @@ class FakeSenderTest {
     }
 
     @Test
+    void player_builder_sets_every_attribute() {
+        UUID uuid = UUID.randomUUID();
+        FakeSender sender = FakeSender.playerBuilder("Alex")
+                                      .name("Steve")
+                                      .uniqueId(uuid)
+                                      .op(true)
+                                      .permissions("a.b", "c.d")
+                                      .denyPermissions("c.d")
+                                      .denyPermissions("e.f")
+                                      .locale("ja_jp")
+                                      .build();
+
+        assertThat(sender.getName()).isEqualTo("Steve");
+        assertThat(sender.getUniqueId()).contains(uuid);
+        assertThat(sender.isPlayer()).isTrue();
+        assertThat(sender.isOperator()).isTrue();
+        assertThat(sender.getLocale()).isEqualTo("ja_jp");
+        assertThat(sender.hasPermission("a.b")).isTrue();
+        assertThat(sender.hasPermission("c.d")).isFalse();
+        assertThat(sender.hasPermission("e.f")).isFalse();
+    }
+
+    @Test
+    void builders_default_to_the_factory_senders() {
+        FakeSender player = FakeSender.playerBuilder("Alex")
+                                      .build();
+        FakeSender console = FakeSender.consoleBuilder()
+                                       .build();
+
+        assertThat(player.isOperator()).isFalse();
+        assertThat(player.getUniqueId()).isPresent();
+        assertThat(player.hasPermission("any.node")).isTrue();
+        assertThat(console.getName()).isEqualTo("Console");
+        assertThat(console.isConsole()).isTrue();
+        assertThat(console.isOperator()).isTrue();
+        assertThat(console.getUniqueId()).isEmpty();
+    }
+
+    @Test
+    void builder_type_overrides_the_sender_type() {
+        FakeSender sender = FakeSender.consoleBuilder()
+                                      .type(CommandActorType.COMMAND_BLOCK)
+                                      .build();
+
+        assertThat(sender.getType()).isEqualTo(CommandActorType.COMMAND_BLOCK);
+        assertThat(sender.isConsole()).isFalse();
+    }
+
+    @Test
     void sent_message_texts_strip_legacy_and_hex_colors() {
         FakeSender sender = FakeSender.console();
 

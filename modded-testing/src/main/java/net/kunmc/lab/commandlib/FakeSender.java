@@ -13,7 +13,9 @@ import org.mockito.Mockito;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -57,6 +59,21 @@ public final class FakeSender {
      */
     public static FakeSender console() {
         return new FakeSender(null, CONSOLE_NAME, null, true);
+    }
+
+    /**
+     * Creates a builder for a non-operator fake player. Without {@link Builder#uniqueId(UUID)} the player gets the
+     * offline-mode UUID for its name.
+     */
+    public static Builder playerBuilder(@NotNull String name) {
+        return new Builder(false, name, false);
+    }
+
+    /**
+     * Creates a builder for the server console, which is an operator.
+     */
+    public static Builder consoleBuilder() {
+        return new Builder(true, CONSOLE_NAME, true);
     }
 
     private FakeSender(ServerPlayer player, String name, UUID uniqueId, boolean op) {
@@ -209,6 +226,72 @@ public final class FakeSender {
                .when(player)
                .sendMessage(Mockito.any(Component.class), Mockito.any(UUID.class));
         *///?}
+    }
+
+    public static final class Builder {
+        private final boolean console;
+        private String name;
+        private UUID uniqueId;
+        private boolean op;
+        private Set<String> permissions;
+        private final Set<String> deniedPermissions = new HashSet<>();
+
+        private Builder(boolean console, String name, boolean op) {
+            this.console = console;
+            this.name = name;
+            this.op = op;
+        }
+
+        public Builder name(@NotNull String name) {
+            this.name = name;
+            return this;
+        }
+
+        /**
+         * Sets the player's UUID. {@link #build()} throws for the console, like {@link FakeSender#uniqueId(UUID)}.
+         */
+        public Builder uniqueId(@NotNull UUID uniqueId) {
+            this.uniqueId = uniqueId;
+            return this;
+        }
+
+        /**
+         * Sets whether the sender has the operator permission level (4) instead of level 0.
+         */
+        public Builder op(boolean op) {
+            this.op = op;
+            return this;
+        }
+
+        /**
+         * Grants only the given permission nodes, replacing any earlier call.
+         */
+        public Builder permissions(@NotNull String... permissions) {
+            this.permissions = Set.of(permissions);
+            return this;
+        }
+
+        /**
+         * Denies the given permission nodes. Calls accumulate, and denied nodes win over {@link #permissions}.
+         */
+        public Builder denyPermissions(@NotNull String... permissions) {
+            deniedPermissions.addAll(Arrays.asList(permissions));
+            return this;
+        }
+
+        public FakeSender build() {
+            FakeSender sender = console ? console() : player(name);
+            sender.name(name)
+                  .op(op);
+            if (uniqueId != null) {
+                sender.uniqueId(uniqueId);
+            }
+            Set<String> granted = permissions;
+            Set<String> denied = Set.copyOf(deniedPermissions);
+            sender.permissionCheck = permission -> !denied.contains(permission) && (granted == null || granted.contains(
+                    permission));
+            return sender;
+        }
     }
 
     private final class ConsoleSource implements CommandSource {

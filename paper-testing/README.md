@@ -57,6 +57,8 @@ class HelloCommandTest {
   ordering. They expose the same package-level testing API names, such as `CommandTester` and `FakeSender`.
 - `FakeSender.player()` and `FakeSender.console()` grant all permissions by default. Use `permissions(...)` or Mockito
   stubbing on `asSender()` when testing permission-denied behavior.
+- `FakeSender.playerBuilder(name)` and `FakeSender.consoleBuilder()` set the name, UUID, locale, operator flag, and
+  granted and denied permissions in one place; denied nodes win over granted ones.
 - `getSentMessages()` returns Adventure `Component` values. Use `getSentMessageTexts()` for plain-text assertions.
 - `CommandTester` exposes Brigadier suggestions so tooltip behavior can be asserted.
 - `paper-testing` stubs Paper's vanilla argument provider, selectors, registry-backed arguments, and resolver-backed

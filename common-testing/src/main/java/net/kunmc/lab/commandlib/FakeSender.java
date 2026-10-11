@@ -32,6 +32,24 @@ public final class FakeSender implements CommandActor {
         return new FakeSender("test", null, CommandActorType.UNKNOWN, false, false, Set.of(), Set.of(), null);
     }
 
+    /**
+     * Creates a builder for a non-operator player that has every permission.
+     */
+    public static Builder playerBuilder(String name) {
+        return new Builder(name, UUID.randomUUID(), CommandActorType.PLAYER, false);
+    }
+
+    /**
+     * Creates a builder for the console, which is an operator and has every permission.
+     */
+    public static Builder consoleBuilder() {
+        return new Builder("Console", null, CommandActorType.CONSOLE, true);
+    }
+
+    /**
+     * @deprecated Use {@link #playerBuilder(String)} or {@link #consoleBuilder()}.
+     */
+    @Deprecated
     public FakeSender(String name,
                       UUID uniqueId,
                       CommandActorType type,
@@ -161,5 +179,76 @@ public final class FakeSender implements CommandActor {
             return Optional.of(type.cast(this));
         }
         return Optional.empty();
+    }
+
+    public static final class Builder {
+        private String name;
+        private UUID uniqueId;
+        private CommandActorType type;
+        private boolean operator;
+        private boolean allowAllPermissions = true;
+        private Set<String> permissions = Set.of();
+        private final Set<String> deniedPermissions = new HashSet<>();
+        private String locale;
+
+        private Builder(String name, UUID uniqueId, CommandActorType type, boolean operator) {
+            this.name = name;
+            this.uniqueId = uniqueId;
+            this.type = type;
+            this.operator = operator;
+        }
+
+        public Builder name(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public Builder uniqueId(UUID uniqueId) {
+            this.uniqueId = uniqueId;
+            return this;
+        }
+
+        public Builder type(CommandActorType type) {
+            this.type = type;
+            return this;
+        }
+
+        public Builder op(boolean operator) {
+            this.operator = operator;
+            return this;
+        }
+
+        /**
+         * Grants only the given permission nodes, replacing any earlier call.
+         */
+        public Builder permissions(String... permissions) {
+            this.allowAllPermissions = false;
+            this.permissions = Set.of(permissions);
+            return this;
+        }
+
+        /**
+         * Denies the given permission nodes, even to operators. Calls accumulate.
+         */
+        public Builder denyPermissions(String... permissions) {
+            deniedPermissions.addAll(Arrays.asList(permissions));
+            return this;
+        }
+
+        public Builder locale(String locale) {
+            this.locale = locale;
+            return this;
+        }
+
+        public FakeSender build() {
+            return new FakeSender(name,
+                                  uniqueId,
+                                  type,
+                                  operator,
+                                  allowAllPermissions,
+                                  permissions,
+                                  deniedPermissions,
+                                  locale);
+        }
     }
 }
