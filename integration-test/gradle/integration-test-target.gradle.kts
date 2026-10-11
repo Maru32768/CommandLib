@@ -357,12 +357,49 @@ val stageDockerServerDirectory = tasks.register<Sync>("stageDockerServerDirector
         "ops.json",
     )
     doLast {
-        stagedDockerServerDir.get().asFile.resolve("Dockerfile").writeText(
+        val stagedDir = stagedDockerServerDir.get().asFile
+        // Bukkit-family servers download, patch and remap the server jar, download plugin libraries and generate
+        // the world on their first start. Starting the server once while building the image keeps that work, and
+        // its network access, out of every test run; Docker caches the layer until the staged directory changes.
+        val warmUp = if (isBukkitPlatform) {
+            stagedDir.resolve("commandlib-warmup.sh").writeText(
+                """
+                set -e
+                printf 'eula=true\n' > eula.txt
+                mkfifo /tmp/console
+                java -Dplugin.env=CI $serverLaunchArgs nogui < /tmp/console > /tmp/warmup.log 2>&1 &
+                pid=${'$'}!
+                exec 3> /tmp/console
+                waited=0
+                until grep -q 'Done (' /tmp/warmup.log; do
+                  if ! kill -0 ${'$'}pid 2> /dev/null || [ ${'$'}waited -ge 600 ]; then
+                    cat /tmp/warmup.log
+                    echo 'The server did not start while warming up the image.'
+                    exit 1
+                  fi
+                  sleep 1
+                  waited=${'$'}((waited + 1))
+                done
+                echo stop >&3
+                waited=0
+                while kill -0 ${'$'}pid 2> /dev/null && [ ${'$'}waited -lt 120 ]; do
+                  sleep 1
+                  waited=${'$'}((waited + 1))
+                done
+                kill -9 ${'$'}pid 2> /dev/null || true
+                rm -rf logs crash-reports world/session.lock commandlib-warmup.sh
+                """.trimIndent() + "\n"
+            )
+            "RUN sh commandlib-warmup.sh\n"
+        } else {
+            ""
+        }
+        stagedDir.resolve("Dockerfile").writeText(
             """
             FROM eclipse-temurin:$minecraftJavaVersion-jre
             WORKDIR /workspace/server
             COPY . /workspace/server
-            """.trimIndent() + "\n"
+            """.trimIndent() + "\n" + warmUp
         )
     }
 }

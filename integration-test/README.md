@@ -22,7 +22,7 @@ Each `minecraftIntegrationTest*` task does the following:
 3. Starts the server in Docker through Testcontainers.
 4. Connects a fake player named `Maru32768` through MCProtocolLib.
 5. Lets the fixture execute its command test suite in game.
-6. Waits for the fixture to write a JUnit XML report.
+6. Waits for the fixture to write a complete JUnit XML report.
 7. Fails the Gradle test if the JUnit XML report contains failures or errors.
 
 The report is written under:
@@ -204,7 +204,13 @@ Run all configured targets:
 Each target builds a reusable Docker image for its server base before running the Minecraft integration test. The image
 contains the server jar, generated libraries, helper artifacts, base configuration, and pre-generated overworld data. The
 current fixture artifact is copied into the container at test startup, so normal code changes do not require recopying the
-whole server directory. Gradle marks the image task up-to-date while the staged server base is unchanged.
+whole server directory. Gradle marks the image task up-to-date while the staged server base is unchanged and the image
+still exists in Docker.
+
+For Bukkit-family targets the image build starts the server once (without the fixture) and stops it after `Done`. That
+run downloads and patches the Paper server jar, remaps it, downloads plugin libraries, and generates the world, so a test
+run no longer repeats that work or depends on those downloads. Docker caches the step until the staged server base
+changes; rebuilding the image therefore takes about one extra server start.
 
 Gradle project parallelism is enabled by default, but Minecraft server tests are throttled to avoid starting every
 Docker server at once. The default server-test concurrency is 4.
