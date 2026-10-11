@@ -373,6 +373,13 @@ val buildMinecraftServerImage = tasks.register<Exec>("buildMinecraftServerImage"
     dependsOn(stageDockerServerDirectory)
     inputs.dir(stagedDockerServerDir)
     outputs.file(dockerImageMarker)
+    // The marker outlives the image when it is removed, for example by `docker image prune -a`.
+    outputs.upToDateWhen {
+        providers.exec {
+            commandLine("docker", "image", "inspect", dockerImageName)
+            isIgnoreExitValue = true
+        }.result.get().exitValue == 0
+    }
 
     commandLine(
         "docker",
