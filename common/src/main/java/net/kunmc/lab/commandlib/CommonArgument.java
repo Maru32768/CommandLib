@@ -73,6 +73,16 @@ public abstract class CommonArgument<T, C extends CommonCommandContext<?, ?>, SE
         return (SELF) this;
     }
 
+    /**
+     * Swaps the argument type's default suggestions, where they are enabled, for the given action and keeps every
+     * other suggestion action in place.
+     */
+    protected final void replaceDefaultSuggestions(@NotNull SuggestionAction<C> suggestionAction) {
+        Objects.requireNonNull(suggestionAction);
+        this.suggestionActions.replaceAll(x -> x.isDefaultSuggestions() ? ArgumentSuggestionAction.custom(
+                suggestionAction) : x);
+    }
+
     @SuppressWarnings("unchecked")
     public final SELF additionalParser(@Nullable BiFunction<C, String, T> parser) {
         this.additionalParser = parser;

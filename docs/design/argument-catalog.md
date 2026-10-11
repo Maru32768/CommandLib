@@ -61,7 +61,7 @@
 | `EnchantmentArgument` | `Implemented` | Bukkit `Enchantment`。 |
 | `PotionEffectArgument` | `Implemented` | Bukkit `PotionEffect` / effect handling。 |
 | `ParticleArgument` | `Implemented` | Bukkit particle data。 |
-| `TeamArgument` | `Implemented` | Bukkit scoreboard team。 |
+| `TeamArgument` | `Implemented` | Bukkit scoreboard team。`scoreboard(Supplier<Scoreboard>)` で parse / suggestion ごとに参照する scoreboard を指定可能（省略時は main scoreboard）。 |
 | `NamespacedKeyArgument` | `Implemented` | Bukkit `NamespacedKey`。namespace 省略時は `minecraft`。 |
 | `SoundArgument` | `Implemented` | Bukkit / Paper `Sound` enum。 |
 | `EntityTypeArgument` | `Implemented` | Bukkit / Paper `EntityType` enum。 |
