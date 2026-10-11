@@ -1,6 +1,5 @@
 {
   "name": "commandlib",
-  "version": "0.17.2",
   "description": "Generate, test, or explain code that uses the CommandLib Minecraft command library",
   "author": {
     "name": "Maru32768"

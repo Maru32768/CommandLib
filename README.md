@@ -788,6 +788,15 @@ claude plugin install commandlib@commandlib
 
 Run `/plugin marketplace update commandlib` to pick up newer versions of the skill.
 
+To pin the skill to the CommandLib version your project uses, add the marketplace at that release tag
+(releases from the one after 0.17.2 onward include the plugin):
+
+```
+/plugin marketplace add Maru32768/CommandLib#<version>
+```
+
+To switch versions, run `/plugin marketplace remove commandlib` and add it again with another tag.
+
 2. Download sources via Gradle so the skill has something to read:
 
 ```bash
