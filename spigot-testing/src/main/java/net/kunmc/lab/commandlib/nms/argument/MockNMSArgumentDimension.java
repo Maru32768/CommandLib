@@ -25,6 +25,11 @@ public class MockNMSArgumentDimension extends NMSArgumentDimension {
 
     @Override
     protected World parseImpl(CommandContext<?> ctx, String name) {
-        return CommandTester.getFakeWorld(ctx.getArgument(name, String.class));
+        String key = ctx.getArgument(name, String.class);
+        World world = CommandTester.getFakeWorld(key);
+        if (world == null) {
+            throw MockArgumentTypes.resolveError("Unknown dimension '" + key + "'");
+        }
+        return world;
     }
 }

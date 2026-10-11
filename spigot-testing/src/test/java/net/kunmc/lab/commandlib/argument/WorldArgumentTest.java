@@ -36,8 +36,7 @@ class WorldArgumentTest {
             tester.execute("tp commandlib:missing", sender);
         }
 
-        assertThat(sender.getSentMessageTexts()).containsExactly("Incorrect argument for command",
-                                                                 "tp commandlib:missing<--[HERE]");
+        assertThat(sender.getSentMessageTexts()).containsExactly("Unknown dimension 'commandlib:missing'");
         assertThat(sender.getSentMessages()
                          .get(0)
                          .getColor()

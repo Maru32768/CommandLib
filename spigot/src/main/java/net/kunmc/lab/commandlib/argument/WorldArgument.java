@@ -3,7 +3,6 @@ package net.kunmc.lab.commandlib.argument;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.kunmc.lab.commandlib.Argument;
 import net.kunmc.lab.commandlib.CommandContext;
-import net.kunmc.lab.commandlib.exception.ArgumentParseException;
 import net.kunmc.lab.commandlib.util.nms.argument.NMSArgumentDimension;
 import org.bukkit.World;
 
@@ -20,12 +19,8 @@ public class WorldArgument extends Argument<World, WorldArgument> {
     }
 
     @Override
-    protected World parseImpl(CommandContext ctx) throws CommandSyntaxException, ArgumentParseException {
-        World world = NMSArgumentDimension.create()
-                                          .parse(ctx.getHandle(), name());
-        if (world == null) {
-            throw ArgumentParseException.ofIncorrectInput(name(), ctx, ctx.getInput(name()));
-        }
-        return world;
+    protected World parseImpl(CommandContext ctx) throws CommandSyntaxException {
+        return NMSArgumentDimension.create()
+                                   .parse(ctx.getHandle(), name());
     }
 }
