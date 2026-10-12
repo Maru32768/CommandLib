@@ -75,6 +75,19 @@ dev bundles. Line numbers refer to the commit that adds this document.
   (line 310). Without any cached dispatcher it throws (line 155).
 - Unregister removes the recorded labels with Paper's
   `RootCommandNode.removeCommand`.
+- A plugin enabled after startup (e.g. by PlugMan) installs its handler but has
+  missed the event; on the next tick it calls `Bukkit.reloadData()` if the
+  handler has not run (`reloadIfCommandsEventMissed`).
+- `bootstrap(BootstrapContext, ...)` registers from a `PluginBootstrap`. Paper
+  fires the bootstrap `COMMANDS` handlers in
+  `ReloadableServerResources.loadResources`, before the function library is
+  loaded, so data pack functions can use the commands. The server does not exist
+  then, so the permissions are not added to the plugin manager; CommandLib keeps
+  their defaults and applies them when a permission is neither set on the sender
+  nor registered (`CommandLib.hasPermission`). Paper's `NullCommandSender`, used
+  to compile functions, keeps its "every permission" answer. Bootstrap commands
+  cannot be unregistered, and Paper refuses Bukkit `/reload` while a bootstrapper
+  handles `COMMANDS`.
 
 ## CommandAPI
 
@@ -106,7 +119,7 @@ dev bundles. Line numbers refer to the commit that adds this document.
 | Overriding an existing command | removes the existing label and vanilla node | `putIfAbsent` at runtime | Intentional difference | Documented |
 | Wrapper permission / `/help` | wrapper permission is null, so `/help` lists the command for everyone, under "Minecraft" with "A Mojang provided command." | sets the permission and writes help topics | Missing edge case | Open: set the wrapper permission to the command permission and write a help topic |
 | `/minecraft:reload` | Spigot: kept through `knownCommands`; Paper 1.20.6+: added again on `ServerResourcesReloadedEvent`; paper module: `COMMANDS` handler | same | Correct | - |
-| Data pack functions | functions are compiled against the new resources before CommandLib's commands are there, so they cannot use them | function library points at V; Paper bootstrap registration | Missing feature | Open: point the function library at V on Spigot, support bootstrap registration on Paper |
+| Data pack functions | functions are compiled against the new resources before CommandLib's commands are there, so they cannot use them | function library points at V; Paper bootstrap registration | Missing feature | Spigot: open, point the function library at V. Paper module: fixed, `CommandLib.bootstrap(BootstrapContext, ...)` registers from the bootstrapper's `COMMANDS` handler, which fires before functions are compiled; see below |
 | Bukkit `/reload` (Spigot) | after reload `execute run <command>` fails: no `execute` node in R during `onEnable`, so the node never reaches V | uses V directly | Missing edge case (unsupported server feature) | Open: add a typed NMS accessor for `vanillaCommandDispatcher` and add to and wrap with V |
 | Runtime wrapper dispatcher | wraps with R, which goes stale after a reload but still holds the node | wraps with V | Works, holds the old dispatcher | Open: same V accessor |
 | Paper module, plugin enabled at runtime | the `COMMANDS` handler registers but does not fire until the next reload, so the commands are missing | `Bukkit.reloadData()` after runtime changes | Missing edge case | Fixed: once the plugin is enabled, a task on the next tick calls `Bukkit.reloadData()` if the handler has not run yet (`reloadIfCommandsEventMissed`). Startup fires the event before the first tick, so the check is a no-op there. A reload was chosen over a direct add because Paper has no public way to reach the live dispatcher outside the event (a fresh plugin has nothing cached), and the reload path also adds `<plugin>:<name>`, rebuilds help topics and sends the tree to players. Registering only after `onEnable()` with nothing cached still throws, since Paper then rejects the handler |

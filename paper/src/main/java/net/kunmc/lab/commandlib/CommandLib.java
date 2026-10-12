@@ -6,9 +6,11 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
+import io.papermc.paper.plugin.bootstrap.BootstrapContext;
 import io.papermc.paper.plugin.lifecycle.event.LifecycleEventManager;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import org.bukkit.Bukkit;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
@@ -24,6 +26,7 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
 /**
@@ -40,6 +43,9 @@ import java.util.logging.Level;
  *     }
  * }
  * }</pre>
+ *
+ * <p>Commands that data pack functions use must be registered from a Paper plugin bootstrapper with
+ * {@link #bootstrap}, because functions are compiled before plugins are enabled.
  */
 @SuppressWarnings("UnstableApiUsage")
 public final class CommandLib implements Listener {
@@ -61,6 +67,9 @@ public final class CommandLib implements Listener {
     // Cached from the first COMMANDS lifecycle event so that runtime calls to register() can fall back
     // to direct dispatcher manipulation instead of failing with IllegalStateException.
     private static volatile CommandDispatcher<CommandSourceStack> serverDispatcher;
+    // Bootstrap commands exist before the plugin manager does, so their permissions cannot be registered with it.
+    private static final Map<String, PermissionDefault> BOOTSTRAP_PERMISSION_DEFAULTS = new ConcurrentHashMap<>();
+    private static final String NULL_SENDER_CLASS = "io.papermc.paper.brigadier.NullCommandSender";
     private static final Map<Plugin, PluginRegistrationState> REGISTRATION_STATES = Collections.synchronizedMap(new WeakHashMap<>());
 
     private final Plugin plugin;
@@ -128,6 +137,87 @@ public final class CommandLib implements Listener {
             instance.scheduleMissedCommandsEventCheck();
         }
         return instance;
+    }
+
+    /**
+     * Registers commands from a Paper plugin bootstrapper ({@code PluginBootstrap#bootstrap}), so they exist before
+     * data pack functions are compiled and functions can use them.
+     *
+     * <p>The commands stay registered for the lifetime of the server and are added again on every
+     * {@code /minecraft:reload}; there is no way to unregister them. Paper refuses {@code /reload} while a bootstrapper
+     * handles the commands event. The server does not exist yet during bootstrap, so the command permissions are not
+     * registered with Bukkit's plugin manager; CommandLib applies their defaults itself unless a permission plugin sets
+     * the permission or it is declared in {@code paper-plugin.yml}.
+     *
+     * <pre>{@code
+     * public class MyBootstrap implements PluginBootstrap {
+     *     @Override
+     *     public void bootstrap(BootstrapContext context) {
+     *         CommandLib.bootstrap(context, new MyCommand());
+     *     }
+     * }
+     * }</pre>
+     */
+    public static void bootstrap(@NotNull BootstrapContext context, @NotNull Command command, @NotNull Command... commands) {
+        List<Command> list = new ArrayList<>();
+        list.add(command);
+        Collections.addAll(list, commands);
+        bootstrap(context,
+                  context.getPluginMeta()
+                         .getName()
+                         .toLowerCase() + ".command",
+                  list);
+    }
+
+    /**
+     * Same as {@link #bootstrap(BootstrapContext, Command, Command...)} with a custom permission prefix.
+     */
+    public static void bootstrap(@NotNull BootstrapContext context,
+                                 @NotNull String permissionPrefix,
+                                 @NotNull Collection<? extends Command> commands) {
+        Objects.requireNonNull(context);
+        Objects.requireNonNull(permissionPrefix);
+        Objects.requireNonNull(commands);
+        if (permissionPrefix.isEmpty()) {
+            throw new IllegalArgumentException("permissionPrefix must not be empty");
+        }
+        commands.forEach(Objects::requireNonNull);
+        CommandNameValidator.validateTopLevel(commands);
+
+        List<Command> list = List.copyOf(commands);
+        list.forEach(c -> c.permissions(permissionPrefix)
+                           .forEach(p -> BOOTSTRAP_PERMISSION_DEFAULTS.put(p.getName(), p.getDefault())));
+        context.getLifecycleManager()
+               .registerEventHandler(LifecycleEvents.COMMANDS, event -> {
+                   for (LiteralCommandNode<CommandSourceStack> node : buildNodes(list, permissionPrefix)) {
+                       event.registrar()
+                            .register(node, "");
+                   }
+               });
+    }
+
+    /**
+     * Checks a command permission, applying the default of a bootstrap command permission that nothing registered.
+     */
+    static boolean hasPermission(CommandSender sender, String name) {
+        PermissionDefault bootstrapDefault = BOOTSTRAP_PERMISSION_DEFAULTS.get(name);
+        // The server is null while functions are first compiled, and Paper's sender for compiling functions on a
+        // reload has every permission, like vanilla's NULL source.
+        boolean useSender = bootstrapDefault == null || Bukkit.getServer() == null || sender.getClass()
+                                                                                         .getName()
+                                                                                         .equals(NULL_SENDER_CLASS);
+        if (useSender || sender.isPermissionSet(name) || Bukkit.getPluginManager()
+                                                               .getPermission(name) != null) {
+            return sender.hasPermission(name);
+        }
+        return bootstrapDefault.getValue(sender.isOp());
+    }
+
+    private static List<LiteralCommandNode<CommandSourceStack>> buildNodes(Collection<? extends Command> commands,
+                                                                           String permissionPrefix) {
+        return new CommandNodeCreator<CommandSourceStack, net.kyori.adventure.text.Component, CommandContext, Command>(
+                commands,
+                permissionPrefix).build();
     }
 
     private void doRegister(Collection<? extends Command> commands, String permissionPrefix) {
@@ -453,7 +543,7 @@ public final class CommandLib implements Listener {
         }
 
         private List<LiteralCommandNode<CommandSourceStack>> buildNodes() {
-            return new CommandNodeCreator<>(commands, permissionPrefix).build();
+            return CommandLib.buildNodes(commands, permissionPrefix);
         }
     }
 }

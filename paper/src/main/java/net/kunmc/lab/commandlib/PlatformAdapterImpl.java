@@ -17,20 +17,17 @@ public final class PlatformAdapterImpl implements PlatformAdapter<CommandSourceS
 
     @Override
     public boolean hasPermission(Command command, CommandSourceStack commandSource, String permissionPrefix) {
-        return commandSource.getSender()
-                            .hasPermission(command.permissionName(permissionPrefix));
+        return CommandLib.hasPermission(commandSource.getSender(), command.permissionName(permissionPrefix));
     }
 
     @Override
     public boolean hasPermission(Command command, CommandContext ctx, String permissionPrefix) {
-        return ctx.getSender()
-                  .hasPermission(command.permissionName(permissionPrefix));
+        return CommandLib.hasPermission(ctx.getSender(), command.permissionName(permissionPrefix));
     }
 
     @Override
     public boolean hasPermission(CommandSourceStack commandSource, String permissionNode) {
-        return commandSource.getSender()
-                            .hasPermission(permissionNode);
+        return CommandLib.hasPermission(commandSource.getSender(), permissionNode);
     }
 
     @Override
