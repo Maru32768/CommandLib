@@ -19,6 +19,9 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.PluginDisableEvent;
+import org.bukkit.help.GenericCommandHelpTopic;
+import org.bukkit.help.HelpMap;
+import org.bukkit.help.HelpTopic;
 import org.bukkit.permissions.Permissible;
 import org.bukkit.permissions.Permission;
 import org.bukkit.plugin.EventExecutor;
@@ -36,6 +39,7 @@ public final class CommandLib implements Listener {
     private final String permissionPrefix;
     private final List<CommandNode<?>> registeredCommands = new ArrayList<>();
     private final List<Permission> registeredPermissions = new ArrayList<>();
+    private final List<HelpTopic> registeredHelpTopics = new ArrayList<>();
 
     public static CommandLib register(@NotNull Plugin plugin, @NotNull Command command, @NotNull Command... commands) {
         List<Command> list = new ArrayList<>();
@@ -190,6 +194,9 @@ public final class CommandLib implements Listener {
                                                                 .getCommandDispatcher();
                 RootCommandNode root = dispatcher.getBrigadier()
                                                  .getRoot();
+                CommandMap commandMap = NMSCraftServer.create(plugin.getServer())
+                                                      .getCommandMap();
+                Map<String, Command> commandsByLabel = commandsByLabel(commands);
                 for (CommandNode x : registeredCommands) {
                     removeRegisteredCommand(root, knownCommands, x.getName());
                     removeExecuteRunCommand(root, x.getName());
@@ -197,8 +204,13 @@ public final class CommandLib implements Listener {
                     root.addChild(x);
                     BukkitCommand wrapper = NMSVanillaCommandWrapper.create()
                                                                     .createInstance(dispatcher, x);
-                    wrapper.setPermission(null);
+                    describe(wrapper, commandsByLabel.get(x.getName()), x, permissionPrefix, plugin.getName());
+                    // Marks the wrapper as registered, as SimpleCommandMap#register does; help topics hide others.
+                    wrapper.register(commandMap);
                     knownCommands.put(x.getName(), wrapper);
+                    HelpTopic helpTopic = new GenericCommandHelpTopic(wrapper);
+                    putHelpTopic(Bukkit.getHelpMap(), helpTopic);
+                    registeredHelpTopics.add(helpTopic);
 
                     CommandNode executeRunRoot = executeRunRedirectRoot(root);
                     if (executeRunRoot != null) {
@@ -212,6 +224,73 @@ public final class CommandLib implements Listener {
         }
 
         updatePlayerCommandsLater();
+    }
+
+    private static Map<String, Command> commandsByLabel(Collection<? extends Command> commands) {
+        Map<String, Command> map = new HashMap<>();
+        for (Command command : commands) {
+            map.put(command.name(), command);
+            command.aliases()
+                   .forEach(alias -> map.put(alias, command));
+        }
+        return map;
+    }
+
+    /**
+     * Replaces what VanillaCommandWrapper reports for a Mojang command ("A Mojang provided command.", the
+     * minecraft.command.&lt;name&gt; permission) with the command's own description, usage and permission, which
+     * /help and other plugins read. The Brigadier requirement still checks the permission when the command runs.
+     */
+    static void describe(BukkitCommand wrapper,
+                         Command command,
+                         CommandNode<?> node,
+                         String permissionPrefix,
+                         String pluginName) {
+        wrapper.setPermission(command.permissionName(permissionPrefix));
+        String description = command.staticDescription();
+        wrapper.setDescription(description == null || description.isEmpty() ? "A command by the " + pluginName + " plugin." : description);
+        wrapper.setUsage(usage(node));
+        List<String> otherLabels = new ArrayList<>();
+        otherLabels.add(command.name());
+        otherLabels.addAll(command.aliases());
+        otherLabels.remove(node.getName());
+        wrapper.setAliases(otherLabels);
+    }
+
+    private static String usage(CommandNode<?> node) {
+        List<String> lines = new ArrayList<>();
+        if (node.getCommand() != null) {
+            lines.add("/<command>");
+        }
+        node.getChildren()
+            .forEach(child -> lines.add("/<command> " + child.getUsageText()));
+        if (lines.size() == 1) {
+            return lines.get(0);
+        }
+        StringBuilder sb = new StringBuilder();
+        lines.forEach(line -> sb.append("\n- ")
+                                .append(line));
+        return sb.toString();
+    }
+
+    /**
+     * HelpMap#addTopic keeps an existing topic of the same name, so that one is removed first, as the command map
+     * entry it described is replaced as well. CraftBukkit's getHelpTopics() is a live view of its topics.
+     */
+    static void putHelpTopic(HelpMap helpMap, HelpTopic topic) {
+        HelpTopic existing = helpMap.getHelpTopic(topic.getName());
+        if (existing != null) {
+            helpMap.getHelpTopics()
+                   .remove(existing);
+        }
+        helpMap.addTopic(topic);
+    }
+
+    static void removeHelpTopic(HelpMap helpMap, HelpTopic topic) {
+        if (helpMap.getHelpTopic(topic.getName()) == topic) {
+            helpMap.getHelpTopics()
+                   .remove(topic);
+        }
     }
 
     @EventHandler
@@ -238,6 +317,8 @@ public final class CommandLib implements Listener {
         } finally {
             HandlerList.unregisterAll(this);
             unregisterPermissions();
+            registeredHelpTopics.forEach(topic -> removeHelpTopic(Bukkit.getHelpMap(), topic));
+            registeredHelpTopics.clear();
             registeredCommands.clear();
             registeredPermissions.clear();
 

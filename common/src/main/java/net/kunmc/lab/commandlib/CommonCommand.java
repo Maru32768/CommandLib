@@ -16,6 +16,7 @@ import java.util.function.Predicate;
 public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T extends CommonCommand<C, T>> {
     private final String name;
     private Function<C, String> description = ctx -> "";
+    private String staticDescription = "";
     private String permissionNodeOverride = null;
     private DefaultPermission defaultPermissionOverride = null;
     private String permissionDescription = "";
@@ -51,10 +52,20 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
 
     public final void description(@NotNull String description) {
         this.description = ctx -> Objects.requireNonNull(description);
+        this.staticDescription = description;
     }
 
     public final void description(@NotNull Function<C, String> description) {
         this.description = Objects.requireNonNull(description);
+        this.staticDescription = null;
+    }
+
+    /**
+     * The description set as a string, for places without a command context such as a server help index. Null when
+     * the description is computed from the context.
+     */
+    final String staticDescription() {
+        return staticDescription;
     }
 
     @SafeVarargs

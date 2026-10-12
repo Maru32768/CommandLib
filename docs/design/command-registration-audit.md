@@ -41,7 +41,7 @@ dev bundles. Line numbers refer to the commit that adds this document.
 
 - `enable()` (line 177): builds the nodes, removes any command with the same
   name from R and from the command map, adds each node to R, puts a
-  `VanillaCommandWrapper(R, node)` with a null permission into `knownCommands`,
+  `VanillaCommandWrapper(R, node)` into `knownCommands`,
   and adds the node to the root that `execute run` redirects to (V), lines
   195-206.
 - In `onEnable` during startup R is V, so the node lands in V and CraftBukkit
@@ -52,8 +52,9 @@ dev bundles. Line numbers refer to the commit that adds this document.
 - Paper 1.20.6+ (`usesPaperCommandDispatcher()`, line 135): nodes are added to
   Paper's dispatcher wrapped in `ShadowBrigNode` (line 165) and added again on
   `ServerResourcesReloadedEvent` (line 103).
-- Permissions are checked only by the Brigadier `requires` predicate, which
-  asks the Bukkit sender for `<prefix>.<command>`.
+- Permissions are checked by the Brigadier `requires` predicate, which asks
+  the Bukkit sender for `<prefix>.<command>`. The wrapper carries the same
+  permission, so Bukkit's `testPermission` and `/help` agree with it.
 - Unregister (line 302, also on `PluginDisableEvent`, line 218) removes the
   nodes from R, from V (through the redirect), and from `knownCommands`; then
   players get `updateCommands()` on the next tick (line 291). The update is
@@ -127,7 +128,7 @@ dev bundles. Line numbers refer to the commit that adds this document.
 | Paper module direct add | `addChild` merged into a same-named command, keeping its requirement and children | goes through the registrar | Bug | Fixed: `replaceChild` (line 387) removes the command first |
 | `plugin:<name>` label (spigot module) | not added | added (`fixNamespaces`, runtime path) | Missing feature | Open: add the label when the plugin namespace is wanted |
 | Overriding an existing command | removes the existing label and vanilla node | `putIfAbsent` at runtime | Intentional difference | Documented |
-| Wrapper permission / `/help` | wrapper permission is null, so `/help` lists the command for everyone, under "Minecraft" with "A Mojang provided command." | sets the permission and writes help topics | Missing edge case | Open: set the wrapper permission to the command permission and write a help topic |
+| Wrapper permission / `/help` | wrapper permission was null and its description "A Mojang provided command." | sets the permission and writes help topics | Missing edge case | Fixed on Spigot and Paper before 1.20.6: the wrapper takes the command permission, the string description (or "A command by the &lt;plugin&gt; plugin."), a usage built from the node's children and the other labels as aliases, and each label gets a `GenericCommandHelpTopic` that replaces an existing topic of that name; unregister removes the topics (`describe`, `putHelpTopic`). CraftBukkit still files the wrapper under the "Minecraft" plugin index, because that index is chosen by the wrapper class. |
 | `/minecraft:reload` | Spigot: kept through `knownCommands`; Paper 1.20.6+: added again on `ServerResourcesReloadedEvent`; paper module: `COMMANDS` handler | same | Correct | - |
 | Data pack functions | functions are compiled against the new resources before CommandLib's commands are there, so they cannot use them | function library points at V; Paper bootstrap registration | Missing feature | Spigot: open, point the function library at V. Paper module: fixed, `CommandLib.bootstrap(BootstrapContext, ...)` registers from the bootstrapper's `COMMANDS` handler, which fires before functions are compiled (see "paper module" above) |
 | Bukkit `/reload` (Spigot) | after reload `execute run <command>` fails: no `execute` node in R during `onEnable`, so the node never reaches V | uses V directly | Missing edge case (unsupported server feature) | Open: add a typed NMS accessor for `vanillaCommandDispatcher` and add to and wrap with V |
