@@ -164,9 +164,9 @@ No `bukkit` artifact is published for GA.
 
 The `spigot` artifact should preserve the current Bukkit-family public API shape as much as possible:
 
-- `net.kunmc.lab.commandlib.Command`
-- `net.kunmc.lab.commandlib.CommandContext`
-- `net.kunmc.lab.commandlib.CommandLib`
+- `dev.marulabs.commandlib.Command`
+- `dev.marulabs.commandlib.CommandContext`
+- `dev.marulabs.commandlib.CommandLib`
 - current Bukkit/Spigot argument classes
 
 Responsibilities:

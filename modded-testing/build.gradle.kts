@@ -5,7 +5,7 @@ plugins {
 // The version projects are named like the modded module's (<loader>-<minecraft version>), so a distinct group keeps
 // Gradle from treating :modded:<node> and this project as the same module. The published groupId is set by the
 // root build.
-group = "net.kunmc.lab.modded-testing"
+group = "dev.marulabs.modded-testing"
 
 apply(from = rootProject.file("gradle/modded-node.gradle.kts"))
 val loader = extra["modded.loader"].toString()

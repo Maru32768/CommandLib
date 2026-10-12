@@ -131,7 +131,7 @@ is left out.
 2. Generate the classes with `tools/nms-codegen` (see its README): add the module, its versions and, for a Spigot
    module, its CraftBukkit package to `MODULES` in `generate.py`, then run `uv run generate.py <module>`. That also
    writes the module table to `TypedNmsModules`, and `settings.gradle.kts` fails for a module directory missing from
-   it. Classes go to `net.kunmc.lab.commandlib.nms.<module>`, named `<NMSWrapper>_<module>` with dots replaced by
+   it. Classes go to `dev.marulabs.commandlib.nms.<module>`, named `<NMSWrapper>_<module>` with dots replaced by
    underscores, such as `NMSArgumentPlayer_spigot_1_20_4`, and are listed in `TypedNmsClasses`. Where the Minecraft
    API changed, add a version flag in `mojang.py` rather than editing the generated classes, which a regeneration
    overwrites. A new wrapper needs a class in every module whose versions use it.

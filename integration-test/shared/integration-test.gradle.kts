@@ -147,7 +147,7 @@ val defaultPluginJarDownloads = mutableListOf(
 )
 val pluginJarDownloads = project.optionalListProperty("pluginJarDownloads").ifEmpty { defaultPluginJarDownloads }
 
-group = "net.kunmc.lab"
+group = "dev.marulabs"
 version = "1.0.0"
 
 repositories {
@@ -209,8 +209,7 @@ val projectNameLower = project.name.lowercase()
 tasks.named<ShadowJar>("shadowJar") {
     mergeServiceFiles()
     archiveFileName.set("${rootProject.name}-${project.version}.jar")
-    relocate("net.kunmc.lab.commandlib", "$projectGroup.$projectNameLower.commandlib")
-    relocate("net.kunmc.lab.configlib", "$projectGroup.$projectNameLower.configlib")
+    relocate("dev.marulabs.commandlib", "$projectGroup.$projectNameLower.commandlib")
     exclude("net/minecraft")
     exclude("org/bukkit")
     exclude("com/mojang")

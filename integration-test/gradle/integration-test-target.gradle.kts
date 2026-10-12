@@ -31,7 +31,7 @@ repositories {
 
 // Targets are named like the modded nodes (<loader>-<minecraft version>), so a distinct group keeps Gradle from
 // treating :modded:<node> and the target as the same module.
-group = "net.kunmc.lab.integration.target"
+group = "dev.marulabs.integration.target"
 
 val targetName = project.name
 val targetPlatform = extra["commandlib.integration.platform"].toString()
@@ -588,7 +588,7 @@ tasks.register<Test>("minecraftIntegrationTest") {
     classpath = files(sourceSets["test"].runtimeClasspath, mcProtocol)
     useJUnitPlatform()
     filter {
-        includeTestsMatching("net.kunmc.lab.commandlib.integration.IntegrationTest")
+        includeTestsMatching("dev.marulabs.commandlib.integration.IntegrationTest")
     }
     testLogging {
         events("started", "passed", "skipped", "failed", "standardOut", "standardError")

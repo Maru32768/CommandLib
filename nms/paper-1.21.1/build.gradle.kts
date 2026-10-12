@@ -31,7 +31,7 @@ dependencies {
     compileOnly(project(":spigot"))
 }
 
-val typedPackage = "net/kunmc/lab/commandlib/nms/paper_1_21_1"
+val typedPackage = "dev/marulabs/commandlib/nms/paper_1_21_1"
 
 val writeSpigotPackageMapping by tasks.registering {
     val mapping = layout.buildDirectory.file("remap/spigot-package.srg")

@@ -42,17 +42,17 @@ If extracted JAR, use `/tmp/commandlib-sources/` as the base path. If
 Read the files relevant to the user's request. Common public API files include:
 
 - `README.md`
-- `spigot/src/main/java/net/kunmc/lab/commandlib/CommandLib.java`
-- `spigot/src/main/java/net/kunmc/lab/commandlib/Command.java`
-- `spigot/src/main/java/net/kunmc/lab/commandlib/CommandContext.java`
-- `common/src/main/java/net/kunmc/lab/commandlib/CommonCommand.java`
-- `common/src/main/java/net/kunmc/lab/commandlib/DefaultPermission.java`
-- `common/src/main/java/net/kunmc/lab/commandlib/CommandOption.java`
-- `common/src/main/java/net/kunmc/lab/commandlib/Options.java`
-- `common/src/main/java/net/kunmc/lab/commandlib/branch/ArgumentBranch.java`
-- `common/src/main/java/net/kunmc/lab/commandlib/ArgumentBuilder.java`
-- `common/src/main/java/net/kunmc/lab/commandlib/CommonArgument.java`
-- `spigot/src/main/java/net/kunmc/lab/commandlib/argument/`
+- `spigot/src/main/java/dev/marulabs/commandlib/CommandLib.java`
+- `spigot/src/main/java/dev/marulabs/commandlib/Command.java`
+- `spigot/src/main/java/dev/marulabs/commandlib/CommandContext.java`
+- `common/src/main/java/dev/marulabs/commandlib/CommonCommand.java`
+- `common/src/main/java/dev/marulabs/commandlib/DefaultPermission.java`
+- `common/src/main/java/dev/marulabs/commandlib/CommandOption.java`
+- `common/src/main/java/dev/marulabs/commandlib/Options.java`
+- `common/src/main/java/dev/marulabs/commandlib/branch/ArgumentBranch.java`
+- `common/src/main/java/dev/marulabs/commandlib/ArgumentBuilder.java`
+- `common/src/main/java/dev/marulabs/commandlib/CommonArgument.java`
+- `spigot/src/main/java/dev/marulabs/commandlib/argument/`
 
 Paper and Forge/NeoForge projects use `paper/` or `modded/` in place of
 `spigot/`. For extracted JAR sources, map those paths to the extracted package layout.

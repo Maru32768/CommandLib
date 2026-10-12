@@ -5,8 +5,8 @@ import shutil
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-NMS_SOURCES = ROOT / "spigot/src/main/java/net/kunmc/lab/commandlib/util/nms"
-BASE_PACKAGE = "net.kunmc.lab.commandlib.util.nms"
+NMS_SOURCES = ROOT / "spigot/src/main/java/dev/marulabs/commandlib/util/nms"
+BASE_PACKAGE = "dev.marulabs.commandlib.util.nms"
 NL = "\n"
 
 
@@ -34,7 +34,7 @@ IMPLICIT_IMPORTS = [
 
 
 def module_package(module):
-    return "net.kunmc.lab.commandlib.nms." + module.replace("-", "_").replace(".", "_")
+    return "dev.marulabs.commandlib.nms." + module.replace("-", "_").replace(".", "_")
 
 
 def source_directory(module):

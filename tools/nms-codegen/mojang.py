@@ -570,7 +570,7 @@ HELPER_PACKAGE = module_package(M)
 if HAS_BUILD_CONTEXT:
     write_source(M, HELPER_PACKAGE, "BuildContexts", f"""package {HELPER_PACKAGE};
 
-import net.kunmc.lab.commandlib.util.nms.server.NMSCraftServer;
+import dev.marulabs.commandlib.util.nms.server.NMSCraftServer;
 import net.minecraft.commands.CommandBuildContext;
 
 final class BuildContexts {{

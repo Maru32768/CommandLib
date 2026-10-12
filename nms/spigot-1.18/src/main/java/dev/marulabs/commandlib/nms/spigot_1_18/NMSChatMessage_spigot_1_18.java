@@ -1,0 +1,21 @@
+package dev.marulabs.commandlib.nms.spigot_1_18;
+
+import com.mojang.brigadier.Message;
+import dev.marulabs.commandlib.util.nms.chat.NMSChatMessage;
+import net.minecraft.network.chat.TranslatableComponent;
+
+public class NMSChatMessage_spigot_1_18 extends NMSChatMessage {
+    public NMSChatMessage_spigot_1_18(Message handle) {
+        super(handle, TranslatableComponent.class);
+    }
+
+    @Override
+    public String getKey() {
+        return ((TranslatableComponent) getHandle()).getKey();
+    }
+
+    @Override
+    public Object[] getArgs() {
+        return ((TranslatableComponent) getHandle()).getArgs();
+    }
+}

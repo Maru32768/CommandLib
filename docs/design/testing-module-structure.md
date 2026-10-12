@@ -86,7 +86,7 @@ Migration from `bukkit-test`:
 
 - Rename / move the `bukkit-test` module to `spigot-test`.
 - Change `api(project(":bukkit"))` to `api(project(":spigot"))`.
-- Keep the public package `net.kunmc.lab.commandlib`.
+- Keep the public package `dev.marulabs.commandlib`.
 - Keep the NMS mock package for now, aligned with the NMS util in the Spigot module.
 - README / downstream docs point to the `spigot-test` artifact.
 

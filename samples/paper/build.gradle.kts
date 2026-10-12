@@ -5,7 +5,7 @@ plugins {
     id("com.gradleup.shadow") version "9.4.1"
 }
 
-group = "net.kunmc.lab"
+group = "dev.marulabs"
 version = "1.0.0"
 
 repositories {
@@ -47,6 +47,6 @@ val projectGroup = project.group.toString()
 val projectNameLower = project.name.lowercase()
 tasks.named<ShadowJar>("shadowJar") {
     archiveFileName.set("${rootProject.name}-${project.version}.jar")
-    relocate("net.kunmc.lab.commandlib", "$projectGroup.$projectNameLower.commandlib")
+    relocate("dev.marulabs.commandlib", "$projectGroup.$projectNameLower.commandlib")
 }
 tasks.named("build") { dependsOn(tasks.named("shadowJar")) }

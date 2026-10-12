@@ -55,7 +55,7 @@ val collectTypedNms by tasks.registering(Sync::class) {
 tasks.named<Jar>("jar") {
     // Only the classes: each module jar also carries the LICENSE that this jar already has.
     from(typedNms.elements.map { files -> files.map { zipTree(it.asFile) } }) {
-        include("net/kunmc/lab/commandlib/nms/**")
+        include("dev/marulabs/commandlib/nms/**")
     }
 }
 

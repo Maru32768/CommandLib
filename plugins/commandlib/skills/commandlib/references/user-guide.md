@@ -45,7 +45,7 @@ public class MyPlugin extends JavaPlugin {
 ```
 
 The `Command` and `CommandContext` classes in the `paper` artifact are in the
-same package (`net.kunmc.lab.commandlib`) as in `spigot`, so command class
+same package (`dev.marulabs.commandlib`) as in `spigot`, so command class
 source is portable between the two artifacts with no import changes. The key
 differences are the registration timing and the message path:
 `CommandContext.sendSuccess(String)` uses Adventure `Component` internally on
@@ -62,8 +62,8 @@ Paper, and Forge / NeoForge, so code shared between platforms can send colors, d
 actions:
 
 ```java
-import net.kunmc.lab.commandlib.util.text.ClickAction;
-import net.kunmc.lab.commandlib.util.text.RichText;
+import dev.marulabs.commandlib.util.text.ClickAction;
+import dev.marulabs.commandlib.util.text.RichText;
 
 ctx.sendMessage(RichText.text("difficulty: ")
                         .append(RichText.text("hard")
@@ -109,7 +109,7 @@ execution, tab completion, generated help, and the permission nodes registered
 by CommandLib.
 
 ```java
-import net.kunmc.lab.commandlib.DefaultPermission;
+import dev.marulabs.commandlib.DefaultPermission;
 
 class ConfigCommand extends Command {
     ConfigCommand() {

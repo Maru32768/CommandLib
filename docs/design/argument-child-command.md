@@ -171,8 +171,8 @@ void addChildren(Collection<? extends T> children);
 `CommonCommand` creates the delegate for a specific `Arguments` instance. This
 keeps the package split clean:
 
-- `net.kunmc.lab.commandlib.branch`: public branch API
-- `net.kunmc.lab.commandlib`: internal command model and tree mutation
+- `dev.marulabs.commandlib.branch`: public branch API
+- `dev.marulabs.commandlib`: internal command model and tree mutation
 
 ## Child Addition Flow
 
@@ -397,7 +397,7 @@ use a real Brigadier command tree shape that fails without that fallback.
 ## Design Constraints
 
 - Keep `Arguments` package-private unless there is a strong reason to expose it.
-- Keep branch classes in `net.kunmc.lab.commandlib.branch` to avoid crowding the
+- Keep branch classes in `dev.marulabs.commandlib.branch` to avoid crowding the
   root package.
 - Prefer arity-prefix names (`BiArgumentBranch`, `TriArgumentBranch`) over
   numbered names (`ArgumentBranch2`, `ArgumentBranch3`).

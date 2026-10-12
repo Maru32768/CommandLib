@@ -58,7 +58,7 @@ dependencies {
 shadowJar {
     archiveFileName = "${rootProject.name}-${project.version}.jar"
     // Avoid package conflicts
-    relocate "net.kunmc.lab.commandlib", "${project.group}.${project.name.toLowerCase()}.commandlib"
+    relocate "dev.marulabs.commandlib", "${project.group}.${project.name.toLowerCase()}.commandlib"
 }
 tasks.build.dependsOn tasks.shadowJar
 ```
@@ -88,7 +88,7 @@ val projectNameLower = project.name.lowercase()
 tasks.named<ShadowJar>("shadowJar") {
     archiveFileName.set("${rootProject.name}-${project.version}.jar")
     // Avoid package conflicts
-    relocate("net.kunmc.lab.commandlib", "$projectGroup.$projectNameLower.commandlib")
+    relocate("dev.marulabs.commandlib", "$projectGroup.$projectNameLower.commandlib")
 }
 tasks.named("build") { dependsOn(tasks.named("shadowJar")) }
 ```
@@ -114,7 +114,7 @@ dependencies {
 shadowJar {
     archiveFileName = "${rootProject.name}-${project.version}.jar"
     // Avoid package conflicts
-    relocate "net.kunmc.lab.commandlib", "${project.group}.${project.name.toLowerCase()}.commandlib"
+    relocate "dev.marulabs.commandlib", "${project.group}.${project.name.toLowerCase()}.commandlib"
 }
 tasks.build.dependsOn tasks.shadowJar
 ```
@@ -146,7 +146,7 @@ val projectNameLower = project.name.lowercase()
 tasks.named<ShadowJar>("shadowJar") {
     archiveFileName.set("${rootProject.name}-${project.version}.jar")
     // Avoid package conflicts
-    relocate("net.kunmc.lab.commandlib", "$projectGroup.$projectNameLower.commandlib")
+    relocate("dev.marulabs.commandlib", "$projectGroup.$projectNameLower.commandlib")
 }
 tasks.named("build") { dependsOn(tasks.named("shadowJar")) }
 ```
@@ -177,7 +177,7 @@ shadowJar {
         include(dependency("com.github.Maru32768.CommandLib:forge-1.20.1:.*"))
     }
     // Avoid package conflicts
-    relocate "net.kunmc.lab.commandlib", "${project.group}.${project.name.toLowerCase()}.commandlib"
+    relocate "dev.marulabs.commandlib", "${project.group}.${project.name.toLowerCase()}.commandlib"
     finalizedBy("reobfShadowJar")
 }
 
@@ -215,7 +215,7 @@ tasks.named<ShadowJar>("shadowJar") {
         include(dependency("com.github.Maru32768.CommandLib:forge-1.20.1:.*"))
     }
     // Avoid package conflicts
-    relocate("net.kunmc.lab.commandlib", "$projectGroup.$projectNameLower.commandlib")
+    relocate("dev.marulabs.commandlib", "$projectGroup.$projectNameLower.commandlib")
     finalizedBy("reobfShadowJar")
 }
 
@@ -251,7 +251,7 @@ tasks.named<ShadowJar>("shadowJar") {
         include(dependency("com.github.Maru32768.CommandLib:neoforge-1.21.1:.*"))
     }
     // Avoid package conflicts
-    relocate("net.kunmc.lab.commandlib", "$projectGroup.$projectNameLower.commandlib")
+    relocate("dev.marulabs.commandlib", "$projectGroup.$projectNameLower.commandlib")
 }
 ```
 
@@ -589,8 +589,8 @@ Paper, and Forge / NeoForge, so code shared between platforms can send colors, d
 actions:
 
 ```java
-import net.kunmc.lab.commandlib.util.text.ClickAction;
-import net.kunmc.lab.commandlib.util.text.RichText;
+import dev.marulabs.commandlib.util.text.ClickAction;
+import dev.marulabs.commandlib.util.text.RichText;
 
 ctx.sendMessage(RichText.text("difficulty: ")
                         .append(RichText.text("hard")
@@ -668,7 +668,7 @@ Control who has the permission by default with CommandLib's `DefaultPermission` 
 Subcommands inherit their parent command's default unless you override them.
 
 ```java
-import net.kunmc.lab.commandlib.DefaultPermission;
+import dev.marulabs.commandlib.DefaultPermission;
 
 public final class TestCommand extends Command {
     public TestCommand() {
@@ -741,7 +741,7 @@ Use CommandLib's common `DefaultPermission` enum to control the default for an a
 argument branch inherits the parent command's default:
 
 ```java
-import net.kunmc.lab.commandlib.DefaultPermission;
+import dev.marulabs.commandlib.DefaultPermission;
 
 public final class ConfigCommand extends Command {
     public ConfigCommand() {

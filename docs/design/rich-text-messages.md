@@ -4,8 +4,7 @@ This document describes how CommandLib's message API (formerly `TextComponentBui
 `sendMessageWithOption`, and `sendComponent`) was rebuilt as an official rich text API that works on every platform.
 
 Status: Phase 1 is implemented. The decisions taken on the former open questions are listed in
-[Decisions](#decisions). Package names use the current `net.kunmc.lab.commandlib` (the layout stays the same after the
-rename to `dev.marulabs`).
+[Decisions](#decisions). Package names use `dev.marulabs.commandlib`.
 
 ## Background
 
@@ -81,7 +80,7 @@ MiniMessage.
 
 ## API
 
-### Value type `RichText` (common, `net.kunmc.lab.commandlib.util.text`)
+### Value type `RichText` (common, `dev.marulabs.commandlib.util.text`)
 
 ```java
 public final class RichText {

@@ -24,7 +24,7 @@ run concurrently on different test threads.
 ## Package Structure
 
 ```text
-net.kunmc.lab.commandlib
+dev.marulabs.commandlib
 |-- CommandTester.java
 |-- FakeSender.java
 `-- nms/

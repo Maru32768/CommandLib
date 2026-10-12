@@ -131,7 +131,7 @@ permission metadata. For default permission metadata on argument branches, use
 CommandLib's `DefaultPermission` enum.
 
 ```java
-import net.kunmc.lab.commandlib.DefaultPermission;
+import dev.marulabs.commandlib.DefaultPermission;
 
 class ConfigCommand extends Command {
     ConfigCommand() {

@@ -8,7 +8,7 @@ plugins {
     id("com.gradleup.shadow") version "9.4.1"
 }
 
-group = "net.kunmc.lab"
+group = "dev.marulabs"
 version = "1.0.0"
 
 base.archivesName.set("samplemod")
@@ -99,7 +99,7 @@ tasks.named<ShadowJar>("shadowJar") {
     dependencies {
         include(dependency("com.github.Maru32768.CommandLib:forge:.*"))
     }
-    relocate("net.kunmc.lab.commandlib", "$projectGroup.$projectNameLower.commandlib")
+    relocate("dev.marulabs.commandlib", "$projectGroup.$projectNameLower.commandlib")
     finalizedBy("reobfShadowJar")
 }
 

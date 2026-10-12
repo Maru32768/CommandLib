@@ -22,7 +22,7 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
     filter {
-        excludeTestsMatching("net.kunmc.lab.commandlib.integration.IntegrationTest")
+        excludeTestsMatching("dev.marulabs.commandlib.integration.IntegrationTest")
     }
     // Real-server tests live in integration-test:targets:* and are intentionally opt-in there.
     // Keeping this property false by default preserves the lightweight coverage check on :integration-test:test.
