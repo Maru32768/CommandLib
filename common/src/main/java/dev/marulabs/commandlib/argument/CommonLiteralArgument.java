@@ -20,7 +20,7 @@ public class CommonLiteralArgument<C extends CommonCommandContext<?, ?>, SELF ex
     public CommonLiteralArgument(String name, Supplier<Collection<String>> literalsSupplier) {
         super(name, StringArgumentType.string());
         this.literalsSupplier = Objects.requireNonNull(literalsSupplier);
-        addSuggestionAction(sb -> {
+        addSuggestionProvider(sb -> {
             literalsSupplier.get()
                             .stream()
                             .filter(x -> sb.getLatestInput()

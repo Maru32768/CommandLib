@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
  *
  * <pre>{@code
  * argument(new StringArgument("key")
- *     .addSuggestionAction(sb -> sb.suggest("difficulty",
+ *     .addSuggestionProvider(sb -> sb.suggest("difficulty",
  *         PaperMessages.toMessage(Component.text("The world difficulty").color(NamedTextColor.GRAY)))));
  * }</pre>
  */

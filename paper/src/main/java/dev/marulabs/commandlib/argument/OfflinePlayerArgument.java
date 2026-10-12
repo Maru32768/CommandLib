@@ -16,7 +16,7 @@ public class OfflinePlayerArgument extends Argument<OfflinePlayer, OfflinePlayer
     public OfflinePlayerArgument(String name) {
         super(name, StringArgumentType.word());
 
-        addSuggestionAction(sb -> {
+        addSuggestionProvider(sb -> {
             Arrays.stream(Bukkit.getOfflinePlayers())
                   .filter(filter(sb.getContext()))
                   .map(OfflinePlayer::getName)

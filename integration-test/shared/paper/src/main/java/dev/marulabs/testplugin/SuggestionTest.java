@@ -23,12 +23,12 @@ public final class SuggestionTest extends TestBase {
 
     private List<String> suggestionLatestInput() {
         String key = getKey();
-        putResult(new TestResult(key, TestStatus.FAILED, "Suggestion action was not called before verification."));
+        putResult(new TestResult(key, TestStatus.FAILED, "Suggestion provider was not called before verification."));
 
         // Receives tab-complete requests; records getLatestInput() for later verification.
         command.addChildren(new Command("suggestionCapture") {{
             permission(PermissionDefault.TRUE);
-            argument(new StringArgument("a").addSuggestionAction(builder -> {
+            argument(new StringArgument("a").addSuggestionProvider(builder -> {
                 capturedLatestInput.set(builder.getLatestInput());
                 builder.suggest("result");
             })).execute((a, ctx) -> {
@@ -41,7 +41,7 @@ public final class SuggestionTest extends TestBase {
             execute(ctx -> {
                 String captured = capturedLatestInput.get();
                 if (captured == null) {
-                    putResult(new TestResult(key, TestStatus.FAILED, "Suggestion action was not called."));
+                    putResult(new TestResult(key, TestStatus.FAILED, "Suggestion provider was not called."));
                 } else {
                     putResult(key, captured, "abc");
                 }

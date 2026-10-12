@@ -21,7 +21,7 @@ public class ObjectiveArgument extends Argument<Objective, ObjectiveArgument> {
 
     public ObjectiveArgument(String name) {
         super(name, StringArgumentType.word());
-        addSuggestionAction(sb -> {
+        addSuggestionProvider(sb -> {
             Scoreboard scoreboard = scoreboardSupplier.get();
             if (scoreboard == null) {
                 return;

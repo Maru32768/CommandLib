@@ -184,7 +184,7 @@ class CommonArgumentTest {
     @Test
     void suggestions_support_async_actions() {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("search") {{
-            argument(new StrArg("word").addSuggestionAction(sb -> sb.await(CompletableFuture.runAsync(() -> {
+            argument(new StrArg("word").addSuggestionProvider(sb -> sb.await(CompletableFuture.runAsync(() -> {
                 sb.suggest("alpha");
                 sb.suggest("beta");
             })))).execute((word, ctx) -> {
@@ -197,16 +197,16 @@ class CommonArgumentTest {
     @Test
     void default_suggestions_can_be_cleared_and_restored() {
         TestCommandRunner addedRunner = new TestCommandRunner(new TestCommand("pick") {{
-            argument(new DefaultSuggestingArg("value").addSuggestionAction(sb -> sb.suggest("custom"))).execute((value,
-                                                                                                                 ctx) -> {
+            argument(new DefaultSuggestingArg("value").addSuggestionProvider(sb -> sb.suggest("custom"))).execute((value,
+                                                                                                                   ctx) -> {
             });
         }});
         TestCommandRunner clearedRunner = new TestCommandRunner(new TestCommand("pick") {{
-            argument(new DefaultSuggestingArg("value").clearSuggestionActions()).execute((value, ctx) -> {
+            argument(new DefaultSuggestingArg("value").clearSuggestionProviders()).execute((value, ctx) -> {
             });
         }});
         TestCommandRunner restoredRunner = new TestCommandRunner(new TestCommand("pick") {{
-            argument(new DefaultSuggestingArg("value").clearSuggestionActions()
+            argument(new DefaultSuggestingArg("value").clearSuggestionProviders()
                                                       .useDefaultSuggestions()).execute((value, ctx) -> {
                                                       });
         }});

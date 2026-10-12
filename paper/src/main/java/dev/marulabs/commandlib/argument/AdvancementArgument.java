@@ -13,7 +13,7 @@ import org.bukkit.advancement.Advancement;
 public class AdvancementArgument extends Argument<Advancement, AdvancementArgument> {
     public AdvancementArgument(String name) {
         super(name, ArgumentTypes.namespacedKey());
-        addSuggestionAction(sb -> NamespacedKeyArgumentSupport.suggestKeys(sb, Bukkit.advancementIterator()));
+        addSuggestionProvider(sb -> NamespacedKeyArgumentSupport.suggestKeys(sb, Bukkit.advancementIterator()));
     }
 
     @Override

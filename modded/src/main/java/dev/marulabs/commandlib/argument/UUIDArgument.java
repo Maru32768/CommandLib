@@ -25,7 +25,7 @@ public class UUIDArgument extends Argument<UUID, UUIDArgument> {
     public UUIDArgument(String name) {
         super(name, StringArgumentType.string());
 
-        setSuggestionAction(sb -> {
+        setSuggestionProvider(sb -> {
             Map<UUID, String> uuidToNameMap = new HashMap<>();
             sb.getContext()
               .getHandle()

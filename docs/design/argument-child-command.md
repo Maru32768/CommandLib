@@ -411,7 +411,7 @@ chains first, then the current chain), not just the current chain. Each chain is
 parsed best-effort in its own `try` so one failing conversion does not hide the
 others; `Arguments#parse` stops at the first argument without input, so partially
 typed chains are fine. This makes parent values readable from a child's
-suggestion actions, matching execution behavior.
+suggestion providers, matching execution behavior.
 
 ## Help Generation
 

@@ -18,7 +18,7 @@ public class UUIDArgument extends Argument<UUID, UUIDArgument> {
     public UUIDArgument(String name) {
         super(name, StringArgumentType.word());
 
-        setSuggestionAction(sb -> {
+        setSuggestionProvider(sb -> {
             Map<UUID, String> uuidToNameMap = new HashMap<>();
             Arrays.stream(Bukkit.getOfflinePlayers())
                   .filter(x -> filter(sb.getContext()).test(x.getUniqueId()))

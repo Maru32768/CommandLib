@@ -295,11 +295,11 @@ class CommandTesterTest {
         @Test
         void suggestion_with_message_tooltip_exposes_tooltip_text() throws Exception {
             try (CommandTester tester = new CommandTester(new Command("cmd") {{
-                argument(new StringArgument("value").addSuggestionAction(sb -> sb.suggest("alpha",
-                                                                                          new LiteralMessage("alpha tooltip"))
-                                                                                 .suggest("beta"))).execute((v,
-                                                                                                             ctx) -> {
-                                                                                 });
+                argument(new StringArgument("value").addSuggestionProvider(sb -> sb.suggest("alpha",
+                                                                                            new LiteralMessage("alpha tooltip"))
+                                                                                   .suggest("beta"))).execute((v,
+                                                                                                               ctx) -> {
+                                                                                   });
             }}, "test.command")) {
                 FakeSender sender = FakeSender.player("Steve");
 

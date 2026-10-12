@@ -19,7 +19,7 @@ public class OfflinePlayersArgument extends Argument<List<OfflinePlayer>, Offlin
     public OfflinePlayersArgument(String name) {
         super(name, ProfileWordArgumentType.profileWord());
 
-        addSuggestionAction(sb -> {
+        addSuggestionProvider(sb -> {
             String input = sb.getLatestInput();
 
             Arrays.stream(Bukkit.getOfflinePlayers())

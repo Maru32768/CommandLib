@@ -331,7 +331,7 @@ class CommandTesterTest {
         @Test
         void suggestion_action_results_are_returned() {
             try (CommandTester tester = new CommandTester(new Command("suggest") {{
-                argument(new StringArgument("a").addSuggestionAction(builder -> {
+                argument(new StringArgument("a").addSuggestionProvider(builder -> {
                     builder.suggest("alpha");
                     builder.suggest("beta");
                 })).execute((a, ctx) -> {

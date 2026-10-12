@@ -21,7 +21,7 @@ public class TeamArgument extends Argument<Team, TeamArgument> {
     public TeamArgument(String name) {
         super(name, StringArgumentType.word());
 
-        addSuggestionAction(sb -> {
+        addSuggestionProvider(sb -> {
             Scoreboard scoreboard = scoreboardSupplier.get();
             if (scoreboard == null) {
                 return;

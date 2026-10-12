@@ -5,8 +5,8 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.tree.ArgumentCommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import dev.marulabs.commandlib.command.CommandExecutor;
-import dev.marulabs.commandlib.suggestion.SuggestionAction;
 import dev.marulabs.commandlib.suggestion.SuggestionBuilder;
+import dev.marulabs.commandlib.suggestion.SuggestionProvider;
 import dev.marulabs.commandlib.util.UncaughtExceptionHandler;
 import org.jetbrains.annotations.Nullable;
 
@@ -45,7 +45,7 @@ final class ArgumentCommandNodeCreator<S, T, C extends CommonCommandContext<S, T
                 SuggestionBuilder<C> suggestionBuilder = new SuggestionBuilder<>(ctx, sb.getRemaining());
                 List<CompletableFuture<Suggestions>> defaultFutures = new ArrayList<>();
                 // Parsing runs user code (validators, transformers) too, so it shares the current context with the
-                // suggestion actions, matching CommandRunner.
+                // suggestion providers, matching CommandRunner.
                 CurrentCommandContext.run(ctx, () -> {
                     // Include inherited parent arguments so argument child commands can read them while suggesting.
                     for (Arguments<C> parsed : executorArguments) {
@@ -53,13 +53,13 @@ final class ArgumentCommandNodeCreator<S, T, C extends CommonCommandContext<S, T
                             parsed.parse(ctx);
                         } catch (Exception ignored) {
                             // Best-effort: pre-populate ctx with already-parsed arguments for use in
-                            // suggestion actions. Failures (e.g. platform-specific context differences)
-                            // are non-fatal - the suggestion action still runs.
+                            // suggestion providers. Failures (e.g. platform-specific context differences)
+                            // are non-fatal - the suggestion provider still runs.
                         }
                     }
 
-                    for (ArgumentSuggestionAction<C> suggestionAction : argument.suggestionActions()) {
-                        SuggestionAction<C> action = suggestionAction.action();
+                    for (ArgumentSuggestionProvider<C> suggestionProvider : argument.suggestionProviders()) {
+                        SuggestionProvider<C> action = suggestionProvider.action();
                         if (action == null) {
                             defaultFutures.add(argument.type()
                                                        .listSuggestions(context, sb)

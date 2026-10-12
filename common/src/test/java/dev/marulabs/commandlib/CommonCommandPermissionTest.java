@@ -257,7 +257,7 @@ class CommonCommandPermissionTest {
     }
 
     private CommonArgument<String, TestCommandContext, ?> suggestingStringArgument() {
-        return new StrArg("key").addSuggestionAction(sb -> sb.suggest("difficulty"));
+        return new StrArg("key").addSuggestionProvider(sb -> sb.suggest("difficulty"));
     }
 
     private static final class StrArg extends CommonStringArgument<TestCommandContext, StrArg> {

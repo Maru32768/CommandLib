@@ -277,11 +277,11 @@ class CommonArgumentEdgeCaseTest {
     @Test
     void suggestion_tooltip_is_exposed() {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("pick") {{
-            argument(new StrArg("value").addSuggestionAction(sb -> sb.suggest("alpha", "First letter")
-                                                                     .suggest("beta", (String) null)))
-                                                                                                      .execute((value,
-                                                                                                                ctx) -> {
-                                                                                                      });
+            argument(new StrArg("value").addSuggestionProvider(sb -> sb.suggest("alpha", "First letter")
+                                                                       .suggest("beta", (String) null)))
+                                                                                                        .execute((value,
+                                                                                                                  ctx) -> {
+                                                                                                        });
         }});
 
         assertThat(runner.suggestTooltips("pick ")).containsEntry("alpha", "First letter")
@@ -291,7 +291,7 @@ class CommonArgumentEdgeCaseTest {
     @Test
     void suggestion_action_can_read_previous_arguments() {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("pair") {{
-            argument(new IntArg("first"), new StrArg("second").addSuggestionAction(sb -> {
+            argument(new IntArg("first"), new StrArg("second").addSuggestionProvider(sb -> {
                 sb.suggest("after-" + sb.getArgument("first", Integer.class));
                 sb.suggest("raw-" + sb.getInput("first"));
             })).execute((first, second, ctx) -> {
@@ -305,8 +305,8 @@ class CommonArgumentEdgeCaseTest {
     void suggestion_action_latest_input_is_current_token() {
         List<String> seen = new ArrayList<>();
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("pick") {{
-            argument(new StrArg("value").addSuggestionAction(sb -> seen.add(sb.getLatestInput()))).execute((value,
-                                                                                                            ctx) -> {
+            argument(new StrArg("value").addSuggestionProvider(sb -> seen.add(sb.getLatestInput()))).execute((value,
+                                                                                                              ctx) -> {
             });
         }});
 
@@ -318,7 +318,7 @@ class CommonArgumentEdgeCaseTest {
     @Test
     void failing_suggestion_action_propagates_exception() {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("pick") {{
-            argument(new StrArg("value").addSuggestionAction(sb -> {
+            argument(new StrArg("value").addSuggestionProvider(sb -> {
                 throw new IllegalStateException("broken suggestion");
             })).execute((value, ctx) -> {
             });
@@ -331,8 +331,8 @@ class CommonArgumentEdgeCaseTest {
     @Test
     void clear_suggestion_actions_clears_all_suggestions() {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("pick") {{
-            argument(new StrArg("value").addSuggestionAction(sb -> sb.suggest("alpha"))
-                                        .clearSuggestionActions()).execute((value, ctx) -> {
+            argument(new StrArg("value").addSuggestionProvider(sb -> sb.suggest("alpha"))
+                                        .clearSuggestionProviders()).execute((value, ctx) -> {
                                         });
         }});
 
@@ -341,10 +341,10 @@ class CommonArgumentEdgeCaseTest {
 
     @Test
     void set_suggestion_action_rejects_null_and_keeps_existing_actions() {
-        StrArg arg = new StrArg("value").addSuggestionAction(sb -> sb.suggest("alpha"));
+        StrArg arg = new StrArg("value").addSuggestionProvider(sb -> sb.suggest("alpha"));
 
-        assertThatThrownBy(() -> arg.setSuggestionAction(null)).isInstanceOf(NullPointerException.class)
-                                                               .hasMessageContaining("clearSuggestionActions()");
+        assertThatThrownBy(() -> arg.setSuggestionProvider(null)).isInstanceOf(NullPointerException.class)
+                                                                 .hasMessageContaining("clearSuggestionProviders()");
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("pick") {{
             argument(arg).execute((value, ctx) -> {
             });
@@ -367,8 +367,8 @@ class CommonArgumentEdgeCaseTest {
     void suggestion_actions_run_once_per_request() {
         AtomicInteger calls = new AtomicInteger();
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("pick") {{
-            argument(new StrArg("value").addSuggestionAction(sb -> calls.incrementAndGet())).execute((value,
-                                                                                                      ctx) -> {
+            argument(new StrArg("value").addSuggestionProvider(sb -> calls.incrementAndGet())).execute((value,
+                                                                                                        ctx) -> {
             });
         }});
 

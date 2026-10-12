@@ -317,7 +317,7 @@ class CommonCommandExecutionTest {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("config") {{
             argument(new CommonStringArgument<>("key")).child(key -> new TestCommand("set") {{
                 CommonArgument<String, TestCommandContext, ?> value = new CommonStringArgument<>("value");
-                value.addSuggestionAction(sb -> sb.suggest(key.get() + "-value"));
+                value.addSuggestionProvider(sb -> sb.suggest(key.get() + "-value"));
                 argument(value).execute((v, ctx) -> ctx.sendMessage(v));
             }});
         }});
@@ -333,7 +333,7 @@ class CommonCommandExecutionTest {
                 field.validator((Predicate<String>) f -> key.get()
                                                             .equals("difficulty"));
                 CommonArgument<String, TestCommandContext, ?> value = new CommonStringArgument<>("value");
-                value.addSuggestionAction(sb -> sb.suggest(sb.getArgument("field") + "-value"));
+                value.addSuggestionProvider(sb -> sb.suggest(sb.getArgument("field") + "-value"));
                 argument(field, value).execute((f, v, ctx) -> ctx.sendMessage(f + "=" + v));
             }});
         }});

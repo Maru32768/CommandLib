@@ -14,12 +14,13 @@ import org.bukkit.inventory.Recipe;
 public class RecipeArgument extends Argument<Recipe, RecipeArgument> {
     public RecipeArgument(String name) {
         super(name, ArgumentTypes.namespacedKey());
-        addSuggestionAction(sb -> Bukkit.recipeIterator()
-                                        .forEachRemaining(recipe -> {
-                                            if (recipe instanceof Keyed) {
-                                                NamespacedKeyArgumentSupport.suggestKey(sb, ((Keyed) recipe).getKey());
-                                            }
-                                        }));
+        addSuggestionProvider(sb -> Bukkit.recipeIterator()
+                                          .forEachRemaining(recipe -> {
+                                              if (recipe instanceof Keyed) {
+                                                  NamespacedKeyArgumentSupport.suggestKey(sb,
+                                                                                          ((Keyed) recipe).getKey());
+                                              }
+                                          }));
     }
 
     @Override

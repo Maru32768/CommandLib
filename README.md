@@ -402,7 +402,7 @@ public final class ConfigCommand extends Command {
 ```
 
 The `child(...)` factory receives an `ArgRef<T>` for each parent argument. Call `key.get()` inside the child's executor
-or suggestion actions to read the parsed value. In code that runs after the callback returns, such as a scheduled task,
+or suggestion providers to read the parsed value. In code that runs after the callback returns, such as a scheduled task,
 read the value first or use `key.get(ctx)`.
 
 Valid inputs:

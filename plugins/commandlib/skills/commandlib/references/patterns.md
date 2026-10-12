@@ -34,7 +34,7 @@ class MyCommand extends Command {
         super("cmd");
 
         argument(new PlayerArgument("target").validator(Player::isOp)
-                                             .addSuggestionAction(sb -> sb.suggest("Steve"))).execute((player, ctx) -> {
+                                             .addSuggestionProvider(sb -> sb.suggest("Steve"))).execute((player, ctx) -> {
             ctx.sendMessage("ok");
         });
     }
@@ -63,7 +63,7 @@ matching a vanilla-like command tree or an existing command contract:
 Use typed argument instances for this shape. The `child(...)` factory receives
 an `ArgRef<T>` for each parent argument, not the parsed value, because child
 commands are built before a command is executed. Read the parent value with
-`ref.get()` inside the child's executor, suggestion actions, or other command
+`ref.get()` inside the child's executor, suggestion providers, or other command
 callbacks. Outside of a callback (for example in a scheduled task), resolve the
 value first (`String k = key.get();`) or use `ref.get(ctx)`.
 

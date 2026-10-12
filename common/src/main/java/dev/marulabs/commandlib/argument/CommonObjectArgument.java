@@ -20,7 +20,7 @@ public class CommonObjectArgument<T, C extends CommonCommandContext<?, ?>, SELF 
     public CommonObjectArgument(String name, Supplier<Map<String, ? extends T>> mapSupplier) {
         super(name, StringArgumentType.string());
         this.mapSupplier = Objects.requireNonNull(mapSupplier);
-        addSuggestionAction(sb -> {
+        addSuggestionProvider(sb -> {
             mapSupplier.get()
                        .entrySet()
                        .stream()

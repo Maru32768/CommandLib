@@ -179,7 +179,7 @@ or compatibility syntax where the target comes before the action.
 
 The `child(...)` factory receives an `ArgRef<T>` for each parent argument, not
 the parsed runtime value. Call `ref.get()` inside the child's executor or
-suggestion actions to read the value. In code that runs after the callback
+suggestion providers to read the value. In code that runs after the callback
 returns (such as a scheduled task), resolve the value first or use
 `ref.get(ctx)`:
 

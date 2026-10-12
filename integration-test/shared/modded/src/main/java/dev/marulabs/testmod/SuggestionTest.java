@@ -19,12 +19,12 @@ public final class SuggestionTest extends TestBase {
     @Override
     public List<String> build() {
         String key = getKey("latestInputFromClientTabComplete");
-        putResult(new TestResult(key, TestStatus.FAILED, "Suggestion action was not called before verification."));
+        putResult(new TestResult(key, TestStatus.FAILED, "Suggestion provider was not called before verification."));
 
         // IntegrationTest sends "/commandlibtest suggestionCapture abc" as a tab-complete request before runTests.
         command.addChildren(new Command("suggestionCapture") {{
             permission(DefaultPermission.ALL);
-            argument(new StringArgument("a").addSuggestionAction(builder -> {
+            argument(new StringArgument("a").addSuggestionProvider(builder -> {
                 capturedLatestInput.set(builder.getLatestInput());
                 builder.suggest("result");
             })).execute((a, ctx) -> {
@@ -35,7 +35,7 @@ public final class SuggestionTest extends TestBase {
             execute(ctx -> {
                 String captured = capturedLatestInput.get();
                 if (captured == null) {
-                    putResult(new TestResult(key, TestStatus.FAILED, "Suggestion action was not called."));
+                    putResult(new TestResult(key, TestStatus.FAILED, "Suggestion provider was not called."));
                 } else {
                     putResult(key, captured, "abc");
                 }

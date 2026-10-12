@@ -6,7 +6,7 @@ import dev.marulabs.commandlib.argument.ArgumentValidator;
 import dev.marulabs.commandlib.command.CommandExecutor;
 import dev.marulabs.commandlib.exception.ArgumentParseException;
 import dev.marulabs.commandlib.exception.ArgumentValidationException;
-import dev.marulabs.commandlib.suggestion.SuggestionAction;
+import dev.marulabs.commandlib.suggestion.SuggestionProvider;
 import dev.marulabs.commandlib.util.UncaughtExceptionHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -20,7 +20,7 @@ import java.util.function.Predicate;
 
 public abstract class CommonArgument<T, C extends CommonCommandContext<?, ?>, SELF extends CommonArgument<T, C, SELF>> {
     private final String name;
-    private final List<ArgumentSuggestionAction<C>> suggestionActions = new ArrayList<>();
+    private final List<ArgumentSuggestionProvider<C>> suggestionProviders = new ArrayList<>();
     // Returns null when it cannot parse the input either.
     private BiFunction<C, String, T> additionalParser = (ctx, input) -> null;
     // Null until execute is called.
@@ -34,56 +34,56 @@ public abstract class CommonArgument<T, C extends CommonCommandContext<?, ?>, SE
     protected CommonArgument(@NotNull String name, @NotNull ArgumentType<?> type) {
         this.name = Objects.requireNonNull(name);
         this.type = Objects.requireNonNull(type);
-        this.suggestionActions.add(ArgumentSuggestionAction.defaults());
+        this.suggestionProviders.add(ArgumentSuggestionProvider.defaults());
     }
 
     public final String name() {
         return name;
     }
 
-    final List<ArgumentSuggestionAction<C>> suggestionActions() {
-        return List.copyOf(suggestionActions);
+    final List<ArgumentSuggestionProvider<C>> suggestionProviders() {
+        return List.copyOf(suggestionProviders);
     }
 
     @SuppressWarnings("unchecked")
-    public final SELF addSuggestionAction(@NotNull SuggestionAction<C> suggestionAction) {
-        this.suggestionActions.add(ArgumentSuggestionAction.custom(suggestionAction));
+    public final SELF addSuggestionProvider(@NotNull SuggestionProvider<C> suggestionProvider) {
+        this.suggestionProviders.add(ArgumentSuggestionProvider.custom(suggestionProvider));
         return (SELF) this;
     }
 
     @SuppressWarnings("unchecked")
-    public final SELF setSuggestionAction(@NotNull SuggestionAction<C> suggestionAction) {
-        Objects.requireNonNull(suggestionAction,
-                               "suggestionAction must not be null; use clearSuggestionActions() to remove all suggestions");
-        this.suggestionActions.clear();
-        this.suggestionActions.add(ArgumentSuggestionAction.custom(suggestionAction));
+    public final SELF setSuggestionProvider(@NotNull SuggestionProvider<C> suggestionProvider) {
+        Objects.requireNonNull(suggestionProvider,
+                               "suggestionProvider must not be null; use clearSuggestionProviders() to remove all suggestions");
+        this.suggestionProviders.clear();
+        this.suggestionProviders.add(ArgumentSuggestionProvider.custom(suggestionProvider));
         return (SELF) this;
     }
 
     @SuppressWarnings("unchecked")
-    public final SELF clearSuggestionActions() {
-        this.suggestionActions.clear();
+    public final SELF clearSuggestionProviders() {
+        this.suggestionProviders.clear();
         return (SELF) this;
     }
 
     @SuppressWarnings("unchecked")
     public final SELF useDefaultSuggestions() {
-        boolean alreadyUsesDefaults = this.suggestionActions.stream()
-                                                            .anyMatch(ArgumentSuggestionAction::isDefaultSuggestions);
+        boolean alreadyUsesDefaults = this.suggestionProviders.stream()
+                                                              .anyMatch(ArgumentSuggestionProvider::isDefaultSuggestions);
         if (!alreadyUsesDefaults) {
-            this.suggestionActions.add(ArgumentSuggestionAction.defaults());
+            this.suggestionProviders.add(ArgumentSuggestionProvider.defaults());
         }
         return (SELF) this;
     }
 
     /**
      * Swaps the argument type's default suggestions, where they are enabled, for the given action and keeps every
-     * other suggestion action in place.
+     * other suggestion provider in place.
      */
-    protected final void replaceDefaultSuggestions(@NotNull SuggestionAction<C> suggestionAction) {
-        Objects.requireNonNull(suggestionAction);
-        this.suggestionActions.replaceAll(x -> x.isDefaultSuggestions()
-                ? ArgumentSuggestionAction.custom(suggestionAction) : x);
+    protected final void replaceDefaultSuggestions(@NotNull SuggestionProvider<C> suggestionProvider) {
+        Objects.requireNonNull(suggestionProvider);
+        this.suggestionProviders.replaceAll(x -> x.isDefaultSuggestions()
+                ? ArgumentSuggestionProvider.custom(suggestionProvider) : x);
     }
 
     @SuppressWarnings("unchecked")

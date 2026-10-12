@@ -4,5 +4,5 @@ import dev.marulabs.commandlib.CommonCommandContext;
 
 import java.util.function.Consumer;
 
-public interface SuggestionAction<C extends CommonCommandContext<?, ?>> extends Consumer<SuggestionBuilder<C>> {
+public interface SuggestionProvider<C extends CommonCommandContext<?, ?>> extends Consumer<SuggestionBuilder<C>> {
 }

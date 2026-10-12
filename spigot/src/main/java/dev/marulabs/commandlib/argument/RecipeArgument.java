@@ -15,12 +15,13 @@ public class RecipeArgument extends Argument<Recipe, RecipeArgument> {
         super(name,
               NMSArgumentNamespacedKey.create()
                                       .argument());
-        addSuggestionAction(sb -> Bukkit.recipeIterator()
-                                        .forEachRemaining(recipe -> {
-                                            if (recipe instanceof Keyed) {
-                                                NamespacedKeyArgumentSupport.suggestKey(sb, ((Keyed) recipe).getKey());
-                                            }
-                                        }));
+        addSuggestionProvider(sb -> Bukkit.recipeIterator()
+                                          .forEachRemaining(recipe -> {
+                                              if (recipe instanceof Keyed) {
+                                                  NamespacedKeyArgumentSupport.suggestKey(sb,
+                                                                                          ((Keyed) recipe).getKey());
+                                              }
+                                          }));
     }
 
     @Override

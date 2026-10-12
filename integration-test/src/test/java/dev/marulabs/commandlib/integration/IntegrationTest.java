@@ -99,7 +99,7 @@ class IntegrationTest {
                 waitForPlayerJoin(container, client);
                 waitForCommandTree(client);
 
-                // Send a tab-complete request before runTests so the server-side suggestion action
+                // Send a tab-complete request before runTests so the server-side suggestion provider
                 // fires and captures getLatestInput() before verifySuggestionCapture runs. The server runs the
                 // action before it answers, so the response means the input has been captured.
                 client.sendTabCompleteRequest(1, "/commandlibtest suggestionCapture abc");

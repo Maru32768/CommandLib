@@ -10,7 +10,7 @@ public class SuggestCommand extends Command {
     public SuggestCommand() {
         super("topic");
 
-        argument(new StringArgument("name", StringArgument.Type.WORD).addSuggestionAction(sb -> {
+        argument(new StringArgument("name", StringArgument.Type.WORD).addSuggestionProvider(sb -> {
             sb.suggest("spawn", "Main spawn area");
             sb.suggest("arena", "PvP arena");
             sb.suggest("shop", "Server shop");

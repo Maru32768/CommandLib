@@ -20,7 +20,7 @@ public class CommonNameableObjectArgument<T extends Nameable, C extends CommonCo
     public CommonNameableObjectArgument(String name, Supplier<Collection<? extends T>> candidatesSupplier) {
         super(name, StringArgumentType.string());
         this.candidatesSupplier = Objects.requireNonNull(candidatesSupplier);
-        addSuggestionAction(sb -> {
+        addSuggestionProvider(sb -> {
             candidatesSupplier.get()
                               .stream()
                               .filter(filter(sb.getContext()))

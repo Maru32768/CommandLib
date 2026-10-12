@@ -16,7 +16,7 @@ public class CommonEnumArgument<T extends Enum<T>, C extends CommonCommandContex
     public CommonEnumArgument(String name, Class<T> clazz) {
         super(name, StringArgumentType.word());
         this.clazz = Objects.requireNonNull(clazz);
-        addSuggestionAction(sb -> {
+        addSuggestionProvider(sb -> {
             Arrays.stream(clazz.getEnumConstants())
                   .filter(filter(sb.getContext()))
                   .map(Enum::name)
