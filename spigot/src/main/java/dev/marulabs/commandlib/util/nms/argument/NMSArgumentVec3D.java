@@ -3,6 +3,7 @@ package dev.marulabs.commandlib.util.nms.argument;
 import dev.marulabs.commandlib.util.nms.NMSClassRegistry;
 import dev.marulabs.commandlib.util.nms.world.NMSVec3D;
 import dev.marulabs.commandlib.util.reflection.ReflectionUtil;
+import org.jetbrains.annotations.Nullable;
 
 public abstract class NMSArgumentVec3D extends NMSArgument<NMSVec3D> {
     public static NMSArgumentVec3D create() {
@@ -10,7 +11,7 @@ public abstract class NMSArgumentVec3D extends NMSArgument<NMSVec3D> {
                              .newInstance();
     }
 
-    public NMSArgumentVec3D(Object handle, Class<?> serverClass) {
+    public NMSArgumentVec3D(@Nullable Object handle, Class<?> serverClass) {
         super(handle, serverClass);
     }
 }

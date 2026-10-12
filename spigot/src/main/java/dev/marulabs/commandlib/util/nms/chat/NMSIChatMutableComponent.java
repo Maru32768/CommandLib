@@ -3,6 +3,7 @@ package dev.marulabs.commandlib.util.nms.chat;
 import dev.marulabs.commandlib.util.nms.NMSClass;
 import dev.marulabs.commandlib.util.nms.NMSClassRegistry;
 import dev.marulabs.commandlib.util.reflection.ReflectionUtil;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * for after 1.19.0
@@ -13,7 +14,7 @@ public abstract class NMSIChatMutableComponent extends NMSClass {
                              .newInstance(handle);
     }
 
-    public NMSIChatMutableComponent(Object handle, Class<?> serverClass) {
+    public NMSIChatMutableComponent(@Nullable Object handle, Class<?> serverClass) {
         super(handle, serverClass);
     }
 

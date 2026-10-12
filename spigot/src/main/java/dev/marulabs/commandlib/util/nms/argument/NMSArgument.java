@@ -5,9 +5,10 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.marulabs.commandlib.util.nms.NMSClass;
 import dev.marulabs.commandlib.util.nms.exception.UncheckedCommandSyntaxException;
+import org.jetbrains.annotations.Nullable;
 
 public abstract class NMSArgument<T> extends NMSClass {
-    public NMSArgument(Object handle, Class<?> serverClass) {
+    public NMSArgument(@Nullable Object handle, Class<?> serverClass) {
         super(handle, serverClass);
     }
 

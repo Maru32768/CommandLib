@@ -4,6 +4,7 @@ import dev.marulabs.commandlib.util.nms.NMSClass;
 import dev.marulabs.commandlib.util.nms.NMSClassRegistry;
 import dev.marulabs.commandlib.util.nms.world.NMSIBlockData;
 import dev.marulabs.commandlib.util.reflection.ReflectionUtil;
+import org.jetbrains.annotations.Nullable;
 
 public abstract class NMSArgumentTileLocation extends NMSClass {
     public static NMSArgumentTileLocation create(Object handle) {
@@ -11,7 +12,7 @@ public abstract class NMSArgumentTileLocation extends NMSClass {
                              .newInstance(handle);
     }
 
-    public NMSArgumentTileLocation(Object handle, Class<?> serverClass) {
+    public NMSArgumentTileLocation(@Nullable Object handle, Class<?> serverClass) {
         super(handle, serverClass);
     }
 

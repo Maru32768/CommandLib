@@ -7,6 +7,7 @@ import dev.marulabs.commandlib.command.Prerequisite;
 import dev.marulabs.commandlib.exception.ArgumentParseException;
 import dev.marulabs.commandlib.exception.CommandPrerequisiteException;
 import dev.marulabs.commandlib.util.UncaughtExceptionHandler;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.List;
@@ -22,7 +23,7 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
     private final Prerequisite<C> prerequisite;
     private final CommandExecutor<C> helpAction;
     private final Predicate<C> preprocess;
-    private final CommandExecutor<C> executor;
+    private final @Nullable CommandExecutor<C> executor;
     private final List<UncaughtExceptionHandler<C>> uncaughtExceptionHandlers;
 
     CommandRunner(PlatformAdapter<S, ?, C, ?> platformAdapter,
@@ -33,7 +34,7 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
                   Prerequisite<C> prerequisite,
                   CommandExecutor<C> helpAction,
                   Predicate<C> preprocess,
-                  CommandExecutor<C> executor,
+                  @Nullable CommandExecutor<C> executor,
                   List<UncaughtExceptionHandler<C>> uncaughtExceptionHandlers) {
         this.platformAdapter = platformAdapter;
         this.command = command;

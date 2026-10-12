@@ -8,6 +8,7 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
+import org.jetbrains.annotations.Nullable;
 
 public class MockNMSCommandListenerWrapper extends NMSCommandListenerWrapper {
     public MockNMSCommandListenerWrapper(Object handle) {
@@ -20,12 +21,14 @@ public class MockNMSCommandListenerWrapper extends NMSCommandListenerWrapper {
     }
 
     @Override
+    @Nullable
     public Entity getBukkitEntity() {
         CommandSender sender = CommandTester.getCurrentCommandSender();
         return sender instanceof Entity ? (Entity) sender : null;
     }
 
     @Override
+    @Nullable
     public World getBukkitWorld() {
         CommandSender sender = CommandTester.getCurrentCommandSender();
         return sender instanceof Entity ? ((Entity) sender).getWorld() : null;
@@ -33,16 +36,19 @@ public class MockNMSCommandListenerWrapper extends NMSCommandListenerWrapper {
 
     // The mock takes the location from the sender entity in getBukkitLocation instead.
     @Override
+    @Nullable
     protected NMSVec3D getPosition() {
         return null;
     }
 
     @Override
+    @Nullable
     protected NMSVec2D getRotation() {
         return null;
     }
 
     @Override
+    @Nullable
     public Location getBukkitLocation() {
         CommandSender sender = CommandTester.getCurrentCommandSender();
         return sender instanceof Entity ? ((Entity) sender).getLocation() : null;

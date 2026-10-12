@@ -1,5 +1,7 @@
 package dev.marulabs.commandlib.util.nms;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -18,6 +20,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -176,6 +179,7 @@ final class TypedClassLinkage {
         }
     }
 
+    @Nullable
     private static byte[] readClassFile(ClassLoader loader, String className) throws IOException {
         String resource = className.replace('.', '/') + ".class";
         try (InputStream in = loader == null ? ClassLoader.getSystemResourceAsStream(resource) : loader.getResourceAsStream(resource)) {
@@ -223,7 +227,8 @@ final class TypedClassLinkage {
                 if (kinds == null || ownerName.startsWith("[")) {
                     continue;
                 }
-                Class<?> owner = resolveInternalName(ownerName, loader);
+                // Not an array, so not a primitive element type either.
+                Class<?> owner = Objects.requireNonNull(resolveInternalName(ownerName, loader));
                 classNames.add(owner.getName());
                 // The check is for servers that differ from the jar a class was compiled against, not for the JDK,
                 // whose members the class's release has. A lookup also cannot resolve the JDK's caller-sensitive
@@ -418,6 +423,7 @@ final class TypedClassLinkage {
      * The class an internal name or array descriptor refers to, or its element class for an array, or null for a
      * primitive element type.
      */
+    @Nullable
     private static Class<?> resolveInternalName(String internalName, ClassLoader loader) throws ClassNotFoundException {
         String name = internalName;
         while (name.startsWith("[")) {

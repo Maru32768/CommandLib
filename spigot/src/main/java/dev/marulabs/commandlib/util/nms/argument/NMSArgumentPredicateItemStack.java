@@ -4,6 +4,7 @@ import dev.marulabs.commandlib.util.nms.NMSClass;
 import dev.marulabs.commandlib.util.nms.NMSClassRegistry;
 import dev.marulabs.commandlib.util.nms.world.NMSItemStack;
 import dev.marulabs.commandlib.util.reflection.ReflectionUtil;
+import org.jetbrains.annotations.Nullable;
 
 public abstract class NMSArgumentPredicateItemStack extends NMSClass {
     public static NMSArgumentPredicateItemStack create(Object handle) {
@@ -12,7 +13,7 @@ public abstract class NMSArgumentPredicateItemStack extends NMSClass {
                              .newInstance(handle);
     }
 
-    public NMSArgumentPredicateItemStack(Object handle, Class<?> serverClass) {
+    public NMSArgumentPredicateItemStack(@Nullable Object handle, Class<?> serverClass) {
         super(handle, serverClass);
     }
 

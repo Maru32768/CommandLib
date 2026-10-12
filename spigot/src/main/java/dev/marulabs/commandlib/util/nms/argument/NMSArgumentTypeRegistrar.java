@@ -6,6 +6,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import dev.marulabs.commandlib.util.nms.NMSClass;
 import dev.marulabs.commandlib.util.nms.NMSClassRegistry;
 import dev.marulabs.commandlib.util.reflection.ReflectionUtil;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -87,6 +88,7 @@ public abstract class NMSArgumentTypeRegistrar extends NMSClass {
     }
 
     @SuppressWarnings({"rawtypes"})
+    @Nullable
     private Map findClassToEntryMap() {
         for (Field f : serverClass.getDeclaredFields()) {
             if (!Map.class.isAssignableFrom(f.getType())) {
@@ -129,6 +131,7 @@ public abstract class NMSArgumentTypeRegistrar extends NMSClass {
         throw new IllegalStateException("No suitable entry constructor found in " + entryClass.getName());
     }
 
+    @Nullable
     private static Object[] entryArguments(Class<?>[] parameterTypes,
                                            Class<?> argumentTypeClass,
                                            Object serializer,
@@ -173,6 +176,9 @@ public abstract class NMSArgumentTypeRegistrar extends NMSClass {
 
         // The string ArgumentTypeInfo already in the map, and its inner Template class.
         Object stringSerializer = byClassMap.get(StringArgumentType.class);
+        if (stringSerializer == null) {
+            throw new IllegalStateException("Could not find the ArgumentTypeInfo of StringArgumentType in " + serverClass.getName());
+        }
         Class<?>[] innerClasses = stringSerializer.getClass()
                                                   .getDeclaredClasses();
         if (innerClasses.length == 0) {

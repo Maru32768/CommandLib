@@ -3,6 +3,7 @@ package dev.marulabs.commandlib.util.nms.argument;
 import dev.marulabs.commandlib.util.nms.NMSClassRegistry;
 import dev.marulabs.commandlib.util.reflection.ReflectionUtil;
 import org.bukkit.World;
+import org.jetbrains.annotations.Nullable;
 
 public abstract class NMSArgumentDimension extends NMSArgument<World> {
     public static NMSArgumentDimension create() {
@@ -10,7 +11,7 @@ public abstract class NMSArgumentDimension extends NMSArgument<World> {
                              .newInstance();
     }
 
-    public NMSArgumentDimension(Object handle, Class<?> serverClass) {
+    public NMSArgumentDimension(@Nullable Object handle, Class<?> serverClass) {
         super(handle, serverClass);
     }
 }

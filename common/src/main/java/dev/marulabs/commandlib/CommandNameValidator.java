@@ -1,5 +1,7 @@
 package dev.marulabs.commandlib;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.*;
 
 /**
@@ -61,11 +63,11 @@ final class CommandNameValidator {
      * Names of the children of one Brigadier node.
      */
     private static final class ChildNames {
-        private final String location;
+        private final @Nullable String location;
         private final Map<String, CommonCommand<?, ?>> literals = new HashMap<>();
         private final Set<String> arguments = new HashSet<>();
 
-        private ChildNames(String location) {
+        private ChildNames(@Nullable String location) {
             this.location = location;
         }
 

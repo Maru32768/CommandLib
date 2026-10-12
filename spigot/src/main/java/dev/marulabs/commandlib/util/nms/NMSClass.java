@@ -11,7 +11,7 @@ import java.util.Objects;
  * so the build remaps it along with the rest of the bytecode.
  */
 public abstract class NMSClass {
-    private final Object handle;
+    private final @Nullable Object handle;
     protected final Class<?> serverClass;
 
     public NMSClass(@Nullable Object handle, @NotNull Class<?> serverClass) {
@@ -23,6 +23,7 @@ public abstract class NMSClass {
         }
     }
 
+    @Nullable
     public final Object getHandle() {
         return handle;
     }

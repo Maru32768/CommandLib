@@ -4,6 +4,7 @@ import dev.marulabs.commandlib.util.nms.NMSClass;
 import dev.marulabs.commandlib.util.nms.NMSClassRegistry;
 import dev.marulabs.commandlib.util.reflection.ReflectionUtil;
 import org.bukkit.block.data.BlockData;
+import org.jetbrains.annotations.Nullable;
 
 public abstract class NMSCraftBlockData extends NMSClass {
     public static NMSCraftBlockData create() {
@@ -11,7 +12,7 @@ public abstract class NMSCraftBlockData extends NMSClass {
                              .newInstance();
     }
 
-    public NMSCraftBlockData(Object handle, Class<?> serverClass) {
+    public NMSCraftBlockData(@Nullable Object handle, Class<?> serverClass) {
         super(handle, serverClass);
     }
 

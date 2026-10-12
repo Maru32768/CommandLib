@@ -24,6 +24,7 @@ import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.Nullable;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
@@ -53,6 +54,7 @@ public class CommandTester implements AutoCloseable {
     /**
      * For use by mock NMS classes only.
      */
+    @Nullable
     public static Entity getFakeEntity(String name) {
         return requireCurrent().fakeEntities.get(name);
     }
@@ -67,6 +69,7 @@ public class CommandTester implements AutoCloseable {
     /**
      * For use by mock NMS classes only.
      */
+    @Nullable
     public static World getFakeWorld(String key) {
         return requireCurrent().fakeWorlds.get(key);
     }
@@ -248,7 +251,7 @@ public class CommandTester implements AutoCloseable {
     public static class Builder {
         private final List<Supplier<? extends Command>> commandSuppliers = new ArrayList<>();
         private final Map<Class<? extends NMSClass>, Class<? extends NMSClass>> nmsMocks = defaultNmsMocks();
-        private String permissionPrefix;
+        private @Nullable String permissionPrefix;
 
         public Builder command(Command command) {
             Objects.requireNonNull(command, "command");

@@ -2,6 +2,7 @@ package dev.marulabs.commandlib.util.nms.argument;
 
 import dev.marulabs.commandlib.util.nms.NMSClassRegistry;
 import dev.marulabs.commandlib.util.reflection.ReflectionUtil;
+import org.jetbrains.annotations.Nullable;
 
 public abstract class NMSArgumentTile extends NMSArgument<NMSArgumentTileLocation> {
     public static NMSArgumentTile create() {
@@ -9,7 +10,7 @@ public abstract class NMSArgumentTile extends NMSArgument<NMSArgumentTileLocatio
                              .newInstance();
     }
 
-    public NMSArgumentTile(Object handle, Class<?> serverClass) {
+    public NMSArgumentTile(@Nullable Object handle, Class<?> serverClass) {
         super(handle, serverClass);
     }
 }

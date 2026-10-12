@@ -7,6 +7,7 @@ import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.mockito.Mockito;
 
 import java.util.ArrayList;
@@ -124,6 +125,7 @@ public final class FakeSender {
         return this;
     }
 
+    @Nullable
     public String getLocale() {
         if (!(commandSender instanceof Player)) {
             return null;
@@ -175,10 +177,10 @@ public final class FakeSender {
     public static final class Builder {
         private final boolean console;
         private String name;
-        private UUID uniqueId;
-        private String locale;
+        private @Nullable UUID uniqueId;
+        private @Nullable String locale;
         private boolean op;
-        private Set<String> permissions;
+        private @Nullable Set<String> permissions;
         private final Set<String> deniedPermissions = new HashSet<>();
 
         private Builder(boolean console, String name, boolean op) {

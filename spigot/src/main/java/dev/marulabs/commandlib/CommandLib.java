@@ -31,6 +31,7 @@ import org.bukkit.plugin.EventExecutor;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -44,7 +45,7 @@ public final class CommandLib implements Listener {
     private final List<CommandNode<?>> registeredCommands = new ArrayList<>();
     private final List<Permission> registeredPermissions = new ArrayList<>();
     private final List<HelpTopic> registeredHelpTopics = new ArrayList<>();
-    private static ServerLoadEvent functionsRecompiledFor;
+    private static @Nullable ServerLoadEvent functionsRecompiledFor;
 
     public static CommandLib register(@NotNull Plugin plugin, @NotNull Command command, @NotNull Command... commands) {
         List<Command> list = new ArrayList<>();
@@ -217,7 +218,11 @@ public final class CommandLib implements Listener {
                     }
                     BukkitCommand wrapper = NMSVanillaCommandWrapper.create()
                                                                     .createInstance(vanillaDispatcher, x);
-                    describe(wrapper, commandsByLabel.get(x.getName()), x, permissionPrefix, plugin.getName());
+                    describe(wrapper,
+                             Objects.requireNonNull(commandsByLabel.get(x.getName())),
+                             x,
+                             permissionPrefix,
+                             plugin.getName());
                     // Marks the wrapper as registered, as SimpleCommandMap#register does; help topics hide others.
                     wrapper.register(commandMap);
                     knownCommands.put(x.getName(), wrapper);
@@ -441,7 +446,7 @@ public final class CommandLib implements Listener {
                 removeRegisteredCommand(root, knownCommands, node.getName());
 
                 if (!usePaperCommandDispatcher) {
-                    removeCommand(vanillaRoot, node.getName());
+                    removeCommand(Objects.requireNonNull(vanillaRoot), node.getName());
                     removeMinecraftNamespacedCommand(root, knownCommands, node);
                     removeRegisteredCommand(root, knownCommands, namespace(plugin) + ":" + node.getName());
                 }
@@ -463,7 +468,7 @@ public final class CommandLib implements Listener {
      * makes for such labels.
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
-    static void addNamespacedCommand(RootCommandNode resourcesRoot,
+    static void addNamespacedCommand(@Nullable RootCommandNode resourcesRoot,
                                      Map<String, org.bukkit.command.Command> knownCommands,
                                      String namespace,
                                      CommandNode<?> node,
@@ -502,6 +507,7 @@ public final class CommandLib implements Listener {
         removeCommand(root, label);
     }
 
+    @Nullable
     private static Object wrappedVanillaCommand(org.bukkit.command.Command command) throws IllegalAccessException {
         try {
             // VanillaCommandWrapper#vanillaCommand is public CraftBukkit API, which keeps its name on every version.

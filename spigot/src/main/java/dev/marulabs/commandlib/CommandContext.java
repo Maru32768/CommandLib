@@ -23,11 +23,13 @@ public final class CommandContext extends CommonCommandContext<Object, BaseCompo
         super(ctx);
     }
 
+    @Nullable
     public Entity getEntity() {
         return NMSCommandListenerWrapper.create(handle.getSource())
                                         .getBukkitEntity();
     }
 
+    @Nullable
     public World getWorld() {
         return NMSCommandListenerWrapper.create(handle.getSource())
                                         .getBukkitWorld();
@@ -37,6 +39,7 @@ public final class CommandContext extends CommonCommandContext<Object, BaseCompo
      * The location the command runs at: the source's position in its world, with the source's rotation as the yaw and
      * pitch, such as the direction a player executing it faces. Null when the source has no world.
      */
+    @Nullable
     public Location getLocation() {
         return NMSCommandListenerWrapper.create(handle.getSource())
                                         .getBukkitLocation();

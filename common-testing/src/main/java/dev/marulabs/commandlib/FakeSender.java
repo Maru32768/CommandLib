@@ -1,18 +1,19 @@
 package dev.marulabs.commandlib;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
 public final class FakeSender implements CommandActor {
     private final String name;
-    private final UUID uniqueId;
+    private final @Nullable UUID uniqueId;
     private final CommandActorType type;
     private final boolean operator;
     private final boolean allowAllPermissions;
     private final Set<String> permissions;
     private final Set<String> deniedPermissions;
-    private final String locale;
+    private final @Nullable String locale;
     private final List<String> sentMessages = new ArrayList<>();
     private final List<String> sentMessageLegacyTexts = new ArrayList<>();
 
@@ -47,13 +48,13 @@ public final class FakeSender implements CommandActor {
     }
 
     private FakeSender(String name,
-                       UUID uniqueId,
+                       @Nullable UUID uniqueId,
                        CommandActorType type,
                        boolean operator,
                        boolean allowAllPermissions,
                        Set<String> permissions,
                        Set<String> deniedPermissions,
-                       String locale) {
+                       @Nullable String locale) {
         this.name = name;
         this.uniqueId = uniqueId;
         this.type = type;
@@ -107,6 +108,7 @@ public final class FakeSender implements CommandActor {
         return new FakeSender(name, uniqueId, type, operator, allowAllPermissions, this.permissions, denied, locale);
     }
 
+    @Nullable
     public String getLocale() {
         return locale;
     }
@@ -178,15 +180,15 @@ public final class FakeSender implements CommandActor {
 
     public static final class Builder {
         private String name;
-        private UUID uniqueId;
+        private @Nullable UUID uniqueId;
         private CommandActorType type;
         private boolean operator;
         private boolean allowAllPermissions = true;
         private Set<String> permissions = Set.of();
         private final Set<String> deniedPermissions = new HashSet<>();
-        private String locale;
+        private @Nullable String locale;
 
-        private Builder(String name, UUID uniqueId, CommandActorType type, boolean operator) {
+        private Builder(String name, @Nullable UUID uniqueId, CommandActorType type, boolean operator) {
             this.name = name;
             this.uniqueId = uniqueId;
             this.type = type;

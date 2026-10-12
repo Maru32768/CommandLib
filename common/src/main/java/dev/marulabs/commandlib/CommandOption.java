@@ -15,10 +15,10 @@ public final class CommandOption<T, C extends CommonCommandContext<?, ?>> {
     static final String INTERNAL_NAME_PREFIX = "__commandlib_option_";
 
     private final String name;
-    private final Character shortName;
+    private final @Nullable Character shortName;
     private final T defaultValue;
-    private final ArgumentType<?> type;
-    private final BiFunction<C, String, T> parser;
+    private final @Nullable ArgumentType<?> type;
+    private final @Nullable BiFunction<C, String, T> parser;
     private final String internalName;
     private final List<OptionValidator<C>> validators = new ArrayList<>();
     private String description = "";

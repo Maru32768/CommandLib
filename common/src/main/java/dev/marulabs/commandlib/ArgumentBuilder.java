@@ -10,7 +10,7 @@ import java.util.Objects;
 
 public final class ArgumentBuilder<C extends CommonCommandContext<?, ?>> {
     private final List<CommonArgument<?, C, ?>> arguments = new ArrayList<>();
-    private CommandExecutor<C> executor = null;
+    private @Nullable CommandExecutor<C> executor = null;
 
     public ArgumentBuilder<C> argument(@NotNull CommonArgument<?, C, ?> argument) {
         Objects.requireNonNull(argument);
@@ -28,6 +28,7 @@ public final class ArgumentBuilder<C extends CommonCommandContext<?, ?>> {
         this.executor = executor;
     }
 
+    @Nullable
     CommandExecutor<C> executor() {
         return executor;
     }

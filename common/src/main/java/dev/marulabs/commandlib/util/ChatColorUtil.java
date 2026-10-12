@@ -32,13 +32,13 @@ public class ChatColorUtil {
     public static class ChatColor {
         public static final char COLOR_CHAR = '\u00A7';
         private final String str;
-        private final Color color;
+        private final @Nullable Color color;
 
         private ChatColor(char code) {
             this(code, null);
         }
 
-        private ChatColor(char code, Color color) {
+        private ChatColor(char code, @Nullable Color color) {
             this.str = new String(new char[]{COLOR_CHAR, code});
             this.color = color;
         }

@@ -5,6 +5,7 @@ import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -58,6 +59,7 @@ public final class CommandTester implements AutoCloseable {
         }
     }
 
+    @Nullable
     public TestCommandContext executeAndGetContext(String input, FakeSender sender) {
         execute(input, sender);
         return TestCommandContext.takeLatestOnCurrentThread();
@@ -74,7 +76,7 @@ public final class CommandTester implements AutoCloseable {
 
     public static final class Builder {
         private final List<Supplier<? extends TestCommand>> commandSuppliers = new ArrayList<>();
-        private String permissionPrefix;
+        private @Nullable String permissionPrefix;
 
         public Builder command(@NotNull TestCommand command) {
             Objects.requireNonNull(command, "command");

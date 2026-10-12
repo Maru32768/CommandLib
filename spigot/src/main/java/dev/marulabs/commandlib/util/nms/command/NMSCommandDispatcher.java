@@ -4,6 +4,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import dev.marulabs.commandlib.util.nms.NMSClass;
 import dev.marulabs.commandlib.util.nms.NMSClassRegistry;
 import dev.marulabs.commandlib.util.reflection.ReflectionUtil;
+import org.jetbrains.annotations.Nullable;
 
 public abstract class NMSCommandDispatcher extends NMSClass {
     public static NMSCommandDispatcher create(Object handle) {
@@ -11,7 +12,7 @@ public abstract class NMSCommandDispatcher extends NMSClass {
                              .newInstance(handle);
     }
 
-    public NMSCommandDispatcher(Object handle, Class<?> serverClass) {
+    public NMSCommandDispatcher(@Nullable Object handle, Class<?> serverClass) {
         super(handle, serverClass);
     }
 

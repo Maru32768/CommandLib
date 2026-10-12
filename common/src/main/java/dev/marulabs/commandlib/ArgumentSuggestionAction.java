@@ -1,13 +1,14 @@
 package dev.marulabs.commandlib;
 
 import dev.marulabs.commandlib.suggestion.SuggestionAction;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
 final class ArgumentSuggestionAction<C extends CommonCommandContext<?, ?>> {
-    private final SuggestionAction<C> action;
+    private final @Nullable SuggestionAction<C> action;
 
-    private ArgumentSuggestionAction(SuggestionAction<C> action) {
+    private ArgumentSuggestionAction(@Nullable SuggestionAction<C> action) {
         this.action = action;
     }
 
@@ -23,6 +24,7 @@ final class ArgumentSuggestionAction<C extends CommonCommandContext<?, ?>> {
         return action == null;
     }
 
+    @Nullable
     SuggestionAction<C> action() {
         return action;
     }

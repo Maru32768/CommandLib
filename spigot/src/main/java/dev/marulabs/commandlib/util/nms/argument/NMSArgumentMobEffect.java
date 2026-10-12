@@ -3,6 +3,7 @@ package dev.marulabs.commandlib.util.nms.argument;
 import dev.marulabs.commandlib.util.nms.NMSClassRegistry;
 import dev.marulabs.commandlib.util.nms.world.NMSMobEffectList;
 import dev.marulabs.commandlib.util.reflection.ReflectionUtil;
+import org.jetbrains.annotations.Nullable;
 
 public abstract class NMSArgumentMobEffect extends NMSArgument<NMSMobEffectList> {
     public static NMSArgumentMobEffect create() {
@@ -10,7 +11,7 @@ public abstract class NMSArgumentMobEffect extends NMSArgument<NMSMobEffectList>
                              .newInstance();
     }
 
-    public NMSArgumentMobEffect(Object handle, Class<?> serverClass) {
+    public NMSArgumentMobEffect(@Nullable Object handle, Class<?> serverClass) {
         super(handle, serverClass);
     }
 }

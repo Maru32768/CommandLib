@@ -5,6 +5,7 @@ import dev.marulabs.commandlib.util.nms.NMSClassRegistry;
 import dev.marulabs.commandlib.util.nms.core.NMSParticleParam;
 import dev.marulabs.commandlib.util.reflection.ReflectionUtil;
 import org.bukkit.Particle;
+import org.jetbrains.annotations.Nullable;
 
 public abstract class NMSCraftParticle extends NMSClass {
     public static NMSCraftParticle create() {
@@ -12,7 +13,7 @@ public abstract class NMSCraftParticle extends NMSClass {
                              .newInstance();
     }
 
-    public NMSCraftParticle(Object handle, Class<?> serverClass) {
+    public NMSCraftParticle(@Nullable Object handle, Class<?> serverClass) {
         super(handle, serverClass);
     }
 

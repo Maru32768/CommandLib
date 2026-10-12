@@ -25,6 +25,7 @@ import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredListener;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
@@ -69,7 +70,7 @@ public final class CommandLib implements Listener {
 
     // Cached from the first COMMANDS lifecycle event so that runtime calls to register() can fall back
     // to direct dispatcher manipulation instead of failing with IllegalStateException.
-    private static volatile CommandDispatcher<CommandSourceStack> serverDispatcher;
+    private static volatile @Nullable CommandDispatcher<CommandSourceStack> serverDispatcher;
     // Bootstrap commands exist before the plugin manager does, so their permissions cannot be registered with it.
     private static final Map<String, PermissionDefault> BOOTSTRAP_PERMISSION_DEFAULTS = new ConcurrentHashMap<>();
     private static final String NULL_SENDER_CLASS = "io.papermc.paper.brigadier.NullCommandSender";
@@ -77,7 +78,7 @@ public final class CommandLib implements Listener {
 
     private final Plugin plugin;
     private final PluginRegistrationState registrationState;
-    private CommandDispatcher<CommandSourceStack> dispatcher;
+    private @Nullable CommandDispatcher<CommandSourceStack> dispatcher;
     private final List<String> registeredCommandNames = new ArrayList<>();
     private final List<Permission> registeredPermissions = new ArrayList<>();
     private final Map<String, String> helpTopicPermissions = new HashMap<>();
@@ -209,11 +210,11 @@ public final class CommandLib implements Listener {
         PermissionDefault bootstrapDefault = BOOTSTRAP_PERMISSION_DEFAULTS.get(name);
         // The server is null while functions are first compiled, and Paper's sender for compiling functions on a
         // reload has every permission, like vanilla's NULL source.
-        boolean useSender = bootstrapDefault == null || Bukkit.getServer() == null || sender.getClass()
-                                                                                            .getName()
-                                                                                            .equals(NULL_SENDER_CLASS);
-        if (useSender || sender.isPermissionSet(name) || Bukkit.getPluginManager()
-                                                               .getPermission(name) != null) {
+        boolean useSender = Bukkit.getServer() == null || sender.getClass()
+                                                                .getName()
+                                                                .equals(NULL_SENDER_CLASS);
+        if (bootstrapDefault == null || useSender || sender.isPermissionSet(name) || Bukkit.getPluginManager()
+                                                                                           .getPermission(name) != null) {
             return sender.hasPermission(name);
         }
         return bootstrapDefault.getValue(sender.isOp());
@@ -556,8 +557,8 @@ public final class CommandLib implements Listener {
 
     private static final class PluginRegistrationState {
         private boolean lifecycleHandlerRegistered;
-        private IllegalStateException registrationFailure;
-        private CommandDispatcher<CommandSourceStack> dispatcher;
+        private @Nullable IllegalStateException registrationFailure;
+        private @Nullable CommandDispatcher<CommandSourceStack> dispatcher;
         private final List<PendingRegistration> registrations = new ArrayList<>();
     }
 

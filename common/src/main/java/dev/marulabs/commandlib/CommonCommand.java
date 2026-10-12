@@ -16,12 +16,12 @@ import java.util.function.Predicate;
 public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T extends CommonCommand<C, T>> {
     private final String name;
     private Function<C, String> description = ctx -> "";
-    private String staticDescription = "";
-    private String permissionNodeOverride = null;
-    private DefaultPermission defaultPermissionOverride = null;
+    private @Nullable String staticDescription = "";
+    private @Nullable String permissionNodeOverride = null;
+    private @Nullable DefaultPermission defaultPermissionOverride = null;
     private String permissionDescription = "";
-    private T parent = null;
-    private Arguments<C> parentArguments = null;
+    private @Nullable T parent = null;
+    private @Nullable Arguments<C> parentArguments = null;
     private boolean inheritParentPrerequisite = true;
     private boolean inheritParentPreprocess = true;
     private final List<T> children = new ArrayList<>();
@@ -31,7 +31,7 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
     private Prerequisite<C> prerequisite = ctx -> {
     };
     private Predicate<C> preprocess = ctx -> true;
-    private CommandExecutor<C> executor;
+    private @Nullable CommandExecutor<C> executor;
     private final List<UncaughtExceptionHandler<C>> uncaughtExceptionHandlers = new ArrayList<>();
 
     protected CommonCommand(@NotNull String name) {
@@ -64,6 +64,7 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
      * The description set as a string, for places without a command context such as a server help index. Null when
      * the description is computed from the context.
      */
+    @Nullable
     final String staticDescription() {
         return staticDescription;
     }
@@ -98,7 +99,7 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
     }
 
     @SuppressWarnings("unchecked")
-    private void setParentFor(@NotNull Collection<? extends T> children, Arguments<C> parentArguments) {
+    private void setParentFor(@NotNull Collection<? extends T> children, @Nullable Arguments<C> parentArguments) {
         for (CommonCommand<C, T> child : children) {
             child.parent = ((T) this);
             child.parentArguments = parentArguments;
@@ -398,10 +399,12 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
         this.uncaughtExceptionHandlers.add(executor);
     }
 
+    @Nullable
     final T parent() {
         return parent;
     }
 
+    @Nullable
     final Arguments<C> parentArguments() {
         return parentArguments;
     }
@@ -449,6 +452,7 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
         return List.copyOf(aliases);
     }
 
+    @Nullable
     final CommandExecutor<C> executor() {
         return executor;
     }
@@ -521,7 +525,7 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
             return defaultPermissionOverride;
         }
         if (parentArguments != null) {
-            return parentArguments.effectiveDefaultPermission(parent);
+            return parentArguments.effectiveDefaultPermission(Objects.requireNonNull(parent));
         }
         if (parent != null) {
             return parent.effectiveDefaultPermission();

@@ -9,6 +9,7 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
+import org.jetbrains.annotations.Nullable;
 
 public abstract class NMSCommandListenerWrapper extends NMSClass {
     public static NMSCommandListenerWrapper create(Object handle) {
@@ -16,30 +17,35 @@ public abstract class NMSCommandListenerWrapper extends NMSClass {
                              .newInstance(handle);
     }
 
-    public NMSCommandListenerWrapper(Object handle, Class<?> serverClass) {
+    public NMSCommandListenerWrapper(@Nullable Object handle, Class<?> serverClass) {
         super(handle, serverClass);
     }
 
     public abstract CommandSender getBukkitSender();
 
+    @Nullable
     public abstract Entity getBukkitEntity();
 
+    @Nullable
     public abstract World getBukkitWorld();
 
     /**
      * The position of the source, or null without one.
      */
+    @Nullable
     protected abstract NMSVec3D getPosition();
 
     /**
      * The rotation of the source, x being the pitch and y the yaw, or null without one.
      */
+    @Nullable
     protected abstract NMSVec2D getRotation();
 
     /**
      * The position of the source in its world, with its rotation as the yaw and pitch, or null without a world or a
      * position.
      */
+    @Nullable
     public Location getBukkitLocation() {
         World world = getBukkitWorld();
         NMSVec3D position = getPosition();

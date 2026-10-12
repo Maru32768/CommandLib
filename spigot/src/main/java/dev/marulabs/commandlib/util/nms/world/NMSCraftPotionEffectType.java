@@ -4,6 +4,7 @@ import dev.marulabs.commandlib.util.nms.NMSClass;
 import dev.marulabs.commandlib.util.nms.NMSClassRegistry;
 import dev.marulabs.commandlib.util.reflection.ReflectionUtil;
 import org.bukkit.potion.PotionEffectType;
+import org.jetbrains.annotations.Nullable;
 
 public abstract class NMSCraftPotionEffectType extends NMSClass {
     public static NMSCraftPotionEffectType create() {
@@ -16,7 +17,7 @@ public abstract class NMSCraftPotionEffectType extends NMSClass {
                              .newInstance(handle);
     }
 
-    public NMSCraftPotionEffectType(Object handle, Class<?> serverClass) {
+    public NMSCraftPotionEffectType(@Nullable Object handle, Class<?> serverClass) {
         super(handle, serverClass);
     }
 

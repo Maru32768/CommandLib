@@ -21,11 +21,11 @@ import java.util.function.Predicate;
 public abstract class CommonArgument<T, C extends CommonCommandContext<?, ?>, SELF extends CommonArgument<T, C, SELF>> {
     private final String name;
     private final List<ArgumentSuggestionAction<C>> suggestionActions = new ArrayList<>();
-    private BiFunction<C, String, T> additionalParser;
-    private CommandExecutor<C> executor;
+    private @Nullable BiFunction<C, String, T> additionalParser;
+    private @Nullable CommandExecutor<C> executor;
     private final ArgumentType<?> type;
-    private ArgumentValidator<? super T, C> validator;
-    private BiFunction<? super T, C, ? extends T> transformer;
+    private @Nullable ArgumentValidator<? super T, C> validator;
+    private @Nullable BiFunction<? super T, C, ? extends T> transformer;
     private final List<UncaughtExceptionHandler<C>> uncaughtExceptionHandlers = new ArrayList<>();
 
     protected CommonArgument(@NotNull String name, @NotNull ArgumentType<?> type) {
@@ -167,6 +167,7 @@ public abstract class CommonArgument<T, C extends CommonCommandContext<?, ?>, SE
 
     @NotNull
     protected final Predicate<? super T> filter(C ctx) {
+        ArgumentValidator<? super T, C> validator = this.validator;
         if (validator == null) {
             return (x) -> true;
         }

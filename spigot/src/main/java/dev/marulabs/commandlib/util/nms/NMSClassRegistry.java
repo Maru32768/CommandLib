@@ -3,6 +3,7 @@ package dev.marulabs.commandlib.util.nms;
 import dev.marulabs.commandlib.util.bukkit.BukkitUtil;
 import dev.marulabs.commandlib.util.bukkit.MinecraftVersion;
 import dev.marulabs.commandlib.util.nms.exception.NMSClassNotFoundException;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -159,9 +160,7 @@ public final class NMSClassRegistry {
             } catch (ClassNotFoundException e) {
                 return new ModuleClasses(Map.of(), "the module is not in this jar");
             } catch (InvocationTargetException e) {
-                return new ModuleClasses(Map.of(),
-                                         e.getCause()
-                                          .toString());
+                return new ModuleClasses(Map.of(), String.valueOf(e.getCause()));
             } catch (ReflectiveOperationException | LinkageError e) {
                 return new ModuleClasses(Map.of(), e.toString());
             }
@@ -214,9 +213,9 @@ public final class NMSClassRegistry {
 
     private static final class ModuleClasses {
         private final Map<Class<?>, Class<?>> byLookUpClass;
-        private final String failure;
+        private final @Nullable String failure;
 
-        private ModuleClasses(Map<Class<?>, Class<?>> byLookUpClass, String failure) {
+        private ModuleClasses(Map<Class<?>, Class<?>> byLookUpClass, @Nullable String failure) {
             this.byLookUpClass = byLookUpClass;
             this.failure = failure;
         }

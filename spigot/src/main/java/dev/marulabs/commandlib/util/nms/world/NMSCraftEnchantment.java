@@ -4,6 +4,7 @@ import dev.marulabs.commandlib.util.nms.NMSClass;
 import dev.marulabs.commandlib.util.nms.NMSClassRegistry;
 import dev.marulabs.commandlib.util.reflection.ReflectionUtil;
 import org.bukkit.enchantments.Enchantment;
+import org.jetbrains.annotations.Nullable;
 
 public abstract class NMSCraftEnchantment extends NMSClass {
     public static NMSCraftEnchantment create() {
@@ -11,7 +12,7 @@ public abstract class NMSCraftEnchantment extends NMSClass {
                              .newInstance();
     }
 
-    public NMSCraftEnchantment(Object handle, Class<?> serverClass) {
+    public NMSCraftEnchantment(@Nullable Object handle, Class<?> serverClass) {
         super(handle, serverClass);
     }
 

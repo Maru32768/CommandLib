@@ -5,8 +5,10 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.tree.ArgumentCommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import dev.marulabs.commandlib.command.CommandExecutor;
+import dev.marulabs.commandlib.suggestion.SuggestionAction;
 import dev.marulabs.commandlib.suggestion.SuggestionBuilder;
 import dev.marulabs.commandlib.util.UncaughtExceptionHandler;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -57,13 +59,13 @@ final class ArgumentCommandNodeCreator<S, T, C extends CommonCommandContext<S, T
                     }
 
                     for (ArgumentSuggestionAction<C> suggestionAction : argument.suggestionActions()) {
-                        if (suggestionAction.isDefaultSuggestions()) {
+                        SuggestionAction<C> action = suggestionAction.action();
+                        if (action == null) {
                             defaultFutures.add(argument.type()
                                                        .listSuggestions(context, sb)
                                                        .toCompletableFuture());
                         } else {
-                            suggestionAction.action()
-                                            .accept(suggestionBuilder);
+                            action.accept(suggestionBuilder);
                         }
                     }
                 });
@@ -111,6 +113,7 @@ final class ArgumentCommandNodeCreator<S, T, C extends CommonCommandContext<S, T
                         .collect(Collectors.toList());
     }
 
+    @Nullable
     ArgumentCommandNode<S, ?> build(CommandExecutor<C> helpAction,
                                     CommonCommand<C, ?> parent,
                                     Collection<LiteralCommandNode<S>> terminalChildren) {

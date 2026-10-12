@@ -9,13 +9,14 @@ import dev.marulabs.commandlib.util.nms.argument.NMSArgumentScoreboardTeam;
 import org.bukkit.Bukkit;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 import java.util.function.Supplier;
 
 public class TeamArgument extends Argument<Team, TeamArgument> {
     // null keeps the vanilla lookup against the server scoreboard.
-    private Supplier<Scoreboard> scoreboardSupplier;
+    private @Nullable Supplier<Scoreboard> scoreboardSupplier;
 
     public TeamArgument(String name) {
         super(name,
@@ -31,7 +32,8 @@ public class TeamArgument extends Argument<Team, TeamArgument> {
         this.scoreboardSupplier = Objects.requireNonNull(scoreboardSupplier);
         // The vanilla suggestions list the server scoreboard's teams.
         replaceDefaultSuggestions(sb -> {
-            Scoreboard scoreboard = this.scoreboardSupplier.get();
+            Scoreboard scoreboard = Objects.requireNonNull(this.scoreboardSupplier)
+                                           .get();
             if (scoreboard == null) {
                 return;
             }

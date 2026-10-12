@@ -25,23 +25,23 @@ public final class RichText {
     private static final int STRIKETHROUGH = 3;
     private static final int OBFUSCATED = 4;
 
-    private final String text;
-    private final String translationKey;
+    private final @Nullable String text;
+    private final @Nullable String translationKey;
     private final List<RichText> arguments;
     private final List<RichText> children;
-    private final Integer color;
+    private final @Nullable Integer color;
     private final Boolean[] decorations;
-    private final RichText hover;
-    private final ClickAction click;
+    private final @Nullable RichText hover;
+    private final @Nullable ClickAction click;
 
-    private RichText(String text,
-                     String translationKey,
+    private RichText(@Nullable String text,
+                     @Nullable String translationKey,
                      List<RichText> arguments,
                      List<RichText> children,
-                     Integer color,
+                     @Nullable Integer color,
                      Boolean[] decorations,
-                     RichText hover,
-                     ClickAction click) {
+                     @Nullable RichText hover,
+                     @Nullable ClickAction click) {
         this.text = text;
         this.translationKey = translationKey;
         this.arguments = arguments;

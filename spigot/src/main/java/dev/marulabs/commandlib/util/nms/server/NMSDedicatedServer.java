@@ -5,6 +5,7 @@ import dev.marulabs.commandlib.util.nms.NMSClass;
 import dev.marulabs.commandlib.util.nms.NMSClassRegistry;
 import dev.marulabs.commandlib.util.nms.command.NMSCommandDispatcher;
 import dev.marulabs.commandlib.util.reflection.ReflectionUtil;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
 
@@ -14,7 +15,7 @@ public abstract class NMSDedicatedServer extends NMSClass {
                              .newInstance(handle);
     }
 
-    public NMSDedicatedServer(Object handle, Class<?> serverClass) {
+    public NMSDedicatedServer(@Nullable Object handle, Class<?> serverClass) {
         super(handle, serverClass);
     }
 

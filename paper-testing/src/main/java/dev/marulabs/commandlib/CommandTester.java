@@ -33,6 +33,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
@@ -63,13 +64,13 @@ public final class CommandTester implements AutoCloseable {
     // These registry value classes trigger Paper/Bukkit RegistryAccess initialization when
     // touched directly outside a real Paper server. Tests may inject real/bootstrap-safe
     // values if available, but paper-testing intentionally does not create defaults.
-    private Enchantment fakeEnchantment;
+    private @Nullable Enchantment fakeEnchantment;
     private Particle fakeParticle = Particle.POOF;
-    private PotionEffectType fakePotionEffectType;
-    private Biome fakeBiome;
-    private Attribute fakeAttribute;
+    private @Nullable PotionEffectType fakePotionEffectType;
+    private @Nullable Biome fakeBiome;
+    private @Nullable Attribute fakeAttribute;
     private EntityType fakeEntityType = EntityType.ZOMBIE;
-    private Sound fakeSound;
+    private @Nullable Sound fakeSound;
     private final String permissionPrefix;
 
     public static Builder builder() {
@@ -287,6 +288,7 @@ public final class CommandTester implements AutoCloseable {
         };
     }
 
+    @Nullable
     private Object resourceValue(RegistryKey<?> key) {
         CommandTester tester = requireCurrent();
         if (RegistryKey.ENCHANTMENT.equals(key)) {
@@ -370,7 +372,7 @@ public final class CommandTester implements AutoCloseable {
 
     public static final class Builder {
         private final List<Supplier<? extends Command>> commandSuppliers = new ArrayList<>();
-        private String permissionPrefix;
+        private @Nullable String permissionPrefix;
 
         public Builder command(@NotNull Command command) {
             Objects.requireNonNull(command, "command");

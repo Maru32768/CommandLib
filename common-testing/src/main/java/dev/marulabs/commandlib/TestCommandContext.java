@@ -14,7 +14,7 @@ public final class TestCommandContext extends CommonCommandContext<FakeSender, S
     // while latest() keeps returning contexts created on other threads, e.g. by an asynchronous execute call.
     private static final ThreadLocal<TestCommandContext> LATEST_ON_THREAD = new ThreadLocal<>();
     private static final ChatColorUtil.ChatColor[] NAMED_COLORS = {ChatColorUtil.BLACK, ChatColorUtil.DARK_BLUE, ChatColorUtil.DARK_GREEN, ChatColorUtil.DARK_AQUA, ChatColorUtil.DARK_RED, ChatColorUtil.DARK_PURPLE, ChatColorUtil.GOLD, ChatColorUtil.GRAY, ChatColorUtil.DARK_GRAY, ChatColorUtil.BLUE, ChatColorUtil.GREEN, ChatColorUtil.AQUA, ChatColorUtil.RED, ChatColorUtil.LIGHT_PURPLE, ChatColorUtil.YELLOW, ChatColorUtil.WHITE};
-    private static volatile TestCommandContext latest;
+    private static volatile @Nullable TestCommandContext latest;
     private final List<String> messages = new ArrayList<>();
     private final List<RichText> richMessages = new ArrayList<>();
 
@@ -24,10 +24,12 @@ public final class TestCommandContext extends CommonCommandContext<FakeSender, S
         latest = this;
     }
 
+    @Nullable
     public static TestCommandContext latest() {
         return latest;
     }
 
+    @Nullable
     static TestCommandContext takeLatestOnCurrentThread() {
         TestCommandContext ctx = LATEST_ON_THREAD.get();
         LATEST_ON_THREAD.remove();
@@ -69,7 +71,7 @@ public final class TestCommandContext extends CommonCommandContext<FakeSender, S
         // An empty uncolored message stays empty, as sendMessage("") always did.
         boolean blank = text.plainText()
                             .isEmpty() && text.color() == null;
-        send(blank ? "" : legacyText(text, ChatColorUtil.WHITE.getRGB(), new boolean[5]));
+        send(blank ? "" : legacyText(text, Objects.requireNonNull(ChatColorUtil.WHITE.getRGB()), new boolean[5]));
     }
 
     /**

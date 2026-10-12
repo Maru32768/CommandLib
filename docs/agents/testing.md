@@ -53,12 +53,14 @@ for command-level Bukkit tests when a full server is not needed.
 
 Error Prone runs inside `compileJava` / `compileTestJava` of `common`, `spigot`, `paper` and their `-testing`
 modules, so the compile checks above also run it. Its compiler is JDK 21 with `--release` set to the module's toolchain
-version. Fix an error rather than suppressing it; suppress with `@SuppressWarnings("<CheckName>")` only at a site that
-does it on purpose.
+version. Its warnings fail the build as well (`-Werror`). Fix what it reports rather than suppressing it; suppress with
+`@SuppressWarnings("<CheckName>")` and a comment giving the reason only at a site that does it on purpose. The checks
+disabled for the whole build are listed with their reasons in the root `build.gradle.kts`.
 
 NullAway runs with Error Prone on the main sources of the same modules and treats code in `dev.marulabs.commandlib` as
-non-null unless annotated `@Nullable` (`org.jetbrains.annotations.Nullable`). It reports warnings for now; annotate
-a field, parameter or return value `@Nullable` when null is a legitimate value, and do not add new NullAway warnings.
+non-null unless annotated `@Nullable` (`org.jetbrains.annotations.Nullable`), and fails the build on a possible null
+dereference. Annotate a field, parameter or return value `@Nullable` when null is a legitimate value, and put the
+annotation of a method on the line above it, as the existing code does.
 
 The same modules publish a javadoc jar, and their `javadoc` task runs doclint without the `missing` group: broken
 Javadoc (malformed HTML, a bad `@param` name, an unknown `{@link}`) fails it, an undocumented member does not. Check
