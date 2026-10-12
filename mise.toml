@@ -4,9 +4,10 @@
 #   TYPESAFE_API_KEY = "..."
 [tools]
 node = "24"
-# mise skips install scripts by default, and @ast-grep/cli puts its binary in place with one. This runs the scripts of
-# every dependency, as npx would; allow_builds = ["@ast-grep/cli"] limits it to that one on a mise that supports it.
-"npm:jev-lint" = { version = "0.7.0", npm_args = "--ignore-scripts=false" }
+# mise skips install scripts by default, and @ast-grep/cli puts its binary in place with one. mise also refuses a package
+# first published less than 30 days ago; jev-lint was on 2026-09-19, so allow_low_downloads approves it until then and
+# can go after 2026-10-19. Both options need mise 2026.10 or later.
+"npm:jev-lint" = { version = "0.7.0", allow_builds = ["@ast-grep/cli"], allow_low_downloads = true }
 
 # Without a base, the review covers what is not pushed yet, since commits usually go straight to master. On a branch,
 # pass the ref it started from: mise run jev-review master
