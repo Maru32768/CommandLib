@@ -261,26 +261,54 @@ w("NMSDedicatedServer", '''    public NMSDedicatedServer_SUFFIX(Object handle) {
         DedicatedServer server = (DedicatedServer) getHandle();
         CustomFunctionManager library = server.dataPackResources.a();
         setFunctionDispatcher(library, CustomFunctionManager.class, dispatcher);
-        library.a(new IReloadListener.a() {
-                      @Override
-                      public <T> CompletableFuture<T> a(T value) {
-                          return CompletableFuture.completedFuture(value);
-                      }
-                  },
-                  server.dataPackResources.h(),
-                  GameProfilerDisabled.a,
-                  GameProfilerDisabled.a,
-                  Runnable::run,
-                  Runnable::run)
-               .join();
+        // Mohist remaps IReloadListener but not its inner barrier interface, so a class implementing it fails to link
+        // there; the barrier is a proxy of the reload method's parameter type instead.
+        Method reload = null;
+        for (Method method : CustomFunctionManager.class.getMethods()) {
+            if (method.getParameterCount() == 6 && method.getReturnType() == CompletableFuture.class) {
+                reload = method;
+            }
+        }
+        if (reload == null) {
+            throw new IllegalStateException("CustomFunctionManager has no reload method");
+        }
+        Class<?> barrierType = reload.getParameterTypes()[0];
+        Object barrier = Proxy.newProxyInstance(barrierType.getClassLoader(),
+                                                new Class<?>[]{barrierType},
+                                                (proxy, method, args) -> {
+                                                    switch (method.getName()) {
+                                                        case "equals":
+                                                            return proxy == args[0];
+                                                        case "hashCode":
+                                                            return System.identityHashCode(proxy);
+                                                        case "toString":
+                                                            return "CommandLib function recompilation";
+                                                        default:
+                                                            return CompletableFuture.completedFuture(args[0]);
+                                                    }
+                                                });
+        Executor direct = Runnable::run;
+        try {
+            ((CompletableFuture<?>) reload.invoke(library,
+                                                  barrier,
+                                                  server.dataPackResources.h(),
+                                                  GameProfilerDisabled.a,
+                                                  GameProfilerDisabled.a,
+                                                  direct,
+                                                  direct)).join();
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException(e);
+        }
         server.getFunctionData()
               .a(library);
     }
 ''', [f"{NMS}.DedicatedServer",
       f"{NMS}.CustomFunctionManager",
-      f"{NMS}.IReloadListener",
       f"{NMS}.GameProfilerDisabled",
-      "java.util.concurrent.CompletableFuture"])
+      "java.lang.reflect.Method",
+      "java.lang.reflect.Proxy",
+      "java.util.concurrent.CompletableFuture",
+      "java.util.concurrent.Executor"])
 
 w("NMSCraftBlockData", '''    public NMSCraftBlockData_SUFFIX() {
         super(null, CraftBlockData.class);
