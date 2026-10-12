@@ -1,4 +1,5 @@
-# Default: clean. Every matched subject not listed here is a clean case.
+# Every matched subject not listed here is a clean case.
+default: clean
 fixtures/TeamDirectory.java:
   - { line: 26, label: bad, window: 0, reason: "promises null for an unknown name; the body throws" }
   - { line: 44, label: bad, window: 0, reason: "promises name order; a HashMap has none" }

@@ -4,7 +4,14 @@ language: Java
 kind: noul
 subject: node
 state: located
-threshold: 0.7  # uncalibrated: fit it on fixtures/ with jev-lint eval before relying on it
+# 0.58, fitted 2026-10-12 on fixtures/ (jev-1.13.0, 5 defects, 8 cleans, 3 passes): cleans top at 0.26 (`apply`, a
+# terse name that records a use), and four defects answer 0.76-0.90. `countActive`, which counts expired cooldowns as
+# active, answers 0.30-0.40: seeing it takes knowing that the map is never pruned, and the question does not reach that
+# far. It is kept labelled as a defect and left under the cutoff rather than fitted into a 0.04 gap above the cleans.
+# 0.58 is the midpoint of the empty band 0.40..0.76, with 0.32 of headroom over the cleans.
+threshold: 0.58
+# Calibrated on the file axis; pinned so the scheduler cannot move it.
+axis: file
 severity: warning
 rule:
   all:

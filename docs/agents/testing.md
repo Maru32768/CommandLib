@@ -78,6 +78,9 @@ code to the TypeSafe API, so run it only when the user asks. `mise.toml` pins No
 the key goes in `mise.local.toml`, which Git ignores, as `[env]` `TYPESAFE_API_KEY = "..."`. Run it through mise, since
 a non-interactive shell may not have mise activated: `mise run jev-review` judges the lines changed since master, and
 `mise exec -- jev-lint check --dry-run` lists the subjects and the price without a request. Its findings are candidates
-to judge, not errors, and the Java rules' cutoffs are not calibrated yet: each rule has labelled cases in its
-`fixtures/` and `expect.yml`, and `mise exec -- jev-lint eval .jev-lint/rules/java/<rule> --repeat 3` fits the cutoff on
-them, which also needs the key. Keep labels out of the fixture code, since the model reads it.
+to judge, not errors. Each Java rule's cutoff is fitted on the labelled cases in its `fixtures/` and `expect.yml`, with
+the reasoning in its `rule.yml` and the accepted run in `baseline.json`; after changing a rule or its cases, refit with
+`mise exec -- jev-lint eval .jev-lint/rules/java/<rule> --repeat 3` and accept with `--accept`, which needs the key. On
+Windows, `eval --replay` and `--accept-last` mis-score these suites, because jev-lint compares a baseline's `/` paths
+with the `\` paths of the labels; a fresh `eval` scores them correctly. Keep labels out of the fixture code, since the
+model reads it.

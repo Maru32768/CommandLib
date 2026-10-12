@@ -127,3 +127,6 @@ run/
 
 # Local mise settings, such as API keys
 mise.local.toml
+
+# The last jev-lint eval run, accepted or not; the accepted one is baseline.json
+.jev-lint/rules/*/*/last.json

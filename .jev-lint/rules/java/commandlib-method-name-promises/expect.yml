@@ -1,4 +1,5 @@
-# Default: clean. Every matched subject not listed here is a clean case.
+# Every matched subject not listed here is a clean case.
+default: clean
 fixtures/CooldownRegistry.java:
   - { line: 29, label: bad, window: 0, reason: "a check that records a new use, so asking twice changes the answer" }
   - { line: 44, label: bad, window: 0, reason: "counts every player ever recorded, expired cooldowns included" }

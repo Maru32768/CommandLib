@@ -4,7 +4,13 @@ language: Java
 kind: noul
 subject: node
 state: located
-threshold: 0.7  # uncalibrated: fit it on fixtures/ with jev-lint eval before relying on it
+# 0.32, fitted 2026-10-12 on fixtures/ (jev-1.13.0, 5 defects, 7 cleans, 3 passes): cleans top at 0.19 worst-pass (a
+# caller obligation, `size`), and the defects start at 0.45 worst-pass (`protectionTime`, which says seconds over ticks
+# times 50, milliseconds only to a reader who knows a tick is 50 ms); the next defect is at 0.91. 0.32 is the midpoint,
+# with 0.13 of headroom on each side.
+threshold: 0.32
+# Calibrated on the file axis; pinned so the scheduler cannot move it.
+axis: file
 severity: warning
 rule:
   all:
