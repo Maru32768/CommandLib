@@ -67,13 +67,23 @@ configure<net.minecraftforge.gradle.userdev.UserDevExtension> {
 
 sourceSets["main"].resources.srcDir("src/generated/resources")
 
+// -PcommandlibLocal=true builds against this repository's code instead of the jitpack release. Publish it first with
+// ./gradlew -Pcommandlib.typedNms=false :common:publishToMavenLocal :modded:forge-1.16.5:publishToMavenLocal
+// at the repository root. The repository build needs Gradle 9, which ForgeGradle 6 does not run on, so this sample
+// cannot include it as a composite build like the Spigot and Paper samples do.
+val commandLibLocal = providers.gradleProperty("commandlibLocal").orNull.toBoolean()
+val commandLibGroup = if (commandLibLocal) "dev.marulabs" else "com.github.Maru32768.CommandLib"
+
 repositories {
+    if (commandLibLocal) {
+        mavenLocal()
+    }
     maven { url = uri("https://jitpack.io") }
 }
 
 dependencies {
     "minecraft"("net.minecraftforge:forge:1.16.5-36.2.20")
-    implementation("com.github.Maru32768.CommandLib:forge:latest.release")
+    implementation("$commandLibGroup:forge-1.16.5:latest.release")
 }
 
 tasks.named<Jar>("jar") {
@@ -97,7 +107,7 @@ val projectNameLower = project.name.lowercase()
 tasks.named<ShadowJar>("shadowJar") {
     archiveFileName.set("${rootProject.name}-${project.version}.jar")
     dependencies {
-        include(dependency("com.github.Maru32768.CommandLib:forge:.*"))
+        include(dependency("$commandLibGroup:forge-1.16.5:.*"))
     }
     relocate("dev.marulabs.commandlib", "$projectGroup.$projectNameLower.commandlib")
     finalizedBy("reobfShadowJar")
