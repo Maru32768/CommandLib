@@ -69,3 +69,9 @@ in the root `build.gradle.kts` and writes `build/reports/japicmp/`. It lists bin
 them when the project version has the baseline's major and minor version, since only a minor release may break the API
 under 0.x versioning. It is not part of `check`. After a release, move the baselines to it and add the modules it
 published for the first time.
+
+[jev-lint](https://github.com/mizchi/jev-lint) asks a model whether a method body contradicts its name and whether a
+comment contradicts the declaration under it (`.jev-lint.yaml`, rules in `.jev-lint/rules/java/`). It sends the judged
+code to the TypeSafe API and needs `TYPESAFE_API_KEY` and Node 24+, so run it only when the user asks:
+`npx -y -p node@24 -p jev-lint jev-lint review --base master`. `--dry-run` lists the subjects and the price without a
+request. Its findings are candidates to judge, not errors, and the Java rules' cutoffs are not calibrated yet.

@@ -1,0 +1,34 @@
+# Ported from jev-lint's rust/fn-name-promises: the same question over Java methods.
+id: commandlib-method-name-promises
+language: Java
+kind: noul
+subject: node
+state: located
+threshold: 0.7  # uncalibrated: no fixtures yet, refit before raising severity
+severity: warning
+rule:
+  all:
+    - kind: method_declaration
+    - has: { field: name, pattern: $NAME }
+    # Abstract and interface methods have no body to judge.
+    - has: { field: body, kind: block }
+ask: >-
+  The body of this function does something materially different from what its
+  name promises.
+criteria:
+  "true": >-
+    Someone who read only the name and the parameter list would be wrong about
+    what this method does: it returns a different kind of thing than the name
+    suggests (a count that is a list, a predicate that is a number), it changes
+    state when the name says it only reads, checks, looks up or serialises, it
+    can fail or return null when the name promises a value, it handles only a
+    narrower case than the name claims, it never performs an effect or
+    repetition the name names, it computes something no reading of the name
+    accounts for, or it does substantial work the name does not mention at all.
+  "false": >-
+    The name and parameter list describe what the body actually does. Someone
+    who read only them would not be surprised by the body, even if a longer or
+    more specific name could be imagined. A terse or conventional name (run,
+    execute, apply, get, toString, a getter or a fluent builder setter returning
+    this) that the body fits is not a violation, and a comment inside the body
+    that is wrong about the body is a wrong comment, not a wrong name.

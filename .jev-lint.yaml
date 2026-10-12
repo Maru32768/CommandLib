@@ -1,0 +1,16 @@
+# jev-lint (https://github.com/mizchi/jev-lint) asks a model whether code contradicts its own names and comments. It
+# sends the judged code to the TypeSafe API, so it runs only by hand with TYPESAFE_API_KEY set; findings are candidates
+# for a human to judge, and no rule blocks anything.
+files:
+  - common/src/main/java
+  - spigot/src/main/java
+  - paper/src/main/java
+  - common-testing/src/main/java
+  - spigot-testing/src/main/java
+  - paper-testing/src/main/java
+rules:
+  java/commandlib-comment-describes-declaration: on
+  java/commandlib-method-name-promises: on
+  # `jev-lint commits --base master`: each commit message against its diff, and each change against AGENTS.md.
+  git/commit-message-describes-diff: on
+  git/diff-follows-instructions: on

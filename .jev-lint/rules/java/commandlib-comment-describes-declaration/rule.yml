@@ -1,0 +1,43 @@
+# Ported from jev-lint's rust/comment-describes-declaration: the same question over Java declarations.
+id: commandlib-comment-describes-declaration
+language: Java
+kind: noul
+subject: node
+state: located
+threshold: 0.7  # uncalibrated: no fixtures yet, refit before raising severity
+severity: warning
+rule:
+  all:
+    - any:
+        - kind: method_declaration
+        - kind: constructor_declaration
+        - kind: class_declaration
+        - kind: interface_declaration
+        - kind: enum_declaration
+    - follows:
+        # Javadoc is a block_comment in this grammar.
+        any:
+          - kind: block_comment
+          - kind: line_comment
+        pattern: $DOC
+ask: >-
+  The comment above this code claims something that is not true of the code.
+criteria:
+  "true": >-
+    A specific claim the comment makes is contradicted by the code: it names a
+    different operation, direction, ordering or unit than the code uses, it
+    states a return value, @throws condition or guarantee the code does not
+    provide, it describes a side effect the code does not perform or omits one
+    it does, it gives a count, limit or default that differs from the code's, or
+    it refers to a parameter, field or method that the code no longer has.
+  "false": >-
+    Every specific claim the comment makes holds for the code below it. A
+    comment that is vague, redundant, restates the obvious, or says less than it
+    could is not a false comment -- only a claim that is actually wrong counts
+    here. A section heading names the part of the file that starts here, not the
+    declaration under it, and makes no claim about it.
+note: >-
+  Judge only claims the code in front of you can confirm or contradict. A
+  comment about a caller's obligations, about performance, about history, or
+  about Minecraft server behavior outside this file is not checkable here and
+  is not a violation.
