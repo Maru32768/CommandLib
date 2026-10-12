@@ -125,10 +125,14 @@ class IntegrationTest {
                 // must not break; the exception is only logged there.
                 assertThat(container.getLogs()).as("server log")
                                                .doesNotContain("ConcurrentModificationException");
-                // The fixtures write their data pack after startup, so only the server's compilation on
-                // /minecraft:reload, before CommandLib's commands are in its dispatcher, could report the function.
-                assertThat(container.getLogs()).as("server log")
-                                               .doesNotContain("Failed to load function commandlibtest:");
+                // On /minecraft:reload the server compiles the fixture's function before CommandLib's commands are
+                // in its dispatcher, and CommandLib compiles it again. Only errors from then count: a server that
+                // starts with the data pack, such as a Mohist image made from a bootstrap run, compiles it before
+                // plugins load.
+                String logs = container.getLogs();
+                String reloadMarker = "Reloading data packs to verify registered commands survive.";
+                assertThat(logs.substring(Math.max(0, logs.indexOf(reloadMarker)))).as("server log after the reload")
+                                                                                   .doesNotContain("Failed to load function commandlibtest:");
 
                 // Bot-side checks need the messages a player receives, which the console-driven report cannot see.
                 // Help message prefix: the usage must start with the typed command, not a token like an argument name.
