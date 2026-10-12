@@ -4,7 +4,7 @@ language: Java
 kind: noul
 subject: node
 state: located
-threshold: 0.7  # uncalibrated: no fixtures yet, refit before raising severity
+threshold: 0.7  # uncalibrated: fit it on fixtures/ with jev-lint eval before relying on it
 severity: warning
 rule:
   all:

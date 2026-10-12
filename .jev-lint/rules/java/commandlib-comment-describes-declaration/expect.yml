@@ -1,0 +1,14 @@
+# Default: clean. Every matched subject not listed here is a clean case.
+fixtures/TeamDirectory.java:
+  - { line: 26, label: bad, window: 0, reason: "promises null for an unknown name; the body throws" }
+  - { line: 44, label: bad, window: 0, reason: "promises name order; a HashMap has none" }
+  - { line: 72, label: bad, window: 0, reason: "says at most 10; the default limit is 20" }
+  - { line: 79, label: bad, window: 0, reason: "says seconds; ticks times 50 is milliseconds" }
+  - { line: 86, label: bad, window: 0, reason: "names a fallback parameter and a move that do not exist" }
+  - { line: 12, label: clean, window: 0, reason: "accurate class summary" }
+  - { line: 19, label: clean, window: 0, reason: "put replaces a team of the same name, as stated" }
+  - { line: 37, label: clean, window: 0, reason: "accurate" }
+  - { line: 53, label: clean, window: 0, reason: "the @throws condition matches the check; the hard clean" }
+  - { line: 95, label: clean, window: 0, reason: "vague but not false" }
+  - { line: 103, label: clean, window: 0, reason: "a caller obligation, not checkable here" }
+  - { line: 110, label: clean, window: 0, reason: "accurate, including the empty case" }

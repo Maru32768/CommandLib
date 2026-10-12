@@ -1,0 +1,15 @@
+# Default: clean. Every matched subject not listed here is a clean case.
+fixtures/CooldownRegistry.java:
+  - { line: 29, label: bad, window: 0, reason: "a check that records a new use, so asking twice changes the answer" }
+  - { line: 44, label: bad, window: 0, reason: "counts every player ever recorded, expired cooldowns included" }
+  - { line: 48, label: bad, window: 0, reason: "clears every cooldown, not only the expired ones" }
+  - { line: 52, label: bad, window: 0, reason: "a lookup that invents and stores an id for an unknown name" }
+  - { line: 60, label: bad, window: 0, reason: "tries once and ignores attempts" }
+  - { line: 21, label: clean, window: 0, reason: "a getter the body fits" }
+  - { line: 25, label: clean, window: 0, reason: "conventional get that may return null" }
+  - { line: 36, label: clean, window: 0, reason: "remaining time, clamped at zero; the hard clean" }
+  - { line: 56, label: clean, window: 0, reason: "ensure creates only when absent, as the name says" }
+  - { line: 69, label: clean, window: 0, reason: "filters to cooldowns still running" }
+  - { line: 80, label: clean, window: 0, reason: "terse conventional name that records a use" }
+  - { line: 84, label: clean, window: 0, reason: "trims and lower-cases, a normal normalization" }
+  - { line: 89, label: clean, window: 0, reason: "conventional toString" }
