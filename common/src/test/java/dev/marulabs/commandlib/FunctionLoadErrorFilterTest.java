@@ -6,7 +6,9 @@ import org.apache.logging.log4j.core.Filter;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.appender.AbstractAppender;
+import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.core.config.Property;
+import org.apache.logging.log4j.core.filter.ThresholdFilter;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -58,6 +60,28 @@ class FunctionLoadErrorFilterTest {
         logger.error(FunctionLoadErrorFilter.MESSAGE, "test:probe", new IllegalArgumentException("Unknown command"));
 
         assertThat(logged).isEmpty();
+    }
+
+    @Test
+    void comes_before_a_filter_that_accepts_errors() {
+        filter.uninstall();
+        Configuration configuration = ((LoggerContext) LogManager.getContext(getClass().getClassLoader(),
+                                                                             false)).getConfiguration();
+        // Like Forge's configuration, which Mohist uses.
+        Filter accepting = ThresholdFilter.createFilter(org.apache.logging.log4j.Level.ERROR,
+                                                        Filter.Result.ACCEPT,
+                                                        Filter.Result.NEUTRAL);
+        configuration.addFilter(accepting);
+        try {
+            filter = Objects.requireNonNull(FunctionLoadErrorFilter.install(getClass().getClassLoader(),
+                                                                            recompiling::get));
+
+            logger.error(FunctionLoadErrorFilter.MESSAGE, "test:probe", new IllegalArgumentException("Unknown"));
+
+            assertThat(logged).isEmpty();
+        } finally {
+            configuration.removeFilter(accepting);
+        }
     }
 
     @Test

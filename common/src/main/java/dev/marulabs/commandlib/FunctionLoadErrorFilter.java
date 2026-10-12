@@ -3,6 +3,7 @@ package dev.marulabs.commandlib;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Marker;
+import org.apache.logging.log4j.core.Filter;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.Logger;
 import org.apache.logging.log4j.core.LoggerContext;
@@ -62,7 +63,16 @@ final class FunctionLoadErrorFilter extends AbstractFilter {
         Configuration configuration = ((LoggerContext) context).getConfiguration();
         FunctionLoadErrorFilter filter = new FunctionLoadErrorFilter(configuration, recompiling);
         filter.start();
+        // A composite filter stops at the first filter that accepts or denies, and Forge's configuration, which Mohist
+        // uses, has filters that accept errors, so this one goes first.
+        Filter existing = configuration.getFilter();
+        if (existing != null) {
+            configuration.removeFilter(existing);
+        }
         configuration.addFilter(filter);
+        if (existing != null) {
+            configuration.addFilter(existing);
+        }
         return filter;
     }
 
