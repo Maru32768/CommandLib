@@ -8,6 +8,7 @@ node = "24"
 # every dependency, as npx would; allow_builds = ["@ast-grep/cli"] limits it to that one on a mise that supports it.
 "npm:jev-lint" = { version = "0.7.0", npm_args = "--ignore-scripts=false" }
 
+# Commits go straight to master, so the review covers what is not pushed yet.
 [tasks.jev-review]
-description = "Judge the lines changed since master with jev-lint"
-run = "jev-lint review --base master"
+description = "Judge the lines of the unpushed commits with jev-lint"
+run = "jev-lint review --base origin/master"
