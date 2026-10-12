@@ -39,9 +39,10 @@ public final class PlatformAdapterImpl implements PlatformAdapter<Object, BaseCo
         try {
             sender = NMSCommandListenerWrapper.create(commandSource)
                                               .getBukkitSender();
-        } catch (UnsupportedOperationException e) {
-            // Data pack functions are compiled with a source that has no Bukkit sender (CraftBukkit's
-            // CommandSource.NULL throws). As for vanilla commands, the function permission level guards them then.
+        } catch (UnsupportedOperationException | NullPointerException e) {
+            // Data pack functions are compiled with a source that has no Bukkit sender: CraftBukkit's
+            // CommandSource.NULL throws, and Mohist's reads the console of the source's server, which is null then. As
+            // for vanilla commands, the function permission level guards them.
             return true;
         }
         return sender.hasPermission(permissionNode);
