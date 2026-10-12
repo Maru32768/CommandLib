@@ -125,6 +125,10 @@ class IntegrationTest {
                 // must not break; the exception is only logged there.
                 assertThat(container.getLogs()).as("server log")
                                                .doesNotContain("ConcurrentModificationException");
+                // The fixtures write their data pack after startup, so only the server's compilation on
+                // /minecraft:reload, before CommandLib's commands are in its dispatcher, could report the function.
+                assertThat(container.getLogs()).as("server log")
+                                               .doesNotContain("Failed to load function commandlibtest:");
 
                 // Bot-side checks need the messages a player receives, which the console-driven report cannot see.
                 // Help message prefix: the usage must start with the typed command, not a token like an argument name.

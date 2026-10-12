@@ -52,6 +52,7 @@ public final class CommandLib implements Listener {
     private final List<HelpTopic> registeredHelpTopics = new ArrayList<>();
     // Shared by the instances of this copy of CommandLib, which a plugin shades.
     private static @Nullable BukkitTask functionCompiler;
+    private static @Nullable FunctionLoadErrorFilter functionLoadErrorFilter;
     private static @Nullable Object functionsCompiledFor;
     private static boolean commandsChangedSinceCompile;
 
@@ -559,6 +560,25 @@ public final class CommandLib implements Listener {
             // Kept by the task, so each tick's check is a field read and an identity comparison.
             functionCompiler = Bukkit.getScheduler()
                                      .runTaskTimer(plugin, () -> compileFunctionsIfStale(plugin, server), 0L, 1L);
+            if (functionLoadErrorFilter == null) {
+                installFunctionLoadErrorFilter();
+            }
+        }
+    }
+
+    /**
+     * Hides the errors of the server's own compilation of functions that use the commands while the task compiles them
+     * again ({@link FunctionLoadErrorFilter}).
+     */
+    private static void installFunctionLoadErrorFilter() {
+        try {
+            functionLoadErrorFilter = FunctionLoadErrorFilter.install(Bukkit.getServer()
+                                                                            .getClass()
+                                                                            .getClassLoader(),
+                                                                      () -> functionCompiler != null
+                                                                              && !functionCompiler.isCancelled());
+        } catch (LinkageError | RuntimeException ignored) {
+            // The server does not log through this Log4j, so there is nothing to filter.
         }
     }
 
@@ -588,6 +608,11 @@ public final class CommandLib implements Listener {
         }
 
         unregister(false);
+        // Shaded into this plugin, this copy compiles functions only for it.
+        if (functionLoadErrorFilter != null) {
+            functionLoadErrorFilter.uninstall();
+            functionLoadErrorFilter = null;
+        }
     }
 
     public void unregister() {

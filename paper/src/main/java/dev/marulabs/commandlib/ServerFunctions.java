@@ -25,12 +25,19 @@ final class ServerFunctions {
     private ServerFunctions() {
     }
 
-    static void recompile(Logger logger) {
+    static boolean available() {
+        return !unavailable;
+    }
+
+    /**
+     * Named as {@link FunctionLoadErrorFilter#RECOMPILE_METHOD}, so the errors of this compilation are logged.
+     */
+    static void recompileFunctions(Logger logger) {
         if (unavailable) {
             return;
         }
         try {
-            recompile();
+            recompileFunctions();
         } catch (ReflectiveOperationException | RuntimeException e) {
             unavailable = true;
             logger.log(Level.WARNING,
@@ -40,7 +47,7 @@ final class ServerFunctions {
         }
     }
 
-    private static void recompile() throws ReflectiveOperationException {
+    private static void recompileFunctions() throws ReflectiveOperationException {
         Object server = Bukkit.getServer()
                               .getClass()
                               .getMethod("getServer")

@@ -17,6 +17,8 @@ dependencies {
     api(project(":common"))
     compileOnly("org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT")
     compileOnlyApi("org.jetbrains:annotations:16.0.2")
+    // FunctionLoadErrorFilter extends a Log4j class; the servers provide Log4j.
+    compileOnly("org.apache.logging.log4j:log4j-core:2.17.1")
     compileOnly("com.mojang:brigadier:1.0.18")
 
     testImplementation("org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT")

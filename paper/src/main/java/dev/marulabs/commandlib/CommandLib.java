@@ -85,6 +85,7 @@ public final class CommandLib implements Listener {
     private static final Map<String, PermissionDefault> BOOTSTRAP_PERMISSION_DEFAULTS = new ConcurrentHashMap<>();
     private static final String NULL_SENDER_CLASS = "io.papermc.paper.brigadier.NullCommandSender";
     private static final Map<Plugin, PluginRegistrationState> REGISTRATION_STATES = Collections.synchronizedMap(new WeakHashMap<>());
+    private static @Nullable FunctionLoadErrorFilter functionLoadErrorFilter;
 
     private final Plugin plugin;
     private final PluginRegistrationState registrationState;
@@ -141,6 +142,9 @@ public final class CommandLib implements Listener {
                                              REGISTRATION_STATES.computeIfAbsent(plugin,
                                                                                  ignored -> new PluginRegistrationState()));
         instance.registerPluginListener();
+        if (functionLoadErrorFilter == null) {
+            installFunctionLoadErrorFilter();
+        }
         try {
             instance.doRegister(commands, permissionPrefix);
         } catch (RuntimeException e) {
@@ -307,6 +311,44 @@ public final class CommandLib implements Listener {
         }
 
         unregister(false);
+        // Shaded into this plugin, this copy compiles functions only for it.
+        if (functionLoadErrorFilter != null) {
+            functionLoadErrorFilter.uninstall();
+            functionLoadErrorFilter = null;
+        }
+    }
+
+    /**
+     * Hides the errors of the server's compilation of functions that use the commands, since CommandLib compiles them
+     * again after every data reload ({@link FunctionLoadErrorFilter}).
+     */
+    private static void installFunctionLoadErrorFilter() {
+        try {
+            functionLoadErrorFilter = FunctionLoadErrorFilter.install(Bukkit.getServer()
+                                                                            .getClass()
+                                                                            .getClassLoader(),
+                                                                      () -> ServerFunctions.available()
+                                                                              && hasEnabledRegistrations());
+        } catch (LinkageError | RuntimeException ignored) {
+            // The server does not log through this Log4j, so there is nothing to filter.
+        }
+    }
+
+    private static boolean hasEnabledRegistrations() {
+        List<Map.Entry<Plugin, PluginRegistrationState>> entries;
+        synchronized (REGISTRATION_STATES) {
+            entries = new ArrayList<>(REGISTRATION_STATES.entrySet());
+        }
+        for (Map.Entry<Plugin, PluginRegistrationState> entry : entries) {
+            synchronized (entry.getValue()) {
+                if (entry.getKey()
+                         .isEnabled()
+                        && !entry.getValue().registrations.isEmpty()) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**
@@ -782,7 +824,7 @@ public final class CommandLib implements Listener {
         Bukkit.getGlobalRegionScheduler()
               .execute(plugin, () -> {
                   registrationState.functionRecompileScheduled = false;
-                  ServerFunctions.recompile(plugin.getLogger());
+                  ServerFunctions.recompileFunctions(plugin.getLogger());
               });
     }
 
