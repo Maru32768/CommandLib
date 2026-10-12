@@ -32,6 +32,7 @@ import org.bukkit.permissions.Permission;
 import org.bukkit.plugin.EventExecutor;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -48,7 +49,10 @@ public final class CommandLib implements Listener {
     private final List<CommandNode<?>> registeredCommands = new ArrayList<>();
     private final List<Permission> registeredPermissions = new ArrayList<>();
     private final List<HelpTopic> registeredHelpTopics = new ArrayList<>();
-    private static @Nullable ServerLoadEvent functionsRecompiledFor;
+    // Shared by the instances of this copy of CommandLib, which a plugin shades.
+    private static @Nullable BukkitTask functionCompiler;
+    private static @Nullable Object functionsCompiledFor;
+    private static boolean commandsChangedSinceCompile;
 
     public static CommandLib register(@NotNull Plugin plugin, @NotNull Command command, @NotNull Command... commands) {
         List<Command> list = new ArrayList<>();
@@ -299,6 +303,7 @@ public final class CommandLib implements Listener {
         }
 
         updatePlayerCommandsLater();
+        compileFunctionsWithCommands();
     }
 
     private static Map<String, Command> commandsByLabel(Collection<? extends Command> commands) {
@@ -440,25 +445,45 @@ public final class CommandLib implements Listener {
         }
     }
 
-    /**
-     * Data pack functions are compiled when the data packs load, before plugins add their commands, and a function
-     * with an unknown command is dropped. Once every plugin has been enabled, the functions are compiled again against
-     * the vanilla dispatcher, as CommandAPI does. Every CommandLib instance of a plugin sees the same event, so only
-     * the first one compiles. A later /minecraft:reload compiles functions against fresh vanilla commands again, and
-     * Spigot fires no event for it.
-     */
+    // The help map has its indexes once the server has loaded. Bukkit needs the event parameter.
+    @SuppressWarnings("UnusedVariable")
     @EventHandler
     private void onServerLoad(ServerLoadEvent e) {
         registeredHelpTopics.forEach(topic -> fileUnderPluginIndex(Bukkit.getHelpMap(), topic, plugin.getName()));
-        if (functionsRecompiledFor == e || usesPaperCommandDispatcher()) {
-            return;
+    }
+
+    /**
+     * Data pack functions are compiled when the data packs load: at startup before plugins add their commands, and on
+     * /minecraft:reload, /datapack or Bukkit#reloadData against fresh vanilla commands, for which Spigot fires no
+     * event. A function with an unknown command is dropped. So a task checks every tick whether the data pack
+     * resources were replaced or the commands changed, and then compiles the functions again with the dispatcher
+     * that holds the commands. Bukkit tasks run before the server ticks functions, so the #load functions run once,
+     * with the commands.
+     */
+    private void compileFunctionsWithCommands() {
+        commandsChangedSinceCompile = true;
+        if (functionCompiler == null || functionCompiler.isCancelled()) {
+            functionCompiler = Bukkit.getScheduler()
+                                     .runTaskTimer(plugin, () -> compileFunctionsIfStale(plugin), 0L, 1L);
         }
-        functionsRecompiledFor = e;
+    }
+
+    private static void compileFunctionsIfStale(Plugin plugin) {
         try {
             NMSDedicatedServer server = NMSCraftServer.create(plugin.getServer())
                                                       .getServer();
-            server.recompileFunctions(server.getVanillaCommandDispatcher());
+            Object resources = server.getDataPackResources()
+                                     .getHandle();
+            if (resources == functionsCompiledFor && !commandsChangedSinceCompile) {
+                return;
+            }
+            functionsCompiledFor = resources;
+            commandsChangedSinceCompile = false;
+            server.recompileFunctions(usesPaperCommandDispatcher() ? server.getCommandDispatcher()
+                    : server.getVanillaCommandDispatcher());
         } catch (RuntimeException | LinkageError ex) {
+            Objects.requireNonNull(functionCompiler)
+                   .cancel();
             plugin.getLogger()
                   .log(Level.WARNING, "Could not compile data pack functions again with CommandLib's commands", ex);
         }
@@ -495,6 +520,8 @@ public final class CommandLib implements Listener {
 
             if (updatePlayerCommands) {
                 updatePlayerCommandsLater();
+                // Functions that use the commands are dropped.
+                compileFunctionsWithCommands();
             }
         }
     }
