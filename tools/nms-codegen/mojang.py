@@ -352,6 +352,20 @@ w("NMSCraftServer", '''    public NMSCraftServer_SUFFIX(Server handle) {
     }
 ''', [f"{CB}.CraftServer", "org.bukkit.Server", "org.bukkit.command.SimpleCommandMap"])
 
+# Paper 1.20.6 dropped MinecraftServer.vanillaCommandDispatcher with its Brigadier command API and keeps one dispatcher.
+# The Paper 1.20.6 module also runs on Paper 1.20.5, so it reads the CraftBukkit field when the server still has it.
+VANILLA_DISPATCHER = '''        DedicatedServer server = (DedicatedServer) getHandle();
+        try {
+            return NMSCommandDispatcher.create(MinecraftServer.class.getField("vanillaCommandDispatcher")
+                                                                    .get(server));
+        } catch (NoSuchFieldException e) {
+            return NMSCommandDispatcher.create(server.getCommands());
+        } catch (IllegalAccessException e) {
+            throw new IllegalStateException(e);
+        }
+''' if PAPER else '''        return NMSCommandDispatcher.create(((DedicatedServer) getHandle()).vanillaCommandDispatcher);
+'''
+
 w("NMSDedicatedServer", f'''    public NMSDedicatedServer_SUFFIX(Object handle) {{
         super(handle, DedicatedServer.class);
     }}
@@ -362,10 +376,40 @@ w("NMSDedicatedServer", f'''    public NMSDedicatedServer_SUFFIX(Object handle) 
     }}
 
     @Override
+    public NMSCommandDispatcher getVanillaCommandDispatcher() {{
+{VANILLA_DISPATCHER}    }}
+
+    @Override
     public NMSDataPackResources getDataPackResources() {{
         return NMSDataPackResources.create(((DedicatedServer) getHandle()).{"resources.managers()" if HAS_RELOADABLE_RESOURCES else "resources"});
     }}
-''', ["net.minecraft.server.dedicated.DedicatedServer"])
+
+    @Override
+    public void recompileFunctions(NMSCommandDispatcher dispatcher) {{
+        DedicatedServer server = (DedicatedServer) getHandle();
+        ServerFunctionLibrary library = server.{"resources.managers()" if HAS_RELOADABLE_RESOURCES else "resources"}.getFunctionLibrary();
+        setFunctionDispatcher(library, ServerFunctionLibrary.class, dispatcher);
+        library.reload(new PreparableReloadListener.PreparationBarrier() {{
+                           @Override
+                           public <T> CompletableFuture<T> wait(T value) {{
+                               return CompletableFuture.completedFuture(value);
+                           }}
+                       }},
+                       server.{"resources.resourceManager()" if HAS_RELOADABLE_RESOURCES else "resources.getResourceManager()"},
+                       InactiveProfiler.INSTANCE,
+                       InactiveProfiler.INSTANCE,
+                       Runnable::run,
+                       Runnable::run)
+               .join();
+        server.getFunctions()
+              .replaceLibrary(library);
+    }}
+''', ["net.minecraft.server.dedicated.DedicatedServer",
+      *(["net.minecraft.server.MinecraftServer"] if PAPER else []),
+      "net.minecraft.server.ServerFunctionLibrary",
+      "net.minecraft.server.packs.resources.PreparableReloadListener",
+      "net.minecraft.util.profiling.InactiveProfiler",
+      "java.util.concurrent.CompletableFuture"])
 
 if BUILDS_CONTEXT_FROM_PUBLIC_API:
     w("NMSDataPackResources", '''    public NMSDataPackResources_SUFFIX(Object handle) {

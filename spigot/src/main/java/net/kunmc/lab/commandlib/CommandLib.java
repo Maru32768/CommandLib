@@ -9,6 +9,7 @@ import net.kunmc.lab.commandlib.util.bukkit.MinecraftVersion;
 import net.kunmc.lab.commandlib.util.nms.command.NMSCommandDispatcher;
 import net.kunmc.lab.commandlib.util.nms.command.NMSVanillaCommandWrapper;
 import net.kunmc.lab.commandlib.util.nms.server.NMSCraftServer;
+import net.kunmc.lab.commandlib.util.nms.server.NMSDedicatedServer;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandMap;
 import org.bukkit.command.SimpleCommandMap;
@@ -20,6 +21,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.PluginDisableEvent;
+import org.bukkit.event.server.ServerLoadEvent;
 import org.bukkit.help.GenericCommandHelpTopic;
 import org.bukkit.help.HelpMap;
 import org.bukkit.help.HelpTopic;
@@ -33,6 +35,7 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.logging.Level;
 
 public final class CommandLib implements Listener {
     private final Plugin plugin;
@@ -41,6 +44,7 @@ public final class CommandLib implements Listener {
     private final List<CommandNode<?>> registeredCommands = new ArrayList<>();
     private final List<Permission> registeredPermissions = new ArrayList<>();
     private final List<HelpTopic> registeredHelpTopics = new ArrayList<>();
+    private static ServerLoadEvent functionsRecompiledFor;
 
     public static CommandLib register(@NotNull Plugin plugin, @NotNull Command command, @NotNull Command... commands) {
         List<Command> list = new ArrayList<>();
@@ -190,21 +194,29 @@ public final class CommandLib implements Listener {
             if (usesPaperCommandDispatcher()) {
                 addToPaperDispatcher(knownCommands, registeredCommands);
             } else {
-                NMSCommandDispatcher dispatcher = NMSCraftServer.create(plugin.getServer())
-                                                                .getServer()
-                                                                .getCommandDispatcher();
-                RootCommandNode root = dispatcher.getBrigadier()
-                                                 .getRoot();
+                NMSDedicatedServer server = NMSCraftServer.create(plugin.getServer())
+                                                          .getServer();
+                // Commands live in the vanilla dispatcher, which "execute run" and data pack functions use and which
+                // is never replaced, and in the synced one players see, unless both are the same during startup.
+                NMSCommandDispatcher vanillaDispatcher = server.getVanillaCommandDispatcher();
+                RootCommandNode vanillaRoot = vanillaDispatcher.getBrigadier()
+                                                               .getRoot();
+                RootCommandNode root = server.getCommandDispatcher()
+                                             .getBrigadier()
+                                             .getRoot();
                 CommandMap commandMap = NMSCraftServer.create(plugin.getServer())
                                                       .getCommandMap();
                 Map<String, Command> commandsByLabel = commandsByLabel(commands);
                 for (CommandNode x : registeredCommands) {
                     removeRegisteredCommand(root, knownCommands, x.getName());
-                    removeExecuteRunCommand(root, x.getName());
+                    removeCommand(vanillaRoot, x.getName());
 
-                    root.addChild(x);
+                    vanillaRoot.addChild(x);
+                    if (root != vanillaRoot) {
+                        root.addChild(x);
+                    }
                     BukkitCommand wrapper = NMSVanillaCommandWrapper.create()
-                                                                    .createInstance(dispatcher, x);
+                                                                    .createInstance(vanillaDispatcher, x);
                     describe(wrapper, commandsByLabel.get(x.getName()), x, permissionPrefix, plugin.getName());
                     // Marks the wrapper as registered, as SimpleCommandMap#register does; help topics hide others.
                     wrapper.register(commandMap);
@@ -213,18 +225,13 @@ public final class CommandLib implements Listener {
                     putHelpTopic(Bukkit.getHelpMap(), helpTopic);
                     registeredHelpTopics.add(helpTopic);
 
-                    CommandNode executeRunRoot = executeRunRedirectRoot(root);
-                    // When the root is the vanilla dispatcher's, CraftBukkit has not synced the commands yet and
+                    // When the synced dispatcher is the vanilla one, CraftBukkit has not synced the commands yet and
                     // adds the namespaced label to the synced dispatcher from the command map itself.
-                    addNamespacedCommand(executeRunRoot == root ? null : root,
+                    addNamespacedCommand(root == vanillaRoot ? null : root,
                                          knownCommands,
                                          namespace(plugin),
                                          x,
                                          wrapper);
-                    if (executeRunRoot != null) {
-                        removeCommand(executeRunRoot, x.getName());
-                        executeRunRoot.addChild(x);
-                    }
                 }
             }
         } catch (Exception e) {
@@ -298,6 +305,29 @@ public final class CommandLib implements Listener {
         if (helpMap.getHelpTopic(topic.getName()) == topic) {
             helpMap.getHelpTopics()
                    .remove(topic);
+        }
+    }
+
+    /**
+     * Data pack functions are compiled when the data packs load, before plugins add their commands, and a function
+     * with an unknown command is dropped. Once every plugin has been enabled, the functions are compiled again against
+     * the vanilla dispatcher, as CommandAPI does. Every CommandLib instance of a plugin sees the same event, so only
+     * the first one compiles. A later /minecraft:reload compiles functions against fresh vanilla commands again, and
+     * Spigot fires no event for it.
+     */
+    @EventHandler
+    private void onServerLoad(ServerLoadEvent e) {
+        if (functionsRecompiledFor == e || usesPaperCommandDispatcher()) {
+            return;
+        }
+        functionsRecompiledFor = e;
+        try {
+            NMSDedicatedServer server = NMSCraftServer.create(plugin.getServer())
+                                                      .getServer();
+            server.recompileFunctions(server.getVanillaCommandDispatcher());
+        } catch (RuntimeException | LinkageError ex) {
+            plugin.getLogger()
+                  .log(Level.WARNING, "Could not compile data pack functions again with CommandLib's commands", ex);
         }
     }
 
@@ -393,21 +423,25 @@ public final class CommandLib implements Listener {
             Map<String, org.bukkit.command.Command> knownCommands = knownCommands();
             boolean usePaperCommandDispatcher = usesPaperCommandDispatcher();
             RootCommandNode root;
+            RootCommandNode vanillaRoot = null;
             if (usePaperCommandDispatcher) {
                 root = paperDispatcherRoot(knownCommands);
             } else {
-                root = NMSCraftServer.create(plugin.getServer())
-                                     .getServer()
-                                     .getCommandDispatcher()
-                                     .getBrigadier()
-                                     .getRoot();
+                NMSDedicatedServer server = NMSCraftServer.create(plugin.getServer())
+                                                          .getServer();
+                root = server.getCommandDispatcher()
+                             .getBrigadier()
+                             .getRoot();
+                vanillaRoot = server.getVanillaCommandDispatcher()
+                                    .getBrigadier()
+                                    .getRoot();
             }
 
             for (CommandNode<?> node : registeredCommands) {
                 removeRegisteredCommand(root, knownCommands, node.getName());
 
                 if (!usePaperCommandDispatcher) {
-                    removeExecuteRunCommand(root, node.getName());
+                    removeCommand(vanillaRoot, node.getName());
                     removeMinecraftNamespacedCommand(root, knownCommands, node);
                     removeRegisteredCommand(root, knownCommands, namespace(plugin) + ":" + node.getName());
                 }
@@ -505,28 +539,5 @@ public final class CommandLib implements Listener {
         Field arguments = clazz.getDeclaredField("arguments");
         arguments.setAccessible(true);
         ((Map) arguments.get(commandNode)).remove(name);
-    }
-
-    private static void removeExecuteRunCommand(RootCommandNode<?> root, String name) throws Exception {
-        CommandNode<?> executeRunRoot = executeRunRedirectRoot(root);
-        if (executeRunRoot == null) {
-            return;
-        }
-
-        removeCommand(executeRunRoot, name);
-    }
-
-    private static CommandNode<?> executeRunRedirectRoot(RootCommandNode<?> root) {
-        CommandNode<?> execute = root.getChild("execute");
-        if (execute == null) {
-            return null;
-        }
-
-        CommandNode<?> run = execute.getChild("run");
-        if (run == null || run.getRedirect() == null) {
-            return null;
-        }
-
-        return run.getRedirect();
     }
 }

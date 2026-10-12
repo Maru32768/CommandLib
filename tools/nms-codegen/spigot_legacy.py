@@ -242,10 +242,40 @@ w("NMSDedicatedServer", '''    public NMSDedicatedServer_SUFFIX(Object handle) {
     }
 
     @Override
+    public NMSCommandDispatcher getVanillaCommandDispatcher() {
+        return NMSCommandDispatcher.create(((DedicatedServer) getHandle()).vanillaCommandDispatcher);
+    }
+
+    @Override
     public NMSDataPackResources getDataPackResources() {
         return NMSDataPackResources.create(((DedicatedServer) getHandle()).dataPackResources);
     }
-''', [f"{NMS}.DedicatedServer"])
+
+    @Override
+    public void recompileFunctions(NMSCommandDispatcher dispatcher) {
+        DedicatedServer server = (DedicatedServer) getHandle();
+        CustomFunctionManager library = server.dataPackResources.a();
+        setFunctionDispatcher(library, CustomFunctionManager.class, dispatcher);
+        library.a(new IReloadListener.a() {
+                      @Override
+                      public <T> CompletableFuture<T> a(T value) {
+                          return CompletableFuture.completedFuture(value);
+                      }
+                  },
+                  server.dataPackResources.h(),
+                  GameProfilerDisabled.a,
+                  GameProfilerDisabled.a,
+                  Runnable::run,
+                  Runnable::run)
+               .join();
+        server.getFunctionData()
+              .a(library);
+    }
+''', [f"{NMS}.DedicatedServer",
+      f"{NMS}.CustomFunctionManager",
+      f"{NMS}.IReloadListener",
+      f"{NMS}.GameProfilerDisabled",
+      "java.util.concurrent.CompletableFuture"])
 
 w("NMSCraftBlockData", '''    public NMSCraftBlockData_SUFFIX() {
         super(null, CraftBlockData.class);

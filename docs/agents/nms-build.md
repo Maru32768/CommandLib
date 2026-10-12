@@ -51,8 +51,9 @@ Every wrapper has a class in every module whose versions use it. The typed class
 to `NMSClass` as a class literal, which every remapping step (SpecialSource, paperweight, Paper's and Mohist's plugin
 remappers) translates along with the rest of the bytecode. Where the server keeps what a wrapper needs in a private
 member, the module's class reads it by reflection, finding the member by its type rather than its obfuscated name:
-`NMSArgumentTypeRegistrar` (the map of argument serializers, through the helpers of the wrapper) and
-`NMSDataPackResources` on Spigot 1.19 to 1.20.4 (the build context). From 1.20.5 the build context is built from
+`NMSArgumentTypeRegistrar` (the map of argument serializers, through the helpers of the wrapper),
+`NMSDataPackResources` on Spigot 1.19 to 1.20.4 (the build context) and `NMSDedicatedServer` (the dispatcher of the
+function library, through `setFunctionDispatcher`). From 1.20.5 the build context is built from
 public API (`CommandBuildContext.simple`), on Spigot and Paper alike.
 
 ## BuildTools

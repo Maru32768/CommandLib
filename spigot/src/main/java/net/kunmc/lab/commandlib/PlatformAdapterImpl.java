@@ -11,6 +11,7 @@ import net.kunmc.lab.commandlib.util.text.TextComponentBuilderImpl;
 import net.kunmc.lab.commandlib.util.text.TranslatableComponentBuilderImpl;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TranslatableComponent;
+import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Level;
@@ -37,9 +38,16 @@ public final class PlatformAdapterImpl implements PlatformAdapter<Object, BaseCo
 
     @Override
     public boolean hasPermission(Object commandSource, String permissionNode) {
-        return NMSCommandListenerWrapper.create(commandSource)
-                                        .getBukkitSender()
-                                        .hasPermission(permissionNode);
+        CommandSender sender;
+        try {
+            sender = NMSCommandListenerWrapper.create(commandSource)
+                                              .getBukkitSender();
+        } catch (UnsupportedOperationException e) {
+            // Data pack functions are compiled with a source that has no Bukkit sender (CraftBukkit's
+            // CommandSource.NULL throws). As for vanilla commands, the function permission level guards them then.
+            return true;
+        }
+        return sender.hasPermission(permissionNode);
     }
 
     @Override
