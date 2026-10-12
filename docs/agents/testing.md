@@ -76,11 +76,11 @@ published for the first time.
 comment contradicts the declaration under it (`.jev-lint.yaml`, rules in `.jev-lint/rules/java/`). It sends the judged
 code to the TypeSafe API, so run it only when the user asks. `mise.toml` pins Node and jev-lint (`mise install`), and
 the key goes in `mise.local.toml`, which Git ignores, as `[env]` `TYPESAFE_API_KEY = "..."`. Run it through mise, since
-a non-interactive shell may not have mise activated: `mise run jev-review` judges the lines changed since master, and
-`mise exec -- jev-lint check --dry-run` lists the subjects and the price without a request. Its findings are candidates
-to judge, not errors. Each Java rule's cutoff is fitted on the labelled cases in its `fixtures/` and `expect.yml`, with
-the reasoning in its `rule.yml` and the accepted run in `baseline.json`; after changing a rule or its cases, refit with
-`mise exec -- jev-lint eval .jev-lint/rules/java/<rule> --repeat 3` and accept with `--accept`, which needs the key. On
-Windows, `eval --replay` and `--accept-last` mis-score these suites, because jev-lint compares a baseline's `/` paths
-with the `\` paths of the labels; a fresh `eval` scores them correctly. Keep labels out of the fixture code, since the
-model reads it.
+a non-interactive shell may not have mise activated: `mise run jev-review [base]` judges the lines changed since `base`,
+by default `origin/master` for the commits not pushed yet, and `mise exec -- jev-lint check --dry-run` lists the
+subjects and the price without a request. Its findings are candidates to judge, not errors. Each Java rule's cutoff is
+fitted on the labelled cases in its `fixtures/` and `expect.yml`, with the reasoning in its `rule.yml` and the accepted
+run in `baseline.json`; after changing a rule or its cases, refit with `mise exec -- jev-lint eval
+.jev-lint/rules/java/<rule> --repeat 3` and accept with `--accept`, which needs the key. On Windows, `eval --replay` and
+`--accept-last` mis-score these suites, because jev-lint compares a baseline's `/` paths with the `\` paths of the
+labels; a fresh `eval` scores them correctly. Keep labels out of the fixture code, since the model reads it.
