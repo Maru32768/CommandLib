@@ -219,7 +219,7 @@ configure(subprojects.filter { it.path in bukkitProjectPaths }) {
         // Tests pass null on purpose, so NullAway checks only the main sources. It warns until the missing @Nullable
         // annotations it reports are added.
         options.errorprone.check("NullAway", if (name == "compileJava") CheckSeverity.WARN else CheckSeverity.OFF)
-        options.errorprone.option("NullAway:AnnotatedPackages", "net.kunmc.lab.commandlib")
+        options.errorprone.option("NullAway:AnnotatedPackages", "dev.marulabs.commandlib")
         // javac stops listing warnings at 100 by default.
         options.compilerArgs.addAll(listOf("-Xmaxwarns", "10000"))
     }

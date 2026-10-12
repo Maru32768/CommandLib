@@ -56,7 +56,7 @@ modules, so the compile checks above also run it. Its compiler is JDK 21 with `-
 version. Fix an error rather than suppressing it; suppress with `@SuppressWarnings("<CheckName>")` only at a site that
 does it on purpose.
 
-NullAway runs with Error Prone on the main sources of the same modules and treats code in `net.kunmc.lab.commandlib` as
+NullAway runs with Error Prone on the main sources of the same modules and treats code in `dev.marulabs.commandlib` as
 non-null unless annotated `@Nullable` (`org.jetbrains.annotations.Nullable`). It reports warnings for now; annotate
 a field, parameter or return value `@Nullable` when null is a legitimate value, and do not add new NullAway warnings.
 
