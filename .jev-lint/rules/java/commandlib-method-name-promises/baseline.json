@@ -1,6 +1,6 @@
 {
   "schema": "jev-lint-eval-1",
-  "recorded": "2026-10-12T04:44:07.749Z",
+  "recorded": "2026-10-12T05:02:26.156Z",
   "model": "jev-1.13.0",
   "suite": "java/commandlib-method-name-promises",
   "rules": [
@@ -15,205 +15,124 @@
     [
       {
         "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\CooldownRegistry.java",
-        "line": 21,
-        "endLine": 23,
-        "kind": "noul",
-        "value": 0.05,
-        "confidence": null
-      },
-      {
-        "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\CooldownRegistry.java",
-        "line": 25,
-        "endLine": 27,
-        "kind": "noul",
-        "value": 0.12,
-        "confidence": null
-      },
-      {
-        "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\CooldownRegistry.java",
-        "line": 29,
-        "endLine": 34,
-        "kind": "noul",
-        "value": 0.89,
-        "confidence": null
-      },
-      {
-        "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\CooldownRegistry.java",
-        "line": 36,
-        "endLine": 42,
-        "kind": "noul",
-        "value": 0.1,
-        "confidence": null
-      },
-      {
-        "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\CooldownRegistry.java",
-        "line": 44,
-        "endLine": 46,
-        "kind": "noul",
-        "value": 0.39,
-        "confidence": null
-      },
-      {
-        "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\CooldownRegistry.java",
-        "line": 48,
-        "endLine": 50,
-        "kind": "noul",
-        "value": 0.83,
-        "confidence": null
-      },
-      {
-        "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\CooldownRegistry.java",
-        "line": 52,
-        "endLine": 54,
-        "kind": "noul",
-        "value": 0.81,
-        "confidence": null
-      },
-      {
-        "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\CooldownRegistry.java",
-        "line": 56,
-        "endLine": 58,
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\ArgumentBuilder.java",
+        "line": 15,
+        "endLine": 25,
         "kind": "noul",
         "value": 0.14,
         "confidence": null
       },
       {
         "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\CooldownRegistry.java",
-        "line": 60,
-        "endLine": 67,
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\ArgumentBuilder.java",
+        "line": 27,
+        "endLine": 29,
         "kind": "noul",
-        "value": 0.77,
+        "value": 0.62,
         "confidence": null
       },
       {
         "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\CooldownRegistry.java",
-        "line": 69,
-        "endLine": 78,
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\ArgumentBuilder.java",
+        "line": 31,
+        "endLine": 34,
         "kind": "noul",
-        "value": 0.16,
+        "value": 0.14,
         "confidence": null
       },
       {
         "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\CooldownRegistry.java",
-        "line": 80,
-        "endLine": 82,
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\ArgumentBuilder.java",
+        "line": 36,
+        "endLine": 38,
         "kind": "noul",
-        "value": 0.25,
+        "value": 0.08,
         "confidence": null
       },
       {
         "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\CooldownRegistry.java",
-        "line": 84,
-        "endLine": 87,
-        "kind": "noul",
-        "value": 0.12,
-        "confidence": null
-      },
-      {
-        "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\CooldownRegistry.java",
-        "line": 89,
-        "endLine": 92,
-        "kind": "noul",
-        "value": 0.05,
-        "confidence": null
-      },
-      {
-        "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\TestCommandContext.java",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\TestCommandContext.java",
         "line": 27,
         "endLine": 30,
+        "kind": "noul",
+        "value": 0.18,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\TestCommandContext.java",
+        "line": 32,
+        "endLine": 37,
+        "kind": "noul",
+        "value": 0.62,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\TestCommandContext.java",
+        "line": 39,
+        "endLine": 42,
+        "kind": "noul",
+        "value": 0.08,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\TestCommandContext.java",
+        "line": 44,
+        "endLine": 47,
+        "kind": "noul",
+        "value": 0.13,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\TestCommandContext.java",
+        "line": 49,
+        "endLine": 52,
+        "kind": "noul",
+        "value": 0.08,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\TestCommandContext.java",
+        "line": 54,
+        "endLine": 57,
+        "kind": "noul",
+        "value": 0.09,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\TestCommandContext.java",
+        "line": 59,
+        "endLine": 62,
+        "kind": "noul",
+        "value": 0.08,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\TestCommandContext.java",
+        "line": 68,
+        "endLine": 75,
+        "kind": "noul",
+        "value": 0.3,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\TestCommandContext.java",
+        "line": 80,
+        "endLine": 84,
         "kind": "noul",
         "value": 0.2,
         "confidence": null
       },
       {
         "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\TestCommandContext.java",
-        "line": 32,
-        "endLine": 37,
-        "kind": "noul",
-        "value": 0.61,
-        "confidence": null
-      },
-      {
-        "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\TestCommandContext.java",
-        "line": 39,
-        "endLine": 42,
-        "kind": "noul",
-        "value": 0.09,
-        "confidence": null
-      },
-      {
-        "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\TestCommandContext.java",
-        "line": 44,
-        "endLine": 47,
-        "kind": "noul",
-        "value": 0.13,
-        "confidence": null
-      },
-      {
-        "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\TestCommandContext.java",
-        "line": 49,
-        "endLine": 52,
-        "kind": "noul",
-        "value": 0.08,
-        "confidence": null
-      },
-      {
-        "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\TestCommandContext.java",
-        "line": 54,
-        "endLine": 57,
-        "kind": "noul",
-        "value": 0.08,
-        "confidence": null
-      },
-      {
-        "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\TestCommandContext.java",
-        "line": 59,
-        "endLine": 62,
-        "kind": "noul",
-        "value": 0.08,
-        "confidence": null
-      },
-      {
-        "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\TestCommandContext.java",
-        "line": 68,
-        "endLine": 75,
-        "kind": "noul",
-        "value": 0.26,
-        "confidence": null
-      },
-      {
-        "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\TestCommandContext.java",
-        "line": 80,
-        "endLine": 84,
-        "kind": "noul",
-        "value": 0.22,
-        "confidence": null
-      },
-      {
-        "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\TestCommandContext.java",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\TestCommandContext.java",
         "line": 86,
         "endLine": 89,
         "kind": "noul",
@@ -222,16 +141,16 @@
       },
       {
         "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\TestCommandContext.java",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\TestCommandContext.java",
         "line": 91,
         "endLine": 99,
         "kind": "noul",
-        "value": 0.09,
+        "value": 0.08,
         "confidence": null
       },
       {
         "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\TestCommandContext.java",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\TestCommandContext.java",
         "line": 101,
         "endLine": 103,
         "kind": "noul",
@@ -240,25 +159,25 @@
       },
       {
         "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\TestCommandContext.java",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\TestCommandContext.java",
         "line": 109,
         "endLine": 111,
         "kind": "noul",
-        "value": 0.06,
+        "value": 0.07,
         "confidence": null
       },
       {
         "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\TestCommandContext.java",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\TestCommandContext.java",
         "line": 113,
         "endLine": 118,
         "kind": "noul",
-        "value": 0.24,
+        "value": 0.22,
         "confidence": null
       },
       {
         "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\TestCommandContext.java",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\TestCommandContext.java",
         "line": 122,
         "endLine": 138,
         "kind": "noul",
@@ -267,308 +186,43 @@
       },
       {
         "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\TestCommandContext.java",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\TestCommandContext.java",
         "line": 140,
         "endLine": 153,
         "kind": "noul",
         "value": 0.15,
         "confidence": null
-      }
-    ],
-    [
+      },
       {
         "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\CooldownRegistry.java",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\CooldownRegistry.java",
         "line": 21,
         "endLine": 23,
-        "kind": "noul",
-        "value": 0.04,
-        "confidence": null
-      },
-      {
-        "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\CooldownRegistry.java",
-        "line": 25,
-        "endLine": 27,
-        "kind": "noul",
-        "value": 0.09,
-        "confidence": null
-      },
-      {
-        "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\CooldownRegistry.java",
-        "line": 29,
-        "endLine": 34,
-        "kind": "noul",
-        "value": 0.89,
-        "confidence": null
-      },
-      {
-        "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\CooldownRegistry.java",
-        "line": 36,
-        "endLine": 42,
-        "kind": "noul",
-        "value": 0.09,
-        "confidence": null
-      },
-      {
-        "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\CooldownRegistry.java",
-        "line": 44,
-        "endLine": 46,
-        "kind": "noul",
-        "value": 0.39,
-        "confidence": null
-      },
-      {
-        "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\CooldownRegistry.java",
-        "line": 48,
-        "endLine": 50,
-        "kind": "noul",
-        "value": 0.81,
-        "confidence": null
-      },
-      {
-        "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\CooldownRegistry.java",
-        "line": 52,
-        "endLine": 54,
-        "kind": "noul",
-        "value": 0.8,
-        "confidence": null
-      },
-      {
-        "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\CooldownRegistry.java",
-        "line": 56,
-        "endLine": 58,
-        "kind": "noul",
-        "value": 0.15,
-        "confidence": null
-      },
-      {
-        "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\CooldownRegistry.java",
-        "line": 60,
-        "endLine": 67,
-        "kind": "noul",
-        "value": 0.77,
-        "confidence": null
-      },
-      {
-        "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\CooldownRegistry.java",
-        "line": 69,
-        "endLine": 78,
-        "kind": "noul",
-        "value": 0.17,
-        "confidence": null
-      },
-      {
-        "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\CooldownRegistry.java",
-        "line": 80,
-        "endLine": 82,
-        "kind": "noul",
-        "value": 0.23,
-        "confidence": null
-      },
-      {
-        "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\CooldownRegistry.java",
-        "line": 84,
-        "endLine": 87,
-        "kind": "noul",
-        "value": 0.11,
-        "confidence": null
-      },
-      {
-        "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\CooldownRegistry.java",
-        "line": 89,
-        "endLine": 92,
         "kind": "noul",
         "value": 0.05,
         "confidence": null
       },
       {
         "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\TestCommandContext.java",
-        "line": 27,
-        "endLine": 30,
-        "kind": "noul",
-        "value": 0.19,
-        "confidence": null
-      },
-      {
-        "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\TestCommandContext.java",
-        "line": 32,
-        "endLine": 37,
-        "kind": "noul",
-        "value": 0.6,
-        "confidence": null
-      },
-      {
-        "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\TestCommandContext.java",
-        "line": 39,
-        "endLine": 42,
-        "kind": "noul",
-        "value": 0.09,
-        "confidence": null
-      },
-      {
-        "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\TestCommandContext.java",
-        "line": 44,
-        "endLine": 47,
-        "kind": "noul",
-        "value": 0.13,
-        "confidence": null
-      },
-      {
-        "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\TestCommandContext.java",
-        "line": 49,
-        "endLine": 52,
-        "kind": "noul",
-        "value": 0.08,
-        "confidence": null
-      },
-      {
-        "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\TestCommandContext.java",
-        "line": 54,
-        "endLine": 57,
-        "kind": "noul",
-        "value": 0.09,
-        "confidence": null
-      },
-      {
-        "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\TestCommandContext.java",
-        "line": 59,
-        "endLine": 62,
-        "kind": "noul",
-        "value": 0.08,
-        "confidence": null
-      },
-      {
-        "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\TestCommandContext.java",
-        "line": 68,
-        "endLine": 75,
-        "kind": "noul",
-        "value": 0.26,
-        "confidence": null
-      },
-      {
-        "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\TestCommandContext.java",
-        "line": 80,
-        "endLine": 84,
-        "kind": "noul",
-        "value": 0.22,
-        "confidence": null
-      },
-      {
-        "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\TestCommandContext.java",
-        "line": 86,
-        "endLine": 89,
-        "kind": "noul",
-        "value": 0.06,
-        "confidence": null
-      },
-      {
-        "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\TestCommandContext.java",
-        "line": 91,
-        "endLine": 99,
-        "kind": "noul",
-        "value": 0.09,
-        "confidence": null
-      },
-      {
-        "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\TestCommandContext.java",
-        "line": 101,
-        "endLine": 103,
-        "kind": "noul",
-        "value": 0.08,
-        "confidence": null
-      },
-      {
-        "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\TestCommandContext.java",
-        "line": 109,
-        "endLine": 111,
-        "kind": "noul",
-        "value": 0.06,
-        "confidence": null
-      },
-      {
-        "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\TestCommandContext.java",
-        "line": 113,
-        "endLine": 118,
-        "kind": "noul",
-        "value": 0.23,
-        "confidence": null
-      },
-      {
-        "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\TestCommandContext.java",
-        "line": 122,
-        "endLine": 138,
-        "kind": "noul",
-        "value": 0.15,
-        "confidence": null
-      },
-      {
-        "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\TestCommandContext.java",
-        "line": 140,
-        "endLine": 153,
-        "kind": "noul",
-        "value": 0.14,
-        "confidence": null
-      }
-    ],
-    [
-      {
-        "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\CooldownRegistry.java",
-        "line": 21,
-        "endLine": 23,
-        "kind": "noul",
-        "value": 0.04,
-        "confidence": null
-      },
-      {
-        "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\CooldownRegistry.java",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\CooldownRegistry.java",
         "line": 25,
         "endLine": 27,
         "kind": "noul",
-        "value": 0.1,
+        "value": 0.11,
         "confidence": null
       },
       {
         "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\CooldownRegistry.java",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\CooldownRegistry.java",
         "line": 29,
         "endLine": 34,
         "kind": "noul",
-        "value": 0.89,
+        "value": 0.9,
         "confidence": null
       },
       {
         "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\CooldownRegistry.java",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\CooldownRegistry.java",
         "line": 36,
         "endLine": 42,
         "kind": "noul",
@@ -577,16 +231,16 @@
       },
       {
         "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\CooldownRegistry.java",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\CooldownRegistry.java",
         "line": 44,
         "endLine": 46,
         "kind": "noul",
-        "value": 0.37,
+        "value": 0.3,
         "confidence": null
       },
       {
         "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\CooldownRegistry.java",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\CooldownRegistry.java",
         "line": 48,
         "endLine": 50,
         "kind": "noul",
@@ -595,16 +249,16 @@
       },
       {
         "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\CooldownRegistry.java",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\CooldownRegistry.java",
         "line": 52,
         "endLine": 54,
         "kind": "noul",
-        "value": 0.8,
+        "value": 0.83,
         "confidence": null
       },
       {
         "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\CooldownRegistry.java",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\CooldownRegistry.java",
         "line": 56,
         "endLine": 58,
         "kind": "noul",
@@ -613,16 +267,16 @@
       },
       {
         "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\CooldownRegistry.java",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\CooldownRegistry.java",
         "line": 60,
         "endLine": 67,
         "kind": "noul",
-        "value": 0.77,
+        "value": 0.76,
         "confidence": null
       },
       {
         "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\CooldownRegistry.java",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\CooldownRegistry.java",
         "line": 69,
         "endLine": 78,
         "kind": "noul",
@@ -631,16 +285,16 @@
       },
       {
         "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\CooldownRegistry.java",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\CooldownRegistry.java",
         "line": 80,
         "endLine": 82,
         "kind": "noul",
-        "value": 0.24,
+        "value": 0.23,
         "confidence": null
       },
       {
         "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\CooldownRegistry.java",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\CooldownRegistry.java",
         "line": 84,
         "endLine": 87,
         "kind": "noul",
@@ -649,7 +303,7 @@
       },
       {
         "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\CooldownRegistry.java",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\CooldownRegistry.java",
         "line": 89,
         "endLine": 92,
         "kind": "noul",
@@ -658,25 +312,315 @@
       },
       {
         "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\TestCommandContext.java",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 20,
+        "endLine": 22,
+        "kind": "noul",
+        "value": 0.21,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 24,
+        "endLine": 26,
+        "kind": "noul",
+        "value": 0.11,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 28,
+        "endLine": 30,
+        "kind": "noul",
+        "value": 0.09,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 32,
+        "endLine": 34,
+        "kind": "noul",
+        "value": 0.13,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 39,
+        "endLine": 41,
+        "kind": "noul",
+        "value": 0.11,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 46,
+        "endLine": 48,
+        "kind": "noul",
+        "value": 0.07,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 68,
+        "endLine": 77,
+        "kind": "noul",
+        "value": 0.13,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 79,
+        "endLine": 88,
+        "kind": "noul",
+        "value": 0.1,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 90,
+        "endLine": 99,
+        "kind": "noul",
+        "value": 0.1,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 101,
+        "endLine": 103,
+        "kind": "noul",
+        "value": 0.23,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 105,
+        "endLine": 109,
+        "kind": "noul",
+        "value": 0.14,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 111,
+        "endLine": 114,
+        "kind": "noul",
+        "value": 0.09,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 116,
+        "endLine": 119,
+        "kind": "noul",
+        "value": 0.06,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 121,
+        "endLine": 125,
+        "kind": "noul",
+        "value": 0.59,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 127,
+        "endLine": 129,
+        "kind": "noul",
+        "value": 0.07,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 131,
+        "endLine": 133,
+        "kind": "noul",
+        "value": 0.14,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 135,
+        "endLine": 137,
+        "kind": "noul",
+        "value": 0.06,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 139,
+        "endLine": 143,
+        "kind": "noul",
+        "value": 0.03,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 145,
+        "endLine": 149,
+        "kind": "noul",
+        "value": 0.09,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 151,
+        "endLine": 155,
+        "kind": "noul",
+        "value": 0.03,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 157,
+        "endLine": 160,
+        "kind": "noul",
+        "value": 0.12,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 162,
+        "endLine": 165,
+        "kind": "noul",
+        "value": 0.04,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 167,
+        "endLine": 170,
+        "kind": "noul",
+        "value": 0.03,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 172,
+        "endLine": 179,
+        "kind": "noul",
+        "value": 0.1,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 198,
+        "endLine": 201,
+        "kind": "noul",
+        "value": 0.04,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 203,
+        "endLine": 206,
+        "kind": "noul",
+        "value": 0.05,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 208,
+        "endLine": 211,
+        "kind": "noul",
+        "value": 0.05,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 213,
+        "endLine": 216,
+        "kind": "noul",
+        "value": 0.06,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 221,
+        "endLine": 225,
+        "kind": "noul",
+        "value": 0.26,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 230,
+        "endLine": 233,
+        "kind": "noul",
+        "value": 0.06,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 235,
+        "endLine": 238,
+        "kind": "noul",
+        "value": 0.05,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 240,
+        "endLine": 249,
+        "kind": "noul",
+        "value": 0.05,
+        "confidence": null
+      }
+    ],
+    [
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\TestCommandContext.java",
         "line": 27,
         "endLine": 30,
         "kind": "noul",
-        "value": 0.19,
+        "value": 0.2,
         "confidence": null
       },
       {
         "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\TestCommandContext.java",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\TestCommandContext.java",
         "line": 32,
         "endLine": 37,
         "kind": "noul",
-        "value": 0.6,
+        "value": 0.61,
         "confidence": null
       },
       {
         "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\TestCommandContext.java",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\TestCommandContext.java",
         "line": 39,
         "endLine": 42,
         "kind": "noul",
@@ -685,7 +629,7 @@
       },
       {
         "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\TestCommandContext.java",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\TestCommandContext.java",
         "line": 44,
         "endLine": 47,
         "kind": "noul",
@@ -694,16 +638,16 @@
       },
       {
         "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\TestCommandContext.java",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\TestCommandContext.java",
         "line": 49,
         "endLine": 52,
         "kind": "noul",
-        "value": 0.08,
+        "value": 0.09,
         "confidence": null
       },
       {
         "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\TestCommandContext.java",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\TestCommandContext.java",
         "line": 54,
         "endLine": 57,
         "kind": "noul",
@@ -712,7 +656,7 @@
       },
       {
         "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\TestCommandContext.java",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\TestCommandContext.java",
         "line": 59,
         "endLine": 62,
         "kind": "noul",
@@ -721,25 +665,25 @@
       },
       {
         "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\TestCommandContext.java",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\TestCommandContext.java",
         "line": 68,
         "endLine": 75,
         "kind": "noul",
-        "value": 0.27,
+        "value": 0.28,
         "confidence": null
       },
       {
         "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\TestCommandContext.java",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\TestCommandContext.java",
         "line": 80,
         "endLine": 84,
         "kind": "noul",
-        "value": 0.23,
+        "value": 0.25,
         "confidence": null
       },
       {
         "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\TestCommandContext.java",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\TestCommandContext.java",
         "line": 86,
         "endLine": 89,
         "kind": "noul",
@@ -748,25 +692,25 @@
       },
       {
         "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\TestCommandContext.java",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\TestCommandContext.java",
         "line": 91,
         "endLine": 99,
         "kind": "noul",
-        "value": 0.08,
+        "value": 0.09,
         "confidence": null
       },
       {
         "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\TestCommandContext.java",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\TestCommandContext.java",
         "line": 101,
         "endLine": 103,
         "kind": "noul",
-        "value": 0.08,
+        "value": 0.09,
         "confidence": null
       },
       {
         "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\TestCommandContext.java",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\TestCommandContext.java",
         "line": 109,
         "endLine": 111,
         "kind": "noul",
@@ -775,16 +719,603 @@
       },
       {
         "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\TestCommandContext.java",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\TestCommandContext.java",
         "line": 113,
         "endLine": 118,
+        "kind": "noul",
+        "value": 0.25,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\TestCommandContext.java",
+        "line": 122,
+        "endLine": 138,
+        "kind": "noul",
+        "value": 0.14,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\TestCommandContext.java",
+        "line": 140,
+        "endLine": 153,
+        "kind": "noul",
+        "value": 0.14,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\ArgumentBuilder.java",
+        "line": 15,
+        "endLine": 25,
+        "kind": "noul",
+        "value": 0.13,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\ArgumentBuilder.java",
+        "line": 27,
+        "endLine": 29,
+        "kind": "noul",
+        "value": 0.57,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\ArgumentBuilder.java",
+        "line": 31,
+        "endLine": 34,
+        "kind": "noul",
+        "value": 0.14,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\ArgumentBuilder.java",
+        "line": 36,
+        "endLine": 38,
+        "kind": "noul",
+        "value": 0.09,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\CooldownRegistry.java",
+        "line": 21,
+        "endLine": 23,
+        "kind": "noul",
+        "value": 0.05,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\CooldownRegistry.java",
+        "line": 25,
+        "endLine": 27,
+        "kind": "noul",
+        "value": 0.1,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\CooldownRegistry.java",
+        "line": 29,
+        "endLine": 34,
+        "kind": "noul",
+        "value": 0.89,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\CooldownRegistry.java",
+        "line": 36,
+        "endLine": 42,
+        "kind": "noul",
+        "value": 0.1,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\CooldownRegistry.java",
+        "line": 44,
+        "endLine": 46,
+        "kind": "noul",
+        "value": 0.25,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\CooldownRegistry.java",
+        "line": 48,
+        "endLine": 50,
+        "kind": "noul",
+        "value": 0.83,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\CooldownRegistry.java",
+        "line": 52,
+        "endLine": 54,
+        "kind": "noul",
+        "value": 0.82,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\CooldownRegistry.java",
+        "line": 56,
+        "endLine": 58,
+        "kind": "noul",
+        "value": 0.14,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\CooldownRegistry.java",
+        "line": 60,
+        "endLine": 67,
+        "kind": "noul",
+        "value": 0.78,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\CooldownRegistry.java",
+        "line": 69,
+        "endLine": 78,
+        "kind": "noul",
+        "value": 0.16,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\CooldownRegistry.java",
+        "line": 80,
+        "endLine": 82,
+        "kind": "noul",
+        "value": 0.27,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\CooldownRegistry.java",
+        "line": 84,
+        "endLine": 87,
+        "kind": "noul",
+        "value": 0.11,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\CooldownRegistry.java",
+        "line": 89,
+        "endLine": 92,
+        "kind": "noul",
+        "value": 0.05,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 20,
+        "endLine": 22,
+        "kind": "noul",
+        "value": 0.2,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 24,
+        "endLine": 26,
+        "kind": "noul",
+        "value": 0.13,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 28,
+        "endLine": 30,
+        "kind": "noul",
+        "value": 0.09,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 32,
+        "endLine": 34,
+        "kind": "noul",
+        "value": 0.12,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 39,
+        "endLine": 41,
+        "kind": "noul",
+        "value": 0.11,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 46,
+        "endLine": 48,
+        "kind": "noul",
+        "value": 0.07,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 68,
+        "endLine": 77,
+        "kind": "noul",
+        "value": 0.13,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 79,
+        "endLine": 88,
+        "kind": "noul",
+        "value": 0.11,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 90,
+        "endLine": 99,
+        "kind": "noul",
+        "value": 0.09,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 101,
+        "endLine": 103,
+        "kind": "noul",
+        "value": 0.24,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 105,
+        "endLine": 109,
+        "kind": "noul",
+        "value": 0.14,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 111,
+        "endLine": 114,
+        "kind": "noul",
+        "value": 0.11,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 116,
+        "endLine": 119,
+        "kind": "noul",
+        "value": 0.06,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 121,
+        "endLine": 125,
+        "kind": "noul",
+        "value": 0.58,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 127,
+        "endLine": 129,
+        "kind": "noul",
+        "value": 0.07,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 131,
+        "endLine": 133,
+        "kind": "noul",
+        "value": 0.14,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 135,
+        "endLine": 137,
+        "kind": "noul",
+        "value": 0.06,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 139,
+        "endLine": 143,
+        "kind": "noul",
+        "value": 0.03,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 145,
+        "endLine": 149,
+        "kind": "noul",
+        "value": 0.09,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 151,
+        "endLine": 155,
+        "kind": "noul",
+        "value": 0.03,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 157,
+        "endLine": 160,
+        "kind": "noul",
+        "value": 0.18,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 162,
+        "endLine": 165,
+        "kind": "noul",
+        "value": 0.04,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 167,
+        "endLine": 170,
+        "kind": "noul",
+        "value": 0.03,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 172,
+        "endLine": 179,
+        "kind": "noul",
+        "value": 0.1,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 198,
+        "endLine": 201,
+        "kind": "noul",
+        "value": 0.05,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 203,
+        "endLine": 206,
+        "kind": "noul",
+        "value": 0.05,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 208,
+        "endLine": 211,
+        "kind": "noul",
+        "value": 0.05,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 213,
+        "endLine": 216,
+        "kind": "noul",
+        "value": 0.06,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 221,
+        "endLine": 225,
         "kind": "noul",
         "value": 0.22,
         "confidence": null
       },
       {
         "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\TestCommandContext.java",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 230,
+        "endLine": 233,
+        "kind": "noul",
+        "value": 0.06,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 235,
+        "endLine": 238,
+        "kind": "noul",
+        "value": 0.05,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 240,
+        "endLine": 249,
+        "kind": "noul",
+        "value": 0.05,
+        "confidence": null
+      }
+    ],
+    [
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\TestCommandContext.java",
+        "line": 27,
+        "endLine": 30,
+        "kind": "noul",
+        "value": 0.19,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\TestCommandContext.java",
+        "line": 32,
+        "endLine": 37,
+        "kind": "noul",
+        "value": 0.59,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\TestCommandContext.java",
+        "line": 39,
+        "endLine": 42,
+        "kind": "noul",
+        "value": 0.11,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\TestCommandContext.java",
+        "line": 44,
+        "endLine": 47,
+        "kind": "noul",
+        "value": 0.13,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\TestCommandContext.java",
+        "line": 49,
+        "endLine": 52,
+        "kind": "noul",
+        "value": 0.08,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\TestCommandContext.java",
+        "line": 54,
+        "endLine": 57,
+        "kind": "noul",
+        "value": 0.08,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\TestCommandContext.java",
+        "line": 59,
+        "endLine": 62,
+        "kind": "noul",
+        "value": 0.08,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\TestCommandContext.java",
+        "line": 68,
+        "endLine": 75,
+        "kind": "noul",
+        "value": 0.27,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\TestCommandContext.java",
+        "line": 80,
+        "endLine": 84,
+        "kind": "noul",
+        "value": 0.22,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\TestCommandContext.java",
+        "line": 86,
+        "endLine": 89,
+        "kind": "noul",
+        "value": 0.06,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\TestCommandContext.java",
+        "line": 91,
+        "endLine": 99,
+        "kind": "noul",
+        "value": 0.09,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\TestCommandContext.java",
+        "line": 101,
+        "endLine": 103,
+        "kind": "noul",
+        "value": 0.09,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\TestCommandContext.java",
+        "line": 109,
+        "endLine": 111,
+        "kind": "noul",
+        "value": 0.07,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\TestCommandContext.java",
+        "line": 113,
+        "endLine": 118,
+        "kind": "noul",
+        "value": 0.21,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\TestCommandContext.java",
         "line": 122,
         "endLine": 138,
         "kind": "noul",
@@ -793,19 +1324,460 @@
       },
       {
         "rule": "commandlib-method-name-promises",
-        "file": ".jev-lint\\rules\\java\\commandlib-method-name-promises\\fixtures\\TestCommandContext.java",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\TestCommandContext.java",
         "line": 140,
         "endLine": 153,
         "kind": "noul",
+        "value": 0.16,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\ArgumentBuilder.java",
+        "line": 15,
+        "endLine": 25,
+        "kind": "noul",
         "value": 0.14,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\ArgumentBuilder.java",
+        "line": 27,
+        "endLine": 29,
+        "kind": "noul",
+        "value": 0.62,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\ArgumentBuilder.java",
+        "line": 31,
+        "endLine": 34,
+        "kind": "noul",
+        "value": 0.16,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\ArgumentBuilder.java",
+        "line": 36,
+        "endLine": 38,
+        "kind": "noul",
+        "value": 0.09,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 20,
+        "endLine": 22,
+        "kind": "noul",
+        "value": 0.21,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 24,
+        "endLine": 26,
+        "kind": "noul",
+        "value": 0.13,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 28,
+        "endLine": 30,
+        "kind": "noul",
+        "value": 0.09,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 32,
+        "endLine": 34,
+        "kind": "noul",
+        "value": 0.13,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 39,
+        "endLine": 41,
+        "kind": "noul",
+        "value": 0.12,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 46,
+        "endLine": 48,
+        "kind": "noul",
+        "value": 0.08,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 68,
+        "endLine": 77,
+        "kind": "noul",
+        "value": 0.12,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 79,
+        "endLine": 88,
+        "kind": "noul",
+        "value": 0.11,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 90,
+        "endLine": 99,
+        "kind": "noul",
+        "value": 0.1,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 101,
+        "endLine": 103,
+        "kind": "noul",
+        "value": 0.23,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 105,
+        "endLine": 109,
+        "kind": "noul",
+        "value": 0.14,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 111,
+        "endLine": 114,
+        "kind": "noul",
+        "value": 0.1,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 116,
+        "endLine": 119,
+        "kind": "noul",
+        "value": 0.05,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 121,
+        "endLine": 125,
+        "kind": "noul",
+        "value": 0.66,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 127,
+        "endLine": 129,
+        "kind": "noul",
+        "value": 0.07,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 131,
+        "endLine": 133,
+        "kind": "noul",
+        "value": 0.14,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 135,
+        "endLine": 137,
+        "kind": "noul",
+        "value": 0.07,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 139,
+        "endLine": 143,
+        "kind": "noul",
+        "value": 0.03,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 145,
+        "endLine": 149,
+        "kind": "noul",
+        "value": 0.09,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 151,
+        "endLine": 155,
+        "kind": "noul",
+        "value": 0.03,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 157,
+        "endLine": 160,
+        "kind": "noul",
+        "value": 0.11,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 162,
+        "endLine": 165,
+        "kind": "noul",
+        "value": 0.04,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 167,
+        "endLine": 170,
+        "kind": "noul",
+        "value": 0.03,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 172,
+        "endLine": 179,
+        "kind": "noul",
+        "value": 0.1,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 198,
+        "endLine": 201,
+        "kind": "noul",
+        "value": 0.05,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 203,
+        "endLine": 206,
+        "kind": "noul",
+        "value": 0.05,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 208,
+        "endLine": 211,
+        "kind": "noul",
+        "value": 0.05,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 213,
+        "endLine": 216,
+        "kind": "noul",
+        "value": 0.07,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 221,
+        "endLine": 225,
+        "kind": "noul",
+        "value": 0.26,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 230,
+        "endLine": 233,
+        "kind": "noul",
+        "value": 0.06,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 235,
+        "endLine": 238,
+        "kind": "noul",
+        "value": 0.05,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\FakeSender.java",
+        "line": 240,
+        "endLine": 249,
+        "kind": "noul",
+        "value": 0.05,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\CooldownRegistry.java",
+        "line": 21,
+        "endLine": 23,
+        "kind": "noul",
+        "value": 0.05,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\CooldownRegistry.java",
+        "line": 25,
+        "endLine": 27,
+        "kind": "noul",
+        "value": 0.1,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\CooldownRegistry.java",
+        "line": 29,
+        "endLine": 34,
+        "kind": "noul",
+        "value": 0.89,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\CooldownRegistry.java",
+        "line": 36,
+        "endLine": 42,
+        "kind": "noul",
+        "value": 0.09,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\CooldownRegistry.java",
+        "line": 44,
+        "endLine": 46,
+        "kind": "noul",
+        "value": 0.45,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\CooldownRegistry.java",
+        "line": 48,
+        "endLine": 50,
+        "kind": "noul",
+        "value": 0.82,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\CooldownRegistry.java",
+        "line": 52,
+        "endLine": 54,
+        "kind": "noul",
+        "value": 0.81,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\CooldownRegistry.java",
+        "line": 56,
+        "endLine": 58,
+        "kind": "noul",
+        "value": 0.14,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\CooldownRegistry.java",
+        "line": 60,
+        "endLine": 67,
+        "kind": "noul",
+        "value": 0.78,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\CooldownRegistry.java",
+        "line": 69,
+        "endLine": 78,
+        "kind": "noul",
+        "value": 0.16,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\CooldownRegistry.java",
+        "line": 80,
+        "endLine": 82,
+        "kind": "noul",
+        "value": 0.27,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\CooldownRegistry.java",
+        "line": 84,
+        "endLine": 87,
+        "kind": "noul",
+        "value": 0.11,
+        "confidence": null
+      },
+      {
+        "rule": "commandlib-method-name-promises",
+        "file": ".jev-lint/rules/java/commandlib-method-name-promises/fixtures\\CooldownRegistry.java",
+        "line": 89,
+        "endLine": 92,
+        "kind": "noul",
+        "value": 0.05,
         "confidence": null
       }
     ]
   ],
   "spent": {
-    "calls": 6,
-    "inputTokens": 51708,
-    "usd": 0.002171736,
-    "ms": 289
+    "calls": 12,
+    "inputTokens": 113301,
+    "usd": 0.004758642,
+    "ms": 409
   }
 }

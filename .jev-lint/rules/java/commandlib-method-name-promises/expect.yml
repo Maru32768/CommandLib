@@ -17,3 +17,8 @@ fixtures/CooldownRegistry.java:
 # A copy of common-testing's TestCommandContext. Real code the rule flagged at 0.62, kept as a hard clean.
 fixtures/TestCommandContext.java:
   - { line: 32, label: clean, window: 0, reason: "take returns the context and removes it, as take means" }
+# Copies of the two highest-scoring sound methods of a full check of the repository (0.57-0.60).
+fixtures/ArgumentBuilder.java:
+  - { line: 27, label: clean, window: 0, reason: "the CommandLib DSL names the setter of the executor execute" }
+fixtures/FakeSender.java:
+  - { line: 121, label: clean, window: 0, reason: "a fake records what it is sent, which is its send" }
