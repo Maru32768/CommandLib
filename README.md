@@ -172,9 +172,9 @@ dependencies {
 }
 
 shadowJar {
-    archiveFileName = "${rootProject.name}-${project.version}.jar"
     dependencies {
-        include(dependency("com.github.Maru32768.CommandLib:forge-1.20.1:.*"))
+        // The platform artifact and the common artifact it depends on
+        include(dependency("com.github.Maru32768.CommandLib:.*:.*"))
     }
     // Avoid package conflicts
     relocate "dev.marulabs.commandlib", "${project.group}.${project.name.toLowerCase()}.commandlib"
@@ -210,9 +210,9 @@ dependencies {
 val projectGroup = project.group.toString()
 val projectNameLower = project.name.lowercase()
 tasks.named<ShadowJar>("shadowJar") {
-    archiveFileName.set("${rootProject.name}-${project.version}.jar")
     dependencies {
-        include(dependency("com.github.Maru32768.CommandLib:forge-1.20.1:.*"))
+        // The platform artifact and the common artifact it depends on
+        include(dependency("com.github.Maru32768.CommandLib:.*:.*"))
     }
     // Avoid package conflicts
     relocate("dev.marulabs.commandlib", "$projectGroup.$projectNameLower.commandlib")
@@ -248,7 +248,8 @@ val projectNameLower = project.name.lowercase()
 tasks.named<ShadowJar>("shadowJar") {
     archiveFileName.set("${rootProject.name}-${project.version}.jar")
     dependencies {
-        include(dependency("com.github.Maru32768.CommandLib:neoforge-1.21.1:.*"))
+        // The platform artifact and the common artifact it depends on
+        include(dependency("com.github.Maru32768.CommandLib:.*:.*"))
     }
     // Avoid package conflicts
     relocate("dev.marulabs.commandlib", "$projectGroup.$projectNameLower.commandlib")

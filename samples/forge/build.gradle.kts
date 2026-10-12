@@ -105,9 +105,9 @@ tasks.named<Jar>("jar") {
 val projectGroup = project.group.toString()
 val projectNameLower = project.name.lowercase()
 tasks.named<ShadowJar>("shadowJar") {
-    archiveFileName.set("${rootProject.name}-${project.version}.jar")
     dependencies {
-        include(dependency("$commandLibGroup:forge-1.16.5:.*"))
+        // The platform artifact and the common artifact it depends on
+        include(dependency("$commandLibGroup:.*:.*"))
     }
     relocate("dev.marulabs.commandlib", "$projectGroup.$projectNameLower.commandlib")
     finalizedBy("reobfShadowJar")
