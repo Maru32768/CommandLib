@@ -119,7 +119,9 @@ annotation API / Kotlin DSL の `@Optional` や default args はこの土台の�
 - `[~]` sender / message abstraction（Adventure と vanilla `Component` の差分吸収）を Velocity 着手前に設計する。
   message 側は `RichText` と platform ごとの変換（`RichTexts.toBungee` / `toAdventure` / `toVanilla`）で Phase 1 を実装済み
   （[`docs/design/rich-text-messages.md`](design/rich-text-messages.md)）。sender 側は未着手。
-- `[ ]` public API の binary compatibility check（japicmp 等）を CI に追加する。
+- `[~]` public API の binary compatibility check（japicmp 等）を CI に追加する。`:common:japicmp` / `:spigot:japicmp` は
+  root `build.gradle.kts` の `apiBaselines` にある JitPack の release と比較できる。基準の 0.17.2 は `net.kunmc.lab`
+  package のままなので、0.18.0 の release 後に基準を移し、paper と `*-testing` を加え、CI で実行する。
 - `[ ]` downstream mod 向けに JarJar / `include()` と shade + relocate の推奨方針を決めて docs に書く。
 - `[ ]` capability-based registration に移行する。
 - `[ ]` runtime platform capability diagnostics を追加する。
@@ -140,6 +142,15 @@ annotation API / Kotlin DSL の `@Optional` や default args はこの土台の�
   10 分前後）、paperweight の dev bundle も取得するため、`~/.m2` の Spigot artifact と paperweight cache を CI 間で
   保持する方法を決める。cache がない job や PR では `-Pcommandlib.typedNms=false` で module を外して unit test だけを
   実行することも検討する（その spigot jar は NMS 実装を持たないので配布しない）。integration test の CI matrix もここで扱う。
+  CI では `check`（Spotless、compile 時の Error Prone / NullAway、doclint）と japicmp を実行する。jev-lint を CI で
+  使う場合は、verdict cache（`.jev-lint/baseline.json`）を commit して key なしで lint する運用に切り替える。
+- `[ ]` 0.18.0 を release する。`AbstractCommandContext` の削除や `net.kunmc.lab` から `dev.marulabs` への package 移動など、
+  0.17.x と binary 互換でない変更を含む。
+- `[ ]` JitPack から Maven Central に移行する。Maven Central は javadoc jar を要求するが、javadoc jar と doclint は Bukkit 側の
+  module（`common`、`spigot`、`paper` と各 `-testing`）にしか設定していないため、modded の node にも追加する。
+- `[ ]` Error Prone / NullAway を typed NMS module と modded の node にも広げる。現在は Bukkit 側の module だけが対象で、
+  typed NMS module は toolchain 16 / 17 で compile し、modded は Architectury Loom 経由で build するため、それぞれ
+  Error Prone を JDK 21 で動かす設定が別途必要になる。
 - `[?]` （優先度低・候補）config-driven customization。server admin が YAML 等で command 名、alias、無効化、message を
   再コンパイルなしで上書きできるようにする。需要を見て採否を決める。
 
