@@ -313,7 +313,7 @@ class CommandOptionTest {
 
 ## Execution Flow
 
-`CommandExecutor.parseOptions(ctx)` reads the already-matched Brigadier nodes
+`CommandRunner.parseOptions(ctx)` reads the already-matched Brigadier nodes
 from `ctx.getHandle().getNodes()`:
 
 1. **Flag options** — any node whose name starts with `-` but is not an internal
@@ -328,7 +328,7 @@ from `ctx.getHandle().getNodes()`:
 
 `validateOptions(ctx)` runs all `CommandOption.validate(ctx)` calls after
 parsing. A constraint violation throws `ArgumentParseException` which is caught
-by `CommandExecutor.run`, sends the error message to the caller, and returns
+by `CommandRunner.run`, sends the error message to the caller, and returns
 without executing the command body.
 
 ## Help Output

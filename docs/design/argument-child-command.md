@@ -336,7 +336,7 @@ to parse both `difficulty` and `hard`.
 
 ## Execution and Argument Parsing
 
-`CommandExecutor` parses a list of `Arguments`, not just a single chain. That is
+`CommandRunner` parses a list of `Arguments`, not just a single chain. That is
 required because an argument-child command may need to parse parent arguments and
 child arguments.
 
