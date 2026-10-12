@@ -73,9 +73,15 @@ dev bundles. Line numbers refer to the commit that adds this document.
   was wrapped in a `ShadowBrigNode` and shown as a `VanillaCommandWrapper`: "A
   Mojang provided command.", the "Minecraft" index, and a
   `minecraft.command.<label>` permission that `SimpleCommandMap#dispatch` (and so
-  `Bukkit.dispatchCommand` and `Player#performCommand`) checked. The nodes are
-  added again on `ServerResourcesReloadedEvent`, since `/minecraft:reload`
-  moves only `BukkitCommandNode`s into the new dispatcher. Paper builds help
+  `Bukkit.dispatchCommand` and `Player#performCommand`) checked. `/minecraft:reload`
+  moves only `BukkitCommandNode`s into the new dispatcher, so the nodes are added
+  again from a `COMMANDS` lifecycle handler registered reflectively, which Paper
+  runs before it sends the new tree. Paper takes the handler only while the
+  plugin is enabling; a registration after that adds them again on
+  `ServerResourcesReloadedEvent`, as before, after Paper has queued the
+  asynchronous tree building for players, which the change can race
+  (`ConcurrentModificationException` logged, seen in the paper-1.21.1 run before
+  the handler existed; the update on the next tick sends the full tree). Paper builds help
   topics only when the server loads and on `/minecraft:reload`, before that
   event, so CommandLib puts a topic for each label from Paper's wrapper with the
   command permission set on it at registration and after the reload

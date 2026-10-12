@@ -40,7 +40,9 @@ public final class HelpTopicTest extends TestBase {
 
         putCommandNotExecutedResult(key);
         putCommandNotExecutedResult(namespacedKey);
-        putResult(new TestResult(afterReloadKey, TestStatus.FAILED, "Help topic was not checked after /minecraft:reload."));
+        putResult(new TestResult(afterReloadKey,
+                                 TestStatus.FAILED,
+                                 "Help topic was not checked after /minecraft:reload."));
         command.addChildren(new Command("helpTopic") {{
             execute(ctx -> putResult(check(key)));
         }}, new Command(AFTER_RELOAD) {{

@@ -177,7 +177,8 @@ public class TestMain {
                                                                                                                         probe);
                                                           tests.forEach(test -> test.hookCommandDispatchError(probe,
                                                                                                               dispatchResult));
-                                                          List<String> afterReload = List.of(MainCommand.NAME + " " + HelpTopicTest.AFTER_RELOAD);
+                                                          List<String> afterReload = List.of(MainCommand.NAME + " "
+                                                                  + HelpTopicTest.AFTER_RELOAD);
                                                           for (String afterReloadCommand : afterReload) {
                                                               dispatchProbe.dispatch(Bukkit.getConsoleSender(),
                                                                                      afterReloadCommand);

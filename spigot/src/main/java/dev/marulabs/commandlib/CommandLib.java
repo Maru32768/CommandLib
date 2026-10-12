@@ -38,6 +38,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Proxy;
 import java.util.*;
 import java.util.logging.Level;
 
@@ -113,9 +115,13 @@ public final class CommandLib implements Listener {
     }
 
     /**
-     * From 1.20.6 the commands are added straight to Paper's dispatcher, which /minecraft:reload replaces. Paper
-     * fires ServerResourcesReloadedEvent after re-syncing Bukkit commands, so the nodes are added again there. The
-     * event is Paper API, so it is registered reflectively.
+     * From 1.20.6 the commands are added straight to Paper's dispatcher, which /minecraft:reload replaces, moving only
+     * Bukkit commands into the new one. The nodes are added again from a COMMANDS lifecycle handler, which Paper runs
+     * before it sends the new tree to players. Paper takes such a handler only while the plugin is enabling, so a
+     * later registration adds them on ServerResourcesReloadedEvent instead, after the tree is sent: the change then
+     * races Paper's asynchronous tree building, which may log a ConcurrentModificationException, and the update on
+     * the next tick sends the full tree. The help topics, which the reload rebuilt without the commands, are put on
+     * that event in either case. Both are Paper API, so they are registered reflectively.
      */
     @SuppressWarnings("unchecked")
     private void registerResourcesReloadListener() {
@@ -128,25 +134,75 @@ public final class CommandLib implements Listener {
         } catch (ClassNotFoundException e) {
             return;
         }
+        boolean commandsHandler = registerCommandsHandler();
         EventExecutor executor = (listener, event) -> {
             if (eventClass.isInstance(event)) {
-                ((CommandLib) listener).readdToPaperDispatcher();
+                ((CommandLib) listener).afterResourcesReload(!commandsHandler);
             }
         };
         Bukkit.getPluginManager()
               .registerEvent(eventClass, this, EventPriority.MONITOR, executor, plugin);
     }
 
-    private void readdToPaperDispatcher() {
+    private boolean registerCommandsHandler() {
         try {
-            Map<String, org.bukkit.command.Command> knownCommands = knownCommands();
-            addToPaperDispatcher(knownCommands);
-            // The reload rebuilt the help map without the commands.
-            showPaperHelpTopics(knownCommands);
+            Class<?> managerClass = Class.forName("io.papermc.paper.plugin.lifecycle.event.LifecycleEventManager");
+            Class<?> typeClass = Class.forName("io.papermc.paper.plugin.lifecycle.event.types.LifecycleEventType");
+            Class<?> handlerClass = Class.forName("io.papermc.paper.plugin.lifecycle.event.handler.LifecycleEventHandler");
+            Object commandsEvent = Class.forName("io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents")
+                                        .getField("COMMANDS")
+                                        .get(null);
+            Object handler = Proxy.newProxyInstance(handlerClass.getClassLoader(),
+                                                    new Class<?>[]{handlerClass},
+                                                    (proxy, method, args) -> {
+                                                        switch (method.getName()) {
+                                                            case "equals":
+                                                                return proxy == args[0];
+                                                            case "hashCode":
+                                                                return System.identityHashCode(proxy);
+                                                            case "toString":
+                                                                return "CommandLib COMMANDS handler";
+                                                            default:
+                                                                readdToPaperDispatcher();
+                                                                return null;
+                                                        }
+                                                    });
+            Object manager = plugin.getClass()
+                                   .getMethod("getLifecycleManager")
+                                   .invoke(plugin);
+            managerClass.getMethod("registerEventHandler", typeClass, handlerClass)
+                        .invoke(manager, commandsEvent, handler);
+            return true;
+        } catch (InvocationTargetException e) {
+            // Paper rejects a handler once the plugin has been enabled.
+            return false;
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    private void readdToPaperDispatcher() {
+        // A lifecycle handler cannot be removed, so it outlives unregister().
+        if (registeredCommands.isEmpty()) {
+            return;
+        }
+        try {
+            addToPaperDispatcher(knownCommands());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        updatePlayerCommandsLater();
+    }
+
+    private void afterResourcesReload(boolean readd) {
+        if (readd) {
+            readdToPaperDispatcher();
+            updatePlayerCommandsLater();
+        }
+        try {
+            showPaperHelpTopics(knownCommands());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
