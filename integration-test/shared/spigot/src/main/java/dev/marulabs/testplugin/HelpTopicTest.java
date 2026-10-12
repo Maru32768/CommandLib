@@ -4,6 +4,7 @@ import dev.marulabs.commandlib.Command;
 import dev.marulabs.integration.core.TestResult;
 import dev.marulabs.integration.core.TestStatus;
 import org.bukkit.Bukkit;
+import org.bukkit.command.CommandMap;
 import org.bukkit.command.CommandSender;
 import org.bukkit.help.HelpMap;
 import org.bukkit.help.HelpTopic;
@@ -16,8 +17,9 @@ import java.util.Locale;
 
 /**
  * Checks the server's /help for the main command, the text set with serverHelp and the plugin's index instead of the
- * "Minecraft" one, and that the command runs under its namespaced label. Paper rebuilds the help map on
- * /minecraft:reload, so the help check runs again after it.
+ * "Minecraft" one, that the command runs under its namespaced label and has no "minecraft:" label, which CraftBukkit
+ * adds for the vanilla dispatcher's commands. Paper rebuilds the help map on /minecraft:reload, so the check runs again
+ * after it.
  */
 public final class HelpTopicTest extends TestBase {
     public static final String SHORT_TEXT = "CommandLib integration test command";
@@ -82,6 +84,10 @@ public final class HelpTopicTest extends TestBase {
             problems.add("plugin index does not list " + topicName + ": "
                     + (pluginIndex == null ? null : pluginIndex.getFullText(console)));
         }
+        String minecraftLabel = "minecraft:" + command.name();
+        if (commandMap().getCommand(minecraftLabel) != null) {
+            problems.add("the command map has " + minecraftLabel);
+        }
         HelpTopic minecraftIndex = helpMap.getHelpTopic("Minecraft");
         if (minecraftIndex != null && minecraftIndex.getFullText(console)
                                                     .contains(topicName + ":")) {
@@ -90,5 +96,17 @@ public final class HelpTopicTest extends TestBase {
 
         return problems.isEmpty() ? new TestResult(key, TestStatus.SUCCEEDED, "Help topic is " + SHORT_TEXT)
                 : new TestResult(key, TestStatus.FAILED, String.join("\n", problems));
+    }
+
+    // Bukkit's API has no getCommandMap before Paper added it.
+    private static CommandMap commandMap() {
+        try {
+            return (CommandMap) Bukkit.getServer()
+                                      .getClass()
+                                      .getMethod("getCommandMap")
+                                      .invoke(Bukkit.getServer());
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException(e);
+        }
     }
 }

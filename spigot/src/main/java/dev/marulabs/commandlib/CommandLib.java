@@ -507,6 +507,38 @@ public final class CommandLib implements Listener {
     @EventHandler
     private void onServerLoad(ServerLoadEvent e) {
         registeredHelpTopics.forEach(topic -> fileUnderPluginIndex(Bukkit.getHelpMap(), topic, plugin.getName()));
+        removeMinecraftNamespacedCommands();
+    }
+
+    /**
+     * When the plugins have been enabled at startup or by Bukkit /reload, CraftBukkit adds every child of the vanilla
+     * dispatcher to the command map as "minecraft:&lt;name&gt;", a VanillaCommandWrapper that /help leaves out and that
+     * describes a Mojang command. CommandLib commands are plugin commands, which Bukkit labels "&lt;plugin&gt;:&lt;name&gt;"
+     * only, as CommandAPI does for commands outside the minecraft namespace, so the label is removed again.
+     */
+    @SuppressWarnings("rawtypes")
+    private void removeMinecraftNamespacedCommands() {
+        if (usesPaperCommandDispatcher()) {
+            return;
+        }
+        boolean removed = false;
+        try {
+            Map<String, org.bukkit.command.Command> knownCommands = knownCommands();
+            RootCommandNode root = NMSCraftServer.create(plugin.getServer())
+                                                 .getServer()
+                                                 .getCommandDispatcher()
+                                                 .getBrigadier()
+                                                 .getRoot();
+            for (CommandNode<?> node : registeredCommands) {
+                removed |= removeMinecraftNamespacedCommand(root, knownCommands, node);
+            }
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
+        // Bukkit /reload has sent the players their trees with the label.
+        if (removed) {
+            updatePlayerCommandsLater();
+        }
     }
 
     /**
@@ -712,20 +744,22 @@ public final class CommandLib implements Listener {
     }
 
     /**
-     * When the server finishes loading, CraftBukkit adds every child of the vanilla dispatcher to the command map as
-     * "minecraft:&lt;name&gt;". Commands registered during startup are children of it then, so that label is removed
-     * as well. Only a wrapper of this node is removed, so the label of another command stays.
+     * Removes the "minecraft:&lt;name&gt;" label that CraftBukkit adds for the node when the server finishes loading.
+     * Only a wrapper of this node is removed, so the label of another command stays.
+     *
+     * @return whether the label was removed
      */
-    static void removeMinecraftNamespacedCommand(RootCommandNode<?> root,
-                                                 Map<String, org.bukkit.command.Command> knownCommands,
-                                                 CommandNode<?> node) throws Exception {
+    static boolean removeMinecraftNamespacedCommand(RootCommandNode<?> root,
+                                                    Map<String, org.bukkit.command.Command> knownCommands,
+                                                    CommandNode<?> node) throws Exception {
         String label = "minecraft:" + node.getName();
         org.bukkit.command.Command command = knownCommands.get(label);
         if (command == null || wrappedVanillaCommand(command) != node) {
-            return;
+            return false;
         }
         knownCommands.remove(label);
         removeCommand(root, label);
+        return true;
     }
 
     @Nullable

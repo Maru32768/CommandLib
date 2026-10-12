@@ -46,7 +46,12 @@ dev bundles. Line numbers refer to the commit that adds this document.
   This replaced adding to R and to the root that `execute run` redirects to,
   with a wrapper of R.
 - In `onEnable` during startup R is V, so CraftBukkit later adds
-  `minecraft:<name>` for the node. At runtime R is the dispatcher built by
+  `minecraft:<name>` for the node, a `VanillaCommandWrapper` describing a Mojang
+  command. On `ServerLoadEvent` (startup and Bukkit `/reload`) CommandLib removes
+  that label again when it wraps the node (`removeMinecraftNamespacedCommands`):
+  CommandLib commands are plugin commands, which Bukkit labels
+  `<plugin>:<name>` only, and CommandAPI removes the label as well for commands
+  outside the `minecraft` namespace. At runtime R is the dispatcher built by
   `syncCommands()`.
 - `/minecraft:reload` keeps the commands because the wrappers are in
   `knownCommands`.
@@ -202,7 +207,7 @@ adds a `<modid>:` label for mod commands, so CommandLib adds none. There is no
 | Area | CommandLib | CommandAPI | Verdict | Status |
 |---|---|---|---|---|
 | Spigot dispatcher choice | was R (V during startup) plus V through the `execute run` redirect | always V, R at runtime | The redirect lookup was indirect and missed V without an `execute` node. | Fixed: always V through the typed accessor, plus R when it is not V |
-| Startup `minecraft:<name>` label | Created by CraftBukkit; unregister left it in the command map and client tree, pointing at a removed command | removed or kept deliberately | Bug | Fixed: unregister removes the label when it wraps the node (`removeMinecraftNamespacedCommand`, line 335) |
+| Startup `minecraft:<name>` label | Created by CraftBukkit; unregister left it in the command map and client tree, pointing at a removed command; while registered it was a Mojang-described wrapper without the command permission, which `/help` did not list | removed for commands outside the `minecraft` namespace (`fixNamespaces`), kept only for commands registered in it | Bug | Fixed: unregister removes the label when it wraps the node (`removeMinecraftNamespacedCommand`, line 335). The label is now removed on `ServerLoadEvent` too, since CommandLib commands are plugin commands, which Bukkit labels `<plugin>:<name>` (CraftBukkit adds `minecraft:` labels only for the vanilla dispatcher's commands); checked by the spigot module fixture (`HelpTopicTest`) |
 | Paper module direct add | `addChild` merged into a same-named command, keeping its requirement and children | goes through the registrar | Bug | Fixed: `replaceChild` (line 387) removes the command first |
 | `plugin:<name>` label (spigot module) | not added | added (`fixNamespaces`, runtime path) | Missing feature | Fixed on Spigot and Paper before 1.20.6: every label, aliases included, also gets `<plugin>:<label>`, the same wrapper under a second command-map key like Bukkit's fallback labels; a runtime registration also adds a copy of the node under that name to R, as `syncCommands` does at startup (`addNamespacedCommand`). Unregister removes both. `execute run <plugin>:<label>` does not work, as for Bukkit's own namespaced labels, because the label is not a node of V. Fixed on Paper 1.20.6+: a copy of the node under `<plugin>:<label>` is added to Paper's dispatcher, as Paper's registrar does, and unregister removes it; there `execute run <plugin>:<label>` works. Checked by the integration fixture (`ScenarioTest`, `HelpTopicTest`) |
 | `plugin:<name>` label (paper module) | registrar labels; the runtime direct add had none | registrar | Missing edge case | Fixed: the direct add also adds `<plugin>:<label>` |
