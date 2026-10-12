@@ -1,9 +1,9 @@
 package dev.marulabs.commandlib.nms.spigot_1_16_5;
 
-import java.util.concurrent.CompletableFuture;
 import dev.marulabs.commandlib.util.nms.command.NMSCommandDispatcher;
 import dev.marulabs.commandlib.util.nms.server.NMSDataPackResources;
 import dev.marulabs.commandlib.util.nms.server.NMSDedicatedServer;
+import java.util.concurrent.CompletableFuture;
 import net.minecraft.server.v1_16_R3.CustomFunctionManager;
 import net.minecraft.server.v1_16_R3.DedicatedServer;
 import net.minecraft.server.v1_16_R3.GameProfilerDisabled;
@@ -26,7 +26,12 @@ public class NMSDedicatedServer_spigot_1_16_5 extends NMSDedicatedServer {
 
     @Override
     public NMSDataPackResources getDataPackResources() {
-        return NMSDataPackResources.create(((DedicatedServer) getHandle()).dataPackResources);
+        return NMSDataPackResources.create(getDataPackResourcesHandle());
+    }
+
+    @Override
+    public Object getDataPackResourcesHandle() {
+        return ((DedicatedServer) getHandle()).dataPackResources;
     }
 
     @Override

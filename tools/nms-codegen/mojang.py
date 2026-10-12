@@ -381,7 +381,12 @@ w("NMSDedicatedServer", f'''    public NMSDedicatedServer_SUFFIX(Object handle) 
 
     @Override
     public NMSDataPackResources getDataPackResources() {{
-        return NMSDataPackResources.create(((DedicatedServer) getHandle()).{"resources.managers()" if HAS_RELOADABLE_RESOURCES else "resources"});
+        return NMSDataPackResources.create(getDataPackResourcesHandle());
+    }}
+
+    @Override
+    public Object getDataPackResourcesHandle() {{
+        return ((DedicatedServer) getHandle()).{"resources.managers()" if HAS_RELOADABLE_RESOURCES else "resources"};
     }}
 
     @Override

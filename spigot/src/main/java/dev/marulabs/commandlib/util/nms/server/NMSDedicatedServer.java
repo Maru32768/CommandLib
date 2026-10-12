@@ -33,6 +33,12 @@ public abstract class NMSDedicatedServer extends NMSClass {
     public abstract NMSDataPackResources getDataPackResources();
 
     /**
+     * The server object that {@link #getDataPackResources()} wraps, which the server replaces when it loads the data
+     * packs again, for an identity check without making a wrapper.
+     */
+    public abstract Object getDataPackResourcesHandle();
+
+    /**
      * Compiles the functions of the current data packs again with the given dispatcher, so their commands may use
      * what was added to it after the data packs were loaded, and hands them to the server's function manager.
      */

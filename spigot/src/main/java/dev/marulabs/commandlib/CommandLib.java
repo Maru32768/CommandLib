@@ -552,17 +552,17 @@ public final class CommandLib implements Listener {
     private void compileFunctionsWithCommands() {
         commandsChangedSinceCompile = true;
         if (functionCompiler == null || functionCompiler.isCancelled()) {
+            NMSDedicatedServer server = NMSCraftServer.create(plugin.getServer())
+                                                      .getServer();
+            // Kept by the task, so each tick's check is a field read and an identity comparison.
             functionCompiler = Bukkit.getScheduler()
-                                     .runTaskTimer(plugin, () -> compileFunctionsIfStale(plugin), 0L, 1L);
+                                     .runTaskTimer(plugin, () -> compileFunctionsIfStale(plugin, server), 0L, 1L);
         }
     }
 
-    private static void compileFunctionsIfStale(Plugin plugin) {
+    private static void compileFunctionsIfStale(Plugin plugin, NMSDedicatedServer server) {
         try {
-            NMSDedicatedServer server = NMSCraftServer.create(plugin.getServer())
-                                                      .getServer();
-            Object resources = server.getDataPackResources()
-                                     .getHandle();
+            Object resources = server.getDataPackResourcesHandle();
             if (resources == functionsCompiledFor && !commandsChangedSinceCompile) {
                 return;
             }

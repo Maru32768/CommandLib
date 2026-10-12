@@ -1,9 +1,9 @@
 package dev.marulabs.commandlib.nms.paper_1_20_6;
 
-import java.util.concurrent.CompletableFuture;
 import dev.marulabs.commandlib.util.nms.command.NMSCommandDispatcher;
 import dev.marulabs.commandlib.util.nms.server.NMSDataPackResources;
 import dev.marulabs.commandlib.util.nms.server.NMSDedicatedServer;
+import java.util.concurrent.CompletableFuture;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerFunctionLibrary;
 import net.minecraft.server.dedicated.DedicatedServer;
@@ -35,7 +35,12 @@ public class NMSDedicatedServer_paper_1_20_6 extends NMSDedicatedServer {
 
     @Override
     public NMSDataPackResources getDataPackResources() {
-        return NMSDataPackResources.create(((DedicatedServer) getHandle()).resources.managers());
+        return NMSDataPackResources.create(getDataPackResourcesHandle());
+    }
+
+    @Override
+    public Object getDataPackResourcesHandle() {
+        return ((DedicatedServer) getHandle()).resources.managers();
     }
 
     @Override

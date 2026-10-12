@@ -248,7 +248,12 @@ w("NMSDedicatedServer", '''    public NMSDedicatedServer_SUFFIX(Object handle) {
 
     @Override
     public NMSDataPackResources getDataPackResources() {
-        return NMSDataPackResources.create(((DedicatedServer) getHandle()).dataPackResources);
+        return NMSDataPackResources.create(getDataPackResourcesHandle());
+    }
+
+    @Override
+    public Object getDataPackResourcesHandle() {
+        return ((DedicatedServer) getHandle()).dataPackResources;
     }
 
     @Override
