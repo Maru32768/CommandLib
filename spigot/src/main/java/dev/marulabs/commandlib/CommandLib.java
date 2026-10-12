@@ -132,7 +132,8 @@ public final class CommandLib implements Listener {
         try {
             eventClass = (Class<? extends Event>) Class.forName("io.papermc.paper.event.server.ServerResourcesReloadedEvent");
         } catch (ClassNotFoundException e) {
-            return;
+            // usesPaperCommandDispatcher() means Paper 1.20.6+, which always has this event.
+            throw new IllegalStateException("Paper's ServerResourcesReloadedEvent is missing", e);
         }
         boolean commandsHandler = registerCommandsHandler();
         EventExecutor executor = (listener, event) -> {
