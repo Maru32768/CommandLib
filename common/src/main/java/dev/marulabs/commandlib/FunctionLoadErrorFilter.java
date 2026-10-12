@@ -4,7 +4,6 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.core.Filter;
-import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.Logger;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.config.Configuration;
@@ -23,7 +22,7 @@ import java.util.function.BooleanSupplier;
  * {@value #RECOMPILE_METHOD} method, pass, so a function that is really broken is still reported, once.
  *
  * <p>It is a context-wide Log4j filter, which the logger checks in the logging thread before the event is made, even
- * with asynchronous loggers. Servers log through Log4j, which plugins see from the server's class loader; without it
+ * with asynchronous loggers, so only its variants for a logger call are needed. Servers log through Log4j, which plugins see from the server's class loader; without it
  * nothing is filtered.
  */
 final class FunctionLoadErrorFilter extends AbstractFilter {
@@ -37,6 +36,9 @@ final class FunctionLoadErrorFilter extends AbstractFilter {
      * one plugin's shaded copy of CommandLib also lets the errors of another copy pass.
      */
     static final String RECOMPILE_METHOD = "recompileFunctions";
+
+    // Set while a function load error is judged, whose checks may log through this filter again.
+    private static final ThreadLocal<Boolean> DECIDING = ThreadLocal.withInitial(() -> false);
 
     private final Configuration configuration;
     private final BooleanSupplier recompiling;
@@ -63,6 +65,13 @@ final class FunctionLoadErrorFilter extends AbstractFilter {
         Configuration configuration = ((LoggerContext) context).getConfiguration();
         FunctionLoadErrorFilter filter = new FunctionLoadErrorFilter(configuration, recompiling);
         filter.start();
+        // A class loader may log each class it loads, as ModLauncher on Mohist does, which would call the filter again
+        // while it resolves a class, endlessly. So every path runs once before the filter is added.
+        filter.filter(null, null, null, (String) null, (Object[]) null);
+        filter.filter(null, null, null, (Message) null, null);
+        filter.decide(MESSAGE);
+        boolean unused = recompiling.getAsBoolean();
+        fromRecompilation();
         // A composite filter stops at the first filter that accepts or denies, and Forge's configuration, which Mohist
         // uses, has filters that accept errors, so this one goes first.
         Filter existing = configuration.getFilter();
@@ -82,26 +91,34 @@ final class FunctionLoadErrorFilter extends AbstractFilter {
     }
 
     @Override
-    public Result filter(Logger logger, Level level, Marker marker, String msg, Object... params) {
+    // Log4j passes null for what a call does not give, such as the marker.
+    public Result filter(@Nullable Logger logger,
+                         @Nullable Level level,
+                         @Nullable Marker marker,
+                         @Nullable String msg,
+                         @Nullable Object @Nullable... params) {
         return decide(msg);
     }
 
     @Override
-    public Result filter(Logger logger, Level level, Marker marker, Message msg, Throwable t) {
+    public Result filter(@Nullable Logger logger,
+                         @Nullable Level level,
+                         @Nullable Marker marker,
+                         @Nullable Message msg,
+                         @Nullable Throwable t) {
         return decide(msg == null ? null : msg.getFormat());
     }
 
-    @Override
-    public Result filter(LogEvent event) {
-        return decide(event.getMessage() == null ? null : event.getMessage()
-                                                               .getFormat());
-    }
-
     Result decide(@Nullable String format) {
-        if (!MESSAGE.equals(format) || !recompiling.getAsBoolean() || fromRecompilation()) {
+        if (!MESSAGE.equals(format) || DECIDING.get()) {
             return Result.NEUTRAL;
         }
-        return Result.DENY;
+        DECIDING.set(true);
+        try {
+            return recompiling.getAsBoolean() && !fromRecompilation() ? Result.DENY : Result.NEUTRAL;
+        } finally {
+            DECIDING.set(false);
+        }
     }
 
     private static boolean fromRecompilation() {
