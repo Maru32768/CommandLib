@@ -56,8 +56,9 @@ import java.util.logging.Level;
  * }
  * }</pre>
  *
- * <p>Commands that data pack functions use must be registered from a Paper plugin bootstrapper with
- * {@link #bootstrap}, because functions are compiled before plugins are enabled.
+ * <p>Paper compiles data pack functions before it fires the commands event for plugins, at startup and on every data
+ * reload, so CommandLib compiles them again on the next tick for functions to use the commands. Commands registered from
+ * a Paper plugin bootstrapper with {@link #bootstrap} exist before the server compiles the functions.
  */
 @SuppressWarnings("UnstableApiUsage")
 public final class CommandLib implements Listener {
@@ -437,6 +438,9 @@ public final class CommandLib implements Listener {
                 dispatcher = null;
                 registeredCommandNames.clear();
                 updateCommandTrees(runtime);
+                if (runtime) {
+                    recompileFunctionsLater();
+                }
             }
 
             for (Permission permission : new ArrayList<>(registeredPermissions)) {
@@ -604,6 +608,7 @@ public final class CommandLib implements Listener {
             } else {
                 // ServerLoadEvent after startup or Bukkit /reload, ServerResourcesReloadedEvent after a data reload.
                 amendHelpTopics();
+                recompileFunctionsLater();
             }
         }, EventPriority.NORMAL, plugin, false);
         PluginDisableEvent.getHandlerList()
@@ -639,6 +644,7 @@ public final class CommandLib implements Listener {
         addNodes(dispatcher, registration);
         showHelpTopics();
         updateCommandTrees(true);
+        recompileFunctionsLater();
     }
 
     /**
@@ -763,6 +769,23 @@ public final class CommandLib implements Listener {
               });
     }
 
+    /**
+     * Compiles the data pack functions again on the next tick, once for the changes of a tick, after the server compiled
+     * them without the commands ({@link ServerFunctions}). Bukkit and global region tasks run before the server runs
+     * functions in a tick, so the #load functions of a data reload run once, with the commands.
+     */
+    private void recompileFunctionsLater() {
+        if (registrationState.functionRecompileScheduled || !plugin.isEnabled()) {
+            return;
+        }
+        registrationState.functionRecompileScheduled = true;
+        Bukkit.getGlobalRegionScheduler()
+              .execute(plugin, () -> {
+                  registrationState.functionRecompileScheduled = false;
+                  ServerFunctions.recompile(plugin.getLogger());
+              });
+    }
+
     private static void sendCommandTrees() {
         Bukkit.getOnlinePlayers()
               .forEach(Player::updateCommands);
@@ -807,6 +830,7 @@ public final class CommandLib implements Listener {
         private boolean lifecycleHandlerRegistered;
         // Main thread only: the changes of one tick share one update of the players' command trees.
         private boolean commandTreeUpdateScheduled;
+        private boolean functionRecompileScheduled;
         private @Nullable IllegalStateException registrationFailure;
         private @Nullable CommandDispatcher<CommandSourceStack> dispatcher;
         private final List<PendingRegistration> registrations = new ArrayList<>();

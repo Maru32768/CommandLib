@@ -79,6 +79,7 @@ public class TestMain {
             SuggestionTest suggestionTest = new SuggestionTest(mainCommand);
             ScenarioTest scenarioTest = new ScenarioTest(mainCommand, plugin, TEST_PLAYER_NAME);
             HelpTopicTest helpTopicTest = new HelpTopicTest(mainCommand, plugin);
+            DataPackFunctionTest dataPackFunctionTest = new DataPackFunctionTest(mainCommand);
             new HelpMessageTest(mainCommand); // registers helpMessageRoot for bot-side help message verification
             List<TestBase> tests = List.of(argumentTest,
                                            optionTest,
@@ -86,7 +87,8 @@ public class TestMain {
                                            runtimePermissionTest,
                                            suggestionTest,
                                            scenarioTest,
-                                           helpTopicTest);
+                                           helpTopicTest,
+                                           dataPackFunctionTest);
             List<String> commands = tests.stream()
                                          .flatMap(x -> x.build()
                                                         .stream())
@@ -178,7 +180,9 @@ public class TestMain {
                                                           tests.forEach(test -> test.hookCommandDispatchError(probe,
                                                                                                               dispatchResult));
                                                           List<String> afterReload = List.of(MainCommand.NAME + " "
-                                                                  + HelpTopicTest.AFTER_RELOAD);
+                                                                  + HelpTopicTest.AFTER_RELOAD,
+                                                                                             "function "
+                                                                                                     + DataPackFunctionTest.FUNCTION);
                                                           for (String afterReloadCommand : afterReload) {
                                                               dispatchProbe.dispatch(Bukkit.getConsoleSender(),
                                                                                      afterReloadCommand);
