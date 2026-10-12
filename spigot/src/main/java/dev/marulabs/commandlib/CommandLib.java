@@ -57,7 +57,7 @@ public final class CommandLib implements Listener {
         return new CommandLib(plugin,
                               commands,
                               plugin.getName()
-                                    .toLowerCase() + ".command");
+                                    .toLowerCase(Locale.ROOT) + ".command");
     }
 
     public static CommandLib register(@NotNull Plugin plugin,

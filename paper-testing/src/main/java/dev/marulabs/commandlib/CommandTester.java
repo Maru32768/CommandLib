@@ -40,6 +40,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -233,7 +234,7 @@ public final class CommandTester implements AutoCloseable {
     private MockedStatic<ArgumentTypes> mockArgumentTypes() {
         MockedStatic<ArgumentTypes> argumentTypes = Mockito.mockStatic(ArgumentTypes.class);
         argumentTypes.when(ArgumentTypes::gameMode)
-                     .thenReturn(word(token -> GameMode.valueOf(token.toUpperCase())));
+                     .thenReturn(word(token -> GameMode.valueOf(token.toUpperCase(Locale.ROOT))));
         argumentTypes.when(ArgumentTypes::namespacedKey)
                      .thenReturn(word(NamespacedKey::fromString));
         argumentTypes.when(ArgumentTypes::world)

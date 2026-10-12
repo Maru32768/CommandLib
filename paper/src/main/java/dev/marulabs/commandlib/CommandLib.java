@@ -99,7 +99,7 @@ public final class CommandLib implements Listener {
     public static CommandLib register(@NotNull Plugin plugin, @NotNull Collection<? extends Command> commands) {
         return register(plugin,
                         plugin.getName()
-                              .toLowerCase() + ".command",
+                              .toLowerCase(Locale.ROOT) + ".command",
                         commands);
     }
 
@@ -171,7 +171,7 @@ public final class CommandLib implements Listener {
         bootstrap(context,
                   context.getPluginMeta()
                          .getName()
-                         .toLowerCase() + ".command",
+                         .toLowerCase(Locale.ROOT) + ".command",
                   list);
     }
 
