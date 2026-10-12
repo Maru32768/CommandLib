@@ -209,9 +209,9 @@ the image task is skipped while Docker has that tag. Checkouts and worktrees wit
 one image, and different server bases never replace each other's image. Images of older server bases stay in Docker
 until removed, for example with `docker image rm` or `docker image prune -a`.
 
-For Bukkit-family targets the image build starts the server once (without the fixture) and stops it after `Done`. That
-run downloads and patches the Paper server jar, remaps it, downloads plugin libraries, and generates the world, so a test
-run no longer repeats that work or depends on those downloads. Docker caches the step until the staged server base
+The image build starts the server once (without the fixture) and stops it after `Done`. That run generates the world
+and, on Paper, downloads and patches the server jar, remaps it, and downloads plugin libraries, so a test run no longer
+repeats that work or depends on those downloads. Docker caches the step until the staged server base
 changes; rebuilding the image therefore takes about one extra server start.
 
 The nested `test-plugin` builds use the same Gradle user home as the outer build, so they reuse its Gradle
