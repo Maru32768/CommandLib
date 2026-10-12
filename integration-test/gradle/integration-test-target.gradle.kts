@@ -143,8 +143,37 @@ val integrationTestDir = rootProject.file("integration-test")
 val sharedDir = integrationTestDir.resolve("shared")
 val testPluginDir = project.file(workDirectory)
 val stagedDockerServerDir = layout.buildDirectory.dir("docker-server")
-val dockerImageMarker = layout.buildDirectory.file("docker-server-image/tag.txt")
-val dockerImageName = "commandlib-it-${targetName.lowercase()}:latest"
+// Image reference tagged with a hash of the staged server directory, written when the directory is staged. Checkouts
+// and worktrees with the same server base share the image, and one with a different base cannot replace it.
+val dockerImageTagFile = layout.buildDirectory.file("docker-server-image/tag.txt")
+val dockerImageRepository = "commandlib-it-${targetName.lowercase()}"
+
+fun dockerImageExists(image: String): Boolean =
+    providers.exec {
+        commandLine("docker", "image", "inspect", image)
+        isIgnoreExitValue = true
+    }.result.get().exitValue == 0
+
+fun hashDirectory(dir: File): String {
+    val digest = java.security.MessageDigest.getInstance("SHA-256")
+    val buffer = ByteArray(1 shl 16)
+    dir.walkTopDown()
+        .filter { it.isFile }
+        .map { it.relativeTo(dir).invariantSeparatorsPath to it }
+        .sortedBy { it.first }
+        .forEach { (path, file) ->
+            digest.update(path.toByteArray())
+            digest.update(0)
+            file.inputStream().use { input ->
+                while (true) {
+                    val read = input.read(buffer)
+                    if (read < 0) break
+                    digest.update(buffer, 0, read)
+                }
+            }
+        }
+    return digest.digest().joinToString("") { "%02x".format(it) }
+}
 val isWindows = System.getProperty("os.name").startsWith("Windows", ignoreCase = true)
 val javaToolchains = extensions.getByType<JavaToolchainService>()
 
@@ -405,37 +434,32 @@ val stageDockerServerDirectory = tasks.register<Sync>("stageDockerServerDirector
             COPY . /workspace/server
             """.trimIndent() + "\n" + warmUp
         )
+        dockerImageTagFile.get().asFile.apply {
+            parentFile.mkdirs()
+            writeText("$dockerImageRepository:${hashDirectory(stagedDir).take(16)}\n")
+        }
     }
+    outputs.file(dockerImageTagFile)
 }
 
 val buildMinecraftServerImage = tasks.register<Exec>("buildMinecraftServerImage") {
     group = "verification"
     description = "Builds the reusable Docker image for the $targetName integration server."
     dependsOn(stageDockerServerDirectory)
-    inputs.dir(stagedDockerServerDir)
-    outputs.file(dockerImageMarker)
-    // The marker outlives the image when it is removed, for example by `docker image prune -a`.
-    outputs.upToDateWhen {
-        providers.exec {
-            commandLine("docker", "image", "inspect", dockerImageName)
-            isIgnoreExitValue = true
-        }.result.get().exitValue == 0
+    // Also rebuilds an image that was removed, for example by `docker image prune -a`.
+    onlyIf("the image for the staged server is not in Docker yet") {
+        !dockerImageExists(dockerImageTagFile.get().asFile.readText().trim())
     }
 
-    commandLine(
-        "docker",
-        "build",
-        "--pull=false",
-        "-t",
-        dockerImageName,
-        stagedDockerServerDir.get().asFile.absolutePath,
-    )
-
-    doLast {
-        dockerImageMarker.get().asFile.apply {
-            parentFile.mkdirs()
-            writeText(dockerImageName + "\n")
-        }
+    doFirst {
+        commandLine(
+            "docker",
+            "build",
+            "--pull=false",
+            "-t",
+            dockerImageTagFile.get().asFile.readText().trim(),
+            stagedDockerServerDir.get().asFile.absolutePath,
+        )
     }
 }
 
@@ -581,7 +605,9 @@ tasks.register<Test>("minecraftIntegrationTest") {
     systemProperty("commandlib.rootDir", rootProject.projectDir.absolutePath)
     systemProperty("commandlib.integrationTestDir", integrationTestDir.absolutePath)
     systemProperty("commandlib.testPluginDir", testPluginDir.absolutePath)
-    systemProperty("commandlib.dockerImageName", dockerImageName)
+    doFirst {
+        systemProperty("commandlib.dockerImageName", dockerImageTagFile.get().asFile.readText().trim())
+    }
     systemProperty("commandlib.sharedDir", sharedDir.absolutePath)
     systemProperty("commandlib.runMinecraftIntegration", "true")
     systemProperty("commandlib.targetName", targetName)

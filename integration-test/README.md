@@ -204,8 +204,10 @@ Run all configured targets:
 Each target builds a reusable Docker image for its server base before running the Minecraft integration test. The image
 contains the server jar, generated libraries, helper artifacts, base configuration, and pre-generated overworld data. The
 current fixture artifact is copied into the container at test startup, so normal code changes do not require recopying the
-whole server directory. Gradle marks the image task up-to-date while the staged server base is unchanged and the image
-still exists in Docker.
+whole server directory. The image is tagged `commandlib-it-<target>:<hash>` with a hash of the staged server base, and
+the image task is skipped while Docker has that tag. Checkouts and worktrees with the same server base therefore share
+one image, and different server bases never replace each other's image. Images of older server bases stay in Docker
+until removed, for example with `docker image rm` or `docker image prune -a`.
 
 For Bukkit-family targets the image build starts the server once (without the fixture) and stops it after `Done`. That
 run downloads and patches the Paper server jar, remaps it, downloads plugin libraries, and generates the world, so a test
