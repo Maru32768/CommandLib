@@ -30,10 +30,14 @@ jars keep them.
 Version-specific code uses Stonecutter comments:
 
 ```java
-//? if >=1.19 {
-MutableComponent component = Component.literal(message);
-//?} else
-/*BaseComponent component = new TextComponent(message);*/
+final class Messages {
+    static void send(String message) {
+        //? if >=1.19 {
+        MutableComponent component = Component.literal(message);
+        //?} else
+        /*BaseComponent component = new TextComponent(message);*/
+    }
+}
 ```
 
 - `modded/src` is committed in the `vcsVersion` state (currently

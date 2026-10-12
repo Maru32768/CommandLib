@@ -65,13 +65,21 @@ actions:
 import dev.marulabs.commandlib.util.text.ClickAction;
 import dev.marulabs.commandlib.util.text.RichText;
 
-ctx.sendMessage(RichText.text("difficulty: ")
-                        .append(RichText.text("hard")
-                                        .color(0xFF5555)
-                                        .bold()
-                                        .hover(RichText.text("Click to change"))
-                                        .click(ClickAction.suggestCommand("/difficulty "))));
-ctx.sendFailure(RichText.translatable("commands.give.failed.toomanyitems", RichText.text("64")));
+class DifficultyCommand extends Command {
+    DifficultyCommand() {
+        super("difficulty");
+
+        execute(ctx -> {
+            ctx.sendMessage(RichText.text("difficulty: ")
+                                    .append(RichText.text("hard")
+                                                    .color(0xFF5555)
+                                                    .bold()
+                                                    .hover(RichText.text("Click to change"))
+                                                    .click(ClickAction.suggestCommand("/difficulty "))));
+            ctx.sendFailure(RichText.translatable("commands.give.failed.toomanyitems", RichText.text("64")));
+        });
+    }
+}
 ```
 
 `sendSuccess` / `sendWarn` / `sendFailure` only color a message that has no color of its own and never change the value

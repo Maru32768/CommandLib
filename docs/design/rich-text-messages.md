@@ -146,11 +146,13 @@ The name is not `Text` because that clashes with Fabric's (yarn mappings) `net.m
 ### Sending (`CommonCommandContext`)
 
 ```java
-public abstract void sendMessage(@NotNull RichText text);   // each platform converts and sends it
+public abstract class CommonCommandContext<S, C> {
+    public abstract void sendMessage(@NotNull RichText text);   // each platform converts and sends it
 
-public void sendSuccess(@NotNull RichText text);   // green unless the root has its own color
-public void sendWarn(@NotNull RichText text);      // yellow unless the root has its own color
-public void sendFailure(@NotNull RichText text);   // red unless the root has its own color
+    public void sendSuccess(@NotNull RichText text);   // green unless the root has its own color
+    public void sendWarn(@NotNull RichText text);      // yellow unless the root has its own color
+    public void sendFailure(@NotNull RichText text);   // red unless the root has its own color
+}
 ```
 
 - The default color is applied to a copy only when the root has no color; the passed value is never changed.
@@ -171,10 +173,14 @@ it has none:
 Example (ConfigLib's list):
 
 ```java
-ctx.sendMessage(RichText.text(entry.entryName() + ": " + value)
-                        .color(ChatColorUtil.GREEN.getRGB())
-                        .hover(RichText.text(description))
-                        .click(ClickAction.suggestCommand("/config " + entry.entryName() + " set ")));
+final class ConfigListCommand {
+    static void sendEntry(CommonCommandContext<?, ?> ctx, ConfigSchemaEntry<?> entry, String value, String description) {
+        ctx.sendMessage(RichText.text(entry.entryName() + ": " + value)
+                                .color(ChatColorUtil.GREEN.getRGB())
+                                .hover(RichText.text(description))
+                                .click(ClickAction.suggestCommand("/config " + entry.entryName() + " set ")));
+    }
+}
 ```
 
 ### Platform conversion
@@ -236,10 +242,14 @@ errors are unchanged; rich help belongs to the formatter API (Pillar 6).
 ### Migration (ConfigLib and other users)
 
 ```java
-// Before
-ctx.sendMessageWithOption(text, o -> o.rgb(ChatColorUtil.GREEN.getRGB()).hoverText(description));
-// After (an empty description shows no tooltip)
-ctx.sendMessage(RichText.text(text).color(ChatColorUtil.GREEN.getRGB()).hover(RichText.text(description)));
+final class Migration {
+    void send(CommonCommandContext<?, ?> ctx, String text, String description) {
+        // Before (removed API)
+        // ctx.sendMessageWithOption(text, o -> o.rgb(ChatColorUtil.GREEN.getRGB()).hoverText(description));
+        // After (an empty description shows no tooltip)
+        ctx.sendMessage(RichText.text(text).color(ChatColorUtil.GREEN.getRGB()).hover(RichText.text(description)));
+    }
+}
 ```
 
 `sendMessageWithOption` defaulted to white (`0xFFFFFF`) without `rgb(...)`; `RichText` without `color(...)` inherits the

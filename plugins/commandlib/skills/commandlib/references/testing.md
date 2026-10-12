@@ -35,13 +35,19 @@ class MyCommandTest {
 attributes at once:
 
 ```java
-FakeSender sender = FakeSender.playerBuilder("Alice")
-                              .uniqueId(uuid)
-                              .locale("ja_jp")
-                              .op(false)
-                              .permissions("myplugin.command.mycmd")
-                              .denyPermissions("myplugin.command.mycmd.admin")
-                              .build();
+class MyCommandTest {
+    @Test
+    void permissionTest() {
+        FakeSender sender = FakeSender.playerBuilder("Alice")
+                                      .uniqueId(UUID.randomUUID())
+                                      .locale("ja_jp")
+                                      .op(false)
+                                      .permissions("myplugin.command.mycmd")
+                                      .denyPermissions("myplugin.command.mycmd.admin")
+                                      .build();
+        // ...
+    }
+}
 ```
 
 ## NMS-backed Arguments

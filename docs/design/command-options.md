@@ -38,17 +38,21 @@ Options are created through the `Options` factory and registered on a command
 with `CommonCommand#option(...)`:
 
 ```java
-new Command("scan") {{
-    CommandOption<Boolean, CommandContext> force =
-        option(Options.flag("force", 'f').description("Force execution"));
-    CommandOption<Integer, CommandContext> limit =
-        option(Options.integer("limit", 'n', 10, 1, 100).description("Max count"));
+public final class ScanCommand extends Command {
+    public ScanCommand() {
+        super("scan");
 
-    argument(new StringArgument("target")).execute((target, ctx) -> {
-        boolean f = ctx.getOption(force);   // true if -f or --force was given
-        int n     = ctx.getOption(limit);   // supplied value or default 10
-    });
-}};
+        CommandOption<Boolean, CommandContext> force =
+            option(Options.flag("force", 'f').description("Force execution"));
+        CommandOption<Integer, CommandContext> limit =
+            option(Options.integer("limit", 'n', 10, 1, 100).description("Max count"));
+
+        argument(new StringArgument("target")).execute((target, ctx) -> {
+            boolean f = ctx.getOption(force);   // true if -f or --force was given
+            int n     = ctx.getOption(limit);   // supplied value or default 10
+        });
+    }
+}
 ```
 
 `option(...)` returns the typed `CommandOption<T, C>` so the variable can be
@@ -99,8 +103,12 @@ always stand alone because they must be followed by their value token:
 ### Reading Options from Context
 
 ```java
-T   value   = ctx.getOption(option);    // value or default if absent
-boolean has = ctx.hasOption(option);    // true only if explicitly supplied
+final class Example {
+    <T> void read(CommandContext ctx, CommandOption<T, CommandContext> option) {
+        T   value   = ctx.getOption(option);    // value or default if absent
+        boolean has = ctx.hasOption(option);    // true only if explicitly supplied
+    }
+}
 ```
 
 `hasOption` returns `false` when the option was omitted, even if the omitted
@@ -112,8 +120,15 @@ the distinction matters (e.g. "did the caller ask for verbose output?").
 An option can declare that it requires another option to be present:
 
 ```java
-CommandOption<String, C> reason =
-    option(Options.string("reason", 'r', "").requires(force));
+public final class ExportCommand extends Command {
+    public ExportCommand() {
+        super("export");
+
+        CommandOption<Boolean, CommandContext> force = option(Options.flag("force", 'f'));
+        CommandOption<String, CommandContext> reason =
+            option(Options.string("reason", 'r', "").requires(force));
+    }
+}
 ```
 
 If `--reason` is supplied without `--force`, the command sends a failure message
@@ -126,8 +141,15 @@ and stops:
 An option can also require another option to hold a specific value:
 
 ```java
-CommandOption<Integer, C> limit =
-    option(Options.integer("limit", 'n', 10).requires(mode, "parallel"));
+public final class ExportCommand extends Command {
+    public ExportCommand() {
+        super("export");
+
+        CommandOption<String, CommandContext> mode = option(Options.string("mode", 'm', "normal"));
+        CommandOption<Integer, CommandContext> limit =
+            option(Options.integer("limit", 'n', 10).requires(mode, "parallel"));
+    }
+}
 ```
 
 Failure message:
@@ -140,7 +162,15 @@ A custom predicate overload is also available for conditions that cannot be
 expressed as a single equality check:
 
 ```java
-option.requires(otherOption, value -> value > 0, "positive");
+public final class ExportCommand extends Command {
+    public ExportCommand() {
+        super("export");
+
+        CommandOption<Integer, CommandContext> threads = option(Options.integer("threads", 't', 0));
+        CommandOption<Boolean, CommandContext> parallel =
+            option(Options.flag("parallel", 'p').requires(threads, value -> value > 0, "positive"));
+    }
+}
 ```
 
 Constraints are only checked when the option itself was supplied. An option
@@ -150,8 +180,14 @@ also absent.
 ### Option Descriptions
 
 ```java
-Options.flag("force", 'f').description("Force execution")
-Options.integer("limit", 'n', 10).description("Maximum count")
+public final class ScanCommand extends Command {
+    public ScanCommand() {
+        super("scan");
+
+        option(Options.flag("force", 'f').description("Force execution"));
+        option(Options.integer("limit", 'n', 10).description("Maximum count"));
+    }
+}
 ```
 
 Descriptions appear in the help output under the `Options:` section.
@@ -189,8 +225,10 @@ throw `IllegalArgumentException`.
 ### `CommonCommandContext` — option storage
 
 ```java
-Map<CommandOption<?, ?>, Object> optionValues   // explicit values
-Set<CommandOption<?, ?>>         presentOptions  // options that were supplied
+public abstract class CommonCommandContext<S, C> {
+    private final Map<CommandOption<?, ?>, Object> optionValues = new LinkedHashMap<>(); // explicit values
+    private final Set<CommandOption<?, ?>> presentOptions = new LinkedHashSet<>();       // options that were supplied
+}
 ```
 
 `setOptionValue(option, value)` writes to both structures. `getOption` reads
@@ -258,8 +296,19 @@ do not exist.
 This constraint is surfaced in tests:
 
 ```java
-// Throws — option after argument is not a valid path
-assertThatThrownBy(() -> runner.execute("scan Alex -f"));
+class CommandOptionTest {
+    @Test
+    void option_after_argument_is_rejected() {
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("scan") {{
+            option(Options.flag("force", 'f'));
+            argument(new CommonStringArgument<>("target", CommonStringArgument.Type.WORD)).execute((target, ctx) -> {
+            });
+        }});
+
+        // Throws — option after argument is not a valid path
+        assertThatThrownBy(() -> runner.execute("scan Alex -f")).isInstanceOf(CommandSyntaxException.class);
+    }
+}
 ```
 
 ## Execution Flow

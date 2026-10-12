@@ -95,7 +95,9 @@ Do not write the factory as if it receives runtime values:
 ```java
 class MyCommand extends Command {
     MyCommand() {
-        // Wrong: keyValue is an Argument object, not the parsed String value.
+        super("config");
+
+        // Wrong: keyValue is an ArgRef<String>, not the parsed String value. Use keyValue.get().
         argument(new StringArgument("key")).child(keyValue -> new Command("get") {{
             execute(ctx -> ctx.sendMessage(keyValue.toString()));
         }});

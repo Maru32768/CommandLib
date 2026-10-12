@@ -592,13 +592,21 @@ actions:
 import dev.marulabs.commandlib.util.text.ClickAction;
 import dev.marulabs.commandlib.util.text.RichText;
 
-ctx.sendMessage(RichText.text("difficulty: ")
-                        .append(RichText.text("hard")
-                                        .color(0xFF5555)
-                                        .bold()
-                                        .hover(RichText.text("Click to change"))
-                                        .click(ClickAction.suggestCommand("/difficulty "))));
-ctx.sendFailure(RichText.translatable("commands.give.failed.toomanyitems", RichText.text("64")));
+public final class DifficultyCommand extends Command {
+    public DifficultyCommand() {
+        super("difficulty");
+
+        execute(ctx -> {
+            ctx.sendMessage(RichText.text("difficulty: ")
+                                    .append(RichText.text("hard")
+                                                    .color(0xFF5555)
+                                                    .bold()
+                                                    .hover(RichText.text("Click to change"))
+                                                    .click(ClickAction.suggestCommand("/difficulty "))));
+            ctx.sendFailure(RichText.translatable("commands.give.failed.toomanyitems", RichText.text("64")));
+        });
+    }
+}
 ```
 
 `sendSuccess` / `sendWarn` / `sendFailure` only color a message that has no color of its own and never change the value
@@ -691,7 +699,7 @@ public final class TestCommand extends Command {
         super("test");
 
         permission(PermissionDefault.FALSE);      // Bukkit
-        permission(DefaultPermissionLevel.NONE);  // Forge
+        permission(DefaultPermissionLevel.NONE);  // Forge 1.16.5
     }
 }
 ```

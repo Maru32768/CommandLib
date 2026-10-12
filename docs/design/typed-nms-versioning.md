@@ -155,8 +155,11 @@ compile classpath. Prefer either:
 The provider should expose:
 
 ```java
-boolean supports(String minecraftVersion, String craftBukkitPackageVersion);
-SpigotNmsBridge create();
+public interface SpigotNmsBridgeProvider {
+    boolean supports(String minecraftVersion, String craftBukkitPackageVersion);
+
+    SpigotNmsBridge create();
+}
 ```
 
 If no typed provider supports the current server, fall back to the existing
@@ -177,9 +180,9 @@ This artifact is normally produced by BuildTools and installed into the local
 Maven repository. The implementation can directly import classes such as:
 
 ```java
-net.minecraft.server.v1_16_R3.CommandDispatcher
-net.minecraft.server.v1_16_R3.MinecraftServer
-org.bukkit.craftbukkit.v1_16_R3.CraftServer
+import net.minecraft.server.v1_16_R3.CommandDispatcher;
+import net.minecraft.server.v1_16_R3.MinecraftServer;
+import org.bukkit.craftbukkit.v1_16_R3.CraftServer;
 ```
 
 This phase does not need remapping. It can use the Spigot-mapped names that

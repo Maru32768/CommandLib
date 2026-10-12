@@ -33,10 +33,15 @@ Scope: argument parsing, validation, and suggestions, and the results of command
 `CommandTester` fully stubs NMS.
 
 ```java
-try (CommandTester tester = new CommandTester(command, "myplugin.cmd")) {
-    FakeSender sender = FakeSender.player("Alice");
-    tester.execute("heal Alice 10", sender);
-    assertThat(sender.getSentMessages()).contains("Healed Alice for 10");
+class HealCommandTest {
+    @Test
+    void heal_sends_message() {
+        try (CommandTester tester = new CommandTester(HealCommand::new, "myplugin.cmd")) {
+            FakeSender sender = FakeSender.player("Alice");
+            tester.execute("heal Alice 10", sender);
+            assertThat(sender.getSentMessageTexts()).contains("Healed Alice for 10");
+        }
+    }
 }
 ```
 
@@ -73,11 +78,18 @@ NMSArgumentPlayer (spigot/nms/argument)
 In addition to the default NMS mock registrations, `CommandTester` lets tests inject their own mocks through the builder.
 
 ```java
-CommandTester tester = CommandTester.builder()
-    .mockNmsClass(NMSArgumentXxx.class, MockNMSArgumentXxx.class)
-    .command(() -> new XxxCommand())
-    .permissionPrefix("prefix")
-    .build();
+class XxxCommandTest {
+    @Test
+    void xxx_test() {
+        try (CommandTester tester = CommandTester.builder()
+                                                 .mockNmsClass(NMSArgumentXxx.class, MockNMSArgumentXxx.class)
+                                                 .command(() -> new XxxCommand())
+                                                 .permissionPrefix("prefix")
+                                                 .build()) {
+            // ...
+        }
+    }
+}
 ```
 
 Keep the existing `Mockito.mockStatic` approach.
@@ -139,24 +151,24 @@ Do not add an integration test if Layer 2 (spigot-testing) can verify the behavi
 
 ---
 
-## NMSClassRegistry and NMSClassResolver Design
+## NMSClassRegistry Design
 
-### NMSClassRegistry
-
-A registry that statically maps version ranges to classes.
+`NMSClassRegistry` finds the implementation of each NMS wrapper in the typed NMS modules bundled into the spigot jar
+(see `docs/agents/nms-build.md`). The generated `TypedNmsModules` lists each module's package and the Minecraft
+versions its server jar matches, and each module's generated `TypedNmsClasses` lists its classes. A class implements
+the wrapper it extends.
 
 ```java
-NMSClassRegistry.register(NMSArgumentPlayer.class, NMSArgumentPlayerImpl_v1_20.class, "1.20", "1.20.4");
-NMSClassRegistry.register(NMSArgumentPlayer.class, NMSArgumentPlayerImpl_v1_20_5.class, "1.20.5", "");
+final class TypedNmsModules {
+    static final List<NMSClassRegistry.TypedModule> MODULES = List.of(
+            new NMSClassRegistry.TypedModule("spigot_1_16_5", "1.16.4", "1.16.5"),
+            // ...
+            new NMSClassRegistry.TypedModule("spigot_1_20_6", "1.20.5", "1.20.6"));
+}
 ```
 
-At runtime, `BukkitUtil.getMinecraftVersion()` resolves the implementation class whose range matches.
-In tests, it is replaced with `Mockito.mockStatic`.
-
-### NMSClassResolver
-
-Supports both the `net.minecraft.server.{version}` format and the unversioned packages of 1.20.5+.
-Uses `Bukkit.getServer().getClass().getClassLoader()` to get the runtime class loader.
+At runtime, `NMSClassRegistry.findClass()` uses `BukkitUtil.getMinecraftVersion()` to pick the implementation from the
+modules whose range matches. In tests, it is replaced with `Mockito.mockStatic`.
 
 ---
 

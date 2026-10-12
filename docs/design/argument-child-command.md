@@ -30,18 +30,28 @@ API is expected to behave, and which internal boundaries are intentional.
 - Keep the user-facing API chainable:
 
   ```java
-  argument(n, p)
-      .description("...")
-      .execute((nValue, pValue, ctx) -> {
-      })
-      .child((n, p) -> new Command("sub") {{
-      }});
+  public final class ACommand extends Command {
+      public ACommand() {
+          super("a");
+
+          argument(new IntegerArgument("n"), new PlayerArgument("p"))
+              .description("...")
+              .execute((nValue, pValue, ctx) -> {
+              })
+              .child((n, p) -> new Command("sub") {{
+              }});
+      }
+  }
   ```
 
 - Let child commands read parent arguments in a typed way:
 
   ```java
-  Integer parsedN = n.get();
+  final class Example {
+      void read(ArgRef<Integer> n) {
+          Integer parsedN = n.get();
+      }
+  }
   ```
 
 - Keep internal tree storage types out of the public API where possible.
@@ -79,15 +89,21 @@ These classes exist so the branch can expose typed `execute(...)` and typed
 child factories:
 
 ```java
-argument(new IntegerArgument("n"), new PlayerArgument("p"))
-    .execute((parsedN, parsedP, ctx) -> {
-    })
-    .child((n, p) -> new Command("sub") {{
-        execute(ctx -> {
-            Integer parsedN = n.get();
-            Player parsedP = p.get();
-        });
-    }});
+public final class ACommand extends Command {
+    public ACommand() {
+        super("a");
+
+        argument(new IntegerArgument("n"), new PlayerArgument("p"))
+            .execute((parsedN, parsedP, ctx) -> {
+            })
+            .child((n, p) -> new Command("sub") {{
+                execute(ctx -> {
+                    Integer parsedN = n.get();
+                    Player parsedP = p.get();
+                });
+            }});
+    }
+}
 ```
 
 The child factory receives an `ArgRef<T>` per parent argument, not parsed
@@ -141,13 +157,30 @@ not a user-facing API.
 It delegates the actual mutation to an `ArgumentBranchDelegate`:
 
 ```java
-description(...)
+public class ArgumentBranch<C extends CommonCommandContext<?, ?>, T extends CommonCommand<C, T>> {
+    protected final ArgumentBranchDelegate<C, T> delegate;
 
-execute(...)
+    public ArgumentBranch<C, T> description(@NotNull String description) {
+        delegate.description(Objects.requireNonNull(description));
+        return this;
+    }
 
-child(...)
+    public ArgumentBranch<C, T> execute(@Nullable CommandExecutor<C> action) {
+        delegate.execute(action);
+        return this;
+    }
 
-children(...)
+    @SafeVarargs
+    public final ArgumentBranch<C, T> child(@NotNull T child, @NotNull T... children) {
+        List<T> list = new ArrayList<>();
+        list.add(child);
+        Collections.addAll(list, children);
+        delegate.addChildren(list);
+        return this;
+    }
+
+    // The permission(...) overloads delegate the same way.
+}
 ```
 
 The branch does not directly store `Arguments`. This keeps `Arguments` from
@@ -161,11 +194,15 @@ to the internal `CommonCommand`/`Arguments` model.
 It has only the operations needed by `ArgumentBranch`:
 
 ```java
-void description(String description);
+public interface ArgumentBranchDelegate<C extends CommonCommandContext<?, ?>, T extends CommonCommand<C, T>> {
+    void description(@NotNull String description);
 
-void execute(CommandHandler<C> action);
+    void execute(@Nullable CommandExecutor<C> action);
 
-void addChildren(Collection<? extends T> children);
+    void addChildren(@NotNull Collection<? extends T> children);
+
+    // Plus description(Function) and the permission(...) overloads that back the same ArgumentBranch methods.
+}
 ```
 
 `CommonCommand` creates the delegate for a specific `Arguments` instance. This
@@ -179,8 +216,14 @@ keeps the package split clean:
 For a typed branch:
 
 ```java
-argument(n, p).child((nRef, pRef) -> new Command("sub") {{
-}});
+public final class ACommand extends Command {
+    public ACommand(IntegerArgument n, PlayerArgument p) {
+        super("a");
+
+        argument(n, p).child((nRef, pRef) -> new Command("sub") {{
+        }});
+    }
+}
 ```
 
 the flow is:
@@ -214,11 +257,17 @@ from the `sub` command alone.
 The same argument branch can receive multiple children:
 
 ```java
-argument(n, p)
-    .child((nRef, pRef) -> new Command("sub") {{
-    }})
-    .child((nRef, pRef) -> new Command("sub2") {{
-    }});
+public final class ACommand extends Command {
+    public ACommand(IntegerArgument n, PlayerArgument p) {
+        super("a");
+
+        argument(n, p)
+            .child((nRef, pRef) -> new Command("sub") {{
+            }})
+            .child((nRef, pRef) -> new Command("sub2") {{
+            }});
+    }
+}
 ```
 
 Internally this appends both commands to the same `Arguments#children` list:
@@ -258,7 +307,17 @@ The key detail is that child commands inherit the argument chain that was parsed
 before the literal child:
 
 ```java
-List<Arguments<C>> executorArguments = appendArgument(inheritedArguments, arguments);
+final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U extends CommonCommand<C, U>> {
+    private List<LiteralCommandNode<S>> toCommandNodes(U command, List<Arguments<C>> inheritedArguments) {
+        List<Arguments<C>> argumentsList = command.argumentsList();
+        // ...
+        argumentsList.forEach(arguments -> {
+            List<Arguments<C>> executorArguments = appendArgument(inheritedArguments, arguments);
+            // Child command nodes and the argument node are built with executorArguments.
+        });
+        // ...
+    }
+}
 ```
 
 That inherited list is passed to child command creation so child executors parse
@@ -291,7 +350,11 @@ Because of that, parent arguments can be read through the normal argument
 implementation:
 
 ```java
-Integer parsedN = n.get();
+final class Example {
+    void read(ArgRef<Integer> n) {
+        Integer parsedN = n.get();
+    }
+}
 ```
 
 No raw-input fallback is required for the current implementation. If a future
@@ -304,9 +367,15 @@ Child factories receive `ArgRef<T>` rather than the parent `CommonArgument` or
 its value:
 
 ```java
-argument(new StringArgument("key")).child(key -> new Command("get") {{
-    execute(ctx -> ctx.sendMessage("get:" + key.get()));
-}});
+public final class ConfigCommand extends Command {
+    public ConfigCommand() {
+        super("config");
+
+        argument(new StringArgument("key")).child(key -> new Command("get") {{
+            execute(ctx -> ctx.sendMessage("get:" + key.get()));
+        }});
+    }
+}
 ```
 
 `ArgRef` is a thin handle around the parent `CommonArgument`:
