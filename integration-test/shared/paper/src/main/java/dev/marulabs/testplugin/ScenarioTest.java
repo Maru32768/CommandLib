@@ -87,8 +87,9 @@ public final class ScenarioTest extends TestBase {
     }
 
     /**
-     * Registers, runs and unregisters a command in separate top-level dispatches. Minecraft 1.20.3+ queues commands
-     * dispatched from inside another command until that command finishes, so the steps cannot be nested.
+     * Registers, runs (also under its namespaced label) and unregisters a command in separate top-level dispatches.
+     * Minecraft 1.20.3+ queues commands dispatched from inside another command until that command finishes, so the
+     * steps cannot be nested.
      */
     public List<String> runtimeRegisteredCommandIsExecutableUntilUnregistered() {
         String name = getMethodName();
@@ -113,11 +114,11 @@ public final class ScenarioTest extends TestBase {
             }})));
         }}, new Command(name + "Unregister") {{
             execute(ctx -> {
-                if (executions.get() != 1) {
+                if (executions.get() != 2) {
                     putResult(new TestResult(key,
                                              TestStatus.FAILED,
-                                             "Registered command was not executed: executions="
-                                                     + executions.get()));
+                                             "Registered command was not executed under both labels: executions="
+                                                     + executions.get() + ": " + executedInputs));
                 }
                 CommandLib current = registration.getAndSet(null);
                 if (current != null) {
@@ -126,14 +127,14 @@ public final class ScenarioTest extends TestBase {
             });
         }}, new Command(name) {{
             execute(ctx -> {
-                if (executions.get() == 1) {
+                if (executions.get() == 2) {
                     putResult(new TestResult(key,
                                              TestStatus.SUCCEEDED,
                                              "Runtime registration was executable until unregistered."));
                 } else {
                     putResult(new TestResult(key,
                                              TestStatus.FAILED,
-                                             "Expected exactly one execution before unregistering but was "
+                                             "Expected exactly two executions before unregistering but was "
                                                      + executions.get() + ": " + executedInputs));
                 }
             });
@@ -141,6 +142,7 @@ public final class ScenarioTest extends TestBase {
 
         return List.of(buildCommand(command, name + "Register"),
                        commandName,
+                       namespacedName,
                        buildCommand(command, name + "Unregister"),
                        commandName,
                        namespacedName,

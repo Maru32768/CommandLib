@@ -50,9 +50,36 @@ dev bundles. Line numbers refer to the commit that adds this document.
   `syncCommands()`.
 - `/minecraft:reload` keeps the commands because the wrappers are in
   `knownCommands`.
-- Paper 1.20.6+ (`usesPaperCommandDispatcher()`, line 135): nodes are added to
-  Paper's dispatcher wrapped in `ShadowBrigNode` (line 165) and added again on
-  `ServerResourcesReloadedEvent` (line 103).
+- Every label also gets `<plugin>:<label>` in the command map, pointing at the
+  same wrapper (`addNamespacedCommand`).
+- `/help`: the wrapper takes the command permission, the server help text
+  (`Command#serverHelp`, else a string description, else "A command by the
+  &lt;plugin&gt; plugin."), a usage built from the node and the other labels as
+  aliases (`describe`). Each label gets a `GenericCommandHelpTopic`, with the
+  `serverHelp` page when one is set, which replaces a topic of the same name
+  (`putHelpTopic`). CraftBukkit picks a command's index by its class and lists
+  every `VanillaCommandWrapper` under "Minecraft", so once the help map has its
+  indexes (at registration after startup, else on `ServerLoadEvent`) each topic
+  is moved into the plugin's index, made with CraftBukkit's texts when missing
+  (`fileUnderPluginIndex`). `IndexHelpTopic` has no accessor for its topics, so
+  its protected `allTopics` set is read by reflection.
+- Paper 1.20.6+ (`usesPaperCommandDispatcher()`): each node is added to Paper's
+  dispatcher under its label and `<plugin>:<label>`, with a `PluginCommandNode`
+  (no children, the server help text as description) cached as its API node
+  through Paper's `wrappedCached` / `unwrappedCached` fields, as Paper's
+  registrar leaves it (`addToPaperDispatcher`). Paper's command map then shows a
+  `PluginVanillaCommandWrapper`, which names the plugin, so Paper's help map
+  lists it under the plugin, and has no permission of its own. Before, the node
+  was wrapped in a `ShadowBrigNode` and shown as a `VanillaCommandWrapper`: "A
+  Mojang provided command.", the "Minecraft" index, and a
+  `minecraft.command.<label>` permission that `SimpleCommandMap#dispatch` (and so
+  `Bukkit.dispatchCommand` and `Player#performCommand`) checked. The nodes are
+  added again on `ServerResourcesReloadedEvent`, since `/minecraft:reload`
+  moves only `BukkitCommandNode`s into the new dispatcher. Paper builds help
+  topics only when the server loads and on `/minecraft:reload`, before that
+  event, so CommandLib puts a topic for each label from Paper's wrapper with the
+  command permission set on it at registration and after the reload
+  (`showPaperHelpTopics`).
 - Permissions are checked by the Brigadier `requires` predicate, which asks
   the Bukkit sender for `<prefix>.<command>`. The wrapper carries the same
   permission, so Bukkit's `testPermission` and `/help` agree with it.
@@ -63,20 +90,35 @@ dev bundles. Line numbers refer to the commit that adds this document.
   building.
 - Aliases are separate literals that share the target's children
   (`CommandNodeCreator.java:299`), not redirects.
+- Data pack functions: a task started at the first registration checks every
+  tick whether the data pack resources were replaced (startup, `/minecraft:reload`,
+  `/datapack`, `Bukkit#reloadData`) or the commands changed (a registration or a
+  runtime unregister), and then points the function library at the dispatcher
+  holding the commands (V, or Paper's live dispatcher on 1.20.6+) and compiles
+  the functions again (`compileFunctionsWithCommands`,
+  `NMSDedicatedServer#recompileFunctions`). Bukkit tasks run before the server
+  ticks functions, so the `#load` functions run once, with the commands.
 
 ### paper module (Paper 1.21+)
 
 `paper/.../CommandLib.java`:
 
 - During plugin initialization it registers a `COMMANDS` handler (line 275)
-  and registers each node with `Commands.register(node, "")` (line 357), which
-  also adds `<plugin>:<name>` and leaves labels owned by other plugins alone.
+  and registers each node with `Commands.register(node, description)`, the
+  description being the server help text, which also adds `<plugin>:<name>`
+  and leaves labels owned by other plugins alone.
 - The handler runs again with the new dispatcher after `/minecraft:reload`.
-- After initialization it adds the nodes to the cached dispatcher directly
-  (line 137) and re-adds them from another plugin's handler after a reload
-  (line 310). Without any cached dispatcher it throws (line 155).
+- After initialization it adds the nodes to the cached dispatcher directly,
+  under their labels and `<plugin>:<label>` (`addNodes`), so they work at once,
+  and re-adds them from another plugin's handler after a reload (line 310).
+  Without any cached dispatcher it throws (line 155). Paper shows such plain
+  nodes as Mojang commands, so a data reload follows on the next tick
+  (`reloadDataLater`), as in CommandAPI: the `COMMANDS` handlers register the
+  commands again through the registrar into a fresh dispatcher, the help map is
+  rebuilt and players get the tree. The changes of one tick share the reload,
+  and it is skipped when a reload has happened in between.
 - Unregister removes the recorded labels with Paper's
-  `RootCommandNode.removeCommand`.
+  `RootCommandNode.removeCommand`; at runtime the same data reload follows.
 - A plugin enabled after startup (e.g. by PlugMan) installs its handler but has
   missed the event; on the next tick it calls `Bukkit.reloadData()` if the
   handler has not run (`reloadIfCommandsEventMissed`).
@@ -96,10 +138,20 @@ dev bundles. Line numbers refer to the commit that adds this document.
   plugin instead of "Minecraft". The wrapper has no permission, so `/help`
   listed the commands for everyone; CommandLib now calls `amendCanSee` with the
   command permission on each label's topic after `ServerLoadEvent` and
-  `ServerResourcesReloadedEvent`, when the help map has been rebuilt
-  (`restrictHelpTopics`). The description stays empty because CommandLib's
-  description depends on the command context. Bootstrap commands keep the
-  unrestricted topic, since there is no plugin to listen with.
+  `ServerResourcesReloadedEvent`, when the help map has been rebuilt, and
+  applies the `serverHelp` page (`amendHelpTopics`). At startup and on Bukkit
+  `/reload` Paper builds the help map once before the `COMMANDS` event and once
+  after it, keeping the plugin indexes of the first pass, so a plugin index made
+  for the plugin's `plugin.yml` commands lacked CommandLib's; `amendHelpTopics`
+  adds them. The description, empty before, is the server help text. Bootstrap
+  commands keep the unrestricted topic, since there is no plugin to listen with.
+
+### Forge / NeoForge
+
+Commands are added to the dispatcher's root under their names only. Vanilla
+commands are not namespaced in the dispatcher, and neither Forge nor NeoForge
+adds a `<modid>:` label for mod commands, so CommandLib adds none. There is no
+`/help` topic system, so `serverHelp` is ignored, and no unregister API.
 
 ## CommandAPI
 
@@ -127,16 +179,20 @@ dev bundles. Line numbers refer to the commit that adds this document.
 | Spigot dispatcher choice | was R (V during startup) plus V through the `execute run` redirect | always V, R at runtime | The redirect lookup was indirect and missed V without an `execute` node. | Fixed: always V through the typed accessor, plus R when it is not V |
 | Startup `minecraft:<name>` label | Created by CraftBukkit; unregister left it in the command map and client tree, pointing at a removed command | removed or kept deliberately | Bug | Fixed: unregister removes the label when it wraps the node (`removeMinecraftNamespacedCommand`, line 335) |
 | Paper module direct add | `addChild` merged into a same-named command, keeping its requirement and children | goes through the registrar | Bug | Fixed: `replaceChild` (line 387) removes the command first |
-| `plugin:<name>` label (spigot module) | not added | added (`fixNamespaces`, runtime path) | Missing feature | Fixed on Spigot and Paper before 1.20.6: every label, aliases included, also gets `<plugin>:<label>`, the same wrapper under a second command-map key like Bukkit's fallback labels; a runtime registration also adds a copy of the node under that name to R, as `syncCommands` does at startup (`addNamespacedCommand`). Unregister removes both. `execute run <plugin>:<label>` does not work, as for Bukkit's own namespaced labels, because the label is not a node of V. Open for the Paper 1.20.6+ path of the spigot module. |
+| `plugin:<name>` label (spigot module) | not added | added (`fixNamespaces`, runtime path) | Missing feature | Fixed on Spigot and Paper before 1.20.6: every label, aliases included, also gets `<plugin>:<label>`, the same wrapper under a second command-map key like Bukkit's fallback labels; a runtime registration also adds a copy of the node under that name to R, as `syncCommands` does at startup (`addNamespacedCommand`). Unregister removes both. `execute run <plugin>:<label>` does not work, as for Bukkit's own namespaced labels, because the label is not a node of V. Fixed on Paper 1.20.6+: a copy of the node under `<plugin>:<label>` is added to Paper's dispatcher, as Paper's registrar does, and unregister removes it; there `execute run <plugin>:<label>` works. Checked by the integration fixture (`ScenarioTest`, `HelpTopicTest`) |
+| `plugin:<name>` label (paper module) | registrar labels; the runtime direct add had none | registrar | Missing edge case | Fixed: the direct add also adds `<plugin>:<label>`, and the data reload that follows registers it through the registrar |
+| Mod id label (Forge / NeoForge) | none | - | Platform convention: vanilla and Forge / NeoForge mod commands are not namespaced | Intentional, nothing added |
 | Overriding an existing command | removes the existing label and vanilla node | `putIfAbsent` at runtime | Intentional difference | Documented |
-| Wrapper permission / `/help` | wrapper permission was null and its description "A Mojang provided command." | sets the permission and writes help topics | Missing edge case | Fixed on Spigot and Paper before 1.20.6: the wrapper takes the command permission, the string description (or "A command by the &lt;plugin&gt; plugin."), a usage built from the node's children and the other labels as aliases, and each label gets a `GenericCommandHelpTopic` that replaces an existing topic of that name; unregister removes the topics (`describe`, `putHelpTopic`). CraftBukkit still files the wrapper under the "Minecraft" plugin index, because that index is chosen by the wrapper class. |
+| Wrapper permission / `/help` | wrapper permission was null and its description "A Mojang provided command." | sets the permission and writes help topics | Missing edge case | Fixed on Spigot and Paper before 1.20.6: the wrapper takes the command permission, the server help text, a usage built from the node's children and the other labels as aliases, and each label gets a `GenericCommandHelpTopic` that replaces an existing topic of that name; unregister removes the topics (`describe`, `putHelpTopic`). Fixed on Paper 1.20.6+ (`PluginCommandNode`, `showPaperHelpTopics`) |
+| `/help` text | the description when it was a string, else "A command by the &lt;plugin&gt; plugin."; the paper module passed an empty description | `withShortDescription` / `withFullDescription` / `withHelp` | Missing feature | Added `Command#serverHelp(shortText)` and `serverHelp(shortText, fullText)`: the short text for the `/help` lists and the command-map description, the full text replacing the `/help <command>` page (through `HelpTopic#amendTopic`, so `<text>` in it stands for the generated page, as in `help.yml`). Without it a string description, else the plugin-named text, on every Bukkit-family path |
+| `/help` plugin index | CraftBukkit listed the spigot module's commands under "Minecraft", since it picks the index by the wrapper class | CommandAPI's Spigot topics stay under "Minecraft" too | Missing feature | Fixed: topics are moved into the plugin's index (`fileUnderPluginIndex`); on Paper 1.20.6+ the plugin-attributed wrappers are listed under the plugin by Paper itself |
 | `/minecraft:reload` | Spigot: kept through `knownCommands`; Paper 1.20.6+: added again on `ServerResourcesReloadedEvent`; paper module: `COMMANDS` handler | same | Correct | - |
-| Data pack functions | functions are compiled when data packs load, before plugins add commands, and a function with an unknown command is dropped | function library points at V and all data packs are reloaded after startup; Paper bootstrap registration | Missing feature | Partly fixed on Spigot and Paper before 1.20.6: on `ServerLoadEvent` (startup and Bukkit `/reload`) the function library's dispatcher is set to V and only the functions are compiled again (`NMSDedicatedServer#recompileFunctions`, once per event per shaded copy), instead of CommandAPI's full data pack reload, which also needs recipes registered again. A permission check from the compiling source, which has no Bukkit sender, passes, as in CommandAPI. Paper module: fixed, `CommandLib.bootstrap(BootstrapContext, ...)` registers from the bootstrapper's `COMMANDS` handler, which fires before functions are compiled (see "paper module" above). Open: `/minecraft:reload` compiles functions against fresh vanilla commands and Spigot fires no event for it, so functions lose the commands until the next Bukkit `/reload` or restart; a command registered after startup is not seen by functions |
+| Data pack functions | functions are compiled when data packs load, before plugins add commands, and a function with an unknown command is dropped | function library points at V and all data packs are reloaded after startup; nothing for `/minecraft:reload` on Spigot; Paper bootstrap registration | Missing feature | Fixed in the spigot module (Spigot, Paper before and from 1.20.6): the function library's dispatcher is set to the one holding the commands and only the functions are compiled again (`NMSDedicatedServer#recompileFunctions`), instead of CommandAPI's full data pack reload, which also needs recipes registered again. Spigot fires no event for `/minecraft:reload`, so a task checks each tick whether the data pack resources object was replaced or the commands changed, which also covers a command registered or unregistered after startup (`compileFunctionsWithCommands`). The check costs a few reflective calls per tick. A permission check from the compiling source, which has no Bukkit sender, passes, as in CommandAPI. Checked by the integration fixture after `/minecraft:reload` (`DataPackFunctionTest`). Paper module: `CommandLib.bootstrap(BootstrapContext, ...)` registers from the bootstrapper's `COMMANDS` handler, which fires before functions are compiled (see "paper module" above); commands registered from a plugin are not seen by functions, by design of Paper's reload order |
 | Bukkit `/reload` (Spigot) | after reload `execute run <command>` failed: no `execute` node in R during `onEnable`, so the node never reached V | uses V directly | Missing edge case (unsupported server feature) | Fixed: nodes go to V through the typed accessor |
 | Runtime wrapper dispatcher | wrapped with R, which goes stale after a reload but still holds the node | wraps with V | Worked, held the old dispatcher | Fixed: wraps with V |
 | Paper module, plugin enabled at runtime | the `COMMANDS` handler registers but does not fire until the next reload, so the commands are missing | `Bukkit.reloadData()` after runtime changes | Missing edge case | Fixed: once the plugin is enabled, a task on the next tick calls `Bukkit.reloadData()` if the handler has not run yet (`reloadIfCommandsEventMissed`). Startup fires the event before the first tick, so the check is a no-op there. A reload was chosen over a direct add because Paper has no public way to reach the live dispatcher outside the event (a fresh plugin has nothing cached), and the reload path also adds `<plugin>:<name>`, rebuilds help topics and sends the tree to players. Registering only after `onEnable()` with nothing cached still throws, since Paper then rejects the handler |
-| Paper module `plugin:<name>` label and `/help` | Paper's registrar adds the namespaced label and plugin-attributed help topics, but the topic had no permission | `/help` topics with permissions | Missing edge case | Fixed: topics are amended with the command permission (`restrictHelpTopics`); namespaced labels need nothing |
-| Paper module runtime direct add / unregister | mutates the live root on the main thread and calls `updateCommands()`; Paper builds the command tree on its async pool, which can throw `ConcurrentModificationException` (seen in the paper-1.21.0 integration run when the fixture registers and unregisters in the same tick) | `Bukkit.reloadData()` instead of mutating | Missing edge case; only logged, the next update sends a good tree | Open: coalesce changes and update players once on the next tick, or reload data |
+| Paper module `plugin:<name>` label and `/help` | Paper's registrar adds the namespaced label and plugin-attributed help topics, but the topic had no permission | `/help` topics with permissions | Missing edge case | Fixed: topics are amended with the command permission (`amendHelpTopics`); namespaced labels need nothing |
+| Paper module runtime direct add / unregister | mutated the live root on the main thread and called `updateCommands()` at once; Paper builds the command tree on its async pool, which threw `ConcurrentModificationException` when a later change in the same tick mutated the root it read (seen in the paper-1.21.0 integration run when the fixture registers and unregisters in the same tick) | `Bukkit.reloadData()` on the next tick instead of mutating | Missing edge case; only logged, the next update sends a good tree | Fixed: the change still applies at once, and nothing is sent in that tick; one data reload on the next tick, shared by the tick's changes, registers the commands through the registrar into a fresh dispatcher and sends the tree (`reloadDataLater`). A change can still race a tree being built for another reason, such as a player joining, as any live change of Paper's dispatcher can |
 | Paper < 1.20.6 async command tree | mutates the root on the main thread; skips the update on disable | same | Acceptable | - |
 | Folia | no handling | runtime changes throw | Not supported (`compatibility.md`) | - |
 | Mohist | no special handling; integration fixtures 1.16.5 / 1.20.1 | none | Acceptable | - |

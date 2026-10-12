@@ -78,13 +78,15 @@ public class TestMain {
             RuntimePermissionTest runtimePermissionTest = new RuntimePermissionTest(mainCommand, plugin);
             SuggestionTest suggestionTest = new SuggestionTest(mainCommand);
             ScenarioTest scenarioTest = new ScenarioTest(mainCommand, plugin, TEST_PLAYER_NAME);
+            HelpTopicTest helpTopicTest = new HelpTopicTest(mainCommand, plugin);
             new HelpMessageTest(mainCommand); // registers helpMessageRoot for bot-side help message verification
             List<TestBase> tests = List.of(argumentTest,
                                            optionTest,
                                            commandSyntaxExceptionTest,
                                            runtimePermissionTest,
                                            suggestionTest,
-                                           scenarioTest);
+                                           scenarioTest,
+                                           helpTopicTest);
             List<String> commands = tests.stream()
                                          .flatMap(x -> x.build()
                                                         .stream())
@@ -175,6 +177,11 @@ public class TestMain {
                                                                                                                         probe);
                                                           tests.forEach(test -> test.hookCommandDispatchError(probe,
                                                                                                               dispatchResult));
+                                                          List<String> afterReload = List.of(MainCommand.NAME + " " + HelpTopicTest.AFTER_RELOAD);
+                                                          for (String afterReloadCommand : afterReload) {
+                                                              dispatchProbe.dispatch(Bukkit.getConsoleSender(),
+                                                                                     afterReloadCommand);
+                                                          }
                                                       } else {
                                                           scenarioTest.failReloadProbe("/minecraft:reload did not finish within "
                                                                   + RELOAD_TIMEOUT_TICKS + " ticks.");
