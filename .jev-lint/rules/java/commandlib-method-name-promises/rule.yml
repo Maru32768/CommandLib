@@ -4,12 +4,13 @@ language: Java
 kind: noul
 subject: node
 state: located
-# 0.58, fitted 2026-10-12 on fixtures/ (jev-1.13.0, 5 defects, 8 cleans, 3 passes): cleans top at 0.26 (`apply`, a
-# terse name that records a use), and four defects answer 0.76-0.90. `countActive`, which counts expired cooldowns as
-# active, answers 0.30-0.40: seeing it takes knowing that the map is never pruned, and the question does not reach that
-# far. It is kept labelled as a defect and left under the cutoff rather than fitted into a 0.04 gap above the cleans.
-# 0.58 is the midpoint of the empty band 0.40..0.76, with 0.32 of headroom over the cleans.
-threshold: 0.58
+# 0.69, refitted 2026-10-12 (jev-1.13.0, 3 passes) after a review of real code flagged a sound name at 0.62. fixtures/
+# now also holds a copy of common-testing's TestCommandContext, whose takeLatestOnCurrentThread returns the context and
+# removes it, as take means, and answers 0.57-0.63: the top clean. Four defects answer 0.74-0.90. `countActive`, which
+# counts expired cooldowns as active, answers 0.25-0.40: seeing it takes knowing that the map is never pruned, and the
+# question does not reach that far, so it is kept labelled as a defect under the cutoff. 0.69 is the midpoint of the
+# empty band 0.63..0.74; the headroom is about 0.05 on each side, so a terse real name can still cross it.
+threshold: 0.69
 # Calibrated on the file axis; pinned so the scheduler cannot move it.
 axis: file
 severity: warning

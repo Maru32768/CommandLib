@@ -13,3 +13,13 @@ fixtures/TeamDirectory.java:
   - { line: 95, label: clean, window: 0, reason: "vague but not false" }
   - { line: 103, label: clean, window: 0, reason: "a caller obligation, not checkable here" }
   - { line: 110, label: clean, window: 0, reason: "accurate, including the empty case" }
+# Copies of real files, at the lines the rule flagged at 0.34-0.46 though each comment holds. Kept as hard cleans: long
+# Javadoc about class loading, NMS and Brigadier that the subject alone cannot fully confirm.
+fixtures/CommandRunner.java:
+  - { line: 132, label: clean, window: 0, reason: "run and executeWithStackTrace do print stack traces, and common has no logger" }
+fixtures/PaperCommandLib.java:
+  - { line: 209, label: clean, window: 0, reason: "applies the bootstrap default only when nothing registered the permission" }
+fixtures/NMSClassRegistry.java:
+  - { line: 149, label: clean, window: 0, reason: "the listed classes are loaded through the list, not linked or initialized" }
+fixtures/NMSArgumentTypeRegistrar.java:
+  - { line: 167, label: clean, window: 0, reason: "the proxy's unpack returns the GREEDY_PHRASE template, as described" }

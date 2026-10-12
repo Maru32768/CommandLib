@@ -130,3 +130,5 @@ mise.local.toml
 
 # The last jev-lint eval run, accepted or not; the accepted one is baseline.json
 .jev-lint/rules/*/*/last.json
+# The jev-lint verdict cache, which would change with most commits
+.jev-lint/baseline.json

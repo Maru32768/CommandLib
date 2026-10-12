@@ -14,3 +14,6 @@ fixtures/CooldownRegistry.java:
   - { line: 80, label: clean, window: 0, reason: "terse conventional name that records a use" }
   - { line: 84, label: clean, window: 0, reason: "trims and lower-cases, a normal normalization" }
   - { line: 89, label: clean, window: 0, reason: "conventional toString" }
+# A copy of common-testing's TestCommandContext. Real code the rule flagged at 0.62, kept as a hard clean.
+fixtures/TestCommandContext.java:
+  - { line: 32, label: clean, window: 0, reason: "take returns the context and removes it, as take means" }
