@@ -10,7 +10,9 @@ import org.bukkit.command.defaults.BukkitCommand;
 import org.bukkit.help.GenericCommandHelpTopic;
 import org.bukkit.help.HelpMap;
 import org.bukkit.help.HelpTopic;
+import org.bukkit.help.HelpTopicComparator;
 import org.bukkit.help.HelpTopicFactory;
+import org.bukkit.help.IndexHelpTopic;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
@@ -136,7 +138,7 @@ class CommandHelpTopicTest {
         helpMap.addTopic(old);
         HelpTopic replacement = topic("/foo");
 
-        CommandLib.putHelpTopic(helpMap, replacement);
+        CommandLib.putHelpTopic(helpMap, replacement, "Plugin");
 
         assertThat(helpMap.getHelpTopic("/foo")).isSameAs(replacement);
         assertThat(helpMap.getHelpTopics()).containsExactly(replacement);
@@ -149,13 +151,77 @@ class CommandHelpTopicTest {
         HelpTopic other = topic("/foo");
         helpMap.addTopic(other);
 
-        CommandLib.removeHelpTopic(helpMap, own);
+        CommandLib.removeHelpTopic(helpMap, own, "Plugin");
 
         assertThat(helpMap.getHelpTopic("/foo")).isSameAs(other);
 
-        CommandLib.removeHelpTopic(helpMap, other);
+        CommandLib.removeHelpTopic(helpMap, other, "Plugin");
 
         assertThat(helpMap.getHelpTopic("/foo")).isNull();
+    }
+
+    @Test
+    void movesTheTopicFromTheMinecraftIndexToANewPluginIndex() {
+        HelpMap helpMap = new TestHelpMap();
+        HelpTopic topic = topic("/foo");
+        Set<HelpTopic> minecraftTopics = indexSet(topic("/foo"), topic("/tp"));
+        helpMap.addTopic(new IndexHelpTopic("Minecraft", "", null, minecraftTopics));
+
+        CommandLib.putHelpTopic(helpMap, topic, "Plugin");
+
+        assertThat(minecraftTopics).extracting(HelpTopic::getName)
+                                   .containsExactly("/tp");
+        assertThat(CommandLib.indexTopics(helpMap.getHelpTopic("Plugin"))).containsExactly(topic);
+        assertThat(helpMap.getHelpTopic("Plugin")
+                          .getShortText()).isEqualTo("All commands for Plugin");
+    }
+
+    @Test
+    void addsTheTopicToAnExistingPluginIndexAndRemovesItAgain() {
+        HelpMap helpMap = new TestHelpMap();
+        helpMap.addTopic(new IndexHelpTopic("Minecraft", "", null, indexSet()));
+        HelpTopic yamlCommand = topic("/bar");
+        HelpTopic pluginIndex = new IndexHelpTopic("Plugin", "", null, indexSet(yamlCommand));
+        helpMap.addTopic(pluginIndex);
+        HelpTopic topic = topic("/foo");
+
+        CommandLib.putHelpTopic(helpMap, topic, "Plugin");
+
+        assertThat(CommandLib.indexTopics(pluginIndex)).containsExactly(yamlCommand, topic);
+
+        CommandLib.removeHelpTopic(helpMap, topic, "Plugin");
+
+        assertThat(CommandLib.indexTopics(pluginIndex)).containsExactly(yamlCommand);
+        assertThat(helpMap.getHelpTopic("Plugin")).isSameAs(pluginIndex);
+    }
+
+    @Test
+    void removesThePluginIndexItEmptied() {
+        HelpMap helpMap = new TestHelpMap();
+        helpMap.addTopic(new IndexHelpTopic("Minecraft", "", null, indexSet()));
+        HelpTopic topic = topic("/foo");
+        CommandLib.putHelpTopic(helpMap, topic, "Plugin");
+
+        CommandLib.removeHelpTopic(helpMap, topic, "Plugin");
+
+        assertThat(helpMap.getHelpTopic("Plugin")).isNull();
+    }
+
+    @Test
+    void leavesTheIndexesAloneBeforeTheHelpMapIsBuilt() {
+        HelpMap helpMap = new TestHelpMap();
+        HelpTopic topic = topic("/foo");
+
+        CommandLib.putHelpTopic(helpMap, topic, "Plugin");
+
+        assertThat(helpMap.getHelpTopic("/foo")).isSameAs(topic);
+        assertThat(helpMap.getHelpTopic("Plugin")).isNull();
+    }
+
+    private static Set<HelpTopic> indexSet(HelpTopic... topics) {
+        Set<HelpTopic> set = new TreeSet<>(HelpTopicComparator.helpTopicComparatorInstance());
+        Collections.addAll(set, topics);
+        return set;
     }
 
     private static HelpTopic topic(String name) {

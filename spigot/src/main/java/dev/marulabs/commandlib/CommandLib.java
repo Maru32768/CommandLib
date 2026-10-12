@@ -25,6 +25,8 @@ import org.bukkit.event.server.ServerLoadEvent;
 import org.bukkit.help.GenericCommandHelpTopic;
 import org.bukkit.help.HelpMap;
 import org.bukkit.help.HelpTopic;
+import org.bukkit.help.HelpTopicComparator;
+import org.bukkit.help.IndexHelpTopic;
 import org.bukkit.permissions.Permissible;
 import org.bukkit.permissions.Permission;
 import org.bukkit.plugin.EventExecutor;
@@ -224,7 +226,7 @@ public final class CommandLib implements Listener {
                     wrapper.register(commandMap);
                     knownCommands.put(x.getName(), wrapper);
                     HelpTopic helpTopic = helpTopic(wrapper, command);
-                    putHelpTopic(Bukkit.getHelpMap(), helpTopic);
+                    putHelpTopic(Bukkit.getHelpMap(), helpTopic, plugin.getName());
                     registeredHelpTopics.add(helpTopic);
 
                     // When the synced dispatcher is the vanilla one, CraftBukkit has not synced the commands yet and
@@ -302,19 +304,80 @@ public final class CommandLib implements Listener {
      * HelpMap#addTopic keeps an existing topic of the same name, so that one is removed first, as the command map
      * entry it described is replaced as well. CraftBukkit's getHelpTopics() is a live view of its topics.
      */
-    static void putHelpTopic(HelpMap helpMap, HelpTopic topic) {
+    static void putHelpTopic(HelpMap helpMap, HelpTopic topic, String pluginName) {
         HelpTopic existing = helpMap.getHelpTopic(topic.getName());
         if (existing != null) {
             helpMap.getHelpTopics()
                    .remove(existing);
         }
         helpMap.addTopic(topic);
+        fileUnderPluginIndex(helpMap, topic, pluginName);
     }
 
-    static void removeHelpTopic(HelpMap helpMap, HelpTopic topic) {
-        if (helpMap.getHelpTopic(topic.getName()) == topic) {
-            helpMap.getHelpTopics()
-                   .remove(topic);
+    /**
+     * CraftBukkit lists a VanillaCommandWrapper in the "Minecraft" index, since it picks the index by the command
+     * class, so the topic is moved to the plugin's index, which is made when the plugin has none. The indexes exist
+     * once the help map has been built after the plugins were enabled; before that, when the "Minecraft" index is
+     * missing, the topic is left for ServerLoadEvent.
+     */
+    static void fileUnderPluginIndex(HelpMap helpMap, HelpTopic topic, String pluginName) {
+        Collection<HelpTopic> minecraftTopics = indexTopics(helpMap.getHelpTopic("Minecraft"));
+        if (minecraftTopics == null || helpMap.getHelpTopic(topic.getName()) != topic) {
+            return;
+        }
+        // The index sets compare topics by name.
+        minecraftTopics.remove(topic);
+        HelpTopic index = helpMap.getHelpTopic(pluginName);
+        Collection<HelpTopic> pluginTopics = indexTopics(index);
+        if (pluginTopics == null) {
+            if (index != null) {
+                return;
+            }
+            pluginTopics = new TreeSet<>(HelpTopicComparator.helpTopicComparatorInstance());
+            // The same texts as CraftBukkit's plugin indexes.
+            helpMap.addTopic(new IndexHelpTopic(pluginName,
+                                                "All commands for " + pluginName,
+                                                null,
+                                                pluginTopics,
+                                                "Below is a list of all " + pluginName + " commands:"));
+        }
+        pluginTopics.remove(topic);
+        pluginTopics.add(topic);
+    }
+
+    static void removeHelpTopic(HelpMap helpMap, HelpTopic topic, String pluginName) {
+        if (helpMap.getHelpTopic(topic.getName()) != topic) {
+            return;
+        }
+        helpMap.getHelpTopics()
+               .remove(topic);
+        HelpTopic index = helpMap.getHelpTopic(pluginName);
+        Collection<HelpTopic> pluginTopics = indexTopics(index);
+        if (pluginTopics != null) {
+            pluginTopics.remove(topic);
+            if (pluginTopics.isEmpty()) {
+                helpMap.getHelpTopics()
+                       .remove(index);
+            }
+        }
+    }
+
+    /**
+     * The topics an index lists, which IndexHelpTopic keeps in a protected field without an accessor. CraftBukkit's
+     * plugin indexes hold a mutable set there.
+     */
+    @Nullable
+    @SuppressWarnings("unchecked")
+    static Collection<HelpTopic> indexTopics(@Nullable HelpTopic index) {
+        if (!(index instanceof IndexHelpTopic)) {
+            return null;
+        }
+        try {
+            Field field = IndexHelpTopic.class.getDeclaredField("allTopics");
+            field.setAccessible(true);
+            return (Collection<HelpTopic>) field.get(index);
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException(e);
         }
     }
 
@@ -327,6 +390,7 @@ public final class CommandLib implements Listener {
      */
     @EventHandler
     private void onServerLoad(ServerLoadEvent e) {
+        registeredHelpTopics.forEach(topic -> fileUnderPluginIndex(Bukkit.getHelpMap(), topic, plugin.getName()));
         if (functionsRecompiledFor == e || usesPaperCommandDispatcher()) {
             return;
         }
@@ -365,7 +429,7 @@ public final class CommandLib implements Listener {
         } finally {
             HandlerList.unregisterAll(this);
             unregisterPermissions();
-            registeredHelpTopics.forEach(topic -> removeHelpTopic(Bukkit.getHelpMap(), topic));
+            registeredHelpTopics.forEach(topic -> removeHelpTopic(Bukkit.getHelpMap(), topic, plugin.getName()));
             registeredHelpTopics.clear();
             registeredCommands.clear();
             registeredPermissions.clear();
