@@ -2,6 +2,7 @@ package net.kunmc.lab.commandlib;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.tree.CommandNode;
+import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
 import net.kunmc.lab.commandlib.util.bukkit.BukkitUtil;
 import net.kunmc.lab.commandlib.util.bukkit.MinecraftVersion;
@@ -213,6 +214,13 @@ public final class CommandLib implements Listener {
                     registeredHelpTopics.add(helpTopic);
 
                     CommandNode executeRunRoot = executeRunRedirectRoot(root);
+                    // When the root is the vanilla dispatcher's, CraftBukkit has not synced the commands yet and
+                    // adds the namespaced label to the synced dispatcher from the command map itself.
+                    addNamespacedCommand(executeRunRoot == root ? null : root,
+                                         knownCommands,
+                                         namespace(plugin),
+                                         x,
+                                         wrapper);
                     if (executeRunRoot != null) {
                         removeCommand(executeRunRoot, x.getName());
                         executeRunRoot.addChild(x);
@@ -401,11 +409,46 @@ public final class CommandLib implements Listener {
                 if (!usePaperCommandDispatcher) {
                     removeExecuteRunCommand(root, node.getName());
                     removeMinecraftNamespacedCommand(root, knownCommands, node);
+                    removeRegisteredCommand(root, knownCommands, namespace(plugin) + ":" + node.getName());
                 }
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static String namespace(Plugin plugin) {
+        return plugin.getName()
+                     .toLowerCase(Locale.ROOT);
+    }
+
+    /**
+     * Adds "&lt;plugin&gt;:&lt;name&gt;" as another label of the wrapper, like Bukkit's fallback labels.
+     * VanillaCommandWrapper parses its node's own name, so the label needs no node in the vanilla dispatcher. The
+     * synced dispatcher, which players see, gets a copy of the node under the label, as CraftServer#syncCommands
+     * makes for such labels.
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    static void addNamespacedCommand(RootCommandNode resourcesRoot,
+                                     Map<String, org.bukkit.command.Command> knownCommands,
+                                     String namespace,
+                                     CommandNode<?> node,
+                                     org.bukkit.command.Command wrapper) throws Exception {
+        String label = namespace + ":" + node.getName();
+        knownCommands.put(label, wrapper);
+        if (resourcesRoot == null) {
+            return;
+        }
+        removeCommand(resourcesRoot, label);
+        LiteralCommandNode copy = new LiteralCommandNode(label,
+                                                         node.getCommand(),
+                                                         node.getRequirement(),
+                                                         node.getRedirect(),
+                                                         node.getRedirectModifier(),
+                                                         node.isFork());
+        node.getChildren()
+            .forEach(child -> copy.addChild((CommandNode) child));
+        resourcesRoot.addChild(copy);
     }
 
     /**
