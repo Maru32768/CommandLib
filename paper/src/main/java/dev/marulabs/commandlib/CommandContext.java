@@ -67,7 +67,7 @@ public final class CommandContext extends CommonCommandContext<CommandSourceStac
 
     @Override
     public void sendMessage(@Nullable String message) {
-        sendMessage(Component.text(Objects.toString(message, "")));
+        sendMessage(Component.text(String.valueOf(message)));
     }
 
     public void sendMessage(@NotNull Component component) {
@@ -76,7 +76,7 @@ public final class CommandContext extends CommonCommandContext<CommandSourceStac
 
     @Override
     public void sendSuccess(@Nullable String message) {
-        sendSuccess(Component.text(Objects.toString(message, "")));
+        sendSuccess(Component.text(String.valueOf(message)));
     }
 
     /**
@@ -88,7 +88,7 @@ public final class CommandContext extends CommonCommandContext<CommandSourceStac
 
     @Override
     public void sendWarn(@Nullable String message) {
-        sendWarn(Component.text(Objects.toString(message, "")));
+        sendWarn(Component.text(String.valueOf(message)));
     }
 
     /**
@@ -100,7 +100,7 @@ public final class CommandContext extends CommonCommandContext<CommandSourceStac
 
     @Override
     public void sendFailure(@Nullable String message) {
-        sendFailure(Component.text(Objects.toString(message, "")));
+        sendFailure(Component.text(String.valueOf(message)));
     }
 
     /**

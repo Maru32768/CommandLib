@@ -82,7 +82,7 @@ class CommandContextTest {
     }
 
     @Test
-    void messages_use_expected_colors_and_null_becomes_empty() {
+    void messages_use_expected_colors_and_null_is_sent_as_null() {
         FakeSender sender = FakeSender.player("Alice");
 
         try (CommandTester tester = new CommandTester(new Command("say") {{
@@ -95,7 +95,7 @@ class CommandContextTest {
             tester.execute("say", sender);
         }
 
-        assertThat(sender.getSentMessageTexts()).containsExactly("careful", "", "broken");
+        assertThat(sender.getSentMessageTexts()).containsExactly("careful", "null", "broken");
         assertThat(sender.getSentMessages()).extracting(Component::color)
                                             .containsExactly(NamedTextColor.YELLOW,
                                                              NamedTextColor.GREEN,
