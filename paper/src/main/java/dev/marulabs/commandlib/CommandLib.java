@@ -406,7 +406,11 @@ public final class CommandLib implements Listener {
         Bukkit.reloadData();
     }
 
-    private void unregister(boolean updatePlayerCommands) {
+    /**
+     * @param runtime false when the plugin is being disabled, which cancels the tasks it schedules, so the players'
+     *                command trees are updated at once
+     */
+    private void unregister(boolean runtime) {
         if (unregistered) {
             return;
         }
@@ -432,9 +436,7 @@ public final class CommandLib implements Listener {
                 removeHelpTopics();
                 dispatcher = null;
                 registeredCommandNames.clear();
-                if (updatePlayerCommands) {
-                    updateCommandTrees();
-                }
+                updateCommandTrees(runtime);
             }
 
             for (Permission permission : new ArrayList<>(registeredPermissions)) {
@@ -636,7 +638,7 @@ public final class CommandLib implements Listener {
     private void registerDirectly(CommandDispatcher<CommandSourceStack> dispatcher, PendingRegistration registration) {
         addNodes(dispatcher, registration);
         showHelpTopics();
-        updateCommandTrees();
+        updateCommandTrees(true);
     }
 
     /**
@@ -739,11 +741,17 @@ public final class CommandLib implements Listener {
 
     /**
      * Sends the players their command trees after a change to the live dispatcher, on the next tick so that the changes
-     * of one tick share one update. Paper builds the trees on an asynchronous pool while the main thread goes on, which
-     * a change of the root's children maps would break (ConcurrentModificationException), so the changes replace those
-     * maps instead ({@link #replaceChildren}).
+     * of one tick share one update, or at once while the plugin is being disabled. Paper builds the trees on an
+     * asynchronous pool while the main thread goes on, which a change of the root's children maps would break
+     * (ConcurrentModificationException), so the changes replace those maps instead ({@link #replaceChildren}).
      */
-    private void updateCommandTrees() {
+    private void updateCommandTrees(boolean later) {
+        if (!later) {
+            if (!Bukkit.isStopping()) {
+                sendCommandTrees();
+            }
+            return;
+        }
         if (registrationState.commandTreeUpdateScheduled) {
             return;
         }

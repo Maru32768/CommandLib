@@ -185,6 +185,18 @@ class CommandLibLifecycleTest {
     }
 
     @Test
+    void plugin_disable_updates_command_trees_at_once() {
+        when(plugin.isEnabled()).thenReturn(true);
+        Player player = onlinePlayer();
+        CommandLib.register(plugin, "test", helloCommand());
+        fireCommandsEvent();
+
+        callDisableEvent(plugin);
+
+        verify(player).updateCommands();
+    }
+
+    @Test
     void help_topics_are_restricted_to_the_command_permission_once_the_help_map_is_built() {
         when(plugin.isEnabled()).thenReturn(true);
         CommandLib.register(plugin, "test", new Command("hello") {{

@@ -129,8 +129,9 @@ dev bundles. Line numbers refer to the commit that adds this document.
   iterating the old maps. The nodes are converted for the vanilla dispatcher
   with Paper's `ApiMirrorRootNode#unwrapNode`, as the mirror's `addChild` does.
   If Paper's internals are not found, the root's own methods change it in place.
-- Unregister removes the recorded labels and their help topics the same way; at
-  runtime players' trees are updated on the next tick.
+- Unregister removes the recorded labels and their help topics the same way and
+  updates players' trees on the next tick, or at once when the plugin is being
+  disabled, since its tasks are cancelled then (not while the server stops).
 - A plugin enabled after startup (e.g. by PlugMan) installs its handler but has
   missed the event; on the next tick it calls `Bukkit.reloadData()` if the
   handler has not run (`reloadIfCommandsEventMissed`).
@@ -206,5 +207,6 @@ adds a `<modid>:` label for mod commands, so CommandLib adds none. There is no
 | Paper module `plugin:<name>` label and `/help` | Paper's registrar adds the namespaced label and plugin-attributed help topics, but the topic had no permission | `/help` topics with permissions | Missing edge case | Fixed: topics are amended with the command permission (`amendHelpTopics`); namespaced labels need nothing |
 | Paper module runtime direct add / unregister | mutated the live root on the main thread and called `updateCommands()` at once; Paper builds the command tree on its async pool, which threw `ConcurrentModificationException` when a later change in the same tick mutated the root it read (seen in the paper-1.21.0 integration run when the fixture registers and unregisters in the same tick) | `Bukkit.reloadData()` on the next tick instead of mutating | Missing edge case; only logged, the next update sends a good tree | Fixed: a data reload on the next tick was used first, which reloads every data pack and resource for each tick with a change. Now the change replaces the root's children maps instead of changing them (`replaceChildren`), so no tree build in progress, ours or one for a joining player, can see a map change under it; the labels are `PluginCommandNode`s with help topics, as the registrar would make them; and players get one tree update on the next tick for the tick's changes. A list copy of the root's children per change replaces a full data reload |
 | Paper < 1.20.6 async command tree | mutates the root on the main thread; skips the update on disable | same | Acceptable | - |
+| Paper module unregister on plugin disable | removed the commands but sent no tree, since the plugin's tasks are cancelled on disable | - | Bug: players kept the removed commands in their trees until the next update | Fixed: the trees are sent at once on disable, which the replaced maps make safe, except while the server stops |
 | Folia | no handling | runtime changes throw | Not supported (`compatibility.md`) | - |
 | Mohist | no special handling; integration fixtures 1.16.5 / 1.20.1 | none | Acceptable | - |
