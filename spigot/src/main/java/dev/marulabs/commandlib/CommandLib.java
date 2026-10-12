@@ -44,6 +44,7 @@ public final class CommandLib implements Listener {
     private final Plugin plugin;
     private final Collection<? extends Command> commands;
     private final String permissionPrefix;
+    private final Map<String, Command> commandsByLabel;
     private final List<CommandNode<?>> registeredCommands = new ArrayList<>();
     private final List<Permission> registeredPermissions = new ArrayList<>();
     private final List<HelpTopic> registeredHelpTopics = new ArrayList<>();
@@ -89,6 +90,7 @@ public final class CommandLib implements Listener {
         for (Command command : commands) {
             Objects.requireNonNull(command);
         }
+        this.commandsByLabel = commandsByLabel(commands);
 
         try {
             enable();
@@ -133,7 +135,10 @@ public final class CommandLib implements Listener {
 
     private void readdToPaperDispatcher() {
         try {
-            addToPaperDispatcher(knownCommands(), registeredCommands);
+            Map<String, org.bukkit.command.Command> knownCommands = knownCommands();
+            addToPaperDispatcher(knownCommands);
+            // The reload rebuilt the help map without the commands.
+            showPaperHelpTopics(knownCommands);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -173,15 +178,69 @@ public final class CommandLib implements Listener {
         return dispatcher.getRoot();
     }
 
+    /**
+     * Adds each node under its label and under "&lt;plugin&gt;:&lt;label&gt;", as Paper's registrar does. Paper shows a
+     * node as a Bukkit command through the API node cached on it: a PluginCommandNode becomes a
+     * PluginVanillaCommandWrapper, which names the plugin and the description and has no permission of its own, while
+     * any other node becomes a VanillaCommandWrapper, "A Mojang provided command." with a minecraft.command.&lt;label&gt;
+     * permission that Bukkit's dispatchCommand checks. The API node gets no children, so Paper's usage of it stays the
+     * label instead of testing the requirements of the children.
+     */
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private static void addToPaperDispatcher(Map<String, org.bukkit.command.Command> knownCommands,
-                                             List<CommandNode<?>> nodes) throws Exception {
+    private void addToPaperDispatcher(Map<String, org.bukkit.command.Command> knownCommands) throws Exception {
         RootCommandNode root = paperDispatcherRoot(knownCommands);
-        Constructor<?> shadowBrigNode = Class.forName("io.papermc.paper.command.brigadier.ShadowBrigNode")
-                                             .getConstructor(CommandNode.class);
-        for (CommandNode<?> node : nodes) {
-            removeRegisteredCommand(root, knownCommands, node.getName());
-            root.addChild((CommandNode) shadowBrigNode.newInstance(node));
+        Constructor<?> pluginCommandNode = Class.forName("io.papermc.paper.command.brigadier.PluginCommandNode")
+                                                .getConstructor(String.class,
+                                                                Class.forName("io.papermc.paper.plugin.configuration.PluginMeta"),
+                                                                LiteralCommandNode.class,
+                                                                String.class);
+        Object pluginMeta = plugin.getClass()
+                                  .getMethod("getPluginMeta")
+                                  .invoke(plugin);
+        Field wrappedCached = CommandNode.class.getField("wrappedCached");
+        Field unwrappedCached = CommandNode.class.getField("unwrappedCached");
+        for (CommandNode<?> node : registeredCommands) {
+            String description = Objects.requireNonNull(commandsByLabel.get(node.getName()))
+                                        .serverHelpShortText(plugin.getName());
+            for (CommandNode<?> labelNode : Arrays.asList(node, copy(node, namespace(plugin) + ":" + node.getName()))) {
+                Object apiNode = pluginCommandNode.newInstance(labelNode.getName(),
+                                                               pluginMeta,
+                                                               new LiteralCommandNode(labelNode.getName(),
+                                                                                      labelNode.getCommand(),
+                                                                                      labelNode.getRequirement(),
+                                                                                      null,
+                                                                                      null,
+                                                                                      false),
+                                                               description);
+                wrappedCached.set(labelNode, apiNode);
+                // Paper's root adds the cached node in its place.
+                unwrappedCached.set(apiNode, labelNode);
+                removeRegisteredCommand(root, knownCommands, labelNode.getName());
+                root.addChild((CommandNode) apiNode);
+            }
+        }
+    }
+
+    /**
+     * Paper builds the help map from the command map when the server loads and on every /minecraft:reload, so a
+     * registration at another time, or a reload, which drops the nodes, leaves the commands without topics. Paper's
+     * wrapper for a label is made on each lookup and has no permission, so it gets the command permission for the
+     * topic, which then shows only to those who may run the command.
+     */
+    private void showPaperHelpTopics(Map<String, org.bukkit.command.Command> knownCommands) {
+        registeredHelpTopics.clear();
+        for (CommandNode<?> node : registeredCommands) {
+            Command command = Objects.requireNonNull(commandsByLabel.get(node.getName()));
+            for (String label : Arrays.asList(node.getName(), namespace(plugin) + ":" + node.getName())) {
+                org.bukkit.command.Command wrapper = knownCommands.get(label);
+                if (wrapper == null) {
+                    continue;
+                }
+                wrapper.setPermission(command.permissionName(permissionPrefix));
+                HelpTopic topic = helpTopic(wrapper, command);
+                putHelpTopic(Bukkit.getHelpMap(), topic, plugin.getName());
+                registeredHelpTopics.add(topic);
+            }
         }
     }
 
@@ -195,7 +254,8 @@ public final class CommandLib implements Listener {
         try {
             Map<String, org.bukkit.command.Command> knownCommands = knownCommands();
             if (usesPaperCommandDispatcher()) {
-                addToPaperDispatcher(knownCommands, registeredCommands);
+                addToPaperDispatcher(knownCommands);
+                showPaperHelpTopics(knownCommands);
             } else {
                 NMSDedicatedServer server = NMSCraftServer.create(plugin.getServer())
                                                           .getServer();
@@ -209,7 +269,6 @@ public final class CommandLib implements Listener {
                                              .getRoot();
                 CommandMap commandMap = NMSCraftServer.create(plugin.getServer())
                                                       .getCommandMap();
-                Map<String, Command> commandsByLabel = commandsByLabel(commands);
                 for (CommandNode x : registeredCommands) {
                     removeRegisteredCommand(root, knownCommands, x.getName());
                     removeCommand(vanillaRoot, x.getName());
@@ -275,7 +334,7 @@ public final class CommandLib implements Listener {
     /**
      * The topic CraftBukkit would make for the wrapper, with the page set by {@link Command#serverHelp(String, String)}.
      */
-    static HelpTopic helpTopic(BukkitCommand wrapper, Command command) {
+    static HelpTopic helpTopic(org.bukkit.command.Command wrapper, Command command) {
         HelpTopic topic = new GenericCommandHelpTopic(wrapper);
         String fullText = command.serverHelpFullText();
         if (fullText != null) {
@@ -513,12 +572,12 @@ public final class CommandLib implements Listener {
 
             for (CommandNode<?> node : registeredCommands) {
                 removeRegisteredCommand(root, knownCommands, node.getName());
+                removeRegisteredCommand(root, knownCommands, namespace(plugin) + ":" + node.getName());
 
                 // Only the Spigot dispatcher has a vanilla root of its own.
                 if (vanillaRoot != null) {
                     removeCommand(vanillaRoot, node.getName());
                     removeMinecraftNamespacedCommand(root, knownCommands, node);
-                    removeRegisteredCommand(root, knownCommands, namespace(plugin) + ":" + node.getName());
                 }
             }
         } catch (Exception e) {
@@ -549,6 +608,14 @@ public final class CommandLib implements Listener {
             return;
         }
         removeCommand(resourcesRoot, label);
+        resourcesRoot.addChild((CommandNode) copy(node, label));
+    }
+
+    /**
+     * The node under another name, sharing its children.
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private static CommandNode<?> copy(CommandNode<?> node, String label) {
         LiteralCommandNode copy = new LiteralCommandNode(label,
                                                          node.getCommand(),
                                                          node.getRequirement(),
@@ -557,7 +624,7 @@ public final class CommandLib implements Listener {
                                                          node.isFork());
         node.getChildren()
             .forEach(child -> copy.addChild((CommandNode) child));
-        resourcesRoot.addChild(copy);
+        return copy;
     }
 
     /**
