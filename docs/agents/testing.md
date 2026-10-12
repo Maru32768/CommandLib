@@ -74,8 +74,10 @@ published for the first time.
 
 [jev-lint](https://github.com/mizchi/jev-lint) asks a model whether a method body contradicts its name and whether a
 comment contradicts the declaration under it (`.jev-lint.yaml`, rules in `.jev-lint/rules/java/`). It sends the judged
-code to the TypeSafe API and needs `TYPESAFE_API_KEY` and Node 24+, so run it only when the user asks:
-`npx -y -p node@24 -p jev-lint jev-lint review --base master`. `--dry-run` lists the subjects and the price without a
-request. Its findings are candidates to judge, not errors, and the Java rules' cutoffs are not calibrated yet: each rule
-has labelled cases in its `fixtures/` and `expect.yml`, and `jev-lint eval .jev-lint/rules/java/<rule> --repeat 3`
-fits the cutoff on them, which also needs the key. Keep labels out of the fixture code, since the model reads it.
+code to the TypeSafe API, so run it only when the user asks. `mise.toml` pins Node and jev-lint (`mise install`), and
+the key goes in `mise.local.toml`, which Git ignores, as `[env]` `TYPESAFE_API_KEY = "..."`. Run it through mise, since
+a non-interactive shell may not have mise activated: `mise run jev-review` judges the lines changed since master, and
+`mise exec -- jev-lint check --dry-run` lists the subjects and the price without a request. Its findings are candidates
+to judge, not errors, and the Java rules' cutoffs are not calibrated yet: each rule has labelled cases in its
+`fixtures/` and `expect.yml`, and `mise exec -- jev-lint eval .jev-lint/rules/java/<rule> --repeat 3` fits the cutoff on
+them, which also needs the key. Keep labels out of the fixture code, since the model reads it.

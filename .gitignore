@@ -124,3 +124,6 @@ run/
 
 # Claude Code agent worktrees
 .claude/worktrees/
+
+# Local mise settings, such as API keys
+mise.local.toml

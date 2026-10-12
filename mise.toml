@@ -1,0 +1,13 @@
+# Tools outside the Gradle build. The JDKs stay with the Gradle toolchains.
+# The TypeSafe API key for jev-lint goes in mise.local.toml, which Git ignores:
+#   [env]
+#   TYPESAFE_API_KEY = "..."
+[tools]
+node = "24"
+# mise skips install scripts by default, and @ast-grep/cli puts its binary in place with one. This runs the scripts of
+# every dependency, as npx would; allow_builds = ["@ast-grep/cli"] limits it to that one on a mise that supports it.
+"npm:jev-lint" = { version = "0.7.0", npm_args = "--ignore-scripts=false" }
+
+[tasks.jev-review]
+description = "Judge the lines changed since master with jev-lint"
+run = "jev-lint review --base master"
