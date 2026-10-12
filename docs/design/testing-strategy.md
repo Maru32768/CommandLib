@@ -6,7 +6,7 @@ This document defines CommandLib's testing strategy. In particular, it covers ho
 
 ```
 Layer 1: unit tests  (spigot:test, common:test)
-Layer 2: spigot-test (command-level unit tests with NMS mocks)
+Layer 2: spigot-testing (command-level unit tests with NMS mocks)
 Layer 3: integration-test (Docker + real Minecraft servers)
 ```
 
@@ -24,7 +24,7 @@ Scope: parser logic, command tree, options, permissions, help, validation.
 
 ---
 
-## Layer 2: Command-Level Tests (spigot-test)
+## Layer 2: Command-Level Tests (spigot-testing)
 
 Scope: argument parsing, validation, and suggestions, and the results of command execution.
 
@@ -50,21 +50,21 @@ The `CommandTester` constructor installs a static mock.
 
 Mock implementation classes pass `Object.class` as the wrapped server class.
 
-The mock implementation classes swapped in by the `NMSClassRegistry` stub live in `spigot-test`.
+The mock implementation classes swapped in by the `NMSClassRegistry` stub live in `spigot-testing`.
 Each mock class extends the corresponding `NMSClass` subclass and implements argument parsing and value return without real NMS.
 
 ```
 NMSArgumentPlayer (spigot/nms/argument)
-  └─ MockNMSArgumentPlayer (spigot-test/nms/argument)
+  └─ MockNMSArgumentPlayer (spigot-testing/nms/argument)
        parse() → CommandTester.getFakeEntity(name)
 ```
 
 ### Steps for Adding a New Argument
 
 1. Add `spigot/nms/argument/NMSArgumentXxx.java`.
-2. Add `spigot-test/nms/argument/MockNMSArgumentXxx.java`.
+2. Add `spigot-testing/nms/argument/MockNMSArgumentXxx.java`.
 3. If it is a shared mock that is always used, add it to the default mock registrations in `CommandTester`. If it is only used by individual tests, register it with `CommandTester.builder().mockNmsClass(NMSArgumentXxx.class, MockNMSArgumentXxx.class)`.
-4. Add `spigot-test/argument/XxxArgumentTest.java`, covering parse / suggestion / validation / error.
+4. Add `spigot-testing/argument/XxxArgumentTest.java`, covering parse / suggestion / validation / error.
 
 **When adding an argument, always create the mock and the test together.**
 
@@ -135,7 +135,7 @@ Add an integration test when any of the following applies:
 - You want to confirm that permission registration and reload work correctly.
 - You want to guarantee interaction with `/execute`, command blocks, or functions.
 
-Do not add an integration test if Layer 2 (spigot-test) can verify the behavior.
+Do not add an integration test if Layer 2 (spigot-testing) can verify the behavior.
 
 ---
 
@@ -186,7 +186,7 @@ Integration tests (Layer 3) guarantee real NMS behavior, so this division of wor
 ### Medium Term (P2: CommandAPI parity)
 
 - When implementing new arguments (NamespacedKey, Biome, Sound, Advancement, etc.), add the matching `MockNMSArgument*` and `ArgumentTest` at the same time.
-- Add spigot-test coverage for suggestions (sync / async) and tooltips.
+- Add spigot-testing coverage for suggestions (sync / async) and tooltips.
 - Add integration test coverage for `/execute`, command blocks, and functions.
 
 ### Long Term (P3 and later)
@@ -199,11 +199,11 @@ Integration tests (Layer 3) guarantee real NMS behavior, so this division of wor
 
 ## Roadmap Checklist
 
-- `[x]` Set up `CommandTester` / `FakeSender` in `spigot-test`.
+- `[x]` Set up `CommandTester` / `FakeSender` in `spigot-testing`.
 - `[x]` Set up the NMS mock classes (arguments, command listener, world-related).
 - `[ ]` Turn `CommandTester` into a builder so mock registrations can be injected from outside.
 - `[ ]` Add a `platform` field to `IntegrationTarget`.
-- `[ ]` Add spigot-test coverage for suggestions / tooltips.
+- `[ ]` Add spigot-testing coverage for suggestions / tooltips.
 - `[ ]` Add integration tests for `/execute` and command blocks.
 - `[x]` Start the `paper-testing` design (after the Paper module API is settled).
 - `[ ]` Add a JUnit extension (for downstream users).

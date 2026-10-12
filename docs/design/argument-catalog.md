@@ -207,7 +207,7 @@ This document summarizes the current state of CommandLib's built-in arguments an
 ### P0: catalog accuracy
 
 - Confirm each current argument return type and behavior with tests.
-- Split Bukkit/Spigot/Paper-specific argument concerns before GA module split.
+- Split Bukkit/Spigot/Paper-specific argument concerns across the `spigot` and `paper` modules.
 - Decide whether `LocationArgument` should represent block position, fine position, or both.
 - Decide whether `PotionEffectArgument` should return type, instance, or both.
 - Decide how Adventure component arguments fit into `paper` without leaking into `spigot`.

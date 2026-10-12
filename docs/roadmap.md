@@ -55,7 +55,7 @@
 | Kotlin DSL                          | `[ ]` | なし。                                                                                                                                     | Kotlin-first builder、default args、coroutine suggestions。                   |
 | Java builder API                    | `[ ]` | 現状は subclass / initializer / fluent API 中心。                                                                                             | explicit builder style。                                                    |
 | Localization / captions             | `[ ]` | なし。                                                                                                                                     | locale-aware help / errors / suggestions。                                  |
-| Public testing framework            | `[~]` | `spigot-test` module と repository tests がある。`CommandTester` / `FakeSender` / NMS mock クラス群を整備済み。`CommandTester.builder()` と `FakeSender.playerBuilder()` / `consoleBuilder()` あり。 | downstream guide、JUnit extension、assertion utilities。                     |
+| Public testing framework            | `[~]` | `spigot-testing` module と repository tests がある。`CommandTester` / `FakeSender` / NMS mock クラス群を整備済み。`CommandTester.builder()` と `FakeSender.playerBuilder()` / `consoleBuilder()` あり。 | downstream guide、JUnit extension、assertion utilities。                     |
 | Adventure / MiniMessage             | `[~]` | platform 非依存の rich text 値型 `RichText`（色、装飾、hover text、click、translatable 引数）を全 platform で送れる（Phase 1 完了）。Paper / modded は native component の `sendSuccess/Warn/Failure` もある。 | rich help、suggestion tooltip、MiniMessage。設計: [`docs/design/rich-text-messages.md`](design/rich-text-messages.md)。 |
 | Multi-version integration tests     | `[~]` | `integration-test` aggregator と Spigot / Mohist fixtures（1.16.5〜1.21.0）がある。                                                             | CI matrix、`IntegrationTarget` への platform フィールド追加、result docs、test kit 化。  |
 | NMS Reflection test strategy        | `[~]` | `CommandTester` が `Mockito.mockStatic` で `NMSClassRegistry` をスタブし、軽量な Mock 実装クラス方式で NMS なしテストを実現している。                 | `CommandTester` Builder パターン化、新引数追加時の Mock + Test セット作成ルール整備。              |
@@ -445,7 +445,7 @@ CommandLib は、この repository 自体だけでなく downstream plugin autho
 #### テスト層の方針
 
 - **Layer 1 (unit)**: `spigot:test` / `common:test` — NMS 非依存ロジックを検証。
-- **Layer 2 (command-level)**: `spigot-test` の `CommandTester` — `Mockito.mockStatic` で `NMSClassRegistry` を
+- **Layer 2 (command-level)**: `spigot-testing` の `CommandTester` — `Mockito.mockStatic` で `NMSClassRegistry` を
   スタブし、実 NMS なしでコマンド parse・実行を検証。CommandAPI の「実 NMS + `Bootstrap.bootStrap()` +
   Mockito スパイ」方式は採用しない。
 - **Layer 3 (integration)**: `integration-test` — Testcontainers + 実 Minecraft サーバー + MCProtocolLib で E2E 検証。
@@ -454,7 +454,7 @@ CommandLib は、この repository 自体だけでなく downstream plugin autho
 
 Required:
 
-- `spigot-test` を public testing framework として文書化する。
+- `spigot-testing` を public testing framework として文書化する。
 - common parser tests。
 - help、usage、errors の snapshot tests。
 - fake sender、fake player、fake permission model。

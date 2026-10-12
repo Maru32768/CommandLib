@@ -1,25 +1,22 @@
 # Testing Module Structure
 
-This document defines how the test modules and the integration-test module are organized after the pre-GA `spigot` / `paper` module split.
+This document defines how the test modules and the integration-test module are organized now that the `spigot` / `paper` module split is done.
 
 ## Assumptions
 
-- The current `bukkit` module is effectively a Spigot-compatible implementation.
-- The current `bukkit-test` depends on `:bukkit` and provides Spigot/Bukkit command testing utilities and NMS mocks.
-- The current `bukkit-integration-test` handles Bukkit / Paper / Mohist fixtures for multiple Minecraft versions in a single module.
-- Forge, Paper, and Folia will also be testing targets, so a public guide built around `bukkit-test` should not be fixed in advance.
+- `spigot-testing` depends on `:spigot` and provides Spigot/Bukkit command testing utilities and NMS mocks.
+- `integration-test` handles Spigot / Paper / Mohist / Forge / NeoForge fixtures for multiple Minecraft versions in a single module.
+- Forge, Paper, and Folia are also testing targets, so the public testing guide is not built around Spigot alone.
 
 ## Goals
 
 - Separate public testing artifacts from repository-only integration tests.
-- Migrate the current `bukkit-test` to `spigot-test`.
 - Handle Paper-only behavior in `paper-testing` and Paper integration targets.
-- Leave room to add a Forge testing story later.
+- Provide a serverless Forge / NeoForge testing story (`modded-testing`).
 - Keep the aggregator approach for integration tests at first, and make platform targets explicit.
 
 ## Non-Goals
 
-- Do not keep the `bukkit-test` artifact after GA.
 - Do not publish the integration-test module as a public artifact.
 - Do not mix Paper-specific tests into the Spigot testing utilities.
 - Do not fold Forge testing into the Spigot/Paper testing utilities.
@@ -28,43 +25,30 @@ This document defines how the test modules and the integration-test module are o
 
 ### Public test artifacts
 
-| Module | Published | Successor of | Role |
-|---|---:|---|---|
-| `common-test` | Maybe | none | Test helpers for the `common` parser / command tree / options / help / permission model. Whether to publish it needs discussion. |
-| `spigot-test` | Yes | `bukkit-test` | Command testing utilities for Spigot/Bukkit plugins. Includes NMS mocks and a fake sender. |
-| `paper-testing` | Yes | none | Testing utilities for the Paper command API, Adventure components, Paper suggestions, and Paper registry arguments. |
-| `forge-testing-<version>` | Yes | none | Forge command testing utilities. One artifact per Minecraft version, like `forge`. |
+| Module | Published | Role |
+|---|---:|---|
+| `common-testing` | Yes | Test helpers for commands built against the platform-neutral `common` API. |
+| `spigot-testing` | Yes | Command testing utilities for Spigot/Bukkit plugins. Includes NMS mocks and a fake sender. |
+| `paper-testing` | Yes | Testing utilities for the Paper command API, Adventure components, Paper suggestions, and Paper registry arguments. |
+| `modded-testing` | Yes | Forge / NeoForge command testing utilities, published as `forge-testing-<version>` and `neoforge-testing-<version>` (one artifact per node, like `modded`). |
 
 ### Repository-only integration modules
 
 | Module | Published | Role |
 |---|---:|---|
-| `integration-test` | No | Multi-platform integration test aggregator. Candidate rename target for the current `bukkit-integration-test`. |
+| `integration-test` | No | Multi-platform integration test aggregator. |
 | `spigot-integration-test` | No | Future split target if the aggregator grows too large. |
 | `paper-integration-test` | No | Future split target if Paper official API / Adventure / latest Paper tests grow. |
 | `mohist-integration-test` | No | Future split target if Mohist-specific differences grow. |
-| `forge-integration-test` | No | Integration tests for the Forge server/mod environment. |
+| `modded-integration-test` | No | Future split target for the Forge / NeoForge server/mod environment. |
 
-Recommended:
+Current approach:
 
-- Before GA, use the `integration-test` aggregator approach as the baseline.
-- Rename `bukkit-integration-test` to `integration-test`.
-- Make `spigot`, `paper`, and `mohist` explicit in target IDs / fixture names.
+- Use the `integration-test` aggregator as the baseline (renamed from `bukkit-integration-test`).
+- The `spigot`, `paper`, `mohist`, and modded platforms are explicit in target IDs / fixture names.
 - Split out `paper-integration-test` once Paper-only fixtures grow and the aggregator becomes hard to manage.
 
-## Current Module Mapping
-
-| Current | Target | Notes |
-|---|---|---|
-| `bukkit-test` | `spigot-test` | The current `bukkit` moves to `spigot`, so the test artifact is renamed too. |
-| `bukkit-integration-test` | `integration-test` | Renamed as a multi-platform aggregator. |
-| `bukkit-integration-test/fixtures/test-plugin-*` | `integration-test/fixtures/spigot-*` or target metadata | Make the platform target explicit, not just the fixture name. |
-| `bukkit-integration-test/fixtures/*-mohist` | `integration-test/fixtures/mohist-*` | Make it explicit as a Mohist target. |
-| `test-plugin-common` | `common` | Kept as the shared fixture source for Spigot/Paper/Mohist. |
-
-## `spigot-test`
-
-`spigot-test` is the successor of the current `bukkit-test`.
+## `spigot-testing`
 
 Responsibilities:
 
@@ -82,17 +66,9 @@ Dependencies:
 - Brigadier.
 - Mockito / AssertJ / JUnit where needed.
 
-Migration from `bukkit-test`:
-
-- Rename / move the `bukkit-test` module to `spigot-test`.
-- Change `api(project(":bukkit"))` to `api(project(":spigot"))`.
-- Keep the public package `dev.marulabs.commandlib`.
-- Keep the NMS mock package for now, aligned with the NMS util in the Spigot module.
-- README / downstream docs point to the `spigot-test` artifact.
+The public package is `dev.marulabs.commandlib`. The NMS mock package stays aligned with the NMS util in the Spigot module.
 
 ## `paper-testing`
-
-`paper-testing` is a new module.
 
 Responsibilities:
 
@@ -114,9 +90,9 @@ Open questions:
 - Whether CommandLib should have its own Adventure component assertions or rely on Kyori test utilities.
 - Whether to include Folia-safe behavior in `paper-testing` or create a separate `folia-test`.
 
-## `forge-testing`
+## `modded-testing`
 
-`forge-testing` uses the same Stonecutter setup as `forge` and publishes `forge-testing-<version>` per Minecraft version.
+`modded-testing` uses the same Stonecutter setup as `modded` and publishes `forge-testing-<version>` / `neoforge-testing-<version>` per node.
 
 Responsibilities:
 
@@ -128,7 +104,7 @@ Responsibilities:
 
 Decisions:
 
-- Like `forge`, the testing API is split into per-version artifacts. The shape of the public API (`CommandTester` / `FakeSender`) is
+- Like `modded`, the testing API is split into per-version artifacts. The shape of the public API (`CommandTester` / `FakeSender`) is
   the same across all versions.
 - Run Minecraft's `Bootstrap` to initialize the registries, and parse vanilla argument types with the real implementations. The
   `NetworkHooks.init` called by `Bootstrap` on Forge 1.17+ assumes FML's class transformer, so it is mocked only during bootstrap.
@@ -138,12 +114,11 @@ Decisions:
 
 Open questions:
 
-- Whether to build test utilities that can be shared with NeoForge.
 - Whether to fake arguments that need a world / scoreboard (such as `TeamArgument`).
 
 ## `integration-test` Aggregator
 
-The current `bukkit-integration-test` is already close to an aggregator with multi-version targets.
+`integration-test` is an aggregator with multi-version targets.
 
 Keep:
 
@@ -152,12 +127,9 @@ Keep:
 - shared fixture source.
 - report file naming per target.
 
-Change:
+Remaining changes:
 
-- module name: `bukkit-integration-test` -> `integration-test`.
-- add the platform to the target metadata.
-- include the platform in fixture names.
-- dependencies in fixtures should target `spigot`, `paper`, or `mohist` explicitly.
+- platform is currently a string property (`"paper"`, `"mohist"`, `"spigot"`) in the shared Bukkit-family script; the modded targets use a separate shared script.
 - task names should include platform where useful.
 
 Suggested target metadata:
@@ -186,15 +158,6 @@ enum class Platform {
 }
 ```
 
-Suggested fixture naming:
-
-| Current | Target |
-|---|---|
-| `test-plugin-1.16.5` | `1.16.5-paper` |
-| `test-plugin-1.16.5-mohist` | `1.16.5-mohist` |
-| `test-plugin-1.20.1-mohist` | `1.20.1-mohist` |
-| `test-plugin-common` | `common` |
-
 Fixtures are now named `{version}-{server}` (e.g. `1.20.6-paper`). Fixtures using the paper CommandLib module set `extra["commandlibModule"] = "paper"` explicitly (1.20.6+).
 
 ## Split Decision
@@ -216,42 +179,17 @@ Split later when:
 - Gradle task graph becomes too hard to maintain in one module.
 - CI needs separate jobs with independent caching and failure reporting.
 
-## Migration Plan
+## Remaining Work
 
-### Step 1: after module split
-
-- Rename `bukkit-test` to `spigot-test`.
-- Update dependency from `:bukkit` to `:spigot`.
-- Keep public package names stable.
-- Update root `publishedProjects`.
-- Update README / docs references.
-
-### Step 2: integration module rename
-
-- Rename `bukkit-integration-test` to `integration-test`.
-- Add `platform` to integration target metadata.
-- Rename fixtures or add explicit platform metadata.
-- Update Gradle task names and reports where useful.
-
-### Step 3: Paper testing
-
-- Add `paper-testing` after `paper` module public API exists.
-- Add Paper-specific integration targets.
-- Add Adventure component assertions.
-- Add Paper command API registration tests.
-
-### Step 4: Forge testing
-
-- Add `forge-testing` after Forge module version strategy is defined.
-- Add Forge integration targets only when server/mod bootstrap is reliable.
+- Decide whether the platform metadata should become a typed model instead of the current per-script `platform` property.
+- Add Fabric / Folia / Velocity testing targets when those platforms are added.
+- Split `paper-integration-test` or `modded-integration-test` out of the aggregator when the "Split later when" conditions above hold.
 
 ## Roadmap Checklist
 
-- `[x]` Rename `bukkit-test` to `spigot-test`.
-- `[x]` Rename `bukkit-integration-test` to `integration-test`.
-- `[ ]` Add platform metadata to integration targets.
-- `[ ]` Decide fixture naming convention.
-- `[x]` Add `paper-testing` design after Paper module API is drafted.
-- `[x]` Add `forge-testing` after Forge support strategy is updated.
+- `[x]` Rename `bukkit-test` to `spigot-testing` and `bukkit-integration-test` to `integration-test`.
+- `[x]` Add `paper-testing`, `common-testing`, and `modded-testing`.
+- `[x]` Decide fixture naming: `{version}-{server}` (for example `1.20.6-paper`).
 - `[x]` Update README dependency snippets for test artifacts.
-- `[ ]` Publish `spigot-testing` and `paper-testing`; keep `integration-test` unpublished.
+- `[ ]` Typed platform metadata for integration targets.
+- `[ ]` Publish `spigot-testing` and `paper-testing` to the final repository; keep `integration-test` unpublished.
