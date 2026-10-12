@@ -70,10 +70,7 @@ formatted. The Stonecutter trees (`modded`, `modded-testing`, the modded test
 mod) are formatted without sorting imports, because conditional comments hold
 version-specific imports.
 
-The existing sources have not been reformatted with Spotless yet, so
-`spotlessApply` also rewrites files you did not touch. Until that one-time
-reformat is committed, keep only the changes to your own files, and
-`spotlessCheck` stays out of `check` (`isEnforceCheck = false`).
+`check` runs `spotlessCheck`, so unformatted Java fails the build.
 
 `.idea/codeStyles` holds the IntelliJ style the profile was derived from, so
 IntelliJ's reformat stays close, but Spotless decides. To format exactly as

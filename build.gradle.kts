@@ -38,8 +38,6 @@ fun com.diffplug.gradle.spotless.JavaExtension.formatJava() {
 }
 
 spotless {
-    // Not part of check until the tree has been reformatted once.
-    isEnforceCheck = false
     java {
         target(javaSources("**/src/**/*.java").minus(javaSources(*stonecutterSources)))
         formatJava()
