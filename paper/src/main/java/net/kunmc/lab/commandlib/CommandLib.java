@@ -14,6 +14,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.PluginDisableEvent;
+import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.Plugin;
@@ -68,6 +69,7 @@ public final class CommandLib implements Listener {
     private final List<String> registeredCommandNames = new ArrayList<>();
     private final List<Permission> registeredPermissions = new ArrayList<>();
     private boolean unregistered;
+    private boolean missedCommandsEventCheckScheduled;
 
     private CommandLib(Plugin plugin, PluginRegistrationState registrationState) {
         this.plugin = plugin;
@@ -113,7 +115,7 @@ public final class CommandLib implements Listener {
         CommandLib instance = new CommandLib(plugin,
                                              REGISTRATION_STATES.computeIfAbsent(plugin,
                                                                                  ignored -> new PluginRegistrationState()));
-        instance.registerDisableListener();
+        instance.registerPluginListener();
         try {
             instance.doRegister(commands, permissionPrefix);
         } catch (RuntimeException e) {
@@ -121,6 +123,9 @@ public final class CommandLib implements Listener {
             // listener do not leak and a later reload does not try to add it again.
             instance.unregister(false);
             throw e;
+        }
+        if (plugin.isEnabled()) {
+            instance.scheduleMissedCommandsEventCheck();
         }
         return instance;
     }
@@ -178,6 +183,39 @@ public final class CommandLib implements Listener {
         }
 
         unregister(false);
+    }
+
+    private void onPluginEnable(PluginEnableEvent event) {
+        if (event.getPlugin()
+                 .equals(plugin)) {
+            scheduleMissedCommandsEventCheck();
+        }
+    }
+
+    /**
+     * A plugin enabled after startup (e.g. by PlugMan) can still install its COMMANDS handler, but the event already
+     * fired, so the handler would only run on the next reload. At startup the event fires before the first tick, so a
+     * handler that has not run by then has missed it.
+     */
+    private void scheduleMissedCommandsEventCheck() {
+        // register() during onEnable() schedules the check, and the PluginEnableEvent that follows would do it again.
+        if (missedCommandsEventCheckScheduled) {
+            return;
+        }
+        missedCommandsEventCheckScheduled = true;
+        Bukkit.getGlobalRegionScheduler()
+              .execute(plugin, this::reloadIfCommandsEventMissed);
+    }
+
+    private void reloadIfCommandsEventMissed() {
+        synchronized (registrationState) {
+            if (unregistered || registrationState.dispatcher != null) {
+                return;
+            }
+        }
+        // Paper offers no public way to reach the live dispatcher outside the event, so take the /minecraft:reload
+        // path: it fires the COMMANDS handlers, rebuilds the help topics, and sends the command tree to players.
+        Bukkit.reloadData();
     }
 
     private void unregister(boolean updatePlayerCommands) {
@@ -333,17 +371,22 @@ public final class CommandLib implements Listener {
         }
     }
 
-    private void registerDisableListener() {
+    private void registerPluginListener() {
         // PluginManager#registerEvents rejects plugins that are not enabled yet, which is the case when register() is
         // called from the constructor or onLoad(), and a later COMMANDS lifecycle event may also fire before
-        // onEnable(). Registering with the handler list directly works in every phase. PluginDisableEvent is fired
+        // onEnable(). Registering with the handler lists directly works in every phase. PluginDisableEvent is fired
         // before the plugin is marked disabled, so the listener still receives it.
+        RegisteredListener listener = new RegisteredListener(this, (ignored, event) -> {
+            if (event instanceof PluginDisableEvent) {
+                onPluginDisable((PluginDisableEvent) event);
+            } else if (event instanceof PluginEnableEvent) {
+                onPluginEnable((PluginEnableEvent) event);
+            }
+        }, EventPriority.NORMAL, plugin, false);
         PluginDisableEvent.getHandlerList()
-                          .register(new RegisteredListener(this, (listener, event) -> {
-                              if (event instanceof PluginDisableEvent) {
-                                  onPluginDisable((PluginDisableEvent) event);
-                              }
-                          }, EventPriority.NORMAL, plugin, false));
+                          .register(listener);
+        PluginEnableEvent.getHandlerList()
+                         .register(listener);
     }
 
     private void registerWithRegistrar(Commands registrar,

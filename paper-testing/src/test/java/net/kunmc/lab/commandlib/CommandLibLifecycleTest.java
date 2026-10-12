@@ -10,11 +10,14 @@ import io.papermc.paper.plugin.lifecycle.event.LifecycleEventManager;
 import io.papermc.paper.plugin.lifecycle.event.handler.LifecycleEventHandler;
 import io.papermc.paper.plugin.lifecycle.event.registrar.ReloadableRegistrarEvent;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEventType;
+import io.papermc.paper.threadedregions.scheduler.GlobalRegionScheduler;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
 import org.bukkit.event.EventException;
 import org.bukkit.event.Listener;
+import org.bukkit.event.Event;
 import org.bukkit.event.server.PluginDisableEvent;
+import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.permissions.Permission;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
@@ -38,6 +41,7 @@ import static org.mockito.Mockito.*;
 class CommandLibLifecycleTest {
     private final List<LifecycleEventHandler<ReloadableRegistrarEvent<Commands>>> handlers = new ArrayList<>();
     private final Set<String> foreignLabels = new HashSet<>();
+    private final List<Runnable> scheduledTasks = new ArrayList<>();
     private MockedStatic<Bukkit> bukkit;
     private PluginManager pluginManager;
     private Plugin plugin;
@@ -69,6 +73,12 @@ class CommandLibLifecycleTest {
         // Permission#setDefault recalculates permissibles through the server.
         bukkit.when(Bukkit::getServer)
               .thenReturn(server);
+        GlobalRegionScheduler scheduler = mock(GlobalRegionScheduler.class);
+        doAnswer(invocation -> scheduledTasks.add(invocation.getArgument(1))).when(scheduler)
+                                                                               .execute(any(Plugin.class),
+                                                                                        any(Runnable.class));
+        bukkit.when(Bukkit::getGlobalRegionScheduler)
+              .thenReturn(scheduler);
     }
 
     @AfterEach
@@ -76,6 +86,8 @@ class CommandLibLifecycleTest {
         // CommandLib registers its disable listener on the static handler list, so remove it to keep tests isolated.
         PluginDisableEvent.getHandlerList()
                           .unregister(plugin);
+        PluginEnableEvent.getHandlerList()
+                         .unregister(plugin);
         bukkit.close();
     }
 
@@ -92,6 +104,52 @@ class CommandLibLifecycleTest {
 
         assertThat(dispatcher.getRoot()
                              .getChild("hello")).isNotNull();
+    }
+
+    @Test
+    void plugin_enabled_after_startup_reloads_data_once_to_fire_the_missed_commands_event() {
+        when(plugin.isEnabled()).thenReturn(false);
+        CommandLib.register(plugin, "test", helloCommand());
+        when(plugin.isEnabled()).thenReturn(true);
+        CommandLib.register(plugin, "test", namedCommand("other"));
+        callEvent(new PluginEnableEvent(plugin));
+        List<CommandDispatcher<CommandSourceStack>> reloaded = new ArrayList<>();
+        bukkit.when(Bukkit::reloadData)
+              .thenAnswer(invocation -> reloaded.add(fireCommandsEvent()));
+
+        runScheduledTasks();
+
+        bukkit.verify(Bukkit::reloadData);
+        assertThat(reloaded).singleElement()
+                            .satisfies(dispatcher -> {
+                                assertThat(dispatcher.getRoot()
+                                                     .getChild("hello")).isNotNull();
+                                assertThat(dispatcher.getRoot()
+                                                     .getChild("other")).isNotNull();
+                            });
+    }
+
+    @Test
+    void commands_event_fired_at_startup_does_not_reload_data() {
+        when(plugin.isEnabled()).thenReturn(false);
+        CommandLib.register(plugin, "test", helloCommand());
+        callEvent(new PluginEnableEvent(plugin));
+        fireCommandsEvent();
+
+        runScheduledTasks();
+
+        bukkit.verify(Bukkit::reloadData, never());
+    }
+
+    @Test
+    void unregistered_commands_do_not_reload_data() {
+        when(plugin.isEnabled()).thenReturn(true);
+        CommandLib.register(plugin, "test", helloCommand())
+                  .unregister();
+
+        runScheduledTasks();
+
+        bukkit.verify(Bukkit::reloadData, never());
     }
 
     @Test
@@ -142,6 +200,8 @@ class CommandLibLifecycleTest {
         } finally {
             PluginDisableEvent.getHandlerList()
                               .unregister(latePlugin);
+            PluginEnableEvent.getHandlerList()
+                             .unregister(latePlugin);
         }
     }
 
@@ -346,10 +406,19 @@ class CommandLibLifecycleTest {
                      .toList();
     }
 
+    private void runScheduledTasks() {
+        List<Runnable> tasks = new ArrayList<>(scheduledTasks);
+        scheduledTasks.clear();
+        tasks.forEach(Runnable::run);
+    }
+
     private static void callDisableEvent(Plugin disabled) {
-        PluginDisableEvent event = new PluginDisableEvent(disabled);
-        for (RegisteredListener listener : PluginDisableEvent.getHandlerList()
-                                                             .getRegisteredListeners()) {
+        callEvent(new PluginDisableEvent(disabled));
+    }
+
+    private static void callEvent(Event event) {
+        for (RegisteredListener listener : event.getHandlers()
+                                                .getRegisteredListeners()) {
             try {
                 listener.callEvent(event);
             } catch (EventException e) {
