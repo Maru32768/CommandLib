@@ -615,6 +615,27 @@ or component passed in. `RichTexts.toBungee` (spigot), `RichTexts.toAdventure` (
 (Forge / NeoForge) convert a `RichText` to the native component. For Paper-only plugins, Adventure and MiniMessage can
 be used directly: `ctx.sendMessage(MiniMessage.miniMessage().deserialize("<red>Hello"))`.
 
+## Server Help
+
+The server's `/help` lists each Bukkit command with a short text under the plugin's index, and `/help <command>` shows
+its page. A command's `description(...)` is shown there when it is a string; a description computed from the command
+context has no context there, so `serverHelp` sets the text for the server help on its own:
+
+```java
+public final class SpawnCommand extends Command {
+    public SpawnCommand() {
+        super("spawn");
+        description(ctx -> "Teleports " + ctx.getSender().getName() + " to the spawn.");
+        // The short text for the /help lists, and optionally the whole /help spawn page.
+        serverHelp("Teleports you to the spawn.", "Teleports you to the spawn of the current world.");
+    }
+}
+```
+
+Without either, the command is listed as "A command by the &lt;plugin&gt; plugin.". Without the page, `/help <command>`
+shows the short text, the usage and the aliases. Only top-level commands use it, and Forge / NeoForge, which have no
+server help, ignore it.
+
 ## Permissions
 
 CommandLib automatically generates and registers permission nodes for each command, subcommand, and argument branch.

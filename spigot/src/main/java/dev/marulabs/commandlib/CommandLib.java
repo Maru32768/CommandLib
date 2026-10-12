@@ -218,15 +218,12 @@ public final class CommandLib implements Listener {
                     }
                     BukkitCommand wrapper = NMSVanillaCommandWrapper.create()
                                                                     .createInstance(vanillaDispatcher, x);
-                    describe(wrapper,
-                             Objects.requireNonNull(commandsByLabel.get(x.getName())),
-                             x,
-                             permissionPrefix,
-                             plugin.getName());
+                    Command command = Objects.requireNonNull(commandsByLabel.get(x.getName()));
+                    describe(wrapper, command, x, permissionPrefix, plugin.getName());
                     // Marks the wrapper as registered, as SimpleCommandMap#register does; help topics hide others.
                     wrapper.register(commandMap);
                     knownCommands.put(x.getName(), wrapper);
-                    HelpTopic helpTopic = new GenericCommandHelpTopic(wrapper);
+                    HelpTopic helpTopic = helpTopic(wrapper, command);
                     putHelpTopic(Bukkit.getHelpMap(), helpTopic);
                     registeredHelpTopics.add(helpTopic);
 
@@ -255,7 +252,7 @@ public final class CommandLib implements Listener {
 
     /**
      * Replaces what VanillaCommandWrapper reports for a Mojang command ("A Mojang provided command.", the
-     * minecraft.command.&lt;name&gt; permission) with the command's own description, usage and permission, which
+     * minecraft.command.&lt;name&gt; permission) with the command's own server help text, usage and permission, which
      * /help and other plugins read. The Brigadier requirement still checks the permission when the command runs.
      */
     static void describe(BukkitCommand wrapper,
@@ -264,15 +261,25 @@ public final class CommandLib implements Listener {
                          String permissionPrefix,
                          String pluginName) {
         wrapper.setPermission(command.permissionName(permissionPrefix));
-        String description = command.staticDescription();
-        wrapper.setDescription(description == null || description.isEmpty()
-                ? "A command by the " + pluginName + " plugin." : description);
+        wrapper.setDescription(command.serverHelpShortText(pluginName));
         wrapper.setUsage(usage(node));
         List<String> otherLabels = new ArrayList<>();
         otherLabels.add(command.name());
         otherLabels.addAll(command.aliases());
         otherLabels.remove(node.getName());
         wrapper.setAliases(otherLabels);
+    }
+
+    /**
+     * The topic CraftBukkit would make for the wrapper, with the page set by {@link Command#serverHelp(String, String)}.
+     */
+    static HelpTopic helpTopic(BukkitCommand wrapper, Command command) {
+        HelpTopic topic = new GenericCommandHelpTopic(wrapper);
+        String fullText = command.serverHelpFullText();
+        if (fullText != null) {
+            topic.amendTopic(null, fullText);
+        }
+        return topic;
     }
 
     private static String usage(CommandNode<?> node) {

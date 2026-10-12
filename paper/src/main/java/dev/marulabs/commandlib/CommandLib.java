@@ -81,7 +81,8 @@ public final class CommandLib implements Listener {
     private @Nullable CommandDispatcher<CommandSourceStack> dispatcher;
     private final List<String> registeredCommandNames = new ArrayList<>();
     private final List<Permission> registeredPermissions = new ArrayList<>();
-    private final Map<String, String> helpTopicPermissions = new HashMap<>();
+    private final Map<String, Command> commandsByLabel = new HashMap<>();
+    private String permissionPrefix = "";
     private boolean unregistered;
     private boolean missedCommandsEventCheckScheduled;
 
@@ -194,11 +195,16 @@ public final class CommandLib implements Listener {
         List<Command> list = List.copyOf(commands);
         list.forEach(c -> c.permissions(permissionPrefix)
                            .forEach(p -> BOOTSTRAP_PERMISSION_DEFAULTS.put(p.getName(), p.getDefault())));
+        Map<String, Command> commandsByLabel = commandsByLabel(list);
+        String pluginName = context.getPluginMeta()
+                                   .getName();
         context.getLifecycleManager()
                .registerEventHandler(LifecycleEvents.COMMANDS, event -> {
                    for (LiteralCommandNode<CommandSourceStack> node : buildNodes(list, permissionPrefix)) {
                        event.registrar()
-                            .register(node, "");
+                            .register(node,
+                                      Objects.requireNonNull(commandsByLabel.get(node.getLiteral()))
+                                             .serverHelpShortText(pluginName));
                    }
                });
     }
@@ -220,6 +226,16 @@ public final class CommandLib implements Listener {
         return bootstrapDefault.getValue(sender.isOp());
     }
 
+    private static Map<String, Command> commandsByLabel(Collection<? extends Command> commands) {
+        Map<String, Command> map = new HashMap<>();
+        for (Command command : commands) {
+            map.put(command.name(), command);
+            command.aliases()
+                   .forEach(alias -> map.put(alias, command));
+        }
+        return map;
+    }
+
     private static List<LiteralCommandNode<CommandSourceStack>> buildNodes(Collection<? extends Command> commands,
                                                                            String permissionPrefix) {
         return new CommandNodeCreator<CommandSourceStack, net.kyori.adventure.text.Component, CommandContext, Command>(commands,
@@ -228,11 +244,8 @@ public final class CommandLib implements Listener {
 
     private void doRegister(Collection<? extends Command> commands, String permissionPrefix) {
         doRegisterPermissions(plugin, permissionPrefix, commands);
-        for (Command command : commands) {
-            helpTopicPermissions.put(command.name(), command.permissionName(permissionPrefix));
-            command.aliases()
-                   .forEach(alias -> helpTopicPermissions.put(alias, command.permissionName(permissionPrefix)));
-        }
+        this.permissionPrefix = permissionPrefix;
+        commandsByLabel.putAll(commandsByLabel(commands));
 
         PendingRegistration registration = new PendingRegistration(this, commands, permissionPrefix);
         synchronized (registrationState) {
@@ -287,16 +300,21 @@ public final class CommandLib implements Listener {
     }
 
     /**
-     * Paper's help topic for a registered command has no permission, so /help would list it for everyone. The help
-     * map is rebuilt after the COMMANDS event, so the topics are restricted once it is ready.
+     * Paper's help topic for a registered command has no permission, so /help would list it for everyone, and its page
+     * is generated. The help map is rebuilt after the COMMANDS event, so the topics are amended once it is ready.
      */
-    private void restrictHelpTopics() {
+    private void amendHelpTopics() {
         for (String label : registeredCommandNames) {
             HelpTopic topic = Bukkit.getHelpMap()
                                     .getHelpTopic("/" + label);
-            String permission = helpTopicPermissions.get(label.substring(label.indexOf(':') + 1));
-            if (topic != null && permission != null) {
-                topic.amendCanSee(permission);
+            Command command = commandsByLabel.get(label.substring(label.indexOf(':') + 1));
+            if (topic == null || command == null) {
+                continue;
+            }
+            topic.amendCanSee(command.permissionName(permissionPrefix));
+            String fullText = command.serverHelpFullText();
+            if (fullText != null) {
+                topic.amendTopic(null, fullText);
             }
         }
     }
@@ -500,7 +518,7 @@ public final class CommandLib implements Listener {
                 onPluginEnable((PluginEnableEvent) event);
             } else {
                 // ServerLoadEvent after startup or Bukkit /reload, ServerResourcesReloadedEvent after a data reload.
-                restrictHelpTopics();
+                amendHelpTopics();
             }
         }, EventPriority.NORMAL, plugin, false);
         PluginDisableEvent.getHandlerList()
@@ -521,7 +539,9 @@ public final class CommandLib implements Listener {
         for (LiteralCommandNode<CommandSourceStack> node : registration.buildNodes()) {
             // Record the labels Paper actually registered. It adds the namespaced label as well, and may skip a label
             // owned by another plugin, which unregister() must then leave alone.
-            registeredCommandNames.addAll(registrar.register(node, ""));
+            registeredCommandNames.addAll(registrar.register(node,
+                                                             Objects.requireNonNull(commandsByLabel.get(node.getLiteral()))
+                                                                    .serverHelpShortText(plugin.getName())));
         }
     }
 

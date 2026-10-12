@@ -81,6 +81,38 @@ class CommandHelpTopicTest {
     }
 
     @Test
+    void serverHelpTextReplacesTheDescription() {
+        Command command = new Command("foo");
+        command.description("Does foo things");
+        command.serverHelp("Short help");
+        BukkitCommand wrapper = wrapper("foo");
+
+        CommandLib.describe(wrapper, command, node("foo"), "plugin.command", "Plugin");
+
+        assertThat(wrapper.getDescription()).isEqualTo("Short help");
+    }
+
+    @Test
+    void helpTopicShowsTheServerHelpPageWhenSet() {
+        Command generated = new Command("foo");
+        generated.serverHelp("Short help");
+        Command custom = new Command("bar");
+        custom.serverHelp("Short help", "The whole page");
+        BukkitCommand generatedWrapper = wrapper("foo");
+        BukkitCommand customWrapper = wrapper("bar");
+        CommandLib.describe(generatedWrapper, generated, node("foo"), "plugin.command", "Plugin");
+        CommandLib.describe(customWrapper, custom, node("bar"), "plugin.command", "Plugin");
+
+        HelpTopic generatedTopic = CommandLib.helpTopic(generatedWrapper, generated);
+        HelpTopic customTopic = CommandLib.helpTopic(customWrapper, custom);
+
+        assertThat(generatedTopic.getShortText()).isEqualTo("Short help");
+        assertThat(generatedTopic.getFullText(mock(CommandSender.class))).contains("Short help", "/foo sub");
+        assertThat(customTopic.getShortText()).isEqualTo("Short help");
+        assertThat(customTopic.getFullText(mock(CommandSender.class))).isEqualTo("The whole page");
+    }
+
+    @Test
     void helpTopicIsVisibleOnlyWithTheCommandPermission() {
         Command command = new Command("foo");
         BukkitCommand wrapper = wrapper("foo");

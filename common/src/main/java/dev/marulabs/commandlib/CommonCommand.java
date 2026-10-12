@@ -17,6 +17,8 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
     private final String name;
     private Function<C, String> description = ctx -> "";
     private @Nullable String staticDescription = "";
+    private @Nullable String serverHelpShortText = null;
+    private @Nullable String serverHelpFullText = null;
     private @Nullable String permissionNodeOverride = null;
     private @Nullable DefaultPermission defaultPermissionOverride = null;
     private String permissionDescription = "";
@@ -64,12 +66,44 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
     }
 
     /**
-     * The description set as a string, for places without a command context such as a server help index. Null when
-     * the description is computed from the context.
+     * Sets the text the server's {@code /help} shows for this top-level command in its command lists, which is also
+     * the description of the command in the server's command map. Without it the description is used when it is set
+     * as a string, and otherwise a text naming the plugin. Platforms without a server help, such as Forge, ignore it.
+     */
+    public final void serverHelp(@NotNull String shortText) {
+        this.serverHelpShortText = Objects.requireNonNull(shortText);
+        this.serverHelpFullText = null;
+    }
+
+    /**
+     * Same as {@link #serverHelp(String)}, and replaces the whole page that {@code /help <command>} shows, which is
+     * otherwise generated from the short text, the usage and the aliases.
+     */
+    public final void serverHelp(@NotNull String shortText, @NotNull String fullText) {
+        this.serverHelpShortText = Objects.requireNonNull(shortText);
+        this.serverHelpFullText = Objects.requireNonNull(fullText);
+    }
+
+    /**
+     * The text for the server help's command lists: the {@link #serverHelp(String)} text, or else the description set
+     * as a string, or else a text naming the plugin, since the context-dependent description has no context there.
+     */
+    final String serverHelpShortText(String pluginName) {
+        if (serverHelpShortText != null) {
+            return serverHelpShortText;
+        }
+        if (staticDescription != null && !staticDescription.isEmpty()) {
+            return staticDescription;
+        }
+        return "A command by the " + pluginName + " plugin.";
+    }
+
+    /**
+     * The page set with {@link #serverHelp(String, String)}, or null to keep the generated one.
      */
     @Nullable
-    final String staticDescription() {
-        return staticDescription;
+    final String serverHelpFullText() {
+        return serverHelpFullText;
     }
 
     @SafeVarargs
