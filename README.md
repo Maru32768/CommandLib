@@ -581,6 +581,31 @@ public final class TestPlugin extends JavaPlugin {
 
 </details>
 
+## Messages
+
+`ctx.sendMessage`, `sendSuccess` (green), `sendWarn` (yellow), and `sendFailure` (red) accept a `String`, a native
+component, or a `RichText`. `RichText` is an immutable, platform-independent message that works the same on Spigot,
+Paper, and Forge / NeoForge, so code shared between platforms can send colors, decorations, hover text, and click
+actions:
+
+```java
+import net.kunmc.lab.commandlib.util.text.ClickAction;
+import net.kunmc.lab.commandlib.util.text.RichText;
+
+ctx.sendMessage(RichText.text("difficulty: ")
+                        .append(RichText.text("hard")
+                                        .color(0xFF5555)
+                                        .bold()
+                                        .hover(RichText.text("Click to change"))
+                                        .click(ClickAction.suggestCommand("/difficulty "))));
+ctx.sendFailure(RichText.translatable("commands.give.failed.toomanyitems", RichText.text("64")));
+```
+
+`sendSuccess` / `sendWarn` / `sendFailure` only color a message that has no color of its own and never change the value
+or component passed in. `RichTexts.toBungee` (spigot), `RichTexts.toAdventure` (paper), and `RichTexts.toVanilla`
+(Forge / NeoForge) convert a `RichText` to the native component. For Paper-only plugins, Adventure and MiniMessage can
+be used directly: `ctx.sendMessage(MiniMessage.miniMessage().deserialize("<red>Hello"))`.
+
 ## Permissions
 
 CommandLib automatically generates and registers permission nodes for each command, subcommand, and argument branch.
