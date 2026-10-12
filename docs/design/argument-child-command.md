@@ -67,8 +67,8 @@ API is expected to behave, and which internal boundaries are intentional.
   `CommonCommand`, `Arguments`, and `CommandNodeCreator` model remains the source
   of truth.
 - This does not require a raw-input parse fallback for parent arguments.
-  Brigadier can resolve parent arguments in argument-child trees after
-  `CommandExecutor` rebuilds the root context.
+  `CommonCommandContext` reads parent arguments from the Brigadier context and
+  its child contexts.
 
 ## Public API Shape
 
@@ -340,11 +340,10 @@ to parse both `difficulty` and `hard`.
 required because an argument-child command may need to parse parent arguments and
 child arguments.
 
-For argument-child commands, `CommandExecutor` rebuilds the Brigadier context
-from the root before creating the CommandLib context. This is important because
-Brigadier may split command execution context across parent/child command
-contexts. Rebuilding from the root gives CommandLib a context that can resolve
-the full executed command path.
+Brigadier splits the execution context of an argument-child command across
+parent and child command contexts. `CommonCommandContext` walks the context and
+its children and keeps one map from argument name to input token, so the
+executor can resolve every argument on the executed command path.
 
 Because of that, parent arguments can be read through the normal argument
 implementation:
@@ -358,7 +357,7 @@ final class Example {
 ```
 
 No raw-input fallback is required for the current implementation. If a future
-change removes or changes root context rebuilding, argument-child parsing should
+change alters how the context collects parent inputs, argument-child parsing should
 be revalidated with tests before adding any fallback behavior.
 
 ## Parent Argument References
@@ -471,7 +470,7 @@ use a real Brigadier command tree shape that fails without that fallback.
 - Prefer arity-prefix names (`BiArgumentBranch`, `TriArgumentBranch`) over
   numbered names (`ArgumentBranch2`, `ArgumentBranch3`).
 - Keep comments focused on why tree inheritance, help prefix reconstruction, or
-  context rebuilding is needed.
+  parent input collection is needed.
 
 ## Open Questions
 
