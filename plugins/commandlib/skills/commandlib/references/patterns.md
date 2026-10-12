@@ -179,7 +179,6 @@ Supported forms:
 /scan alex
 /scan -f alex
 /scan --force alex
-/scan -fv alex
 /scan -n 20 alex
 /scan --limit 20 alex
 /scan -f -n 20 --format json alex

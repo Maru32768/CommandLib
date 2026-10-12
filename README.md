@@ -861,4 +861,4 @@ Or in IntelliJ: **View > Tool Windows > Gradle > Download Sources**.
 CommandLib is licensed under the MIT License. See [LICENSE](./LICENSE).
 
 Spigot, Paper, Bukkit, Minecraft, Brigadier, Forge, and other platform APIs or runtimes are separate projects and may
-be governed by their own license terms. They are not bundled with ConfigLib unless explicitly stated otherwise.
+be governed by their own license terms. They are not bundled with CommandLib unless explicitly stated otherwise.
