@@ -1,6 +1,5 @@
 package dev.marulabs.commandlib;
 
-import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
@@ -118,10 +117,11 @@ public final class CommandLib implements Listener {
      * From 1.20.6 the commands are added straight to Paper's dispatcher, which /minecraft:reload replaces, moving only
      * Bukkit commands into the new one. The nodes are added again from a COMMANDS lifecycle handler, which Paper runs
      * before it sends the new tree to players. Paper takes such a handler only while the plugin is enabling, so a
-     * later registration adds them on ServerResourcesReloadedEvent instead, after the tree is sent: the change then
-     * races Paper's asynchronous tree building, which may log a ConcurrentModificationException, and the update on
-     * the next tick sends the full tree. The help topics, which the reload rebuilt without the commands, are put on
-     * that event in either case. Both are Paper API, so they are registered reflectively.
+     * later registration adds them on ServerResourcesReloadedEvent instead, after the trees are sent, and the update on
+     * the next tick sends them again with the commands. The trees are built on Paper's asynchronous pool, so the nodes
+     * are added without changing the maps a build may be iterating ({@link #addToPaperDispatcher}). The help topics,
+     * which the reload rebuilt without the commands, are put on that event in either case. Both are Paper API, so they
+     * are registered reflectively.
      */
     @SuppressWarnings("unchecked")
     private void registerResourcesReloadListener() {
@@ -188,7 +188,7 @@ public final class CommandLib implements Listener {
             return;
         }
         try {
-            addToPaperDispatcher(knownCommands());
+            addToPaperDispatcher();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -231,25 +231,24 @@ public final class CommandLib implements Listener {
         return ((Map<String, org.bukkit.command.Command>) knownCommandsField.get(commandMap));
     }
 
-    @SuppressWarnings("rawtypes")
-    private static RootCommandNode paperDispatcherRoot(Map<String, org.bukkit.command.Command> knownCommands) throws Exception {
-        CommandDispatcher dispatcher = ((CommandDispatcher) knownCommands.getClass()
-                                                                         .getDeclaredMethod("getDispatcher")
-                                                                         .invoke(knownCommands));
-        return dispatcher.getRoot();
-    }
-
     /**
      * Adds each node under its label and under "&lt;plugin&gt;:&lt;label&gt;", as Paper's registrar does. Paper shows a
      * node as a Bukkit command through the API node cached on it: a PluginCommandNode becomes a
      * PluginVanillaCommandWrapper, which names the plugin and the description and has no permission of its own, while
      * any other node becomes a VanillaCommandWrapper, "A Mojang provided command." with a minecraft.command.&lt;label&gt;
      * permission that Bukkit's dispatchCommand checks. The API node gets no children, so Paper's usage of it stays the
-     * label instead of testing the requirements of the children.
+     * label instead of testing the requirements of the children. Paper builds players' command trees on an
+     * asynchronous pool by iterating the root's children, so the nodes replace the root's maps instead of changing
+     * them ({@link CommandNodeChildren}).
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private void addToPaperDispatcher(Map<String, org.bukkit.command.Command> knownCommands) throws Exception {
-        RootCommandNode root = paperDispatcherRoot(knownCommands);
+    private void addToPaperDispatcher() throws Exception {
+        // Paper's live dispatcher, which its command map forwards to.
+        RootCommandNode root = NMSCraftServer.create(plugin.getServer())
+                                             .getServer()
+                                             .getCommandDispatcher()
+                                             .getBrigadier()
+                                             .getRoot();
         Constructor<?> pluginCommandNode = Class.forName("io.papermc.paper.command.brigadier.PluginCommandNode")
                                                 .getConstructor(String.class,
                                                                 Class.forName("io.papermc.paper.plugin.configuration.PluginMeta"),
@@ -260,6 +259,8 @@ public final class CommandLib implements Listener {
                                   .invoke(plugin);
         Field wrappedCached = CommandNode.class.getField("wrappedCached");
         Field unwrappedCached = CommandNode.class.getField("unwrappedCached");
+        List<String> labels = new ArrayList<>();
+        List<CommandNode<?>> labelNodes = new ArrayList<>();
         for (CommandNode<?> node : registeredCommands) {
             String description = Objects.requireNonNull(commandsByLabel.get(node.getName()))
                                         .serverHelpShortText(plugin.getName());
@@ -274,12 +275,12 @@ public final class CommandLib implements Listener {
                                                                                       false),
                                                                description);
                 wrappedCached.set(labelNode, apiNode);
-                // Paper's root adds the cached node in its place.
                 unwrappedCached.set(apiNode, labelNode);
-                removeRegisteredCommand(root, knownCommands, labelNode.getName());
-                root.addChild((CommandNode) apiNode);
+                labels.add(labelNode.getName());
+                labelNodes.add(labelNode);
             }
         }
+        CommandNodeChildren.replace(root, labels, labelNodes);
     }
 
     /**
@@ -315,7 +316,7 @@ public final class CommandLib implements Listener {
         try {
             Map<String, org.bukkit.command.Command> knownCommands = knownCommands();
             if (usesPaperCommandDispatcher()) {
-                addToPaperDispatcher(knownCommands);
+                addToPaperDispatcher();
                 showPaperHelpTopics(knownCommands);
             } else {
                 NMSDedicatedServer server = NMSCraftServer.create(plugin.getServer())
@@ -331,12 +332,13 @@ public final class CommandLib implements Listener {
                 CommandMap commandMap = NMSCraftServer.create(plugin.getServer())
                                                       .getCommandMap();
                 for (CommandNode x : registeredCommands) {
-                    removeRegisteredCommand(root, knownCommands, x.getName());
-                    removeCommand(vanillaRoot, x.getName());
-
-                    vanillaRoot.addChild(x);
+                    // Paper before 1.20.6 builds players' command trees asynchronously from the synced root.
+                    knownCommands.remove(x.getName());
+                    List<String> names = Collections.singletonList(x.getName());
+                    List<CommandNode<?>> added = Collections.singletonList(x);
+                    CommandNodeChildren.replace(vanillaRoot, names, added);
                     if (root != vanillaRoot) {
-                        root.addChild(x);
+                        CommandNodeChildren.replace(root, names, added);
                     }
                     BukkitCommand wrapper = NMSVanillaCommandWrapper.create()
                                                                     .createInstance(vanillaDispatcher, x);
@@ -670,21 +672,15 @@ public final class CommandLib implements Listener {
     private void unregisterCommands() {
         try {
             Map<String, org.bukkit.command.Command> knownCommands = knownCommands();
-            boolean usePaperCommandDispatcher = usesPaperCommandDispatcher();
-            RootCommandNode root;
-            RootCommandNode vanillaRoot = null;
-            if (usePaperCommandDispatcher) {
-                root = paperDispatcherRoot(knownCommands);
-            } else {
-                NMSDedicatedServer server = NMSCraftServer.create(plugin.getServer())
-                                                          .getServer();
-                root = server.getCommandDispatcher()
-                             .getBrigadier()
-                             .getRoot();
-                vanillaRoot = server.getVanillaCommandDispatcher()
-                                    .getBrigadier()
-                                    .getRoot();
-            }
+            NMSDedicatedServer server = NMSCraftServer.create(plugin.getServer())
+                                                      .getServer();
+            // On Paper 1.20.6+ the live dispatcher, which the command map forwards to.
+            RootCommandNode root = server.getCommandDispatcher()
+                                         .getBrigadier()
+                                         .getRoot();
+            RootCommandNode vanillaRoot = usesPaperCommandDispatcher() ? null : server.getVanillaCommandDispatcher()
+                                                                                      .getBrigadier()
+                                                                                      .getRoot();
 
             for (CommandNode<?> node : registeredCommands) {
                 removeRegisteredCommand(root, knownCommands, node.getName());
@@ -723,8 +719,9 @@ public final class CommandLib implements Listener {
         if (resourcesRoot == null) {
             return;
         }
-        removeCommand(resourcesRoot, label);
-        resourcesRoot.addChild((CommandNode) copy(node, label));
+        CommandNodeChildren.replace(resourcesRoot,
+                                    Collections.singletonList(label),
+                                    Collections.singletonList(copy(node, label)));
     }
 
     /**
@@ -781,24 +778,7 @@ public final class CommandLib implements Listener {
         knownCommands.remove(name);
     }
 
-    @SuppressWarnings("rawtypes")
-    private static void removeCommand(CommandNode<?> commandNode, String name) throws Exception {
-        if (commandNode == null) {
-            return;
-        }
-
-        Class<?> clazz = CommandNode.class;
-
-        Field children = clazz.getDeclaredField("children");
-        children.setAccessible(true);
-        ((Map) children.get(commandNode)).remove(name);
-
-        Field literals = clazz.getDeclaredField("literals");
-        literals.setAccessible(true);
-        ((Map) literals.get(commandNode)).remove(name);
-
-        Field arguments = clazz.getDeclaredField("arguments");
-        arguments.setAccessible(true);
-        ((Map) arguments.get(commandNode)).remove(name);
+    private static void removeCommand(CommandNode<?> commandNode, String name) {
+        CommandNodeChildren.replace(commandNode, Collections.singletonList(name), Collections.emptyList());
     }
 }

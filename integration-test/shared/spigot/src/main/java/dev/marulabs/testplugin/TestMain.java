@@ -185,7 +185,8 @@ public class TestMain {
                                                           List<String> afterReload = List.of(MainCommand.NAME + " "
                                                                   + HelpTopicTest.AFTER_RELOAD,
                                                                                              "function "
-                                                                                                     + DataPackFunctionTest.FUNCTION);
+                                                                                                     + DataPackFunctionTest.FUNCTION,
+                                                                                             ScenarioTest.LATE_COMMAND);
                                                           for (String afterReloadCommand : afterReload) {
                                                               dispatchProbe.dispatch(Bukkit.getConsoleSender(),
                                                                                      afterReloadCommand);

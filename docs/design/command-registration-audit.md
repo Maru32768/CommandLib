@@ -82,10 +82,13 @@ dev bundles. Line numbers refer to the commit that adds this document.
   again from a `COMMANDS` lifecycle handler registered reflectively, which Paper
   runs before it sends the new tree. Paper takes the handler only while the
   plugin is enabling; a registration after that adds them again on
-  `ServerResourcesReloadedEvent`, as before, after Paper has queued the
-  asynchronous tree building for players, which the change can race
-  (`ConcurrentModificationException` logged, seen in the paper-1.21.1 run before
-  the handler existed; the update on the next tick sends the full tree). Paper builds help
+  `ServerResourcesReloadedEvent`, after Paper has queued the asynchronous tree
+  building for players, and the update on the next tick sends the trees with the
+  commands. Every change of Paper's dispatcher, there and at registration and
+  unregister, replaces the root's children maps with changed copies instead of
+  changing them (`CommandNodeChildren`), so a tree being built keeps iterating
+  the old maps; changing them in place logged `ConcurrentModificationException`
+  (seen in the paper-1.21.1 run before the handler existed). Paper builds help
   topics only when the server loads and on `/minecraft:reload`, before that
   event, so CommandLib puts a topic for each label from Paper's wrapper with the
   command permission set on it at registration and after the reload
@@ -223,6 +226,7 @@ adds a `<modid>:` label for mod commands, so CommandLib adds none. There is no
 | Paper module, plugin enabled at runtime | the `COMMANDS` handler registers but does not fire until the next reload, so the commands are missing | `Bukkit.reloadData()` after runtime changes | Missing edge case | Fixed: once the plugin is enabled, a task on the next tick calls `Bukkit.reloadData()` if the handler has not run yet (`reloadIfCommandsEventMissed`). Startup fires the event before the first tick, so the check is a no-op there. A reload was chosen over a direct add because Paper has no public way to reach the live dispatcher outside the event (a fresh plugin has nothing cached), and the reload path also adds `<plugin>:<name>`, rebuilds help topics and sends the tree to players. Registering only after `onEnable()` with nothing cached still throws, since Paper then rejects the handler |
 | Paper module `plugin:<name>` label and `/help` | Paper's registrar adds the namespaced label and plugin-attributed help topics, but the topic had no permission | `/help` topics with permissions | Missing edge case | Fixed: topics are amended with the command permission (`amendHelpTopics`); namespaced labels need nothing |
 | Paper module runtime direct add / unregister | mutated the live root on the main thread and called `updateCommands()` at once; Paper builds the command tree on its async pool, which threw `ConcurrentModificationException` when a later change in the same tick mutated the root it read (seen in the paper-1.21.0 integration run when the fixture registers and unregisters in the same tick) | `Bukkit.reloadData()` on the next tick instead of mutating | Missing edge case; only logged, the next update sends a good tree | Fixed: a data reload on the next tick was used first, which reloads every data pack and resource for each tick with a change. Now the change replaces the root's children maps instead of changing them (`replaceChildren`), so no tree build in progress, ours or one for a joining player, can see a map change under it; the labels are `PluginCommandNode`s with help topics, as the registrar would make them; and players get one tree update on the next tick for the tick's changes. A list copy of the root's children per change replaces a full data reload |
+| Spigot module on Paper 1.20.6+, registration after enabling | no `COMMANDS` handler (Paper refuses it), so the nodes were added on `ServerResourcesReloadedEvent` by changing the live root while Paper built the trees `syncCommands` had queued | - | Missing edge case; `ConcurrentModificationException` logged on `/minecraft:reload` | Fixed: the root's children maps are replaced instead of changed (`CommandNodeChildren`), at registration, unregister and after a reload; the update on the next tick sends the trees with the commands |
 | Paper < 1.20.6 async command tree | mutates the root on the main thread; skips the update on disable | same | Acceptable | - |
 | Paper module unregister on plugin disable | removed the commands but sent no tree, since the plugin's tasks are cancelled on disable | - | Bug: players kept the removed commands in their trees until the next update | Fixed: the trees are sent at once on disable, which the replaced maps make safe, except while the server stops |
 | Folia | no handling | runtime changes throw | Not supported (`compatibility.md`) | - |

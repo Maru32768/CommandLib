@@ -121,6 +121,10 @@ class IntegrationTest {
                 client.assertNotDisconnected();
 
                 assertJUnitReportSucceeded(reportFile, report.get());
+                // Paper builds players' command trees on an asynchronous pool, which a change of the live dispatcher
+                // must not break; the exception is only logged there.
+                assertThat(container.getLogs()).as("server log")
+                                               .doesNotContain("ConcurrentModificationException");
 
                 // Bot-side checks need the messages a player receives, which the console-driven report cannot see.
                 // Help message prefix: the usage must start with the typed command, not a token like an argument name.

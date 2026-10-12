@@ -28,6 +28,12 @@ public final class ScenarioTest extends TestBase {
      * Sub command dispatched after {@code /minecraft:reload} to check that the command tree survives the reload.
      */
     public static final String RELOAD_PROBE = "reloadProbe";
+    /**
+     * Command registered while the tests run, after the plugin was enabled, and dispatched after
+     * {@code /minecraft:reload}. On Paper 1.20.6+ it has no COMMANDS lifecycle handler, so it is added again after the
+     * reload has sent players their trees.
+     */
+    public static final String LATE_COMMAND = "commandliblate";
 
     private final Plugin plugin;
     private final String playerName;
@@ -45,6 +51,7 @@ public final class ScenarioTest extends TestBase {
         commands.addAll(executeRunAsPlayer());
         commands.addAll(executeRunWithArgument());
         commands.addAll(runtimeRegisteredCommandIsExecutableUntilUnregistered());
+        commands.addAll(lateRegisteredCommandSurvivesReload());
         deniedProbe();
         reloadProbe();
 
@@ -147,6 +154,23 @@ public final class ScenarioTest extends TestBase {
                        commandName,
                        namespacedName,
                        buildCommand(command, name));
+    }
+
+    public List<String> lateRegisteredCommandSurvivesReload() {
+        String name = getMethodName();
+        String key = getKey();
+
+        putResult(new TestResult(key, TestStatus.FAILED, LATE_COMMAND + " was not executed after /minecraft:reload."));
+        command.addChildren(new Command(name) {{
+            execute(ctx -> CommandLib.register(plugin, new Command(LATE_COMMAND) {{
+                permission(PermissionDefault.TRUE);
+                execute(inner -> putResult(new TestResult(key,
+                                                          TestStatus.SUCCEEDED,
+                                                          LATE_COMMAND + " survived /minecraft:reload.")));
+            }}));
+        }});
+
+        return List.of(buildCommand(command, name));
     }
 
     private void deniedProbe() {
