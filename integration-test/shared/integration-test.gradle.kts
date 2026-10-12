@@ -278,6 +278,19 @@ tasks.register("downloadServerJar") {
     }
 }
 
+val plugManXLibraries = listOf(
+    "com/fasterxml/oss-parent/43/oss-parent-43.pom",
+    "com/fasterxml/jackson/jackson-parent/2.13/jackson-parent-2.13.pom",
+    "com/fasterxml/jackson/jackson-bom/2.13.5/jackson-bom-2.13.5.pom",
+    "com/fasterxml/jackson/jackson-base/2.13.5/jackson-base-2.13.5.pom",
+    "com/fasterxml/jackson/core/jackson-annotations/2.13.5/jackson-annotations-2.13.5.pom",
+    "com/fasterxml/jackson/core/jackson-annotations/2.13.5/jackson-annotations-2.13.5.jar",
+    "com/fasterxml/jackson/core/jackson-core/2.13.5/jackson-core-2.13.5.pom",
+    "com/fasterxml/jackson/core/jackson-core/2.13.5/jackson-core-2.13.5.jar",
+    "com/fasterxml/jackson/core/jackson-databind/2.13.5/jackson-databind-2.13.5.pom",
+    "com/fasterxml/jackson/core/jackson-databind/2.13.5/jackson-databind-2.13.5.jar",
+)
+
 tasks.register("downloadPluginJars") {
     group = "setup"
     doLast {
@@ -288,6 +301,16 @@ tasks.register("downloadPluginJars") {
             }
             copyTargets.forEach { target ->
                 downloadIfMissing(urlString, projectDir.toPath().resolve(target).resolve(fileName).toFile())
+            }
+        }
+        // PlugManX 3.0.2 makes Paper resolve these from oss.sonatype.org, which Sonatype has retired. Paper looks in
+        // the server's libraries directory first, so placing them there from Maven Central avoids that repository.
+        if (pluginJarDownloads.any { it.contains("PlugManX-3.0.2.jar") }) {
+            plugManXLibraries.forEach { path ->
+                copyTargets.forEach { target ->
+                    val libraries = projectDir.toPath().resolve(target).parent.resolve("libraries")
+                    downloadIfMissing("https://repo.maven.apache.org/maven2/$path", libraries.resolve(path).toFile())
+                }
             }
         }
     }
