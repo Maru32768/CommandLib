@@ -54,6 +54,33 @@ Design notes under `docs/design` are written in English. Temporary working
 documents such as `docs/roadmap.md` and `docs/compatibility.md` are written in
 Japanese.
 
+## Formatting
+
+Java sources are formatted with Spotless and the Eclipse JDT formatter. The
+profile is `config/eclipse-formatter.xml`; `build.gradle.kts` adds the import
+order (others, `javax`/`java`, static) and keeps double brace initializations
+(`new Command("x") {{ ... }}`) on one line. Format changed files with:
+
+```bash
+./gradlew spotlessApply
+```
+
+The generated typed NMS sources (`nms/*`, `TypedNmsModules`) are not
+formatted. The Stonecutter trees (`modded`, `modded-testing`, the modded test
+mod) are formatted without sorting imports, because conditional comments hold
+version-specific imports.
+
+The existing sources have not been reformatted with Spotless yet, so
+`spotlessApply` also rewrites files you did not touch. Until that one-time
+reformat is committed, keep only the changes to your own files, and
+`spotlessCheck` stays out of `check` (`isEnforceCheck = false`).
+
+`.idea/codeStyles` holds the IntelliJ style the profile was derived from, so
+IntelliJ's reformat stays close, but Spotless decides. To format exactly as
+Spotless does in IntelliJ, install the "Adapter for Eclipse Code Formatter"
+plugin and point it at `config/eclipse-formatter.xml`, or run `spotlessApply`
+before committing.
+
 ## Public Usage Patterns
 
 When writing examples or tests that represent downstream user code, prefer the
