@@ -23,6 +23,10 @@ public abstract class NMSClass {
         }
     }
 
+    /**
+     * The wrapped server object, or null for a wrapper that only uses the static members of its server class, such as
+     * an argument type factory, and for the test mocks.
+     */
     @Nullable
     public final Object getHandle() {
         return handle;

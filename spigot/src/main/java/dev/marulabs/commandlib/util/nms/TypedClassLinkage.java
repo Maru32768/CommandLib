@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -229,8 +228,7 @@ final class TypedClassLinkage {
                 if (kinds == null || ownerName.startsWith("[")) {
                     continue;
                 }
-                // Not an array, so not a primitive element type either.
-                Class<?> owner = Objects.requireNonNull(resolveInternalName(ownerName, loader));
+                Class<?> owner = Class.forName(ownerName.replace('/', '.'), false, loader);
                 classNames.add(owner.getName());
                 // The check is for servers that differ from the jar a class was compiled against, not for the JDK,
                 // whose members the class's release has. A lookup also cannot resolve the JDK's caller-sensitive

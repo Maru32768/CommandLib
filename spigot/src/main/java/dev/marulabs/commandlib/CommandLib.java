@@ -443,8 +443,9 @@ public final class CommandLib implements Listener {
             for (CommandNode<?> node : registeredCommands) {
                 removeRegisteredCommand(root, knownCommands, node.getName());
 
-                if (!usePaperCommandDispatcher) {
-                    removeCommand(Objects.requireNonNull(vanillaRoot), node.getName());
+                // Only the Spigot dispatcher has a vanilla root of its own.
+                if (vanillaRoot != null) {
+                    removeCommand(vanillaRoot, node.getName());
                     removeMinecraftNamespacedCommand(root, knownCommands, node);
                     removeRegisteredCommand(root, knownCommands, namespace(plugin) + ":" + node.getName());
                 }
