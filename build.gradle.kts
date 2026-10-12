@@ -4,6 +4,7 @@ import net.ltgt.gradle.errorprone.errorprone
 plugins {
     id("com.diffplug.spotless") version "8.10.3"
     id("net.ltgt.errorprone") version "5.1.1" apply false
+    id("me.champeau.gradle.japicmp") version "0.4.6" apply false
 }
 
 allprojects {
@@ -221,5 +222,52 @@ configure(subprojects.filter { it.path in bukkitProjectPaths }) {
         options.errorprone.option("NullAway:AnnotatedPackages", "net.kunmc.lab.commandlib")
         // javac stops listing warnings at 100 by default.
         options.compilerArgs.addAll(listOf("-Xmaxwarns", "10000"))
+    }
+}
+
+// The release whose JitPack artifact each module's public API is compared with by the japicmp task. A module joins once
+// it has a release, and the entries move to each new release.
+val apiBaselines = mapOf(
+    ":common" to "common:0.17.2",
+    // 0.17.2 published this module as bukkit.
+    ":spigot" to "bukkit:0.17.2",
+)
+
+configure(subprojects.filter { it.path in apiBaselines }) {
+    repositories {
+        maven("https://jitpack.io") {
+            content { includeGroup("com.github.Maru32768.CommandLib") }
+        }
+    }
+
+    val baseline = apiBaselines.getValue(path)
+    val apiBaseline = configurations.create("apiBaseline") { isTransitive = false }
+    // The baseline's own CommandLib dependencies, such as common of the same release.
+    val apiBaselineClasspath = configurations.create("apiBaselineClasspath")
+    dependencies {
+        apiBaseline("com.github.Maru32768.CommandLib:$baseline")
+        apiBaselineClasspath("com.github.Maru32768.CommandLib:$baseline")
+    }
+
+    val compileClasspath = configurations.named("compileClasspath")
+    // The compile-only platform APIs, which the published POMs leave out, without the current CommandLib modules.
+    val externalCompileClasspath = compileClasspath.map { classpath ->
+        classpath.incoming.artifactView {
+            componentFilter { it !is org.gradle.api.artifacts.component.ProjectComponentIdentifier }
+        }.files
+    }
+    tasks.register<me.champeau.gradle.japicmp.JapicmpTask>("japicmp") {
+        group = "verification"
+        description = "Reports public API changes against the $baseline release."
+        oldArchives.from(apiBaseline)
+        oldClasspath.from(apiBaselineClasspath, externalCompileClasspath)
+        newArchives.from(tasks.named("jar"))
+        newClasspath.from(tasks.named("jar"), compileClasspath)
+        onlyBinaryIncompatibleModified.set(true)
+        // Under 0.x semantic versioning only a minor release may break the API.
+        failOnModification.set(baseline.substringAfter(":").substringBeforeLast(".") ==
+                                   version.toString().substringBeforeLast("."))
+        txtOutputFile.set(layout.buildDirectory.file("reports/japicmp/japicmp.txt"))
+        htmlOutputFile.set(layout.buildDirectory.file("reports/japicmp/japicmp.html"))
     }
 }

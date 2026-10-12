@@ -63,3 +63,9 @@ a field, parameter or return value `@Nullable` when null is a legitimate value, 
 The same modules publish a javadoc jar, and their `javadoc` task runs doclint without the `missing` group: broken
 Javadoc (malformed HTML, a bad `@param` name, an unknown `{@link}`) fails it, an undocumented member does not. Check
 with `./gradlew :common:javadoc :spigot:javadoc :paper:javadoc`.
+
+`./gradlew :common:japicmp :spigot:japicmp` compares the public API with the JitPack release named in `apiBaselines`
+in the root `build.gradle.kts` and writes `build/reports/japicmp/`. It lists binary-incompatible changes, and fails on
+them when the project version has the baseline's major and minor version, since only a minor release may break the API
+under 0.x versioning. It is not part of `check`. After a release, move the baselines to it and add the modules it
+published for the first time.
