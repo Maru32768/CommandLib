@@ -38,8 +38,7 @@ public final class RichTexts {
         }
         component = component.decoration(TextDecoration.BOLD, TextDecoration.State.byBoolean(text.isBold()))
                              .decoration(TextDecoration.ITALIC, TextDecoration.State.byBoolean(text.isItalic()))
-                             .decoration(TextDecoration.UNDERLINED,
-                                         TextDecoration.State.byBoolean(text.isUnderlined()))
+                             .decoration(TextDecoration.UNDERLINED, TextDecoration.State.byBoolean(text.isUnderlined()))
                              .decoration(TextDecoration.STRIKETHROUGH,
                                          TextDecoration.State.byBoolean(text.isStrikethrough()))
                              .decoration(TextDecoration.OBFUSCATED,

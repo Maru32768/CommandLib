@@ -2,9 +2,10 @@ package dev.marulabs.commandlib.nms.argument;
 
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
-import java.util.List;
 import dev.marulabs.commandlib.util.nms.argument.NMSArgumentEntities;
 import org.bukkit.entity.Entity;
+
+import java.util.List;
 
 public class MockNMSArgumentEntities extends NMSArgumentEntities {
     public MockNMSArgumentEntities() {

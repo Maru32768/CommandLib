@@ -79,8 +79,7 @@ public abstract class CommonArgument<T, C extends CommonCommandContext<?, ?>, SE
      */
     protected final void replaceDefaultSuggestions(@NotNull SuggestionAction<C> suggestionAction) {
         Objects.requireNonNull(suggestionAction);
-        this.suggestionActions.replaceAll(x -> x.isDefaultSuggestions() ? ArgumentSuggestionAction.custom(
-                suggestionAction) : x);
+        this.suggestionActions.replaceAll(x -> x.isDefaultSuggestions() ? ArgumentSuggestionAction.custom(suggestionAction) : x);
     }
 
     @SuppressWarnings("unchecked")

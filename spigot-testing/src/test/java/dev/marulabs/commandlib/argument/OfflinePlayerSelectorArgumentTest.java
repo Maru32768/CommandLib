@@ -36,7 +36,8 @@ class OfflinePlayerSelectorArgumentTest {
 
         run(sender, new OfflinePlayer[]{player("Steve", STEVE_ID), player("Alex", ALEX_ID)}, "players @a", "uuids @a");
 
-        assertThat(sender.getSentMessageTexts()).containsExactly("2:[Steve, Alex]", "2:[" + STEVE_ID + ", " + ALEX_ID + "]");
+        assertThat(sender.getSentMessageTexts()).containsExactly("2:[Steve, Alex]",
+                                                                 "2:[" + STEVE_ID + ", " + ALEX_ID + "]");
     }
 
     @Test
@@ -102,7 +103,8 @@ class OfflinePlayerSelectorArgumentTest {
                                                      });
                                                  }})
                                                  .command(() -> new Command("uuids") {{
-                                                     argument(new UUIDsArgument("targets")).execute((targets, ctx) -> {
+                                                     argument(new UUIDsArgument("targets")).execute((targets,
+                                                                                                     ctx) -> {
                                                          ctx.sendMessage(targets.size() + ":" + targets);
                                                      });
                                                  }})

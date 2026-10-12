@@ -104,7 +104,8 @@ public final class CommandOption<T, C extends CommonCommandContext<?, ?>> {
         return type != null;
     }
 
-    @Nullable ArgumentType<?> type() {
+    @Nullable
+    ArgumentType<?> type() {
         return type;
     }
 

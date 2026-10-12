@@ -15,8 +15,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class ArgumentIntegrationCoverageTest {
     private static final Set<String> EXCLUDED_ARGUMENTS = Set.of(
-            // Structural command node, already exercised indirectly by command tree tests.
-            "LiteralArgument");
+                                                                 // Structural command node, already exercised indirectly by command tree tests.
+                                                                 "LiteralArgument");
 
     @Test
     void spigot_public_arguments_have_integration_cases() throws IOException {
@@ -45,8 +45,7 @@ class ArgumentIntegrationCoverageTest {
     }
 
     private void assertIntegrationCases(Path rootDir, String moduleName, String argumentTestPath) throws IOException {
-        Set<String> arguments = new HashSet<>(publicArgumentClassNames(rootDir.resolve(
-                moduleName + "/src/main/java/dev/marulabs/commandlib/argument")));
+        Set<String> arguments = new HashSet<>(publicArgumentClassNames(rootDir.resolve(moduleName + "/src/main/java/dev/marulabs/commandlib/argument")));
         arguments.removeAll(EXCLUDED_ARGUMENTS);
 
         String argumentTestSource = Files.readString(rootDir.resolve(argumentTestPath));

@@ -30,7 +30,8 @@ public class UUIDsArgument extends Argument<List<UUID>, UUIDsArgument> {
                           return true;
                       }
                       return StringUtil.containsIgnoreCase(x.getUniqueId()
-                                                            .toString(), input);
+                                                            .toString(),
+                                                           input);
                   })
                   .forEach(x -> uuidToNameMap.put(x.getUniqueId(), x.getName()));
 

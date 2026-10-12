@@ -1,9 +1,8 @@
 package dev.marulabs.testplugin;
 
+import dev.marulabs.commandlib.Command;
 import dev.marulabs.integration.core.TestResult;
 import dev.marulabs.integration.core.TestStatus;
-
-import dev.marulabs.commandlib.Command;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -32,16 +31,13 @@ public abstract class TestBase {
         addCommandDispatchErrorHook(key,
                                     (commandLine, dispatchResult) -> resultMap.computeIfPresent(key,
                                                                                                 (ignored, result) -> {
-                                                                                                    if (result.status() != TestStatus.FAILED || !COMMAND_NOT_EXECUTED_MESSAGE.equals(
-                                                                                                            result.message())) {
+                                                                                                    if (result.status() != TestStatus.FAILED || !COMMAND_NOT_EXECUTED_MESSAGE.equals(result.message())) {
                                                                                                         return result;
                                                                                                     }
 
-                                                                                                    return new TestResult(
-                                                                                                            key,
-                                                                                                            TestStatus.FAILED,
-                                                                                                            COMMAND_NOT_EXECUTED_MESSAGE + "\n" + dispatchResult.describe(
-                                                                                                                    commandLine));
+                                                                                                    return new TestResult(key,
+                                                                                                                          TestStatus.FAILED,
+                                                                                                                          COMMAND_NOT_EXECUTED_MESSAGE + "\n" + dispatchResult.describe(commandLine));
                                                                                                 }));
     }
 

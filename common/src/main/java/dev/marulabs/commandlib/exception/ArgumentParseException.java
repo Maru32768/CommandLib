@@ -13,10 +13,9 @@ import java.util.function.Consumer;
 public class ArgumentParseException extends Exception {
     private final Consumer<CommonCommandContext<?, ?>> sendMessages;
 
-    protected static <C extends CommonCommandContext<?, ?>> Consumer<CommonCommandContext<?, ?>> buildIncorrectInputMessage(
-            String argumentName,
-            C ctx,
-            String incorrectInput) {
+    protected static <C extends CommonCommandContext<?, ?>> Consumer<CommonCommandContext<?, ?>> buildIncorrectInputMessage(String argumentName,
+                                                                                                                            C ctx,
+                                                                                                                            String incorrectInput) {
         // Resolve the context lazily: validators also run while suggesting, where the argument node may not have
         // been parsed yet and the message is never sent.
         return context -> {
@@ -61,10 +60,11 @@ public class ArgumentParseException extends Exception {
         // The incorrect token follows the nodes parsed so far, so search from their end. Searching the whole input
         // would pick another occurrence of the same text.
         List<? extends ParsedCommandNode<?>> nodes = ctx.getHandle()
-                                                       .getNodes();
+                                                        .getNodes();
         int parsedEnd = nodes.isEmpty() ? 0 : Math.min(nodes.get(nodes.size() - 1)
                                                             .getRange()
-                                                            .getEnd(), input.length());
+                                                            .getEnd(),
+                                                       input.length());
         if (incorrectInput.isEmpty()) {
             return parsedEnd;
         }

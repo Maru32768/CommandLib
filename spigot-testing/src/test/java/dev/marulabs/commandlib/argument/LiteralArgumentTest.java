@@ -54,7 +54,8 @@ class LiteralArgumentTest {
         FakeSender sender = FakeSender.player("Alice");
 
         try (CommandTester tester = new CommandTester(new Command("mode") {{
-            argument(new LiteralArgument("value", () -> literals)).execute((value, ctx) -> ctx.sendMessage("mode=" + value));
+            argument(new LiteralArgument("value",
+                                         () -> literals)).execute((value, ctx) -> ctx.sendMessage("mode=" + value));
         }}, "test.command")) {
             literals.add("off");
             tester.execute("mode off", sender);
@@ -65,7 +66,8 @@ class LiteralArgumentTest {
 
     private static Command modeCommand(List<String> literals) {
         return new Command("mode") {{
-            argument(new LiteralArgument("value", literals)).execute((value, ctx) -> ctx.sendMessage("mode=" + value));
+            argument(new LiteralArgument("value", literals)).execute((value,
+                                                                      ctx) -> ctx.sendMessage("mode=" + value));
         }};
     }
 

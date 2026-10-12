@@ -52,8 +52,7 @@ class CommandTesterTest {
         }}, "test.command");
 
         assertThatThrownBy(() -> tester.execute("secure", FakeSender.unknown())).isInstanceOf(RuntimeException.class)
-                                                                               .hasCauseInstanceOf(
-                                                                                       CommandSyntaxException.class);
+                                                                                .hasCauseInstanceOf(CommandSyntaxException.class);
     }
 
     @Test
@@ -103,9 +102,10 @@ class CommandTesterTest {
             execute(ctx -> {
                 ctx.sendSuccess("ok");
                 ctx.sendMessage(RichText.text("a")
-                                        .append(hint, RichText.translatable("b")
-                                                              .color(0x123456)
-                                                              .bold(false)));
+                                        .append(hint,
+                                                RichText.translatable("b")
+                                                        .color(0x123456)
+                                                        .bold(false)));
                 ctx.sendFailure(RichText.text("blue")
                                         .color(0x5555FF));
             });
@@ -123,9 +123,7 @@ class CommandTesterTest {
                                                                                .bold(false)),
                                                        RichText.text("blue")
                                                                .color(0x5555FF));
-        assertThat(sender.getSentMessageLegacyTexts()).containsExactly("§aok",
-                                                                       "§fa§f§lclick§x§1§2§3§4§5§6b",
-                                                                       "§9blue");
+        assertThat(sender.getSentMessageLegacyTexts()).containsExactly("§aok", "§fa§f§lclick§x§1§2§3§4§5§6b", "§9blue");
     }
 
     @Test
@@ -144,9 +142,9 @@ class CommandTesterTest {
     @Test
     void execute_and_get_context_returns_executed_context() {
         CommandTester tester = new CommandTester(new TestCommand("sum") {{
-            argument(new CommonIntegerArgument<>("left"), new CommonIntegerArgument<>("right")).execute((left, right,
-                                                                                                         ctx) -> {
-            });
+            argument(new CommonIntegerArgument<>("left"),
+                     new CommonIntegerArgument<>("right")).execute((left, right, ctx) -> {
+                     });
         }});
 
         TestCommandContext ctx = tester.executeAndGetContext("sum 1 2", FakeSender.console());

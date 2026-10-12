@@ -12,13 +12,13 @@ import org.mockito.Mockito;
 public final class TestLifecycleEventTypeProvider implements LifecycleEventTypeProvider {
     @Override
     public <O extends LifecycleEventOwner, E extends LifecycleEvent> LifecycleEventType.Monitorable<O, E> monitor(String name,
-                                                                                                                   Class<? extends O> ownerType) {
+                                                                                                                  Class<? extends O> ownerType) {
         return Mockito.mock(LifecycleEventType.Monitorable.class);
     }
 
     @Override
     public <O extends LifecycleEventOwner, E extends LifecycleEvent> LifecycleEventType.Prioritizable<O, E> prioritized(String name,
-                                                                                                                         Class<? extends O> ownerType) {
+                                                                                                                        Class<? extends O> ownerType) {
         return Mockito.mock(LifecycleEventType.Prioritizable.class);
     }
 }

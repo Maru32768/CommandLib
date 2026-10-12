@@ -30,7 +30,8 @@ class CommonCommandContextTest {
     void missing_argument_lookups_fail_clearly() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("sum") {{
             argument(new CommonIntegerArgument<>("value")).execute((value, ctx) -> {
-                ctx.sendMessage(ctx.getInput("missing").isEmpty());
+                ctx.sendMessage(ctx.getInput("missing")
+                                   .isEmpty());
                 try {
                     ctx.getArgument("missing");
                 } catch (IllegalArgumentException e) {

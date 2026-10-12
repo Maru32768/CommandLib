@@ -32,11 +32,14 @@ class CommonArgumentEdgeCaseTest {
     void long_float_and_double_arguments_reject_out_of_range_values() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("set") {{
             addChildren(new TestCommand("long") {{
-                argument(new CommonLongArgument<>("value", 0L, 5L)).execute((value, ctx) -> ctx.sendMessage(value));
+                argument(new CommonLongArgument<>("value", 0L, 5L)).execute((value,
+                                                                             ctx) -> ctx.sendMessage(value));
             }}, new TestCommand("float") {{
-                argument(new CommonFloatArgument<>("value", 0F, 1F)).execute((value, ctx) -> ctx.sendMessage(value));
+                argument(new CommonFloatArgument<>("value", 0F, 1F)).execute((value,
+                                                                              ctx) -> ctx.sendMessage(value));
             }}, new TestCommand("double") {{
-                argument(new CommonDoubleArgument<>("value", -1D, 1D)).execute((value, ctx) -> ctx.sendMessage(value));
+                argument(new CommonDoubleArgument<>("value", -1D, 1D)).execute((value,
+                                                                                ctx) -> ctx.sendMessage(value));
             }});
         }});
 
@@ -81,8 +84,7 @@ class CommonArgumentEdgeCaseTest {
     void quoted_string_argument_rejects_unclosed_quote_and_supports_escapes() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("say") {{
             argument(new CommonStringArgument<>("text",
-                                                CommonStringArgument.Type.PHRASE_QUOTED)).execute((text, ctx) -> ctx.sendMessage(
-                    text));
+                                                CommonStringArgument.Type.PHRASE_QUOTED)).execute((text, ctx) -> ctx.sendMessage(text));
         }});
 
         assertThat(runner.execute("say \"a \\\"quoted\\\" word\"")
@@ -122,11 +124,11 @@ class CommonArgumentEdgeCaseTest {
         List<Item> items = new ArrayList<>(List.of(new Item("sword", 1)));
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("pick") {{
             addChildren(new TestCommand("literal") {{
-                argument(new CommonLiteralArgument<>("value", () -> literals)).execute((value, ctx) -> ctx.sendMessage(
-                        value));
+                argument(new CommonLiteralArgument<>("value",
+                                                     () -> literals)).execute((value, ctx) -> ctx.sendMessage(value));
             }}, new TestCommand("object") {{
-                argument(new CommonObjectArgument<>("value", () -> objects)).execute((value, ctx) -> ctx.sendMessage(
-                        value));
+                argument(new CommonObjectArgument<>("value",
+                                                    () -> objects)).execute((value, ctx) -> ctx.sendMessage(value));
             }}, new TestCommand("nameable") {{
                 argument(new CommonNameableObjectArgument<>("value",
                                                             () -> items)).execute((value, ctx) -> ctx.sendMessage(value.id));
@@ -168,9 +170,12 @@ class CommonArgumentEdgeCaseTest {
     void validator_with_context_can_read_previous_argument() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("range") {{
             argument(new IntArg("min"),
-                     new IntArg("max").validator((max, ctx) -> max >= (int) ctx.getArgument("min"))).execute((min, max, ctx) -> {
-                ctx.sendMessage(min + ".." + max);
-            });
+                     new IntArg("max").validator((max, ctx) -> max >= (int) ctx.getArgument("min")))
+                                                                                                    .execute((min,
+                                                                                                              max,
+                                                                                                              ctx) -> {
+                                                                                                        ctx.sendMessage(min + ".." + max);
+                                                                                                    });
         }});
 
         assertThat(runner.execute("range 1 5")
@@ -183,7 +188,8 @@ class CommonArgumentEdgeCaseTest {
     @Test
     void argument_validator_can_send_custom_failure_message() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("set") {{
-            argument(new IntArg("value").validator((ArgumentValidator<Integer, TestCommandContext>) (value, ctx) -> {
+            argument(new IntArg("value").validator((ArgumentValidator<Integer, TestCommandContext>) (value,
+                                                                                                     ctx) -> {
                 if (value % 2 != 0) {
                     throw new ArgumentValidationException("value must be even", "got " + value);
                 }
@@ -200,8 +206,7 @@ class CommonArgumentEdgeCaseTest {
     void validator_can_be_removed_with_null() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("set") {{
             argument(new IntArg("value").validator(x -> x > 0)
-                                        .validator((java.util.function.Predicate<Integer>) null)).execute((value, ctx) -> ctx.sendMessage(
-                    value));
+                                        .validator((java.util.function.Predicate<Integer>) null)).execute((value, ctx) -> ctx.sendMessage(value));
         }});
 
         assertThat(runner.execute("set -1")
@@ -212,8 +217,8 @@ class CommonArgumentEdgeCaseTest {
     void transformer_with_context_can_use_sender() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("greet") {{
             argument(new StrArg("name").transformer((name, ctx) -> name + "@" + ctx.getActor()
-                                                                                   .getName())).execute((name, ctx) -> ctx.sendMessage(
-                    name));
+                                                                                   .getName())).execute((name,
+                                                                                                         ctx) -> ctx.sendMessage(name));
         }});
 
         assertThat(runner.execute("greet Alex")
@@ -238,8 +243,9 @@ class CommonArgumentEdgeCaseTest {
     @Test
     void additional_parser_recovers_from_brigadier_syntax_failure() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("set") {{
-            argument(new IntArg("value").additionalParser((ctx, input) -> input.equals("max") ? Integer.MAX_VALUE : null)).execute(
-                    (value, ctx) -> ctx.sendMessage(value));
+            argument(new IntArg("value").additionalParser((ctx,
+                                                           input) -> input.equals("max") ? Integer.MAX_VALUE : null)).execute((value,
+                                                                                                                               ctx) -> ctx.sendMessage(value));
         }});
 
         // IntegerArgumentType rejects "max" while Brigadier parses the tree, before CommandLib can recover.
@@ -249,9 +255,12 @@ class CommonArgumentEdgeCaseTest {
     @Test
     void additional_parser_returning_null_keeps_original_failure() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("give") {{
-            argument(new ObjArg<>("item", Map.of("sword", 1)).additionalParser((ctx, input) -> null)).execute((item, ctx) -> {
-                ctx.sendMessage("item=" + item);
-            });
+            argument(new ObjArg<>("item",
+                                  Map.of("sword", 1)).additionalParser((ctx, input) -> null))
+                                                                                             .execute((item,
+                                                                                                       ctx) -> {
+                                                                                                 ctx.sendMessage("item=" + item);
+                                                                                             });
         }});
 
         assertThat(runner.execute("give axe")
@@ -263,8 +272,7 @@ class CommonArgumentEdgeCaseTest {
     void additional_parser_result_is_validated() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("give") {{
             argument(new ObjArg<>("item", Map.of("sword", 1)).additionalParser((ctx, input) -> -1)
-                                                              .validator(x -> x > 0)).execute((item, ctx) -> ctx.sendMessage(
-                    "item=" + item));
+                                                             .validator(x -> x > 0)).execute((item, ctx) -> ctx.sendMessage("item=" + item));
         }});
 
         assertThat(runner.execute("give axe")
@@ -276,8 +284,10 @@ class CommonArgumentEdgeCaseTest {
     void suggestion_tooltip_is_exposed() {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("pick") {{
             argument(new StrArg("value").addSuggestionAction(sb -> sb.suggest("alpha", "First letter")
-                                                                     .suggest("beta", (String) null))).execute((value, ctx) -> {
-            });
+                                                                     .suggest("beta", (String) null)))
+                                                                                                      .execute((value,
+                                                                                                                ctx) -> {
+                                                                                                      });
         }});
 
         assertThat(runner.suggestTooltips("pick ")).containsEntry("alpha", "First letter")
@@ -301,7 +311,8 @@ class CommonArgumentEdgeCaseTest {
     void suggestion_action_latest_input_is_current_token() {
         List<String> seen = new ArrayList<>();
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("pick") {{
-            argument(new StrArg("value").addSuggestionAction(sb -> seen.add(sb.getLatestInput()))).execute((value, ctx) -> {
+            argument(new StrArg("value").addSuggestionAction(sb -> seen.add(sb.getLatestInput()))).execute((value,
+                                                                                                            ctx) -> {
             });
         }});
 
@@ -328,7 +339,7 @@ class CommonArgumentEdgeCaseTest {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("pick") {{
             argument(new StrArg("value").addSuggestionAction(sb -> sb.suggest("alpha"))
                                         .clearSuggestionActions()).execute((value, ctx) -> {
-            });
+                                        });
         }});
 
         assertThat(runner.suggest("pick ")).containsExactly("help");
@@ -352,7 +363,8 @@ class CommonArgumentEdgeCaseTest {
     void suggestion_actions_run_once_per_request() {
         AtomicInteger calls = new AtomicInteger();
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("pick") {{
-            argument(new StrArg("value").addSuggestionAction(sb -> calls.incrementAndGet())).execute((value, ctx) -> {
+            argument(new StrArg("value").addSuggestionAction(sb -> calls.incrementAndGet())).execute((value,
+                                                                                                      ctx) -> {
             });
         }});
 

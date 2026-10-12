@@ -42,8 +42,7 @@ class TypedClassLinkageTest {
         byte[] bytes = replace(classFile(Caller.class), "linkedMethod", "missedMethod");
 
         assertThatThrownBy(() -> TypedClassLinkage.checkReferences(bytes,
-                                                                   Caller.class)).isInstanceOf(
-                TypedClassLinkage.NoSuchMemberException.class);
+                                                                   Caller.class)).isInstanceOf(TypedClassLinkage.NoSuchMemberException.class);
     }
 
     @Test
@@ -51,8 +50,7 @@ class TypedClassLinkageTest {
         byte[] bytes = replace(classFile(Caller.class), "linkedField", "missedField");
 
         assertThatThrownBy(() -> TypedClassLinkage.checkReferences(bytes,
-                                                                   Caller.class)).isInstanceOf(
-                TypedClassLinkage.NoSuchMemberException.class);
+                                                                   Caller.class)).isInstanceOf(TypedClassLinkage.NoSuchMemberException.class);
     }
 
     @Test
@@ -60,8 +58,7 @@ class TypedClassLinkageTest {
         byte[] bytes = replace(classFile(Caller.class), ")Ljava/lang/String;", ")Ljava/lang/Object;");
 
         assertThatThrownBy(() -> TypedClassLinkage.checkReferences(bytes,
-                                                                   Caller.class)).isInstanceOf(
-                TypedClassLinkage.NoSuchMemberException.class);
+                                                                   Caller.class)).isInstanceOf(TypedClassLinkage.NoSuchMemberException.class);
     }
 
     @Test
@@ -69,8 +66,7 @@ class TypedClassLinkageTest {
         byte[] bytes = replace(classFile(Caller.class), "LinkedTarget", "MissedTarget");
 
         assertThatThrownBy(() -> TypedClassLinkage.checkReferences(bytes,
-                                                                   Caller.class)).isInstanceOf(
-                ClassNotFoundException.class);
+                                                                   Caller.class)).isInstanceOf(ClassNotFoundException.class);
     }
 
     @Test
@@ -78,8 +74,7 @@ class TypedClassLinkageTest {
         byte[] bytes = replace(classFile(Caller.class), "linkedField", "staticField");
 
         assertThatThrownBy(() -> TypedClassLinkage.checkReferences(bytes,
-                                                                   Caller.class)).isInstanceOf(
-                TypedClassLinkage.NoSuchMemberException.class);
+                                                                   Caller.class)).isInstanceOf(TypedClassLinkage.NoSuchMemberException.class);
     }
 
     @Test
@@ -87,8 +82,7 @@ class TypedClassLinkageTest {
         byte[] bytes = replace(classFile(Caller.class), "linkedMethod", "memberMethod");
 
         assertThatThrownBy(() -> TypedClassLinkage.checkReferences(bytes,
-                                                                   Caller.class)).isInstanceOf(
-                TypedClassLinkage.NoSuchMemberException.class);
+                                                                   Caller.class)).isInstanceOf(TypedClassLinkage.NoSuchMemberException.class);
     }
 
     @Test
@@ -96,8 +90,7 @@ class TypedClassLinkageTest {
         byte[] bytes = replace(classFile(Caller.class), "publicMethod", "hiddenMethod");
 
         assertThatThrownBy(() -> TypedClassLinkage.checkReferences(bytes,
-                                                                   Caller.class)).isInstanceOf(
-                TypedClassLinkage.NoSuchMemberException.class);
+                                                                   Caller.class)).isInstanceOf(TypedClassLinkage.NoSuchMemberException.class);
     }
 
     @Test
@@ -126,8 +119,7 @@ class TypedClassLinkageTest {
         byte[] bytes = replace(classFile(ProtectedSub.class), "(I)V", "(C)V");
 
         assertThatThrownBy(() -> TypedClassLinkage.checkReferences(bytes,
-                                                                   ProtectedSub.class)).isInstanceOf(
-                TypedClassLinkage.NoSuchMemberException.class);
+                                                                   ProtectedSub.class)).isInstanceOf(TypedClassLinkage.NoSuchMemberException.class);
     }
 
     @Test
@@ -151,8 +143,7 @@ class TypedClassLinkageTest {
         byte[] bytes = replace(classFile(FieldWriter.class), "OpenFields", "ShutFields");
 
         assertThatThrownBy(() -> TypedClassLinkage.checkReferences(bytes,
-                                                                   FieldWriter.class)).isInstanceOf(
-                TypedClassLinkage.NoSuchMemberException.class);
+                                                                   FieldWriter.class)).isInstanceOf(TypedClassLinkage.NoSuchMemberException.class);
     }
 
     @Test
@@ -166,8 +157,7 @@ class TypedClassLinkageTest {
         byte[] bytes = replace(classFile(SwitchCaller.class), "linkedMethod", "missedMethod");
 
         assertThatThrownBy(() -> TypedClassLinkage.checkReferences(bytes,
-                                                                   SwitchCaller.class)).isInstanceOf(
-                TypedClassLinkage.NoSuchMemberException.class);
+                                                                   SwitchCaller.class)).isInstanceOf(TypedClassLinkage.NoSuchMemberException.class);
     }
 
     private static byte[] classFile(Class<?> clazz) throws IOException {

@@ -1,10 +1,9 @@
 package dev.marulabs.testplugin;
 
-import dev.marulabs.integration.core.TestResult;
-import dev.marulabs.integration.core.TestStatus;
-
 import dev.marulabs.commandlib.Command;
 import dev.marulabs.commandlib.argument.StringArgument;
+import dev.marulabs.integration.core.TestResult;
+import dev.marulabs.integration.core.TestStatus;
 import org.bukkit.permissions.PermissionDefault;
 
 import java.util.List;

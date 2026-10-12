@@ -1,12 +1,11 @@
 package dev.marulabs.testplugin;
 
-import dev.marulabs.integration.core.ExceptionUtil;
-import dev.marulabs.integration.core.TestResult;
-import dev.marulabs.integration.core.TestStatus;
-
 import dev.marulabs.commandlib.Command;
 import dev.marulabs.commandlib.CommandLib;
 import dev.marulabs.commandlib.DefaultPermission;
+import dev.marulabs.integration.core.ExceptionUtil;
+import dev.marulabs.integration.core.TestResult;
+import dev.marulabs.integration.core.TestStatus;
 import org.bukkit.Bukkit;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;

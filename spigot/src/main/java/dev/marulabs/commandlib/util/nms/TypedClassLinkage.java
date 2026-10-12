@@ -178,8 +178,7 @@ final class TypedClassLinkage {
 
     private static byte[] readClassFile(ClassLoader loader, String className) throws IOException {
         String resource = className.replace('.', '/') + ".class";
-        try (InputStream in = loader == null ? ClassLoader.getSystemResourceAsStream(resource) : loader.getResourceAsStream(
-                resource)) {
+        try (InputStream in = loader == null ? ClassLoader.getSystemResourceAsStream(resource) : loader.getResourceAsStream(resource)) {
             if (in == null) {
                 return null;
             }
@@ -322,8 +321,7 @@ final class TypedClassLinkage {
      * Rejects a write to a final field of another class, which the JVM rejects. A setter lookup would also reject the
      * final fields that the class writes in its own constructor.
      */
-    private static void checkWritable(MethodHandles.Lookup lookup,
-                                      MethodHandle getter) throws IllegalAccessException {
+    private static void checkWritable(MethodHandles.Lookup lookup, MethodHandle getter) throws IllegalAccessException {
         MethodHandleInfo field = lookup.revealDirect(getter);
         if (Modifier.isFinal(field.getModifiers()) && field.getDeclaringClass() != lookup.lookupClass()) {
             throw new IllegalAccessException("write to final field " + field);
@@ -365,8 +363,7 @@ final class TypedClassLinkage {
      * {@link MethodType#fromMethodDescriptorString} in a plugin it remaps to take Spigot names, while the class file
      * of the remapped plugin has Mojang names, and some Mojang names are Spigot names of other classes.
      */
-    private static MethodType methodType(String descriptor,
-                                         ClassLoader loader) throws ClassNotFoundException {
+    private static MethodType methodType(String descriptor, ClassLoader loader) throws ClassNotFoundException {
         List<Class<?>> parameters = new ArrayList<>();
         int index = descriptor.startsWith("(") ? 1 : 0;
         while (index < descriptor.length() && descriptor.charAt(index) != ')') {
@@ -411,7 +408,9 @@ final class TypedClassLinkage {
                     return Class.forName(descriptor.replace('/', '.'), false, loader);
                 }
                 return Class.forName(descriptor.substring(1, descriptor.length() - 1)
-                                               .replace('/', '.'), false, loader);
+                                               .replace('/', '.'),
+                                     false,
+                                     loader);
         }
     }
 
@@ -419,8 +418,7 @@ final class TypedClassLinkage {
      * The class an internal name or array descriptor refers to, or its element class for an array, or null for a
      * primitive element type.
      */
-    private static Class<?> resolveInternalName(String internalName,
-                                                ClassLoader loader) throws ClassNotFoundException {
+    private static Class<?> resolveInternalName(String internalName, ClassLoader loader) throws ClassNotFoundException {
         String name = internalName;
         while (name.startsWith("[")) {
             name = name.substring(1);
@@ -661,8 +659,7 @@ final class TypedClassLinkage {
         }
 
         private static int readInt(byte[] code, int index) {
-            return (code[index] & 0xFF) << 24 | (code[index + 1] & 0xFF) << 16 | (code[index + 2] & 0xFF) << 8
-                    | (code[index + 3] & 0xFF);
+            return (code[index] & 0xFF) << 24 | (code[index + 1] & 0xFF) << 16 | (code[index + 2] & 0xFF) << 8 | (code[index + 3] & 0xFF);
         }
     }
 

@@ -14,10 +14,10 @@ import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEventType;
 import io.papermc.paper.threadedregions.scheduler.GlobalRegionScheduler;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventException;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
-import org.bukkit.event.Event;
 import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.event.server.ServerLoadEvent;
@@ -80,8 +80,8 @@ class CommandLibLifecycleTest {
               .thenReturn(server);
         GlobalRegionScheduler scheduler = mock(GlobalRegionScheduler.class);
         doAnswer(invocation -> scheduledTasks.add(invocation.getArgument(1))).when(scheduler)
-                                                                               .execute(any(Plugin.class),
-                                                                                        any(Runnable.class));
+                                                                             .execute(any(Plugin.class),
+                                                                                      any(Runnable.class));
         bukkit.when(Bukkit::getGlobalRegionScheduler)
               .thenReturn(scheduler);
     }
@@ -351,8 +351,9 @@ class CommandLibLifecycleTest {
         RejectingRoot root = new RejectingRoot("broken");
         fireCommandsEvent(new CommandDispatcher<>(root));
 
-        assertThatThrownBy(() -> CommandLib.register(plugin, "test", namedCommand("broken"))).isInstanceOf(
-                IllegalStateException.class);
+        assertThatThrownBy(() -> CommandLib.register(plugin,
+                                                     "test",
+                                                     namedCommand("broken"))).isInstanceOf(IllegalStateException.class);
         verify(pluginManager, times(1)).removePermission(any(Permission.class));
 
         CommandDispatcher<CommandSourceStack> reloaded = fireCommandsEvent();

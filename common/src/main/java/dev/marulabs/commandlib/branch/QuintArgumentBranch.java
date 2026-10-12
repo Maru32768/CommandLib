@@ -1,19 +1,18 @@
 package dev.marulabs.commandlib.branch;
 
 import dev.marulabs.commandlib.ArgRef;
-import dev.marulabs.commandlib.CommonCommandContext;
 import dev.marulabs.commandlib.CommonArgument;
 import dev.marulabs.commandlib.CommonCommand;
+import dev.marulabs.commandlib.CommonCommandContext;
 import dev.marulabs.commandlib.DefaultPermission;
 import dev.marulabs.commandlib.command.CommandExecutor;
 import dev.marulabs.commandlib.command.Extractor;
 import dev.marulabs.commandlib.util.function.HexaConsumer;
 import dev.marulabs.commandlib.util.function.QuintFunction;
-
-import java.util.function.Function;
-
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.function.Function;
 
 public final class QuintArgumentBranch<T1, T2, T3, T4, T5, C extends CommonCommandContext<?, ?>, T extends CommonCommand<C, T>> extends ArgumentBranch<C, T> {
     private final CommonArgument<T1, C, ?> argument1;
@@ -105,7 +104,11 @@ public final class QuintArgumentBranch<T1, T2, T3, T4, T5, C extends CommonComma
     }
 
     public QuintArgumentBranch<T1, T2, T3, T4, T5, C, T> child(@NotNull QuintFunction<ArgRef<T1>, ArgRef<T2>, ArgRef<T3>, ArgRef<T4>, ArgRef<T5>, T> factory) {
-        child(factory.apply(ArgRef.of(argument1), ArgRef.of(argument2), ArgRef.of(argument3), ArgRef.of(argument4), ArgRef.of(argument5)));
+        child(factory.apply(ArgRef.of(argument1),
+                            ArgRef.of(argument2),
+                            ArgRef.of(argument3),
+                            ArgRef.of(argument4),
+                            ArgRef.of(argument5)));
         return this;
     }
 

@@ -219,8 +219,9 @@ public final class CommandTester implements AutoCloseable {
         Mockito.when(players.getPlayers())
                .thenReturn(Collections.unmodifiableList(playerList));
         Mockito.when(players.getPlayerByName(Mockito.anyString()))
-               .thenAnswer(invocation -> findPlayer(onlinePlayers, invocation.getArgument(0)).flatMap(FakeSender::asPlayer)
-                                                                                           .orElse(null));
+               .thenAnswer(invocation -> findPlayer(onlinePlayers,
+                                                    invocation.getArgument(0)).flatMap(FakeSender::asPlayer)
+                                                                              .orElse(null));
         Mockito.when(players.getPlayer(Mockito.any(java.util.UUID.class)))
                .thenAnswer(invocation -> playerList.stream()
                                                    .filter(player -> player.getUUID()
@@ -360,8 +361,8 @@ public final class CommandTester implements AutoCloseable {
                 Bootstrap.bootStrap();
             }
             *///?} elif >=1.17 {
-            // Forge's Bootstrap patch initializes networking, whose event classes need FML's class transformer.
-            // Commands do not use networking, so skip it outside a real Forge launch.
+               // Forge's Bootstrap patch initializes networking, whose event classes need FML's class transformer.
+               // Commands do not use networking, so skip it outside a real Forge launch.
             try (MockedStatic<NetworkHooks> ignored = Mockito.mockStatic(NetworkHooks.class)) {
                 Bootstrap.bootStrap();
             }

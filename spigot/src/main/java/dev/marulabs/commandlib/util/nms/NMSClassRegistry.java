@@ -100,8 +100,7 @@ public final class NMSClassRegistry {
     private Class<?> resolve(Class<?> lookUpClass, String version) {
         List<TypedModule> candidates = modulesFor(new MinecraftVersion(version));
         if (candidates.isEmpty()) {
-            throw new NMSClassNotFoundException(String.format("%s has no implementation for Minecraft %s: no typed NMS "
-                                                                      + "module supports this version",
+            throw new NMSClassNotFoundException(String.format("%s has no implementation for Minecraft %s: no typed NMS " + "module supports this version",
                                                               lookUpClass.getSimpleName(),
                                                               version));
         }
@@ -160,8 +159,9 @@ public final class NMSClassRegistry {
             } catch (ClassNotFoundException e) {
                 return new ModuleClasses(Map.of(), "the module is not in this jar");
             } catch (InvocationTargetException e) {
-                return new ModuleClasses(Map.of(), e.getCause()
-                                                    .toString());
+                return new ModuleClasses(Map.of(),
+                                         e.getCause()
+                                          .toString());
             } catch (ReflectiveOperationException | LinkageError e) {
                 return new ModuleClasses(Map.of(), e.toString());
             }

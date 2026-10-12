@@ -33,8 +33,8 @@ class ArgumentErrorMessageTest {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("go") {{
             argument(new CommonStringArgument<>("label"),
                      new CommonEnumArgument<>("dir", Direction.class)).execute((label, dir, ctx) -> {
-                ctx.sendMessage("unreachable");
-            });
+                         ctx.sendMessage("unreachable");
+                     });
         }});
 
         TestCommandContext ctx = runner.execute("go abcdefghijkl up");

@@ -42,8 +42,7 @@ class EnumArgumentTest {
             tester.execute("go up", sender);
         }
 
-        assertThat(sender.getSentMessageTexts()).containsExactly("Incorrect argument for command",
-                                                                 "go up<--[HERE]");
+        assertThat(sender.getSentMessageTexts()).containsExactly("Incorrect argument for command", "go up<--[HERE]");
         assertThat(sender.getSentMessages()
                          .get(0)
                          .getColor()

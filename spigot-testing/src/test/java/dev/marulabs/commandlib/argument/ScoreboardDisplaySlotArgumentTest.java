@@ -13,7 +13,8 @@ class ScoreboardDisplaySlotArgumentTest {
         FakeSender sender = FakeSender.player("Alice");
 
         try (CommandTester tester = new CommandTester(new Command("slot") {{
-            argument(new ScoreboardDisplaySlotArgument("value")).execute((slot, ctx) -> ctx.sendMessage(slot.name()));
+            argument(new ScoreboardDisplaySlotArgument("value")).execute((slot,
+                                                                          ctx) -> ctx.sendMessage(slot.name()));
         }}, "test.command")) {
             tester.execute("slot sidebar", sender);
         }

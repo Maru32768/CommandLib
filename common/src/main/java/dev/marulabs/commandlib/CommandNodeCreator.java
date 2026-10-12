@@ -122,8 +122,7 @@ final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U ext
         builder.executes(bareRunner);
 
         argumentsList.stream()
-                     .sorted((x, y) -> Integer.compare(y.size(),
-                                                       x.size())) // Sort in descending order to handle variable-length arguments
+                     .sorted((x, y) -> Integer.compare(y.size(), x.size())) // Sort in descending order to handle variable-length arguments
                      .forEach(arguments -> {
                          List<Arguments<C>> executorArguments = appendArgument(inheritedArguments, arguments);
                          // Brigadier can attach literal nodes under an argument node. The executor still needs the
@@ -136,12 +135,15 @@ final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U ext
                                                                                                     executorArguments))
                                                                            .flatMap(Collection::stream)
                                                                            .collect(Collectors.toList());
-                         Supplier<ArgumentCommandNode<S, ?>> argumentNodeSupplier = () -> new ArgumentCommandNodeCreator<>(
-                                 arguments,
-                                 executorArguments,
-                                 permissionPrefix).build(helpAction, command, childNodes);
+                         Supplier<ArgumentCommandNode<S, ?>> argumentNodeSupplier = () -> new ArgumentCommandNodeCreator<>(arguments,
+                                                                                                                           executorArguments,
+                                                                                                                           permissionPrefix).build(helpAction,
+                                                                                                                                                   command,
+                                                                                                                                                   childNodes);
                          builder.then(argumentNodeSupplier.get());
-                         createOptionCommands(command.options(), argumentNodeSupplier, bareRunner).forEach(builder::then);
+                         createOptionCommands(command.options(),
+                                              argumentNodeSupplier,
+                                              bareRunner).forEach(builder::then);
                      });
 
         return builder.build();
@@ -264,7 +266,8 @@ final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U ext
             dest.add(new OptionToken<>("-" + current.stream()
                                                     .map(CommandOption::shortName)
                                                     .map(String::valueOf)
-                                                    .collect(Collectors.joining()), List.copyOf(current)));
+                                                    .collect(Collectors.joining()),
+                                       List.copyOf(current)));
             return;
         }
 
@@ -301,10 +304,9 @@ final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U ext
                      .stream()
                      .map(s -> {
                          LiteralCommandNode<S> node = LiteralArgumentBuilder.<S>literal(s)
-                                                                            .requires(x -> platformAdapter.hasPermission(
-                                                                                    source,
-                                                                                    x,
-                                                                                    permissionPrefix))
+                                                                            .requires(x -> platformAdapter.hasPermission(source,
+                                                                                                                         x,
+                                                                                                                         permissionPrefix))
                                                                             .executes(x -> redirectTarget.getCommand()
                                                                                                          .run(x))
                                                                             .build();

@@ -41,7 +41,9 @@ public abstract class NMSDedicatedServer extends NMSClass {
      * The function library keeps the dispatcher it compiles functions with in a private final field, found by its
      * type since its name is obfuscated on Spigot.
      */
-    protected static void setFunctionDispatcher(Object library, Class<?> libraryClass, NMSCommandDispatcher dispatcher) {
+    protected static void setFunctionDispatcher(Object library,
+                                                Class<?> libraryClass,
+                                                NMSCommandDispatcher dispatcher) {
         for (Field field : libraryClass.getDeclaredFields()) {
             if (field.getType() == CommandDispatcher.class) {
                 try {

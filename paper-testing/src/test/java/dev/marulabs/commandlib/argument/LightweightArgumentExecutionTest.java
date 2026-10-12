@@ -35,8 +35,8 @@ class LightweightArgumentExecutionTest {
                      new FloatArgument("float"),
                      new DoubleArgument("double"),
                      new StringArgument("word")).execute((bool, integer, longValue, floatValue, doubleValue, word, ctx) -> {
-                ctx.sendMessage(bool + ":" + integer + ":" + longValue + ":" + floatValue + ":" + doubleValue + ":" + word);
-            });
+                         ctx.sendMessage(bool + ":" + integer + ":" + longValue + ":" + floatValue + ":" + doubleValue + ":" + word);
+                     });
         }}, "test.command");
         FakeSender sender = FakeSender.player("Steve");
 
@@ -53,8 +53,8 @@ class LightweightArgumentExecutionTest {
                      new EnumArgument<>("mode", SampleMode.class),
                      new LiteralArgument("literal", List.of("literal")),
                      new UnparsedArgument("tail")).execute((object, nameable, mode, literal, tail, ctx) -> {
-                ctx.sendMessage(object + ":" + nameable.tabCompleteName() + ":" + mode + ":" + literal + ":" + tail);
-            });
+                         ctx.sendMessage(object + ":" + nameable.tabCompleteName() + ":" + mode + ":" + literal + ":" + tail);
+                     });
         }}, "test.command");
         FakeSender sender = FakeSender.player("Steve");
 
@@ -70,8 +70,8 @@ class LightweightArgumentExecutionTest {
                 argument(new OfflinePlayerArgument("offline"),
                          new UUIDArgument("uuid"),
                          new TeamArgument("team")).execute((offline, uuid, team, ctx) -> {
-                    ctx.sendMessage(offline.getName() + ":" + uuid + ":" + team.getName());
-                });
+                             ctx.sendMessage(offline.getName() + ":" + uuid + ":" + team.getName());
+                         });
             }}, "test.command");
             FakeSender sender = FakeSender.player("Steve");
 
@@ -94,8 +94,8 @@ class LightweightArgumentExecutionTest {
                      new PlayersArgument("players"),
                      new EntityArgument("entity"),
                      new EntitiesArgument("entities")).execute((player, players, entity, entities, ctx) -> {
-                ctx.sendMessage(player.getName() + ":" + players.size() + ":" + entity.getName() + ":" + entities.size());
-            });
+                         ctx.sendMessage(player.getName() + ":" + players.size() + ":" + entity.getName() + ":" + entities.size());
+                     });
         }}, "test.command").withFakePlayer(steve)
                            .withFakeEntity("Zombie", zombie);
         FakeSender sender = FakeSender.player("Sender");
@@ -117,8 +117,8 @@ class LightweightArgumentExecutionTest {
             argument(new BlockDataArgument("block"),
                      new ItemStackArgument("item"),
                      new ParticleArgument("particle")).execute((block, item, particle, ctx) -> {
-                ctx.sendMessage((block == blockData) + ":" + (item == itemStack) + ":" + particle.name());
-            });
+                         ctx.sendMessage((block == blockData) + ":" + (item == itemStack) + ":" + particle.name());
+                     });
         }}, "test.command").withFakeBlockData(blockData)
                            .withFakeItemStack(itemStack)
                            .withFakeParticle(Particle.POOF);

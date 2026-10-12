@@ -38,7 +38,7 @@ class CommandSyntaxExceptionConversionTest {
         TranslatableComponent component = (TranslatableComponent) captor.getValue();
         assertThat(component.getTranslate()).isEqualTo("argument.entity.notfound.player");
         assertThat(component.getWith()).extracting(x -> x.toPlainText())
-                                        .containsExactly("Alex");
+                                       .containsExactly("Alex");
     }
 
     @Test
@@ -53,8 +53,7 @@ class CommandSyntaxExceptionConversionTest {
 
     @Test
     void plain_brigadier_message_is_not_reported_as_conversion_failure() {
-        List<LogRecord> records = captureWarnings(() -> convertAndSend(new SimpleCommandExceptionType(new LiteralMessage(
-                "custom failure")).create()));
+        List<LogRecord> records = captureWarnings(() -> convertAndSend(new SimpleCommandExceptionType(new LiteralMessage("custom failure")).create()));
 
         assertThat(records).isEmpty();
     }

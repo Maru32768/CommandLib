@@ -47,7 +47,8 @@ public class UUIDsArgument extends Argument<List<UUID>, UUIDsArgument> {
                       return true;
                   }
                   return StringUtil.containsIgnoreCase(x.getId()
-                                                        .toString(), input);
+                                                        .toString(),
+                                                       input);
               })
               .forEach(x -> uuidToNameMap.put(x.getId(), x.getName()));
 
@@ -81,10 +82,10 @@ public class UUIDsArgument extends Argument<List<UUID>, UUIDsArgument> {
                                   .getOnlinePlayerNames()
                                   .stream()
                                   .map(getProfileCache()::get)
-              //? if >=1.17 {
-              .flatMap(Optional::stream)
-              //?} else
-              /*.filter(Objects::nonNull)*/
+                                  //? if >=1.17 {
+                                  .flatMap(Optional::stream)
+                                  //?} else
+                                  /*.filter(Objects::nonNull)*/
                                   .map(GameProfile::getId)
                                   .collect(Collectors.toList());
             if (s.equals("@a")) {
@@ -106,7 +107,8 @@ public class UUIDsArgument extends Argument<List<UUID>, UUIDsArgument> {
         //? if >=1.17 {
         Optional<GameProfile> gameProfile = getProfileCache().get(s);
         if (gameProfile.isPresent()) {
-            return List.of(gameProfile.get().getId());
+            return List.of(gameProfile.get()
+                                      .getId());
         }
         //?} else {
         /*GameProfile gameProfile = getProfileCache().get(s);

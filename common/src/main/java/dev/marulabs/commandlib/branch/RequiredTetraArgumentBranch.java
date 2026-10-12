@@ -1,9 +1,9 @@
 package dev.marulabs.commandlib.branch;
 
 import dev.marulabs.commandlib.ArgRef;
-import dev.marulabs.commandlib.CommonCommandContext;
 import dev.marulabs.commandlib.CommonArgument;
 import dev.marulabs.commandlib.CommonCommand;
+import dev.marulabs.commandlib.CommonCommandContext;
 import dev.marulabs.commandlib.command.CommandExecutor;
 import dev.marulabs.commandlib.command.Extractor;
 import dev.marulabs.commandlib.util.function.HexaConsumer;
@@ -44,7 +44,10 @@ public final class RequiredTetraArgumentBranch<S, T1, T2, T3, T4, C extends Comm
     }
 
     public RequiredTetraArgumentBranch<S, T1, T2, T3, T4, C, T> child(@NotNull TetraFunction<ArgRef<T1>, ArgRef<T2>, ArgRef<T3>, ArgRef<T4>, T> factory) {
-        super.child(factory.apply(ArgRef.of(argument1), ArgRef.of(argument2), ArgRef.of(argument3), ArgRef.of(argument4)));
+        super.child(factory.apply(ArgRef.of(argument1),
+                                  ArgRef.of(argument2),
+                                  ArgRef.of(argument3),
+                                  ArgRef.of(argument4)));
         return this;
     }
 }

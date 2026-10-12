@@ -1,12 +1,12 @@
 package dev.marulabs.commandlib.nms.argument;
 
 import com.mojang.brigadier.arguments.ArgumentType;
-import org.bukkit.Bukkit;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import dev.marulabs.commandlib.nms.world.MockNMSScoreboardTeam;
 import dev.marulabs.commandlib.util.nms.argument.NMSArgumentScoreboardTeam;
 import dev.marulabs.commandlib.util.nms.world.NMSScoreboardTeam;
+import org.bukkit.Bukkit;
 
 public class MockNMSArgumentScoreboardTeam extends NMSArgumentScoreboardTeam {
     public MockNMSArgumentScoreboardTeam() {

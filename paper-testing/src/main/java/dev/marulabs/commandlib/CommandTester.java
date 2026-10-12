@@ -2,9 +2,9 @@ package dev.marulabs.commandlib;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.LiteralMessage;
+import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
-import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
@@ -337,8 +337,7 @@ public final class CommandTester implements AutoCloseable {
                 // Paper's registry and world arguments reject unknown values while parsing. Returning null here would
                 // let Brigadier fail with a NullPointerException instead.
                 reader.setCursor(start);
-                throw new SimpleCommandExceptionType(new LiteralMessage("Unknown value '" + token + "'")).createWithContext(
-                        reader);
+                throw new SimpleCommandExceptionType(new LiteralMessage("Unknown value '" + token + "'")).createWithContext(reader);
             }
             return value;
         };

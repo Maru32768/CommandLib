@@ -1,8 +1,8 @@
 package dev.marulabs.commandlib;
 
-import io.papermc.paper.command.brigadier.CommandSourceStack;
 import dev.marulabs.commandlib.util.text.RichText;
 import dev.marulabs.commandlib.util.text.RichTexts;
+import io.papermc.paper.command.brigadier.CommandSourceStack;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;

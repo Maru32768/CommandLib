@@ -67,8 +67,7 @@ class RichTextTest {
                                            .italic()
                                            .append(RichText.text("child")));
         assertThat(RichText.text("key")).isNotEqualTo(RichText.translatable("key"));
-        assertThat(a.toString()).isEqualTo(
-                "RichText{translatable=\"key\", arguments=[RichText{text=\"arg\"}], color=#ff5555, italic=true, " + "children=[RichText{text=\"child\"}]}");
+        assertThat(a.toString()).isEqualTo("RichText{translatable=\"key\", arguments=[RichText{text=\"arg\"}], color=#ff5555, italic=true, " + "children=[RichText{text=\"child\"}]}");
     }
 
     @Test
@@ -134,7 +133,8 @@ class RichTextTest {
     @Test
     void null_content_is_rejected() {
         assertThatThrownBy(() -> RichText.text(null)).isInstanceOf(NullPointerException.class);
-        assertThatThrownBy(() -> RichText.translatable("key", (RichText) null)).isInstanceOf(NullPointerException.class);
+        assertThatThrownBy(() -> RichText.translatable("key",
+                                                       (RichText) null)).isInstanceOf(NullPointerException.class);
         assertThatThrownBy(() -> ClickAction.runCommand(null)).isInstanceOf(NullPointerException.class);
     }
 }

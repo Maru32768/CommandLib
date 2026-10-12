@@ -6,11 +6,14 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface CommandActor {
-    @NotNull String getName();
+    @NotNull
+    String getName();
 
-    @NotNull Optional<UUID> getUniqueId();
+    @NotNull
+    Optional<UUID> getUniqueId();
 
-    @NotNull CommandActorType getType();
+    @NotNull
+    CommandActorType getType();
 
     boolean isConsole();
 
@@ -20,5 +23,6 @@ public interface CommandActor {
 
     boolean hasPermission(@NotNull String permission);
 
-    @NotNull <T> Optional<T> unwrap(@NotNull Class<T> type);
+    @NotNull
+    <T> Optional<T> unwrap(@NotNull Class<T> type);
 }

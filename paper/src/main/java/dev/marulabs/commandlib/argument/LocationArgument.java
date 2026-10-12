@@ -1,12 +1,12 @@
 package dev.marulabs.commandlib.argument;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
-import io.papermc.paper.command.brigadier.argument.resolvers.FinePositionResolver;
-import io.papermc.paper.math.FinePosition;
 import dev.marulabs.commandlib.Argument;
 import dev.marulabs.commandlib.CommandContext;
 import dev.marulabs.commandlib.exception.ArgumentParseException;
+import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
+import io.papermc.paper.command.brigadier.argument.resolvers.FinePositionResolver;
+import io.papermc.paper.math.FinePosition;
 import org.bukkit.Location;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -30,6 +30,9 @@ public class LocationArgument extends Argument<Location, LocationArgument> {
         return new Location(ctx.getHandle()
                                .getSource()
                                .getLocation()
-                               .getWorld(), pos.x(), pos.y(), pos.z());
+                               .getWorld(),
+                            pos.x(),
+                            pos.y(),
+                            pos.z());
     }
 }

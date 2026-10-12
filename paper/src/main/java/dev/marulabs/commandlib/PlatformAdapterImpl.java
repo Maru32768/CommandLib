@@ -1,8 +1,8 @@
 package dev.marulabs.commandlib;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import io.papermc.paper.command.brigadier.CommandSourceStack;
 import dev.marulabs.commandlib.exception.ArgumentParseException;
+import io.papermc.paper.command.brigadier.CommandSourceStack;
 import net.kyori.adventure.text.Component;
 
 @SuppressWarnings("UnstableApiUsage")

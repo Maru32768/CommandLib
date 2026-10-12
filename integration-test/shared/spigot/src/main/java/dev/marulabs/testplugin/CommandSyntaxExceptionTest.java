@@ -1,9 +1,5 @@
 package dev.marulabs.testplugin;
 
-import dev.marulabs.integration.core.ExceptionUtil;
-import dev.marulabs.integration.core.TestResult;
-import dev.marulabs.integration.core.TestStatus;
-
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.marulabs.commandlib.Argument;
@@ -11,6 +7,9 @@ import dev.marulabs.commandlib.Command;
 import dev.marulabs.commandlib.CommandContext;
 import dev.marulabs.commandlib.PlatformAdapter;
 import dev.marulabs.commandlib.util.UncaughtExceptionHandler;
+import dev.marulabs.integration.core.ExceptionUtil;
+import dev.marulabs.integration.core.TestResult;
+import dev.marulabs.integration.core.TestStatus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,15 +41,19 @@ public class CommandSyntaxExceptionTest extends TestBase {
         // nor a silent fallback to plain text can pass. An unexpected execution reaches the executor and overrides it.
         putResult(new TestResult(key, TestStatus.FAILED, "parseImpl was not invoked."));
         command.addChildren(new Command(name) {{
-            argument(new ThrowingBoolArg("a", result -> putResult(new TestResult(key,
-                                                                                 result == null ? TestStatus.SUCCEEDED : TestStatus.FAILED,
-                                                                                 result == null ? "Succeeded converting CommandSyntaxException" : result)),
-                                         (e, ctx) -> putResult(new TestResult(key,
-                                                                              TestStatus.FAILED,
-                                                                              ExceptionUtil.stackTraceToString(e))))).execute(
-                    (a, ctx) -> {
-                        putResult(new TestResult(key, TestStatus.FAILED, "CommandSyntaxException was not thrown."));
-                    });
+            argument(new ThrowingBoolArg("a",
+                                         result -> putResult(new TestResult(key,
+                                                                            result == null ? TestStatus.SUCCEEDED : TestStatus.FAILED,
+                                                                            result == null ? "Succeeded converting CommandSyntaxException" : result)),
+                                         (e,
+                                          ctx) -> putResult(new TestResult(key,
+                                                                           TestStatus.FAILED,
+                                                                           ExceptionUtil.stackTraceToString(e))))).execute((a,
+                                                                                                                            ctx) -> {
+                                                                               putResult(new TestResult(key,
+                                                                                                        TestStatus.FAILED,
+                                                                                                        "CommandSyntaxException was not thrown."));
+                                                                           });
         }});
 
         return List.of(buildCommand(command, name + " true"));
@@ -117,8 +120,7 @@ public class CommandSyntaxExceptionTest extends TestBase {
             }
             if (!warnings.isEmpty()) {
                 LogRecord warning = warnings.get(0);
-                return warning.getMessage() + (warning.getThrown() == null ? "" : "\n" + ExceptionUtil.stackTraceToString(
-                        warning.getThrown()));
+                return warning.getMessage() + (warning.getThrown() == null ? "" : "\n" + ExceptionUtil.stackTraceToString(warning.getThrown()));
             }
             return null;
         }

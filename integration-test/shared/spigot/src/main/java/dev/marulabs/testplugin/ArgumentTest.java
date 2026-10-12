@@ -1,18 +1,17 @@
 package dev.marulabs.testplugin;
 
-import dev.marulabs.integration.core.ExceptionUtil;
-import dev.marulabs.integration.core.TestResult;
-import dev.marulabs.integration.core.TestStatus;
-
 import dev.marulabs.commandlib.Command;
 import dev.marulabs.commandlib.argument.*;
 import dev.marulabs.commandlib.util.bukkit.BukkitUtil;
+import dev.marulabs.integration.core.ExceptionUtil;
+import dev.marulabs.integration.core.TestResult;
+import dev.marulabs.integration.core.TestStatus;
 import org.bukkit.Bukkit;
-import org.bukkit.potion.PotionEffectType;
 import org.bukkit.Keyed;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Particle;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
 
@@ -108,7 +107,10 @@ public final class ArgumentTest extends TestBase {
             });
         }});
 
-        return List.of(buildCommand(command, name + " " + registryInput(org.bukkit.attribute.Attribute.class, "generic_max_health", "generic.max_health")));
+        return List.of(buildCommand(command,
+                                    name + " " + registryInput(org.bukkit.attribute.Attribute.class,
+                                                               "generic_max_health",
+                                                               "generic.max_health")));
     }
 
     public List<String> blockDataArgument() {
@@ -120,8 +122,10 @@ public final class ArgumentTest extends TestBase {
             argument(new BlockDataArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
             })).execute((a, ctx) -> {
-                putResult(key, a.getMaterial()
-                           .name(), "STONE");
+                putResult(key,
+                          a.getMaterial()
+                           .name(),
+                          "STONE");
             });
         }});
 
@@ -201,8 +205,10 @@ public final class ArgumentTest extends TestBase {
             argument(new EnchantmentArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
             })).execute((a, ctx) -> {
-                putResult(key, a.getKey()
-                           .toString(), "minecraft:flame");
+                putResult(key,
+                          a.getKey()
+                           .toString(),
+                          "minecraft:flame");
             });
         }});
 
@@ -226,9 +232,8 @@ public final class ArgumentTest extends TestBase {
         }});
 
         // Particle options are written as SNBT from 1.20.5.
-        String input = isLessThan(BukkitUtil.getMinecraftVersion(), "1.20.5")
-                       ? "minecraft:dust 1 0 0 1"
-                       : "minecraft:dust{color:[1.0,0.0,0.0],scale:1.0}";
+        String input = isLessThan(BukkitUtil.getMinecraftVersion(),
+                                  "1.20.5") ? "minecraft:dust 1 0 0 1" : "minecraft:dust{color:[1.0,0.0,0.0],scale:1.0}";
         return List.of(buildCommand(command, name + " " + input));
     }
 
@@ -353,8 +358,10 @@ public final class ArgumentTest extends TestBase {
             argument(new ItemStackArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
             })).execute((a, ctx) -> {
-                putResult(key, a.getType()
-                           .name() + " x" + a.getAmount(), "DIRT x1");
+                putResult(key,
+                          a.getType()
+                           .name() + " x" + a.getAmount(),
+                          "DIRT x1");
             });
         }});
 
@@ -386,7 +393,9 @@ public final class ArgumentTest extends TestBase {
             argument(new LocationArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
             })).execute((a, ctx) -> {
-                putResult(key, a.getX() + "," + a.getY() + "," + a.getZ() + "," + (a.getWorld() != null), "0.5,0.0,0.5,true");
+                putResult(key,
+                          a.getX() + "," + a.getY() + "," + a.getZ() + "," + (a.getWorld() != null),
+                          "0.5,0.0,0.5,true");
             });
         }});
 
@@ -632,8 +641,10 @@ public final class ArgumentTest extends TestBase {
             argument(new PotionEffectArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
             })).execute((a, ctx) -> {
-                putResult(key, a.getType()
-                           .equals(PotionEffectType.SPEED) + ":" + a.getDuration() + ":" + a.getAmplifier(), "true:1:0");
+                putResult(key,
+                          a.getType()
+                           .equals(PotionEffectType.SPEED) + ":" + a.getDuration() + ":" + a.getAmplifier(),
+                          "true:1:0");
             });
         }});
 
@@ -688,7 +699,10 @@ public final class ArgumentTest extends TestBase {
             });
         }});
 
-        return List.of(buildCommand(command, name + " " + registryInput(org.bukkit.Sound.class, "block_anvil_land", "block.anvil.land")));
+        return List.of(buildCommand(command,
+                                    name + " " + registryInput(org.bukkit.Sound.class,
+                                                               "block_anvil_land",
+                                                               "block.anvil.land")));
     }
 
     public List<String> stringArgument() {

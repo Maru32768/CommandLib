@@ -172,7 +172,9 @@ public final class ScenarioTest extends TestBase {
 
         putResult(new TestResult(key, TestStatus.FAILED, "Command was not executed after /minecraft:reload."));
         command.addChildren(new Command(RELOAD_PROBE) {{
-            execute(ctx -> putResult(new TestResult(key, TestStatus.SUCCEEDED, "Command survived /minecraft:reload.")));
+            execute(ctx -> putResult(new TestResult(key,
+                                                    TestStatus.SUCCEEDED,
+                                                    "Command survived /minecraft:reload.")));
         }});
     }
 }

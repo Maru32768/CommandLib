@@ -35,14 +35,14 @@ class ArgumentFailureTest {
 
         try (CommandTester tester = CommandTester.builder()
                                                  .command(() -> new Command("go") {{
-                                                     argument(new EnumArgument<>("dir", Direction.class)).execute((dir,
-                                                                                                                   ctx) -> ctx.sendMessage(
-                                                             "unreachable"));
+                                                     argument(new EnumArgument<>("dir",
+                                                                                 Direction.class)).execute((dir, ctx) -> ctx.sendMessage("unreachable"));
                                                  }})
                                                  .command(() -> new Command("give") {{
-                                                     argument(new ObjectArgument<>("item", Map.of("sword", 1))).execute((item,
-                                                                                                                         ctx) -> ctx.sendMessage(
-                                                             "unreachable"));
+                                                     argument(new ObjectArgument<>("item",
+                                                                                   Map.of("sword", 1)))
+                                                                                                       .execute((item,
+                                                                                                                 ctx) -> ctx.sendMessage("unreachable"));
                                                  }})
                                                  .permissionPrefix("test.command")
                                                  .build()) {
@@ -64,8 +64,8 @@ class ArgumentFailureTest {
         try (CommandTester tester = new CommandTester(() -> new Command("tp") {{
             argument(new WorldArgument("world")).execute((world, ctx) -> ctx.sendMessage("world=" + world));
         }}, "test.command")) {
-            assertThatThrownBy(() -> tester.execute("tp missing", FakeSender.player("Alice"))).hasCauseInstanceOf(
-                    CommandSyntaxException.class);
+            assertThatThrownBy(() -> tester.execute("tp missing",
+                                                    FakeSender.player("Alice"))).hasCauseInstanceOf(CommandSyntaxException.class);
         }
     }
 

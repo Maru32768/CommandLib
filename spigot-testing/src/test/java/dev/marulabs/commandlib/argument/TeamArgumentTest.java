@@ -66,6 +66,7 @@ class TeamArgumentTest {
 
         assertThat(sender.getSentMessageTexts()).containsExactly("Unknown team 'blue'");
     }
+
     @Test
     void custom_scoreboard_is_resolved_on_each_parse_and_suggestion() throws Exception {
         FakeSender sender = FakeSender.player("Alice");

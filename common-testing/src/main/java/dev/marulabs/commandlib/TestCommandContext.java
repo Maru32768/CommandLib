@@ -13,11 +13,7 @@ public final class TestCommandContext extends CommonCommandContext<FakeSender, S
     // The thread-local copy lets CommandTester#executeAndGetContext return its own context when tests run in parallel,
     // while latest() keeps returning contexts created on other threads, e.g. by an asynchronous execute call.
     private static final ThreadLocal<TestCommandContext> LATEST_ON_THREAD = new ThreadLocal<>();
-    private static final ChatColorUtil.ChatColor[] NAMED_COLORS = {ChatColorUtil.BLACK, ChatColorUtil.DARK_BLUE,
-            ChatColorUtil.DARK_GREEN, ChatColorUtil.DARK_AQUA, ChatColorUtil.DARK_RED, ChatColorUtil.DARK_PURPLE,
-            ChatColorUtil.GOLD, ChatColorUtil.GRAY, ChatColorUtil.DARK_GRAY, ChatColorUtil.BLUE, ChatColorUtil.GREEN,
-            ChatColorUtil.AQUA, ChatColorUtil.RED, ChatColorUtil.LIGHT_PURPLE, ChatColorUtil.YELLOW,
-            ChatColorUtil.WHITE};
+    private static final ChatColorUtil.ChatColor[] NAMED_COLORS = {ChatColorUtil.BLACK, ChatColorUtil.DARK_BLUE, ChatColorUtil.DARK_GREEN, ChatColorUtil.DARK_AQUA, ChatColorUtil.DARK_RED, ChatColorUtil.DARK_PURPLE, ChatColorUtil.GOLD, ChatColorUtil.GRAY, ChatColorUtil.DARK_GRAY, ChatColorUtil.BLUE, ChatColorUtil.GREEN, ChatColorUtil.AQUA, ChatColorUtil.RED, ChatColorUtil.LIGHT_PURPLE, ChatColorUtil.YELLOW, ChatColorUtil.WHITE};
     private static volatile TestCommandContext latest;
     private final List<String> messages = new ArrayList<>();
     private final List<RichText> richMessages = new ArrayList<>();
@@ -123,8 +119,7 @@ public final class TestCommandContext extends CommonCommandContext<FakeSender, S
     // assert richMessages() when they matter.
     private static String legacyText(RichText text, int parentColor, boolean[] parentDecorations) {
         int color = text.color() != null ? text.color() : parentColor;
-        Boolean[] own = {text.isBold(), text.isItalic(), text.isUnderlined(), text.isStrikethrough(),
-                text.isObfuscated()};
+        Boolean[] own = {text.isBold(), text.isItalic(), text.isUnderlined(), text.isStrikethrough(), text.isObfuscated()};
         boolean[] decorations = new boolean[own.length];
         StringBuilder builder = new StringBuilder(legacyColor(color));
         for (int i = 0; i < own.length; i++) {

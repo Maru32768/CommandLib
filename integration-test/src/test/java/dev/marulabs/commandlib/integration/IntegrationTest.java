@@ -1,7 +1,7 @@
 package dev.marulabs.commandlib.integration;
 
-import org.awaitility.Awaitility;
 import com.github.dockerjava.api.model.HostConfig;
+import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -60,7 +60,8 @@ class IntegrationTest {
 
         Path testPluginDir = Path.of(System.getProperty("commandlib.testPluginDir"));
         Path testPluginJar = findTestPluginJar(testPluginDir.resolve(serverDirectory)
-                                                            .resolve(testPluginSubdirectory), testPluginJarPattern);
+                                                            .resolve(testPluginSubdirectory),
+                                               testPluginJarPattern);
         Path sharedDir = Path.of(System.getProperty("commandlib.sharedDir"));
         Path reportDir = sharedDir.resolve("test-results");
         Path reportFile = reportDir.resolve(reportFileName);
@@ -143,11 +144,7 @@ class IntegrationTest {
                                                                 "unknown command message for a node without permission",
                                                                 // The parent command is usable, so Brigadier reports the
                                                                 // hidden child as an incorrect argument.
-                                                                m -> m.contains("command.unknown.command") || m.contains(
-                                                                        "command.unknown.argument") || m.contains(
-                                                                        "Unknown or incomplete command") || m.contains(
-                                                                        "Incorrect argument") || m.contains(
-                                                                        "Unknown command"));
+                                                                m -> m.contains("command.unknown.command") || m.contains("command.unknown.argument") || m.contains("Unknown or incomplete command") || m.contains("Incorrect argument") || m.contains("Unknown command"));
                 assertThat(deniedMessages).noneMatch(m -> m.contains("deniedProbe executed"));
             } finally {
                 client.disconnect("Test completed");
@@ -158,8 +155,7 @@ class IntegrationTest {
     @Test
     void player_join_log_detection_accepts_and_mohist_formats() {
         assertThat(isPlayerJoinLog("[12:47:42 INFO]: Maru32768 joined the game")).isTrue();
-        assertThat(isPlayerJoinLog(
-                "[12:47:42 INFO]: Maru32768[/172.17.0.1:52648] logged in with entity id 127 at (-245.5, 63, 153.5)")).isTrue();
+        assertThat(isPlayerJoinLog("[12:47:42 INFO]: Maru32768[/172.17.0.1:52648] logged in with entity id 127 at (-245.5, 63, 153.5)")).isTrue();
         assertThat(isPlayerJoinLog("[12:47:42 INFO]: OtherPlayer joined the game")).isFalse();
     }
 
@@ -310,8 +306,7 @@ class IntegrationTest {
         String opsJson = "[{\"uuid\":\"" + offlineUuid + "\",\"name\":\"" + TEST_PLAYER_NAME + "\",\"level\":4,\"bypassesPlayerLimit\":false}]";
 
         return new GenericContainer<>(DockerImageName.parse(dockerImageName)).withExposedPorts(25565)
-                                                                             .withCopyFileToContainer(MountableFile.forHostPath(
-                                                                                                              testPluginJar),
+                                                                             .withCopyFileToContainer(MountableFile.forHostPath(testPluginJar),
                                                                                                       containerWorkDir + "/" + testPluginSubdirectory + "/" + testPluginJar.getFileName())
                                                                              .withFileSystemBind(reportDir.toAbsolutePath()
                                                                                                           .toString(),
@@ -325,22 +320,19 @@ class IntegrationTest {
                                                                                  if (hostConfig == null) {
                                                                                      hostConfig = HostConfig.newHostConfig();
                                                                                  }
-                                                                                 hostConfig.withNanoCPUs(Math.round(
-                                                                                         containerCpuLimit * 1_000_000_000L));
+                                                                                 hostConfig.withNanoCPUs(Math.round(containerCpuLimit * 1_000_000_000L));
                                                                                  cmd.withHostConfig(hostConfig);
                                                                              })
                                                                              .withWorkingDirectory(containerWorkDir)
-                                                                             .withLogConsumer(new Slf4jLogConsumer(
-                                                                                     LOGGER).withPrefix(targetName))
+                                                                             .withLogConsumer(new Slf4jLogConsumer(LOGGER).withPrefix(targetName))
                                                                              .withCommand("sh",
                                                                                           "-lc",
                                                                                           "printf 'eula=true\n' > eula.txt && "
                                                                                                   // Write ops.json before the server starts so the player has operator permission on join.
                                                                                                   // Offline UUID is deterministic: UUID.nameUUIDFromBytes("OfflinePlayer:<name>").
                                                                                                   + "printf '" + opsJson + "' > ops.json && " + "java -Dplugin.env=CI -Dcommandlib.testReportName=" + reportFileName + " " + "-Dcommandlib.testReportDir=/workspace/test-results " + serverLaunchArgs + " nogui")
-                                                                             .waitingFor(Wait.forLogMessage(
-                                                                                     ".*Done \\(.*\\)! For help, type \"help\".*",
-                                                                                     1))
+                                                                             .waitingFor(Wait.forLogMessage(".*Done \\(.*\\)! For help, type \"help\".*",
+                                                                                                            1))
                                                                              .withStartupTimeout(Duration.ofMinutes(8));
     }
 
@@ -446,8 +438,7 @@ class IntegrationTest {
             if (parameterTypes[0] != String.class || parameterTypes[1] != int.class) {
                 continue;
             }
-            if (parameterTypes[2].isAssignableFrom(protocolClass) && parameterTypes[3].isAssignableFrom(
-                    sessionFactoryClass)) {
+            if (parameterTypes[2].isAssignableFrom(protocolClass) && parameterTypes[3].isAssignableFrom(sessionFactoryClass)) {
                 return constructor;
             }
         }
@@ -502,20 +493,17 @@ class IntegrationTest {
                                                                   botSession.receivedPackets.add(packet);
                                                               }
                                                           } catch (ReflectiveOperationException e) {
-                                                              throw new IllegalStateException(
-                                                                      "packetReceived event has no getPacket(): " + args[0].getClass()
-                                                                                                                           .getName(),
-                                                                      e);
+                                                              throw new IllegalStateException("packetReceived event has no getPacket(): " + args[0].getClass()
+                                                                                                                                                   .getName(),
+                                                                                              e);
                                                           }
                                                       } else {
-                                                          throw new IllegalStateException(
-                                                                  "Unexpected packetReceived signature: " + args.length + " arguments");
+                                                          throw new IllegalStateException("Unexpected packetReceived signature: " + args.length + " arguments");
                                                       }
                                                   }
                                                   if (isDisconnectCallback(method.getName())) {
                                                       botSession.disconnectionReason.compareAndSet(null,
-                                                                                                   describeDisconnectEvent(
-                                                                                                           args));
+                                                                                                   describeDisconnectEvent(args));
                                                   }
                                                   return null;
                                               });
@@ -603,8 +591,7 @@ class IntegrationTest {
                 String className = packet.getClass()
                                          .getName();
                 // 1.19+ uses SystemChatPacket, 1.17/1.18 use ClientboundChatPacket and 1.16.5 uses ServerChatPacket.
-                if (!className.contains("SystemChatPacket") && !className.contains("ServerChatPacket") && !className.endsWith(
-                        "ClientboundChatPacket")) {
+                if (!className.contains("SystemChatPacket") && !className.contains("ServerChatPacket") && !className.endsWith("ClientboundChatPacket")) {
                     continue;
                 }
                 // Try getContent() (1.19+) then getMessage() (1.16.5)
@@ -630,8 +617,7 @@ class IntegrationTest {
             try {
                 // Reflective call to GsonComponentSerializer.gson().serialize(component)
                 // to avoid compile-time Adventure version coupling with MCProtocolLib's bundled Adventure.
-                Class<?> serializerClass = Class.forName(
-                        "net.kyori.adventure.text.serializer.gson.GsonComponentSerializer");
+                Class<?> serializerClass = Class.forName("net.kyori.adventure.text.serializer.gson.GsonComponentSerializer");
                 Object serializer = serializerClass.getMethod("gson")
                                                    .invoke(null);
                 Class<?> componentClass = Class.forName("net.kyori.adventure.text.Component");
@@ -716,10 +702,9 @@ class IntegrationTest {
         private static Object createTabCompletePacket(int transactionId,
                                                       String text) throws ReflectiveOperationException {
             // Try each known class name across MCProtocolLib versions.
-            for (String className : List.of(
-                    "org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.ServerboundCommandSuggestionPacket",
-                    "com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundCommandSuggestionPacket",
-                    "com.github.steveice10.mc.protocol.packet.ingame.client.ClientTabCompletePacket")) {
+            for (String className : List.of("org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.ServerboundCommandSuggestionPacket",
+                                            "com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundCommandSuggestionPacket",
+                                            "com.github.steveice10.mc.protocol.packet.ingame.client.ClientTabCompletePacket")) {
                 try {
                     return Class.forName(className)
                                 .getConstructor(int.class, String.class)
@@ -732,24 +717,21 @@ class IntegrationTest {
 
         private Object createCommandPacket(String command) throws ReflectiveOperationException {
             String normalizedCommand = command.startsWith("/") ? command.substring(1) : command;
-            Object modernCommandPacket = tryCreateStringPacket(
-                    "org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.ServerboundChatCommandPacket",
-                    normalizedCommand);
+            Object modernCommandPacket = tryCreateStringPacket("org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.ServerboundChatCommandPacket",
+                                                               normalizedCommand);
             if (modernCommandPacket != null) {
                 return modernCommandPacket;
             }
 
-            Object signedCommandPacket = tryCreateSignedCommandPacket(
-                    "com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundChatCommandPacket",
-                    normalizedCommand);
+            Object signedCommandPacket = tryCreateSignedCommandPacket("com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundChatCommandPacket",
+                                                                      normalizedCommand);
             if (signedCommandPacket != null) {
                 return signedCommandPacket;
             }
 
             // Minecraft 1.17 and 1.18 send commands as chat text through the renamed serverbound chat packet.
-            Object chatPacket = tryCreateStringPacket(
-                    "com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundChatPacket",
-                    "/" + normalizedCommand);
+            Object chatPacket = tryCreateStringPacket("com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundChatPacket",
+                                                      "/" + normalizedCommand);
             if (chatPacket != null) {
                 return chatPacket;
             }

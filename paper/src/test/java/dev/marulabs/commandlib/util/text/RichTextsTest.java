@@ -59,8 +59,7 @@ class RichTextsTest {
         assertThat(click(ClickAction.runCommand("/a"))).isEqualTo(ClickEvent.runCommand("/a"));
         assertThat(click(ClickAction.suggestCommand("/b"))).isEqualTo(ClickEvent.suggestCommand("/b"));
         assertThat(click(ClickAction.copyToClipboard("c"))).isEqualTo(ClickEvent.copyToClipboard("c"));
-        assertThat(click(ClickAction.openUrl("https://example.com"))).isEqualTo(ClickEvent.openUrl(
-                "https://example.com"));
+        assertThat(click(ClickAction.openUrl("https://example.com"))).isEqualTo(ClickEvent.openUrl("https://example.com"));
     }
 
     @Test
@@ -74,8 +73,8 @@ class RichTextsTest {
         assertThat(component).isEqualTo(Component.translatable("commands.give.success",
                                                                Component.text("x")
                                                                         .decorate(TextDecoration.BOLD))
-                                                  .append(Component.text("!")
-                                                                   .decorate(TextDecoration.ITALIC)));
+                                                 .append(Component.text("!")
+                                                                  .decorate(TextDecoration.ITALIC)));
     }
 
     private static ClickEvent click(ClickAction action) {

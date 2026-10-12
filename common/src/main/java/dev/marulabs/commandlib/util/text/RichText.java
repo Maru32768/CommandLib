@@ -87,14 +87,7 @@ public final class RichText {
      */
     @NotNull
     public RichText color(int rgb) {
-        return new RichText(text,
-                            translationKey,
-                            arguments,
-                            children,
-                            rgb & 0xFFFFFF,
-                            decorations,
-                            hover,
-                            click);
+        return new RichText(text, translationKey, arguments, children, rgb & 0xFFFFFF, decorations, hover, click);
     }
 
     @NotNull
@@ -277,14 +270,13 @@ public final class RichText {
             return false;
         }
         RichText that = (RichText) o;
-        return Objects.equals(text, that.text)
-                && Objects.equals(translationKey, that.translationKey)
-                && arguments.equals(that.arguments)
-                && children.equals(that.children)
-                && Objects.equals(color, that.color)
-                && Arrays.equals(decorations, that.decorations)
-                && Objects.equals(hover, that.hover)
-                && Objects.equals(click, that.click);
+        return Objects.equals(text,
+                              that.text) && Objects.equals(translationKey,
+                                                           that.translationKey) && arguments.equals(that.arguments) && children.equals(that.children) && Objects.equals(color,
+                                                                                                                                                                        that.color) && Arrays.equals(decorations,
+                                                                                                                                                                                                     that.decorations) && Objects.equals(hover,
+                                                                                                                                                                                                                                         that.hover) && Objects.equals(click,
+                                                                                                                                                                                                                                                                       that.click);
     }
 
     @Override

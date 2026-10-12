@@ -296,10 +296,10 @@ class CommandTesterTest {
         void suggestion_with_message_tooltip_exposes_tooltip_text() throws Exception {
             try (CommandTester tester = new CommandTester(new Command("cmd") {{
                 argument(new StringArgument("value").addSuggestionAction(sb -> sb.suggest("alpha",
-                                                                                          new LiteralMessage(
-                                                                                                  "alpha tooltip"))
-                                                                                 .suggest("beta"))).execute((v, ctx) -> {
-                });
+                                                                                          new LiteralMessage("alpha tooltip"))
+                                                                                 .suggest("beta"))).execute((v,
+                                                                                                             ctx) -> {
+                                                                                 });
             }}, "test.command")) {
                 FakeSender sender = FakeSender.player("Steve");
 
@@ -339,8 +339,7 @@ class CommandTesterTest {
             try (CommandTester tester = CommandTester.builder()
                                                      .mockNmsClass(TestNMSClass.class, MockTestNMSClass.class)
                                                      .command(() -> {
-                                                         assertThat(NMSClassRegistry.findClass(TestNMSClass.class)).isEqualTo(
-                                                                 MockTestNMSClass.class);
+                                                         assertThat(NMSClassRegistry.findClass(TestNMSClass.class)).isEqualTo(MockTestNMSClass.class);
                                                          return new Command("hello") {{
                                                              execute(ctx -> ctx.sendMessage("Hello!"));
                                                          }};

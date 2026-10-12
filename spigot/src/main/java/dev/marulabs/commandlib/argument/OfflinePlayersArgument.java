@@ -68,8 +68,7 @@ public class OfflinePlayersArgument extends Argument<List<OfflinePlayer>, Offlin
                 Collections.shuffle(players, ThreadLocalRandom.current());
                 return List.of(players.stream()
                                       .findFirst()
-                                      .orElseThrow(() -> new ArgumentParseException(x -> x.sendFailure(
-                                              "no player found."))));
+                                      .orElseThrow(() -> new ArgumentParseException(x -> x.sendFailure("no player found."))));
             }
 
             throw new ArgumentParseException(x -> x.sendFailure(s + " is invalid selector."));

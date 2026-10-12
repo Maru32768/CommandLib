@@ -162,7 +162,9 @@ public final class CommandLib implements Listener {
      * }
      * }</pre>
      */
-    public static void bootstrap(@NotNull BootstrapContext context, @NotNull Command command, @NotNull Command... commands) {
+    public static void bootstrap(@NotNull BootstrapContext context,
+                                 @NotNull Command command,
+                                 @NotNull Command... commands) {
         List<Command> list = new ArrayList<>();
         list.add(command);
         Collections.addAll(list, commands);
@@ -208,8 +210,8 @@ public final class CommandLib implements Listener {
         // The server is null while functions are first compiled, and Paper's sender for compiling functions on a
         // reload has every permission, like vanilla's NULL source.
         boolean useSender = bootstrapDefault == null || Bukkit.getServer() == null || sender.getClass()
-                                                                                         .getName()
-                                                                                         .equals(NULL_SENDER_CLASS);
+                                                                                            .getName()
+                                                                                            .equals(NULL_SENDER_CLASS);
         if (useSender || sender.isPermissionSet(name) || Bukkit.getPluginManager()
                                                                .getPermission(name) != null) {
             return sender.hasPermission(name);
@@ -219,9 +221,8 @@ public final class CommandLib implements Listener {
 
     private static List<LiteralCommandNode<CommandSourceStack>> buildNodes(Collection<? extends Command> commands,
                                                                            String permissionPrefix) {
-        return new CommandNodeCreator<CommandSourceStack, net.kyori.adventure.text.Component, CommandContext, Command>(
-                commands,
-                permissionPrefix).build();
+        return new CommandNodeCreator<CommandSourceStack, net.kyori.adventure.text.Component, CommandContext, Command>(commands,
+                                                                                                                       permissionPrefix).build();
     }
 
     private void doRegister(Collection<? extends Command> commands, String permissionPrefix) {
@@ -256,9 +257,8 @@ public final class CommandLib implements Listener {
             // handler can no longer be installed. Fall back to direct dispatcher manipulation.
             CommandDispatcher<CommandSourceStack> dispatcher = serverDispatcher;
             if (dispatcher == null) {
-                throw new IllegalStateException(
-                        "CommandLib.register() was called after Paper's command registration phase, " + "but no dispatcher is cached yet. Ensure at least one CommandLib.register() call " + "is made during plugin initialization.",
-                        registrationState.registrationFailure);
+                throw new IllegalStateException("CommandLib.register() was called after Paper's command registration phase, " + "but no dispatcher is cached yet. Ensure at least one CommandLib.register() call " + "is made during plugin initialization.",
+                                                registrationState.registrationFailure);
             }
             registrationState.dispatcher = dispatcher;
             // Kept so that a COMMANDS event fired for another plugin re-adds it after /minecraft:reload.

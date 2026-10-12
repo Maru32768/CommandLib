@@ -1,8 +1,8 @@
 package dev.marulabs.commandlib.argument;
 
 import com.mojang.brigadier.arguments.IntegerArgumentType;
-import dev.marulabs.commandlib.CommonCommandContext;
 import dev.marulabs.commandlib.CommonArgument;
+import dev.marulabs.commandlib.CommonCommandContext;
 
 public class CommonIntegerArgument<C extends CommonCommandContext<?, ?>, SELF extends CommonIntegerArgument<C, SELF>> extends CommonArgument<Integer, C, SELF> {
     public CommonIntegerArgument(String name) {

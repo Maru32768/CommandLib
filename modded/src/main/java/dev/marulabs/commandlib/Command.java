@@ -34,8 +34,10 @@ public class Command extends CommonCommand<CommandContext, Command> {
                                             PermissionNode<Boolean> node = new PermissionNode<>("commandlib",
                                                                                                 c.node(),
                                                                                                 PermissionTypes.BOOLEAN,
-                                                                                                (player, playerId, context) -> toForgeDefault(c.defaultPermission(),
-                                                                                                                                               player));
+                                                                                                (player,
+                                                                                                 playerId,
+                                                                                                 context) -> toForgeDefault(c.defaultPermission(),
+                                                                                                                            player));
                                             node.setInformation(Component.literal(c.node()),
                                                                 Component.literal(c.description()));
                                             return node;

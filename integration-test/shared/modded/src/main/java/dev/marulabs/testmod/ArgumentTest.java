@@ -68,7 +68,11 @@ public final class ArgumentTest extends TestBase {
                            x -> x.getName()
                                  .getString(),
                            playerName));
-        commands.add(check("enumArgument", new EnumArgument<>("a", TestEnum.class), "second", String::valueOf, "SECOND"));
+        commands.add(check("enumArgument",
+                           new EnumArgument<>("a", TestEnum.class),
+                           "second",
+                           String::valueOf,
+                           "SECOND"));
         commands.add(check("floatArgument", new FloatArgument("a"), "1.5", String::valueOf, "1.5"));
         commands.add(check("gameProfileArgument",
                            new GameProfileArgument("a"),
@@ -81,7 +85,11 @@ public final class ArgumentTest extends TestBase {
                            "minecraft:diamond",
                            x -> (x.getItem() == Items.DIAMOND) + "," + x.getCount(),
                            "true,1"));
-        commands.add(check("literalArgument", new LiteralArgument("a", List.of("first", "second")), "second", x -> x, "second"));
+        commands.add(check("literalArgument",
+                           new LiteralArgument("a", List.of("first", "second")),
+                           "second",
+                           x -> x,
+                           "second"));
         commands.add(check("locationArgument",
                            new LocationArgument("a"),
                            "1.25 2.5 3.75",
@@ -134,10 +142,10 @@ public final class ArgumentTest extends TestBase {
     }
 
     private <T, A extends CommonArgument<T, CommandContext, A>> String check(String name,
-                                                                          A arg,
-                                                                          String input,
-                                                                          Function<? super T, String> actual,
-                                                                          String expected) {
+                                                                             A arg,
+                                                                             String input,
+                                                                             Function<? super T, String> actual,
+                                                                             String expected) {
         String key = getKey(name);
 
         putCommandNotExecutedResult(key);
@@ -159,6 +167,7 @@ public final class ArgumentTest extends TestBase {
     }
 
     public enum TestEnum {
-        FIRST, SECOND
+        FIRST,
+        SECOND
     }
 }

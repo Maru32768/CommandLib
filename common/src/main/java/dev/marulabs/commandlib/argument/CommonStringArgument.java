@@ -1,8 +1,8 @@
 package dev.marulabs.commandlib.argument;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
-import dev.marulabs.commandlib.CommonCommandContext;
 import dev.marulabs.commandlib.CommonArgument;
+import dev.marulabs.commandlib.CommonCommandContext;
 
 public class CommonStringArgument<C extends CommonCommandContext<?, ?>, SELF extends CommonStringArgument<C, SELF>> extends CommonArgument<String, C, SELF> {
     public CommonStringArgument(String name) {

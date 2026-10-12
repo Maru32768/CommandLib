@@ -22,8 +22,7 @@ public final class JUnitXmlReport {
         if (result.status() == TestStatus.SUCCEEDED) {
             return "  <testcase classname=\"" + xmlEscape(className) + "\" name=\"" + xmlEscape(testName) + "\"/>\n";
         }
-        return "  <testcase classname=\"" + xmlEscape(className) + "\" name=\"" + xmlEscape(testName) + "\">\n" + "    <failure message=\"" + xmlEscape(
-                firstLine(result.message())) + "\">" + xmlEscape(result.message()) + "</failure>\n" + "  </testcase>\n";
+        return "  <testcase classname=\"" + xmlEscape(className) + "\" name=\"" + xmlEscape(testName) + "\">\n" + "    <failure message=\"" + xmlEscape(firstLine(result.message())) + "\">" + xmlEscape(result.message()) + "</failure>\n" + "  </testcase>\n";
     }
 
     private static String testClassName(String key) {

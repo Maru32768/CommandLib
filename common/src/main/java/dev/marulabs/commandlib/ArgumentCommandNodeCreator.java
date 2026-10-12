@@ -98,7 +98,7 @@ final class ArgumentCommandNodeCreator<S, T, C extends CommonCommandContext<S, T
     }
 
     private List<UncaughtExceptionHandler<C>> uncaughtExceptionHandlers(CommonCommand<C, ?> parent,
-                                                                     CommonArgument<?, C, ?> argument) {
+                                                                        CommonArgument<?, C, ?> argument) {
         List<UncaughtExceptionHandler<C>> handlers = new ArrayList<>(parent.uncaughtExceptionHandlers());
         handlers.addAll(argument.uncaughtExceptionHandlers());
         return handlers;

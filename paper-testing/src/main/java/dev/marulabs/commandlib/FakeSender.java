@@ -32,9 +32,9 @@ public final class FakeSender {
         FakeSender fakeSender = new FakeSender(player);
         fakeSender.op(false);
         Mockito.doAnswer(invocation -> {
-                   fakeSender.sentMessages.add(invocation.getArgument(0));
-                   return null;
-               })
+            fakeSender.sentMessages.add(invocation.getArgument(0));
+            return null;
+        })
                .when(player)
                .sendMessage(Mockito.any(Component.class));
 
@@ -53,9 +53,9 @@ public final class FakeSender {
         FakeSender fakeSender = new FakeSender(console);
         fakeSender.op(true);
         Mockito.doAnswer(invocation -> {
-                   fakeSender.sentMessages.add(invocation.getArgument(0));
-                   return null;
-               })
+            fakeSender.sentMessages.add(invocation.getArgument(0));
+            return null;
+        })
                .when(console)
                .sendMessage(Mockito.any(Component.class));
 

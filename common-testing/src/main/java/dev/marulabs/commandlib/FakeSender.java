@@ -47,13 +47,13 @@ public final class FakeSender implements CommandActor {
     }
 
     private FakeSender(String name,
-                      UUID uniqueId,
-                      CommandActorType type,
-                      boolean operator,
-                      boolean allowAllPermissions,
-                      Set<String> permissions,
-                      Set<String> deniedPermissions,
-                      String locale) {
+                       UUID uniqueId,
+                       CommandActorType type,
+                       boolean operator,
+                       boolean allowAllPermissions,
+                       Set<String> permissions,
+                       Set<String> deniedPermissions,
+                       String locale) {
         this.name = name;
         this.uniqueId = uniqueId;
         this.type = type;
@@ -113,8 +113,7 @@ public final class FakeSender implements CommandActor {
 
     @Override
     public boolean hasPermission(@NotNull String permission) {
-        return !deniedPermissions.contains(permission) && (operator || allowAllPermissions || permissions.contains(
-                permission));
+        return !deniedPermissions.contains(permission) && (operator || allowAllPermissions || permissions.contains(permission));
     }
 
     void sendMessage(String message) {

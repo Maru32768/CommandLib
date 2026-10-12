@@ -1,8 +1,8 @@
 package dev.marulabs.commandlib.argument;
 
 import com.mojang.brigadier.arguments.DoubleArgumentType;
-import dev.marulabs.commandlib.CommonCommandContext;
 import dev.marulabs.commandlib.CommonArgument;
+import dev.marulabs.commandlib.CommonCommandContext;
 
 public class CommonDoubleArgument<C extends CommonCommandContext<?, ?>, SELF extends CommonDoubleArgument<C, SELF>> extends CommonArgument<Double, C, SELF> {
     public CommonDoubleArgument(String name) {

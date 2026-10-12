@@ -148,8 +148,7 @@ class FakeSenderTest {
         sender.sendMessage("§x§f§f§0§0§0§0Hex");
 
         assertThat(sender.getSentMessageTexts()).containsExactly("Green bold", "Hex");
-        assertThat(sender.getSentMessageLegacyTexts()).containsExactly("§aGreen §lbold§r",
-                                                                       "§x§f§f§0§0§0§0Hex");
+        assertThat(sender.getSentMessageLegacyTexts()).containsExactly("§aGreen §lbold§r", "§x§f§f§0§0§0§0Hex");
     }
 
     @Test

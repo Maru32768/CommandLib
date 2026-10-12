@@ -118,11 +118,11 @@ class CommonCommandExecutionTest {
     void argument_branch_can_have_multiple_child_factories() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("config") {{
             argument(new CommonStringArgument<>("key")).child(key -> new TestCommand("get") {{
-                             execute(ctx -> ctx.sendMessage("get:" + key.get()));
-                         }})
-                         .child(key -> new TestCommand("delete") {{
-                             execute(ctx -> ctx.sendMessage("delete:" + key.get()));
-                         }});
+                execute(ctx -> ctx.sendMessage("get:" + key.get()));
+            }})
+                                                       .child(key -> new TestCommand("delete") {{
+                                                           execute(ctx -> ctx.sendMessage("delete:" + key.get()));
+                                                       }});
         }});
 
         TestCommandContext get = runner.execute("config difficulty get");
@@ -154,8 +154,8 @@ class CommonCommandExecutionTest {
             });
             argument(new CommonStringArgument<>("key"),
                      new CommonStringArgument<>("value")).execute((key, value, ctx) -> {
-                ctx.sendMessage("two:" + key + ":" + value);
-            });
+                         ctx.sendMessage("two:" + key + ":" + value);
+                     });
         }});
 
         TestCommandContext ctx = runner.execute("set name Steve");
@@ -330,7 +330,7 @@ class CommonCommandExecutionTest {
             argument(new CommonStringArgument<>("key")).child(key -> new TestCommand("set") {{
                 CommonArgument<String, TestCommandContext, ?> field = new CommonStringArgument<>("field");
                 field.validator((Predicate<String>) f -> key.get()
-                                                          .equals("difficulty"));
+                                                            .equals("difficulty"));
                 CommonArgument<String, TestCommandContext, ?> value = new CommonStringArgument<>("value");
                 value.addSuggestionAction(sb -> sb.suggest(sb.getArgument("field") + "-value"));
                 argument(field, value).execute((f, v, ctx) -> ctx.sendMessage(f + "=" + v));

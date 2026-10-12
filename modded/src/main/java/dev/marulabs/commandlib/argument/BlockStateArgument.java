@@ -8,7 +8,8 @@ import net.minecraft.commands.arguments.blocks.BlockInput;
 public class BlockStateArgument extends Argument<BlockInput, BlockStateArgument> {
     public BlockStateArgument(String name) {
         //? if >=1.19.3 {
-        super(name, net.minecraft.commands.arguments.blocks.BlockStateArgument.block(BuiltInCommandBuildContext.INSTANCE));
+        super(name,
+              net.minecraft.commands.arguments.blocks.BlockStateArgument.block(BuiltInCommandBuildContext.INSTANCE));
         //?} else
         /*super(name, net.minecraft.commands.arguments.blocks.BlockStateArgument.block());*/
     }

@@ -44,8 +44,7 @@ public final class FakeSender {
      * Creates a non-operator fake player with the offline-mode UUID for the name.
      */
     public static FakeSender player(@NotNull String name) {
-        return player(name,
-                      UUID.nameUUIDFromBytes(("OfflinePlayer:" + name).getBytes(StandardCharsets.UTF_8)));
+        return player(name, UUID.nameUUIDFromBytes(("OfflinePlayer:" + name).getBytes(StandardCharsets.UTF_8)));
     }
 
     public static FakeSender player(@NotNull String name, @NotNull UUID uniqueId) {
@@ -213,9 +212,9 @@ public final class FakeSender {
                .thenReturn(false);
         //? if >=1.19 {
         Mockito.doAnswer(invocation -> {
-                   sentMessages.add(invocation.getArgument(0));
-                   return null;
-               })
+            sentMessages.add(invocation.getArgument(0));
+            return null;
+        })
                .when(player)
                .sendSystemMessage(Mockito.any(Component.class));
         //?} else {
@@ -288,8 +287,7 @@ public final class FakeSender {
             }
             Set<String> granted = permissions;
             Set<String> denied = Set.copyOf(deniedPermissions);
-            sender.permissionCheck = permission -> !denied.contains(permission) && (granted == null || granted.contains(
-                    permission));
+            sender.permissionCheck = permission -> !denied.contains(permission) && (granted == null || granted.contains(permission));
             return sender;
         }
     }

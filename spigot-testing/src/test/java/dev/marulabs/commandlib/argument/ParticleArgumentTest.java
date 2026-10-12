@@ -26,8 +26,7 @@ class ParticleArgumentTest {
     void unknown_particle_is_a_syntax_error() {
         try (CommandTester tester = new CommandTester(ParticleArgumentTest::particleCommand, "test.command")) {
             assertThatThrownBy(() -> tester.execute("particle not_a_particle",
-                                                    FakeSender.player("Alice"))).hasCauseInstanceOf(
-                    CommandSyntaxException.class);
+                                                    FakeSender.player("Alice"))).hasCauseInstanceOf(CommandSyntaxException.class);
         }
     }
 

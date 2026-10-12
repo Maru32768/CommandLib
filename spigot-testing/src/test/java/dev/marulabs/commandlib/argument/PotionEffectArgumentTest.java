@@ -36,8 +36,7 @@ class PotionEffectArgumentTest {
         try (MockedStatic<PotionEffectType> ignored = Mockito.mockStatic(PotionEffectType.class);
              CommandTester tester = new CommandTester(PotionEffectArgumentTest::effectCommand, "test.command")) {
             assertThatThrownBy(() -> tester.execute("effect minecraft:not_an_effect",
-                                                    FakeSender.player("Alice"))).hasCauseInstanceOf(
-                    CommandSyntaxException.class);
+                                                    FakeSender.player("Alice"))).hasCauseInstanceOf(CommandSyntaxException.class);
         }
     }
 

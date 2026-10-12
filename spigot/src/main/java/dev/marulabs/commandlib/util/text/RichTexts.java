@@ -15,10 +15,7 @@ import java.awt.*;
  * Converts {@link RichText} to Bungee chat components.
  */
 public final class RichTexts {
-    private static final ChatColor[] NAMED_COLORS = {ChatColor.BLACK, ChatColor.DARK_BLUE, ChatColor.DARK_GREEN,
-            ChatColor.DARK_AQUA, ChatColor.DARK_RED, ChatColor.DARK_PURPLE, ChatColor.GOLD, ChatColor.GRAY,
-            ChatColor.DARK_GRAY, ChatColor.BLUE, ChatColor.GREEN, ChatColor.AQUA, ChatColor.RED,
-            ChatColor.LIGHT_PURPLE, ChatColor.YELLOW, ChatColor.WHITE};
+    private static final ChatColor[] NAMED_COLORS = {ChatColor.BLACK, ChatColor.DARK_BLUE, ChatColor.DARK_GREEN, ChatColor.DARK_AQUA, ChatColor.DARK_RED, ChatColor.DARK_PURPLE, ChatColor.GOLD, ChatColor.GRAY, ChatColor.DARK_GRAY, ChatColor.BLUE, ChatColor.GREEN, ChatColor.AQUA, ChatColor.RED, ChatColor.LIGHT_PURPLE, ChatColor.YELLOW, ChatColor.WHITE};
 
     private RichTexts() {
     }

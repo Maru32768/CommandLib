@@ -63,9 +63,12 @@ class CommonCommandRequireTest {
     @Test
     void require_on_two_arguments_passes_both_args_and_extracted_value() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("cmd") {{
-            argument(new CommonStringArgument<>("a"), new CommonIntegerArgument<>("b")).require(SUCCEEDING_EXTRACTOR)
-                                                                                       .execute((a, b, s, ctx) -> ctx.sendMessage(
-                                                                                               a + ":" + b + ":" + s));
+            argument(new CommonStringArgument<>("a"),
+                     new CommonIntegerArgument<>("b")).require(SUCCEEDING_EXTRACTOR)
+                                                      .execute((a,
+                                                                b,
+                                                                s,
+                                                                ctx) -> ctx.sendMessage(a + ":" + b + ":" + s));
         }});
 
         TestCommandContext ctx = runner.execute("cmd hello 42");

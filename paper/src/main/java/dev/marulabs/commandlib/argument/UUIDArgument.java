@@ -31,7 +31,8 @@ public class UUIDArgument extends Argument<UUID, UUIDArgument> {
                           return true;
                       }
                       return StringUtil.containsIgnoreCase(x.getUniqueId()
-                                                            .toString(), input);
+                                                            .toString(),
+                                                           input);
                   })
                   .forEach(x -> uuidToNameMap.put(x.getUniqueId(), x.getName()));
             uuidToNameMap.forEach((k, v) -> {

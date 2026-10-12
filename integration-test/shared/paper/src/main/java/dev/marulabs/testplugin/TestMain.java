@@ -1,12 +1,11 @@
 package dev.marulabs.testplugin;
 
-import dev.marulabs.integration.core.JUnitXmlReport;
-import dev.marulabs.integration.core.TestResult;
-import dev.marulabs.integration.core.TestStatus;
-
 import dev.marulabs.commandlib.Command;
 import dev.marulabs.commandlib.CommandLib;
 import dev.marulabs.commandlib.util.bukkit.BukkitUtil;
+import dev.marulabs.integration.core.JUnitXmlReport;
+import dev.marulabs.integration.core.TestResult;
+import dev.marulabs.integration.core.TestStatus;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -135,8 +134,7 @@ public class TestMain {
                                   }
                               };
                               if (!reloadResult.succeeded()) {
-                                  scenarioTest.failReloadProbe("/minecraft:reload failed.\n" + reloadResult.describe(
-                                          "minecraft:reload"));
+                                  scenarioTest.failReloadProbe("/minecraft:reload failed.\n" + reloadResult.describe("minecraft:reload"));
                                   finish.run();
                                   return;
                               }
@@ -157,8 +155,7 @@ public class TestMain {
                                                       poll[0].cancel();
                                                       logger.log(Level.SEVERE, "Failed to check reload completion", e);
                                                       try {
-                                                          scenarioTest.failReloadProbe(
-                                                                  "Failed to check whether /minecraft:reload finished: " + e);
+                                                          scenarioTest.failReloadProbe("Failed to check whether /minecraft:reload finished: " + e);
                                                       } finally {
                                                           finish.run();
                                                       }
@@ -171,14 +168,12 @@ public class TestMain {
                                                   try {
                                                       if (reloaded) {
                                                           String probe = MainCommand.NAME + " " + ScenarioTest.RELOAD_PROBE;
-                                                          CommandDispatchResult dispatchResult = dispatchProbe.dispatch(
-                                                                  Bukkit.getConsoleSender(),
-                                                                  probe);
+                                                          CommandDispatchResult dispatchResult = dispatchProbe.dispatch(Bukkit.getConsoleSender(),
+                                                                                                                        probe);
                                                           tests.forEach(test -> test.hookCommandDispatchError(probe,
                                                                                                               dispatchResult));
                                                       } else {
-                                                          scenarioTest.failReloadProbe(
-                                                                  "/minecraft:reload did not finish within " + RELOAD_TIMEOUT_TICKS + " ticks.");
+                                                          scenarioTest.failReloadProbe("/minecraft:reload did not finish within " + RELOAD_TIMEOUT_TICKS + " ticks.");
                                                       }
                                                   } finally {
                                                       finish.run();
@@ -209,8 +204,7 @@ public class TestMain {
     public void outputResultsToJUnitXml(List<TestResult> results) {
         String reportName = System.getProperty("commandlib.testReportName",
                                                "TEST-commandlib-" + BukkitUtil.getMinecraftVersion() + ".xml");
-        Path reportDir = Paths.get(System.getProperty("commandlib.testReportDir",
-                                                      "../../../../shared/test-results"));
+        Path reportDir = Paths.get(System.getProperty("commandlib.testReportDir", "../../../../shared/test-results"));
         Path path = reportDir.resolve(reportName);
         try {
             Files.createDirectories(path.getParent());

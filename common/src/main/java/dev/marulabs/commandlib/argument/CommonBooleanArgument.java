@@ -1,8 +1,8 @@
 package dev.marulabs.commandlib.argument;
 
 import com.mojang.brigadier.arguments.BoolArgumentType;
-import dev.marulabs.commandlib.CommonCommandContext;
 import dev.marulabs.commandlib.CommonArgument;
+import dev.marulabs.commandlib.CommonCommandContext;
 
 public class CommonBooleanArgument<C extends CommonCommandContext<?, ?>, SELF extends CommonBooleanArgument<C, SELF>> extends CommonArgument<Boolean, C, SELF> {
     public CommonBooleanArgument(String name) {

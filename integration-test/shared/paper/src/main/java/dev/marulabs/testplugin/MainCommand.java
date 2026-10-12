@@ -1,8 +1,7 @@
 package dev.marulabs.testplugin;
 
-import dev.marulabs.integration.core.TestStatus;
-
 import dev.marulabs.commandlib.Command;
+import dev.marulabs.integration.core.TestStatus;
 import org.bukkit.entity.Player;
 
 public class MainCommand extends Command {

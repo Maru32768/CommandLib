@@ -180,8 +180,8 @@ class CommandStructureTest {
 
         assertThatThrownBy(() -> command.argument(new StrArg("target"))
                                         .child(target -> new TestCommand("kick"))).isInstanceOf(IllegalArgumentException.class)
-                                                                              .hasMessageContaining("kick")
-                                                                              .hasMessageContaining("game <target>");
+                                                                                  .hasMessageContaining("kick")
+                                                                                  .hasMessageContaining("game <target>");
     }
 
     @Test
@@ -217,9 +217,9 @@ class CommandStructureTest {
             addAliases("foo");
         }});
 
-        assertThatThrownBy(() -> new CommandNodeCreator<>(commands, "test.command").build()).isInstanceOf(
-                                                                                                    IllegalArgumentException.class)
-                                                                                            .hasMessageContaining("foo");
+        assertThatThrownBy(() -> new CommandNodeCreator<>(commands,
+                                                          "test.command").build()).isInstanceOf(IllegalArgumentException.class)
+                                                                                  .hasMessageContaining("foo");
     }
 
     @Test
@@ -283,7 +283,8 @@ class CommandStructureTest {
     void alias_executes_argument_branch() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("give") {{
             addAliases("g");
-            argument(new CommonIntegerArgument<>("amount")).execute((amount, ctx) -> ctx.sendMessage("amount=" + amount));
+            argument(new CommonIntegerArgument<>("amount")).execute((amount,
+                                                                     ctx) -> ctx.sendMessage("amount=" + amount));
         }});
 
         assertThat(runner.execute("g 3")
@@ -324,16 +325,23 @@ class CommandStructureTest {
     void every_branch_arity_passes_arguments_in_declaration_order() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("n") {{
             addChildren(new TestCommand("four") {{
-                argument(i("a"), i("b"), i("c"), i("d")).execute((a, b, c, d, ctx) -> ctx.sendMessage(List.of(a,
-                                                                                                                b,
-                                                                                                                c,
-                                                                                                                d)));
+                argument(i("a"),
+                         i("b"),
+                         i("c"),
+                         i("d")).execute((a, b, c, d, ctx) -> ctx.sendMessage(List.of(a, b, c, d)));
             }}, new TestCommand("five") {{
-                argument(i("a"), i("b"), i("c"), i("d"), i("e")).execute((a, b, c, d, e, ctx) -> ctx.sendMessage(
-                        List.of(a, b, c, d, e)));
+                argument(i("a"),
+                         i("b"),
+                         i("c"),
+                         i("d"),
+                         i("e")).execute((a, b, c, d, e, ctx) -> ctx.sendMessage(List.of(a, b, c, d, e)));
             }}, new TestCommand("six") {{
-                argument(i("a"), i("b"), i("c"), i("d"), i("e"), i("f")).execute((a, b, c, d, e, f, ctx) -> ctx.sendMessage(
-                        List.of(a, b, c, d, e, f)));
+                argument(i("a"),
+                         i("b"),
+                         i("c"),
+                         i("d"),
+                         i("e"),
+                         i("f")).execute((a, b, c, d, e, f, ctx) -> ctx.sendMessage(List.of(a, b, c, d, e, f)));
             }}, new TestCommand("seven") {{
                 argument(i("a"),
                          i("b"),
@@ -377,10 +385,11 @@ class CommandStructureTest {
         List<String> handled = new ArrayList<>();
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("boom") {{
             addUncaughtExceptionHandler((e, ctx) -> handled.add("command:" + e.getMessage()));
-            argument(new IntArg("value").addUncaughtExceptionHandler((e, ctx) -> handled.add("argument:" + e.getMessage()))).execute(
-                    (value, ctx) -> {
-                        throw new IllegalStateException("value=" + value);
-                    });
+            argument(new IntArg("value").addUncaughtExceptionHandler((e,
+                                                                      ctx) -> handled.add("argument:" + e.getMessage()))).execute((value,
+                                                                                                                                   ctx) -> {
+                                                                          throw new IllegalStateException("value=" + value);
+                                                                      });
         }});
 
         runner.execute("boom 3");

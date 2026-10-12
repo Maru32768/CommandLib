@@ -119,8 +119,8 @@ class CommandTesterTest {
                 execute(ctx -> {
                 });
             }}, "test")) {
-                assertThatThrownBy(() -> tester.execute("unknown", FakeSender.player("Steve"))).isInstanceOf(
-                        RuntimeException.class);
+                assertThatThrownBy(() -> tester.execute("unknown",
+                                                        FakeSender.player("Steve"))).isInstanceOf(RuntimeException.class);
             }
         }
 
@@ -131,7 +131,7 @@ class CommandTesterTest {
                 execute(ctx -> {
                     CommandActor actor = ctx.getActor();
                     result.set(actor.getName() + "," + actor.getType() + "," + actor.getUniqueId()
-                                                                                     .orElse(null));
+                                                                                    .orElse(null));
                 });
             }}, "test")) {
                 UUID uuid = UUID.randomUUID();
@@ -189,8 +189,8 @@ class CommandTesterTest {
             try (CommandTester tester = new CommandTester(new Command("whoami") {{
                 execute(ctx -> result.set(ctx.getActor()
                                              .getName() + "," + ctx.getActor()
-                                                                  .getUniqueId()
-                                                                  .orElse(null)));
+                                                                   .getUniqueId()
+                                                                   .orElse(null)));
             }}, "test")) {
                 UUID uuid = UUID.randomUUID();
                 FakeSender sender = FakeSender.playerBuilder("Alex")
@@ -238,17 +238,18 @@ class CommandTesterTest {
 
         @Test
         void item_stack() {
-            assertThat(parse(new ItemStackArgument("a"), "minecraft:diamond", FakeSender.console()).getItem())
-                    .isEqualTo(Items.DIAMOND);
+            assertThat(parse(new ItemStackArgument("a"),
+                             "minecraft:diamond",
+                             FakeSender.console()).getItem()).isEqualTo(Items.DIAMOND);
         }
 
         @Test
         void effect() {
             assertThat(parse(new EffectArgument("a"), "minecraft:speed", FakeSender.console()))
-                    //? if >=1.20.5 {
-                    /*.isSameAs(MobEffects.MOVEMENT_SPEED);
-                    *///?} else
-                    .isEqualTo(MobEffects.MOVEMENT_SPEED);
+                                                                                               //? if >=1.20.5 {
+                                                                                               /*.isSameAs(MobEffects.MOVEMENT_SPEED);
+                                                                                               *///?} else
+                                                                                               .isEqualTo(MobEffects.MOVEMENT_SPEED);
         }
 
         @Test
@@ -283,8 +284,7 @@ class CommandTesterTest {
         @Test
         void block_state() {
             assertThat(parse(new BlockStateArgument("a"), "minecraft:stone", FakeSender.console()).getState()
-                                                                                                    .getBlock())
-                    .isEqualTo(Blocks.STONE);
+                                                                                                  .getBlock()).isEqualTo(Blocks.STONE);
         }
 
         @Test
@@ -297,7 +297,7 @@ class CommandTesterTest {
             AtomicReference<String> result = new AtomicReference<>();
             try (CommandTester tester = new CommandTester(new Command("arg") {{
                 argument(new PlayerArgument("a")).execute((a, ctx) -> result.set(a.getGameProfile()
-                                                                                    .getName()));
+                                                                                  .getName()));
             }}, "test").withPlayer(FakeSender.player("Alex"))) {
                 tester.execute("arg Alex",
                                FakeSender.player("Steve")

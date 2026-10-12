@@ -39,8 +39,7 @@ class ObjectArgumentTest {
             tester.execute("give axe", sender);
         }
 
-        assertThat(sender.getSentMessageTexts()).containsExactly("Incorrect argument for command",
-                                                                 "give axe<--[HERE]");
+        assertThat(sender.getSentMessageTexts()).containsExactly("Incorrect argument for command", "give axe<--[HERE]");
         assertThat(sender.getSentMessages()
                          .get(0)
                          .getColor()

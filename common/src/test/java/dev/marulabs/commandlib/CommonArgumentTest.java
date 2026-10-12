@@ -23,8 +23,8 @@ class CommonArgumentTest {
                      new CommonLongArgument<>("ticks"),
                      new CommonFloatArgument<>("speed"),
                      new CommonDoubleArgument<>("ratio")).execute((enabled, amount, ticks, speed, ratio, ctx) -> {
-                ctx.sendMessage(enabled + ":" + amount + ":" + ticks + ":" + speed + ":" + ratio);
-            });
+                         ctx.sendMessage(enabled + ":" + amount + ":" + ticks + ":" + speed + ":" + ratio);
+                     });
         }});
 
         TestCommandContext ctx = runner.execute("set true -5 9999999999 1.5 3.14");
@@ -37,10 +37,13 @@ class CommonArgumentTest {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("say") {{
             argument(new CommonStringArgument<>("word", CommonStringArgument.Type.WORD),
                      new CommonStringArgument<>("quoted", CommonStringArgument.Type.PHRASE_QUOTED),
-                     new CommonStringArgument<>("rest",
-                                                CommonStringArgument.Type.PHRASE)).execute((word, quoted, rest, ctx) -> {
-                ctx.sendMessage(word + "|" + quoted + "|" + rest);
-            });
+                     new CommonStringArgument<>("rest", CommonStringArgument.Type.PHRASE))
+                                                                                          .execute((word,
+                                                                                                    quoted,
+                                                                                                    rest,
+                                                                                                    ctx) -> {
+                                                                                              ctx.sendMessage(word + "|" + quoted + "|" + rest);
+                                                                                          });
         }});
 
         TestCommandContext ctx = runner.execute("say hello \"good morning\" this is rest");
@@ -116,8 +119,8 @@ class CommonArgumentTest {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("set") {{
             argument(new IntArg("amount").validator(value -> value >= 0)
                                          .transformer(value -> value * 2)).execute((amount, ctx) -> {
-                ctx.sendMessage("amount=" + amount);
-            });
+                                             ctx.sendMessage("amount=" + amount);
+                                         });
         }});
 
         TestCommandContext passed = runner.execute("set 21");
@@ -132,10 +135,12 @@ class CommonArgumentTest {
     void additional_parser_can_recover_from_library_parse_failure() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("set") {{
             argument(new ObjArg<>("item",
-                                  Map.of("sword",
-                                         1)).additionalParser((ctx, input) -> input.equals("axe") ? 2 : null)).execute((item, ctx) -> {
-                ctx.sendMessage("item=" + item);
-            });
+                                  Map.of("sword", 1))
+                                                     .additionalParser((ctx,
+                                                                        input) -> input.equals("axe") ? 2 : null)).execute((item,
+                                                                                                                            ctx) -> {
+                                                                            ctx.sendMessage("item=" + item);
+                                                                        });
         }});
 
         TestCommandContext ctx = runner.execute("set axe");
@@ -148,13 +153,13 @@ class CommonArgumentTest {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("sum") {{
             argument(new CommonIntegerArgument<>("left"),
                      new CommonIntegerArgument<>("right")).execute((left, right, ctx) -> {
-                ctx.sendMessage(ctx.getInput("left") + ":" + ctx.getInput("right"));
-                ctx.sendMessage(ctx.getInputs()
-                                   .toString());
-                ctx.sendMessage(ctx.getArguments()
-                                   .toString());
-                ctx.sendMessage(ctx.getArgument("left", Integer.class) + right);
-            });
+                         ctx.sendMessage(ctx.getInput("left") + ":" + ctx.getInput("right"));
+                         ctx.sendMessage(ctx.getInputs()
+                                            .toString());
+                         ctx.sendMessage(ctx.getArguments()
+                                            .toString());
+                         ctx.sendMessage(ctx.getArgument("left", Integer.class) + right);
+                     });
         }});
 
         TestCommandContext ctx = runner.execute("sum 20 22");
@@ -193,7 +198,8 @@ class CommonArgumentTest {
     @Test
     void default_suggestions_can_be_cleared_and_restored() {
         TestCommandRunner addedRunner = new TestCommandRunner(new TestCommand("pick") {{
-            argument(new DefaultSuggestingArg("value").addSuggestionAction(sb -> sb.suggest("custom"))).execute((value, ctx) -> {
+            argument(new DefaultSuggestingArg("value").addSuggestionAction(sb -> sb.suggest("custom"))).execute((value,
+                                                                                                                 ctx) -> {
             });
         }});
         TestCommandRunner clearedRunner = new TestCommandRunner(new TestCommand("pick") {{
@@ -203,7 +209,7 @@ class CommonArgumentTest {
         TestCommandRunner restoredRunner = new TestCommandRunner(new TestCommand("pick") {{
             argument(new DefaultSuggestingArg("value").clearSuggestionActions()
                                                       .useDefaultSuggestions()).execute((value, ctx) -> {
-            });
+                                                      });
         }});
 
         assertThat(addedRunner.suggest("pick ")).containsExactlyInAnyOrder("default", "custom", "help");

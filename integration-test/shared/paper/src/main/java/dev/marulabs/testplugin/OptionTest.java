@@ -1,13 +1,12 @@
 package dev.marulabs.testplugin;
 
-import dev.marulabs.integration.core.TestResult;
-import dev.marulabs.integration.core.TestStatus;
-
 import dev.marulabs.commandlib.Command;
 import dev.marulabs.commandlib.CommandContext;
 import dev.marulabs.commandlib.CommandOption;
 import dev.marulabs.commandlib.Options;
 import dev.marulabs.commandlib.argument.StringArgument;
+import dev.marulabs.integration.core.TestResult;
+import dev.marulabs.integration.core.TestStatus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -87,7 +86,9 @@ public final class OptionTest extends TestBase {
             CommandOption<Boolean, CommandContext> verbose = option(Options.flag("verbose", 'v'));
 
             argument(new StringArgument("target", StringArgument.Type.WORD)).execute((target, ctx) -> {
-                putResult(key, ctx.getOption(force) + ":" + ctx.getOption(verbose) + ":" + target, "true:true:alex");
+                putResult(key,
+                          ctx.getOption(force) + ":" + ctx.getOption(verbose) + ":" + target,
+                          "true:true:alex");
             });
         }});
 
@@ -105,7 +106,9 @@ public final class OptionTest extends TestBase {
                                                                          .requires(force));
 
             argument(new StringArgument("target", StringArgument.Type.WORD)).execute((target, ctx) -> {
-                putResult(key, ctx.getOption(force) + ":" + ctx.getOption(reason) + ":" + target, "true:cleanup:alex");
+                putResult(key,
+                          ctx.getOption(force) + ":" + ctx.getOption(reason) + ":" + target,
+                          "true:cleanup:alex");
             });
         }});
 
@@ -144,7 +147,9 @@ public final class OptionTest extends TestBase {
                                                                          .requires(mode, "parallel"));
 
             argument(new StringArgument("target", StringArgument.Type.WORD)).execute((target, ctx) -> {
-                recordRejectedInputResult(key, target, rejectedInputExecuted,
+                recordRejectedInputResult(key,
+                                          target,
+                                          rejectedInputExecuted,
                                           "mode=" + ctx.getOption(mode) + ", limit=" + ctx.getOption(limit));
             });
         }});
@@ -186,8 +191,7 @@ public final class OptionTest extends TestBase {
             });
         }});
 
-        return List.of(buildCommand(command, name + " rejected -f"),
-                       buildCommand(command, name + " -f control"));
+        return List.of(buildCommand(command, name + " rejected -f"), buildCommand(command, name + " -f control"));
     }
 
     private void recordRejectedInputResult(String key,

@@ -48,7 +48,8 @@ public class UUIDArgument extends Argument<UUID, UUIDArgument> {
                       return true;
                   }
                   return StringUtil.containsIgnoreCase(x.getId()
-                                                        .toString(), input);
+                                                        .toString(),
+                                                       input);
               })
               .forEach(x -> uuidToNameMap.put(x.getId(), x.getName()));
 
@@ -74,7 +75,8 @@ public class UUIDArgument extends Argument<UUID, UUIDArgument> {
         //? if >=1.17 {
         Optional<GameProfile> gameProfile = getProfileCache().get(s);
         if (gameProfile.isPresent()) {
-            return gameProfile.get().getId();
+            return gameProfile.get()
+                              .getId();
         }
         //?} else {
         /*GameProfile gameProfile = getProfileCache().get(s);

@@ -148,7 +148,8 @@ class CommandTesterTest {
         @Test
         void command_with_string_argument() {
             CommandTester tester = new CommandTester(new Command("greet") {{
-                argument(new StringArgument("name")).execute((name, ctx) -> ctx.sendMessage("Hello, " + name + "!"));
+                argument(new StringArgument("name")).execute((name,
+                                                              ctx) -> ctx.sendMessage("Hello, " + name + "!"));
             }}, "test.command");
             FakeSender sender = FakeSender.player("Steve");
 
@@ -255,8 +256,8 @@ class CommandTesterTest {
         void returns_suggestions_with_string_tooltip() throws Exception {
             CommandTester tester = new CommandTester(new Command("choose") {{
                 argument(new StringArgument("value").addSuggestionAction(sb -> sb.suggest("alpha",
-                                                                                          "first value"))).execute((value, ctx) -> ctx.sendSuccess(
-                        value));
+                                                                                          "first value"))).execute((value,
+                                                                                                                    ctx) -> ctx.sendSuccess(value));
             }}, "test.command");
 
             var suggestions = tester.suggestions("choose a", FakeSender.player("Steve"))
@@ -276,10 +277,10 @@ class CommandTesterTest {
         void returns_suggestions_with_message_tooltip() throws Exception {
             CommandTester tester = new CommandTester(new Command("cmd") {{
                 argument(new StringArgument("value").addSuggestionAction(sb -> sb.suggest("alpha",
-                                                                                          new LiteralMessage(
-                                                                                                  "alpha tooltip"))
-                                                                                 .suggest("beta"))).execute((v, ctx) -> {
-                });
+                                                                                          new LiteralMessage("alpha tooltip"))
+                                                                                 .suggest("beta"))).execute((v,
+                                                                                                             ctx) -> {
+                                                                                 });
             }}, "test.command");
             FakeSender sender = FakeSender.player("Steve");
 

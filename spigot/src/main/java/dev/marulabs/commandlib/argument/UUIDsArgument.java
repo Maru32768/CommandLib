@@ -36,7 +36,8 @@ public class UUIDsArgument extends Argument<List<UUID>, UUIDsArgument> {
                           return true;
                       }
                       return StringUtil.containsIgnoreCase(x.getUniqueId()
-                                                            .toString(), input);
+                                                            .toString(),
+                                                           input);
                   })
                   .forEach(x -> uuidToNameMap.put(x.getUniqueId(), x.getName()));
             uuidToNameMap.forEach((k, v) -> {
@@ -71,15 +72,13 @@ public class UUIDsArgument extends Argument<List<UUID>, UUIDsArgument> {
                 if (!uuids.isEmpty()) {
                     return uuids;
                 }
-                throw new ArgumentParseException(x -> ((CommandContext) x).sendFailure(new TextComponent(
-                        "no player found")));
+                throw new ArgumentParseException(x -> ((CommandContext) x).sendFailure(new TextComponent("no player found")));
             }
             if (s.equals("@r")) {
                 Collections.shuffle(uuids, ThreadLocalRandom.current());
                 return List.of(uuids.stream()
                                     .findFirst()
-                                    .orElseThrow(() -> new ArgumentParseException(x -> ((CommandContext) x).sendFailure(
-                                            new TextComponent("no player found")))));
+                                    .orElseThrow(() -> new ArgumentParseException(x -> ((CommandContext) x).sendFailure(new TextComponent("no player found")))));
             }
 
             throw new ArgumentParseException(x -> ((CommandContext) x).sendFailure(new TextComponent(s + " is invalid selector")));

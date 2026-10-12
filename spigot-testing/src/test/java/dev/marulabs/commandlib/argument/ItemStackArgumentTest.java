@@ -36,8 +36,7 @@ class ItemStackArgumentTest {
     void unknown_item_is_a_syntax_error() {
         try (CommandTester tester = new CommandTester(ItemStackArgumentTest::giveCommand, "test.command")) {
             assertThatThrownBy(() -> tester.execute("give not_a_real_material",
-                                                    FakeSender.player("Alice"))).hasCauseInstanceOf(
-                    CommandSyntaxException.class);
+                                                    FakeSender.player("Alice"))).hasCauseInstanceOf(CommandSyntaxException.class);
         }
     }
 
@@ -45,16 +44,15 @@ class ItemStackArgumentTest {
     void block_without_item_form_is_a_syntax_error() {
         try (CommandTester tester = new CommandTester(ItemStackArgumentTest::giveCommand, "test.command")) {
             assertThatThrownBy(() -> tester.execute("give minecraft:water",
-                                                    FakeSender.player("Alice"))).hasCauseInstanceOf(
-                    CommandSyntaxException.class);
+                                                    FakeSender.player("Alice"))).hasCauseInstanceOf(CommandSyntaxException.class);
         }
     }
 
     @Test
     void uppercase_item_id_is_a_syntax_error() {
         try (CommandTester tester = new CommandTester(ItemStackArgumentTest::giveCommand, "test.command")) {
-            assertThatThrownBy(() -> tester.execute("give STONE", FakeSender.player("Alice"))).hasCauseInstanceOf(
-                    CommandSyntaxException.class);
+            assertThatThrownBy(() -> tester.execute("give STONE",
+                                                    FakeSender.player("Alice"))).hasCauseInstanceOf(CommandSyntaxException.class);
         }
     }
 

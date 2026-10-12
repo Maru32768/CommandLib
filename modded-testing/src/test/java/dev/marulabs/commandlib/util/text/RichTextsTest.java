@@ -76,8 +76,7 @@ class RichTextsTest {
 
     @Test
     void every_click_action_is_converted() {
-        assertThat(click(ClickAction.runCommand("/a"))).isEqualTo(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                                                                                 "/a"));
+        assertThat(click(ClickAction.runCommand("/a"))).isEqualTo(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/a"));
         assertThat(click(ClickAction.suggestCommand("/b"))).isEqualTo(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND,
                                                                                      "/b"));
         assertThat(click(ClickAction.copyToClipboard("c"))).isEqualTo(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD,

@@ -204,7 +204,8 @@ class CommandOptionTest {
     void option_after_argument_is_rejected() {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("scan") {{
             CommandOption<Boolean, TestCommandContext> force = option(Options.flag("force", 'f'));
-            argument(new CommonStringArgument<>("target", CommonStringArgument.Type.WORD)).execute((target, ctx) -> {
+            argument(new CommonStringArgument<>("target", CommonStringArgument.Type.WORD)).execute((target,
+                                                                                                    ctx) -> {
                 ctx.sendMessage(target + ":" + ctx.getOption(force));
             });
         }});
@@ -245,8 +246,7 @@ class CommandOptionTest {
         assertThat(ctx.messages()).anyMatch(x -> x.contains("Usage:"))
                                   .anyMatch(x -> x.contains("/scan") && x.contains("options") && x.contains("target"))
                                   .anyMatch(x -> x.contains("Options:"))
-                                  .anyMatch(x -> x.contains("-f") && x.contains("--force") && x.contains(
-                                          "Force execution"))
+                                  .anyMatch(x -> x.contains("-f") && x.contains("--force") && x.contains("Force execution"))
                                   .anyMatch(x -> x.contains("-n") && x.contains("--limit") && x.contains("Maximum count"));
     }
 
@@ -271,8 +271,7 @@ class CommandOptionTest {
             CommandOption<Long, TestCommandContext> longValue = option(Options.longValue("long", 'l', 0L));
             CommandOption<Float, TestCommandContext> floatValue = option(Options.floatValue("float", 'x', 0F));
             CommandOption<Double, TestCommandContext> doubleValue = option(Options.doubleValue("double", 'd', 0D));
-            execute(ctx -> ctx.sendMessage(ctx.getOption(bool) + ":" + ctx.getOption(longValue) + ":" + ctx.getOption(
-                    floatValue) + ":" + ctx.getOption(doubleValue)));
+            execute(ctx -> ctx.sendMessage(ctx.getOption(bool) + ":" + ctx.getOption(longValue) + ":" + ctx.getOption(floatValue) + ":" + ctx.getOption(doubleValue)));
         }});
 
         assertThat(runner.execute("scan -b true -l 9999999999 -x 1.5 -d 2.25")
@@ -377,7 +376,8 @@ class CommandOptionTest {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("scan") {{
             option(Options.flag("force", 'f'));
             option(Options.integer("limit", 'n', 10));
-            argument(new CommonStringArgument<>("target")).execute((target, ctx) -> ctx.sendMessage(ctx.getInputs()));
+            argument(new CommonStringArgument<>("target")).execute((target,
+                                                                    ctx) -> ctx.sendMessage(ctx.getInputs()));
         }});
 
         assertThat(runner.execute("scan -f -n 3 Alex")

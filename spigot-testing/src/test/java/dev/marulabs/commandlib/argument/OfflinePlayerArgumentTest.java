@@ -19,13 +19,12 @@ class OfflinePlayerArgumentTest {
         Mockito.when(mockPlayer.getName())
                .thenReturn("Steve");
 
-        try (MockedStatic<Bukkit> bukkit = Mockito.mockStatic(Bukkit.class); CommandTester tester = new CommandTester(
-                new Command("info") {{
-                    argument(new OfflinePlayerArgument("player")).execute((player, ctx) -> {
-                        ctx.sendMessage(player.getName());
-                    });
-                }},
-                "test.command")) {
+        try (MockedStatic<Bukkit> bukkit = Mockito.mockStatic(Bukkit.class);
+             CommandTester tester = new CommandTester(new Command("info") {{
+                 argument(new OfflinePlayerArgument("player")).execute((player, ctx) -> {
+                     ctx.sendMessage(player.getName());
+                 });
+             }}, "test.command")) {
             bukkit.when(Bukkit::getOfflinePlayers)
                   .thenReturn(new OfflinePlayer[]{mockPlayer});
             tester.execute("info steve", sender);
@@ -38,13 +37,12 @@ class OfflinePlayerArgumentTest {
     void unknown_player_sends_failure_message() {
         FakeSender sender = FakeSender.player("Alice");
 
-        try (MockedStatic<Bukkit> bukkit = Mockito.mockStatic(Bukkit.class); CommandTester tester = new CommandTester(
-                new Command("info") {{
-                    argument(new OfflinePlayerArgument("player")).execute((player, ctx) -> {
-                        ctx.sendMessage(player.getName());
-                    });
-                }},
-                "test.command")) {
+        try (MockedStatic<Bukkit> bukkit = Mockito.mockStatic(Bukkit.class);
+             CommandTester tester = new CommandTester(new Command("info") {{
+                 argument(new OfflinePlayerArgument("player")).execute((player, ctx) -> {
+                     ctx.sendMessage(player.getName());
+                 });
+             }}, "test.command")) {
             bukkit.when(Bukkit::getOfflinePlayers)
                   .thenReturn(new OfflinePlayer[0]);
             tester.execute("info nobody", sender);

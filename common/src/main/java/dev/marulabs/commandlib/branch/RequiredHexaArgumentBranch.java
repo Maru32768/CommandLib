@@ -1,9 +1,9 @@
 package dev.marulabs.commandlib.branch;
 
 import dev.marulabs.commandlib.ArgRef;
-import dev.marulabs.commandlib.CommonCommandContext;
 import dev.marulabs.commandlib.CommonArgument;
 import dev.marulabs.commandlib.CommonCommand;
+import dev.marulabs.commandlib.CommonCommandContext;
 import dev.marulabs.commandlib.command.CommandExecutor;
 import dev.marulabs.commandlib.command.Extractor;
 import dev.marulabs.commandlib.util.function.HexaFunction;
@@ -52,7 +52,12 @@ public final class RequiredHexaArgumentBranch<S, T1, T2, T3, T4, T5, T6, C exten
     }
 
     public RequiredHexaArgumentBranch<S, T1, T2, T3, T4, T5, T6, C, T> child(@NotNull HexaFunction<ArgRef<T1>, ArgRef<T2>, ArgRef<T3>, ArgRef<T4>, ArgRef<T5>, ArgRef<T6>, T> factory) {
-        super.child(factory.apply(ArgRef.of(argument1), ArgRef.of(argument2), ArgRef.of(argument3), ArgRef.of(argument4), ArgRef.of(argument5), ArgRef.of(argument6)));
+        super.child(factory.apply(ArgRef.of(argument1),
+                                  ArgRef.of(argument2),
+                                  ArgRef.of(argument3),
+                                  ArgRef.of(argument4),
+                                  ArgRef.of(argument5),
+                                  ArgRef.of(argument6)));
         return this;
     }
 }

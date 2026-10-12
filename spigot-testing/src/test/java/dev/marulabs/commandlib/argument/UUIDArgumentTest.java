@@ -20,13 +20,12 @@ class UUIDArgumentTest {
     void raw_uuid_string_is_parsed() {
         FakeSender sender = FakeSender.player("Alice");
 
-        try (MockedStatic<Bukkit> bukkit = Mockito.mockStatic(Bukkit.class); CommandTester tester = new CommandTester(
-                new Command("id") {{
-                    argument(new UUIDArgument("uuid")).execute((uuid, ctx) -> {
-                        ctx.sendMessage(uuid.toString());
-                    });
-                }},
-                "test.command")) {
+        try (MockedStatic<Bukkit> bukkit = Mockito.mockStatic(Bukkit.class);
+             CommandTester tester = new CommandTester(new Command("id") {{
+                 argument(new UUIDArgument("uuid")).execute((uuid, ctx) -> {
+                     ctx.sendMessage(uuid.toString());
+                 });
+             }}, "test.command")) {
             bukkit.when(Bukkit::getOfflinePlayers)
                   .thenReturn(new OfflinePlayer[0]);
             tester.execute("id " + FIXED_UUID, sender);
@@ -44,13 +43,12 @@ class UUIDArgumentTest {
         Mockito.when(mockPlayer.getUniqueId())
                .thenReturn(FIXED_UUID);
 
-        try (MockedStatic<Bukkit> bukkit = Mockito.mockStatic(Bukkit.class); CommandTester tester = new CommandTester(
-                new Command("id") {{
-                    argument(new UUIDArgument("uuid")).execute((uuid, ctx) -> {
-                        ctx.sendMessage(uuid.toString());
-                    });
-                }},
-                "test.command")) {
+        try (MockedStatic<Bukkit> bukkit = Mockito.mockStatic(Bukkit.class);
+             CommandTester tester = new CommandTester(new Command("id") {{
+                 argument(new UUIDArgument("uuid")).execute((uuid, ctx) -> {
+                     ctx.sendMessage(uuid.toString());
+                 });
+             }}, "test.command")) {
             bukkit.when(Bukkit::getOfflinePlayers)
                   .thenReturn(new OfflinePlayer[]{mockPlayer});
             tester.execute("id Steve", sender);

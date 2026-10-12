@@ -1,7 +1,7 @@
 package dev.marulabs.commandlib.branch;
 
-import dev.marulabs.commandlib.CommonCommandContext;
 import dev.marulabs.commandlib.CommonCommand;
+import dev.marulabs.commandlib.CommonCommandContext;
 import dev.marulabs.commandlib.DefaultPermission;
 import dev.marulabs.commandlib.command.CommandExecutor;
 import dev.marulabs.commandlib.command.Extractor;

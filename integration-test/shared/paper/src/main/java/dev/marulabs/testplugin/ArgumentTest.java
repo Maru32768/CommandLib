@@ -1,18 +1,17 @@
 package dev.marulabs.testplugin;
 
-import dev.marulabs.integration.core.ExceptionUtil;
-import dev.marulabs.integration.core.TestResult;
-import dev.marulabs.integration.core.TestStatus;
-
 import dev.marulabs.commandlib.Command;
 import dev.marulabs.commandlib.argument.*;
 import dev.marulabs.commandlib.util.bukkit.BukkitUtil;
+import dev.marulabs.integration.core.ExceptionUtil;
+import dev.marulabs.integration.core.TestResult;
+import dev.marulabs.integration.core.TestStatus;
 import org.bukkit.Bukkit;
-import org.bukkit.potion.PotionEffectType;
 import org.bukkit.Keyed;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Particle;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
 
@@ -120,8 +119,10 @@ public final class ArgumentTest extends TestBase {
             argument(new BlockDataArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
             })).execute((a, ctx) -> {
-                putResult(key, a.getMaterial()
-                           .name(), "STONE");
+                putResult(key,
+                          a.getMaterial()
+                           .name(),
+                          "STONE");
             });
         }});
 
@@ -201,8 +202,10 @@ public final class ArgumentTest extends TestBase {
             argument(new EnchantmentArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
             })).execute((a, ctx) -> {
-                putResult(key, a.getKey()
-                           .toString(), "minecraft:flame");
+                putResult(key,
+                          a.getKey()
+                           .toString(),
+                          "minecraft:flame");
             });
         }});
 
@@ -349,8 +352,10 @@ public final class ArgumentTest extends TestBase {
             argument(new ItemStackArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
             })).execute((a, ctx) -> {
-                putResult(key, a.getType()
-                           .name() + " x" + a.getAmount(), "DIRT x1");
+                putResult(key,
+                          a.getType()
+                           .name() + " x" + a.getAmount(),
+                          "DIRT x1");
             });
         }});
 
@@ -382,7 +387,9 @@ public final class ArgumentTest extends TestBase {
             argument(new LocationArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
             })).execute((a, ctx) -> {
-                putResult(key, a.getX() + "," + a.getY() + "," + a.getZ() + "," + (a.getWorld() != null), "0.5,0.0,0.5,true");
+                putResult(key,
+                          a.getX() + "," + a.getY() + "," + a.getZ() + "," + (a.getWorld() != null),
+                          "0.5,0.0,0.5,true");
             });
         }});
 
@@ -624,8 +631,10 @@ public final class ArgumentTest extends TestBase {
             argument(new PotionEffectArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
             })).execute((a, ctx) -> {
-                putResult(key, a.getType()
-                           .equals(PotionEffectType.SPEED) + ":" + a.getDuration() + ":" + a.getAmplifier(), "true:1:0");
+                putResult(key,
+                          a.getType()
+                           .equals(PotionEffectType.SPEED) + ":" + a.getDuration() + ":" + a.getAmplifier(),
+                          "true:1:0");
             });
         }});
 

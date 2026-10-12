@@ -132,26 +132,22 @@ class CommonCommandHelpSnapshotTest {
                      new CommonStringArgument<>("p")).description("Run root arguments")
                                                      .child((n, p) -> new TestCommand("sub") {{
                                                          description("Sub command");
-                                                         argument(new CommonBooleanArgument<>("b")).description(
-                                                                 "Boolean argument");
-                                                         argument(new CommonFloatArgument<>("float")).child(f -> new TestCommand(
-                                                                                                             "sub") {{
-                                                                                                         description("Nested sub command");
-                                                                                                         execute(ctx -> {
-                                                                                                             ctx.sendSuccess("sub sub");
-                                                                                                             ctx.sendSuccess(n.get());
-                                                                                                             ctx.sendSuccess(p.get(ctx));
-                                                                                                             ctx.sendSuccess(f.get());
-                                                                                                         });
-                                                                                                     }})
-                                                                                                     .description(
-                                                                                                             "Float argument");
+                                                         argument(new CommonBooleanArgument<>("b")).description("Boolean argument");
+                                                         argument(new CommonFloatArgument<>("float")).child(f -> new TestCommand("sub") {{
+                                                             description("Nested sub command");
+                                                             execute(ctx -> {
+                                                                 ctx.sendSuccess("sub sub");
+                                                                 ctx.sendSuccess(n.get());
+                                                                 ctx.sendSuccess(p.get(ctx));
+                                                                 ctx.sendSuccess(f.get());
+                                                             });
+                                                         }})
+                                                                                                     .description("Float argument");
                                                      }})
                                                      .child((n, p) -> new TestCommand("sub2") {{
                                                          description("sub2");
                                                          argument(new CommonEnumArgument<>("enum",
-                                                                                           TestEnum.class)).description(
-                                                                 "Enum argument");
+                                                                                           TestEnum.class)).description("Enum argument");
                                                      }});
         }};
     }

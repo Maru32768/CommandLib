@@ -83,8 +83,8 @@ class ObjectiveArgumentTest {
                .thenReturn(java.util.Set.of(objective));
 
         try (CommandTester tester = new CommandTester(new Command("objective") {{
-            argument(new ObjectiveArgument("value").scoreboard(() -> scoreboard)).execute((value, ctx) -> ctx.sendMessage(
-                    value.getName()));
+            argument(new ObjectiveArgument("value").scoreboard(() -> scoreboard)).execute((value,
+                                                                                           ctx) -> ctx.sendMessage(value.getName()));
         }}, "test.command")) {
             tester.execute("objective arena_kills", sender);
             var suggestions = tester.suggestions("objective arena", FakeSender.player("Bob"))

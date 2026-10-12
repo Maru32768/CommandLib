@@ -27,6 +27,9 @@ public class LocationArgument extends Argument<Location, LocationArgument> {
                                        .parse(ctx.getHandle(), name());
         return new Location(NMSCommandListenerWrapper.create(ctx.getHandle()
                                                                 .getSource())
-                                                     .getBukkitWorld(), vec.x(), vec.y(), vec.z());
+                                                     .getBukkitWorld(),
+                            vec.x(),
+                            vec.y(),
+                            vec.z());
     }
 }

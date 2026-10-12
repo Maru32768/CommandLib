@@ -9,8 +9,7 @@ public interface PlatformAdapter<S, T, C extends CommonCommandContext<S, T>, U e
     @SuppressWarnings("unchecked")
     static <S, T, C extends CommonCommandContext<S, T>, U extends CommonCommand<C, U>> PlatformAdapter<S, T, C, U> get() {
         try {
-            Class<PlatformAdapter<S, T, C, U>> platformAdapterImplClass = (Class<PlatformAdapter<S, T, C, U>>) Class.forName(
-                    "dev.marulabs.commandlib.PlatformAdapterImpl");
+            Class<PlatformAdapter<S, T, C, U>> platformAdapterImplClass = (Class<PlatformAdapter<S, T, C, U>>) Class.forName("dev.marulabs.commandlib.PlatformAdapterImpl");
             return platformAdapterImplClass.getConstructor()
                                            .newInstance();
         } catch (ClassNotFoundException | InvocationTargetException | InstantiationException | IllegalAccessException |
@@ -29,7 +28,8 @@ public interface PlatformAdapter<S, T, C extends CommonCommandContext<S, T>, U e
 
     default boolean hasPermission(C ctx, String permissionNode) {
         return hasPermission(ctx.getHandle()
-                                .getSource(), permissionNode);
+                                .getSource(),
+                             permissionNode);
     }
 
     ArgumentParseException convertCommandSyntaxException(CommandSyntaxException e);

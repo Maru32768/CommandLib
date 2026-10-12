@@ -107,10 +107,12 @@ class EntitySelectorArgumentTest {
         FakeSender admin = FakeSender.player("Admin");
 
         try (CommandTester tester = tester()) {
-            assertThatThrownBy(() -> tester.execute("entity nobody", admin)).isInstanceOf(IllegalArgumentException.class)
-                                                                            .hasMessageContaining("withFakePlayer()");
-            assertThatThrownBy(() -> tester.execute("player nobody", admin)).isInstanceOf(IllegalArgumentException.class)
-                                                                            .hasMessageContaining("nobody");
+            assertThatThrownBy(() -> tester.execute("entity nobody",
+                                                    admin)).isInstanceOf(IllegalArgumentException.class)
+                                                           .hasMessageContaining("withFakePlayer()");
+            assertThatThrownBy(() -> tester.execute("player nobody",
+                                                    admin)).isInstanceOf(IllegalArgumentException.class)
+                                                           .hasMessageContaining("nobody");
         }
     }
 
@@ -131,15 +133,13 @@ class EntitySelectorArgumentTest {
         try (CommandTester tester = tester()) {
             // Brigadier wraps exceptions thrown while parsing into a syntax error.
             assertThatThrownBy(() -> tester.execute("entities @e[type=zombie]",
-                                                    FakeSender.player("Admin"))).hasMessageContaining(
-                    "Selector arguments are not supported by the test mock");
+                                                    FakeSender.player("Admin"))).hasMessageContaining("Selector arguments are not supported by the test mock");
         }
     }
 
     private static void assertSyntaxError(CommandTester tester, String input) {
         assertThatThrownBy(() -> tester.execute(input, FakeSender.player("Admin"))).as(input)
-                                                                                   .hasCauseInstanceOf(
-                                                                                           CommandSyntaxException.class);
+                                                                                   .hasCauseInstanceOf(CommandSyntaxException.class);
     }
 
     private static Entity namedEntity(String name) {
@@ -153,20 +153,20 @@ class EntitySelectorArgumentTest {
         // Commands are created through suppliers so the NMS argument mocks are active while they are constructed.
         return CommandTester.builder()
                             .command(() -> new Command("entity") {{
-                                argument(new EntityArgument("target")).execute((target, ctx) -> ctx.sendMessage(
-                                        "entity=" + target.getName()));
+                                argument(new EntityArgument("target")).execute((target,
+                                                                                ctx) -> ctx.sendMessage("entity=" + target.getName()));
                             }})
                             .command(() -> new Command("entities") {{
-                                argument(new EntitiesArgument("targets")).execute((targets, ctx) -> ctx.sendMessage(
-                                        "entities=" + names(targets)));
+                                argument(new EntitiesArgument("targets")).execute((targets,
+                                                                                   ctx) -> ctx.sendMessage("entities=" + names(targets)));
                             }})
                             .command(() -> new Command("player") {{
-                                argument(new PlayerArgument("target")).execute((target, ctx) -> ctx.sendMessage(
-                                        "player=" + target.getName()));
+                                argument(new PlayerArgument("target")).execute((target,
+                                                                                ctx) -> ctx.sendMessage("player=" + target.getName()));
                             }})
                             .command(() -> new Command("players") {{
-                                argument(new PlayersArgument("targets")).execute((targets, ctx) -> ctx.sendMessage(
-                                        "players=" + names(targets)));
+                                argument(new PlayersArgument("targets")).execute((targets,
+                                                                                  ctx) -> ctx.sendMessage("players=" + names(targets)));
                             }})
                             .permissionPrefix("test.command")
                             .build();

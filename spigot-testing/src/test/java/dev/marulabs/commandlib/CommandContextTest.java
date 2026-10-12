@@ -226,8 +226,10 @@ class CommandContextTest {
             }});
         }}, "test.command")) {
             tester.execute("game start", sender);
-            assertThatThrownBy(() -> tester.execute("game stop", sender)).hasCauseInstanceOf(CommandSyntaxException.class);
-            assertThatThrownBy(() -> tester.execute("game say hi", sender)).hasCauseInstanceOf(CommandSyntaxException.class);
+            assertThatThrownBy(() -> tester.execute("game stop",
+                                                    sender)).hasCauseInstanceOf(CommandSyntaxException.class);
+            assertThatThrownBy(() -> tester.execute("game say hi",
+                                                    sender)).hasCauseInstanceOf(CommandSyntaxException.class);
         }
 
         assertThat(sender.getSentMessageTexts()).containsExactly("start");

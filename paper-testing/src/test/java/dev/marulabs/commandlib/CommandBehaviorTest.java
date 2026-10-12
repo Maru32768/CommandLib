@@ -10,10 +10,9 @@ class CommandBehaviorTest {
     @Test
     void argumentBranchPermissionFiltersSuggestions() throws Exception {
         CommandTester tester = new CommandTester(new Command("config") {{
-            argument(new StringArgument("key").addSuggestionAction(sb -> sb.suggest("difficulty"))).permission(
-                                                                                                           "custom.config.key")
-                                                                                                   .execute((key, ctx) -> ctx.sendMessage(
-                                                                                                           key));
+            argument(new StringArgument("key").addSuggestionAction(sb -> sb.suggest("difficulty"))).permission("custom.config.key")
+                                                                                                   .execute((key,
+                                                                                                             ctx) -> ctx.sendMessage(key));
         }}, "test.command");
         FakeSender sender = FakeSender.player("Steve");
         Mockito.when(sender.asSender()

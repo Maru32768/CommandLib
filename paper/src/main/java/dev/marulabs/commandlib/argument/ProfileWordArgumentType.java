@@ -16,7 +16,9 @@ import java.util.Collection;
  */
 @SuppressWarnings("UnstableApiUsage")
 class ProfileWordArgumentType implements CustomArgumentType<String, PlayerProfileListResolver> {
-    private static final Collection<String> EXAMPLES = Arrays.asList("Player", "@a", "dd12be42-52a9-4a91-a8a1-11c01849e498");
+    private static final Collection<String> EXAMPLES = Arrays.asList("Player",
+                                                                     "@a",
+                                                                     "dd12be42-52a9-4a91-a8a1-11c01849e498");
 
     static ProfileWordArgumentType profileWord() {
         return new ProfileWordArgumentType();

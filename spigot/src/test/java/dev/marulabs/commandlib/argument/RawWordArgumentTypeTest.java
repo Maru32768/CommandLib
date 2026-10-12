@@ -57,9 +57,9 @@ class RawWordArgumentTypeTest {
     void failed_registration_is_retried_on_next_use() {
         NMSArgumentTypeRegistrar registrar = mock(NMSArgumentTypeRegistrar.class);
         doThrow(new IllegalStateException("registry is frozen")).doNothing()
-                                                                 .when(registrar)
-                                                                 .registerAsGreedyString(eq(RawWordArgumentType.class),
-                                                                                         any());
+                                                                .when(registrar)
+                                                                .registerAsGreedyString(eq(RawWordArgumentType.class),
+                                                                                        any());
         try (MockedStatic<NMSArgumentTypeRegistrar> registrarStatic = mockStatic(NMSArgumentTypeRegistrar.class)) {
             registrarStatic.when(NMSArgumentTypeRegistrar::create)
                            .thenReturn(registrar);

@@ -1,8 +1,8 @@
 package dev.marulabs.commandlib.argument;
 
 import com.mojang.brigadier.arguments.FloatArgumentType;
-import dev.marulabs.commandlib.CommonCommandContext;
 import dev.marulabs.commandlib.CommonArgument;
+import dev.marulabs.commandlib.CommonCommandContext;
 
 public class CommonFloatArgument<C extends CommonCommandContext<?, ?>, SELF extends CommonFloatArgument<C, SELF>> extends CommonArgument<Float, C, SELF> {
     public CommonFloatArgument(String name) {

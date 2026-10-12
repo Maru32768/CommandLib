@@ -9,7 +9,7 @@ import java.io.InputStream;
  */
 public class HybridClassLoader extends ClassLoader {
     private static final String PACKAGE = HybridClassLoader.class.getPackage()
-                                                                  .getName() + ".";
+                                                                 .getName() + ".";
 
     public HybridClassLoader() {
         super(HybridClassLoader.class.getClassLoader());

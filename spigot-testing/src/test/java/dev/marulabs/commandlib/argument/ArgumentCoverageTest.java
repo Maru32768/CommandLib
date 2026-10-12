@@ -97,10 +97,8 @@ class ArgumentCoverageTest {
                 try (JarFile jarFile = jarConn.getJarFile()) {
                     jarFile.stream()
                            .map(JarEntry::getName)
-                           .filter(name -> name.startsWith(packagePath + "/") && name.endsWith(".class") && !name.substring(
-                                                                                                                         packagePath.length() + 1)
-                                                                                                                 .contains(
-                                                                                                                         "/"))
+                           .filter(name -> name.startsWith(packagePath + "/") && name.endsWith(".class") && !name.substring(packagePath.length() + 1)
+                                                                                                                 .contains("/"))
                            .forEach(name -> {
                                String className = name.replace('/', '.')
                                                       .replace(".class", "");
@@ -126,8 +124,7 @@ class ArgumentCoverageTest {
             boolean isPublicTopLevel = Modifier.isPublic(cls.getModifiers()) && cls.getEnclosingClass() == null;
             // The common module uses the same package name; only the Spigot module's own classes need tests here.
             boolean isSpigotClass = Objects.equals(location(cls), location(IntegerArgument.class));
-            if (isPublicTopLevel && isSpigotClass && !Modifier.isAbstract(cls.getModifiers()) && CommonArgument.class.isAssignableFrom(
-                    cls) && !EXCLUDED_ARGUMENTS.contains(cls)) {
+            if (isPublicTopLevel && isSpigotClass && !Modifier.isAbstract(cls.getModifiers()) && CommonArgument.class.isAssignableFrom(cls) && !EXCLUDED_ARGUMENTS.contains(cls)) {
                 result.add(cls);
             }
         } catch (ClassNotFoundException ignored) {
