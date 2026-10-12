@@ -7,11 +7,24 @@ platform.
 - [Paper](./paper)
 - [Forge](./forge)
 
-When these samples are built from this repository, Gradle uses `includeBuild`
-and dependency substitution so the samples compile against the local
-CommandLib source. When copied outside the repository, they resolve
+When the Spigot and Paper samples are built from this repository, Gradle uses
+`includeBuild` and dependency substitution so the samples compile against the
+local CommandLib source. When copied outside the repository, they resolve
 `com.github.Maru32768.CommandLib:*:latest.release` from the configured
 repositories.
+
+The Forge sample uses ForgeGradle 6, which does not run on the Gradle 9 that
+the repository build needs, so it cannot include the repository build. To
+build it against the local source, publish the artifacts it uses at the
+repository root and pass `-PcommandlibLocal=true`:
+
+```bash
+./gradlew -Pcommandlib.typedNms=false :common:publishToMavenLocal :modded:forge-1.16.5:publishToMavenLocal
+cd samples/forge
+./gradlew build -PcommandlibLocal=true
+```
+
+Without the property it resolves the jitpack release like a downstream mod.
 
 ## Commands
 

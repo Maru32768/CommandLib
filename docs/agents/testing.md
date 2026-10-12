@@ -38,6 +38,20 @@ other than the active one is only type-checked when that node compiles (see
 ./gradlew :modded-testing:forge-1.16.5:test :modded-testing:forge-1.20.1:test :modded-testing:neoforge-1.21.1:test
 ```
 
+The samples under `samples/` are separate builds, so the root build does not
+compile them. Build them after a public API change, one at a time, since
+parallel Loom builds share a cache:
+
+```bash
+# Spigot and Paper include the repository as a composite build. The Spigot
+# sample builds the typed NMS modules it bundles.
+(cd samples/spigot && ./gradlew build)
+(cd samples/paper && ./gradlew build)
+# ForgeGradle 6 does not run on Gradle 9, so the Forge sample reads mavenLocal.
+./gradlew -Pcommandlib.typedNms=false :common:publishToMavenLocal :modded:forge-1.16.5:publishToMavenLocal
+(cd samples/forge && ./gradlew build -PcommandlibLocal=true)
+```
+
 Integration tests may require Docker or a local Minecraft server environment.
 Run them only when the touched behavior requires it or the user asks for it:
 
