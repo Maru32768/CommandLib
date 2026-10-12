@@ -99,6 +99,7 @@ public abstract class NMSArgumentTypeRegistrar extends NMSClass {
                     return m;
                 }
             } catch (IllegalAccessException ignored) {
+                // A field this class cannot read is not the map it looks for.
             }
         }
         return null;

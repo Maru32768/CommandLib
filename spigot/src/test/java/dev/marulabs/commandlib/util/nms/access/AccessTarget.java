@@ -7,6 +7,8 @@ public class AccessTarget {
     public static void publicMethod() {
     }
 
+    // Called only from the bytecode TypedClassLinkageTest rewrites, which the linkage check must reject.
+    @SuppressWarnings("UnusedMethod")
     private static void hiddenMethod() {
     }
 

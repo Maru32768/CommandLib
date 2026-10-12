@@ -94,6 +94,7 @@ public final class BiArgumentBranch<T1, T2, C extends CommonCommandContext<?, ?>
         return this;
     }
 
+    @Override
     public <S> RequiredBiArgumentBranch<S, T1, T2, C, T> require(@NotNull Extractor<C, S> extractor) {
         return new RequiredBiArgumentBranch<>(extractor,
                                               this::execute,

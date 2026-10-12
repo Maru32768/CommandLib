@@ -38,8 +38,8 @@ public class MinecraftVersion implements Comparable<MinecraftVersion> {
 
     @Override
     public int compareTo(@NotNull MinecraftVersion o) {
-        String[] xUnits = version.split("\\.");
-        String[] yUnits = o.version.split("\\.");
+        String[] xUnits = version.split("\\.", -1);
+        String[] yUnits = o.version.split("\\.", -1);
 
         for (int i = 0; i < xUnits.length; i++) {
             int xn = Integer.parseInt(xUnits[i]);
@@ -61,7 +61,7 @@ public class MinecraftVersion implements Comparable<MinecraftVersion> {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof MinecraftVersion)) {
             return false;
         }
 

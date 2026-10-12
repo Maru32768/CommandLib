@@ -128,6 +128,7 @@ class ArgumentCoverageTest {
                 result.add(cls);
             }
         } catch (ClassNotFoundException ignored) {
+            // A listed name that does not load is not an argument class to cover.
         }
     }
 }

@@ -216,6 +216,12 @@ configure(subprojects.filter { it.path in bukkitProjectPaths }) {
         javaCompiler.set(errorProneCompiler)
         options.release.set(toolchainVersion.map { it.asInt() })
         options.errorprone.disableWarningsInGeneratedCode.set(true)
+        // Brigadier nodes, dispatchers and commands are compared by identity on purpose.
+        options.errorprone.disable("ReferenceEquality")
+        // common and spigot stay on Java 11, and paper keeps their style.
+        options.errorprone.disable("PatternMatchingInstanceof", "StatementSwitchToExpressionSwitch")
+        // Bukkit calls event handlers through reflection.
+        options.errorprone.option("UnusedMethod:ExemptingMethodAnnotations", "org.bukkit.event.EventHandler")
         // Tests pass null on purpose, so NullAway checks only the main sources. It warns until the missing @Nullable
         // annotations it reports are added.
         options.errorprone.check("NullAway", if (name == "compileJava") CheckSeverity.WARN else CheckSeverity.OFF)

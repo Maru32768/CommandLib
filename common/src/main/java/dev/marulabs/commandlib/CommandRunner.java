@@ -127,6 +127,8 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
         }
     }
 
+    // common has no logger, so a stack trace on the console is how it reports, as in run and executeWithStackTrace.
+    @SuppressWarnings("CatchAndPrintStackTrace")
     private void notifyUncaughtExceptionHandlers(Throwable e, C ctx) {
         // A failing handler must neither keep the remaining handlers from running nor escape to the outer catch,
         // which would notify every handler again with the handler's own exception.

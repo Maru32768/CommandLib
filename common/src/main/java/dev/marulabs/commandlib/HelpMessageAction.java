@@ -3,8 +3,9 @@ package dev.marulabs.commandlib;
 import dev.marulabs.commandlib.command.CommandExecutor;
 import dev.marulabs.commandlib.util.ChatColorUtil;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.LinkedList;
+import java.util.Deque;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -191,7 +192,7 @@ final class HelpMessageAction<S, T, C extends CommonCommandContext<S, T>, U exte
         //   child help: "game start"
         //   argument-child help: "config <key> set"
         // The root name uses ctx.getInput(0), so aliases are preserved in help output.
-        LinkedList<String> parts = new LinkedList<>();
+        Deque<String> parts = new ArrayDeque<>();
         U current = command;
         while (current != null) {
             Arguments<C> parentArguments = current.parentArguments();

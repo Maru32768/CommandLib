@@ -117,6 +117,7 @@ public final class HexaArgumentBranch<T1, T2, T3, T4, T5, T6, C extends CommonCo
         return this;
     }
 
+    @Override
     public <S> RequiredHexaArgumentBranch<S, T1, T2, T3, T4, T5, T6, C, T> require(@NotNull Extractor<C, S> extractor) {
         return new RequiredHexaArgumentBranch<>(extractor,
                                                 this::execute,

@@ -50,8 +50,7 @@ final class Arguments<C extends CommonCommandContext<?, ?>> {
         }
 
         return arguments.stream()
-                        .map(x -> String.format(ChatColorUtil.GRAY + "<" + ChatColorUtil.YELLOW + "%s" + ChatColorUtil.GRAY + ">",
-                                                x.name()))
+                        .map(x -> ChatColorUtil.GRAY + "<" + ChatColorUtil.YELLOW + x.name() + ChatColorUtil.GRAY + ">")
                         .collect(Collectors.joining(" "));
     }
 

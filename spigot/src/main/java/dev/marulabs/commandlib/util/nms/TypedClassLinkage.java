@@ -645,7 +645,7 @@ final class TypedClassLinkage {
                     return base + 8 + readInt(code, base + 4) * 8 - pc;
                 }
                 default:
-                    if (opcode >= 0x15 && opcode <= 0x19 || opcode >= 0x36 && opcode <= 0x3A) {
+                    if ((opcode >= 0x15 && opcode <= 0x19) || (opcode >= 0x36 && opcode <= 0x3A)) {
                         return 2; // loads and stores with a local variable index
                     }
                     if (opcode >= 0x99 && opcode <= 0xA8) {

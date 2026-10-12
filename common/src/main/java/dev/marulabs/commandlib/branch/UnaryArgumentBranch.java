@@ -89,6 +89,7 @@ public final class UnaryArgumentBranch<T1, C extends CommonCommandContext<?, ?>,
         return this;
     }
 
+    @Override
     public <S> RequiredUnaryArgumentBranch<S, T1, C, T> require(@NotNull Extractor<C, S> extractor) {
         return new RequiredUnaryArgumentBranch<>(extractor,
                                                  this::execute,

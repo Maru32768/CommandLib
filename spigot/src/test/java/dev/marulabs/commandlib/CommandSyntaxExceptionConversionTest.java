@@ -145,10 +145,12 @@ class CommandSyntaxExceptionConversionTest {
      * A {@code ChatMessage} stand-in whose arguments getter fails, as a broken NMS mapping would.
      */
     public static final class BrokenChatMessage implements ChatMessage {
+        @Override
         public String getKey() {
             return "broken.key";
         }
 
+        @Override
         public Object[] getArgs() {
             throw new IllegalStateException("broken mapping");
         }
@@ -171,10 +173,12 @@ class CommandSyntaxExceptionConversionTest {
             this.args = args;
         }
 
+        @Override
         public String getKey() {
             return key;
         }
 
+        @Override
         public Object[] getArgs() {
             return args;
         }

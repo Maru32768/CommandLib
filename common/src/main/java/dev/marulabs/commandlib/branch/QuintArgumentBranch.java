@@ -112,6 +112,7 @@ public final class QuintArgumentBranch<T1, T2, T3, T4, T5, C extends CommonComma
         return this;
     }
 
+    @Override
     public <S> RequiredQuintArgumentBranch<S, T1, T2, T3, T4, T5, C, T> require(@NotNull Extractor<C, S> extractor) {
         return new RequiredQuintArgumentBranch<>(extractor,
                                                  this::execute,

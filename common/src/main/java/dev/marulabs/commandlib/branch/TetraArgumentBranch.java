@@ -104,6 +104,7 @@ public final class TetraArgumentBranch<T1, T2, T3, T4, C extends CommonCommandCo
         return this;
     }
 
+    @Override
     public <S> RequiredTetraArgumentBranch<S, T1, T2, T3, T4, C, T> require(@NotNull Extractor<C, S> extractor) {
         return new RequiredTetraArgumentBranch<>(extractor,
                                                  this::execute,

@@ -100,6 +100,7 @@ public final class TriArgumentBranch<T1, T2, T3, C extends CommonCommandContext<
         return this;
     }
 
+    @Override
     public <S> RequiredTriArgumentBranch<S, T1, T2, T3, C, T> require(@NotNull Extractor<C, S> extractor) {
         return new RequiredTriArgumentBranch<>(extractor,
                                                this::execute,

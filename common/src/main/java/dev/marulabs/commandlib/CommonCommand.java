@@ -382,6 +382,8 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
     }
 
     /**
+     * Adds a check that runs before this command executes.
+     *
      * @param preprocess return false if cancel executing command.
      */
     public final void addPreprocess(@NotNull Predicate<C> preprocess) {

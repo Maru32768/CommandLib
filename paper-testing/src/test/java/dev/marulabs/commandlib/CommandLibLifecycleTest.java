@@ -409,6 +409,8 @@ class CommandLibLifecycleTest {
         }
     }
 
+    // Reads back the server that setUp stubbed on the plugin mock.
+    @SuppressWarnings("DirectInvocationOnMock")
     private Plugin latePlugin() {
         LifecycleEventManager<Plugin> lifecycleManager = mock(LifecycleEventManager.class);
         doThrow(new IllegalStateException("closed")).when(lifecycleManager)

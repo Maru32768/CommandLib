@@ -57,6 +57,8 @@ public abstract class CommonCommandContext<S, C> {
     }
 
     /**
+     * Returns the input of the argument at the given index as the sender typed it.
+     *
      * @throws IndexOutOfBoundsException if the index is out of range ({@code index < 0 || index >= size()})
      */
     @NotNull
@@ -75,6 +77,8 @@ public abstract class CommonCommandContext<S, C> {
     }
 
     /**
+     * Returns the parsed value of the argument at the given index.
+     *
      * @throws IndexOutOfBoundsException if the index is out of range ({@code index < 0 || index >= size()})
      */
     @NotNull
@@ -92,6 +96,8 @@ public abstract class CommonCommandContext<S, C> {
     }
 
     /**
+     * Returns the parsed value of the argument at the given index, cast to the given type.
+     *
      * @throws IndexOutOfBoundsException if the index is out of range ({@code index < 0 || index >= size()})
      */
     @NotNull

@@ -21,8 +21,8 @@ public final class PlatformAdapterImpl implements PlatformAdapter<TestCommandSou
 
     @Override
     public boolean hasPermission(TestCommandSource commandSource, String permissionNode) {
-        if (commandSource instanceof TestCommandSource) {
-            return ((TestCommandSource) commandSource).hasPermission(permissionNode);
+        if (commandSource != null) {
+            return commandSource.hasPermission(permissionNode);
         }
         return true;
     }

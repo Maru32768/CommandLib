@@ -430,8 +430,9 @@ public final class CommandLib implements Listener {
             lifecycleManager.registerEventHandler(LifecycleEvents.COMMANDS, event -> {
                 Commands registrar = event.registrar();
                 CommandDispatcher<CommandSourceStack> dispatcher = registrar.getDispatcher();
+                // Volatile, so it needs no lock.
+                serverDispatcher = dispatcher;
                 synchronized (state) {
-                    serverDispatcher = dispatcher;
                     state.dispatcher = dispatcher;
 
                     // The event fires at startup and again after /minecraft:reload with a fresh dispatcher, so every

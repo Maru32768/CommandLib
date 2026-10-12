@@ -64,7 +64,7 @@ public class ChatColorUtil {
             if (this == obj) {
                 return true;
             }
-            if (obj == null || getClass() != obj.getClass()) {
+            if (!(obj instanceof ChatColor)) {
                 return false;
             }
             final ChatColor other = (ChatColor) obj;

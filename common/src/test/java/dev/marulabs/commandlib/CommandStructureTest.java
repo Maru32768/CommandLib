@@ -448,8 +448,8 @@ class CommandStructureTest {
     void option_parse_failure_returns_zero_result() throws CommandSyntaxException {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("go") {{
             CommandOption<Boolean, TestCommandContext> force = option(Options.flag("force", 'f'));
-            CommandOption<Boolean, TestCommandContext> verbose = option(Options.flag("verbose", 'v')
-                                                                               .requires(force));
+            option(Options.flag("verbose", 'v')
+                          .requires(force));
             execute(ctx -> {
             });
         }});

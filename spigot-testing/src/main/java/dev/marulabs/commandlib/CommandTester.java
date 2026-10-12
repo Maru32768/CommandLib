@@ -46,6 +46,8 @@ public class CommandTester implements AutoCloseable {
     private final CommandDispatcher<Object> dispatcher = new CommandDispatcher<>();
     private final Map<String, Entity> fakeEntities = new LinkedHashMap<>();
     private final Map<String, World> fakeWorlds = new LinkedHashMap<>();
+    // Per tester on purpose: each tester tracks the sender of the command it is executing.
+    @SuppressWarnings("ThreadLocalUsage")
     private final ThreadLocal<CommandSender> currentCommandSender = new ThreadLocal<>();
 
     /**
