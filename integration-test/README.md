@@ -212,6 +212,10 @@ run downloads and patches the Paper server jar, remaps it, downloads plugin libr
 run no longer repeats that work or depends on those downloads. Docker caches the step until the staged server base
 changes; rebuilding the image therefore takes about one extra server start.
 
+The nested `test-plugin` builds use the same Gradle user home as the outer build, so they reuse its Gradle
+distributions, dependencies and toolchains. Pass `-Pcommandlib.integrationGradleUserHome=<dir>` to give them a separate
+one.
+
 Gradle project parallelism is enabled by default, but Minecraft server tests are throttled to avoid starting every
 Docker server at once. The default server-test concurrency is 4.
 

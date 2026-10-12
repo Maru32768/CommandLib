@@ -134,7 +134,11 @@ tasks.named<Test>("test") {
     enabled = false
 }
 
-val nestedGradleUserHome = rootProject.file(".gradle-user-home-integration-test")
+// The nested test-plugin builds share this build's Gradle user home by default, so a fresh checkout or worktree
+// reuses the Gradle distribution, dependencies and toolchains that are already downloaded.
+val nestedGradleUserHome = providers.gradleProperty("commandlib.integrationGradleUserHome")
+    .map { rootProject.file(it) }
+    .getOrElse(gradle.gradleUserHomeDir)
 val integrationTestDir = rootProject.file("integration-test")
 val sharedDir = integrationTestDir.resolve("shared")
 val testPluginDir = project.file(workDirectory)
