@@ -12,7 +12,6 @@ import io.papermc.paper.plugin.lifecycle.event.LifecycleEventManager;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
@@ -20,6 +19,7 @@ import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.event.server.ServerLoadEvent;
 import org.bukkit.help.HelpTopic;
+import org.bukkit.help.IndexHelpTopic;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.Plugin;
@@ -29,6 +29,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
+import java.lang.reflect.Field;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
@@ -75,6 +76,8 @@ public final class CommandLib implements Listener {
     private static final Map<String, PermissionDefault> BOOTSTRAP_PERMISSION_DEFAULTS = new ConcurrentHashMap<>();
     private static final String NULL_SENDER_CLASS = "io.papermc.paper.brigadier.NullCommandSender";
     private static final Map<Plugin, PluginRegistrationState> REGISTRATION_STATES = Collections.synchronizedMap(new WeakHashMap<>());
+    // The dispatcher a scheduled reload was requested for, or null when none is scheduled.
+    private static @Nullable CommandDispatcher<CommandSourceStack> reloadRequestedFor;
 
     private final Plugin plugin;
     private final PluginRegistrationState registrationState;
@@ -316,6 +319,34 @@ public final class CommandLib implements Listener {
             if (fullText != null) {
                 topic.amendTopic(null, fullText);
             }
+            // At startup and on Bukkit /reload, Paper builds the plugin indexes before the COMMANDS event and keeps
+            // them when it builds the help map again after it, so a plugin index made for the plugin's plugin.yml
+            // commands lacks these.
+            Collection<HelpTopic> pluginTopics = indexTopics(Bukkit.getHelpMap()
+                                                                   .getHelpTopic(plugin.getName()));
+            if (pluginTopics != null) {
+                pluginTopics.remove(topic);
+                pluginTopics.add(topic);
+            }
+        }
+    }
+
+    /**
+     * The topics an index lists, which IndexHelpTopic keeps in a protected field without an accessor. The plugin
+     * indexes of the help map hold a mutable set there.
+     */
+    @Nullable
+    @SuppressWarnings("unchecked")
+    static Collection<HelpTopic> indexTopics(@Nullable HelpTopic index) {
+        if (!(index instanceof IndexHelpTopic)) {
+            return null;
+        }
+        try {
+            Field field = IndexHelpTopic.class.getDeclaredField("allTopics");
+            field.setAccessible(true);
+            return (Collection<HelpTopic>) field.get(index);
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException(e);
         }
     }
 
@@ -379,8 +410,7 @@ public final class CommandLib implements Listener {
                 registeredCommandNames.clear();
 
                 if (updatePlayerCommands) {
-                    Bukkit.getOnlinePlayers()
-                          .forEach(Player::updateCommands);
+                    reloadDataLater();
                 }
             }
 
@@ -552,19 +582,64 @@ public final class CommandLib implements Listener {
 
     private void registerDirectly(CommandDispatcher<CommandSourceStack> dispatcher, PendingRegistration registration) {
         addNodes(dispatcher, registration);
-        Bukkit.getOnlinePlayers()
-              .forEach(Player::updateCommands);
+        reloadDataLater();
     }
 
+    /**
+     * Adds the nodes to the live dispatcher, so they work at once, under their labels and "&lt;plugin&gt;:&lt;label&gt;".
+     * Paper shows such plain nodes as Mojang commands until the registrar adds them again on a reload.
+     */
     private void addNodes(CommandDispatcher<CommandSourceStack> dispatcher, PendingRegistration registration) {
         if (this.dispatcher != dispatcher) {
             this.dispatcher = dispatcher;
             registeredCommandNames.clear();
         }
+        String namespace = plugin.getName()
+                                 .toLowerCase(Locale.ROOT);
         for (LiteralCommandNode<CommandSourceStack> node : registration.buildNodes()) {
-            replaceChild(dispatcher.getRoot(), node);
-            registeredCommandNames.add(node.getLiteral());
+            for (LiteralCommandNode<CommandSourceStack> labelNode : List.of(node,
+                                                                            renamed(node,
+                                                                                    namespace + ":"
+                                                                                            + node.getLiteral()))) {
+                replaceChild(dispatcher.getRoot(), labelNode);
+                registeredCommandNames.add(labelNode.getLiteral());
+            }
         }
+    }
+
+    static LiteralCommandNode<CommandSourceStack> renamed(LiteralCommandNode<CommandSourceStack> node, String label) {
+        LiteralCommandNode<CommandSourceStack> copy = new LiteralCommandNode<>(label,
+                                                                               node.getCommand(),
+                                                                               node.getRequirement(),
+                                                                               node.getRedirect(),
+                                                                               node.getRedirectModifier(),
+                                                                               node.isFork());
+        node.getChildren()
+            .forEach(copy::addChild);
+        return copy;
+    }
+
+    /**
+     * After a change to the live dispatcher, reloads the data on the next tick, as CommandAPI does: the COMMANDS
+     * handlers then register the commands through Paper's registrar, which makes them plugin commands with their
+     * help topics in a fresh dispatcher, and the tree is sent to players. Sending it at once would race Paper's
+     * asynchronous tree building with a change later in the same tick, which threw ConcurrentModificationException.
+     * Changes in one tick share one reload, and a reload that happens first, which also fires the handlers, makes it
+     * unnecessary.
+     */
+    private void reloadDataLater() {
+        CommandDispatcher<CommandSourceStack> current = serverDispatcher;
+        if (current == null || reloadRequestedFor == current || !plugin.isEnabled()) {
+            return;
+        }
+        reloadRequestedFor = current;
+        Bukkit.getGlobalRegionScheduler()
+              .execute(plugin, () -> {
+                  if (reloadRequestedFor == serverDispatcher) {
+                      Bukkit.reloadData();
+                  }
+                  reloadRequestedFor = null;
+              });
     }
 
     /**
