@@ -15,31 +15,42 @@ public final class CommandOption<T, C extends CommonCommandContext<?, ?>> {
     static final String INTERNAL_NAME_PREFIX = "__commandlib_option_";
 
     private final String name;
+    // Null for an option without a short name.
     private final @Nullable Character shortName;
     private final T defaultValue;
-    private final @Nullable ArgumentType<?> type;
-    private final @Nullable BiFunction<C, String, T> parser;
+    // Null for a flag, which takes no value.
+    private final @Nullable Value<C, T> value;
     private final String internalName;
     private final List<OptionValidator<C>> validators = new ArrayList<>();
     private String description = "";
 
+    /**
+     * A flag, which takes no value.
+     */
     public CommandOption(@NotNull String name, @Nullable Character shortName, @NotNull T defaultValue) {
-        this(name, shortName, defaultValue, null, null);
+        this(name, shortName, defaultValue, null);
     }
 
+    /**
+     * An option that takes a value of {@code type}, which {@code parser} reads from the context by the option's
+     * internal argument name.
+     */
     public CommandOption(@NotNull String name,
                          @Nullable Character shortName,
                          @NotNull T defaultValue,
-                         @Nullable ArgumentType<?> type,
-                         @Nullable BiFunction<C, String, T> parser) {
+                         @NotNull ArgumentType<?> type,
+                         @NotNull BiFunction<C, String, T> parser) {
+        this(name, shortName, defaultValue, new Value<>(type, parser));
+    }
+
+    private CommandOption(String name, @Nullable Character shortName, T defaultValue, @Nullable Value<C, T> value) {
         this.name = Objects.requireNonNull(name);
         if (name.isEmpty()) {
             throw new IllegalArgumentException("name is not expected to empty.");
         }
         this.shortName = shortName;
         this.defaultValue = Objects.requireNonNull(defaultValue);
-        this.type = type;
-        this.parser = parser;
+        this.value = value;
         this.internalName = INTERNAL_NAME_PREFIX + name;
     }
 
@@ -102,12 +113,11 @@ public final class CommandOption<T, C extends CommonCommandContext<?, ?>> {
     }
 
     boolean hasValue() {
-        return type != null;
+        return value != null;
     }
 
-    @Nullable
     ArgumentType<?> type() {
-        return type;
+        return requireValue().type;
     }
 
     String internalName() {
@@ -115,8 +125,14 @@ public final class CommandOption<T, C extends CommonCommandContext<?, ?>> {
     }
 
     T parse(C ctx) {
-        return Objects.requireNonNull(parser)
-                      .apply(ctx, internalName);
+        return requireValue().parser.apply(ctx, internalName);
+    }
+
+    private Value<C, T> requireValue() {
+        if (value == null) {
+            throw new IllegalStateException(formatName() + " is a flag and takes no value.");
+        }
+        return value;
     }
 
     void validate(C ctx) throws ArgumentParseException {
@@ -140,5 +156,15 @@ public final class CommandOption<T, C extends CommonCommandContext<?, ?>> {
 
     private interface OptionValidator<C extends CommonCommandContext<?, ?>> {
         void validate(C ctx) throws ArgumentParseException;
+    }
+
+    private static final class Value<C extends CommonCommandContext<?, ?>, T> {
+        private final ArgumentType<?> type;
+        private final BiFunction<C, String, T> parser;
+
+        private Value(ArgumentType<?> type, BiFunction<C, String, T> parser) {
+            this.type = Objects.requireNonNull(type);
+            this.parser = Objects.requireNonNull(parser);
+        }
     }
 }

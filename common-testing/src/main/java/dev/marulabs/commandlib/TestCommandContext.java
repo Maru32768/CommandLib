@@ -72,7 +72,8 @@ public final class TestCommandContext extends CommonCommandContext<FakeSender, S
         boolean blank = text.plainText()
                             .isEmpty()
                 && text.color() == null;
-        send(blank ? "" : legacyText(text, Objects.requireNonNull(ChatColorUtil.WHITE.getRGB()), new boolean[5]));
+        // White, the default chat color.
+        send(blank ? "" : legacyText(text, 0xFFFFFF, new boolean[5]));
     }
 
     /**

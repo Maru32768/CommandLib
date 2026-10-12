@@ -5,7 +5,6 @@ import dev.marulabs.commandlib.CommonCommandContext;
 import dev.marulabs.commandlib.DefaultPermission;
 import dev.marulabs.commandlib.command.CommandExecutor;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.function.Function;
@@ -15,7 +14,7 @@ public interface ArgumentBranchDelegate<C extends CommonCommandContext<?, ?>, T 
 
     void description(@NotNull Function<C, String> description);
 
-    void execute(@Nullable CommandExecutor<C> action);
+    void execute(@NotNull CommandExecutor<C> action);
 
     void addChildren(@NotNull Collection<? extends T> children);
 

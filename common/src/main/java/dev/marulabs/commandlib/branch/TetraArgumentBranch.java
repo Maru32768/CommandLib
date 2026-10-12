@@ -10,7 +10,6 @@ import dev.marulabs.commandlib.command.Extractor;
 import dev.marulabs.commandlib.util.function.QuintConsumer;
 import dev.marulabs.commandlib.util.function.TetraFunction;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
 
@@ -42,7 +41,7 @@ public final class TetraArgumentBranch<T1, T2, T3, T4, C extends CommonCommandCo
     }
 
     @Override
-    public TetraArgumentBranch<T1, T2, T3, T4, C, T> execute(@Nullable CommandExecutor<C> action) {
+    public TetraArgumentBranch<T1, T2, T3, T4, C, T> execute(@NotNull CommandExecutor<C> action) {
         super.execute(action);
         return this;
     }

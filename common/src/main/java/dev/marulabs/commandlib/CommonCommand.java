@@ -20,7 +20,9 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
     private @Nullable String permissionNodeOverride = null;
     private @Nullable DefaultPermission defaultPermissionOverride = null;
     private String permissionDescription = "";
+    // Null for a top-level command.
     private @Nullable T parent = null;
+    // The parent's argument branch this command follows, or null when it follows the parent's literal.
     private @Nullable Arguments<C> parentArguments = null;
     private boolean inheritParentPrerequisite = true;
     private boolean inheritParentPreprocess = true;
@@ -31,6 +33,7 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
     private Prerequisite<C> prerequisite = ctx -> {
     };
     private Predicate<C> preprocess = ctx -> true;
+    // Null until execute is called; the command then runs its help action.
     private @Nullable CommandExecutor<C> executor;
     private final List<UncaughtExceptionHandler<C>> uncaughtExceptionHandlers = new ArrayList<>();
 
@@ -174,9 +177,10 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
             throw new IllegalArgumentException("ArgumentBuilder must add at least one argument.");
         }
         Arguments<C> arguments = addArguments(builtArguments, List.of());
-        if (builder.executor() != null && builtArguments.get(builtArguments.size() - 1)
-                                                        .executor() == null) {
-            arguments.executor(builder.executor());
+        CommandExecutor<C> executor = builder.executor();
+        if (executor != null && builtArguments.get(builtArguments.size() - 1)
+                                              .executor() == null) {
+            arguments.executor(executor);
         }
         return new ArgumentBranch<>(delegateFor(arguments));
     }
@@ -274,7 +278,7 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
             }
 
             @Override
-            public void execute(@Nullable CommandExecutor<C> action) {
+            public void execute(@NotNull CommandExecutor<C> action) {
                 arguments.executor(action);
             }
 
@@ -391,8 +395,8 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
         this.preprocess = this.preprocess.and(Objects.requireNonNull(preprocess));
     }
 
-    public final void execute(@Nullable CommandExecutor<C> executor) {
-        this.executor = executor;
+    public final void execute(@NotNull CommandExecutor<C> executor) {
+        this.executor = Objects.requireNonNull(executor);
     }
 
     public final void addUncaughtExceptionHandler(UncaughtExceptionHandler<C> executor) {
@@ -525,7 +529,7 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
             return defaultPermissionOverride;
         }
         if (parentArguments != null) {
-            return parentArguments.effectiveDefaultPermission(Objects.requireNonNull(parent));
+            return parentArguments.effectiveDefaultPermission();
         }
         if (parent != null) {
             return parent.effectiveDefaultPermission();

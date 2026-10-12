@@ -6,7 +6,6 @@ import dev.marulabs.commandlib.DefaultPermission;
 import dev.marulabs.commandlib.command.CommandExecutor;
 import dev.marulabs.commandlib.command.Extractor;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,8 +30,8 @@ public class ArgumentBranch<C extends CommonCommandContext<?, ?>, T extends Comm
         return this;
     }
 
-    public ArgumentBranch<C, T> execute(@Nullable CommandExecutor<C> action) {
-        delegate.execute(action);
+    public ArgumentBranch<C, T> execute(@NotNull CommandExecutor<C> action) {
+        delegate.execute(Objects.requireNonNull(action));
         return this;
     }
 

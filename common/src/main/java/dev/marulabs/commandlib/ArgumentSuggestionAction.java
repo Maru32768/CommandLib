@@ -6,6 +6,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Objects;
 
 final class ArgumentSuggestionAction<C extends CommonCommandContext<?, ?>> {
+    // Null for the argument type's own suggestions, which need the Brigadier context instead of a SuggestionBuilder.
     private final @Nullable SuggestionAction<C> action;
 
     private ArgumentSuggestionAction(@Nullable SuggestionAction<C> action) {

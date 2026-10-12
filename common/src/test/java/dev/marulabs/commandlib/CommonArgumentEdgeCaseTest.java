@@ -2,6 +2,7 @@ package dev.marulabs.commandlib;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.marulabs.commandlib.argument.*;
+import dev.marulabs.commandlib.command.CommandExecutor;
 import dev.marulabs.commandlib.exception.ArgumentValidationException;
 import org.junit.jupiter.api.Test;
 
@@ -9,6 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -205,17 +208,6 @@ class CommonArgumentEdgeCaseTest {
     }
 
     @Test
-    void validator_can_be_removed_with_null() throws Exception {
-        TestCommandRunner runner = new TestCommandRunner(new TestCommand("set") {{
-            argument(new IntArg("value").validator(x -> x > 0)
-                                        .validator((java.util.function.Predicate<Integer>) null)).execute((value, ctx) -> ctx.sendMessage(value));
-        }});
-
-        assertThat(runner.execute("set -1")
-                         .messages()).containsExactly("-1");
-    }
-
-    @Test
     void transformer_with_context_can_use_sender() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("greet") {{
             argument(new StrArg("name").transformer((name, ctx) -> name + "@" + ctx.getActor()
@@ -359,6 +351,16 @@ class CommonArgumentEdgeCaseTest {
         }});
 
         assertThat(runner.suggest("pick ")).contains("alpha");
+    }
+
+    @Test
+    void argument_setters_reject_null() {
+        StrArg arg = new StrArg("value");
+
+        assertThatThrownBy(() -> arg.execute((CommandExecutor<TestCommandContext>) null)).isInstanceOf(NullPointerException.class);
+        assertThatThrownBy(() -> arg.additionalParser(null)).isInstanceOf(NullPointerException.class);
+        assertThatThrownBy(() -> arg.validator((Predicate<String>) null)).isInstanceOf(NullPointerException.class);
+        assertThatThrownBy(() -> arg.transformer((Function<String, String>) null)).isInstanceOf(NullPointerException.class);
     }
 
     @Test

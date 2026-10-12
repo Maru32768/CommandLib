@@ -10,7 +10,6 @@ import dev.marulabs.commandlib.command.Extractor;
 import dev.marulabs.commandlib.util.function.HexaConsumer;
 import dev.marulabs.commandlib.util.function.QuintFunction;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
 
@@ -46,7 +45,7 @@ public final class QuintArgumentBranch<T1, T2, T3, T4, T5, C extends CommonComma
     }
 
     @Override
-    public QuintArgumentBranch<T1, T2, T3, T4, T5, C, T> execute(@Nullable CommandExecutor<C> action) {
+    public QuintArgumentBranch<T1, T2, T3, T4, T5, C, T> execute(@NotNull CommandExecutor<C> action) {
         super.execute(action);
         return this;
     }

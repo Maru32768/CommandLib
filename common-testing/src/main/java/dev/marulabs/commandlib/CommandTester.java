@@ -59,10 +59,15 @@ public final class CommandTester implements AutoCloseable {
         }
     }
 
-    @Nullable
-    public TestCommandContext executeAndGetContext(String input, FakeSender sender) {
+    @NotNull
+    public TestCommandContext executeAndGetContext(@NotNull String input, @NotNull FakeSender sender) {
         execute(input, sender);
-        return TestCommandContext.takeLatestOnCurrentThread();
+        // Every node CommandLib builds creates a context when it runs, so a successful execute always leaves one.
+        TestCommandContext ctx = TestCommandContext.takeLatestOnCurrentThread();
+        if (ctx == null) {
+            throw new IllegalStateException("No command context was created for '" + input + "'.");
+        }
+        return ctx;
     }
 
     public CompletableFuture<Suggestions> suggestions(@NotNull String input, @NotNull FakeSender sender) {

@@ -10,7 +10,6 @@ import dev.marulabs.commandlib.command.Extractor;
 import dev.marulabs.commandlib.util.function.HeptConsumer;
 import dev.marulabs.commandlib.util.function.HexaFunction;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
 
@@ -50,7 +49,7 @@ public final class HexaArgumentBranch<T1, T2, T3, T4, T5, T6, C extends CommonCo
     }
 
     @Override
-    public HexaArgumentBranch<T1, T2, T3, T4, T5, T6, C, T> execute(@Nullable CommandExecutor<C> action) {
+    public HexaArgumentBranch<T1, T2, T3, T4, T5, T6, C, T> execute(@NotNull CommandExecutor<C> action) {
         super.execute(action);
         return this;
     }

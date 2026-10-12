@@ -9,7 +9,6 @@ import dev.marulabs.commandlib.command.CommandExecutor;
 import dev.marulabs.commandlib.command.Extractor;
 import dev.marulabs.commandlib.util.function.TriConsumer;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -32,7 +31,7 @@ public final class BiArgumentBranch<T1, T2, C extends CommonCommandContext<?, ?>
     }
 
     @Override
-    public BiArgumentBranch<T1, T2, C, T> execute(@Nullable CommandExecutor<C> action) {
+    public BiArgumentBranch<T1, T2, C, T> execute(@NotNull CommandExecutor<C> action) {
         super.execute(action);
         return this;
     }

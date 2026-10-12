@@ -31,15 +31,13 @@ class CommandStructureTest {
     }
 
     @Test
-    void branch_execute_null_overrides_argument_executor() throws Exception {
-        IntArg value = new IntArg("value").execute(ctx -> ctx.sendMessage("argument executor"));
-        TestCommandRunner runner = new TestCommandRunner(new TestCommand("set") {{
-            argument(value).execute((CommandExecutor<TestCommandContext>) null);
-        }});
-
-        assertThat(runner.execute("set 1")
-                         .messages()).doesNotContain("argument executor")
-                                     .isNotEmpty();
+    void execute_rejects_null() {
+        assertThatThrownBy(() -> new TestCommand("set") {{
+            argument(new IntArg("value")).execute((CommandExecutor<TestCommandContext>) null);
+        }}).isInstanceOf(NullPointerException.class);
+        assertThatThrownBy(() -> new TestCommand("set") {{
+            execute(null);
+        }}).isInstanceOf(NullPointerException.class);
     }
 
     @Test

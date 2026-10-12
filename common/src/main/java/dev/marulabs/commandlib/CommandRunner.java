@@ -23,6 +23,7 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
     private final Prerequisite<C> prerequisite;
     private final CommandExecutor<C> helpAction;
     private final Predicate<C> preprocess;
+    // Null when the command or branch has no executor; the help action runs instead, without the preprocess.
     private final @Nullable CommandExecutor<C> executor;
     private final List<UncaughtExceptionHandler<C>> uncaughtExceptionHandlers;
 

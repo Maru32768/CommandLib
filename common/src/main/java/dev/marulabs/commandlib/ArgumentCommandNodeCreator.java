@@ -113,14 +113,11 @@ final class ArgumentCommandNodeCreator<S, T, C extends CommonCommandContext<S, T
                         .collect(Collectors.toList());
     }
 
-    @Nullable
     ArgumentCommandNode<S, ?> build(CommandExecutor<C> helpAction,
                                     CommonCommand<C, ?> parent,
                                     Collection<LiteralCommandNode<S>> terminalChildren) {
+        // CommonCommand rejects an argument branch without arguments, so there is always a first node.
         List<ArgumentCommandNode<S, ?>> nodes = toCommandNodes(helpAction, parent);
-        if (nodes.isEmpty()) {
-            return null;
-        }
 
         for (int i = 0; i < nodes.size() - 1; i++) {
             nodes.get(i)

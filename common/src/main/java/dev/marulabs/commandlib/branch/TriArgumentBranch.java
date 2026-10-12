@@ -10,7 +10,6 @@ import dev.marulabs.commandlib.command.Extractor;
 import dev.marulabs.commandlib.util.function.TetraConsumer;
 import dev.marulabs.commandlib.util.function.TriFunction;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
 
@@ -38,7 +37,7 @@ public final class TriArgumentBranch<T1, T2, T3, C extends CommonCommandContext<
     }
 
     @Override
-    public TriArgumentBranch<T1, T2, T3, C, T> execute(@Nullable CommandExecutor<C> action) {
+    public TriArgumentBranch<T1, T2, T3, C, T> execute(@NotNull CommandExecutor<C> action) {
         super.execute(action);
         return this;
     }

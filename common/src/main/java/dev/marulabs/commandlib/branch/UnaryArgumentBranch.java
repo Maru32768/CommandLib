@@ -8,7 +8,6 @@ import dev.marulabs.commandlib.DefaultPermission;
 import dev.marulabs.commandlib.command.CommandExecutor;
 import dev.marulabs.commandlib.command.Extractor;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -27,7 +26,7 @@ public final class UnaryArgumentBranch<T1, C extends CommonCommandContext<?, ?>,
     }
 
     @Override
-    public UnaryArgumentBranch<T1, C, T> execute(@Nullable CommandExecutor<C> action) {
+    public UnaryArgumentBranch<T1, C, T> execute(@NotNull CommandExecutor<C> action) {
         super.execute(action);
         return this;
     }

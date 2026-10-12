@@ -1,5 +1,6 @@
 package dev.marulabs.commandlib;
 
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.marulabs.commandlib.argument.CommonStringArgument;
 import org.junit.jupiter.api.Test;
@@ -8,6 +9,21 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class CommandOptionTest {
+    @Test
+    void value_option_requires_type_and_parser() {
+        assertThatThrownBy(() -> new CommandOption<String, TestCommandContext>("mode",
+                                                                               null,
+                                                                               "",
+                                                                               null,
+                                                                               (ctx, name) -> ""))
+                                                                                                  .isInstanceOf(NullPointerException.class);
+        assertThatThrownBy(() -> new CommandOption<String, TestCommandContext>("mode",
+                                                                               null,
+                                                                               "",
+                                                                               StringArgumentType.word(),
+                                                                               null)).isInstanceOf(NullPointerException.class);
+    }
+
     @Test
     void flag_is_available_from_context() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("scan") {{
