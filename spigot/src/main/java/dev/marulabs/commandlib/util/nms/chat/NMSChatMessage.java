@@ -8,7 +8,7 @@ import dev.marulabs.commandlib.util.nms.NMSClassRegistry;
 import dev.marulabs.commandlib.util.reflection.ReflectionUtil;
 
 /**
- * for before 1.18.2
+ * For 1.18.2 and earlier, which isSupportedVersion() tells apart.
  */
 public abstract class NMSChatMessage extends NMSClass {
     public static boolean isSupportedVersion() {
