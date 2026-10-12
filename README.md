@@ -618,8 +618,7 @@ be used directly: `ctx.sendMessage(MiniMessage.miniMessage().deserialize("<red>H
 ## Server Help
 
 The server's `/help` lists each Bukkit command with a short text under the plugin's index, and `/help <command>` shows
-its page. A command's `description(...)` is shown there when it is a string; a description computed from the command
-context has no context there, so `serverHelp` sets the text for the server help on its own:
+its page. `description(...)` is not used there; `serverHelp` sets the text for the server help on its own:
 
 ```java
 public final class SpawnCommand extends Command {

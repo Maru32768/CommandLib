@@ -90,9 +90,8 @@ be used directly: `ctx.sendMessage(MiniMessage.miniMessage().deserialize("<red>H
 ## Server Help
 
 `serverHelp(shortText)` sets the text the server's `/help` lists a top-level Bukkit command with, and
-`serverHelp(shortText, fullText)` also replaces the whole `/help <command>` page. Without it a string `description(...)`
-is used, and otherwise "A command by the <plugin> plugin."; a description computed from the command context is not
-used there. Forge / NeoForge ignore it.
+`serverHelp(shortText, fullText)` also replaces the whole `/help <command>` page. Without it the command is listed as
+"A command by the <plugin> plugin."; `description(...)` is not used there. Forge / NeoForge ignore it.
 
 ```java
 class SpawnCommand extends Command {

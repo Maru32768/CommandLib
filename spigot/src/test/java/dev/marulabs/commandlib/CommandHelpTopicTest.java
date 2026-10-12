@@ -40,7 +40,7 @@ class CommandHelpTopicTest {
     }
 
     @Test
-    void describesTheWrapperWithTheCommandPermissionDescriptionUsageAndAliases() {
+    void describesTheWrapperWithTheCommandPermissionPluginTextUsageAndAliases() {
         Command command = new Command("foo");
         command.description("Does foo things");
         command.addAliases("f");
@@ -49,7 +49,7 @@ class CommandHelpTopicTest {
         CommandLib.describe(wrapper, command, node("foo"), "plugin.command", "Plugin");
 
         assertThat(wrapper.getPermission()).isEqualTo("plugin.command.foo");
-        assertThat(wrapper.getDescription()).isEqualTo("Does foo things");
+        assertThat(wrapper.getDescription()).isEqualTo("A command by the Plugin plugin.");
         assertThat(wrapper.getUsage()).isEqualTo("\n- /<command>\n- /<command> sub\n- /<command> <value>");
         assertThat(wrapper.getAliases()).containsExactly("f");
     }
@@ -67,7 +67,7 @@ class CommandHelpTopicTest {
     }
 
     @Test
-    void namesThePluginWhenTheDescriptionIsMissingOrDependsOnTheContext() {
+    void namesThePluginWithoutServerHelpWhateverTheDescription() {
         Command missing = new Command("foo");
         Command dynamic = new Command("bar");
         dynamic.description(ctx -> "for " + ctx.getSender()

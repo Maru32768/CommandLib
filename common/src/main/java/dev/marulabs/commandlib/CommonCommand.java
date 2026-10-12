@@ -16,7 +16,6 @@ import java.util.function.Predicate;
 public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T extends CommonCommand<C, T>> {
     private final String name;
     private Function<C, String> description = ctx -> "";
-    private @Nullable String staticDescription = "";
     private @Nullable String serverHelpShortText = null;
     private @Nullable String serverHelpFullText = null;
     private @Nullable String permissionNodeOverride = null;
@@ -56,19 +55,19 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
     }
 
     public final void description(@NotNull String description) {
-        this.description = ctx -> Objects.requireNonNull(description);
-        this.staticDescription = description;
+        Objects.requireNonNull(description);
+        this.description = ctx -> description;
     }
 
     public final void description(@NotNull Function<C, String> description) {
         this.description = Objects.requireNonNull(description);
-        this.staticDescription = null;
     }
 
     /**
      * Sets the text the server's {@code /help} shows for this top-level command in its command lists, which is also
-     * the description of the command in the server's command map. Without it the description is used when it is set
-     * as a string, and otherwise a text naming the plugin. Platforms without a server help, such as Forge, ignore it.
+     * the description of the command in the server's command map. Without it the server help shows a text naming the
+     * plugin; {@link #description(String)} is not used there. Platforms without a server help, such as Forge, ignore
+     * it.
      */
     public final void serverHelp(@NotNull String shortText) {
         this.serverHelpShortText = Objects.requireNonNull(shortText);
@@ -85,15 +84,12 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
     }
 
     /**
-     * The text for the server help's command lists: the {@link #serverHelp(String)} text, or else the description set
-     * as a string, or else a text naming the plugin, since the context-dependent description has no context there.
+     * The text for the server help's command lists: the {@link #serverHelp(String)} text, or else a text naming the
+     * plugin.
      */
     final String serverHelpShortText(String pluginName) {
         if (serverHelpShortText != null) {
             return serverHelpShortText;
-        }
-        if (staticDescription != null && !staticDescription.isEmpty()) {
-            return staticDescription;
         }
         return "A command by the " + pluginName + " plugin.";
     }
