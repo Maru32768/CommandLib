@@ -221,7 +221,12 @@ one.
 Gradle project parallelism is enabled by default, but Minecraft server tests are throttled to avoid starting every
 Docker server at once. The default server-test concurrency is 4.
 
-For smaller Docker Desktop environments, reduce it:
+The server JVM sets no `-Xmx`, so its heap limit is the JVM default of a quarter of the Docker VM memory (about 1.9 GiB
+in an 8 GiB VM). Containers used about 1.1 GiB each after startup in measurements on paper-1.21.0 and forge-1.20.1, so
+four servers at once need roughly 4.5 GiB of Docker memory. A fixed lower limit was not added because no modded target
+was measured under heavy load.
+
+For smaller Docker Desktop environments, reduce the concurrency:
 
 ```powershell
 .\gradlew.bat :integration-test:minecraftIntegrationTest -Pcommandlib.minecraftIntegrationMaxParallel=1
