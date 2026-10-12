@@ -8,17 +8,22 @@ import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.event.server.ServerResourcesReloadedEvent;
 import io.papermc.paper.plugin.bootstrap.BootstrapContext;
+import io.papermc.paper.plugin.configuration.PluginMeta;
 import io.papermc.paper.plugin.lifecycle.event.LifecycleEventManager;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.event.server.ServerLoadEvent;
+import org.bukkit.help.GenericCommandHelpTopic;
+import org.bukkit.help.HelpMap;
 import org.bukkit.help.HelpTopic;
+import org.bukkit.help.HelpTopicComparator;
 import org.bukkit.help.IndexHelpTopic;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
@@ -29,7 +34,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
@@ -57,6 +64,7 @@ public final class CommandLib implements Listener {
     private static final VarHandle CHILDREN;
     private static final VarHandle LITERALS;
     private static final VarHandle ARGUMENTS;
+    private static final @Nullable PaperInternals PAPER = PaperInternals.find();
 
     static {
         try {
@@ -76,8 +84,6 @@ public final class CommandLib implements Listener {
     private static final Map<String, PermissionDefault> BOOTSTRAP_PERMISSION_DEFAULTS = new ConcurrentHashMap<>();
     private static final String NULL_SENDER_CLASS = "io.papermc.paper.brigadier.NullCommandSender";
     private static final Map<Plugin, PluginRegistrationState> REGISTRATION_STATES = Collections.synchronizedMap(new WeakHashMap<>());
-    // The dispatcher a scheduled reload was requested for, or null when none is scheduled.
-    private static @Nullable CommandDispatcher<CommandSourceStack> reloadRequestedFor;
 
     private final Plugin plugin;
     private final PluginRegistrationState registrationState;
@@ -307,9 +313,9 @@ public final class CommandLib implements Listener {
      * is generated. The help map is rebuilt after the COMMANDS event, so the topics are amended once it is ready.
      */
     private void amendHelpTopics() {
+        HelpMap helpMap = Bukkit.getHelpMap();
         for (String label : registeredCommandNames) {
-            HelpTopic topic = Bukkit.getHelpMap()
-                                    .getHelpTopic("/" + label);
+            HelpTopic topic = helpMap.getHelpTopic("/" + label);
             Command command = commandsByLabel.get(label.substring(label.indexOf(':') + 1));
             if (topic == null || command == null) {
                 continue;
@@ -321,14 +327,31 @@ public final class CommandLib implements Listener {
             }
             // At startup and on Bukkit /reload, Paper builds the plugin indexes before the COMMANDS event and keeps
             // them when it builds the help map again after it, so a plugin index made for the plugin's plugin.yml
-            // commands lacks these.
-            Collection<HelpTopic> pluginTopics = indexTopics(Bukkit.getHelpMap()
-                                                                   .getHelpTopic(plugin.getName()));
+            // commands lacks these. A direct add after the help map was built has no plugin index if the plugin had no
+            // commands then.
+            Collection<HelpTopic> pluginTopics = pluginIndexTopics(helpMap);
             if (pluginTopics != null) {
                 pluginTopics.remove(topic);
                 pluginTopics.add(topic);
             }
         }
+    }
+
+    @Nullable
+    private Collection<HelpTopic> pluginIndexTopics(HelpMap helpMap) {
+        String name = plugin.getName();
+        HelpTopic index = helpMap.getHelpTopic(name);
+        if (index != null) {
+            return indexTopics(index);
+        }
+        Collection<HelpTopic> topics = new TreeSet<>(HelpTopicComparator.helpTopicComparatorInstance());
+        // The same texts as CraftBukkit's plugin indexes.
+        helpMap.addTopic(new IndexHelpTopic(name,
+                                            "All commands for " + name,
+                                            null,
+                                            topics,
+                                            "Below is a list of all " + name + " commands:"));
+        return topics;
     }
 
     /**
@@ -400,17 +423,17 @@ public final class CommandLib implements Listener {
                     // Keep going so that one failure does not leave the remaining commands and the permissions
                     // registered, since unregister() cannot be retried.
                     try {
-                        removeFromNode(root, name);
+                        replaceChildren(root, List.of(name), List.of());
                     } catch (RuntimeException e) {
                         plugin.getLogger()
                               .log(Level.WARNING, "Failed to remove command " + name, e);
                     }
                 }
+                removeHelpTopics();
                 dispatcher = null;
                 registeredCommandNames.clear();
-
                 if (updatePlayerCommands) {
-                    reloadDataLater();
+                    updateCommandTrees();
                 }
             }
 
@@ -424,6 +447,36 @@ public final class CommandLib implements Listener {
             registeredPermissions.clear();
         } finally {
             HandlerList.unregisterAll(this);
+        }
+    }
+
+    /**
+     * Removes the commands with the given names from the root and adds the given ones, replacing those of the same
+     * name. On Paper the root mirrors the vanilla dispatcher, which Paper also reads on an asynchronous pool to build
+     * the players' command trees, so its children are replaced without changing the maps such a build may be
+     * iterating ({@link CommandNodeChildren}), each node converted as the mirror's addChild would.
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    static void replaceChildren(RootCommandNode<CommandSourceStack> root,
+                                Collection<String> names,
+                                Collection<? extends CommandNode<CommandSourceStack>> nodes) {
+        if (PAPER == null || !PAPER.mirrorRoot()
+                                   .isInstance(root)) {
+            names.forEach(name -> removeFromNode(root, name));
+            nodes.forEach(root::addChild);
+            return;
+        }
+        try {
+            CommandNode vanillaRoot = ((CommandDispatcher) PAPER.mirroredDispatcher()
+                                                                .invoke(root)).getRoot();
+            List<CommandNode<?>> converted = new ArrayList<>();
+            for (CommandNode<CommandSourceStack> node : nodes) {
+                converted.add((CommandNode<?>) PAPER.unwrapNode()
+                                                    .invoke(root, node));
+            }
+            CommandNodeChildren.replace(vanillaRoot, names, converted);
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException(e);
         }
     }
 
@@ -582,12 +635,15 @@ public final class CommandLib implements Listener {
 
     private void registerDirectly(CommandDispatcher<CommandSourceStack> dispatcher, PendingRegistration registration) {
         addNodes(dispatcher, registration);
-        reloadDataLater();
+        showHelpTopics();
+        updateCommandTrees();
     }
 
     /**
      * Adds the nodes to the live dispatcher, so they work at once, under their labels and "&lt;plugin&gt;:&lt;label&gt;".
-     * Paper shows such plain nodes as Mojang commands until the registrar adds them again on a reload.
+     * On Paper each label is a PluginCommandNode, as Paper's registrar makes them, so the command map shows a
+     * PluginVanillaCommandWrapper, which names the plugin and has no minecraft.command.&lt;label&gt; permission, instead
+     * of a Mojang command.
      */
     private void addNodes(CommandDispatcher<CommandSourceStack> dispatcher, PendingRegistration registration) {
         if (this.dispatcher != dispatcher) {
@@ -596,14 +652,35 @@ public final class CommandLib implements Listener {
         }
         String namespace = plugin.getName()
                                  .toLowerCase(Locale.ROOT);
+        List<String> labels = new ArrayList<>();
+        List<LiteralCommandNode<CommandSourceStack>> labelNodes = new ArrayList<>();
         for (LiteralCommandNode<CommandSourceStack> node : registration.buildNodes()) {
-            for (LiteralCommandNode<CommandSourceStack> labelNode : List.of(node,
-                                                                            renamed(node,
-                                                                                    namespace + ":"
-                                                                                            + node.getLiteral()))) {
-                replaceChild(dispatcher.getRoot(), labelNode);
-                registeredCommandNames.add(labelNode.getLiteral());
+            String description = Objects.requireNonNull(commandsByLabel.get(node.getLiteral()))
+                                        .serverHelpShortText(plugin.getName());
+            for (String label : List.of(node.getLiteral(), namespace + ":" + node.getLiteral())) {
+                labels.add(label);
+                labelNodes.add(labelNode(node, label, description));
             }
+        }
+        replaceChildren(dispatcher.getRoot(), labels, labelNodes);
+        registeredCommandNames.addAll(labels);
+    }
+
+    @SuppressWarnings("unchecked")
+    private LiteralCommandNode<CommandSourceStack> labelNode(LiteralCommandNode<CommandSourceStack> node,
+                                                             String label,
+                                                             String description) {
+        if (PAPER == null) {
+            return label.equals(node.getLiteral()) ? node : renamed(node, label);
+        }
+        try {
+            return (LiteralCommandNode<CommandSourceStack>) PAPER.pluginCommandNode()
+                                                                 .newInstance(label,
+                                                                              plugin.getPluginMeta(),
+                                                                              node,
+                                                                              description);
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException(e);
         }
     }
 
@@ -620,39 +697,108 @@ public final class CommandLib implements Listener {
     }
 
     /**
-     * After a change to the live dispatcher, reloads the data on the next tick, as CommandAPI does: the COMMANDS
-     * handlers then register the commands through Paper's registrar, which makes them plugin commands with their
-     * help topics in a fresh dispatcher, and the tree is sent to players. Sending it at once would race Paper's
-     * asynchronous tree building with a change later in the same tick, which threw ConcurrentModificationException.
-     * Changes in one tick share one reload, and a reload that happens first, which also fires the handlers, makes it
-     * unnecessary.
+     * Paper builds the help map from the command map only when the server loads and on a data reload, so the labels of
+     * a direct add get their topics here.
      */
-    private void reloadDataLater() {
-        CommandDispatcher<CommandSourceStack> current = serverDispatcher;
-        if (current == null || reloadRequestedFor == current || !plugin.isEnabled()) {
+    private void showHelpTopics() {
+        HelpMap helpMap = Bukkit.getHelpMap();
+        for (String label : registeredCommandNames) {
+            if (helpMap.getHelpTopic("/" + label) != null) {
+                continue;
+            }
+            org.bukkit.command.Command wrapper = Bukkit.getCommandMap()
+                                                       .getCommand(label);
+            if (wrapper != null) {
+                helpMap.addTopic(new GenericCommandHelpTopic(wrapper));
+            }
+        }
+        amendHelpTopics();
+    }
+
+    private void removeHelpTopics() {
+        HelpMap helpMap = Bukkit.getHelpMap();
+        HelpTopic index = helpMap.getHelpTopic(plugin.getName());
+        Collection<HelpTopic> pluginTopics = indexTopics(index);
+        for (String label : registeredCommandNames) {
+            HelpTopic topic = helpMap.getHelpTopic("/" + label);
+            if (topic == null) {
+                continue;
+            }
+            // CraftBukkit's getHelpTopics() is a live view of its topics.
+            helpMap.getHelpTopics()
+                   .remove(topic);
+            if (pluginTopics != null) {
+                pluginTopics.remove(topic);
+            }
+        }
+        if (pluginTopics != null && pluginTopics.isEmpty()) {
+            helpMap.getHelpTopics()
+                   .remove(index);
+        }
+    }
+
+    /**
+     * Sends the players their command trees after a change to the live dispatcher, on the next tick so that the changes
+     * of one tick share one update. Paper builds the trees on an asynchronous pool while the main thread goes on, which
+     * a change of the root's children maps would break (ConcurrentModificationException), so the changes replace those
+     * maps instead ({@link #replaceChildren}).
+     */
+    private void updateCommandTrees() {
+        if (registrationState.commandTreeUpdateScheduled) {
             return;
         }
-        reloadRequestedFor = current;
+        registrationState.commandTreeUpdateScheduled = true;
         Bukkit.getGlobalRegionScheduler()
               .execute(plugin, () -> {
-                  if (reloadRequestedFor == serverDispatcher) {
-                      Bukkit.reloadData();
-                  }
-                  reloadRequestedFor = null;
+                  registrationState.commandTreeUpdateScheduled = false;
+                  sendCommandTrees();
               });
+    }
+
+    private static void sendCommandTrees() {
+        Bukkit.getOnlinePlayers()
+              .forEach(Player::updateCommands);
     }
 
     /**
      * Brigadier merges a node into an existing child of the same name, which keeps that child's requirement and
-     * children, so the existing command is removed first.
+     * children, so the existing command is replaced instead.
      */
     static void replaceChild(RootCommandNode<CommandSourceStack> root, LiteralCommandNode<CommandSourceStack> node) {
-        removeFromNode(root, node.getLiteral());
-        root.addChild(node);
+        replaceChildren(root, List.of(node.getLiteral()), List.of(node));
+    }
+
+    /**
+     * Paper's internal classes for changing its live dispatcher as its registrar does.
+     */
+    private record PaperInternals(Class<?> mirrorRoot, Method mirroredDispatcher, Method unwrapNode,
+            Constructor<?> pluginCommandNode) {
+        @Nullable
+        static PaperInternals find() {
+            try {
+                Class<?> mirrorRoot = Class.forName("io.papermc.paper.command.brigadier.ApiMirrorRootNode");
+                Method unwrapNode = mirrorRoot.getDeclaredMethod("unwrapNode", CommandNode.class);
+                unwrapNode.setAccessible(true);
+                return new PaperInternals(mirrorRoot,
+                                          mirrorRoot.getMethod("getDispatcher"),
+                                          unwrapNode,
+                                          Class.forName("io.papermc.paper.command.brigadier.PluginCommandNode")
+                                               .getConstructor(String.class,
+                                                               PluginMeta.class,
+                                                               LiteralCommandNode.class,
+                                                               String.class));
+            } catch (ReflectiveOperationException | RuntimeException e) {
+                // Not a Paper server, as in tests, or Paper changed these internals: nodes are then added as plain
+                // nodes and the root's own methods change it.
+                return null;
+            }
+        }
     }
 
     private static final class PluginRegistrationState {
         private boolean lifecycleHandlerRegistered;
+        // Main thread only: the changes of one tick share one update of the players' command trees.
+        private boolean commandTreeUpdateScheduled;
         private @Nullable IllegalStateException registrationFailure;
         private @Nullable CommandDispatcher<CommandSourceStack> dispatcher;
         private final List<PendingRegistration> registrations = new ArrayList<>();

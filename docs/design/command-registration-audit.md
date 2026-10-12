@@ -116,14 +116,21 @@ dev bundles. Line numbers refer to the commit that adds this document.
 - After initialization it adds the nodes to the cached dispatcher directly,
   under their labels and `<plugin>:<label>` (`addNodes`), so they work at once,
   and re-adds them from another plugin's handler after a reload (line 310).
-  Without any cached dispatcher it throws (line 155). Paper shows such plain
-  nodes as Mojang commands, so a data reload follows on the next tick
-  (`reloadDataLater`), as in CommandAPI: the `COMMANDS` handlers register the
-  commands again through the registrar into a fresh dispatcher, the help map is
-  rebuilt and players get the tree. The changes of one tick share the reload,
-  and it is skipped when a reload has happened in between.
-- Unregister removes the recorded labels with Paper's
-  `RootCommandNode.removeCommand`; at runtime the same data reload follows.
+  Without any cached dispatcher it throws (line 155). Each label is a
+  `PluginCommandNode`, made reflectively as Paper's registrar makes it, so the
+  command map shows a plugin-attributed `PluginVanillaCommandWrapper` instead of
+  a Mojang command. The label topics are added to the help map, which Paper
+  builds only at startup and on a data reload (`showHelpTopics`), and players
+  get their trees once on the next tick for all the changes of that tick.
+- Changes of the live dispatcher do not touch the maps of its root: Paper reads
+  them on its asynchronous pool to build players' command trees, so the root's
+  `children`, `literals` and `arguments` maps are replaced by changed copies
+  (`replaceChildren`, `CommandNodeChildren`); a build in progress keeps
+  iterating the old maps. The nodes are converted for the vanilla dispatcher
+  with Paper's `ApiMirrorRootNode#unwrapNode`, as the mirror's `addChild` does.
+  If Paper's internals are not found, the root's own methods change it in place.
+- Unregister removes the recorded labels and their help topics the same way; at
+  runtime players' trees are updated on the next tick.
 - A plugin enabled after startup (e.g. by PlugMan) installs its handler but has
   missed the event; on the next tick it calls `Bukkit.reloadData()` if the
   handler has not run (`reloadIfCommandsEventMissed`).
@@ -185,7 +192,7 @@ adds a `<modid>:` label for mod commands, so CommandLib adds none. There is no
 | Startup `minecraft:<name>` label | Created by CraftBukkit; unregister left it in the command map and client tree, pointing at a removed command | removed or kept deliberately | Bug | Fixed: unregister removes the label when it wraps the node (`removeMinecraftNamespacedCommand`, line 335) |
 | Paper module direct add | `addChild` merged into a same-named command, keeping its requirement and children | goes through the registrar | Bug | Fixed: `replaceChild` (line 387) removes the command first |
 | `plugin:<name>` label (spigot module) | not added | added (`fixNamespaces`, runtime path) | Missing feature | Fixed on Spigot and Paper before 1.20.6: every label, aliases included, also gets `<plugin>:<label>`, the same wrapper under a second command-map key like Bukkit's fallback labels; a runtime registration also adds a copy of the node under that name to R, as `syncCommands` does at startup (`addNamespacedCommand`). Unregister removes both. `execute run <plugin>:<label>` does not work, as for Bukkit's own namespaced labels, because the label is not a node of V. Fixed on Paper 1.20.6+: a copy of the node under `<plugin>:<label>` is added to Paper's dispatcher, as Paper's registrar does, and unregister removes it; there `execute run <plugin>:<label>` works. Checked by the integration fixture (`ScenarioTest`, `HelpTopicTest`) |
-| `plugin:<name>` label (paper module) | registrar labels; the runtime direct add had none | registrar | Missing edge case | Fixed: the direct add also adds `<plugin>:<label>`, and the data reload that follows registers it through the registrar |
+| `plugin:<name>` label (paper module) | registrar labels; the runtime direct add had none | registrar | Missing edge case | Fixed: the direct add also adds `<plugin>:<label>` |
 | Mod id label (Forge / NeoForge) | none | - | Platform convention: vanilla and Forge / NeoForge mod commands are not namespaced | Intentional, nothing added |
 | Overriding an existing command | removes the existing label and vanilla node | `putIfAbsent` at runtime | Intentional difference | Documented |
 | Wrapper permission / `/help` | wrapper permission was null and its description "A Mojang provided command." | sets the permission and writes help topics | Missing edge case | Fixed on Spigot and Paper before 1.20.6: the wrapper takes the command permission, the server help text, a usage built from the node's children and the other labels as aliases, and each label gets a `GenericCommandHelpTopic` that replaces an existing topic of that name; unregister removes the topics (`describe`, `putHelpTopic`). Fixed on Paper 1.20.6+ (`PluginCommandNode`, `showPaperHelpTopics`) |
@@ -197,7 +204,7 @@ adds a `<modid>:` label for mod commands, so CommandLib adds none. There is no
 | Runtime wrapper dispatcher | wrapped with R, which goes stale after a reload but still holds the node | wraps with V | Worked, held the old dispatcher | Fixed: wraps with V |
 | Paper module, plugin enabled at runtime | the `COMMANDS` handler registers but does not fire until the next reload, so the commands are missing | `Bukkit.reloadData()` after runtime changes | Missing edge case | Fixed: once the plugin is enabled, a task on the next tick calls `Bukkit.reloadData()` if the handler has not run yet (`reloadIfCommandsEventMissed`). Startup fires the event before the first tick, so the check is a no-op there. A reload was chosen over a direct add because Paper has no public way to reach the live dispatcher outside the event (a fresh plugin has nothing cached), and the reload path also adds `<plugin>:<name>`, rebuilds help topics and sends the tree to players. Registering only after `onEnable()` with nothing cached still throws, since Paper then rejects the handler |
 | Paper module `plugin:<name>` label and `/help` | Paper's registrar adds the namespaced label and plugin-attributed help topics, but the topic had no permission | `/help` topics with permissions | Missing edge case | Fixed: topics are amended with the command permission (`amendHelpTopics`); namespaced labels need nothing |
-| Paper module runtime direct add / unregister | mutated the live root on the main thread and called `updateCommands()` at once; Paper builds the command tree on its async pool, which threw `ConcurrentModificationException` when a later change in the same tick mutated the root it read (seen in the paper-1.21.0 integration run when the fixture registers and unregisters in the same tick) | `Bukkit.reloadData()` on the next tick instead of mutating | Missing edge case; only logged, the next update sends a good tree | Fixed: the change still applies at once, and nothing is sent in that tick; one data reload on the next tick, shared by the tick's changes, registers the commands through the registrar into a fresh dispatcher and sends the tree (`reloadDataLater`). A change can still race a tree being built for another reason, such as a player joining, as any live change of Paper's dispatcher can |
+| Paper module runtime direct add / unregister | mutated the live root on the main thread and called `updateCommands()` at once; Paper builds the command tree on its async pool, which threw `ConcurrentModificationException` when a later change in the same tick mutated the root it read (seen in the paper-1.21.0 integration run when the fixture registers and unregisters in the same tick) | `Bukkit.reloadData()` on the next tick instead of mutating | Missing edge case; only logged, the next update sends a good tree | Fixed: a data reload on the next tick was used first, which reloads every data pack and resource for each tick with a change. Now the change replaces the root's children maps instead of changing them (`replaceChildren`), so no tree build in progress, ours or one for a joining player, can see a map change under it; the labels are `PluginCommandNode`s with help topics, as the registrar would make them; and players get one tree update on the next tick for the tick's changes. A list copy of the root's children per change replaces a full data reload |
 | Paper < 1.20.6 async command tree | mutates the root on the main thread; skips the update on disable | same | Acceptable | - |
 | Folia | no handling | runtime changes throw | Not supported (`compatibility.md`) | - |
 | Mohist | no special handling; integration fixtures 1.16.5 / 1.20.1 | none | Acceptable | - |

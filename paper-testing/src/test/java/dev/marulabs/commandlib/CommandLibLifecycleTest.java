@@ -14,6 +14,8 @@ import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEventType;
 import io.papermc.paper.threadedregions.scheduler.GlobalRegionScheduler;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
+import org.bukkit.command.CommandMap;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventException;
 import org.bukkit.event.HandlerList;
@@ -84,6 +86,10 @@ class CommandLibLifecycleTest {
                                                                                       any(Runnable.class));
         bukkit.when(Bukkit::getGlobalRegionScheduler)
               .thenReturn(scheduler);
+        bukkit.when(Bukkit::getHelpMap)
+              .thenReturn(mock(HelpMap.class));
+        bukkit.when(Bukkit::getCommandMap)
+              .thenReturn(mock(CommandMap.class));
     }
 
     @AfterEach
@@ -155,6 +161,30 @@ class CommandLibLifecycleTest {
     }
 
     @Test
+    void runtime_changes_update_command_trees_once_on_the_next_tick_without_reloading_data() {
+        when(plugin.isEnabled()).thenReturn(true);
+        Player player = onlinePlayer();
+        CommandLib.register(plugin, "test", helloCommand());
+        CommandDispatcher<CommandSourceStack> dispatcher = fireCommandsEvent();
+
+        CommandLib.register(plugin, "test", namedCommand("late"));
+        CommandLib.register(plugin, "test", namedCommand("later"))
+                  .unregister();
+        verify(player, never()).updateCommands();
+
+        runScheduledTasks();
+
+        verify(player).updateCommands();
+        bukkit.verify(Bukkit::reloadData, never());
+        assertThat(dispatcher.getRoot()
+                             .getChild("late")).isNotNull();
+        assertThat(dispatcher.getRoot()
+                             .getChild("testplugin:late")).isNotNull();
+        assertThat(dispatcher.getRoot()
+                             .getChild("later")).isNull();
+    }
+
+    @Test
     void help_topics_are_restricted_to_the_command_permission_once_the_help_map_is_built() {
         when(plugin.isEnabled()).thenReturn(true);
         CommandLib.register(plugin, "test", new Command("hello") {{
@@ -166,6 +196,8 @@ class CommandLibLifecycleTest {
         HelpMap helpMap = mock(HelpMap.class);
         HelpTopic hello = mock(HelpTopic.class);
         HelpTopic namespacedHi = mock(HelpTopic.class);
+        when(hello.getName()).thenReturn("/hello");
+        when(namespacedHi.getName()).thenReturn("/testplugin:hi");
         when(helpMap.getHelpTopic("/hello")).thenReturn(hello);
         when(helpMap.getHelpTopic("/testplugin:hi")).thenReturn(namespacedHi);
         bukkit.when(Bukkit::getHelpMap)
@@ -423,6 +455,13 @@ class CommandLibLifecycleTest {
         when(latePlugin.getLifecycleManager()).thenReturn(lifecycleManager);
         when(latePlugin.isEnabled()).thenReturn(true);
         return latePlugin;
+    }
+
+    private Player onlinePlayer() {
+        Player player = mock(Player.class);
+        bukkit.when(Bukkit::getOnlinePlayers)
+              .thenReturn(List.of(player));
+        return player;
     }
 
     private List<RegisteredListener> disableListeners() {
