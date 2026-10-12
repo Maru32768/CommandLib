@@ -6,6 +6,7 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
+import io.papermc.paper.event.server.ServerResourcesReloadedEvent;
 import io.papermc.paper.plugin.lifecycle.event.LifecycleEventManager;
 import io.papermc.paper.plugin.lifecycle.event.handler.LifecycleEventHandler;
 import io.papermc.paper.plugin.lifecycle.event.registrar.ReloadableRegistrarEvent;
@@ -14,10 +15,14 @@ import io.papermc.paper.threadedregions.scheduler.GlobalRegionScheduler;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
 import org.bukkit.event.EventException;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.Event;
 import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.event.server.PluginEnableEvent;
+import org.bukkit.event.server.ServerLoadEvent;
+import org.bukkit.help.HelpMap;
+import org.bukkit.help.HelpTopic;
 import org.bukkit.permissions.Permission;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
@@ -83,11 +88,8 @@ class CommandLibLifecycleTest {
 
     @AfterEach
     void tearDown() {
-        // CommandLib registers its disable listener on the static handler list, so remove it to keep tests isolated.
-        PluginDisableEvent.getHandlerList()
-                          .unregister(plugin);
-        PluginEnableEvent.getHandlerList()
-                         .unregister(plugin);
+        // CommandLib registers its listeners on the static handler lists, so remove them to keep tests isolated.
+        HandlerList.unregisterAll(plugin);
         bukkit.close();
     }
 
@@ -153,6 +155,30 @@ class CommandLibLifecycleTest {
     }
 
     @Test
+    void help_topics_are_restricted_to_the_command_permission_once_the_help_map_is_built() {
+        when(plugin.isEnabled()).thenReturn(true);
+        CommandLib.register(plugin, "test", new Command("hello") {{
+            addAliases("hi");
+            execute(ctx -> {
+            });
+        }});
+        fireCommandsEvent();
+        HelpMap helpMap = mock(HelpMap.class);
+        HelpTopic hello = mock(HelpTopic.class);
+        HelpTopic namespacedHi = mock(HelpTopic.class);
+        when(helpMap.getHelpTopic("/hello")).thenReturn(hello);
+        when(helpMap.getHelpTopic("/testplugin:hi")).thenReturn(namespacedHi);
+        bukkit.when(Bukkit::getHelpMap)
+              .thenReturn(helpMap);
+
+        callEvent(new ServerLoadEvent(ServerLoadEvent.LoadType.STARTUP));
+        callEvent(new ServerResourcesReloadedEvent(ServerResourcesReloadedEvent.Cause.COMMAND));
+
+        verify(hello, times(2)).amendCanSee("test.hello");
+        verify(namespacedHi, times(2)).amendCanSee("test.hello");
+    }
+
+    @Test
     void disable_listener_is_registered_on_handler_list_before_enable() {
         when(plugin.isEnabled()).thenReturn(false);
 
@@ -198,10 +224,7 @@ class CommandLibLifecycleTest {
             assertThat(reloaded.getRoot()
                                .getChild("later")).isNotNull();
         } finally {
-            PluginDisableEvent.getHandlerList()
-                              .unregister(latePlugin);
-            PluginEnableEvent.getHandlerList()
-                             .unregister(latePlugin);
+            HandlerList.unregisterAll(latePlugin);
         }
     }
 

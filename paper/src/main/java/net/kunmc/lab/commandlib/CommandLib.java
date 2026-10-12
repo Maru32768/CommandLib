@@ -6,6 +6,7 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
+import io.papermc.paper.event.server.ServerResourcesReloadedEvent;
 import io.papermc.paper.plugin.bootstrap.BootstrapContext;
 import io.papermc.paper.plugin.lifecycle.event.LifecycleEventManager;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
@@ -17,6 +18,8 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.event.server.PluginEnableEvent;
+import org.bukkit.event.server.ServerLoadEvent;
+import org.bukkit.help.HelpTopic;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.Plugin;
@@ -77,6 +80,7 @@ public final class CommandLib implements Listener {
     private CommandDispatcher<CommandSourceStack> dispatcher;
     private final List<String> registeredCommandNames = new ArrayList<>();
     private final List<Permission> registeredPermissions = new ArrayList<>();
+    private final Map<String, String> helpTopicPermissions = new HashMap<>();
     private boolean unregistered;
     private boolean missedCommandsEventCheckScheduled;
 
@@ -222,6 +226,11 @@ public final class CommandLib implements Listener {
 
     private void doRegister(Collection<? extends Command> commands, String permissionPrefix) {
         doRegisterPermissions(plugin, permissionPrefix, commands);
+        for (Command command : commands) {
+            helpTopicPermissions.put(command.name(), command.permissionName(permissionPrefix));
+            command.aliases()
+                   .forEach(alias -> helpTopicPermissions.put(alias, command.permissionName(permissionPrefix)));
+        }
 
         PendingRegistration registration = new PendingRegistration(this, commands, permissionPrefix);
         synchronized (registrationState) {
@@ -273,6 +282,21 @@ public final class CommandLib implements Listener {
         }
 
         unregister(false);
+    }
+
+    /**
+     * Paper's help topic for a registered command has no permission, so /help would list it for everyone. The help
+     * map is rebuilt after the COMMANDS event, so the topics are restricted once it is ready.
+     */
+    private void restrictHelpTopics() {
+        for (String label : registeredCommandNames) {
+            HelpTopic topic = Bukkit.getHelpMap()
+                                    .getHelpTopic("/" + label);
+            String permission = helpTopicPermissions.get(label.substring(label.indexOf(':') + 1));
+            if (topic != null && permission != null) {
+                topic.amendCanSee(permission);
+            }
+        }
     }
 
     private void onPluginEnable(PluginEnableEvent event) {
@@ -471,12 +495,19 @@ public final class CommandLib implements Listener {
                 onPluginDisable((PluginDisableEvent) event);
             } else if (event instanceof PluginEnableEvent) {
                 onPluginEnable((PluginEnableEvent) event);
+            } else {
+                // ServerLoadEvent after startup or Bukkit /reload, ServerResourcesReloadedEvent after a data reload.
+                restrictHelpTopics();
             }
         }, EventPriority.NORMAL, plugin, false);
         PluginDisableEvent.getHandlerList()
                           .register(listener);
         PluginEnableEvent.getHandlerList()
                          .register(listener);
+        ServerLoadEvent.getHandlerList()
+                       .register(listener);
+        ServerResourcesReloadedEvent.getHandlerList()
+                                    .register(listener);
     }
 
     private void registerWithRegistrar(Commands registrar,
