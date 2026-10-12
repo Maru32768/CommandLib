@@ -1,10 +1,10 @@
 package net.kunmc.lab.commandlib;
 
 import io.papermc.paper.command.brigadier.CommandSourceStack;
+import net.kunmc.lab.commandlib.util.text.RichText;
+import net.kunmc.lab.commandlib.util.text.RichTexts;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
@@ -13,7 +13,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Locale;
 import java.util.Objects;
-import java.util.function.Consumer;
 
 @SuppressWarnings("UnstableApiUsage")
 public final class CommandContext extends CommonCommandContext<CommandSourceStack, Component> {
@@ -68,42 +67,56 @@ public final class CommandContext extends CommonCommandContext<CommandSourceStac
 
     @Override
     public void sendMessage(@Nullable String message) {
-        getSender().sendMessage(Component.text(Objects.toString(message, "")));
+        sendMessage(Component.text(Objects.toString(message, "")));
+    }
+
+    public void sendMessage(@NotNull Component component) {
+        getSender().sendMessage(Objects.requireNonNull(component));
     }
 
     @Override
     public void sendSuccess(@Nullable String message) {
-        getSender().sendMessage(Component.text(Objects.toString(message, ""))
-                                         .color(NamedTextColor.GREEN));
+        sendSuccess(Component.text(Objects.toString(message, "")));
+    }
+
+    /**
+     * Sends {@code component} in green unless it has its own color.
+     */
+    public void sendSuccess(@NotNull Component component) {
+        sendMessage(component.colorIfAbsent(NamedTextColor.GREEN));
     }
 
     @Override
     public void sendWarn(@Nullable String message) {
-        getSender().sendMessage(Component.text(Objects.toString(message, ""))
-                                         .color(NamedTextColor.YELLOW));
+        sendWarn(Component.text(Objects.toString(message, "")));
+    }
+
+    /**
+     * Sends {@code component} in yellow unless it has its own color.
+     */
+    public void sendWarn(@NotNull Component component) {
+        sendMessage(component.colorIfAbsent(NamedTextColor.YELLOW));
     }
 
     @Override
     public void sendFailure(@Nullable String message) {
-        getSender().sendMessage(Component.text(Objects.toString(message, ""))
-                                         .color(NamedTextColor.RED));
+        sendFailure(Component.text(Objects.toString(message, "")));
+    }
+
+    /**
+     * Sends {@code component} in red unless it has its own color.
+     */
+    public void sendFailure(@NotNull Component component) {
+        sendMessage(component.colorIfAbsent(NamedTextColor.RED));
     }
 
     @Override
-    public void sendMessageWithOption(@Nullable String message, @NotNull Consumer<MessageOption> options) {
-        Component component = MessageOption.createMessage(options, (rgb, hoverText) -> Component.text(Objects.toString(
-                                                                                                        message,
-                                                                                                        ""))
-                                                                                                .color(TextColor.color(
-                                                                                                        rgb))
-                                                                                                .hoverEvent(HoverEvent.showText(
-                                                                                                        Component.text(
-                                                                                                                hoverText))));
-        getSender().sendMessage(component);
+    public void sendMessage(@NotNull RichText text) {
+        sendMessage(RichTexts.toAdventure(text));
     }
 
     @Override
     public void sendComponent(@NotNull Component component) {
-        getSender().sendMessage(component);
+        sendMessage(component);
     }
 }

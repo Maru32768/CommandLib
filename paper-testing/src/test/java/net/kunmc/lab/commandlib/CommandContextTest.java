@@ -5,14 +5,13 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.kunmc.lab.commandlib.argument.StringArgument;
 import net.kunmc.lab.commandlib.exception.ArgumentParseException;
-import net.kunmc.lab.commandlib.util.text.TextComponentBuilderImpl;
-import net.kunmc.lab.commandlib.util.text.TranslatableComponentBuilderImpl;
+import net.kunmc.lab.commandlib.util.text.ClickAction;
+import net.kunmc.lab.commandlib.util.text.RichText;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TranslatableComponent;
+import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
-import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.RemoteConsoleCommandSender;
@@ -102,13 +101,21 @@ class CommandContextTest {
     }
 
     @Test
-    void message_with_option_applies_rgb_and_hover_text() {
+    void rich_text_is_sent_as_adventure_component() {
         FakeSender sender = FakeSender.player("Alice");
 
         try (CommandTester tester = new CommandTester(new Command("say") {{
-            execute(ctx -> ctx.sendMessageWithOption("hello",
-                                                     option -> option.rgb(0x123456)
-                                                                     .hoverText("details")));
+            execute(ctx -> {
+                ctx.sendMessage(RichText.text("hello")
+                                        .color(0x123456)
+                                        .hover(RichText.text("details"))
+                                        .click(ClickAction.suggestCommand("/say ")));
+                ctx.sendMessage(RichText.text("plain")
+                                        .hover(RichText.text("")));
+                ctx.sendFailure(RichText.text("fail"));
+                ctx.sendSuccess(RichText.text("own")
+                                        .color(0x5555FF));
+            });
         }}, "test.command")) {
             tester.execute("say", sender);
         }
@@ -116,11 +123,34 @@ class CommandContextTest {
         Component message = sender.getSentMessages()
                                   .get(0);
         assertThat(message.color()).isEqualTo(TextColor.color(0x123456));
-        assertThat(message.hoverEvent()).isNotNull();
-        assertThat(message.hoverEvent()
-                          .action()).isEqualTo(HoverEvent.Action.SHOW_TEXT);
-        assertThat(message.hoverEvent()
-                          .value()).isEqualTo(Component.text("details"));
+        assertThat(message.hoverEvent()).isEqualTo(HoverEvent.showText(Component.text("details")));
+        assertThat(message.clickEvent()).isEqualTo(ClickEvent.suggestCommand("/say "));
+        assertThat(sender.getSentMessages()
+                         .get(1)
+                         .hoverEvent()).isNull();
+        assertThat(sender.getSentMessages()
+                         .subList(2, 4)).extracting(Component::color)
+                                        .containsExactly(NamedTextColor.RED, NamedTextColor.BLUE);
+    }
+
+    @Test
+    void colored_component_sends_keep_an_existing_color() {
+        FakeSender sender = FakeSender.player("Alice");
+
+        try (CommandTester tester = new CommandTester(new Command("say") {{
+            execute(ctx -> {
+                ctx.sendSuccess(Component.text("plain"));
+                ctx.sendWarn(Component.text("colored", NamedTextColor.AQUA));
+                ctx.sendFailure(Component.text("failed"));
+            });
+        }}, "test.command")) {
+            tester.execute("say", sender);
+        }
+
+        assertThat(sender.getSentMessages()).extracting(Component::color)
+                                            .containsExactly(NamedTextColor.GREEN,
+                                                             NamedTextColor.AQUA,
+                                                             NamedTextColor.RED);
     }
 
     @Test
@@ -168,26 +198,6 @@ class CommandContextTest {
         }
 
         assertThat(sender.getSentMessageTexts()).containsExactly("start");
-    }
-
-    @Test
-    void text_and_translatable_builders_apply_style_and_append() {
-        Component text = new TextComponentBuilderImpl("a").color(0xFF5555)
-                                                          .italic()
-                                                          .append(Component.text("b"))
-                                                          .build();
-        Component translatable = new TranslatableComponentBuilderImpl("command.unknown.argument").color(0xFF5555)
-                                                                                                .italic()
-                                                                                                .append(Component.text(
-                                                                                                        "!"))
-                                                                                                .build();
-
-        assertThat(text.color()).isEqualTo(TextColor.color(0xFF5555));
-        assertThat(text.decoration(TextDecoration.ITALIC)).isEqualTo(TextDecoration.State.TRUE);
-        assertThat(text.children()).containsExactly(Component.text("b"));
-        assertThat(translatable).isInstanceOf(TranslatableComponent.class);
-        assertThat(((TranslatableComponent) translatable).key()).isEqualTo("command.unknown.argument");
-        assertThat(translatable.children()).containsExactly(Component.text("!"));
     }
 
     @Test

@@ -7,12 +7,9 @@ import net.kunmc.lab.commandlib.util.nms.chat.NMSIChatMutableComponent;
 import net.kunmc.lab.commandlib.util.nms.chat.NMSTranslatableContents;
 import net.kunmc.lab.commandlib.util.nms.command.NMSCommandListenerWrapper;
 import net.kunmc.lab.commandlib.util.nms.exception.NMSClassNotAssignableException;
-import net.kunmc.lab.commandlib.util.text.TextComponentBuilderImpl;
-import net.kunmc.lab.commandlib.util.text.TranslatableComponentBuilderImpl;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TranslatableComponent;
 import org.bukkit.command.CommandSender;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -91,15 +88,5 @@ public final class PlatformAdapterImpl implements PlatformAdapter<Object, BaseCo
             component = new TranslatableComponent(contents.getKey(), contents.getArgs());
         }
         return new ArgumentParseException(ctx -> ((CommandContext) ctx).sendFailure(component));
-    }
-
-    @Override
-    public TextComponentBuilderImpl createTextComponentBuilder(@NotNull String text) {
-        return new TextComponentBuilderImpl(text);
-    }
-
-    @Override
-    public TranslatableComponentBuilderImpl createTranslatableComponentBuilder(@NotNull String key) {
-        return new TranslatableComponentBuilderImpl(key);
     }
 }

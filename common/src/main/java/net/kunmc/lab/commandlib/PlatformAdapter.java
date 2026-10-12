@@ -2,9 +2,6 @@ package net.kunmc.lab.commandlib;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.kunmc.lab.commandlib.exception.ArgumentParseException;
-import net.kunmc.lab.commandlib.util.text.TextComponentBuilder;
-import net.kunmc.lab.commandlib.util.text.TranslatableComponentBuilder;
-import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.InvocationTargetException;
 
@@ -36,8 +33,4 @@ public interface PlatformAdapter<S, T, C extends CommonCommandContext<S, T>, U e
     }
 
     ArgumentParseException convertCommandSyntaxException(CommandSyntaxException e);
-
-    TextComponentBuilder<T, ? extends T, ?> createTextComponentBuilder(@NotNull String text);
-
-    TranslatableComponentBuilder<T, ? extends T, ?> createTranslatableComponentBuilder(@NotNull String key);
 }

@@ -3,10 +3,7 @@ package net.kunmc.lab.commandlib;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import net.kunmc.lab.commandlib.exception.ArgumentParseException;
-import net.kunmc.lab.commandlib.util.text.TextComponentBuilderImpl;
-import net.kunmc.lab.commandlib.util.text.TranslatableComponentBuilderImpl;
 import net.kyori.adventure.text.Component;
-import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings("UnstableApiUsage")
 public final class PlatformAdapterImpl implements PlatformAdapter<CommandSourceStack, Component, CommandContext, Command> {
@@ -35,15 +32,5 @@ public final class PlatformAdapterImpl implements PlatformAdapter<CommandSourceS
         String message = e.getMessage();
         return new ArgumentParseException(ctx -> ctx.sendFailure(message != null ? message : e.getClass()
                                                                                               .getSimpleName()));
-    }
-
-    @Override
-    public TextComponentBuilderImpl createTextComponentBuilder(@NotNull String text) {
-        return new TextComponentBuilderImpl(text);
-    }
-
-    @Override
-    public TranslatableComponentBuilderImpl createTranslatableComponentBuilder(@NotNull String key) {
-        return new TranslatableComponentBuilderImpl(key);
     }
 }

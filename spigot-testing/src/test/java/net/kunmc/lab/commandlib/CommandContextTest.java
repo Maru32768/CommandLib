@@ -2,8 +2,11 @@ package net.kunmc.lab.commandlib;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.kunmc.lab.commandlib.argument.StringArgument;
+import net.kunmc.lab.commandlib.util.text.ClickAction;
+import net.kunmc.lab.commandlib.util.text.RichText;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.chat.hover.content.Text;
@@ -96,13 +99,21 @@ class CommandContextTest {
     }
 
     @Test
-    void message_with_option_applies_rgb_and_hover_text() {
+    void rich_text_is_sent_as_bungee_component() {
         FakeSender sender = FakeSender.player("Alice");
 
         try (CommandTester tester = new CommandTester(new Command("say") {{
-            execute(ctx -> ctx.sendMessageWithOption("hello",
-                                                     option -> option.rgb(0x123456)
-                                                                     .hoverText("details")));
+            execute(ctx -> {
+                ctx.sendMessage(RichText.text("hello")
+                                        .color(0x123456)
+                                        .hover(RichText.text("details"))
+                                        .click(ClickAction.suggestCommand("/say ")));
+                ctx.sendMessage(RichText.text("plain")
+                                        .hover(RichText.text("")));
+                ctx.sendFailure(RichText.text("fail"));
+                ctx.sendSuccess(RichText.text("own")
+                                        .color(0x5555FF));
+            });
         }}, "test.command")) {
             tester.execute("say", sender);
         }
@@ -113,9 +124,37 @@ class CommandContextTest {
         assertThat(message.getColor()).isEqualTo(ChatColor.of(new Color(0x123456)));
         assertThat(message.getHoverEvent()
                           .getAction()).isEqualTo(HoverEvent.Action.SHOW_TEXT);
-        assertThat(((Text) message.getHoverEvent()
-                                  .getContents()
-                                  .get(0)).getValue()).isEqualTo("details");
+        assertThat(((BaseComponent[]) ((Text) message.getHoverEvent()
+                                                     .getContents()
+                                                     .get(0)).getValue())[0].toPlainText()).isEqualTo("details");
+        assertThat(message.getClickEvent()).isEqualTo(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/say "));
+        assertThat(sender.getSentMessages()
+                         .get(1)
+                         .getHoverEvent()).isNull();
+        assertThat(sender.getSentMessages()
+                         .subList(2, 4)).extracting(BaseComponent::getColor)
+                                        .containsExactly(ChatColor.RED, ChatColor.BLUE);
+    }
+
+    @Test
+    void colored_sends_do_not_change_the_passed_component() {
+        FakeSender sender = FakeSender.player("Alice");
+        TextComponent plain = new TextComponent("plain");
+        TextComponent colored = new TextComponent("colored");
+        colored.setColor(ChatColor.AQUA);
+
+        try (CommandTester tester = new CommandTester(new Command("say") {{
+            execute(ctx -> {
+                ctx.sendSuccess(plain);
+                ctx.sendWarn(colored);
+            });
+        }}, "test.command")) {
+            tester.execute("say", sender);
+        }
+
+        assertThat(sender.getSentMessages()).extracting(BaseComponent::getColor)
+                                            .containsExactly(ChatColor.GREEN, ChatColor.AQUA);
+        assertThat(plain.getColorRaw()).isNull();
     }
 
     @Test

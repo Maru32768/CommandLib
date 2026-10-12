@@ -2,18 +2,14 @@ package net.kunmc.lab.commandlib;
 
 import net.kunmc.lab.commandlib.CommonCommandContext;
 import net.kunmc.lab.commandlib.util.Location;
+import net.kunmc.lab.commandlib.util.text.RichText;
+import net.kunmc.lab.commandlib.util.text.RichTexts;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.HoverEvent;
-import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextColor;
-//? if >=1.19 {
 import net.minecraft.network.chat.MutableComponent;
-//?} else {
-/*import net.minecraft.network.chat.BaseComponent;
-import net.minecraft.network.chat.TextComponent;
-*///?}
+//? if <1.19
+/*import net.minecraft.network.chat.TextComponent;*/
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.NotNull;
@@ -23,7 +19,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.function.Consumer;
 
 public final class CommandContext extends CommonCommandContext<CommandSourceStack, Component> {
     public CommandContext(com.mojang.brigadier.context.CommandContext<CommandSourceStack> ctx) {
@@ -105,11 +100,7 @@ public final class CommandContext extends CommonCommandContext<CommandSourceStac
     }
 
     public void sendMessage(@Nullable String message, boolean allowLogging) {
-        //? if >=1.19 {
-        sendMessage(Component.literal(String.valueOf(message)), allowLogging);
-        //?} else
-        /*sendMessage(new TextComponent(String.valueOf(message)), allowLogging);*/
-
+        sendMessage(literal(message), allowLogging);
     }
 
     public void sendMessage(@NotNull Component component) {
@@ -129,15 +120,18 @@ public final class CommandContext extends CommonCommandContext<CommandSourceStac
     }
 
     public void sendSuccess(@Nullable String message, boolean allowLogging) {
-        //? if >=1.19 {
-        MutableComponent component = Component.literal(String.valueOf(message))
-                                             .withStyle(ChatFormatting.GREEN);
-        //?} else {
-        /*BaseComponent component = new TextComponent(String.valueOf(message));
-        component.setStyle(component.getStyle()
-                                    .withColor(TextColor.fromRgb(ChatFormatting.GREEN.getColor())));
-        *///?}
-        sendMessage(component, allowLogging);
+        sendSuccess(literal(message), allowLogging);
+    }
+
+    /**
+     * Sends {@code component} in green unless it has its own color.
+     */
+    public void sendSuccess(@NotNull Component component) {
+        sendSuccess(component, false);
+    }
+
+    public void sendSuccess(@NotNull Component component, boolean allowLogging) {
+        sendMessage(withDefaultColor(component, ChatFormatting.GREEN), allowLogging);
     }
 
     @Override
@@ -146,15 +140,18 @@ public final class CommandContext extends CommonCommandContext<CommandSourceStac
     }
 
     public void sendWarn(@Nullable String message, boolean allowLogging) {
-        //? if >=1.19 {
-        MutableComponent component = Component.literal(String.valueOf(message))
-                                             .withStyle(ChatFormatting.YELLOW);
-        //?} else {
-        /*BaseComponent component = new TextComponent(String.valueOf(message));
-        component.setStyle(component.getStyle()
-                                    .withColor(TextColor.fromRgb(ChatFormatting.YELLOW.getColor())));
-        *///?}
-        sendMessage(component, allowLogging);
+        sendWarn(literal(message), allowLogging);
+    }
+
+    /**
+     * Sends {@code component} in yellow unless it has its own color.
+     */
+    public void sendWarn(@NotNull Component component) {
+        sendWarn(component, false);
+    }
+
+    public void sendWarn(@NotNull Component component, boolean allowLogging) {
+        sendMessage(withDefaultColor(component, ChatFormatting.YELLOW), allowLogging);
     }
 
     @Override
@@ -163,46 +160,56 @@ public final class CommandContext extends CommonCommandContext<CommandSourceStac
     }
 
     public void sendFailure(@Nullable String message, boolean allowLogging) {
-        //? if >=1.19 {
-        MutableComponent component = Component.literal(String.valueOf(message))
-                                             .withStyle(ChatFormatting.RED);
-        //?} else {
-        /*BaseComponent component = new TextComponent(String.valueOf(message));
-        component.setStyle(component.getStyle()
-                                    .withColor(TextColor.fromRgb(ChatFormatting.RED.getColor())));
-        *///?}
+        sendFailure(literal(message), allowLogging);
+    }
+
+    /**
+     * Sends {@code component} in red unless it has its own color, through {@link CommandSourceStack#sendFailure}.
+     */
+    public void sendFailure(@NotNull Component component) {
+        sendFailure(component, false);
+    }
+
+    public void sendFailure(@NotNull Component component, boolean allowLogging) {
+        Component colored = withDefaultColor(component, ChatFormatting.RED);
         if (allowLogging) {
             // CommandSourceStack#sendFailure never broadcasts to ops, so route through sendSuccess.
-            sendMessage(component, true);
+            sendMessage(colored, true);
         } else {
-            getSender().sendFailure(component);
+            getSender().sendFailure(colored);
         }
     }
 
     @Override
-    public void sendMessageWithOption(@Nullable String message, @NotNull Consumer<MessageOption> options) {
-        Component messageComponent = MessageOption.createMessage(options, (rgb, hoverText) -> {
-            //? if >=1.19 {
-            MutableComponent component = Component.literal(String.valueOf(message));
-            Style style = component.getStyle()
-                                   .withColor(TextColor.fromRgb(rgb))
-                                   .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                                                                  Component.literal(hoverText)));
-            return component.setStyle(style);
-            //?} else {
-            /*BaseComponent c = new TextComponent(String.valueOf(message));
-            return c.setStyle(c.getStyle()
-                               .withColor(TextColor.fromRgb(rgb))
-                               .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                                                              new TextComponent(hoverText))));
-            *///?}
-        });
+    public void sendMessage(@NotNull RichText text) {
+        sendMessage(RichTexts.toVanilla(text));
+    }
 
-        sendMessage(messageComponent);
+    @Override
+    public void sendFailure(@NotNull RichText text) {
+        sendFailure(RichTexts.toVanilla(text));
     }
 
     @Override
     public void sendComponent(Component component) {
         sendMessage(component);
+    }
+
+    private static MutableComponent literal(@Nullable String message) {
+        //? if >=1.19 {
+        return Component.literal(String.valueOf(message));
+        //?} else
+        /*return new TextComponent(String.valueOf(message));*/
+    }
+
+    private static Component withDefaultColor(Component component, ChatFormatting color) {
+        if (component.getStyle()
+                     .getColor() != null) {
+            return component;
+        }
+        // Color a copy so that the caller's component is not changed.
+        MutableComponent copy = component.copy();
+        return copy.setStyle(component.getStyle()
+                                      .withColor(color));
     }
 }

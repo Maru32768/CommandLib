@@ -4,6 +4,8 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.kunmc.lab.commandlib.argument.CommonIntegerArgument;
 import net.kunmc.lab.commandlib.argument.CommonLiteralArgument;
 import net.kunmc.lab.commandlib.argument.CommonStringArgument;
+import net.kunmc.lab.commandlib.util.text.ClickAction;
+import net.kunmc.lab.commandlib.util.text.RichText;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -75,7 +77,8 @@ class CommandTesterTest {
                 ctx.sendSuccess("ok");
                 ctx.sendWarn("warn");
                 ctx.sendFailure("fail");
-                ctx.sendMessageWithOption("custom", option -> option.rgb(0x123456));
+                ctx.sendMessage(RichText.text("custom")
+                                        .color(0x123456));
             });
         }});
         FakeSender sender = FakeSender.console();
@@ -88,6 +91,41 @@ class CommandTesterTest {
                                                                        "§ewarn",
                                                                        "§cfail",
                                                                        "§x§1§2§3§4§5§6custom");
+    }
+
+    @Test
+    void rich_messages_keep_values_and_render_legacy_texts() {
+        RichText hint = RichText.text("click")
+                                .bold()
+                                .hover(RichText.text("details"))
+                                .click(ClickAction.suggestCommand("/say "));
+        CommandTester tester = new CommandTester(new TestCommand("say") {{
+            execute(ctx -> {
+                ctx.sendSuccess("ok");
+                ctx.sendMessage(RichText.text("a")
+                                        .append(hint, RichText.translatable("b")
+                                                              .color(0x123456)
+                                                              .bold(false)));
+                ctx.sendFailure(RichText.text("blue")
+                                        .color(0x5555FF));
+            });
+        }});
+        FakeSender sender = FakeSender.console();
+
+        TestCommandContext ctx = tester.executeAndGetContext("say", sender);
+
+        assertThat(ctx.richMessages()).containsExactly(RichText.text("ok")
+                                                               .color(0x55FF55),
+                                                       RichText.text("a")
+                                                               .append(hint,
+                                                                       RichText.translatable("b")
+                                                                               .color(0x123456)
+                                                                               .bold(false)),
+                                                       RichText.text("blue")
+                                                               .color(0x5555FF));
+        assertThat(sender.getSentMessageLegacyTexts()).containsExactly("§aok",
+                                                                       "§fa§f§lclick§x§1§2§3§4§5§6b",
+                                                                       "§9blue");
     }
 
     @Test

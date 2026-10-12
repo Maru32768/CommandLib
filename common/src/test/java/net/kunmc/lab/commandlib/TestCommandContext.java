@@ -1,8 +1,9 @@
 package net.kunmc.lab.commandlib;
 
+import net.kunmc.lab.commandlib.util.text.RichText;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 final class TestCommandContext extends CommonCommandContext<TestCommandSource, String> {
     private static TestCommandContext latest;
@@ -42,8 +43,8 @@ final class TestCommandContext extends CommonCommandContext<TestCommandSource, S
     }
 
     @Override
-    public void sendMessageWithOption(String message, Consumer<MessageOption> options) {
-        messages.add(String.valueOf(message));
+    public void sendMessage(RichText text) {
+        messages.add(text.plainText());
     }
 
     @Override

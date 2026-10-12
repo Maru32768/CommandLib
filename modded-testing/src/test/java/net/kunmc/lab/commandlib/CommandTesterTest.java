@@ -2,6 +2,12 @@ package net.kunmc.lab.commandlib;
 
 import com.mojang.brigadier.suggestion.Suggestion;
 import net.kunmc.lab.commandlib.argument.*;
+import net.kunmc.lab.commandlib.util.text.ClickAction;
+import net.kunmc.lab.commandlib.util.text.RichText;
+import net.kunmc.lab.commandlib.util.text.RichTexts;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextColor;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.item.Items;
 //? if >=1.20.5 {
@@ -56,6 +62,54 @@ class CommandTesterTest {
                 FakeSender sender = FakeSender.player("Steve");
                 tester.execute("hello", sender);
                 assertThat(sender.getSentMessageTexts()).containsExactly("failed");
+            }
+        }
+
+        @Test
+        void rich_text_is_sent_as_vanilla_component() {
+            try (CommandTester tester = new CommandTester(new Command("hello") {{
+                execute(ctx -> {
+                    ctx.sendMessage(RichText.text("hi")
+                                            .color(0x123456)
+                                            .click(ClickAction.runCommand("/hello")));
+                    ctx.sendSuccess(RichText.text("ok"));
+                    ctx.sendFailure(RichText.text("failed"));
+                });
+            }}, "test")) {
+                FakeSender sender = FakeSender.player("Steve");
+                tester.execute("hello", sender);
+                assertThat(sender.getSentMessageTexts()).containsExactly("hi", "ok", "failed");
+                assertThat(sender.getSentMessages()
+                                 .get(0)
+                                 .getStyle()
+                                 .getClickEvent()
+                                 .getValue()).isEqualTo("/hello");
+                assertThat(sender.getSentMessages()
+                                 .get(1)
+                                 .getStyle()
+                                 .getColor()).isEqualTo(TextColor.fromLegacyFormat(ChatFormatting.GREEN));
+            }
+        }
+
+        @Test
+        void colored_component_sends_do_not_change_the_passed_component() {
+            MutableComponent plain = RichTexts.toVanilla(RichText.text("plain"));
+            MutableComponent colored = RichTexts.toVanilla(RichText.text("colored")
+                                                                   .color(0x55FFFF));
+            try (CommandTester tester = new CommandTester(new Command("hello") {{
+                execute(ctx -> {
+                    ctx.sendSuccess(plain);
+                    ctx.sendWarn(colored);
+                });
+            }}, "test")) {
+                FakeSender sender = FakeSender.console();
+                tester.execute("hello", sender);
+                assertThat(sender.getSentMessages()).extracting(c -> c.getStyle()
+                                                                      .getColor())
+                                                    .containsExactly(TextColor.fromLegacyFormat(ChatFormatting.GREEN),
+                                                                     TextColor.fromLegacyFormat(ChatFormatting.AQUA));
+                assertThat(plain.getStyle()
+                                .getColor()).isNull();
             }
         }
 

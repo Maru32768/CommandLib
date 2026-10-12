@@ -36,7 +36,7 @@ class LiteralArgumentTest {
                                                                  "mode auto<--[HERE]");
         assertThat(sender.getSentMessages()
                          .get(0)
-                         .getColor()).isEqualTo(ChatColor.of(new java.awt.Color(0xFF5555)));
+                         .getColor()).isEqualTo(ChatColor.RED);
     }
 
     @Test

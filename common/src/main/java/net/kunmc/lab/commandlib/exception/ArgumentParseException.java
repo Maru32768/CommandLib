@@ -3,8 +3,8 @@ package net.kunmc.lab.commandlib.exception;
 import com.mojang.brigadier.context.ParsedCommandNode;
 import com.mojang.brigadier.tree.ArgumentCommandNode;
 import net.kunmc.lab.commandlib.CommonCommandContext;
-import net.kunmc.lab.commandlib.PlatformAdapter;
 import net.kunmc.lab.commandlib.util.ChatColorUtil;
+import net.kunmc.lab.commandlib.util.text.RichText;
 
 import java.util.List;
 import java.util.Objects;
@@ -13,7 +13,6 @@ import java.util.function.Consumer;
 public class ArgumentParseException extends Exception {
     private final Consumer<CommonCommandContext<?, ?>> sendMessages;
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
     protected static <C extends CommonCommandContext<?, ?>> Consumer<CommonCommandContext<?, ?>> buildIncorrectInputMessage(
             String argumentName,
             C ctx,
@@ -21,19 +20,14 @@ public class ArgumentParseException extends Exception {
         // Resolve the context lazily: validators also run while suggesting, where the argument node may not have
         // been parsed yet and the message is never sent.
         return context -> {
-            PlatformAdapter platformAdapter = PlatformAdapter.get();
             String prefix = inputBefore(ctx, argumentName, incorrectInput);
-            CommonCommandContext c = context;
-            c.sendComponent(platformAdapter.createTranslatableComponentBuilder("command.unknown.argument")
-                                           .color(Objects.requireNonNull(ChatColorUtil.RED.getRGB()))
-                                           .build());
-            c.sendComponent(platformAdapter.createTextComponentBuilder(ChatColorUtil.GRAY + prefix + ChatColorUtil.RED + ChatColorUtil.UNDERLINE + incorrectInput + ChatColorUtil.RESET)
-                                           .append(platformAdapter.createTranslatableComponentBuilder(
-                                                                          "command.context.here")
-                                                                  .italic()
-                                                                  .color(ChatColorUtil.RED.getRGB())
-                                                                  .build())
-                                           .build());
+            int red = Objects.requireNonNull(ChatColorUtil.RED.getRGB());
+            context.sendMessage(RichText.translatable("command.unknown.argument")
+                                        .color(red));
+            context.sendMessage(RichText.text(ChatColorUtil.GRAY + prefix + ChatColorUtil.RED + ChatColorUtil.UNDERLINE + incorrectInput + ChatColorUtil.RESET)
+                                        .append(RichText.translatable("command.context.here")
+                                                        .italic()
+                                                        .color(red)));
         };
     }
 

@@ -1,11 +1,11 @@
 package net.kunmc.lab.commandlib;
 
 import net.kunmc.lab.commandlib.util.nms.command.NMSCommandListenerWrapper;
+import net.kunmc.lab.commandlib.util.text.RichText;
+import net.kunmc.lab.commandlib.util.text.RichTexts;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
-import net.md_5.bungee.api.chat.hover.content.Text;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
@@ -15,10 +15,8 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.awt.*;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.function.Consumer;
 
 public final class CommandContext extends CommonCommandContext<Object, BaseComponent> {
     public CommandContext(com.mojang.brigadier.context.CommandContext<Object> ctx) {
@@ -103,8 +101,7 @@ public final class CommandContext extends CommonCommandContext<Object, BaseCompo
     }
 
     public void sendSuccess(@NotNull BaseComponent component) {
-        component.setColor(ChatColor.GREEN);
-        sendMessage(component);
+        sendMessage(withDefaultColor(component, ChatColor.GREEN));
     }
 
     @Override
@@ -113,8 +110,7 @@ public final class CommandContext extends CommonCommandContext<Object, BaseCompo
     }
 
     public void sendWarn(@NotNull BaseComponent component) {
-        component.setColor(ChatColor.YELLOW);
-        sendMessage(component);
+        sendMessage(withDefaultColor(component, ChatColor.YELLOW));
     }
 
     @Override
@@ -123,25 +119,26 @@ public final class CommandContext extends CommonCommandContext<Object, BaseCompo
     }
 
     public void sendFailure(@NotNull BaseComponent component) {
-        component.setColor(ChatColor.RED);
-        sendMessage(component);
+        sendMessage(withDefaultColor(component, ChatColor.RED));
     }
 
     @Override
-    public void sendMessageWithOption(@Nullable String message, @NotNull Consumer<MessageOption> options) {
-        TextComponent messageComponent = MessageOption.createMessage(options, (rgb, hoverText) -> {
-            TextComponent component = new TextComponent(String.valueOf(message));
-            component.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(hoverText)));
-            component.setColor(ChatColor.of(new Color(rgb)));
-
-            return component;
-        });
-
-        sendMessage(messageComponent);
+    public void sendMessage(@NotNull RichText text) {
+        sendMessage(RichTexts.toBungee(text));
     }
 
     @Override
     public void sendComponent(BaseComponent component) {
         sendMessage(component);
+    }
+
+    private static BaseComponent withDefaultColor(BaseComponent component, ChatColor color) {
+        if (component.getColorRaw() != null) {
+            return component;
+        }
+        // Color a copy so that the caller's component is not changed.
+        BaseComponent copy = component.duplicate();
+        copy.setColor(color);
+        return copy;
     }
 }

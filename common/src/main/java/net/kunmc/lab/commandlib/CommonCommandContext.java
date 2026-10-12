@@ -1,11 +1,11 @@
 package net.kunmc.lab.commandlib;
 
+import net.kunmc.lab.commandlib.util.ChatColorUtil;
+import net.kunmc.lab.commandlib.util.text.RichText;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.function.BiFunction;
-import java.util.function.Consumer;
 
 public abstract class CommonCommandContext<S, C> {
     protected final com.mojang.brigadier.context.CommandContext<S> handle;
@@ -147,11 +147,35 @@ public abstract class CommonCommandContext<S, C> {
 
     public abstract void sendFailure(@Nullable String message);
 
-    public final void sendMessageWithOption(@Nullable Object obj, @NotNull Consumer<MessageOption> options) {
-        sendMessageWithOption(Objects.toString(obj), options);
+    /**
+     * Sends {@code text}, converted to the platform's native component.
+     */
+    public abstract void sendMessage(@NotNull RichText text);
+
+    /**
+     * Sends {@code text} in green unless it has its own color.
+     */
+    public void sendSuccess(@NotNull RichText text) {
+        sendMessage(withDefaultColor(text, ChatColorUtil.GREEN));
     }
 
-    public abstract void sendMessageWithOption(@Nullable String message, @NotNull Consumer<MessageOption> options);
+    /**
+     * Sends {@code text} in yellow unless it has its own color.
+     */
+    public void sendWarn(@NotNull RichText text) {
+        sendMessage(withDefaultColor(text, ChatColorUtil.YELLOW));
+    }
+
+    /**
+     * Sends {@code text} in red unless it has its own color.
+     */
+    public void sendFailure(@NotNull RichText text) {
+        sendMessage(withDefaultColor(text, ChatColorUtil.RED));
+    }
+
+    private static RichText withDefaultColor(@NotNull RichText text, @NotNull ChatColorUtil.ChatColor color) {
+        return text.color() != null ? text : text.color(Objects.requireNonNull(color.getRGB()));
+    }
 
     public abstract void sendComponent(C component);
 
@@ -187,30 +211,5 @@ public abstract class CommonCommandContext<S, C> {
     final void setOptionValue(CommandOption<?, ?> option, Object value) {
         optionValues.put(option, value);
         presentOptions.add(option);
-    }
-
-    public static class MessageOption {
-        private int rgb = 0xFFFFFF;
-        private String hoverText = "";
-
-        protected static <T> T createMessage(Consumer<MessageOption> optionConsumer,
-                                             BiFunction<Integer, String, T> messageCreator) {
-            MessageOption option = new MessageOption();
-            optionConsumer.accept(option);
-            return messageCreator.apply(option.rgb, option.hoverText);
-        }
-
-        private MessageOption() {
-        }
-
-        public MessageOption rgb(int rgb) {
-            this.rgb = rgb;
-            return this;
-        }
-
-        public MessageOption hoverText(@NotNull String hoverText) {
-            this.hoverText = Objects.requireNonNull(hoverText);
-            return this;
-        }
     }
 }
