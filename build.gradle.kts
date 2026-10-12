@@ -181,9 +181,9 @@ class DoubleBraceInitialization : com.diffplug.spotless.FormatterFunc, java.io.S
     }
 }
 
-// Error Prone checks the Bukkit-side modules. The typed NMS modules and the modded nodes build with their own
-// toolchains and plugins, so they are left out.
-val errorProneProjectPaths = setOf(
+// Error Prone and the javadoc jar cover the Bukkit-side modules. The typed NMS modules and the modded nodes build with
+// their own toolchains and plugins, so they are left out.
+val bukkitProjectPaths = setOf(
     ":common",
     ":common-testing",
     ":spigot",
@@ -192,8 +192,15 @@ val errorProneProjectPaths = setOf(
     ":paper-testing",
 )
 
-configure(subprojects.filter { it.path in errorProneProjectPaths }) {
+configure(subprojects.filter { it.path in bukkitProjectPaths }) {
     apply(plugin = "net.ltgt.errorprone")
+
+    // Building the javadoc jar runs doclint, which fails on broken Javadoc. Undocumented members are allowed.
+    the<JavaPluginExtension>().withJavadocJar()
+    tasks.named<Javadoc>("javadoc") {
+        options.encoding = "UTF-8"
+        (options as StandardJavadocDocletOptions).addBooleanOption("Xdoclint:all,-missing", true)
+    }
 
     dependencies {
         "errorprone"("com.google.errorprone:error_prone_core:2.50.0")

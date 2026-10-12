@@ -57,7 +57,7 @@ public abstract class CommonCommandContext<S, C> {
     }
 
     /**
-     * @throws IndexOutOfBoundsException - if the index is out of range (index < 0 || index >= size())n
+     * @throws IndexOutOfBoundsException if the index is out of range ({@code index < 0 || index >= size()})
      */
     @NotNull
     public final String getInput(int index) {
@@ -75,7 +75,7 @@ public abstract class CommonCommandContext<S, C> {
     }
 
     /**
-     * @throws IndexOutOfBoundsException - if the index is out of range (index < 0 || index >= size())n
+     * @throws IndexOutOfBoundsException if the index is out of range ({@code index < 0 || index >= size()})
      */
     @NotNull
     public final Object getArgument(int index) {
@@ -92,7 +92,7 @@ public abstract class CommonCommandContext<S, C> {
     }
 
     /**
-     * @throws IndexOutOfBoundsException - if the index is out of range (index < 0 || index >= size())n
+     * @throws IndexOutOfBoundsException if the index is out of range ({@code index < 0 || index >= size()})
      */
     @NotNull
     public final <T> T getArgument(int index, Class<T> clazz) {

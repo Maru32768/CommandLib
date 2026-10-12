@@ -59,3 +59,7 @@ does it on purpose.
 NullAway runs with Error Prone on the main sources of the same modules and treats code in `net.kunmc.lab.commandlib` as
 non-null unless annotated `@Nullable` (`org.jetbrains.annotations.Nullable`). It reports warnings for now; annotate
 a field, parameter or return value `@Nullable` when null is a legitimate value, and do not add new NullAway warnings.
+
+The same modules publish a javadoc jar, and their `javadoc` task runs doclint without the `missing` group: broken
+Javadoc (malformed HTML, a bad `@param` name, an unknown `{@link}`) fails it, an undocumented member does not. Check
+with `./gradlew :common:javadoc :spigot:javadoc :paper:javadoc`.
