@@ -124,9 +124,8 @@ final class HelpMessageAction<S, T, C extends CommonCommandContext<S, T>, U exte
                                                    C ctx,
                                                    String commandPrefix) {
         // Example: "/config <key> get"
-        return createArgumentChildUsages(commandPrefix + " " + arguments.concatTagNames() + " " + ChatColorUtil.YELLOW + child.name(),
-                                         child,
-                                         ctx);
+        return createArgumentChildUsages(commandPrefix + " " + arguments.concatTagNames() + " " + ChatColorUtil.YELLOW
+                + child.name(), child, ctx);
     }
 
     private List<String> createArgumentChildUsages(String prefix, CommonCommand<C, ?> command, C ctx) {
@@ -156,9 +155,8 @@ final class HelpMessageAction<S, T, C extends CommonCommandContext<S, T>, U exte
                    arguments.children()
                             .stream()
                             .filter(x -> platformAdapter.hasPermission(castCommand(x), ctx, permissionPrefix))
-                            .flatMap(child -> createArgumentChildUsages(argumentPrefix + " " + ChatColorUtil.YELLOW + child.name(),
-                                                                        child,
-                                                                        ctx).stream())
+                            .flatMap(child -> createArgumentChildUsages(argumentPrefix + " " + ChatColorUtil.YELLOW
+                                    + child.name(), child, ctx).stream())
                             .forEach(usages::add);
                });
         return usages;

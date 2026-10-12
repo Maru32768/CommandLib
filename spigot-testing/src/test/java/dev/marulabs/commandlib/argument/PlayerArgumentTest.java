@@ -35,7 +35,8 @@ class PlayerArgumentTest {
             requirePlayer();
             argument(new PlayerArgument("target")).execute((target, ctx) -> {
                 ctx.sendMessage(ctx.getPlayer()
-                                   .getName() + " targeted " + target.getName());
+                                   .getName()
+                        + " targeted " + target.getName());
             });
         }}, "test.command")) {
             tester.withFakePlayer((Player) steve.asSender());

@@ -70,7 +70,8 @@ public final class TestCommandContext extends CommonCommandContext<FakeSender, S
         richMessages.add(text);
         // An empty uncolored message stays empty, as sendMessage("") always did.
         boolean blank = text.plainText()
-                            .isEmpty() && text.color() == null;
+                            .isEmpty()
+                && text.color() == null;
         send(blank ? "" : legacyText(text, Objects.requireNonNull(ChatColorUtil.WHITE.getRGB()), new boolean[5]));
     }
 

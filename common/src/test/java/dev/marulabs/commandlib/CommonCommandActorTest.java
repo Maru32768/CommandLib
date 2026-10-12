@@ -19,8 +19,9 @@ class CommonCommandActorTest {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("actor") {{
             execute(ctx -> {
                 CommandActor actor = ctx.getActor();
-                ctx.sendMessage(actor.getName() + ":" + actor.isPlayer() + ":" + actor.hasPermission("test.actor.reveal") + ":" + actor.getUniqueId()
-                                                                                                                                       .orElseThrow());
+                ctx.sendMessage(actor.getName() + ":" + actor.isPlayer() + ":"
+                        + actor.hasPermission("test.actor.reveal") + ":" + actor.getUniqueId()
+                                                                                .orElseThrow());
             });
         }}, source);
 

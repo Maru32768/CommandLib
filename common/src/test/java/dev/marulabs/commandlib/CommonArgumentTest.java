@@ -42,7 +42,9 @@ class CommonArgumentTest {
                                                                                                     quoted,
                                                                                                     rest,
                                                                                                     ctx) -> {
-                                                                                              ctx.sendMessage(word + "|" + quoted + "|" + rest);
+                                                                                              ctx.sendMessage(word
+                                                                                                      + "|" + quoted
+                                                                                                      + "|" + rest);
                                                                                           });
         }});
 
@@ -134,13 +136,10 @@ class CommonArgumentTest {
     @Test
     void additional_parser_can_recover_from_library_parse_failure() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("set") {{
-            argument(new ObjArg<>("item",
-                                  Map.of("sword", 1))
-                                                     .additionalParser((ctx,
-                                                                        input) -> input.equals("axe") ? 2 : null)).execute((item,
-                                                                                                                            ctx) -> {
-                                                                            ctx.sendMessage("item=" + item);
-                                                                        });
+            argument(new ObjArg<>("item", Map.of("sword", 1)).additionalParser((ctx, input) -> input.equals("axe")
+                    ? 2 : null)).execute((item, ctx) -> {
+                        ctx.sendMessage("item=" + item);
+                    });
         }});
 
         TestCommandContext ctx = runner.execute("set axe");

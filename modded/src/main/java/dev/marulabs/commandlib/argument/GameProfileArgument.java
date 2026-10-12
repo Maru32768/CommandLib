@@ -36,7 +36,8 @@ public class GameProfileArgument extends Argument<GameProfile, GameProfileArgume
               .filter(filter(sb.getContext()))
               .map(GameProfile::getName)
               .filter(x -> sb.getLatestInput()
-                             .isEmpty() || StringUtil.containsIgnoreCase(x, sb.getLatestInput()))
+                             .isEmpty()
+                      || StringUtil.containsIgnoreCase(x, sb.getLatestInput()))
               .forEach(sb::suggest);
         });
     }

@@ -52,9 +52,11 @@ final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U ext
 
     private boolean shouldAddHelpChild(U command) {
         if (command.children()
-                   .isEmpty() && command.argumentsList()
-                                        .isEmpty() && command.options()
-                                                             .isEmpty()) {
+                   .isEmpty()
+                && command.argumentsList()
+                          .isEmpty()
+                && command.options()
+                          .isEmpty()) {
             return false;
         }
         // A child named or aliased "help" replaces the generated help node; adding both would make Brigadier merge
@@ -62,8 +64,9 @@ final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U ext
         return command.children()
                       .stream()
                       .noneMatch(x -> x.name()
-                                       .equals("help") || x.aliases()
-                                                           .contains("help"));
+                                       .equals("help")
+                              || x.aliases()
+                                  .contains("help"));
     }
 
     private LiteralCommandNode<S> createHelpNode(U command, HelpMessageAction<S, T, C, U> helpAction) {

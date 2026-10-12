@@ -163,7 +163,9 @@ class TypedClassLinkageTest {
     private static byte[] classFile(Class<?> clazz) throws IOException {
         try (InputStream in = clazz.getResourceAsStream(clazz.getName()
                                                              .substring(clazz.getName()
-                                                                             .lastIndexOf('.') + 1) + ".class")) {
+                                                                             .lastIndexOf('.')
+                                                                     + 1)
+                + ".class")) {
             return in.readAllBytes();
         }
     }

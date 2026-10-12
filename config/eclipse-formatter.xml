@@ -43,12 +43,12 @@
         <setting id="org.eclipse.jdt.core.formatter.alignment_for_throws_clause_in_method_declaration" value="0"/>
         <setting id="org.eclipse.jdt.core.formatter.alignment_for_throws_clause_in_constructor_declaration" value="0"/>
         <!-- Binary and ternary expressions and array initializers are not wrapped (IntelliJ default) -->
-        <setting id="org.eclipse.jdt.core.formatter.alignment_for_additive_operator" value="0"/>
-        <setting id="org.eclipse.jdt.core.formatter.alignment_for_string_concatenation" value="0"/>
+        <setting id="org.eclipse.jdt.core.formatter.alignment_for_additive_operator" value="16"/>
+        <setting id="org.eclipse.jdt.core.formatter.alignment_for_string_concatenation" value="16"/>
         <setting id="org.eclipse.jdt.core.formatter.alignment_for_multiplicative_operator" value="0"/>
-        <setting id="org.eclipse.jdt.core.formatter.alignment_for_logical_operator" value="0"/>
+        <setting id="org.eclipse.jdt.core.formatter.alignment_for_logical_operator" value="16"/>
         <setting id="org.eclipse.jdt.core.formatter.alignment_for_bitwise_operator" value="0"/>
-        <setting id="org.eclipse.jdt.core.formatter.alignment_for_conditional_expression" value="0"/>
+        <setting id="org.eclipse.jdt.core.formatter.alignment_for_conditional_expression" value="16"/>
         <setting id="org.eclipse.jdt.core.formatter.alignment_for_expressions_in_array_initializer" value="0"/>
         <setting id="org.eclipse.jdt.core.formatter.alignment_for_assertion_message" value="0"/>
         <!-- Multi-catch types wrap after the operator, aligned on the first type -->

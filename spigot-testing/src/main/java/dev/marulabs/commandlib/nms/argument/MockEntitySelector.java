@@ -38,7 +38,8 @@ final class MockEntitySelector {
             String input = MockArgumentTypes.token()
                                             .parse(reader);
             if (input.startsWith("@") && input.contains("[")) {
-                throw new UnsupportedOperationException("Selector arguments are not supported by the test mock: " + input);
+                throw new UnsupportedOperationException("Selector arguments are not supported by the test mock: "
+                        + input);
             }
             boolean multiple = input.equals("@a") || input.equals("@e");
             if (single && multiple) {
@@ -74,7 +75,8 @@ final class MockEntitySelector {
                 // a missing fixture, so fail loudly with a hint instead of silently not running the executor.
                 Entity entity = CommandTester.getFakeEntity(input);
                 if (entity == null) {
-                    throw new IllegalArgumentException("No fake entity registered with name: " + input + ". Call withFakePlayer() or withFakeEntity() before execute().");
+                    throw new IllegalArgumentException("No fake entity registered with name: " + input
+                            + ". Call withFakePlayer() or withFakeEntity() before execute().");
                 }
                 return List.of(entity);
         }

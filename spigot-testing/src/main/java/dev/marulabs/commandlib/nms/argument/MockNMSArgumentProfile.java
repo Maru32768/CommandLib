@@ -17,6 +17,7 @@ public class MockNMSArgumentProfile extends NMSArgumentProfile {
 
     @Override
     protected Object parseImpl(CommandContext<?> ctx, String name) {
-        throw new UnsupportedOperationException("MockNMSArgumentProfile.parseImpl is not called directly; " + "callers use ctx.getInput() instead.");
+        throw new UnsupportedOperationException("MockNMSArgumentProfile.parseImpl is not called directly; "
+                + "callers use ctx.getInput() instead.");
     }
 }

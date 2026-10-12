@@ -137,14 +137,19 @@ class IntegrationTest {
                 assertBotReceives(client,
                                   "commandlibtest testConvertCommandSyntaxException true",
                                   "converted CommandSyntaxException message",
-                                  m -> m.contains("argument.integer.big") || m.contains("Integer must not be more than"));
+                                  m -> m.contains("argument.integer.big")
+                                          || m.contains("Integer must not be more than"));
                 // A node with PermissionDefault.FALSE is not usable even by an operator.
                 List<String> deniedMessages = assertBotReceives(client,
                                                                 "commandlibtest deniedProbe",
                                                                 "unknown command message for a node without permission",
                                                                 // The parent command is usable, so Brigadier reports the
                                                                 // hidden child as an incorrect argument.
-                                                                m -> m.contains("command.unknown.command") || m.contains("command.unknown.argument") || m.contains("Unknown or incomplete command") || m.contains("Incorrect argument") || m.contains("Unknown command"));
+                                                                m -> m.contains("command.unknown.command")
+                                                                        || m.contains("command.unknown.argument")
+                                                                        || m.contains("Unknown or incomplete command")
+                                                                        || m.contains("Incorrect argument")
+                                                                        || m.contains("Unknown command"));
                 assertThat(deniedMessages).noneMatch(m -> m.contains("deniedProbe executed"));
             } finally {
                 client.disconnect("Test completed");
@@ -302,12 +307,18 @@ class IntegrationTest {
                                                        String reportFileName,
                                                        double containerCpuLimit) {
         String containerWorkDir = "/workspace/server";
-        UUID offlineUuid = UUID.nameUUIDFromBytes(("OfflinePlayer:" + TEST_PLAYER_NAME).getBytes(StandardCharsets.UTF_8));
-        String opsJson = "[{\"uuid\":\"" + offlineUuid + "\",\"name\":\"" + TEST_PLAYER_NAME + "\",\"level\":4,\"bypassesPlayerLimit\":false}]";
+        UUID offlineUuid = UUID.nameUUIDFromBytes(("OfflinePlayer:"
+                + TEST_PLAYER_NAME).getBytes(StandardCharsets.UTF_8));
+        String opsJson = "[{\"uuid\":\"" + offlineUuid + "\",\"name\":\"" + TEST_PLAYER_NAME
+                + "\",\"level\":4,\"bypassesPlayerLimit\":false}]";
 
         return new GenericContainer<>(DockerImageName.parse(dockerImageName)).withExposedPorts(25565)
                                                                              .withCopyFileToContainer(MountableFile.forHostPath(testPluginJar),
-                                                                                                      containerWorkDir + "/" + testPluginSubdirectory + "/" + testPluginJar.getFileName())
+                                                                                                      containerWorkDir
+                                                                                                              + "/"
+                                                                                                              + testPluginSubdirectory
+                                                                                                              + "/"
+                                                                                                              + testPluginJar.getFileName())
                                                                              .withFileSystemBind(reportDir.toAbsolutePath()
                                                                                                           .toString(),
                                                                                                  "/workspace/test-results",
@@ -330,7 +341,13 @@ class IntegrationTest {
                                                                                           "printf 'eula=true\n' > eula.txt && "
                                                                                                   // Write ops.json before the server starts so the player has operator permission on join.
                                                                                                   // Offline UUID is deterministic: UUID.nameUUIDFromBytes("OfflinePlayer:<name>").
-                                                                                                  + "printf '" + opsJson + "' > ops.json && " + "java -Dplugin.env=CI -Dcommandlib.testReportName=" + reportFileName + " " + "-Dcommandlib.testReportDir=/workspace/test-results " + serverLaunchArgs + " nogui")
+                                                                                                  + "printf '" + opsJson
+                                                                                                  + "' > ops.json && "
+                                                                                                  + "java -Dplugin.env=CI -Dcommandlib.testReportName="
+                                                                                                  + reportFileName + " "
+                                                                                                  + "-Dcommandlib.testReportDir=/workspace/test-results "
+                                                                                                  + serverLaunchArgs
+                                                                                                  + " nogui")
                                                                              .waitingFor(Wait.forLogMessage(".*Done \\(.*\\)! For help, type \"help\".*",
                                                                                                             1))
                                                                              .withStartupTimeout(Duration.ofMinutes(8));
@@ -404,7 +421,8 @@ class IntegrationTest {
         if (constructor != null) {
             return constructor;
         }
-        throw new IllegalStateException("Unable to find a compatible TcpClientSession constructor for " + sessionClass.getName());
+        throw new IllegalStateException("Unable to find a compatible TcpClientSession constructor for "
+                + sessionClass.getName());
     }
 
     private static Constructor<?> findNullableSessionConstructor(Class<?> sessionClass,
@@ -438,11 +456,13 @@ class IntegrationTest {
             if (parameterTypes[0] != String.class || parameterTypes[1] != int.class) {
                 continue;
             }
-            if (parameterTypes[2].isAssignableFrom(protocolClass) && parameterTypes[3].isAssignableFrom(sessionFactoryClass)) {
+            if (parameterTypes[2].isAssignableFrom(protocolClass)
+                    && parameterTypes[3].isAssignableFrom(sessionFactoryClass)) {
                 return constructor;
             }
         }
-        throw new IllegalStateException("Unable to find a compatible PacketLib Client constructor for " + clientClass.getName());
+        throw new IllegalStateException("Unable to find a compatible PacketLib Client constructor for "
+                + clientClass.getName());
     }
 
     // The listener must be registered before connecting, so packets sent during login are not missed.
@@ -471,14 +491,16 @@ class IntegrationTest {
             }
         }
         if (addListener == null) {
-            throw new IllegalStateException("No addListener(SessionListener) method found on " + sessionClass.getName());
+            throw new IllegalStateException("No addListener(SessionListener) method found on "
+                    + sessionClass.getName());
         }
 
         Object proxy = Proxy.newProxyInstance(listenerInterface.getClassLoader(),
                                               new Class<?>[]{listenerInterface},
                                               (p, method, args) -> {
                                                   if (method.getName()
-                                                            .equals("packetReceived") && args != null) {
+                                                            .equals("packetReceived")
+                                                          && args != null) {
                                                       if (args.length == 2) {
                                                           // Modern MCProtocolLib: packetReceived(Session, Packet)
                                                           botSession.receivedPackets.add(args[1]);
@@ -493,12 +515,13 @@ class IntegrationTest {
                                                                   botSession.receivedPackets.add(packet);
                                                               }
                                                           } catch (ReflectiveOperationException e) {
-                                                              throw new IllegalStateException("packetReceived event has no getPacket(): " + args[0].getClass()
-                                                                                                                                                   .getName(),
-                                                                                              e);
+                                                              throw new IllegalStateException("packetReceived event has no getPacket(): "
+                                                                      + args[0].getClass()
+                                                                               .getName(), e);
                                                           }
                                                       } else {
-                                                          throw new IllegalStateException("Unexpected packetReceived signature: " + args.length + " arguments");
+                                                          throw new IllegalStateException("Unexpected packetReceived signature: "
+                                                                  + args.length + " arguments");
                                                       }
                                                   }
                                                   if (isDisconnectCallback(method.getName())) {
@@ -541,11 +564,13 @@ class IntegrationTest {
     private static Method findSendMethod(Class<?> sessionClass) {
         for (Method method : sessionClass.getMethods()) {
             if (method.getName()
-                      .equals("send") && method.getParameterCount() == 1) {
+                      .equals("send")
+                    && method.getParameterCount() == 1) {
                 return method;
             }
         }
-        throw new IllegalStateException("Unable to find a compatible send(Packet) method for " + sessionClass.getName());
+        throw new IllegalStateException("Unable to find a compatible send(Packet) method for "
+                + sessionClass.getName());
     }
 
     private static Method findDisconnectMethod(Class<?> sessionClass) throws NoSuchMethodException {
@@ -591,7 +616,8 @@ class IntegrationTest {
                 String className = packet.getClass()
                                          .getName();
                 // 1.19+ uses SystemChatPacket, 1.17/1.18 use ClientboundChatPacket and 1.16.5 uses ServerChatPacket.
-                if (!className.contains("SystemChatPacket") && !className.contains("ServerChatPacket") && !className.endsWith("ClientboundChatPacket")) {
+                if (!className.contains("SystemChatPacket") && !className.contains("ServerChatPacket")
+                        && !className.endsWith("ClientboundChatPacket")) {
                     continue;
                 }
                 // Try getContent() (1.19+) then getMessage() (1.16.5)
@@ -606,7 +632,8 @@ class IntegrationTest {
                     }
                 }
                 if (component == null) {
-                    throw new IllegalStateException("Chat packet " + className + " has neither getContent() nor getMessage().");
+                    throw new IllegalStateException("Chat packet " + className
+                            + " has neither getContent() nor getMessage().");
                 }
                 messages.add(serializeComponent(component));
             }
@@ -646,7 +673,8 @@ class IntegrationTest {
                 fail(reason);
             }
             if (connectedOnce && !isConnected()) {
-                fail(reason != null ? reason : "MCProtocolLib session disconnected before the integration test completed.");
+                fail(reason != null ? reason
+                        : "MCProtocolLib session disconnected before the integration test completed.");
             }
         }
 
@@ -661,7 +689,8 @@ class IntegrationTest {
             try {
                 int id = (int) findAccessor(packetClass, "getId", "id").invoke(packet);
                 String pongClassName = packetClass.getPackageName()
-                                                  .replace(".clientbound", ".serverbound") + ".ServerboundPongPacket";
+                                                  .replace(".clientbound", ".serverbound")
+                        + ".ServerboundPongPacket";
                 Object pong = Class.forName(pongClassName, true, packetClass.getClassLoader())
                                    .getConstructor(int.class)
                                    .newInstance(id);

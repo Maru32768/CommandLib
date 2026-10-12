@@ -23,7 +23,8 @@ public class ArgumentParseException extends Exception {
             int red = Objects.requireNonNull(ChatColorUtil.RED.getRGB());
             context.sendMessage(RichText.translatable("command.unknown.argument")
                                         .color(red));
-            context.sendMessage(RichText.text(ChatColorUtil.GRAY + prefix + ChatColorUtil.RED + ChatColorUtil.UNDERLINE + incorrectInput + ChatColorUtil.RESET)
+            context.sendMessage(RichText.text(ChatColorUtil.GRAY + prefix + ChatColorUtil.RED + ChatColorUtil.UNDERLINE
+                    + incorrectInput + ChatColorUtil.RESET)
                                         .append(RichText.translatable("command.context.here")
                                                         .italic()
                                                         .color(red)));

@@ -340,7 +340,8 @@ public final class CommandTester implements AutoCloseable {
                 // Paper's registry and world arguments reject unknown values while parsing. Returning null here would
                 // let Brigadier fail with a NullPointerException instead.
                 reader.setCursor(start);
-                throw new SimpleCommandExceptionType(new LiteralMessage("Unknown value '" + token + "'")).createWithContext(reader);
+                throw new SimpleCommandExceptionType(new LiteralMessage("Unknown value '" + token
+                        + "'")).createWithContext(reader);
             }
             return value;
         };

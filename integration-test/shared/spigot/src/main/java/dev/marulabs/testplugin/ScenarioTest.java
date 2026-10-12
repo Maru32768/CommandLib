@@ -95,7 +95,8 @@ public final class ScenarioTest extends TestBase {
         String key = getKey();
         String commandName = "runtimeexec";
         String namespacedName = plugin.getName()
-                                      .toLowerCase(Locale.ROOT) + ":" + commandName;
+                                      .toLowerCase(Locale.ROOT)
+                + ":" + commandName;
         AtomicInteger executions = new AtomicInteger();
         List<String> executedInputs = Collections.synchronizedList(new ArrayList<>());
         AtomicReference<CommandLib> registration = new AtomicReference<>();
@@ -115,7 +116,8 @@ public final class ScenarioTest extends TestBase {
                 if (executions.get() != 1) {
                     putResult(new TestResult(key,
                                              TestStatus.FAILED,
-                                             "Registered command was not executed: executions=" + executions.get()));
+                                             "Registered command was not executed: executions="
+                                                     + executions.get()));
                 }
                 CommandLib current = registration.getAndSet(null);
                 if (current != null) {
@@ -131,7 +133,8 @@ public final class ScenarioTest extends TestBase {
                 } else {
                     putResult(new TestResult(key,
                                              TestStatus.FAILED,
-                                             "Expected exactly one execution before unregistering but was " + executions.get() + ": " + executedInputs));
+                                             "Expected exactly one execution before unregistering but was "
+                                                     + executions.get() + ": " + executedInputs));
                 }
             });
         }});

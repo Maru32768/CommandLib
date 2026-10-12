@@ -53,7 +53,8 @@ class PotionEffectArgumentTest {
         return new Command("effect") {{
             argument(new PotionEffectArgument("type")).execute((effect, ctx) -> {
                 ctx.sendMessage(effect.getType()
-                                      .getName() + " duration=" + effect.getDuration() + " amplifier=" + effect.getAmplifier());
+                                      .getName()
+                        + " duration=" + effect.getDuration() + " amplifier=" + effect.getAmplifier());
             });
         }};
     }

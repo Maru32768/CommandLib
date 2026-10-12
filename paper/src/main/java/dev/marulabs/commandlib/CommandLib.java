@@ -244,8 +244,8 @@ public final class CommandLib implements Listener {
                 return;
             }
 
-            if (!registrationState.lifecycleHandlerRegistered && tryRegisterLifecycleHandler(plugin,
-                                                                                             registrationState)) {
+            if (!registrationState.lifecycleHandlerRegistered
+                    && tryRegisterLifecycleHandler(plugin, registrationState)) {
                 registrationState.lifecycleHandlerRegistered = true;
             }
 
@@ -258,8 +258,9 @@ public final class CommandLib implements Listener {
             // handler can no longer be installed. Fall back to direct dispatcher manipulation.
             CommandDispatcher<CommandSourceStack> dispatcher = serverDispatcher;
             if (dispatcher == null) {
-                throw new IllegalStateException("CommandLib.register() was called after Paper's command registration phase, " + "but no dispatcher is cached yet. Ensure at least one CommandLib.register() call " + "is made during plugin initialization.",
-                                                registrationState.registrationFailure);
+                throw new IllegalStateException("CommandLib.register() was called after Paper's command registration phase, "
+                        + "but no dispatcher is cached yet. Ensure at least one CommandLib.register() call "
+                        + "is made during plugin initialization.", registrationState.registrationFailure);
             }
             registrationState.dispatcher = dispatcher;
             // Kept so that a COMMANDS event fired for another plugin re-adds it after /minecraft:reload.

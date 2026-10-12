@@ -22,7 +22,8 @@ public class OfflinePlayerArgument extends Argument<OfflinePlayer, OfflinePlayer
                   .map(OfflinePlayer::getName)
                   .filter(Objects::nonNull)
                   .filter(x -> sb.getLatestInput()
-                                 .isEmpty() || StringUtil.containsIgnoreCase(x, sb.getLatestInput()))
+                                 .isEmpty()
+                          || StringUtil.containsIgnoreCase(x, sb.getLatestInput()))
                   .forEach(sb::suggest);
         });
     }

@@ -26,7 +26,8 @@ public class CommonNameableObjectArgument<T extends Nameable, C extends CommonCo
                               .filter(filter(sb.getContext()))
                               .map(Nameable::tabCompleteName)
                               .filter(x -> sb.getLatestInput()
-                                             .isEmpty() || StringUtil.containsIgnoreCase(x, sb.getLatestInput()))
+                                             .isEmpty()
+                                      || StringUtil.containsIgnoreCase(x, sb.getLatestInput()))
                               .forEach(sb::suggest);
         });
     }

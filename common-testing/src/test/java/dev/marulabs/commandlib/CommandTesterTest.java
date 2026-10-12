@@ -19,7 +19,8 @@ class CommandTesterTest {
     @Test
     void executesCommonCommand() throws Exception {
         CommandTester tester = new CommandTester(new TestCommand("hello") {{
-            argument(new CommonStringArgument<>("name")).execute(ctx -> ctx.sendMessage("Hello " + ctx.getInput("name")));
+            argument(new CommonStringArgument<>("name")).execute(ctx -> ctx.sendMessage("Hello "
+                    + ctx.getInput("name")));
         }});
 
         FakeSender sender = FakeSender.console();

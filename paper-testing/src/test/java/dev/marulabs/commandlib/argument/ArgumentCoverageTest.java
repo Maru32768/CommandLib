@@ -159,8 +159,9 @@ class ArgumentCoverageTest {
                 try (JarFile jarFile = jarConn.getJarFile()) {
                     jarFile.stream()
                            .map(JarEntry::getName)
-                           .filter(name -> name.startsWith(packagePath + "/") && name.endsWith(".class") && !name.substring(packagePath.length() + 1)
-                                                                                                                 .contains("/"))
+                           .filter(name -> name.startsWith(packagePath + "/") && name.endsWith(".class")
+                                   && !name.substring(packagePath.length() + 1)
+                                           .contains("/"))
                            .map(name -> name.substring(packagePath.length() + 1))
                            .forEach(name -> addIfConcreteArgument(name, classLoader, result));
                 }

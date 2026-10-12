@@ -24,7 +24,8 @@ public class CommonLiteralArgument<C extends CommonCommandContext<?, ?>, SELF ex
             literalsSupplier.get()
                             .stream()
                             .filter(x -> sb.getLatestInput()
-                                           .isEmpty() || StringUtil.containsIgnoreCase(x, sb.getLatestInput()))
+                                           .isEmpty()
+                                    || StringUtil.containsIgnoreCase(x, sb.getLatestInput()))
                             .forEach(sb::suggest);
         });
     }

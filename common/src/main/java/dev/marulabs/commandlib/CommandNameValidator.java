@@ -83,7 +83,8 @@ final class CommandNameValidator {
                 // is harmless, so only collisions between different commands are rejected.
                 CommonCommand<?, ?> owner = literals.putIfAbsent(name, command);
                 if (owner != null && owner != command) {
-                    throw new IllegalArgumentException((location == null ? "Duplicate command name or alias '" : "Duplicate child command name or alias '") + name + "'" + suffix());
+                    throw new IllegalArgumentException((location == null ? "Duplicate command name or alias '"
+                            : "Duplicate child command name or alias '") + name + "'" + suffix());
                 }
             }
         }
@@ -98,7 +99,8 @@ final class CommandNameValidator {
         }
 
         private IllegalArgumentException conflictWithArgument(String name) {
-            return new IllegalArgumentException("Command name or alias '" + name + "' conflicts with an argument of the same name" + suffix());
+            return new IllegalArgumentException("Command name or alias '" + name
+                    + "' conflicts with an argument of the same name" + suffix());
         }
 
         private String suffix() {

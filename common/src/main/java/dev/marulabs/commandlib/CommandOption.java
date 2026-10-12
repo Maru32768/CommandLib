@@ -84,7 +84,8 @@ public final class CommandOption<T, C extends CommonCommandContext<?, ?>> {
             E value = ctx.getOption(option);
             if (!predicate.test(value)) {
                 throw new ArgumentParseException(x -> {
-                    x.sendFailure(formatName() + " requires " + option.formatName() + " to be " + expectedDescription + ".");
+                    x.sendFailure(formatName() + " requires " + option.formatName() + " to be " + expectedDescription
+                            + ".");
                 });
             }
         });

@@ -30,7 +30,8 @@ public class ObjectiveArgument extends Argument<Objective, ObjectiveArgument> {
                       .stream()
                       .map(Objective::getName)
                       .filter(x -> sb.getLatestInput()
-                                     .isEmpty() || StringUtil.containsIgnoreCase(x, sb.getLatestInput()))
+                                     .isEmpty()
+                              || StringUtil.containsIgnoreCase(x, sb.getLatestInput()))
                       .forEach(sb::suggest);
         });
     }

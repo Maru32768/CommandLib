@@ -188,9 +188,10 @@ class CommandTesterTest {
             AtomicReference<String> result = new AtomicReference<>();
             try (CommandTester tester = new CommandTester(new Command("whoami") {{
                 execute(ctx -> result.set(ctx.getActor()
-                                             .getName() + "," + ctx.getActor()
-                                                                   .getUniqueId()
-                                                                   .orElse(null)));
+                                             .getName()
+                        + "," + ctx.getActor()
+                                   .getUniqueId()
+                                   .orElse(null)));
             }}, "test")) {
                 UUID uuid = UUID.randomUUID();
                 FakeSender sender = FakeSender.playerBuilder("Alex")

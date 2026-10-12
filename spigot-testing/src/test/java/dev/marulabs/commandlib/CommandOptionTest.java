@@ -35,10 +35,13 @@ class CommandOptionTest {
             FakeSender sender = FakeSender.player("Steve");
             tester.execute("scan", sender);
             assertThat(sender.getSentMessageTexts()).anyMatch(x -> x.contains("Usage:"))
-                                                    .anyMatch(x -> x.contains("/scan") && x.contains("options") && x.contains("target"))
+                                                    .anyMatch(x -> x.contains("/scan") && x.contains("options")
+                                                            && x.contains("target"))
                                                     .anyMatch(x -> x.contains("Options:"))
-                                                    .anyMatch(x -> x.contains("-f") && x.contains("--force") && x.contains("Force execution"))
-                                                    .anyMatch(x -> x.contains("-n") && x.contains("--limit") && x.contains("Maximum count"));
+                                                    .anyMatch(x -> x.contains("-f") && x.contains("--force")
+                                                            && x.contains("Force execution"))
+                                                    .anyMatch(x -> x.contains("-n") && x.contains("--limit")
+                                                            && x.contains("Maximum count"));
         }
     }
 }

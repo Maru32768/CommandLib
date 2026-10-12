@@ -108,9 +108,10 @@ public final class ArgumentTest extends TestBase {
         }});
 
         return List.of(buildCommand(command,
-                                    name + " " + registryInput(org.bukkit.attribute.Attribute.class,
-                                                               "generic_max_health",
-                                                               "generic.max_health")));
+                                    name + " "
+                                            + registryInput(org.bukkit.attribute.Attribute.class,
+                                                            "generic_max_health",
+                                                            "generic.max_health")));
     }
 
     public List<String> blockDataArgument() {
@@ -232,8 +233,8 @@ public final class ArgumentTest extends TestBase {
         }});
 
         // Particle options are written as SNBT from 1.20.5.
-        String input = isLessThan(BukkitUtil.getMinecraftVersion(),
-                                  "1.20.5") ? "minecraft:dust 1 0 0 1" : "minecraft:dust{color:[1.0,0.0,0.0],scale:1.0}";
+        String input = isLessThan(BukkitUtil.getMinecraftVersion(), "1.20.5") ? "minecraft:dust 1 0 0 1"
+                : "minecraft:dust{color:[1.0,0.0,0.0],scale:1.0}";
         return List.of(buildCommand(command, name + " " + input));
     }
 
@@ -700,9 +701,10 @@ public final class ArgumentTest extends TestBase {
         }});
 
         return List.of(buildCommand(command,
-                                    name + " " + registryInput(org.bukkit.Sound.class,
-                                                               "block_anvil_land",
-                                                               "block.anvil.land")));
+                                    name + " "
+                                            + registryInput(org.bukkit.Sound.class,
+                                                            "block_anvil_land",
+                                                            "block.anvil.land")));
     }
 
     public List<String> stringArgument() {

@@ -45,7 +45,8 @@ public final class ArgRef<T> {
     public T get() {
         CommonCommandContext<?, ?> ctx = CurrentCommandContext.get();
         if (ctx == null) {
-            throw new IllegalStateException("ArgRef '" + name() + "' was resolved outside of a command callback. " + "Resolve the value inside the callback or use get(ctx).");
+            throw new IllegalStateException("ArgRef '" + name() + "' was resolved outside of a command callback. "
+                    + "Resolve the value inside the callback or use get(ctx).");
         }
         return get(ctx);
     }

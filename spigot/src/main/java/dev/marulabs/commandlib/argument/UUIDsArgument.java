@@ -81,7 +81,8 @@ public class UUIDsArgument extends Argument<List<UUID>, UUIDsArgument> {
                                     .orElseThrow(() -> new ArgumentParseException(x -> ((CommandContext) x).sendFailure(new TextComponent("no player found")))));
             }
 
-            throw new ArgumentParseException(x -> ((CommandContext) x).sendFailure(new TextComponent(s + " is invalid selector")));
+            throw new ArgumentParseException(x -> ((CommandContext) x).sendFailure(new TextComponent(s
+                    + " is invalid selector")));
         }
 
         OfflinePlayer p = BukkitUtil.getOfflinePlayerIfEverPlayed(s);

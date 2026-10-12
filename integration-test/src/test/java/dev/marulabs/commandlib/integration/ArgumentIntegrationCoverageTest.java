@@ -53,11 +53,13 @@ class ArgumentIntegrationCoverageTest {
     private void assertIntegrationCases(Path rootDir, String moduleName) throws IOException {
         assertIntegrationCases(rootDir,
                                moduleName,
-                               "integration-test/shared/" + moduleName + "/src/main/java/dev/marulabs/testplugin/ArgumentTest.java");
+                               "integration-test/shared/" + moduleName
+                                       + "/src/main/java/dev/marulabs/testplugin/ArgumentTest.java");
     }
 
     private void assertIntegrationCases(Path rootDir, String moduleName, String argumentTestPath) throws IOException {
-        Set<String> arguments = new HashSet<>(publicArgumentClassNames(rootDir.resolve(moduleName + "/src/main/java/dev/marulabs/commandlib/argument")));
+        Set<String> arguments = new HashSet<>(publicArgumentClassNames(rootDir.resolve(moduleName
+                + "/src/main/java/dev/marulabs/commandlib/argument")));
         arguments.removeAll(EXCLUDED_ARGUMENTS);
 
         String argumentTestSource = Files.readString(rootDir.resolve(argumentTestPath));
@@ -65,7 +67,8 @@ class ArgumentIntegrationCoverageTest {
                                        .filter(argument -> !instantiatesArgument(argumentTestSource, argument))
                                        .collect(Collectors.toCollection(java.util.TreeSet::new));
 
-        assertThat(missing).as("Add integration coverage in shared " + moduleName + " ArgumentTest or document an exclusion")
+        assertThat(missing).as("Add integration coverage in shared " + moduleName
+                + " ArgumentTest or document an exclusion")
                            .isEmpty();
     }
 

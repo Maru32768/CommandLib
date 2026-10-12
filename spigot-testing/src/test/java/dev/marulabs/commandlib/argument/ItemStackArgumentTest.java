@@ -60,7 +60,8 @@ class ItemStackArgumentTest {
         return new Command("give") {{
             argument(new ItemStackArgument("item")).execute((item, ctx) -> {
                 ctx.sendMessage(item.getType()
-                                    .name() + " x" + item.getAmount());
+                                    .name()
+                        + " x" + item.getAmount());
             });
         }};
     }

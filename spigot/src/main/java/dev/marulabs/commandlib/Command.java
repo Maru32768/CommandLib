@@ -79,7 +79,8 @@ public class Command extends CommonCommand<CommandContext, Command> {
             case OP:
                 return DefaultPermission.OP;
             default:
-                throw new IllegalArgumentException("Unsupported PermissionDefault: " + bukkit.name() + " (use TRUE, FALSE or OP)");
+                throw new IllegalArgumentException("Unsupported PermissionDefault: " + bukkit.name()
+                        + " (use TRUE, FALSE or OP)");
         }
     }
 

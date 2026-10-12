@@ -39,7 +39,8 @@ public final class RuntimePermissionTest extends TestBase {
                 CommandLib noneRegistration = null;
                 String commandName = "runtimepermissioncleanup";
                 String node = plugin.getName()
-                                    .toLowerCase() + ".command." + commandName;
+                                    .toLowerCase()
+                        + ".command." + commandName;
                 try {
                     allRegistration = CommandLib.register(plugin, new Command(commandName) {{
                         permission(DefaultPermission.ALL);
@@ -83,7 +84,8 @@ public final class RuntimePermissionTest extends TestBase {
             throw new AssertionError("Permission " + node + " was not registered.");
         }
         if (permission.getDefault() != expected) {
-            throw new AssertionError("Expected " + node + " default to be " + expected + " but was " + permission.getDefault());
+            throw new AssertionError("Expected " + node + " default to be " + expected + " but was "
+                    + permission.getDefault());
         }
     }
 

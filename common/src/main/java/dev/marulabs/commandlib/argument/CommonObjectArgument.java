@@ -27,7 +27,8 @@ public class CommonObjectArgument<T, C extends CommonCommandContext<?, ?>, SELF 
                        .filter(x -> filter(sb.getContext()).test(x.getValue()))
                        .map(Map.Entry::getKey)
                        .filter(x -> sb.getLatestInput()
-                                      .isEmpty() || StringUtil.containsIgnoreCase(x, sb.getLatestInput()))
+                                      .isEmpty()
+                               || StringUtil.containsIgnoreCase(x, sb.getLatestInput()))
                        .forEach(sb::suggest);
         });
     }

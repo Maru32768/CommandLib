@@ -22,7 +22,8 @@ public class CommonEnumArgument<T extends Enum<T>, C extends CommonCommandContex
                   .map(Enum::name)
                   .map(x -> x.toLowerCase(Locale.ROOT))
                   .filter(x -> sb.getLatestInput()
-                                 .isEmpty() || StringUtil.containsIgnoreCase(x, sb.getLatestInput()))
+                                 .isEmpty()
+                          || StringUtil.containsIgnoreCase(x, sb.getLatestInput()))
                   .forEach(sb::suggest);
         });
     }

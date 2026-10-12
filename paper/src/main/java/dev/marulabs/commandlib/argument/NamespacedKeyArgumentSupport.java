@@ -37,7 +37,8 @@ final class NamespacedKeyArgumentSupport {
     static void suggestKey(SuggestionBuilder<?> builder, NamespacedKey key) {
         String value = key.toString();
         if (builder.getLatestInput()
-                   .isEmpty() || StringUtil.containsIgnoreCase(value, builder.getLatestInput())) {
+                   .isEmpty()
+                || StringUtil.containsIgnoreCase(value, builder.getLatestInput())) {
             builder.suggest(value);
         }
     }

@@ -14,9 +14,12 @@ class CommandActorTest {
         try (CommandTester tester = new CommandTester(new Command("actor") {{
             execute(ctx -> {
                 CommandActor actor = ctx.getActor();
-                ctx.sendMessage(actor.getName() + ":" + actor.isPlayer() + ":" + actor.isConsole() + ":" + actor.isOperator() + ":" + actor.hasPermission("test.actor.reveal") + ":" + actor.getUniqueId()
-                                                                                                                                                                                            .orElseThrow() + ":" + actor.unwrap(Player.class)
-                                                                                                                                                                                                                        .isPresent());
+                ctx.sendMessage(actor.getName() + ":" + actor.isPlayer() + ":" + actor.isConsole() + ":"
+                        + actor.isOperator() + ":" + actor.hasPermission("test.actor.reveal") + ":"
+                        + actor.getUniqueId()
+                               .orElseThrow()
+                        + ":" + actor.unwrap(Player.class)
+                                     .isPresent());
             });
         }}, "test.command")) {
             FakeSender sender = FakeSender.player("Alex")
@@ -35,7 +38,8 @@ class CommandActorTest {
         try (CommandTester tester = new CommandTester(new Command("actor") {{
             execute(ctx -> {
                 CommandActor actor = ctx.getActor();
-                ctx.sendMessage(actor.getName() + ":" + actor.getType() + ":" + actor.isConsole() + ":" + actor.isPlayer() + ":" + actor.isOperator());
+                ctx.sendMessage(actor.getName() + ":" + actor.getType() + ":" + actor.isConsole() + ":"
+                        + actor.isPlayer() + ":" + actor.isOperator());
             });
         }}, "test.command")) {
             FakeSender sender = FakeSender.console()

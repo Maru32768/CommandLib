@@ -16,8 +16,8 @@ public class HelloCommand extends Command {
         argument(new PlayersArgument("players")).execute((players, ctx) -> {
             players.forEach(x -> {
                 x.sendMessage(new StringTextComponent("Hello " + x.getName()
-                                                                  .getString() + "!"),
-                              Util.DUMMY_UUID);
+                                                                  .getString()
+                        + "!"), Util.DUMMY_UUID);
             });
         });
     }

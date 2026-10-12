@@ -154,19 +154,23 @@ class EntitySelectorArgumentTest {
         return CommandTester.builder()
                             .command(() -> new Command("entity") {{
                                 argument(new EntityArgument("target")).execute((target,
-                                                                                ctx) -> ctx.sendMessage("entity=" + target.getName()));
+                                                                                ctx) -> ctx.sendMessage("entity="
+                                                                                        + target.getName()));
                             }})
                             .command(() -> new Command("entities") {{
                                 argument(new EntitiesArgument("targets")).execute((targets,
-                                                                                   ctx) -> ctx.sendMessage("entities=" + names(targets)));
+                                                                                   ctx) -> ctx.sendMessage("entities="
+                                                                                           + names(targets)));
                             }})
                             .command(() -> new Command("player") {{
                                 argument(new PlayerArgument("target")).execute((target,
-                                                                                ctx) -> ctx.sendMessage("player=" + target.getName()));
+                                                                                ctx) -> ctx.sendMessage("player="
+                                                                                        + target.getName()));
                             }})
                             .command(() -> new Command("players") {{
                                 argument(new PlayersArgument("targets")).execute((targets,
-                                                                                  ctx) -> ctx.sendMessage("players=" + names(targets)));
+                                                                                  ctx) -> ctx.sendMessage("players="
+                                                                                          + names(targets)));
                             }})
                             .permissionPrefix("test.command")
                             .build();

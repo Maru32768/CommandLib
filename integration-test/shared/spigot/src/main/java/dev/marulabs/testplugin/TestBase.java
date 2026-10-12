@@ -31,13 +31,16 @@ public abstract class TestBase {
         addCommandDispatchErrorHook(key,
                                     (commandLine, dispatchResult) -> resultMap.computeIfPresent(key,
                                                                                                 (ignored, result) -> {
-                                                                                                    if (result.status() != TestStatus.FAILED || !COMMAND_NOT_EXECUTED_MESSAGE.equals(result.message())) {
+                                                                                                    if (result.status() != TestStatus.FAILED
+                                                                                                            || !COMMAND_NOT_EXECUTED_MESSAGE.equals(result.message())) {
                                                                                                         return result;
                                                                                                     }
 
                                                                                                     return new TestResult(key,
                                                                                                                           TestStatus.FAILED,
-                                                                                                                          COMMAND_NOT_EXECUTED_MESSAGE + "\n" + dispatchResult.describe(commandLine));
+                                                                                                                          COMMAND_NOT_EXECUTED_MESSAGE
+                                                                                                                                  + "\n"
+                                                                                                                                  + dispatchResult.describe(commandLine));
                                                                                                 }));
     }
 

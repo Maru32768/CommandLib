@@ -287,7 +287,8 @@ public final class FakeSender {
             }
             Set<String> granted = permissions;
             Set<String> denied = Set.copyOf(deniedPermissions);
-            sender.permissionCheck = permission -> !denied.contains(permission) && (granted == null || granted.contains(permission));
+            sender.permissionCheck = permission -> !denied.contains(permission)
+                    && (granted == null || granted.contains(permission));
             return sender;
         }
     }

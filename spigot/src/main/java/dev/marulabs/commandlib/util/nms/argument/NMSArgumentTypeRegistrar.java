@@ -57,7 +57,8 @@ public abstract class NMSArgumentTypeRegistrar extends NMSClass {
                                                                                 Object brigadierStringKey) {
         Map classToEntryMap = findClassToEntryMap();
         if (classToEntryMap == null) {
-            throw new IllegalStateException("Could not find NMS argument-type Class→Entry map in " + serverClass.getName());
+            throw new IllegalStateException("Could not find NMS argument-type Class→Entry map in "
+                    + serverClass.getName());
         }
         if (classToEntryMap.containsKey(argumentTypeClass)) {
             return;
@@ -168,7 +169,8 @@ public abstract class NMSArgumentTypeRegistrar extends NMSClass {
     protected final void registerInArgumentTypeInfos(Class<?> argumentTypeClass, Class<?> argumentTypeInfoInterface) {
         Map byClassMap = findClassToEntryMap();
         if (byClassMap == null) {
-            throw new IllegalStateException("Could not find NMS argument-type Class→ArgumentTypeInfo map in " + serverClass.getName());
+            throw new IllegalStateException("Could not find NMS argument-type Class→ArgumentTypeInfo map in "
+                    + serverClass.getName());
         }
         if (byClassMap.containsKey(argumentTypeClass)) {
             return;
@@ -177,7 +179,8 @@ public abstract class NMSArgumentTypeRegistrar extends NMSClass {
         // The string ArgumentTypeInfo already in the map, and its inner Template class.
         Object stringSerializer = byClassMap.get(StringArgumentType.class);
         if (stringSerializer == null) {
-            throw new IllegalStateException("Could not find the ArgumentTypeInfo of StringArgumentType in " + serverClass.getName());
+            throw new IllegalStateException("Could not find the ArgumentTypeInfo of StringArgumentType in "
+                    + serverClass.getName());
         }
         Class<?>[] innerClasses = stringSerializer.getClass()
                                                   .getDeclaredClasses();
@@ -196,7 +199,8 @@ public abstract class NMSArgumentTypeRegistrar extends NMSClass {
             }
         }
         if (templateCtor == null) {
-            throw new IllegalStateException("Could not find Template(outer, StringType) constructor in " + templateClass.getName());
+            throw new IllegalStateException("Could not find Template(outer, StringType) constructor in "
+                    + templateClass.getName());
         }
         templateCtor.setAccessible(true);
         Object greedyTemplate;
@@ -211,7 +215,8 @@ public abstract class NMSArgumentTypeRegistrar extends NMSClass {
         Object proxy = Proxy.newProxyInstance(argumentTypeClass.getClassLoader(),
                                               new Class[]{argumentTypeInfoInterface},
                                               (p, method, args) -> {
-                                                  if (args != null && args.length == 1 && args[0] instanceof ArgumentType) {
+                                                  if (args != null && args.length == 1
+                                                          && args[0] instanceof ArgumentType) {
                                                       return greedyTemplate;
                                                   }
                                                   return null;

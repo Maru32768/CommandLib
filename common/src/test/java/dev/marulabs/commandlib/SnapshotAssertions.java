@@ -21,8 +21,8 @@ final class SnapshotAssertions {
                                    .stripTrailing();
             assertThat(actual.replace("\r\n", "\n")).isEqualTo(expected);
         } catch (IOException e) {
-            throw new AssertionError("Could not read snapshot: " + path.toAbsolutePath() + System.lineSeparator() + "Actual snapshot:" + System.lineSeparator() + actual,
-                                     e);
+            throw new AssertionError("Could not read snapshot: " + path.toAbsolutePath() + System.lineSeparator()
+                    + "Actual snapshot:" + System.lineSeparator() + actual, e);
         }
     }
 }

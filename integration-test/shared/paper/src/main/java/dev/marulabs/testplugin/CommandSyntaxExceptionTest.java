@@ -43,8 +43,11 @@ public class CommandSyntaxExceptionTest extends TestBase {
         command.addChildren(new Command(name) {{
             argument(new ThrowingBoolArg("a",
                                          result -> putResult(new TestResult(key,
-                                                                            result == null ? TestStatus.SUCCEEDED : TestStatus.FAILED,
-                                                                            result == null ? "Succeeded converting CommandSyntaxException" : result)),
+                                                                            result == null ? TestStatus.SUCCEEDED
+                                                                                    : TestStatus.FAILED,
+                                                                            result == null
+                                                                                    ? "Succeeded converting CommandSyntaxException"
+                                                                                    : result)),
                                          (e,
                                           ctx) -> putResult(new TestResult(key,
                                                                            TestStatus.FAILED,
@@ -120,7 +123,8 @@ public class CommandSyntaxExceptionTest extends TestBase {
             }
             if (!warnings.isEmpty()) {
                 LogRecord warning = warnings.get(0);
-                return warning.getMessage() + (warning.getThrown() == null ? "" : "\n" + ExceptionUtil.stackTraceToString(warning.getThrown()));
+                return warning.getMessage() + (warning.getThrown() == null ? ""
+                        : "\n" + ExceptionUtil.stackTraceToString(warning.getThrown()));
             }
             return null;
         }

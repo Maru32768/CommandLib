@@ -14,7 +14,8 @@ public class MinecraftVersion implements Comparable<MinecraftVersion> {
     public static void checkMinecraftVersionFormat(String version) {
         if (!MINECRAFT_VERSION_PATTERN.matcher(version)
                                       .matches()) {
-            throw new InvalidMinecraftVersionFormatException("'" + version + "' doesn't satisfy the version format, '\\d+.\\d+.\\d+'");
+            throw new InvalidMinecraftVersionFormatException("'" + version
+                    + "' doesn't satisfy the version format, '\\d+.\\d+.\\d+'");
         }
     }
 

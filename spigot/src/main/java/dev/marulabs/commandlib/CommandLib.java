@@ -232,11 +232,8 @@ public final class CommandLib implements Listener {
 
                     // When the synced dispatcher is the vanilla one, CraftBukkit has not synced the commands yet and
                     // adds the namespaced label to the synced dispatcher from the command map itself.
-                    addNamespacedCommand(root == vanillaRoot ? null : root,
-                                         knownCommands,
-                                         namespace(plugin),
-                                         x,
-                                         wrapper);
+                    addNamespacedCommand(root == vanillaRoot ? null
+                            : root, knownCommands, namespace(plugin), x, wrapper);
                 }
             }
         } catch (Exception e) {
@@ -268,7 +265,8 @@ public final class CommandLib implements Listener {
                          String pluginName) {
         wrapper.setPermission(command.permissionName(permissionPrefix));
         String description = command.staticDescription();
-        wrapper.setDescription(description == null || description.isEmpty() ? "A command by the " + pluginName + " plugin." : description);
+        wrapper.setDescription(description == null || description.isEmpty()
+                ? "A command by the " + pluginName + " plugin." : description);
         wrapper.setUsage(usage(node));
         List<String> otherLabels = new ArrayList<>();
         otherLabels.add(command.name());

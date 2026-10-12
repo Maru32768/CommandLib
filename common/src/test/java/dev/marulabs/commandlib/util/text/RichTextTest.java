@@ -67,7 +67,8 @@ class RichTextTest {
                                            .italic()
                                            .append(RichText.text("child")));
         assertThat(RichText.text("key")).isNotEqualTo(RichText.translatable("key"));
-        assertThat(a.toString()).isEqualTo("RichText{translatable=\"key\", arguments=[RichText{text=\"arg\"}], color=#ff5555, italic=true, " + "children=[RichText{text=\"child\"}]}");
+        assertThat(a.toString()).isEqualTo("RichText{translatable=\"key\", arguments=[RichText{text=\"arg\"}], color=#ff5555, italic=true, "
+                + "children=[RichText{text=\"child\"}]}");
     }
 
     @Test

@@ -121,7 +121,8 @@ class CommonCommandExecutionTest {
                 execute(ctx -> ctx.sendMessage("get:" + key.get()));
             }})
                                                        .child(key -> new TestCommand("delete") {{
-                                                           execute(ctx -> ctx.sendMessage("delete:" + key.get()));
+                                                           execute(ctx -> ctx.sendMessage("delete:"
+                                                                   + key.get()));
                                                        }});
         }});
 

@@ -13,7 +13,9 @@ public final class JUnitXmlReport {
                                   .sorted(Comparator.comparing(TestResult::key))
                                   .map(JUnitXmlReport::buildTestCaseXml)
                                   .collect(Collectors.joining());
-        return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + "<testsuite name=\"CommandLib Test Plugin\" tests=\"" + results.size() + "\" failures=\"" + failedCount + "\" errors=\"0\" skipped=\"0\">\n" + testCases + "</testsuite>\n";
+        return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + "<testsuite name=\"CommandLib Test Plugin\" tests=\""
+                + results.size() + "\" failures=\"" + failedCount + "\" errors=\"0\" skipped=\"0\">\n" + testCases
+                + "</testsuite>\n";
     }
 
     private static String buildTestCaseXml(TestResult result) {
@@ -22,7 +24,9 @@ public final class JUnitXmlReport {
         if (result.status() == TestStatus.SUCCEEDED) {
             return "  <testcase classname=\"" + xmlEscape(className) + "\" name=\"" + xmlEscape(testName) + "\"/>\n";
         }
-        return "  <testcase classname=\"" + xmlEscape(className) + "\" name=\"" + xmlEscape(testName) + "\">\n" + "    <failure message=\"" + xmlEscape(firstLine(result.message())) + "\">" + xmlEscape(result.message()) + "</failure>\n" + "  </testcase>\n";
+        return "  <testcase classname=\"" + xmlEscape(className) + "\" name=\"" + xmlEscape(testName) + "\">\n"
+                + "    <failure message=\"" + xmlEscape(firstLine(result.message())) + "\">"
+                + xmlEscape(result.message()) + "</failure>\n" + "  </testcase>\n";
     }
 
     private static String testClassName(String key) {

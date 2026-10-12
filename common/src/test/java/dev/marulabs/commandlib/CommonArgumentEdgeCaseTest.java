@@ -174,7 +174,9 @@ class CommonArgumentEdgeCaseTest {
                                                                                                     .execute((min,
                                                                                                               max,
                                                                                                               ctx) -> {
-                                                                                                        ctx.sendMessage(min + ".." + max);
+                                                                                                        ctx.sendMessage(min
+                                                                                                                + ".."
+                                                                                                                + max);
                                                                                                     });
         }});
 
@@ -243,9 +245,8 @@ class CommonArgumentEdgeCaseTest {
     @Test
     void additional_parser_recovers_from_brigadier_syntax_failure() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("set") {{
-            argument(new IntArg("value").additionalParser((ctx,
-                                                           input) -> input.equals("max") ? Integer.MAX_VALUE : null)).execute((value,
-                                                                                                                               ctx) -> ctx.sendMessage(value));
+            argument(new IntArg("value").additionalParser((ctx, input) -> input.equals("max") ? Integer.MAX_VALUE
+                    : null)).execute((value, ctx) -> ctx.sendMessage(value));
         }});
 
         // IntegerArgumentType rejects "max" while Brigadier parses the tree, before CommandLib can recover.
@@ -259,7 +260,8 @@ class CommonArgumentEdgeCaseTest {
                                   Map.of("sword", 1)).additionalParser((ctx, input) -> null))
                                                                                              .execute((item,
                                                                                                        ctx) -> {
-                                                                                                 ctx.sendMessage("item=" + item);
+                                                                                                 ctx.sendMessage("item="
+                                                                                                         + item);
                                                                                              });
         }});
 

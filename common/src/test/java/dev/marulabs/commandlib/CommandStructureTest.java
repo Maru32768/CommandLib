@@ -48,7 +48,8 @@ class CommandStructureTest {
             argument(builder -> {
                 builder.argument(new CommonIntegerArgument<>("left"))
                        .argument(new CommonIntegerArgument<>("right"));
-                builder.execute(ctx -> ctx.sendMessage((int) ctx.getArgument("left") + (int) ctx.getArgument("right")));
+                builder.execute(ctx -> ctx.sendMessage((int) ctx.getArgument("left")
+                        + (int) ctx.getArgument("right")));
             });
         }});
 
@@ -386,10 +387,12 @@ class CommandStructureTest {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("boom") {{
             addUncaughtExceptionHandler((e, ctx) -> handled.add("command:" + e.getMessage()));
             argument(new IntArg("value").addUncaughtExceptionHandler((e,
-                                                                      ctx) -> handled.add("argument:" + e.getMessage()))).execute((value,
-                                                                                                                                   ctx) -> {
-                                                                          throw new IllegalStateException("value=" + value);
-                                                                      });
+                                                                      ctx) -> handled.add("argument:"
+                                                                              + e.getMessage()))).execute((value,
+                                                                                                           ctx) -> {
+                                                                                  throw new IllegalStateException("value="
+                                                                                          + value);
+                                                                              });
         }});
 
         runner.execute("boom 3");

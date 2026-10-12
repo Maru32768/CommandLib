@@ -37,10 +37,12 @@ class CommandContextTest {
 
         try (CommandTester tester = new CommandTester(new Command("who") {{
             execute(ctx -> types.add(ctx.getActor()
-                                        .getType() + ":" + ctx.getActor()
-                                                              .isConsole() + ":" + ctx.getActor()
-                                                                                      .getUniqueId()
-                                                                                      .isPresent()));
+                                        .getType()
+                    + ":" + ctx.getActor()
+                               .isConsole()
+                    + ":" + ctx.getActor()
+                               .getUniqueId()
+                               .isPresent()));
         }}, "test.command")) {
             tester.execute("who", permitted(RemoteConsoleCommandSender.class));
             tester.execute("who", permitted(BlockCommandSender.class));

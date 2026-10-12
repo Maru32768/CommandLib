@@ -101,9 +101,8 @@ public final class NMSClassRegistry {
     private Class<?> resolve(Class<?> lookUpClass, String version) {
         List<TypedModule> candidates = modulesFor(new MinecraftVersion(version));
         if (candidates.isEmpty()) {
-            throw new NMSClassNotFoundException(String.format("%s has no implementation for Minecraft %s: no typed NMS " + "module supports this version",
-                                                              lookUpClass.getSimpleName(),
-                                                              version));
+            throw new NMSClassNotFoundException(String.format("%s has no implementation for Minecraft %s: no typed NMS "
+                    + "module supports this version", lookUpClass.getSimpleName(), version));
         }
 
         List<String> reasons = new ArrayList<>();

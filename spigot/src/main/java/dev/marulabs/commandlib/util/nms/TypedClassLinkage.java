@@ -140,7 +140,8 @@ final class TypedClassLinkage {
         String packagePrefix = typedClass.getName()
                                          .substring(0,
                                                     typedClass.getName()
-                                                              .lastIndexOf('.') + 1);
+                                                              .lastIndexOf('.')
+                                                            + 1);
         Set<String> visited = new HashSet<>();
         Deque<String> pending = new ArrayDeque<>();
         pending.add(typedClass.getName());
@@ -182,7 +183,8 @@ final class TypedClassLinkage {
     @Nullable
     private static byte[] readClassFile(ClassLoader loader, String className) throws IOException {
         String resource = className.replace('.', '/') + ".class";
-        try (InputStream in = loader == null ? ClassLoader.getSystemResourceAsStream(resource) : loader.getResourceAsStream(resource)) {
+        try (InputStream in = loader == null ? ClassLoader.getSystemResourceAsStream(resource)
+                : loader.getResourceAsStream(resource)) {
             if (in == null) {
                 return null;
             }
@@ -665,7 +667,8 @@ final class TypedClassLinkage {
         }
 
         private static int readInt(byte[] code, int index) {
-            return (code[index] & 0xFF) << 24 | (code[index + 1] & 0xFF) << 16 | (code[index + 2] & 0xFF) << 8 | (code[index + 3] & 0xFF);
+            return (code[index] & 0xFF) << 24 | (code[index + 1] & 0xFF) << 16 | (code[index
+                    + 2] & 0xFF) << 8 | (code[index + 3] & 0xFF);
         }
     }
 

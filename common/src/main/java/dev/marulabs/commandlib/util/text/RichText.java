@@ -270,13 +270,10 @@ public final class RichText {
             return false;
         }
         RichText that = (RichText) o;
-        return Objects.equals(text,
-                              that.text) && Objects.equals(translationKey,
-                                                           that.translationKey) && arguments.equals(that.arguments) && children.equals(that.children) && Objects.equals(color,
-                                                                                                                                                                        that.color) && Arrays.equals(decorations,
-                                                                                                                                                                                                     that.decorations) && Objects.equals(hover,
-                                                                                                                                                                                                                                         that.hover) && Objects.equals(click,
-                                                                                                                                                                                                                                                                       that.click);
+        return Objects.equals(text, that.text) && Objects.equals(translationKey, that.translationKey)
+                && arguments.equals(that.arguments) && children.equals(that.children)
+                && Objects.equals(color, that.color) && Arrays.equals(decorations, that.decorations)
+                && Objects.equals(hover, that.hover) && Objects.equals(click, that.click);
     }
 
     @Override

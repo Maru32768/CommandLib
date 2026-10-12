@@ -69,7 +69,8 @@ public class NMSClassRegistryTest {
 
         assertThatThrownBy(() -> registry.find(TypedLookUp.class,
                                                "1.16.3")).isInstanceOf(NMSClassNotFoundException.class)
-                                                         .hasMessage("TypedLookUp has no implementation for Minecraft 1.16.3: no typed NMS module supports this " + "version");
+                                                         .hasMessage("TypedLookUp has no implementation for Minecraft 1.16.3: no typed NMS module supports this "
+                                                                 + "version");
     }
 
     @Test
@@ -89,9 +90,11 @@ public class NMSClassRegistryTest {
                                                "1.18.2")).hasMessageStartingWith("TypedLookUp has no implementation for Minecraft 1.18.2 (registry_unlinkable: ")
                                                          .hasMessageContaining("org.jetbrains.annotations.NotNull");
         assertThatThrownBy(() -> registry.find(TypedLookUp.class,
-                                               "1.16.5")).hasMessage("TypedLookUp has no implementation for Minecraft 1.16.5 (registry_missing: the module is not " + "in this jar)");
+                                               "1.16.5")).hasMessage("TypedLookUp has no implementation for Minecraft 1.16.5 (registry_missing: the module is not "
+                                                       + "in this jar)");
         assertThatThrownBy(() -> registry.find(TypedLookUp.class,
-                                               "1.19.4")).hasMessageStartingWith("TypedLookUp has no implementation for Minecraft 1.19.4 (registry_broken: " + "java.lang.ClassFormatError");
+                                               "1.19.4")).hasMessageStartingWith("TypedLookUp has no implementation for Minecraft 1.19.4 (registry_broken: "
+                                                       + "java.lang.ClassFormatError");
     }
 
     @Test

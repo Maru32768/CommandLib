@@ -48,7 +48,8 @@ public final class OptionTest extends TestBase {
 
             argument(new StringArgument("str", StringArgument.Type.WORD)).execute((target, ctx) -> {
                 putResult(key,
-                          ctx.getOption(force) + ":" + ctx.getOption(limit) + ":" + ctx.getOption(format) + ":" + target,
+                          ctx.getOption(force) + ":" + ctx.getOption(limit) + ":" + ctx.getOption(format) + ":"
+                                  + target,
                           "true:20:json:alex");
             });
         }});
@@ -68,7 +69,8 @@ public final class OptionTest extends TestBase {
 
             argument(new StringArgument("target", StringArgument.Type.WORD)).execute((target, ctx) -> {
                 putResult(key,
-                          ctx.getOption(force) + ":" + ctx.getOption(limit) + ":" + ctx.getOption(format) + ":" + target,
+                          ctx.getOption(force) + ":" + ctx.getOption(limit) + ":" + ctx.getOption(format) + ":"
+                                  + target,
                           "false:10:text:alex");
             });
         }});
