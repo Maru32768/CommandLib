@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * A platform-independent, immutable chat message: a literal text or a translation key, with a color, decorations, a
- * hover text, a click action, and children.
+ * A platform-independent, immutable chat message: a literal text ({@link TextRichText}) or a translation key
+ * ({@link TranslatableRichText}), with a color, decorations, a hover text, a click action, and children.
  * <p>
  * Send it with {@code ctx.sendMessage(text)} on any platform. Every method that changes something returns a new
  * instance. Children inherit the style of their parent unless they set their own, as in Minecraft.
@@ -18,76 +18,56 @@ import java.util.Objects;
  * Decorations are tri-state: {@code null} (not set, inherited from the parent), {@code true}, or {@code false}
  * (explicitly cancels an inherited decoration). {@code bold()} is shorthand for {@code bold(true)}.
  */
-public final class RichText {
-    private static final int BOLD = 0;
-    private static final int ITALIC = 1;
-    private static final int UNDERLINED = 2;
-    private static final int STRIKETHROUGH = 3;
-    private static final int OBFUSCATED = 4;
-
-    private final @Nullable String text;
-    private final @Nullable String translationKey;
-    private final List<RichText> arguments;
+public abstract class RichText {
+    private final TextStyle style;
     private final List<RichText> children;
-    private final @Nullable Integer color;
-    private final Boolean[] decorations;
-    private final @Nullable RichText hover;
-    private final @Nullable ClickAction click;
 
-    private RichText(@Nullable String text,
-                     @Nullable String translationKey,
-                     List<RichText> arguments,
-                     List<RichText> children,
-                     @Nullable Integer color,
-                     Boolean[] decorations,
-                     @Nullable RichText hover,
-                     @Nullable ClickAction click) {
-        this.text = text;
-        this.translationKey = translationKey;
-        this.arguments = arguments;
+    // Package-private, so the kinds of text are the ones the platform converters know.
+    RichText(TextStyle style, List<RichText> children) {
+        this.style = style;
         this.children = children;
-        this.color = color;
-        this.decorations = decorations;
-        this.hover = hover;
-        this.click = click;
     }
 
     /**
      * A literal text. Legacy {@code §} codes in {@code content} are sent as they are and rendered by the client.
      */
     @NotNull
-    public static RichText text(@NotNull String content) {
-        return new RichText(Objects.requireNonNull(content),
-                            null,
-                            List.of(),
-                            List.of(),
-                            null,
-                            new Boolean[5],
-                            null,
-                            null);
+    public static TextRichText text(@NotNull String content) {
+        return new TextRichText(Objects.requireNonNull(content), TextStyle.EMPTY, List.of());
     }
 
     /**
      * A text the client translates with {@code key}, filling its placeholders with {@code args}.
      */
     @NotNull
-    public static RichText translatable(@NotNull String key, @NotNull RichText... args) {
-        return new RichText(null,
-                            Objects.requireNonNull(key),
-                            List.copyOf(Arrays.asList(args)),
-                            List.of(),
-                            null,
-                            new Boolean[5],
-                            null,
-                            null);
+    public static TranslatableRichText translatable(@NotNull String key, @NotNull RichText... args) {
+        return new TranslatableRichText(Objects.requireNonNull(key),
+                                        List.copyOf(Arrays.asList(args)),
+                                        TextStyle.EMPTY,
+                                        List.of());
     }
+
+    /**
+     * The same text with another style and children.
+     */
+    abstract RichText with(TextStyle style, List<RichText> children);
+
+    /**
+     * The text of this node alone, without its children, for {@link #plainText()}.
+     */
+    abstract String plainContent();
+
+    /**
+     * Appends the {@link #toString()} part that tells what this node shows.
+     */
+    abstract void appendContent(StringBuilder builder);
 
     /**
      * Sets the color as {@code 0xRRGGBB}. The 16 legacy chat colors are sent as named colors.
      */
     @NotNull
     public RichText color(int rgb) {
-        return new RichText(text, translationKey, arguments, children, rgb & 0xFFFFFF, decorations, hover, click);
+        return with(style.color(rgb), children);
     }
 
     @NotNull
@@ -97,7 +77,7 @@ public final class RichText {
 
     @NotNull
     public RichText bold(boolean bold) {
-        return decoration(BOLD, bold);
+        return with(style.decoration(TextStyle.BOLD, bold), children);
     }
 
     @NotNull
@@ -107,7 +87,7 @@ public final class RichText {
 
     @NotNull
     public RichText italic(boolean italic) {
-        return decoration(ITALIC, italic);
+        return with(style.decoration(TextStyle.ITALIC, italic), children);
     }
 
     @NotNull
@@ -117,7 +97,7 @@ public final class RichText {
 
     @NotNull
     public RichText underlined(boolean underlined) {
-        return decoration(UNDERLINED, underlined);
+        return with(style.decoration(TextStyle.UNDERLINED, underlined), children);
     }
 
     @NotNull
@@ -127,7 +107,7 @@ public final class RichText {
 
     @NotNull
     public RichText strikethrough(boolean strikethrough) {
-        return decoration(STRIKETHROUGH, strikethrough);
+        return with(style.decoration(TextStyle.STRIKETHROUGH, strikethrough), children);
     }
 
     @NotNull
@@ -137,13 +117,7 @@ public final class RichText {
 
     @NotNull
     public RichText obfuscated(boolean obfuscated) {
-        return decoration(OBFUSCATED, obfuscated);
-    }
-
-    private RichText decoration(int index, boolean state) {
-        Boolean[] newDecorations = decorations.clone();
-        newDecorations[index] = state;
-        return new RichText(text, translationKey, arguments, children, color, newDecorations, hover, click);
+        return with(style.decoration(TextStyle.OBFUSCATED, obfuscated), children);
     }
 
     /**
@@ -154,7 +128,7 @@ public final class RichText {
     public RichText hover(@Nullable RichText hover) {
         RichText newHover = hover == null || hover.plainText()
                                                   .isEmpty() ? null : hover;
-        return new RichText(text, translationKey, arguments, children, color, decorations, newHover, click);
+        return with(style.hover(newHover), children);
     }
 
     /**
@@ -162,7 +136,7 @@ public final class RichText {
      */
     @NotNull
     public RichText click(@Nullable ClickAction click) {
-        return new RichText(text, translationKey, arguments, children, color, decorations, hover, click);
+        return with(style.click(click), children);
     }
 
     /**
@@ -172,35 +146,7 @@ public final class RichText {
     public RichText append(@NotNull RichText... children) {
         List<RichText> newChildren = new ArrayList<>(this.children);
         newChildren.addAll(Arrays.asList(children));
-        return new RichText(text,
-                            translationKey,
-                            arguments,
-                            List.copyOf(newChildren),
-                            color,
-                            decorations,
-                            hover,
-                            click);
-    }
-
-    /**
-     * The literal text, or {@code null} for a translatable text.
-     */
-    @Nullable
-    public String text() {
-        return text;
-    }
-
-    /**
-     * The translation key, or {@code null} for a literal text.
-     */
-    @Nullable
-    public String translationKey() {
-        return translationKey;
-    }
-
-    @NotNull
-    public List<RichText> arguments() {
-        return arguments;
+        return with(style, List.copyOf(newChildren));
     }
 
     @NotNull
@@ -213,42 +159,42 @@ public final class RichText {
      */
     @Nullable
     public Integer color() {
-        return color;
+        return style.color;
     }
 
     @Nullable
     public Boolean isBold() {
-        return decorations[BOLD];
+        return style.decoration(TextStyle.BOLD);
     }
 
     @Nullable
     public Boolean isItalic() {
-        return decorations[ITALIC];
+        return style.decoration(TextStyle.ITALIC);
     }
 
     @Nullable
     public Boolean isUnderlined() {
-        return decorations[UNDERLINED];
+        return style.decoration(TextStyle.UNDERLINED);
     }
 
     @Nullable
     public Boolean isStrikethrough() {
-        return decorations[STRIKETHROUGH];
+        return style.decoration(TextStyle.STRIKETHROUGH);
     }
 
     @Nullable
     public Boolean isObfuscated() {
-        return decorations[OBFUSCATED];
+        return style.decoration(TextStyle.OBFUSCATED);
     }
 
     @Nullable
     public RichText hover() {
-        return hover;
+        return style.hover;
     }
 
     @Nullable
     public ClickAction click() {
-        return click;
+        return style.click;
     }
 
     /**
@@ -256,11 +202,14 @@ public final class RichText {
      */
     @NotNull
     public String plainText() {
-        StringBuilder builder = new StringBuilder(text != null ? text : translationKey);
+        StringBuilder builder = new StringBuilder(plainContent());
         children.forEach(child -> builder.append(child.plainText()));
         return builder.toString();
     }
 
+    /**
+     * Compares the style and the children; each kind of text also compares what it shows.
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -270,60 +219,19 @@ public final class RichText {
             return false;
         }
         RichText that = (RichText) o;
-        return Objects.equals(text, that.text) && Objects.equals(translationKey, that.translationKey)
-                && arguments.equals(that.arguments) && children.equals(that.children)
-                && Objects.equals(color, that.color) && Arrays.equals(decorations, that.decorations)
-                && Objects.equals(hover, that.hover) && Objects.equals(click, that.click);
+        return style.equals(that.style) && children.equals(that.children);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(text,
-                            translationKey,
-                            arguments,
-                            children,
-                            color,
-                            Arrays.hashCode(decorations),
-                            hover,
-                            click);
+        return Objects.hash(style, children);
     }
 
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder("RichText{");
-        if (text != null) {
-            builder.append("text=\"")
-                   .append(text)
-                   .append('"');
-        } else {
-            builder.append("translatable=\"")
-                   .append(translationKey)
-                   .append('"');
-            if (!arguments.isEmpty()) {
-                builder.append(", arguments=")
-                       .append(arguments);
-            }
-        }
-        if (color != null) {
-            builder.append(String.format(", color=#%06x", color));
-        }
-        String[] names = {"bold", "italic", "underlined", "strikethrough", "obfuscated"};
-        for (int i = 0; i < names.length; i++) {
-            if (decorations[i] != null) {
-                builder.append(", ")
-                       .append(names[i])
-                       .append('=')
-                       .append(decorations[i]);
-            }
-        }
-        if (hover != null) {
-            builder.append(", hover=")
-                   .append(hover);
-        }
-        if (click != null) {
-            builder.append(", click=")
-                   .append(click);
-        }
+        appendContent(builder);
+        style.appendTo(builder);
         if (!children.isEmpty()) {
             builder.append(", children=")
                    .append(children);

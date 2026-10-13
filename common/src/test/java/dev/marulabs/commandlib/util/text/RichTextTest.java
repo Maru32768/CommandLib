@@ -67,6 +67,7 @@ class RichTextTest {
                                            .italic()
                                            .append(RichText.text("child")));
         assertThat(RichText.text("key")).isNotEqualTo(RichText.translatable("key"));
+        assertThat(RichText.translatable("key")).isNotEqualTo(RichText.text("key"));
         assertThat(a.toString()).isEqualTo("RichText{translatable=\"key\", arguments=[RichText{text=\"arg\"}], color=#ff5555, italic=true, "
                 + "children=[RichText{text=\"child\"}]}");
     }
@@ -79,11 +80,10 @@ class RichTextTest {
                                                 .append(RichText.text("c")));
 
         assertThat(text.plainText()).isEqualTo("akeybc");
-        assertThat(text.text()).isEqualTo("a");
-        assertThat(text.translationKey()).isNull();
+        assertThat(text).isInstanceOfSatisfying(TextRichText.class, x -> assertThat(x.content()).isEqualTo("a"));
         assertThat(text.children()
-                       .get(0)
-                       .arguments()).containsExactly(RichText.text("ignored"));
+                       .get(0)).isInstanceOfSatisfying(TranslatableRichText.class,
+                                                       x -> assertThat(x.arguments()).containsExactly(RichText.text("ignored")));
     }
 
     @Test

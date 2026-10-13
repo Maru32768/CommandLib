@@ -83,10 +83,10 @@ MiniMessage.
 ### Value type `RichText` (common, `dev.marulabs.commandlib.util.text`)
 
 ```java
-public final class RichText {
+public abstract class RichText {   // package-private constructor: the kinds are the two below
     // Creation
-    public static RichText text(@NotNull String content);
-    public static RichText translatable(@NotNull String key, @NotNull RichText... args);
+    public static TextRichText text(@NotNull String content);
+    public static TranslatableRichText translatable(@NotNull String key, @NotNull RichText... args);
 
     // Every change returns a new instance (immutable)
     public RichText color(int rgb);                 // 0xRRGGBB; the 16 legacy colors are sent as named colors
@@ -101,9 +101,6 @@ public final class RichText {
     public RichText append(@NotNull RichText... children);
 
     // Reading (platform converters and tests)
-    public @Nullable String text();             // null for a translatable
-    public @Nullable String translationKey();   // null for a literal
-    public @NotNull List<RichText> arguments();
     public @NotNull List<RichText> children();
     public @Nullable Integer color();
     public @Nullable Boolean isBold();          // null = not set (inherited); same for the other four
@@ -120,6 +117,15 @@ public final class RichText {
     // equals / hashCode / toString are value based
 }
 
+public final class TextRichText extends RichText {
+    public @NotNull String content();
+}
+
+public final class TranslatableRichText extends RichText {
+    public @NotNull String key();
+    public @NotNull List<RichText> arguments();
+}
+
 public final class ClickAction {
     public static ClickAction runCommand(@NotNull String command);
     public static ClickAction suggestCommand(@NotNull String command);
@@ -132,6 +138,11 @@ public final class ClickAction {
     public enum Type { RUN_COMMAND, SUGGEST_COMMAND, COPY_TO_CLIPBOARD, OPEN_URL }
 }
 ```
+
+Each kind of text is its own class, as Adventure's `TextComponent` and `TranslatableComponent`, so a literal has no
+translation key or arguments to leave null and a converter picks the native component by type. The style methods return
+`RichText`, so they need no self type, and the style lives in one package-private value (`TextStyle`) that every kind
+shares. The constructor is package-private because each converter knows exactly these kinds.
 
 Decorations use shortcut methods instead of a `Decoration` enum. `bold()` sets `true`, `bold(false)` keeps an explicit
 `false` apart from "not set", so tri-state is representable. The getters are `isBold()` etc. returning `@Nullable Boolean`

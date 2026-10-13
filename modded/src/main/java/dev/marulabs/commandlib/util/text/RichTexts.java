@@ -26,20 +26,22 @@ public final class RichTexts {
     @NotNull
     public static MutableComponent toVanilla(@NotNull RichText text) {
         MutableComponent component;
-        if (text.text() != null) {
+        if (text instanceof TextRichText) {
+            String content = ((TextRichText) text).content();
             //? if >=1.19 {
-            component = Component.literal(text.text());
+            component = Component.literal(content);
             //?} else
-            /*component = new TextComponent(text.text());*/
+            /*component = new TextComponent(content);*/
         } else {
-            Object[] args = text.arguments()
-                                .stream()
-                                .map(RichTexts::toVanilla)
-                                .toArray();
+            TranslatableRichText translatable = (TranslatableRichText) text;
+            Object[] args = translatable.arguments()
+                                        .stream()
+                                        .map(RichTexts::toVanilla)
+                                        .toArray();
             //? if >=1.19 {
-            component = Component.translatable(text.translationKey(), args);
+            component = Component.translatable(translatable.key(), args);
             //?} else
-            /*component = new TranslatableComponent(text.translationKey(), args);*/
+            /*component = new TranslatableComponent(translatable.key(), args);*/
         }
 
         Style style = Style.EMPTY;

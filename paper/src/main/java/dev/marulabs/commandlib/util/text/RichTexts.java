@@ -23,14 +23,15 @@ public final class RichTexts {
     @NotNull
     public static Component toAdventure(@NotNull RichText text) {
         Component component;
-        if (text.text() != null) {
-            component = Component.text(text.text());
+        if (text instanceof TextRichText literal) {
+            component = Component.text(literal.content());
         } else {
-            component = Component.translatable(text.translationKey(),
-                                               text.arguments()
-                                                   .stream()
-                                                   .map(RichTexts::toAdventure)
-                                                   .collect(Collectors.toList()));
+            TranslatableRichText translatable = (TranslatableRichText) text;
+            component = Component.translatable(translatable.key(),
+                                               translatable.arguments()
+                                                           .stream()
+                                                           .map(RichTexts::toAdventure)
+                                                           .collect(Collectors.toList()));
         }
         if (text.color() != null) {
             NamedTextColor named = NamedTextColor.namedColor(text.color());

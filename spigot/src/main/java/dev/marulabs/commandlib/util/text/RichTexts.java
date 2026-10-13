@@ -26,14 +26,15 @@ public final class RichTexts {
     @NotNull
     public static BaseComponent toBungee(@NotNull RichText text) {
         BaseComponent component;
-        if (text.text() != null) {
-            component = new TextComponent(text.text());
+        if (text instanceof TextRichText) {
+            component = new TextComponent(((TextRichText) text).content());
         } else {
-            component = new TranslatableComponent(text.translationKey(),
-                                                  text.arguments()
-                                                      .stream()
-                                                      .map(RichTexts::toBungee)
-                                                      .toArray());
+            TranslatableRichText translatable = (TranslatableRichText) text;
+            component = new TranslatableComponent(translatable.key(),
+                                                  translatable.arguments()
+                                                              .stream()
+                                                              .map(RichTexts::toBungee)
+                                                              .toArray());
         }
         if (text.color() != null) {
             component.setColor(color(text.color()));
