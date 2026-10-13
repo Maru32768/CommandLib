@@ -59,6 +59,13 @@ val requiresMohistBootstrap = if (extra.has("commandlib.integration.requiresMohi
 }
     .toBooleanStrictOrNull()
     ?: false
+// Arguments that make Mohist install its libraries and exit. When set, the bootstrap installs with them first and then
+// starts the server without the library check, as the Docker run does.
+val mohistInstallArgs = if (extra.has("commandlib.integration.mohistInstallArgs")) {
+    extra["commandlib.integration.mohistInstallArgs"].toString().split(" ")
+} else {
+    null
+}
 // Directory under the target project that holds the server directory. Bukkit-family targets use their nested
 // test-plugin Gradle project; other platforms only need a work directory.
 val workDirectory = if (extra.has("commandlib.integration.workDirectory")) {
@@ -506,6 +513,33 @@ val mohistBootstrapTask = tasks.register("bootstrapMohist") {
 
         serverDir.mkdirs()
         serverDir.resolve("eula.txt").writeText("eula=true\n")
+
+        if (mohistInstallArgs != null) {
+            val install = ProcessBuilder(javaExecutable.get().absolutePath, "-jar", serverJar.name, *mohistInstallArgs.toTypedArray())
+                .directory(serverDir)
+                .redirectErrorStream(true)
+                .start()
+            val installOutput = StringBuilder()
+            val installReader = Thread {
+                install.inputStream.bufferedReader().useLines { lines ->
+                    lines.forEach { line ->
+                        installOutput.appendLine(line)
+                        logger.lifecycle("[$targetName] $line")
+                    }
+                }
+            }
+            installReader.isDaemon = true
+            installReader.start()
+            if (!install.waitFor(10, TimeUnit.MINUTES)) {
+                install.destroyForcibly()
+                throw GradleException("Timed out while installing $targetName. Last output:\n$installOutput")
+            }
+            installReader.join(TimeUnit.SECONDS.toMillis(10))
+            if (install.exitValue() != 0) {
+                throw GradleException("Installing $targetName failed. Output:\n$installOutput")
+            }
+            writeMohistConfig(serverDir, false)
+        }
 
         val process = ProcessBuilder(
             javaExecutable.get().absolutePath,

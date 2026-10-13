@@ -177,6 +177,11 @@ The bootstrap startup leaves Mohist library checks enabled; the Docker test star
 bootstrap
 so repeated test runs avoid unnecessary Mohist library validation.
 
+Mohist 1.16.5 cannot start with the library check: it puts the Guava 20 it checks before the Guava 21 of the
+Minecraft server, which fails in `GameRules` with `NoSuchMethodError` (`ImmutableMap.toImmutableMap`). Its target sets
+`commandlib.integration.mohistInstallArgs` to `-noserver`, so the bootstrap first runs Mohist with the check and that
+argument, which installs the libraries and exits, and then starts the server without the check, as the Docker run does.
+
 Example:
 
 ```powershell
