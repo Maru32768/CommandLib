@@ -622,7 +622,7 @@ public final class CommandLib implements Listener {
             NMSDedicatedServer server = NMSCraftServer.create(plugin.getServer())
                                                       .getServer();
             if (server.isRunning()) {
-                commandsChangedSinceCompile = true;
+                FunctionCompilationMarker.changed();
                 compileFunctionsIfStale(plugin, server);
             }
         }

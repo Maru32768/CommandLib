@@ -307,6 +307,7 @@ public final class CommandLib implements Listener {
         // Compiled functions hold the nodes they use, so they would run the disabled plugin's commands until the next
         // data reload. The plugin's tasks are cancelled, so they are compiled now.
         if (removed && !Bukkit.isStopping()) {
+            FunctionCompilationMarker.changed();
             ServerFunctions.recompileFunctions(plugin.getLogger());
         }
         // Shaded into this plugin, this copy compiles functions only for it.
