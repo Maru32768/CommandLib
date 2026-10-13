@@ -57,7 +57,13 @@ final class ServerFunctions {
         resourcesField.setAccessible(true);
         Object resources = resourcesField.get(server);
         Object resourceManager = invoke(resources, "resourceManager");
-        Object library = invoke(invoke(resources, "managers"), "getFunctionLibrary");
+        Object managers = invoke(resources, "managers");
+        // Shared with the other plugins' copies of CommandLib, so one of them compiles for a change. The spigot module
+        // keys it by the same object.
+        if (FunctionCompilationMarker.compiled(managers)) {
+            return;
+        }
+        Object library = invoke(managers, "getFunctionLibrary");
 
         Method reload = null;
         for (Method method : library.getClass()
@@ -92,6 +98,7 @@ final class ServerFunctions {
                        .getMethod("replaceLibrary", library.getClass())
                        .invoke(functionManager, library);
         postReload.setBoolean(functionManager, loadPending);
+        FunctionCompilationMarker.markCompiled(managers);
     }
 
     /**

@@ -815,6 +815,8 @@ public final class CommandLib implements Listener {
      * functions in a tick, so the #load functions of a data reload run once, with the commands.
      */
     private void recompileFunctionsLater() {
+        // Counted even when a compilation is scheduled, since another copy of CommandLib may compile before it.
+        FunctionCompilationMarker.changed();
         if (registrationState.functionRecompileScheduled || !plugin.isEnabled()) {
             return;
         }

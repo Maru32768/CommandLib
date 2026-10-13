@@ -55,8 +55,6 @@ public final class CommandLib implements Listener {
     // Shared by the instances of this copy of CommandLib, which a plugin shades.
     private static @Nullable BukkitTask functionCompiler;
     private static @Nullable FunctionLoadErrorFilter functionLoadErrorFilter;
-    private static @Nullable Object functionsCompiledFor;
-    private static boolean commandsChangedSinceCompile;
 
     public static CommandLib register(@NotNull Plugin plugin, @NotNull Command command, @NotNull Command... commands) {
         List<Command> list = new ArrayList<>();
@@ -556,7 +554,7 @@ public final class CommandLib implements Listener {
      * with the commands.
      */
     private void compileFunctionsWithCommands() {
-        commandsChangedSinceCompile = true;
+        FunctionCompilationMarker.changed();
         if (functionCompiler == null || functionCompiler.isCancelled()) {
             NMSDedicatedServer server = NMSCraftServer.create(plugin.getServer())
                                                       .getServer();
@@ -587,14 +585,14 @@ public final class CommandLib implements Listener {
 
     private static void compileFunctionsIfStale(Plugin plugin, NMSDedicatedServer server) {
         try {
+            // Shared with the other plugins' copies of CommandLib, so one of them compiles for a change.
             Object resources = server.getDataPackResourcesHandle();
-            if (resources == functionsCompiledFor && !commandsChangedSinceCompile) {
+            if (FunctionCompilationMarker.compiled(resources)) {
                 return;
             }
-            functionsCompiledFor = resources;
-            commandsChangedSinceCompile = false;
             server.recompileFunctions(usesPaperCommandDispatcher() ? server.getCommandDispatcher()
                     : server.getVanillaCommandDispatcher());
+            FunctionCompilationMarker.markCompiled(resources);
         } catch (RuntimeException | LinkageError ex) {
             Objects.requireNonNull(functionCompiler)
                    .cancel();
