@@ -32,8 +32,6 @@ import org.bukkit.plugin.RegisteredListener;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.VarHandle;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -62,21 +60,7 @@ import java.util.logging.Level;
  */
 @SuppressWarnings("UnstableApiUsage")
 public final class CommandLib implements Listener {
-    private static final VarHandle CHILDREN;
-    private static final VarHandle LITERALS;
-    private static final VarHandle ARGUMENTS;
     private static final @Nullable PaperInternals PAPER = PaperInternals.find();
-
-    static {
-        try {
-            MethodHandles.Lookup lookup = MethodHandles.privateLookupIn(CommandNode.class, MethodHandles.lookup());
-            CHILDREN = lookup.findVarHandle(CommandNode.class, "children", Map.class);
-            LITERALS = lookup.findVarHandle(CommandNode.class, "literals", Map.class);
-            ARGUMENTS = lookup.findVarHandle(CommandNode.class, "arguments", Map.class);
-        } catch (ReflectiveOperationException e) {
-            throw new ExceptionInInitializerError(e);
-        }
-    }
 
     // Cached from the first COMMANDS lifecycle event so that runtime calls to register() can fall back
     // to direct dispatcher manipulation instead of failing with IllegalStateException.
@@ -528,7 +512,6 @@ public final class CommandLib implements Listener {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private static void removeFromNode(RootCommandNode<CommandSourceStack> root, String name) {
         // Paper's dispatcher root mirrors the vanilla dispatcher and overrides its own removeCommand(String) to
         // remove the node there as well. Editing the root's maps directly would leave the command executable.
@@ -542,9 +525,7 @@ public final class CommandLib implements Listener {
         } catch (ReflectiveOperationException e) {
             throw new IllegalStateException("Failed to remove command " + name, e);
         }
-        ((Map<String, ?>) CHILDREN.get(root)).remove(name);
-        ((Map<String, ?>) LITERALS.get(root)).remove(name);
-        ((Map<String, ?>) ARGUMENTS.get(root)).remove(name);
+        CommandNodeChildren.replace(root, List.of(name), List.of());
     }
 
     private void doRegisterPermissions(Plugin plugin, String permissionPrefix, Collection<? extends Command> commands) {
@@ -831,14 +812,6 @@ public final class CommandLib implements Listener {
     private static void sendCommandTrees() {
         Bukkit.getOnlinePlayers()
               .forEach(Player::updateCommands);
-    }
-
-    /**
-     * Brigadier merges a node into an existing child of the same name, which keeps that child's requirement and
-     * children, so the existing command is replaced instead.
-     */
-    static void replaceChild(RootCommandNode<CommandSourceStack> root, LiteralCommandNode<CommandSourceStack> node) {
-        replaceChildren(root, List.of(node.getLiteral()), List.of(node));
     }
 
     /**

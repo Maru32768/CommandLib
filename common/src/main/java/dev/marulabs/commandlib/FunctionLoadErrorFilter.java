@@ -70,7 +70,7 @@ final class FunctionLoadErrorFilter extends AbstractFilter {
         filter.filter(null, null, null, (String) null, (Object[]) null);
         filter.filter(null, null, null, (Message) null, null);
         filter.decide(MESSAGE);
-        boolean unused = recompiling.getAsBoolean();
+        // decide checks the stack only while CommandLib is going to compile the functions again.
         fromRecompilation();
         // A composite filter stops at the first filter that accepts or denies, and Forge's configuration, which Mohist
         // uses, has filters that accept errors, so this one goes first.

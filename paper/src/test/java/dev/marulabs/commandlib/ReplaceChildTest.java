@@ -7,6 +7,8 @@ import com.mojang.brigadier.tree.RootCommandNode;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 class ReplaceChildTest {
@@ -22,7 +24,8 @@ class ReplaceChildTest {
                                                                             .executes(executor)
                                                                             .build();
 
-        CommandLib.replaceChild(root, node);
+        // Brigadier's addChild would merge the node into the existing child, keeping its requirement and children.
+        CommandLib.replaceChildren(root, List.of("give"), List.of(node));
 
         assertThat(root.getChild("give")).isSameAs(node);
         assertThat(node.getChild("vanillaChild")).isNull();
