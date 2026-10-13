@@ -115,26 +115,32 @@ class CommandLibLifecycleTest {
     }
 
     @Test
-    void plugin_enabled_after_startup_reloads_data_once_to_fire_the_missed_commands_event() {
-        when(plugin.isEnabled()).thenReturn(false);
-        CommandLib.register(plugin, "test", helloCommand());
+    void plugin_enabled_after_startup_adds_its_commands_to_the_live_dispatcher_without_reloading_data() {
         when(plugin.isEnabled()).thenReturn(true);
-        CommandLib.register(plugin, "test", namedCommand("other"));
-        callEvent(new PluginEnableEvent(plugin));
-        List<CommandDispatcher<CommandSourceStack>> reloaded = new ArrayList<>();
-        bukkit.when(Bukkit::reloadData)
-              .thenAnswer(invocation -> reloaded.add(fireCommandsEvent()));
-
+        CommandLib.register(plugin, "test", helloCommand());
+        CommandDispatcher<CommandSourceStack> dispatcher = fireCommandsEvent();
         runScheduledTasks();
 
-        bukkit.verify(Bukkit::reloadData);
-        assertThat(reloaded).singleElement()
-                            .satisfies(dispatcher -> {
-                                assertThat(dispatcher.getRoot()
-                                                     .getChild("hello")).isNotNull();
-                                assertThat(dispatcher.getRoot()
-                                                     .getChild("other")).isNotNull();
-                            });
+        // Enabled by a plugin manager such as PlugMan after the COMMANDS event fired: Paper takes its handler, which
+        // runs only on the next reload.
+        Plugin enabledLater = pluginWithUnfiredHandler();
+        try {
+            CommandLib.register(enabledLater, "later", namedCommand("later"));
+            CommandLib.register(enabledLater, "later", namedCommand("other"));
+            when(enabledLater.isEnabled()).thenReturn(true);
+            callEvent(new PluginEnableEvent(enabledLater));
+            runScheduledTasks();
+
+            bukkit.verify(Bukkit::reloadData, never());
+            assertThat(dispatcher.getRoot()
+                                 .getChild("later")).isNotNull();
+            assertThat(dispatcher.getRoot()
+                                 .getChild("enabledlater:later")).isNotNull();
+            assertThat(dispatcher.getRoot()
+                                 .getChild("other")).isNotNull();
+        } finally {
+            HandlerList.unregisterAll(enabledLater);
+        }
     }
 
     @Test
@@ -467,6 +473,18 @@ class CommandLibLifecycleTest {
         when(latePlugin.getLifecycleManager()).thenReturn(lifecycleManager);
         when(latePlugin.isEnabled()).thenReturn(true);
         return latePlugin;
+    }
+
+    // Reads back the server that setUp stubbed on the plugin mock.
+    @SuppressWarnings("DirectInvocationOnMock")
+    private Plugin pluginWithUnfiredHandler() {
+        Server server = plugin.getServer();
+        Plugin other = mock(Plugin.class);
+        when(other.getName()).thenReturn("EnabledLater");
+        when(other.getLogger()).thenReturn(Logger.getLogger("EnabledLater"));
+        when(other.getServer()).thenReturn(server);
+        when(other.getLifecycleManager()).thenReturn(mock(LifecycleEventManager.class));
+        return other;
     }
 
     private Player onlinePlayer() {

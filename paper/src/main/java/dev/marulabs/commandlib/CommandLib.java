@@ -433,18 +433,51 @@ public final class CommandLib implements Listener {
         }
         missedCommandsEventCheckScheduled = true;
         Bukkit.getGlobalRegionScheduler()
-              .execute(plugin, this::reloadIfCommandsEventMissed);
+              .execute(plugin, this::addIfCommandsEventMissed);
     }
 
-    private void reloadIfCommandsEventMissed() {
+    /**
+     * Adds the plugin's registrations to the live dispatcher as a registration after initialization does, which also
+     * adds the help topics and compiles the functions again. The plugin's handler adds them on the next reload.
+     */
+    private void addIfCommandsEventMissed() {
         synchronized (registrationState) {
             if (unregistered || registrationState.dispatcher != null) {
                 return;
             }
+            CommandDispatcher<CommandSourceStack> dispatcher = liveDispatcher();
+            if (dispatcher != null) {
+                registrationState.dispatcher = dispatcher;
+                for (PendingRegistration registration : registrationState.registrations) {
+                    try {
+                        registration.instance.registerDirectly(dispatcher, registration);
+                    } catch (RuntimeException e) {
+                        registration.instance.logRegistrationFailure(e);
+                    }
+                }
+                return;
+            }
         }
-        // Paper offers no public way to reach the live dispatcher outside the event, so take the /minecraft:reload
-        // path: it fires the COMMANDS handlers, rebuilds the help topics, and sends the command tree to players.
+        // Without Paper's dispatcher, take the /minecraft:reload path: it fires the COMMANDS handlers, rebuilds the help
+        // topics, and sends the command tree to players.
         Bukkit.reloadData();
+    }
+
+    /**
+     * The dispatcher that Paper hands to the COMMANDS handlers, which it replaces on every data reload. Paper has no
+     * API for it outside the event, so it is read from its registrar, or else the one this copy of CommandLib saw last.
+     */
+    @Nullable
+    @SuppressWarnings("unchecked")
+    private static CommandDispatcher<CommandSourceStack> liveDispatcher() {
+        try {
+            Class<?> registrar = Class.forName("io.papermc.paper.command.brigadier.PaperCommands");
+            return (CommandDispatcher<CommandSourceStack>) registrar.getMethod("getDispatcherInternal")
+                                                                    .invoke(registrar.getField("INSTANCE")
+                                                                                     .get(null));
+        } catch (ReflectiveOperationException | RuntimeException e) {
+            return serverDispatcher;
+        }
     }
 
     /**
