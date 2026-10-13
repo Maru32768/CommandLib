@@ -47,6 +47,7 @@ tasks.register("minecraftIntegrationTest") {
         ":integration-test:targets:paper-1.20.5:minecraftIntegrationTest",
         ":integration-test:targets:paper-1.20.6:minecraftIntegrationTest",
         ":integration-test:targets:paper-1.21.0:minecraftIntegrationTest",
+        ":integration-test:targets:paper-1.21.4:minecraftIntegrationTest",
         ":integration-test:targets:forge-1.16.5:minecraftIntegrationTest",
         ":integration-test:targets:forge-1.20.1:minecraftIntegrationTest",
         ":integration-test:targets:neoforge-1.21.1:minecraftIntegrationTest",

@@ -32,7 +32,7 @@ CommandLib の長期目標は、Minecraft `1.16.5` から各リリース時点�
 | Platform | Status | Current coverage | Notes |
 |---|---:|---|---|
 | Spigot | `Best effort` | `spigot` module。compile target は Spigot API `1.16.5`。typed NMS module により `1.16.5`〜`1.21.1` を扱う。 | Bukkit API 互換を基準にし、Paper-specific API に依存しない。 |
-| Paper | `Best effort` | `paper` module と `paper-testing`。Paper 公式 command API と Adventure component を使う。 | Paper `1.16.5`〜`1.21.1` の integration target がある。 |
+| Paper | `Best effort` | `paper` module と `paper-testing`。Paper 公式 command API と Adventure component を使う。 | Paper `1.16.5`〜`1.21.1` と `1.21.4` の integration target がある（`1.21.0` と `1.21.4` は paper module）。 |
 | Folia | `Planned` | なし。 | scheduler、threading、command registration の安全性確認が必要。 |
 | Mohist | `Best effort` | integration fixture: `1.16.5`, `1.20.1`。README に tested version として記載あり。 | Bukkit compatibility 上で動かす方針。Forge side との干渉確認が必要。 |
 | Velocity | `Planned` | なし。 | proxy command model と Minecraft server command model の差分設計が必要。 |
@@ -57,6 +57,7 @@ CommandLib は `1.16.5` から最新安定版までのサポートを目標に�
 | `1.20.5` | Paper / Spigot fixture、typed NMS module。 | Tested。 |
 | `1.20.6` | Paper / Spigot fixture、typed NMS module。Paper 1.20.6+ registration path がある。 | Tested。Paper official API path の候補。 |
 | `1.21` / `1.21.1` | Paper `1.21.0` fixture（paper module）、Paper `1.21.1` fixture（spigot module）、Spigot `1.21` / `1.21.1` fixture、typed NMS module。 | Tested。 |
+| `1.21.4` | Paper `1.21.4` fixture（paper module）。1.21.2 で変わった `ServerFunctionLibrary#reload` の引数など、paper module が reflection で読む内部を確認する。 | paper module で Tested。 |
 | spigot module の `1.21.2+` | 未対応。`Attribute` / `Biome` / `Sound` が registry interface になり、spigot module の引数が動かない。typed NMS module もないため NMS を使う引数は `NMSClassNotFoundException` になる。Paper では paper module を使う。 | roadmap 参照。 |
 | spigot module の `1.16.3` 以前 | 未対応。typed NMS module がない。 | 対応予定なし。 |
 | latest stable | 未固定。 | 各 release 時点の最新安定版を追従対象にする。 |

@@ -97,17 +97,23 @@ public final class ArgumentTest extends TestBase {
     public List<String> attributeArgument() {
         String name = getMethodName();
         String key = getKey();
+        // 1.21.2 dropped the "generic." prefix of attribute ids.
+        String attribute = isLessThan(BukkitUtil.getMinecraftVersion(), "1.21.2") ? "generic.max_health" : "max_health";
 
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name) {{
             argument(new AttributeArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
             })).execute((a, ctx) -> {
-                putResult(key, a.toString(), "GENERIC_MAX_HEALTH");
+                // Keyed, since Attribute is an enum before 1.21.3 and a registry interface from then.
+                putResult(key,
+                          ((Keyed) a).getKey()
+                                     .getKey(),
+                          attribute);
             });
         }});
 
-        return List.of(buildCommand(command, name + " " + registryInput("generic_max_health", "generic.max_health")));
+        return List.of(buildCommand(command, name + " " + attribute));
     }
 
     public List<String> blockDataArgument() {
@@ -685,7 +691,11 @@ public final class ArgumentTest extends TestBase {
             argument(new SoundArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
             })).execute((a, ctx) -> {
-                putResult(key, a.toString(), "BLOCK_ANVIL_LAND");
+                // Keyed, since Sound is an enum before 1.21.3 and a registry interface from then.
+                putResult(key,
+                          ((Keyed) a).getKey()
+                                     .getKey(),
+                          "block.anvil.land");
             });
         }});
 

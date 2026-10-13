@@ -126,13 +126,15 @@ class IntegrationTest {
                 assertThat(container.getLogs()).as("server log")
                                                .doesNotContain("ConcurrentModificationException");
                 // On /minecraft:reload the server compiles the fixture's function before CommandLib's commands are
-                // in its dispatcher, and CommandLib compiles it again. Only errors from then count: a server that
-                // starts with the data pack, such as a Mohist image made from a bootstrap run, compiles it before
-                // plugins load.
+                // in its dispatcher, and CommandLib compiles it again, so only the function that is really broken is
+                // reported, by CommandLib's compilation. Only errors from then count: a server that starts with the
+                // data pack, such as a Mohist image made from a bootstrap run, compiles it before plugins load.
                 String logs = container.getLogs();
                 String reloadMarker = "Reloading data packs to verify registered commands survive.";
-                assertThat(logs.substring(Math.max(0, logs.indexOf(reloadMarker)))).as("server log after the reload")
-                                                                                   .doesNotContain("Failed to load function commandlibtest:");
+                String afterReload = logs.substring(Math.max(0, logs.indexOf(reloadMarker)));
+                assertThat(afterReload).as("server log after the reload")
+                                       .doesNotContain("Failed to load function commandlibtest:probe")
+                                       .contains("Failed to load function commandlibtest:broken");
 
                 // Bot-side checks need the messages a player receives, which the console-driven report cannot see.
                 // Help message prefix: the usage must start with the typed command, not a token like an argument name.
@@ -419,9 +421,25 @@ class IntegrationTest {
         Object protocol = protocolClass.getConstructor(String.class)
                                        .newInstance(TEST_PLAYER_NAME);
 
-        Class<?> sessionClass = Class.forName("org.geysermc.mcprotocollib.network.tcp.TcpClientSession");
-        Constructor<?> constructor = findSessionConstructor(sessionClass, protocolClass);
-        Object session = constructor.newInstance(container.getHost(), container.getMappedPort(25565), protocol);
+        Object session;
+        try {
+            Class<?> tcpSessionClass = Class.forName("org.geysermc.mcprotocollib.network.tcp.TcpClientSession");
+            session = findSessionConstructor(tcpSessionClass, protocolClass).newInstance(container.getHost(),
+                                                                                         container.getMappedPort(25565),
+                                                                                         protocol);
+        } catch (ClassNotFoundException e) {
+            // Later 1.21.4 snapshots and newer releases make sessions through ClientNetworkSessionFactory.
+            Class<?> factoryClass = Class.forName("org.geysermc.mcprotocollib.network.factory.ClientNetworkSessionFactory");
+            Object factory = factoryClass.getMethod("factory")
+                                         .invoke(null);
+            factoryClass.getMethod("setAddress", String.class, int.class)
+                        .invoke(factory, container.getHost(), container.getMappedPort(25565));
+            factoryClass.getMethod("setProtocol", protocolClass)
+                        .invoke(factory, protocol);
+            session = factoryClass.getMethod("create")
+                                  .invoke(factory);
+        }
+        Class<?> sessionClass = session.getClass();
         BotSession botSession = createBotSession(session, sessionClass);
         sessionClass.getMethod("connect", boolean.class)
                     .invoke(session, false);

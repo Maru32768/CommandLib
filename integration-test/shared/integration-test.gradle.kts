@@ -319,7 +319,7 @@ tasks.register("downloadPluginJars") {
 
 fun resolvePlugManXDownloadUrl(minecraftServerVersion: String): String =
     when (minecraftServerVersion) {
-        "1.20.4", "1.20.5", "1.20.6", "1.21" ->
+        "1.20.4", "1.20.5", "1.20.6", "1.21", "1.21.4" ->
             "https://cdn.modrinth.com/data/yro4niHu/versions/bYRNAPF0/PlugManX-3.0.2.jar"
 
         else ->

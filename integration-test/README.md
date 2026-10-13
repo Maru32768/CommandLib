@@ -103,7 +103,8 @@ Bukkit-family targets: `paper-1.16.5`, `paper-1.17.1`, `paper-1.18`, `paper-1.18
 `paper-1.19.1`, `paper-1.19.2`, `paper-1.19.3`, `paper-1.19.4`, `paper-1.20`, `paper-1.20.1`, `paper-1.20.2`,
 `paper-1.20.4`, `paper-1.20.5`, `paper-1.20.6`, `paper-1.21.1`, `mohist-1.16.5`, `mohist-1.20.1`, `spigot-1.20.3`,
 `spigot-1.20.4`, `spigot-1.20.5`, `spigot-1.20.6`, `spigot-1.21` and `spigot-1.21.1` run the `spigot` module, and
-`paper-1.21.0` runs the `paper` module.
+`paper-1.21.0` and `paper-1.21.4` run the `paper` module. `paper-1.21.4` covers the server internals that changed in
+1.21.2, such as the parameters of `ServerFunctionLibrary#reload`, which the paper module reads by reflection.
 
 Minecraft 1.17 has no target: no MCProtocolLib release speaks its protocol (755), and a 1.17 server rejects the 1.17.1
 bot (756). The `nms:spigot-1.17` module is only checked by its compilation (see `docs/agents/nms-build.md`).

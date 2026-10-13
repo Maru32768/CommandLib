@@ -17,10 +17,12 @@ import java.util.List;
 /**
  * Checks that a data pack function can run a CommandLib command after /minecraft:reload, which compiles functions
  * against fresh vanilla commands. The data pack is written into the world while the plugin enables; the reload
- * discovers and enables it.
+ * discovers and enables it. It also has a function with an unknown subcommand, {@value #BROKEN_FUNCTION}, whose error
+ * CommandLib's own compilation must still log, which the integration test checks in the server log.
  */
 public final class DataPackFunctionTest extends TestBase {
     public static final String FUNCTION = "commandlibtest:probe";
+    public static final String BROKEN_FUNCTION = "commandlibtest:broken";
     private static final String PROBE = "functionProbe";
 
     public DataPackFunctionTest(Command command) {
@@ -57,6 +59,9 @@ public final class DataPackFunctionTest extends TestBase {
             // The directory is "function" from 1.21 and "functions" before.
             write(pack.resolve("data/commandlibtest/functions/probe.mcfunction"), function);
             write(pack.resolve("data/commandlibtest/function/probe.mcfunction"), function);
+            String broken = command.name() + " noSuchSubcommand\n";
+            write(pack.resolve("data/commandlibtest/functions/broken.mcfunction"), broken);
+            write(pack.resolve("data/commandlibtest/function/broken.mcfunction"), broken);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

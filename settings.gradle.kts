@@ -92,6 +92,7 @@ include(
     "integration-test:targets:paper-1.20.5",
     "integration-test:targets:paper-1.20.6",
     "integration-test:targets:paper-1.21.0",
+    "integration-test:targets:paper-1.21.4",
     "integration-test:targets:forge-1.16.5",
     "integration-test:targets:forge-1.20.1",
     "integration-test:targets:neoforge-1.21.1",
