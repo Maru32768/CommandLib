@@ -134,7 +134,15 @@ dev bundles. Line numbers refer to the commit that adds this document.
 
 ### paper module (Paper 1.21+)
 
-`paper/.../CommandLib.java`:
+`paper/.../CommandLib.java`. Each plugin's registrations share a
+`PluginRegistrationState`, whose `Mode` says how their commands reach the
+dispatcher: `Unhandled` (no `COMMANDS` handler yet), `Handled` (the plugin's
+handler adds them, with the dispatcher it last saw) or `Direct` (added to the
+live dispatcher after initialization). Each `CommandLib` instance holds its
+immutable `CommandSet` and a `State`: `Pending`, `Live` (the dispatcher and the
+labels the commands got there) or `Unregistered`. Both change only under the
+plugin state's lock. The live dispatcher changes are in `PaperDispatcher`, the
+`/help` topics in `HelpTopics` and the permissions in `CommandPermissions`.
 
 - During plugin initialization it registers a `COMMANDS` handler (line 275)
   and registers each node with `Commands.register(node, description)`, the
@@ -148,12 +156,12 @@ dev bundles. Line numbers refer to the commit that adds this document.
   `PluginCommandNode`, made reflectively as Paper's registrar makes it, so the
   command map shows a plugin-attributed `PluginVanillaCommandWrapper` instead of
   a Mojang command. The label topics are added to the help map, which Paper
-  builds only at startup and on a data reload (`showHelpTopics`), and players
+  builds only at startup and on a data reload (`HelpTopics#show`), and players
   get their trees once on the next tick for all the changes of that tick.
 - Changes of the live dispatcher do not touch the maps of its root: Paper reads
   them on its asynchronous pool to build players' command trees, so the root's
   `children`, `literals` and `arguments` maps are replaced by changed copies
-  (`replaceChildren`, `CommandNodeChildren`); a build in progress keeps
+  (`PaperDispatcher#replaceChildren`, `CommandNodeChildren`); a build in progress keeps
   iterating the old maps. The nodes are converted for the vanilla dispatcher
   with Paper's `ApiMirrorRootNode#unwrapNode`, as the mirror's `addChild` does.
   If Paper's internals are not found, the root's own methods change it in place.
@@ -190,7 +198,7 @@ dev bundles. Line numbers refer to the commit that adds this document.
   loaded, so data pack functions can use the commands. The server does not exist
   then, so the permissions are not added to the plugin manager; CommandLib keeps
   their defaults and applies them when a permission is neither set on the sender
-  nor registered (`CommandLib.hasPermission`). Paper's `NullCommandSender`, used
+  nor registered (`CommandPermissions#hasPermission`). Paper's `NullCommandSender`, used
   to compile functions, keeps its "every permission" answer. Bootstrap commands
   cannot be unregistered, and Paper refuses Bukkit `/reload` while a bootstrapper
   handles `COMMANDS`.
@@ -201,10 +209,10 @@ dev bundles. Line numbers refer to the commit that adds this document.
   listed the commands for everyone; CommandLib now calls `amendCanSee` with the
   command permission on each label's topic after `ServerLoadEvent` and
   `ServerResourcesReloadedEvent`, when the help map has been rebuilt, and
-  applies the `serverHelp` page (`amendHelpTopics`). At startup and on Bukkit
+  applies the `serverHelp` page (`HelpTopics#amend`). At startup and on Bukkit
   `/reload` Paper builds the help map once before the `COMMANDS` event and once
   after it, keeping the plugin indexes of the first pass, so a plugin index made
-  for the plugin's `plugin.yml` commands lacked CommandLib's; `amendHelpTopics`
+  for the plugin's `plugin.yml` commands lacked CommandLib's; `HelpTopics#amend`
   adds them. The description, empty before, is the server help text. Bootstrap
   commands keep the unrestricted topic, since there is no plugin to listen with.
 
@@ -255,7 +263,7 @@ adds a `<modid>:` label for mod commands, so CommandLib adds none. There is no
 | Bukkit `/reload` (Spigot) | after reload `execute run <command>` failed: no `execute` node in R during `onEnable`, so the node never reached V | uses V directly | Missing edge case (unsupported server feature) | Fixed: nodes go to V through the typed accessor |
 | Runtime wrapper dispatcher | wrapped with R, which goes stale after a reload but still holds the node | wraps with V | Worked, held the old dispatcher | Fixed: wraps with V |
 | Paper module, plugin enabled at runtime | the `COMMANDS` handler registers but does not fire until the next reload, so the commands are missing | `Bukkit.reloadData()` after runtime changes | Missing edge case | Fixed: once the plugin is enabled, a task on the next tick adds the registrations to the live dispatcher if the handler has not run yet (`addIfCommandsEventMissed`). Startup fires the event before the first tick, so the check is a no-op there. It called `Bukkit.reloadData()` first, since Paper has no public way to reach the live dispatcher outside the event (a fresh plugin has nothing cached); the copy-on-write path of runtime changes now adds the nodes, `<plugin>:<name>` labels, help topics and the tree update without a data reload, with the dispatcher read from Paper's registrar, and the reload remains the fallback when that is not found. Registering only after `onEnable()` with nothing cached still throws, since Paper then rejects the handler and no handler would add the commands again after a reload |
-| Paper module `plugin:<name>` label and `/help` | Paper's registrar adds the namespaced label and plugin-attributed help topics, but the topic had no permission | `/help` topics with permissions | Missing edge case | Fixed: topics are amended with the command permission (`amendHelpTopics`); namespaced labels need nothing |
+| Paper module `plugin:<name>` label and `/help` | Paper's registrar adds the namespaced label and plugin-attributed help topics, but the topic had no permission | `/help` topics with permissions | Missing edge case | Fixed: topics are amended with the command permission (`HelpTopics#amend`); namespaced labels need nothing |
 | Paper module runtime direct add / unregister | mutated the live root on the main thread and called `updateCommands()` at once; Paper builds the command tree on its async pool, which threw `ConcurrentModificationException` when a later change in the same tick mutated the root it read (seen in the paper-1.21.0 integration run when the fixture registers and unregisters in the same tick) | `Bukkit.reloadData()` on the next tick instead of mutating | Missing edge case; only logged, the next update sends a good tree | Fixed: a data reload on the next tick was used first, which reloads every data pack and resource for each tick with a change. Now the change replaces the root's children maps instead of changing them (`replaceChildren`), so no tree build in progress, ours or one for a joining player, can see a map change under it; the labels are `PluginCommandNode`s with help topics, as the registrar would make them; and players get one tree update on the next tick for the tick's changes. A list copy of the root's children per change replaces a full data reload |
 | Spigot module on Paper 1.20.6+, registration after enabling | no `COMMANDS` handler (Paper refuses it), so the nodes were added on `ServerResourcesReloadedEvent` by changing the live root while Paper built the trees `syncCommands` had queued | - | Missing edge case; `ConcurrentModificationException` logged on `/minecraft:reload` | Fixed: the root's children maps are replaced instead of changed (`CommandNodeChildren`), at registration, unregister and after a reload; the update on the next tick sends the trees with the commands |
 | Paper < 1.20.6 async command tree | mutates the root on the main thread; skips the update on disable | same | Acceptable | - |

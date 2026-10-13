@@ -25,7 +25,7 @@ class ReplaceChildTest {
                                                                             .build();
 
         // Brigadier's addChild would merge the node into the existing child, keeping its requirement and children.
-        CommandLib.replaceChildren(root, List.of("give"), List.of(node));
+        PaperDispatcher.replaceChildren(root, List.of("give"), List.of(node));
 
         assertThat(root.getChild("give")).isSameAs(node);
         assertThat(node.getChild("vanillaChild")).isNull();
@@ -39,7 +39,7 @@ class ReplaceChildTest {
                                                                             .then(LiteralArgumentBuilder.literal("sub"))
                                                                             .build();
 
-        LiteralCommandNode<CommandSourceStack> copy = CommandLib.renamed(node, "plugin:foo");
+        LiteralCommandNode<CommandSourceStack> copy = PaperDispatcher.renamed(node, "plugin:foo");
 
         assertThat(copy.getLiteral()).isEqualTo("plugin:foo");
         assertThat(copy.getCommand()).isSameAs(executor);
