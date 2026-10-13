@@ -82,9 +82,16 @@ final class ServerFunctions {
 
         Object functionManager = minecraftServer.getMethod("getFunctions")
                                                 .invoke(server);
+        // replaceLibrary schedules the #load functions, as after a data reload, so a compilation outside one would run
+        // them again; only a run still pending from a data reload stays.
+        Field postReload = functionManager.getClass()
+                                          .getDeclaredField("postReload");
+        postReload.setAccessible(true);
+        boolean loadPending = postReload.getBoolean(functionManager);
         functionManager.getClass()
                        .getMethod("replaceLibrary", library.getClass())
                        .invoke(functionManager, library);
+        postReload.setBoolean(functionManager, loadPending);
     }
 
     /**

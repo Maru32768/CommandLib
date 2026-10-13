@@ -299,8 +299,12 @@ w("NMSDedicatedServer", '''    public NMSDedicatedServer_SUFFIX(Object handle) {
         } catch (ReflectiveOperationException e) {
             throw new IllegalStateException(e);
         }
-        server.getFunctionData()
-              .a(library);
+        keepPendingLoad(server.getFunctionData(), () -> server.getFunctionData().a(library));
+    }
+
+    @Override
+    public boolean isRunning() {
+        return ((DedicatedServer) getHandle()).isRunning();
     }
 ''', [f"{NMS}.DedicatedServer",
       f"{NMS}.CustomFunctionManager",

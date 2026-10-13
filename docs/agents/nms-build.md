@@ -53,7 +53,8 @@ remappers) translates along with the rest of the bytecode. Where the server keep
 member, the module's class reads it by reflection, finding the member by its type rather than its obfuscated name:
 `NMSArgumentTypeRegistrar` (the map of argument serializers, through the helpers of the wrapper),
 `NMSDataPackResources` on Spigot 1.19 to 1.20.4 (the build context) and `NMSDedicatedServer` (the dispatcher of the
-function library, through `setFunctionDispatcher`). From 1.20.5 the build context is built from
+function library, through `setFunctionDispatcher`, and the function manager's boolean fields, through
+`keepPendingLoad`). From 1.20.5 the build context is built from
 public API (`CommandBuildContext.simple`), on Spigot and Paper alike.
 
 ## BuildTools

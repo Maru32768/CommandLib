@@ -110,7 +110,16 @@ dev bundles. Line numbers refer to the commit that adds this document.
   holding the commands (V, or Paper's live dispatcher on 1.20.6+) and compiles
   the functions again (`compileFunctionsWithCommands`,
   `NMSDedicatedServer#recompileFunctions`). Bukkit tasks run before the server
-  ticks functions, so the `#load` functions run once, with the commands.
+  ticks functions, so the `#load` functions of a data reload run once, with the
+  commands. `ServerFunctionManager#replaceLibrary` schedules a `#load` run as
+  after a data reload, so the manager's boolean fields (`postReload`, and
+  `isInFunction` on 1.16.5) keep their values across the call
+  (`NMSDedicatedServer#keepPendingLoad`); otherwise every registration or
+  unregister after startup ran the `#load` functions of every data pack again.
+  A compiled function holds the nodes it uses, so a plugin disable removes every
+  instance of the plugin and compiles the functions at once, while the server
+  runs, since the plugin's tasks are cancelled then; otherwise the functions ran
+  the disabled plugin's commands until the next data reload.
 
 ### paper module (Paper 1.21+)
 
@@ -153,8 +162,12 @@ dev bundles. Line numbers refer to the commit that adds this document.
   (`ServerFunctions`, by reflection with Mojang names; `ServerFunctionLibrary#reload`
   changed its parameters in 1.21.2 and later releases, which it fills by type).
   Bukkit and global region tasks run before the server runs functions in a
-  tick, so the `#load` functions run once, with the commands. A plugin disable
-  does not compile them again, since the plugin's tasks are cancelled then.
+  tick, so the `#load` functions of a data reload run once, with the commands;
+  `postReload` keeps its value across `replaceLibrary`, so a compilation after a
+  runtime change does not run them again. A plugin disable removes every
+  instance of the plugin and compiles the functions at once unless the server is
+  stopping, since the plugin's tasks are cancelled then and the compiled
+  functions would otherwise run the disabled plugin's commands.
 - `bootstrap(BootstrapContext, ...)` registers from a `PluginBootstrap`. Paper
   fires the bootstrap `COMMANDS` handlers in
   `ReloadableServerResources.loadResources`, before the function library is

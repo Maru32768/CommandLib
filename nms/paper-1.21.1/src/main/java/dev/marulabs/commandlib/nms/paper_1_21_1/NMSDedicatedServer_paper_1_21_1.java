@@ -60,7 +60,11 @@ public class NMSDedicatedServer_paper_1_21_1 extends NMSDedicatedServer {
                        Runnable::run,
                        Runnable::run)
                .join();
-        server.getFunctions()
-              .replaceLibrary(library);
+        keepPendingLoad(server.getFunctions(), () -> server.getFunctions().replaceLibrary(library));
+    }
+
+    @Override
+    public boolean isRunning() {
+        return ((DedicatedServer) getHandle()).isRunning();
     }
 }

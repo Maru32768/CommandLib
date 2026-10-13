@@ -406,8 +406,12 @@ w("NMSDedicatedServer", f'''    public NMSDedicatedServer_SUFFIX(Object handle) 
                        Runnable::run,
                        Runnable::run)
                .join();
-        server.getFunctions()
-              .replaceLibrary(library);
+        keepPendingLoad(server.getFunctions(), () -> server.getFunctions().replaceLibrary(library));
+    }}
+
+    @Override
+    public boolean isRunning() {{
+        return ((DedicatedServer) getHandle()).isRunning();
     }}
 ''', ["net.minecraft.server.dedicated.DedicatedServer",
       *(["net.minecraft.server.MinecraftServer"] if PAPER else []),

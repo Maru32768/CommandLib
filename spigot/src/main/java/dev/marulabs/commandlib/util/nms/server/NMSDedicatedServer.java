@@ -8,6 +8,9 @@ import dev.marulabs.commandlib.util.reflection.ReflectionUtil;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class NMSDedicatedServer extends NMSClass {
     public static NMSDedicatedServer create(Object handle) {
@@ -43,6 +46,44 @@ public abstract class NMSDedicatedServer extends NMSClass {
      * what was added to it after the data packs were loaded, and hands them to the server's function manager.
      */
     public abstract void recompileFunctions(NMSCommandDispatcher dispatcher);
+
+    /**
+     * Whether the server is running, which is false once it begins to stop, before it disables the plugins.
+     */
+    public abstract boolean isRunning();
+
+    /**
+     * Runs {@code replaceLibrary}, a call of ServerFunctionManager#replaceLibrary, without the run of the #load functions
+     * that it schedules, as after a data reload, so a compilation outside a data reload does not run them again. A run
+     * still pending from a data reload stays. The flag, postReload, is the manager's only boolean field from 1.17, and
+     * 1.16.5 also has isInFunction, which the call leaves alone, so every boolean field keeps its value; its name is
+     * obfuscated on Spigot.
+     */
+    protected static void keepPendingLoad(Object functionManager, Runnable replaceLibrary) {
+        List<Field> flags = new ArrayList<>();
+        for (Class<?> c = functionManager.getClass(); c != Object.class; c = c.getSuperclass()) {
+            for (Field field : c.getDeclaredFields()) {
+                if (field.getType() == boolean.class && !Modifier.isStatic(field.getModifiers())) {
+                    field.setAccessible(true);
+                    flags.add(field);
+                }
+            }
+        }
+        try {
+            boolean[] values = new boolean[flags.size()];
+            for (int i = 0; i < values.length; i++) {
+                values[i] = flags.get(i)
+                                 .getBoolean(functionManager);
+            }
+            replaceLibrary.run();
+            for (int i = 0; i < values.length; i++) {
+                flags.get(i)
+                     .setBoolean(functionManager, values[i]);
+            }
+        } catch (IllegalAccessException e) {
+            throw new IllegalStateException(e);
+        }
+    }
 
     /**
      * The function library keeps the dispatcher it compiles functions with in a private final field, found by its

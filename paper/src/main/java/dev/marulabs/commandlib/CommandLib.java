@@ -294,7 +294,21 @@ public final class CommandLib implements Listener {
             return;
         }
 
-        unregister(false);
+        // Every instance of the plugin is removed first, so the functions are compiled once without all its commands.
+        List<CommandLib> instances = new ArrayList<>();
+        synchronized (registrationState) {
+            registrationState.registrations.forEach(x -> instances.add(x.instance));
+        }
+        instances.add(this);
+        boolean removed = false;
+        for (CommandLib instance : instances) {
+            removed |= instance.unregister(false);
+        }
+        // Compiled functions hold the nodes they use, so they would run the disabled plugin's commands until the next
+        // data reload. The plugin's tasks are cancelled, so they are compiled now.
+        if (removed && !Bukkit.isStopping()) {
+            ServerFunctions.recompileFunctions(plugin.getLogger());
+        }
         // Shaded into this plugin, this copy compiles functions only for it.
         if (functionLoadErrorFilter != null) {
             functionLoadErrorFilter.uninstall();
@@ -436,12 +450,14 @@ public final class CommandLib implements Listener {
     /**
      * @param runtime false when the plugin is being disabled, which cancels the tasks it schedules, so the players'
      *                command trees are updated at once
+     * @return whether commands were removed from the live dispatcher
      */
-    private void unregister(boolean runtime) {
+    private boolean unregister(boolean runtime) {
         if (unregistered) {
-            return;
+            return false;
         }
         unregistered = true;
+        boolean removed = dispatcher != null;
 
         synchronized (registrationState) {
             registrationState.registrations.removeIf(x -> x.instance == this);
@@ -480,6 +496,7 @@ public final class CommandLib implements Listener {
         } finally {
             HandlerList.unregisterAll(this);
         }
+        return removed;
     }
 
     /**

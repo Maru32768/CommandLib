@@ -51,7 +51,11 @@ public class NMSDedicatedServer_spigot_1_19_4 extends NMSDedicatedServer {
                        Runnable::run,
                        Runnable::run)
                .join();
-        server.getFunctions()
-              .replaceLibrary(library);
+        keepPendingLoad(server.getFunctions(), () -> server.getFunctions().replaceLibrary(library));
+    }
+
+    @Override
+    public boolean isRunning() {
+        return ((DedicatedServer) getHandle()).isRunning();
     }
 }

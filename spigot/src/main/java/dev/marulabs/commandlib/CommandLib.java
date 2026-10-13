@@ -50,6 +50,8 @@ public final class CommandLib implements Listener {
     private final List<CommandNode<?>> registeredCommands = new ArrayList<>();
     private final List<Permission> registeredPermissions = new ArrayList<>();
     private final List<HelpTopic> registeredHelpTopics = new ArrayList<>();
+    // Main thread only: the instances not unregistered yet, so a plugin disable removes them at once.
+    private static final Set<CommandLib> INSTANCES = new LinkedHashSet<>();
     // Shared by the instances of this copy of CommandLib, which a plugin shades.
     private static @Nullable BukkitTask functionCompiler;
     private static @Nullable FunctionLoadErrorFilter functionLoadErrorFilter;
@@ -112,6 +114,7 @@ public final class CommandLib implements Listener {
         Bukkit.getPluginManager()
               .registerEvents(this, plugin);
         registerResourcesReloadListener();
+        INSTANCES.add(this);
     }
 
     /**
@@ -607,7 +610,24 @@ public final class CommandLib implements Listener {
             return;
         }
 
-        unregister(false);
+        // Every instance of the plugin is removed first, so the functions are compiled once without all its commands.
+        boolean removed = false;
+        for (CommandLib instance : new ArrayList<>(INSTANCES)) {
+            if (instance.plugin.equals(plugin)) {
+                removed |= !instance.registeredCommands.isEmpty();
+                instance.unregister(false);
+            }
+        }
+        // Compiled functions hold the nodes they use, so they would run the disabled plugin's commands until the next
+        // data reload. The plugin's tasks are cancelled, so they are compiled now, unless the server is stopping.
+        if (removed) {
+            NMSDedicatedServer server = NMSCraftServer.create(plugin.getServer())
+                                                      .getServer();
+            if (server.isRunning()) {
+                commandsChangedSinceCompile = true;
+                compileFunctionsIfStale(plugin, server);
+            }
+        }
         // Shaded into this plugin, this copy compiles functions only for it.
         if (functionLoadErrorFilter != null) {
             functionLoadErrorFilter.uninstall();
@@ -624,6 +644,7 @@ public final class CommandLib implements Listener {
     // command-tree serialization and cause ConcurrentModificationException. Runtime unregisters still
     // need to refresh online players, so keep the update controlled by this flag.
     private void unregister(boolean updatePlayerCommands) {
+        INSTANCES.remove(this);
         try {
             unregisterCommands();
         } finally {

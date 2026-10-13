@@ -79,7 +79,11 @@ public class NMSDedicatedServer_spigot_1_16_5 extends NMSDedicatedServer {
         } catch (ReflectiveOperationException e) {
             throw new IllegalStateException(e);
         }
-        server.getFunctionData()
-              .a(library);
+        keepPendingLoad(server.getFunctionData(), () -> server.getFunctionData().a(library));
+    }
+
+    @Override
+    public boolean isRunning() {
+        return ((DedicatedServer) getHandle()).isRunning();
     }
 }
