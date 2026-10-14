@@ -32,7 +32,7 @@ CommandLib の長期目標は、Minecraft `1.16.5` から各リリース時点�
 | Platform | Status | Current coverage | Notes |
 |---|---:|---|---|
 | Spigot | `Tested` | `spigot` module。compile target は Spigot API `1.16.5`。typed NMS module により `1.16.4`〜`26.3` を扱う。Spigot integration target は `1.16.5`、`1.17.1`、`1.18`〜`26.3` の全 release。 | Bukkit API 互換を基準にし、Paper-specific API に依存しない。Paper 上でも `1.16.5`〜`1.21.1` を integration target で確認している。 |
-| Paper | `Tested` | `paper` module と `paper-testing`。Paper 公式 command API と Adventure component を使う。paper module の integration target は `1.21`、`1.21.3`〜`1.21.11`、`26.1.1`〜`26.3`（Paper `1.21.2` と `26.1` の build はない）。 | Paper `1.20.6` 以前は spigot module を使い、`1.16.5`〜`1.21.1` の Paper integration target で確認している。 |
+| Paper | `Tested` | `paper` module と `paper-testing`。Paper 公式 command API と Adventure component を使う。paper module の integration target は `1.21`、`1.21.3`〜`1.21.11`、`26.1.1`〜`26.3`（Paper `1.21.2` と `26.1` の build はない）。 | Paper `1.20.6` 以前は spigot module を使い、`1.16.5`〜`1.21.1` の Paper integration target で確認している。それより新しい Paper で spigot module を使うと paper artifact を案内する `NMSClassNotFoundException` になり、`paper-26.3-spigot-jar` で確認している。 |
 | Folia | `Planned` | なし。 | scheduler、threading、command registration の安全性確認が必要。 |
 | Mohist | `Best effort` | integration fixture: `1.16.5`, `1.20.1`。README に tested version として記載あり。 | Bukkit compatibility 上で動かす方針。Forge side との干渉確認が必要。 |
 | Velocity | `Planned` | なし。 | proxy command model と Minecraft server command model の差分設計が必要。 |

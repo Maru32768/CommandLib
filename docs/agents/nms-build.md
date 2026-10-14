@@ -48,7 +48,8 @@ server. They follow CommandAPI's build layout:
   Mojang-named jar and its paperweight `reobfJar`, moved to the `<package>_spigot` package. Each package has a
   `MappingProbe`, and `NMSClassRegistry` uses the package whose probe matches. The Spigot modules from 1.20.5 have a
   probe that matches only on Spigot (the Spigot name `MobEffectList` up to 1.21.11, no Paper lifecycle API from
-  26.1), so the spigot jar on a later Paper throws `NMSClassNotFoundException` instead of running Spigot code.
+  26.1), so the spigot jar on a later Paper throws `NMSClassNotFoundException` instead of running Spigot code. On Paper
+  after 1.21.1 the message names the paper artifact; the `paper-26.3-spigot-jar` integration target checks it.
 
 The typed classes target Java 11 up to 1.16.5 and Java 16 after (`typedNmsRelease`), the oldest releases that
 compile, while the toolchain follows the server jar. A plugin's shading tool reads every class of the spigot jar, so

@@ -109,10 +109,13 @@ module:
   1.21.2 and 1.21.9, such as the parameters of `ServerFunctionLibrary#reload`, which the paper module reads by
   reflection.
 - `mohist-1.16.5` and `mohist-1.20.1`.
+- `paper-26.3-spigot-jar`: the `spigot` module on Paper 26.3, which it does not support. The target sets
+  `commandlib.integration.expectedEnableFailure`, so it starts no bot and passes when the plugin fails to enable with
+  that text, which names the paper artifact.
 
 From 26.1 the servers need Java 25, and from 26.2 MCProtocolLib needs Java 21 and Adventure 5, so those targets set
-`commandlib.integration.botJavaVersion` to 21, which also puts MCProtocolLib before the test's own Adventure 4 on the
-test classpath.
+`commandlib.integration.botJavaVersion` to 21. A bot that brings adventure-api 5 goes before the test's own
+Adventure 4 on the test classpath.
 
 Minecraft 1.17 has no target: no MCProtocolLib release speaks its protocol (755), and a 1.17 server rejects the 1.17.1
 bot (756). The `nms:spigot-1.17` module is only checked by its compilation (see `docs/agents/nms-build.md`).

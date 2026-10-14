@@ -137,6 +137,14 @@ val botJavaVersion = if (extra.has("commandlib.integration.botJavaVersion")) {
     17
 }
 
+// Set by a target whose plugin the server must refuse: the text its enable failure has to log. Such a target starts
+// no bot.
+val expectedEnableFailure = if (extra.has("commandlib.integration.expectedEnableFailure")) {
+    extra["commandlib.integration.expectedEnableFailure"].toString()
+} else {
+    null
+}
+
 configure<JavaPluginExtension> {
     toolchain.languageVersion.set(JavaLanguageVersion.of(botJavaVersion))
     sourceSets.named("test") {
@@ -662,6 +670,7 @@ tasks.register<Test>("minecraftIntegrationTest") {
     systemProperty("commandlib.sharedDir", sharedDir.absolutePath)
     systemProperty("commandlib.runMinecraftIntegration", "true")
     systemProperty("commandlib.targetName", targetName)
+    expectedEnableFailure?.let { systemProperty("commandlib.expectedEnableFailure", it) }
     systemProperty("commandlib.platform", targetPlatform)
     systemProperty("commandlib.reportFileName", reportFileName)
     systemProperty("commandlib.serverDirectory", serverDirectory)

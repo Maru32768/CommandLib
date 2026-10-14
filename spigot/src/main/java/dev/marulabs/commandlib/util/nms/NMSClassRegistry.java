@@ -22,9 +22,14 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public final class NMSClassRegistry {
     private static final String TYPED_PACKAGE_PREFIX = "dev.marulabs.commandlib.nms.";
-    private static final NMSClassRegistry DEFAULT = new NMSClassRegistry(TypedNmsModules.MODULES);
+    private static final NMSClassRegistry DEFAULT = new NMSClassRegistry(TypedNmsModules.MODULES, isPaper());
+    /**
+     * The last Paper release the spigot jar has modules for. Later Paper releases need the paper artifact.
+     */
+    private static final String LAST_PAPER_VERSION = "1.21.1";
 
     private final List<TypedModule> modules;
+    private final boolean paper;
     private final Map<String, ModuleClasses> moduleClasses = new ConcurrentHashMap<>();
     private final Map<String, Boolean> mappingProbes = new ConcurrentHashMap<>();
     /**
@@ -33,7 +38,23 @@ public final class NMSClassRegistry {
     private final Map<Class<?>, Resolution> resolved = new ConcurrentHashMap<>();
 
     NMSClassRegistry(List<TypedModule> modules) {
+        this(modules, false);
+    }
+
+    NMSClassRegistry(List<TypedModule> modules, boolean paper) {
         this.modules = List.copyOf(modules);
+        this.paper = paper;
+    }
+
+    private static boolean isPaper() {
+        try {
+            Class.forName("io.papermc.paper.plugin.lifecycle.event.LifecycleEventManager",
+                          false,
+                          NMSClassRegistry.class.getClassLoader());
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
     }
 
     /**
@@ -102,7 +123,7 @@ public final class NMSClassRegistry {
         List<TypedModule> candidates = modulesFor(new MinecraftVersion(version));
         if (candidates.isEmpty()) {
             throw new NMSClassNotFoundException(String.format("%s has no implementation for Minecraft %s: no typed NMS "
-                    + "module supports this version", lookUpClass.getSimpleName(), version));
+                    + "module supports this version", lookUpClass.getSimpleName(), version) + paperHint(version));
         }
 
         List<String> reasons = new ArrayList<>();
@@ -128,7 +149,15 @@ public final class NMSClassRegistry {
         throw new NMSClassNotFoundException(String.format("%s has no implementation for Minecraft %s (%s)",
                                                           lookUpClass.getSimpleName(),
                                                           version,
-                                                          String.join("; ", reasons)));
+                                                          String.join("; ", reasons)) + paperHint(version));
+    }
+
+    private String paperHint(String version) {
+        if (!paper || !new MinecraftVersion(LAST_PAPER_VERSION).isLessThan(new MinecraftVersion(version))) {
+            return "";
+        }
+        return ". The spigot artifact of CommandLib supports Paper up to " + LAST_PAPER_VERSION
+                + "; use the paper artifact on Paper " + version;
     }
 
     private List<TypedModule> modulesFor(MinecraftVersion version) {

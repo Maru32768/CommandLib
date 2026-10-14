@@ -35,7 +35,7 @@ public class NMSClassRegistryTest {
      * implementations.
      */
     @ParameterizedTest
-    @ValueSource(strings = {"1.16.4", "1.16.5", "1.17", "1.17.1", "1.18", "1.18.1", "1.18.2", "1.19", "1.19.1", "1.19.2", "1.19.3", "1.19.4", "1.20", "1.20.1", "1.20.2", "1.20.3", "1.20.4", "1.20.5", "1.20.6", "1.21", "1.21.1"})
+    @ValueSource(strings = {"1.16.4", "1.16.5", "1.17", "1.17.1", "1.18", "1.18.1", "1.18.2", "1.19", "1.19.1", "1.19.2", "1.19.3", "1.19.4", "1.20", "1.20.1", "1.20.2", "1.20.3", "1.20.4", "1.20.5", "1.20.6", "1.21", "1.21.1", "1.21.2", "1.21.3", "1.21.4", "1.21.5", "1.21.6", "1.21.7", "1.21.8", "1.21.9", "1.21.10", "1.21.11", "26.1", "26.1.1", "26.1.2", "26.2", "26.3"})
     void every_supported_release_has_a_typed_module(String release) throws ReflectiveOperationException {
         MinecraftVersion version = new MinecraftVersion(release);
         Field lower = NMSClassRegistry.TypedModule.class.getDeclaredField("lowerVersion");
@@ -71,6 +71,18 @@ public class NMSClassRegistryTest {
                                                "1.16.3")).isInstanceOf(NMSClassNotFoundException.class)
                                                          .hasMessage("TypedLookUp has no implementation for Minecraft 1.16.3: no typed NMS module supports this "
                                                                  + "version");
+    }
+
+    @Test
+    void find_points_paper_after_1_21_1_to_the_paper_artifact() {
+        NMSClassRegistry registry = new NMSClassRegistry(FIXTURE_MODULES, true);
+
+        assertThatThrownBy(() -> registry.find(TypedLookUp.class,
+                                               "26.3")).hasMessage("TypedLookUp has no implementation for Minecraft 26.3: no typed NMS module supports this "
+                                                       + "version. The spigot artifact of CommandLib supports Paper up to 1.21.1; use the paper "
+                                                       + "artifact on Paper 26.3");
+        assertThatThrownBy(() -> registry.find(TypedLookUp.class,
+                                               "1.18.2")).hasMessageNotContaining("paper artifact");
     }
 
     @Test

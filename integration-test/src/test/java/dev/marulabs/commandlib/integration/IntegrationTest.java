@@ -67,6 +67,27 @@ class IntegrationTest {
         Path reportFile = reportDir.resolve(reportFileName);
         double containerCpuLimit = Double.parseDouble(System.getProperty("commandlib.containerCpuLimit", "2.0"));
         Files.createDirectories(reportDir);
+
+        String expectedEnableFailure = System.getProperty("commandlib.expectedEnableFailure");
+        if (expectedEnableFailure != null) {
+            // The plugin writes no report, and another target may write one under the same name, so it is left alone.
+            try (GenericContainer<?> container = createContainer(targetName,
+                                                                 dockerImageName,
+                                                                 testPluginJar,
+                                                                 testPluginSubdirectory,
+                                                                 reportDir,
+                                                                 serverLaunchArgs,
+                                                                 reportFileName,
+                                                                 containerCpuLimit)) {
+                container.start();
+                Awaitility.await()
+                          .atMost(Duration.ofSeconds(60))
+                          .untilAsserted(() -> assertThat(container.getLogs()).as("server log")
+                                                                             .contains("COMMANDLIB_TEST_PLUGIN_ENABLE_FAILED")
+                                                                             .contains(expectedEnableFailure));
+            }
+            return;
+        }
         Files.deleteIfExists(reportFile);
 
         try (GenericContainer<?> container = createContainer(targetName,
@@ -362,7 +383,7 @@ class IntegrationTest {
                                                                                                   + "-Dcommandlib.testReportDir=/workspace/test-results "
                                                                                                   + serverLaunchArgs
                                                                                                   + " nogui")
-                                                                             .waitingFor(Wait.forLogMessage(".*Done \\(.*\\)! For help, type \"help\".*",
+                                                                             .waitingFor(Wait.forLogMessage(".*(Done \\(.*\\)! For help, type \"help\"|COMMANDLIB_TEST_PLUGIN_ENABLE_FAILED).*",
                                                                                                             1))
                                                                              .withStartupTimeout(Duration.ofMinutes(8));
     }
