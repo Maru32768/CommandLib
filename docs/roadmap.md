@@ -1,7 +1,8 @@
 # CommandLib Roadmap
 
 この Roadmap は、CommandLib を Spigot、Paper、Folia、Mohist、Velocity、Forge、NeoForge、Fabric を含む Minecraft
-コマンドライブラリの中で最有力の選択肢にするために、足りないものと実装順を整理する。
+コマンドライブラリとして、CommandAPI、Cloud、Lamp、ACF と Paper 公式 API を利用する開発体験を凌駕するために、
+不足機能、実装順、競合を上回ったと判断するための証拠を整理する。機能の同等化は途中の到達点であり、最終目標ではない。
 
 完了済み項目は [`docs/roadmap-history.md`](roadmap-history.md) に移動済み。
 
@@ -24,9 +25,9 @@
 | Dynamic command tree refresh        | `[ ]` | なし。                                                                                                                                     | permission / state 変化時に対象 player へ command tree を再送する API。                       |
 | Vanilla-style feedback              | `[ ]` | なし。                                                                                                                                     | `sendCommandFeedback` / `logAdminCommands` gamerule を尊重する success feedback と op broadcast。 |
 | Bukkit / Spigot / Paper support     | `[~]` | `spigot` module（Spigot 1.16.5〜26.3 を Tested）と `paper` module（Paper 1.21〜26.3 を Tested）がある。 | Folia 対応。 |
-| Paper 1.20.6+ registration          | `[x]` | `LifecycleEvents.COMMANDS` + `Commands registrar` + `CommandSourceStack` を使った公式 API 登録が実装済み。Adventure component を標準 message path として利用。 | bootstrap compatibility。                                                   |
+| Paper 1.20.6+ registration          | `[x]` | `LifecycleEvents.COMMANDS` + `Commands registrar` + `CommandSourceStack` を使った公式 API 登録が実装済み。Adventure component を標準 message path として利用。 | bootstrap 登録の互換性保証・docs / tests の拡充（`CommandLib.bootstrap(BootstrapContext, ...)` は実装済み）。                                                   |
 | Spigot / Paper module split         | `[x]` | `bukkit` を `spigot` へ rename / move し、`paper` module を新設済み。                                                                               | —                                                                          |
-| Forge support                       | `[~]` | Forge 1.16.5 / 1.20.1 module がある（version ごとのソースコピー）。                                                                                                                | Architectury Loom + Stonecutter による単一ソース化、1.16.5+ 全 version 対応、Bukkit との差分整理。                                     |
+| Forge support                       | `[~]` | Forge 1.16.5 / 1.20.1 を Architectury Loom + Stonecutter による `modded` の単一ソースから build。                                                                                                                | 1.16.5+ の対象 version 拡充、loader 非依存層の分離、Bukkit との差分整理。                                     |
 | Mohist support                      | `[~]` | README 上で tested version が記載されている。                                                                                                      | integration test の明文化、非対応ケースの整理。                                           |
 | Folia support                       | `[ ]` | なし。                                                                                                                                     | scheduler / threading model を踏まえた Paper 互換性確認。                             |
 | Velocity support                    | `[ ]` | なし。                                                                                                                                     | proxy command model 向け module / API 設計（方針案: Pillar 11）。                                    |
@@ -34,11 +35,11 @@
 | Fabric support                      | `[ ]` | なし。                                                                                                                                     | Fabric command registration / Brigadier integration 設計、Stonecutter matrix への追加（方針案: Pillar 11）。                    |
 | Brigadier / NMS hiding              | `[~]` | 利用者 API から Brigadier / NMS を隠している。                                                                                                      | capability detection、公式 API 優先、fallback policy。                            |
 | `/execute` integration              | `[~]` | README と Bukkit registration path で `/execute run` 連携を扱っている。spigot module と paper module の command は `/minecraft:reload` 後や runtime 登録後も data pack function から使える（`/minecraft:reload` 後は両 module に integration test あり）。paper module で plugin から登録した command は次 tick の function 再 compile 後に使える（bootstrap 登録は server の compile 時点から使える）。 | command block / tag での保証と tests。 |
-| Built-in arguments                  | `[~]` | 基本的な primitive、string、player、entity、location、item などがある。                                                                                | CommandAPI / Paper との argument catalog、NBT、registry、biome、sound 等の不足補完。    |
+| Built-in arguments                  | `[~]` | 基本的な primitive、string、player、entity、location、item などがある。                                                                                | CommandAPI / Paper との挙動別 catalog、NBT / SNBT、range、duration、component 等の不足補完。    |
 | Argument validation                 | `[x]` | `validator(...)` と `ArgumentValidator` がある。                                                                                             | reusable condition registry、error customization。                           |
 | Argument transform                  | `[x]` | `transformer(...)` がある。                                                                                                                 | docs と examples。                                                           |
 | Custom parsing fallback             | `[x]` | `additionalParser(...)` がある。                                                                                                            | behavior spec と tests。                                                     |
-| Sync suggestions                    | `[x]` | `suggestionProvider(...)` と additional suggestions がある。                                                                                   | tooltip support、ranking、fuzzy suggestions。                                 |
+| Sync suggestions                    | `[x]` | `suggestionProvider(...)`、additional suggestions、`SuggestionBuilder#suggest` の String / Brigadier Message tooltip overload がある。                                                                                   | rich tooltip の platform 別保証、ranking、fuzzy suggestions。                                 |
 | Async suggestions                   | `[~]` | `SuggestionBuilder#await(CompletionStage)` がある。                                                                                                      | deadlock policy、cache、invalidation、Paper native path。                      |
 | Permission-aware execution          | `[x]` | command / argument branch permission が実行時に使われる。                                                                                         | option permission、diagnostics、export。                                      |
 | Permission registration             | `[~]` | Bukkit / Forge の permission registration がある。                                                                                           | reload safety の integration tests、LuckPerms guide。                         |
@@ -55,18 +56,20 @@
 | Kotlin DSL                          | `[ ]` | なし。                                                                                                                                     | Kotlin-first builder、default args、coroutine suggestions。                   |
 | Java builder API                    | `[ ]` | 現状は subclass / initializer / fluent API 中心。                                                                                             | explicit builder style。                                                    |
 | Localization / captions             | `[ ]` | なし。                                                                                                                                     | locale-aware help / errors / suggestions。                                  |
-| Public testing framework            | `[~]` | `spigot-testing` module と repository tests がある。`CommandTester` / `FakeSender` / NMS mock クラス群を整備済み。`CommandTester.builder()` と `FakeSender.playerBuilder()` / `consoleBuilder()` あり。 | downstream guide、JUnit extension、assertion utilities。                     |
-| Adventure / MiniMessage             | `[~]` | platform 非依存の rich text 値型 `RichText`（色、装飾、hover text、click、translatable 引数）を全 platform で送れる（Phase 1 完了）。Paper / modded は native component の `sendSuccess/Warn/Failure` もある。 | rich help、suggestion tooltip、MiniMessage。設計: [`docs/design/rich-text-messages.md`](design/rich-text-messages.md)。 |
+| Public testing framework            | `[~]` | `common-testing` / `spigot-testing` / `paper-testing` / loader 別 `modded-testing` と repository tests がある。`CommandTester` / `FakeSender` / NMS mock クラス群を整備済み。`CommandTester.builder()` と `FakeSender.playerBuilder()` / `consoleBuilder()` あり。 | downstream guide、JUnit extension、assertion utilities。                     |
+| Adventure / MiniMessage             | `[~]` | platform 非依存の rich text 値型 `RichText`（色、装飾、hover text、click、translatable 引数）を全 platform で送れる（Phase 1 完了）。Paper / modded は native component の `sendSuccess/Warn/Failure` もある。 | rich help、rich suggestion tooltip の統一、MiniMessage。設計: [`docs/design/rich-text-messages.md`](design/rich-text-messages.md)。 |
 | Multi-version integration tests     | `[~]` | `integration-test` aggregator と Spigot（1.16.5〜26.3 の全 release）/ Paper / Mohist / Forge / NeoForge fixtures がある。                                                             | CI matrix、`IntegrationTarget` への platform フィールド追加、result docs、test kit 化。  |
-| NMS Reflection test strategy        | `[~]` | `CommandTester` が `Mockito.mockStatic` で `NMSClassRegistry` をスタブし、軽量な Mock 実装クラス方式で NMS なしテストを実現している。                 | `CommandTester` Builder パターン化、新引数追加時の Mock + Test セット作成ルール整備。              |
-| Documentation                       | `[~]` | README と design docs がある。                                                                                                               | compatibility、arguments、suggestions、permissions、migration、troubleshooting。 |
+| NMS Reflection test strategy        | `[~]` | `CommandTester` が `Mockito.mockStatic` で `NMSClassRegistry` をスタブし、軽量な Mock 実装クラス方式で NMS なしテストを実現している。                 | Builder / mock 差し込みの保証拡充、新引数の Mock + Test ルールの継続適用。              |
+| Documentation                       | `[~]` | README、`docs/compatibility.md`、design docs がある。                                                                                                               | compatibility の結果公開・更新、arguments、suggestions、permissions、migration、troubleshooting。 |
 | Migration guides                    | `[ ]` | なし。                                                                                                                                     | CommandAPI、Cloud、Lamp、ACF からの移行 guide。                                     |
 | Runtime diagnostics                 | `[ ]` | なし。                                                                                                                                     | command tree、permissions、platform capability report。                       |
 | Generated docs / exports            | `[ ]` | なし。                                                                                                                                     | command docs、permission tree Markdown / JSON。                              |
 
 ## 優先度別バックログ
 
-### P3: CommandAPI parity を埋める
+### P3: Minecraft 連携で CommandAPI を上回る
+
+- `[ ]` 公式資料を基準に argument / vanilla behavior の比較 catalog を作り、未対応と未確認を分けて追跡する。
 
 - `[~]` missing built-in arguments を catalog に基づいて実装する（NMS 依存引数は `MockNMSArgumentXxx` + `XxxArgumentTest`
   をセットで追加する）。`GameModeArgument`（Spigot / Paper）、`BiomeArgument`（Spigot / Paper）、`WorldArgument`（Spigot /
@@ -86,7 +89,7 @@
 - `[ ]` error taxonomy を公開仕様として整理する。
 - `[ ]` CommandAPI migration guide を追加する。
 
-### P4: Cloud / Lamp に対抗する developer experience を追加する
+### P4: Cloud / Lamp / ACF を上回る developer experience
 
 annotation API / Kotlin DSL の `@Optional` や default args はこの土台の上に載せるため、先頭 3 項目を優先する。
 
@@ -103,6 +106,9 @@ annotation API / Kotlin DSL の `@Optional` や default args はこの土台の�
 - `[ ]` annotation API を設計・実装する。
 - `[ ]` Kotlin DSL を設計・実装する。
 - `[ ]` middleware / interceptor API を追加する。
+- `[ ]` 8 引数以上を raw types / casts なしで扱える表現と explicit Java builder API を追加する。
+- `[ ]` options の repeatable / multi-value / aliases / required / 排他・継承と配置拡張を実装する。
+- `[ ]` reusable condition registry、help / usage / error formatter、rich help / MiniMessage を追加する。
 - `[ ]` dependency injection hooks を追加する。
 - `[ ]` sender mapper / context enrichment を追加する。
 - `[ ]` localization / caption system を追加する。
@@ -157,82 +163,56 @@ version、Brigadier、NMS の差分を意識しなくて済む状態を目指す
 最終的な目標は次の状態である。
 
 - CommandAPI に対して、vanilla command 連携、argument coverage、`/execute` 対応、suggestions、permissions、documentation、testing
-  で同等以上になる。
-- Cloud / Lamp に対して、拡張性、annotation、Kotlin support、dependency injection、execution pipeline customization で同等以上になる。
+  で上回る。
+- Cloud / Lamp に対して、拡張性、annotation、Kotlin support、dependency injection、execution pipeline customization で上回る。
+- ACF に対して、reusable conditions、help / error customization、localization、syntax advice で上回る。
 - 利用可能な環境では Paper 公式 command API を使い、旧 Bukkit / Spigot / Paper 互換も維持する。
+  公式 API を直接使う場合と同じ vanilla semantics を保ち、定義・テスト・運用の負担を減らす。
 - Spigot、Paper、Folia、Mohist、Velocity、Forge、NeoForge、Fabric を、可能な限り同じ public command model に揃える。
 - downstream plugin が安全に shade / relocate できる状態を維持する。
 
-## 競合ベースライン
+## 競合ベースラインと勝利条件
 
-### CommandAPI
+比較基準は 2026-10-14 に確認した公式資料と現行ソース。競合の更新に合わせて release ごとに再確認する。
+「未確認」は「非対応」と区別し、競合が型安全な API、複数 platform、testing を持つことも前提に比較する。
 
-CommandAPI は最も直接的な競合である。vanilla command registration、多数の built-in arguments、`/execute`、functions /
-tags、tooltips、Kotlin DSL、annotation support、testing utilities、documentation、Minecraft 最新版への追従が強い。
+| 対象 | 競合の強み | 現行 CommandLib | 上回るための到達条件 |
+|---|---|---|---|
+| CommandAPI | vanilla arguments、result executors、functions / tags、tooltips、annotation / Kotlin、test toolkit | typed callback、options、広い Spigot / Paper matrix、公開 testing、tooltip と bootstrap の基礎あり | 引数を名前でなく parse / suggestion / error / registry semantics で比較し、主要カテゴリの同等性と型付き callback・options・test coverage の優位性を示す。result / success、feedback、reload、command block / function / tag を実サーバーで保証する。 |
+| Cloud | execution coordinators、future handlers、pipeline、sender mapping、DI、captions、複数 API / platform | tree と callback が直結。async suggestions と preprocess / prerequisite はあるが、async execution・汎用 pipeline は未実装 | 非同期・thread 復帰・例外処理・DI・sender mapping を合成でき、同じ Minecraft ユースケースを少ない設定と型付き API で実装・検証できる。 |
+| Lamp | annotation、DI、custom annotations、optional / default、Kotlin default args、flags、複数 platform | fluent / tree、argument-first child、typed options を提供。annotation / Kotlin DSL は未実装 | 同じ example を fluent / builder / annotation / Kotlin で自然に書け、default / variadic / options と独自 annotation の拡張が同じモデル・help・tests に反映される。 |
+| ACF | conditions、validation、completion、help、syntax advice、DI、annotation | validator / prerequisite、generated help、branch permissions の基礎あり | reusable conditions と formatter / locale を備え、権限・options・入力位置に整合した案内を出し、snapshot と移行例で確認できる。 |
+| Paper Command API / Brigadier | 公式 lifecycle、bootstrap、native arguments、vanilla semantics と直接制御 | 独立 paper module、Adventure、lifecycle / bootstrap、function 再 compile 対応あり | result / success、source / executor、registry、reload の意味を保ち、型付き callback・help・options・testing・診断で開発負担を減らす。必要な native extension point を提供する。 |
 
-CommandLib に足りないもの:
+公式資料:
 
-- Minecraft version ごとの compatibility matrix。
-- CommandAPI と比較できる argument catalog。
-- `/execute`、command blocks、datapack functions、tags に対する明確な保証。
-- public testing utilities と利用ガイド。
-- Kotlin DSL と annotation API。
-- migration guide と troubleshooting guide。
-- Minecraft version support policy。
+- [CommandAPI](https://docs.commandapi.dev/)、[result executors](https://docs.commandapi.dev/create-commands/executors/resulting-executors)、[testing](https://docs.commandapi.dev/test/intro)。
+- [Cloud Core](https://cloud.incendo.org/core/)、[Minecraft platforms](https://cloud.incendo.org/minecraft/)、[Fabric / NeoForge](https://cloud.incendo.org/minecraft/modded/)。
+- [Lamp](https://github.com/Revxrsal/Lamp)、[ACF](https://github.com/aikar/commands)。
+- [Paper command registration](https://docs.papermc.io/paper/dev/command-api/basics/registration/)、[Brigadier](https://github.com/Mojang/brigadier)。
 
-### Cloud
+## 実装順と完了判定
 
-Cloud は汎用 JVM command framework として強い。builder、annotation、Kotlin、execution coordinators、sender mapping、platform
-modules、pipeline extension points を備えている。
+backlog は作業項目、Product Pillars は仕様の詳細、Release Phases は公開可能なまとまりを示す。
+同じ機能の状態は実装状況サマリを基準に更新し、完了の証拠は roadmap-history に残す。
 
-CommandLib に足りないもの:
+1. **現在地と配布を固める**: 実装済み API の docs / tests を揃え、0.18.0 の移行、CI、binary compatibility、Maven Central を整える。
+   P6 の配布・品質項目は Phase 5 まで待たず、各 phase の公開前に必要な範囲を実施する。
+2. **vanilla semantics を完成させる**: argument catalog、result / success、feedback、command block / function / tag の保証を優先する。
+3. **共通モデルを拡張する**: optional / variadic、8 引数以上の型安全な表現、options、sender / message、thread / async / middleware を設計する。
+4. **定義方法と platform を広げる**: 共通モデル上に builder / annotation / Kotlin、DI、locale と Folia / Velocity / Fabric、modded version matrix を載せる。
+5. **競合優位を証明する**: 共通 example、移行ガイド、公開 test kit、diagnostics、exports、benchmark を揃える。
 
-- middleware、interceptor、postprocessor。
-- sender abstraction と custom sender mapping。
-- platform capability detection。
-- localization / caption support。
-- 現在の fluent API と併存する annotation / builder API。
-- command lifecycle hooks。
+機能の完了には public API、使用例、仕様、focused tests が必要。platform の対応完了には実サーバーの証拠が必要。
+fixture の存在、設計方針の決定、compile 成功だけでは全挙動の保証完了としない。
 
-### Lamp
-
-Lamp は annotation-driven な developer experience が強い。dependency injection、custom annotations、flags /
-switches、multiple command variants、Kotlin default arguments、広い platform support を備えている。
-
-CommandLib に足りないもの:
-
-- annotation-first API。
-- dependency injection。
-- custom annotation extension points。
-- optional / default argument の使いやすさ。
-- Kotlin-native な API design。
-
-### ACF
-
-ACF は長い採用実績があり、annotations、dependency injection、validation、tab completion、help、syntax advice、conditions を扱える。
-
-CommandLib に足りないもの:
-
-- reusable condition / prerequisite registry。
-- syntax advice。
-- error message customization。
-- help formatter / theme customization。
-- locale-aware messages。
-- annotation usage の成熟度。
-
-### Paper Command API
-
-Paper の command API は、modern Paper server で Brigadier integration を行う最も自然な方法である。
-
-CommandLib に足りないもの:
-
-- Paper 1.20.6+ では Paper 公式 command / lifecycle API を優先すること。
-- Spigot と Paper を GA 前に module と artifact の単位で分けること。
-- Paper module では Adventure component を標準 message path として扱うこと。
-- bootstrap registration support。
-- modern Paper における datapack function compatibility。
-- Brigadier suggestions と async completions を capability に応じて切り替える仕組み。
-- Folia compatibility。
+- [ ] 競合比較用の共通 example suite を作る（admin options、optional / variadic、argument-first tree、async I/O、DI、locale、vanilla result）。
+- [ ] 各 example の定義量、取得キー / cast、設定手順、拡張のしやすさ、テスト可能範囲を比較し、差分と制約を公開する。
+- [ ] parse / suggestion の p50 / p95 latency、throughput、allocation と起動 / 登録コストを同条件で計測する。
+  JDK、MC / platform、ライブラリ version、tree 規模、権限、async / cache 条件を記録し、結果を見る前に回帰許容値を決める。
+- [ ] 競合の各主要領域で同等性を確認し、少なくとも一つの具体的な優位性を example / test / measurement で示す。
+  未対応カテゴリの deferred reason は中間 release の判断材料であり、最終的な勝利条件の代わりにはしない。
+- [ ] platform 固有の制約と対象外用途を公開する。CLI / JDA 等への拡張は Minecraft 領域の完成後に別 phase として判断する。
 
 ## Product Pillars
 
@@ -242,18 +222,18 @@ CommandLib は、複数の Minecraft version と platform をまたいで 1 つ�
 
 Required:
 
-- `docs/compatibility.md` を追加し、Bukkit、Spigot、Paper、Folia、Mohist、Velocity、Forge、NeoForge、Fabric ごとに
+- 実装済み `docs/compatibility.md` を更新し、Bukkit、Spigot、Paper、Folia、Mohist、Velocity、Forge、NeoForge、Fabric ごとに
   supported、tested、best-effort、unsupported を明示する。
 - supported modules に対する focused compile / test matrix を作る。
 - integration test の結果を docs に掲載する。
 - Paper 1.20.6+ では Paper 公式 command API を優先する。
 - 可能な限り version-string branching より capability detection を優先する。
 
-Stretch:
+Required platform expansion（Phase 4）:
 
 - Folia support。
 - Velocity support。
-- Fabric / NeoForge support。
+- Fabric support と Forge / NeoForge version matrix 拡充。
 - Mojang-mapped server regression tests。
 
 ### 2. Argument Supremacy
@@ -298,7 +278,7 @@ Required:
 
 - suggestion API を sync、async、default、additional、replacement の観点で整理する。
 - permission filtering を suggestions と help に一貫して適用する。
-- suggestions with tooltips を実装する。
+- 実装済み String / Brigadier Message tooltip の保証を platform 別に検証し、rich tooltip の統一 API を整える。
 - 利用可能な Paper では native Brigadier suggestions を優先する。
 - legacy platform で deadlock しない async completion policy を定義する。
 - suggestion cache と invalidation API を追加する。
@@ -345,7 +325,7 @@ Required:
 - LuckPerms guide を追加する。
 - permission / state 変化時に command tree を再送する dynamic refresh API を追加する。
 
-Stretch:
+Required tooling（Phase 5）:
 
 - permission export command。
 - generated permission tree の Markdown / JSON 出力。
@@ -368,7 +348,7 @@ Required:
 - unknown subcommand、missing argument、invalid argument、invalid option、failed prerequisite、permission denied を区別した
   error。
 
-Stretch:
+Required developer experience / tooling（Phase 3 / 5）:
 
 - MiniMessage / Adventure component support。
 - hover / click 対応の rich help。
@@ -409,7 +389,7 @@ Kotlin DSL goals:
 
 ### 8. Execution Pipeline
 
-Cloud の大きな強みは pipeline customization である。CommandLib にも小さく実用的な同等機能が必要である。
+Cloud の大きな強みは pipeline customization である。CommandLib は同等の拡張性を備え、型安全性・thread 安全性・テスト容易性で上回る。
 
 Required:
 
@@ -449,16 +429,16 @@ CommandLib は、この repository 自体だけでなく downstream plugin autho
 
 Required:
 
-- `spigot-testing` を public testing framework として文書化する。
+- common / Spigot / Paper / modded の公開 testing framework を文書化し、引数別の実 parse / mock / 未対応範囲を公開する。
 - common parser tests。
 - help、usage、errors の snapshot tests。
 - fake sender、fake player、fake permission model。
 - suggestion assertion utilities。
 - command execution assertion utilities。
 - `IntegrationTarget` に `platform` フィールドを追加し、multi-version integration test guide を整備する。
-- `CommandTester` を Builder パターン化し、外部から Mock クラスを差し込めるようにする。
+- 実装済み `CommandTester` Builder と mock 差し込みの使用例・互換性・保証範囲を整える。
 
-Stretch:
+Required downstream testing（Phase 5）:
 
 - JUnit extension（`@ExtendWith(CommandLibExtension.class)`）。
 - golden command tree snapshots。
@@ -513,8 +493,9 @@ Spigot のように単一 jar で複数 version に対応することは目指�
 - ForgeGradle / NeoGradle は 1 project 1 MC version 前提で、必要な Java version も 8 → 16 → 17 → 21 と変わる。
 - `mods.toml` / `neoforge.mods.toml` / `fabric.mod.json` などの metadata も loader・version ごとに異なる。
 
-現行の `forge:1.16.5` と `forge:1.20.1` は同じ file 構成のコピーで、約 1,600 行中約 540 行の diff がある。
-diff の大半は MCP 名と Mojang 名の差・import 変更などの機械的なもので、対象 version と loader が増えるとコピー方式は破綻する。
+旧 Forge module の version 別コピーは廃止済み。現行は `modded/src` の単一ソースから
+Forge 1.16.5 / 1.20.1 と NeoForge 1.21.1 を build する。残る作業は version matrix の拡充、Fabric 追加、
+MC 依存層と loader 依存層の分離である。以下の module 分割は目標構成であり、現行の directory 構成ではない。
 
 方針:
 
@@ -578,12 +559,12 @@ Forge 系で「マイナーアップデートで mod が動かなくなる」原
 
 Phase 0（Freeze Direction）と Phase 1（GA Module Split）は完了済み。詳細は [`docs/roadmap-history.md`](roadmap-history.md) を参照。
 
-### Phase 2: CommandAPI Parity
+### Phase 2: Vanilla Integration Beyond CommandAPI
 
-目的: 最大の直接競合である CommandAPI との差を埋める。
+目的: CommandAPI との parity を通過し、vanilla 連携・型安全性・検証容易性で上回る。
 
 - priority arguments を実装する。
-- tooltip suggestions を追加する。
+- 実装済み tooltip suggestions を検証し、rich tooltip の API を整える。
 - `/execute`、command block、function、tag behavior を検証する。
 - error taxonomy を改善する。
 - options syntax を拡張する。
@@ -593,19 +574,22 @@ Phase 0（Freeze Direction）と Phase 1（GA Module Split）は完了済み。�
 
 Exit criteria:
 
-- CommandAPI の主要 argument categories に対して、CommandLib equivalent または deferred reason がある。
+- CommandAPI の主要 argument categories を挙動別に比較し、equivalent の tests がある。未対応は明記し、最終完遂まで追跡する。
+- result / success、feedback、command block / function / tag、reload を integration tests で確認する。
+- 共通 example で typed callback / options / testing の具体的な優位性を示す。
 - integration tests が主要 supported Spigot / Paper versions をカバーしている。
 - 最小限の CommandAPI migration example が存在する。
 
-### Phase 3: Cloud And Lamp Developer Experience
+### Phase 3: Developer Experience Beyond Cloud, Lamp And ACF
 
-目的: modern users が期待する authoring styles と extension points を追加する。
+目的: Cloud / Lamp / ACF の主要な開発体験を満たし、型安全性・合成容易性・テスト容易性で上回る。
 
 - variadic / optional argument。
 - async execution。
 - confirmation / cooldown。
 - dynamic command tree refresh。
 - annotation API。
+- explicit Java builder API。
 - Kotlin DSL。
 - middleware / interceptor API。
 - sender mapper。
@@ -615,9 +599,11 @@ Exit criteria:
 
 Exit criteria:
 
-- 同じ example command を fluent、annotation、Kotlin DSL の 3 style で書ける。
+- 同じ example command を fluent、Java builder、annotation、Kotlin DSL の 4 style で書け、help / permissions / options / tests が一致する。
 - cross-cutting behavior を middleware として実装できる。
 - Kotlin examples が casts や raw types なしで書ける。
+- async execution の timeout / cancellation / exception / thread 復帰を検証する。同期の vanilla result と非同期完了の扱いを明文化する。
+- DI、custom annotations、conditions、locale / formatters の共通 example と競合からの移行例がある。
 
 ### Phase 4: Platform Expansion
 
@@ -633,9 +619,9 @@ Exit criteria:
 
 Exit criteria:
 
-- Folia の対応方針が決まっている。
-- Forge testing module の方針が決まっている。
-- NeoForge / Fabric / Velocity の module 方針が決まっている（[11. Platform Architecture](#11-platform-architecture)）。
+- Folia / Velocity / Fabric の public module / API が実装され、登録・実行・補完・権限を対象環境で検証している。
+- Folia の entity / region thread 復帰と安全な scheduler 利用を実サーバーで検証している。
+- Forge / NeoForge の対象 version matrix と公開 testing artifact の保証範囲を文書化している。
 - Forge / NeoForge / Fabric が Stonecutter による単一ソースから build されている。
 - public API の binary compatibility check が CI で動いている。
 - runtime platform capability diagnostics が使える。
@@ -655,6 +641,8 @@ Exit criteria:
 
 - downstream plugins が command / permission documentation を生成できる。
 - server admins が registered commands、permissions、platform capabilities を確認できる。
+- Maven Central 配布、documentation site、競合からの migration guides と downstream compatibility test kit が利用できる。
+- 競合比較 suite と再現可能な benchmark 結果を公開し、未解決の差分と regression を追跡できる。
 
 ## Non-Goals
 
@@ -669,9 +657,13 @@ Exit criteria:
 
 ## Success Metrics
 
+最終目標の達成は機能数だけで判定せず、競合ベースラインの各勝利条件を証拠付きで満たすことを必要とする。
+
 - README だけで、新規 plugin が CommandLib を選ぶ理由を説明できる。
 - CommandAPI、Cloud、Lamp、ACF からの migration guides がある。
 - supported Minecraft versions が focused tests または integration tests で裏付けられている。
 - breaking changes が release notes で管理されている。
 - downstream plugins が execution、permissions、suggestions、help をテストできる。
-- Minecraft release 後、latest Paper support を短期間で更新できる。
+- Minecraft release 後、latest Paper support を短期間で更新できる。対応までの日数を release ごとに記録し、追従目標を公開する。
+- 競合の主要ユースケースを共通 example suite で再現でき、型安全性・開発負担・拡張性・検証範囲の優位性を説明できる。
+- 性能・メモリ・登録コストの再現可能な測定と回帰検知がある。未測定の性能優位を主張しない。
