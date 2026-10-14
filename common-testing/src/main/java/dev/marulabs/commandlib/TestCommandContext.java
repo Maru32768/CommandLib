@@ -2,6 +2,8 @@ package dev.marulabs.commandlib;
 
 import dev.marulabs.commandlib.util.ChatColorUtil;
 import dev.marulabs.commandlib.util.text.RichText;
+import dev.marulabs.commandlib.util.text.TextRichText;
+import dev.marulabs.commandlib.util.text.TranslatableRichText;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -133,7 +135,8 @@ public final class TestCommandContext extends CommonCommandContext<FakeSender, S
                        .append("lonmk".charAt(i));
             }
         }
-        builder.append(text.text() != null ? text.text() : text.translationKey());
+        builder.append(text instanceof TextRichText ? ((TextRichText) text).content()
+                : ((TranslatableRichText) text).key());
         text.children()
             .forEach(child -> builder.append(legacyText(child, color, decorations)));
         return builder.toString();
