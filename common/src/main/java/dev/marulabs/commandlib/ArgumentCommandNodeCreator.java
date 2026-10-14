@@ -15,6 +15,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 final class ArgumentCommandNodeCreator<S, T, C extends CommonCommandContext<S, T>> {
     private final PlatformAdapter<S, T, C, ?> platformAdapter = PlatformAdapter.get();
@@ -85,18 +86,27 @@ final class ArgumentCommandNodeCreator<S, T, C extends CommonCommandContext<S, T
             }
         });
 
-        builder.executes(new CommandRunner<>(platformAdapter,
-                                             parent,
-                                             permissionPrefix,
-                                             executorArguments,
-                                             parent.options(),
-                                             parent.prerequisite(),
-                                             helpAction,
-                                             parent.preprocess(),
-                                             arguments.executorFor(argument),
-                                             uncaughtExceptionHandlers(parent, argument)));
+        builder.executes(runner(argument, helpAction, parent));
 
         return builder;
+    }
+
+    /**
+     * The runner for input that ends at the given argument of the branch.
+     */
+    CommandRunner<S, C> runner(CommonArgument<?, C, ?> argument,
+                               CommandExecutor<C> helpAction,
+                               CommonCommand<C, ?> parent) {
+        return new CommandRunner<>(platformAdapter,
+                                   parent,
+                                   permissionPrefix,
+                                   executorArguments,
+                                   parent.options(),
+                                   parent.prerequisite(),
+                                   helpAction,
+                                   parent.preprocess(),
+                                   arguments.executorFor(argument),
+                                   uncaughtExceptionHandlers(parent, argument));
     }
 
     private List<UncaughtExceptionHandler<C>> uncaughtExceptionHandlers(CommonCommand<C, ?> parent,
@@ -107,9 +117,10 @@ final class ArgumentCommandNodeCreator<S, T, C extends CommonCommandContext<S, T
     }
 
     private List<ArgumentCommandNode<S, ?>> toCommandNodes(CommandExecutor<C> helpAction, CommonCommand<C, ?> parent) {
+        // A variadic argument takes one node per value it accepts.
         return arguments.stream()
-                        .map(x -> buildArgument(x, helpAction, parent))
-                        .map(RequiredArgumentBuilder::build)
+                        .flatMap(x -> IntStream.range(0, x.nodeCount())
+                                               .mapToObj(i -> buildArgument(x, helpAction, parent).build()))
                         .collect(Collectors.toList());
     }
 

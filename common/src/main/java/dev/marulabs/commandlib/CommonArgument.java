@@ -4,8 +4,10 @@ import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.marulabs.commandlib.argument.ArgumentValidator;
 import dev.marulabs.commandlib.command.CommandExecutor;
+import dev.marulabs.commandlib.command.Extractor;
 import dev.marulabs.commandlib.exception.ArgumentParseException;
 import dev.marulabs.commandlib.exception.ArgumentValidationException;
+import dev.marulabs.commandlib.exception.CommandPrerequisiteException;
 import dev.marulabs.commandlib.suggestion.SuggestionProvider;
 import dev.marulabs.commandlib.util.UncaughtExceptionHandler;
 import org.jetbrains.annotations.NotNull;
@@ -30,6 +32,8 @@ public abstract class CommonArgument<T, C extends CommonCommandContext<?, ?>, SE
     };
     private BiFunction<? super T, C, ? extends T> transformer = (x, ctx) -> x;
     private final List<UncaughtExceptionHandler<C>> uncaughtExceptionHandlers = new ArrayList<>();
+    // Null unless optional is called; gives the value of the omitted argument.
+    private @Nullable Extractor<C, ? extends T> defaultValue;
 
     protected CommonArgument(@NotNull String name, @NotNull ArgumentType<?> type) {
         this.name = Objects.requireNonNull(name);
@@ -84,6 +88,86 @@ public abstract class CommonArgument<T, C extends CommonCommandContext<?, ?>, SE
         Objects.requireNonNull(suggestionProvider);
         this.suggestionProviders.replaceAll(x -> x.isDefaultSuggestions()
                 ? ArgumentSuggestionProvider.custom(suggestionProvider) : x);
+    }
+
+    final void copySuggestionProviders(@NotNull CommonArgument<?, C, ?> source) {
+        this.suggestionProviders.clear();
+        this.suggestionProviders.addAll(source.suggestionProviders);
+    }
+
+    /**
+     * Makes this argument optional: when the sender omits it, the callback receives {@code defaultValue}. The default
+     * is used as is, without the validator or the transformer. Only the last arguments of a branch can be optional,
+     * and such a branch cannot have child commands; registering the command fails otherwise.
+     *
+     * <pre>{@code
+     * argument(new StringArgument("item"), new IntegerArgument("count").optional(1)).execute((item, count, ctx) -> {
+     *     ctx.sendMessage(item + " x" + count);
+     * });
+     * }</pre>
+     */
+    public final SELF optional(@NotNull T defaultValue) {
+        Objects.requireNonNull(defaultValue);
+        return optional(ctx -> defaultValue);
+    }
+
+    /**
+     * Same as {@link #optional(Object)}, and computes the default from the context each time the argument is omitted,
+     * for example {@code optional(Command.playerRequirer())} to target the sender. A
+     * {@link CommandPrerequisiteException} thrown by the extractor is sent to the sender and stops the command. The
+     * extractor must not return null.
+     */
+    @SuppressWarnings("unchecked")
+    public final SELF optional(@NotNull Extractor<C, ? extends T> defaultValue) {
+        this.defaultValue = Objects.requireNonNull(defaultValue);
+        return (SELF) this;
+    }
+
+    final boolean isOptional() {
+        return defaultValue != null;
+    }
+
+    final T defaultValue(C ctx) throws CommandPrerequisiteException {
+        Extractor<C, ? extends T> defaultValue = Objects.requireNonNull(this.defaultValue);
+        return Objects.requireNonNull(defaultValue.extract(ctx),
+                                      () -> "The default value of argument '" + name + "' must not be null");
+    }
+
+    /**
+     * Returns an argument that takes this argument one or more times and gives the values as a list, such as
+     * {@code new PlayerArgument("targets").variadic()} for {@code /heal <targets...>}. It accepts up to
+     * {@value VariadicArgument#DEFAULT_MAX_COUNT} values; use {@link #variadic(int)} to change the limit. Only the last
+     * argument of a branch can be variadic, and such a branch cannot have child commands; registering the command
+     * fails otherwise.
+     *
+     * <p>Configure each value (validator, transformer, suggestions) on this argument before calling {@code variadic},
+     * and the list on the returned argument. Make it optional with {@code variadic().optional(List.of())}.
+     */
+    @NotNull
+    public final VariadicArgument<T, C> variadic() {
+        return variadic(VariadicArgument.DEFAULT_MAX_COUNT);
+    }
+
+    /**
+     * Same as {@link #variadic()}, and accepts up to {@code maxCount} values. Brigadier has no repetition, so the
+     * command tree holds one node per accepted value.
+     *
+     * @throws IllegalArgumentException if {@code maxCount} is less than 1
+     * @throws IllegalStateException    if this argument is already variadic
+     */
+    @NotNull
+    public final VariadicArgument<T, C> variadic(int maxCount) {
+        if (this instanceof VariadicArgument) {
+            throw new IllegalStateException("Argument '" + name + "' is already variadic");
+        }
+        return new VariadicArgument<>(this, maxCount);
+    }
+
+    /**
+     * The number of command nodes this argument takes in a branch.
+     */
+    int nodeCount() {
+        return 1;
     }
 
     @SuppressWarnings("unchecked")

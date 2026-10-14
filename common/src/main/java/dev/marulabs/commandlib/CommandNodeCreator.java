@@ -109,19 +109,36 @@ final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U ext
             return builder.build();
         }
 
+        argumentsList.forEach(x -> x.validateTrailingArguments(command));
+        List<Arguments<C>> allOptional = argumentsList.stream()
+                                                      .filter(Arguments::isAllOptional)
+                                                      .collect(Collectors.toList());
+        if (allOptional.size() > 1 || (allOptional.size() == 1 && command.executor() != null)) {
+            throw new IllegalStateException("Command '" + command.name()
+                    + "' has more than one action for input without arguments: its own executor or a branch whose arguments are all optional");
+        }
+
         // Input that stops at the command literal (optionally followed by options only) consumes no branch, so its
         // runner must not check or parse any branch of this command. Using a branch runner here would require that
-        // branch's permission for a bare "/command" call.
-        CommandRunner<S, C> bareRunner = new CommandRunner<>(platformAdapter,
-                                                             command,
-                                                             permissionPrefix,
-                                                             inheritedArguments,
-                                                             command.options(),
-                                                             command.prerequisite(),
-                                                             helpAction,
-                                                             command.preprocess(),
-                                                             command.executor(),
-                                                             command.uncaughtExceptionHandlers());
+        // branch's permission for a bare "/command" call. A branch whose arguments are all optional is the exception:
+        // it runs with its defaults then.
+        CommandRunner<S, C> bareRunner = allOptional.isEmpty()
+                ? new CommandRunner<>(platformAdapter,
+                                      command,
+                                      permissionPrefix,
+                                      inheritedArguments,
+                                      command.options(),
+                                      command.prerequisite(),
+                                      helpAction,
+                                      command.preprocess(),
+                                      command.executor(),
+                                      command.uncaughtExceptionHandlers())
+                : new ArgumentCommandNodeCreator<>(allOptional.get(0),
+                                                   appendArgument(inheritedArguments, allOptional.get(0)),
+                                                   permissionPrefix).runner(allOptional.get(0)
+                                                                                       .first(),
+                                                                            helpAction,
+                                                                            command);
         builder.executes(bareRunner);
 
         argumentsList.stream()

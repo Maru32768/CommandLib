@@ -21,7 +21,7 @@ The runner works in this order and stops at the first failure:
 |---|---|---|
 | 1 | Permission of the command node | `You do not have permission to execute this command.` |
 | 2 | Option values and option dependencies (`requires(...)`) | The option message, see [Option errors](#option-errors) |
-| 3 | For each argument branch on the path: branch permission, then each argument's parse → `validator` → `transformer` | The permission message, or the argument's `ArgumentParseException` |
+| 3 | For each argument branch on the path: branch permission, then each argument's parse → `validator` → `transformer`, or the default of an omitted optional argument | The permission message, the argument's `ArgumentParseException`, or the `CommandPrerequisiteException` of an `optional(extractor)` default |
 | 4 | Prerequisites (`addPrerequisite`, `require(...)`, `requirePlayer()`, `requireConsole()`) | The `CommandPrerequisiteException` message |
 | 5 | No executor on this node: the generated help is sent instead | (help text, not an error) |
 | 6 | Preprocesses (`addPreprocess`) | Nothing; a preprocess that returns `false` stops silently |

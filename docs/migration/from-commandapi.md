@@ -87,7 +87,8 @@ Typed executors take up to seven arguments. Beyond that, use `argument(builder -
 | `PotionEffectArgument` | `PotionEffectArgument` (returns a `PotionEffect`; use `getType()`) |
 | `ScoreboardSlotArgument` | `ScoreboardDisplaySlotArgument` (Bukkit `DisplaySlot` names) |
 | `CustomArgument` | `ObjectArgument`, `NameableObjectArgument`, `EnumArgument`, or a subclass of `Argument` |
-| `IntegerRangeArgument`, `DoubleRangeArgument`, `TimeArgument`, `RotationArgument`, `AngleArgument`, `AxisArgument`, `Location2DArgument`, `ChatComponentArgument`, `ChatArgument`, `NBTCompoundArgument`, `BlockPredicateArgument`, `ItemStackPredicateArgument`, `FunctionArgument`, `CommandArgument`, `ListArgument`, `MapArgument`, `MathOperationArgument`, `ObjectiveCriteriaArgument`, `ScoreHolderArgument` | **Not available.** See [missing arguments](../arguments.md#missing-arguments-by-priority) |
+| `ListArgument` | `variadic()` on the element argument (see [optional arguments](#optional-arguments)) |
+| `IntegerRangeArgument`, `DoubleRangeArgument`, `TimeArgument`, `RotationArgument`, `AngleArgument`, `AxisArgument`, `Location2DArgument`, `ChatComponentArgument`, `ChatArgument`, `NBTCompoundArgument`, `BlockPredicateArgument`, `ItemStackPredicateArgument`, `FunctionArgument`, `CommandArgument`, `MapArgument`, `MathOperationArgument`, `ObjectiveCriteriaArgument`, `ScoreHolderArgument` | **Not available.** See [missing arguments](../arguments.md#missing-arguments-by-priority) |
 
 ### Optional arguments
 
@@ -103,20 +104,22 @@ new CommandAPICommand("heal")
 ```
 
 ```java
-// CommandLib: one branch per form
+// CommandLib
 class HealCommand extends Command {
     HealCommand() {
         super("heal");
-        requirePlayer();
 
-        execute(ctx -> ctx.getPlayer()
-                          .setHealth(20));
-        argument(new PlayerArgument("target")).execute((target, ctx) -> target.setHealth(20));
+        argument(new PlayerArgument("target").optional(playerRequirer())).execute((target, ctx) -> {
+            target.setHealth(20);
+        });
     }
 }
 ```
 
-**Not available:** optional and default-valued arguments as one declaration. Declare a branch per arity.
+`optional(defaultValue)` takes a fixed default, and `optional(extractor)` computes one; here a console sender without a
+target gets the requirer's failure message. Only the last arguments of a branch can be optional. `ListArgument`
+becomes `variadic()` on the element argument, such as `new PlayerArgument("targets").variadic()` for a
+`List<Player>`: each value is its own token with the element's parsing and suggestions, not one delimited string.
 
 ## Executors
 
@@ -299,6 +302,6 @@ See [testing](../testing.md).
 
 ## Not available yet
 
-Tracked in the roadmap: optional / default arguments, resulting executors and `/execute store`, vanilla success
+Tracked in the roadmap: resulting executors and `/execute store`, vanilla success
 feedback, requirement-based visibility, per-sender executor variants, annotation and Kotlin DSL APIs, and the
 arguments listed as missing in the [catalog](../arguments.md).

@@ -89,6 +89,10 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
                 } catch (ArgumentParseException e) {
                     e.sendMessage(ctx);
                     return 0;
+                } catch (CommandPrerequisiteException e) {
+                    // The default value of an omitted optional argument can need a prerequisite.
+                    e.sendMessage(ctx);
+                    return 0;
                 }
             }
             try {

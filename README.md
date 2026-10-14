@@ -638,22 +638,40 @@ public final class TestPlugin extends JavaPlugin {
 </details>
 
 <details>
-<summary>Defining Variable Length Arguments</summary>
+<summary>Defining Optional and Variadic Arguments</summary>
+
+`optional(defaultValue)` lets the sender omit an argument, and the callback receives the default. Pass an extractor
+instead to compute the default, such as `Command.playerRequirer()` to target the sender. `variadic()` takes an argument
+one or more times and gives the values as a `List`; it accepts up to 16 values, or the count given to
+`variadic(maxCount)`. Make it optional with `variadic().optional(List.of())`.
 
 ```java
 public final class TestPlugin extends JavaPlugin {
     public void onEnable() {
-        CommandLib.register(this, new Command("test") {{
-            argument(new PlayerArgument("player")).execute((player, ctx) -> {
-                // Do something
+        CommandLib.register(this, new Command("give") {{
+            // /give <item> [count]
+            argument(new StringArgument("item"), new IntegerArgument("count").optional(1)).execute((item, count, ctx) -> {
+                // count is 1 when omitted
             });
-            argument(new PlayerArgument("player"), new StringArgument("message")).execute((player, message, ctx) -> {
-                // Do something
+        }}, new Command("heal") {{
+            // /heal [target]: heals the sender when omitted
+            argument(new PlayerArgument("target").optional(Command.playerRequirer())).execute((target, ctx) -> {
+                target.setHealth(20);
+            });
+        }}, new Command("kick") {{
+            // /kick <reason> <targets...>
+            argument(new StringArgument("reason"), new PlayerArgument("targets").variadic()).execute((reason, targets, ctx) -> {
+                targets.forEach(x -> x.kickPlayer(reason));
             });
         }});
     }
 }
 ```
+
+Only the last arguments of a branch can be optional, only the last one can be variadic, and such a branch cannot have
+child commands; registering the command fails otherwise. A branch whose arguments are all optional also runs for the
+bare command, so the command cannot have its own `execute` then. Generated help shows `[count]` and `<targets...>`.
+Configure each value (validator, suggestions) before `variadic()` and the whole list after it.
 
 </details>
 

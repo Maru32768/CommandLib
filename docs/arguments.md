@@ -188,9 +188,10 @@ Notes:
 | time / duration (`1d`, `20t`) | `TimeArgument` | `time()` | missing | missing | missing |
 | function / function tag | `FunctionArgument` | — | missing | missing | missing |
 | command | `CommandArgument` | — | missing | missing | missing |
-| list / map | `ListArgument`, `MapArgument` | — | missing | missing | missing |
+| list | `ListArgument` | — | partial | partial | partial |
+| map | `MapArgument` | — | missing | missing | missing |
 | structure mirror / rotation | — | `templateMirror()`, `templateRotation()` | missing | missing | missing |
-| optional / default argument | `withOptionalArguments`, `setOptional` | — | missing | missing | missing |
+| optional / default argument | `withOptionalArguments`, `setOptional` | — | equivalent | equivalent | equivalent |
 | custom argument type | `CustomArgument<T, B>` | `CustomArgumentType` | partial | partial | partial |
 
 Notes:
@@ -199,8 +200,13 @@ Notes:
   implement `cast` and `parseImpl`, or adapt an existing argument with `validator`, `transformer`, and
   `additionalParser`. A new `ArgumentType` class must be known to the client, which CommandLib does not register for
   you (only the internal raw word type of `UnparsedArgument` is), so it is `partial`.
-- Optional trailing arguments can be written today as several branches:
-  `argument(a).execute(...)` plus `argument(a, b).execute(...)`.
+- Optional and variadic arguments: `optional(defaultValue)` lets the sender omit the last arguments of a branch, and
+  `optional(extractor)` computes the default, e.g. `optional(Command.playerRequirer())` for the sender. `variadic()`
+  takes the last argument one or more times (up to 16, or `variadic(maxCount)`) and gives a `List<T>`. Only the last
+  arguments of a branch can be optional or variadic, and such a branch cannot have child commands; registration fails
+  otherwise. Help shows `[count]` and `<targets...>`. Each value of a variadic argument is a separate token parsed by the
+  element's own type, with its own suggestions, so it is `partial` against CommandAPI's `ListArgument`, which reads one
+  greedy string split by a delimiter. See [the design note](design/optional-variadic-arguments.md).
 
 ## Not checked yet
 
@@ -216,25 +222,23 @@ These points are open, separate from the missing arguments below:
 
 The order weighs plugin demand, the CommandAPI / Paper parity gap, and how much of the work already exists.
 
-1. **Optional / default and variadic trailing arguments.** The most common shape that needs workarounds today
-   (separate branches per arity).
-2. **Integer / double range** (`1..10`, `..5`, `3..`) and **time / duration**. Common in admin commands; Paper has native
+1. **Integer / double range** (`1..10`, `..5`, `3..`) and **time / duration**. Common in admin commands; Paper has native
    types for both.
-3. **Text component and signed message** for Paper (`component()`, `signedMessage()`), and a portable component
+2. **Text component and signed message** for Paper (`component()`, `signedMessage()`), and a portable component
    argument for Spigot and Forge / NeoForge.
-4. **Block position on Bukkit** and an uncentered location option. The Spigot NMS bridge (`NMSArgumentTileLocation`)
+3. **Block position on Bukkit** and an uncentered location option. The Spigot NMS bridge (`NMSArgumentTileLocation`)
    and its test mock already exist.
-5. **Item predicate and block predicate.** The Spigot NMS bridge for item predicates (`NMSArgumentPredicateItemStack`)
+4. **Item predicate and block predicate.** The Spigot NMS bridge for item predicates (`NMSArgumentPredicateItemStack`)
    and its mock already exist.
-6. **NBT / SNBT compound.**
-7. **Registry semantics on Spigot**: `EntityTypeArgument` by `minecraft:` key, and a generic registry argument
+5. **NBT / SNBT compound.**
+6. **Registry semantics on Spigot**: `EntityTypeArgument` by `minecraft:` key, and a generic registry argument
    (Paper `resource(RegistryKey)` / `resourceKey(RegistryKey)` equivalent) on both Bukkit modules.
-8. **Forge / NeoForge parity**: dimension / world, sound, biome, attribute, entity type, objective, game mode, and the
+7. **Forge / NeoForge parity**: dimension / world, sound, biome, attribute, entity type, objective, game mode, and the
    other Bukkit-only registry arguments.
-9. **Rotation, angle, 2D location, axes.**
-10. **Score holder, objective criteria, math operation**, the remaining scoreboard set.
-11. **Function, command, list, map** arguments.
-12. **Vanilla display slot names, `NamedTextColor` on Paper**, `style`, `hexColor`, `heightMap`, `entityAnchor`,
+8. **Rotation, angle, 2D location, axes.**
+9. **Score holder, objective criteria, math operation**, the remaining scoreboard set.
+10. **Function, command, list, map** arguments.
+11. **Vanilla display slot names, `NamedTextColor` on Paper**, `style`, `hexColor`, `heightMap`, `entityAnchor`,
     structure mirror / rotation.
 
 ## Testing each argument

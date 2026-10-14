@@ -2,6 +2,7 @@ package dev.marulabs.commandlib;
 
 import dev.marulabs.commandlib.command.CommandExecutor;
 import dev.marulabs.commandlib.exception.ArgumentParseException;
+import dev.marulabs.commandlib.exception.CommandPrerequisiteException;
 import dev.marulabs.commandlib.util.ChatColorUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -33,11 +34,15 @@ final class Arguments<C extends CommonCommandContext<?, ?>> {
         this.children = new ArrayList<>(children);
     }
 
-    void parse(C ctx) throws ArgumentParseException {
+    void parse(C ctx) throws ArgumentParseException, CommandPrerequisiteException {
         for (CommonArgument<?, C, ?> argument : arguments) {
-            // Help actions can run before the whole branch is typed; stop at the first missing token so partial
-            // input still produces help instead of an unrelated parse failure.
             if (!ctx.hasInput(argument.name())) {
+                if (argument.isOptional()) {
+                    ctx.setParsedArgument(argument.name(), argument.defaultValue(ctx));
+                    continue;
+                }
+                // Help actions can run before the whole branch is typed; stop at the first missing token so partial
+                // input still produces help instead of an unrelated parse failure.
                 return;
             }
             Object parsedArg = argument.parse(ctx);
@@ -50,9 +55,55 @@ final class Arguments<C extends CommonCommandContext<?, ?>> {
             return "";
         }
 
+        // Examples: "<target>", "[count]", "<targets...>"
         return arguments.stream()
-                        .map(x -> ChatColorUtil.GRAY + "<" + ChatColorUtil.YELLOW + x.name() + ChatColorUtil.GRAY + ">")
+                        .map(x -> {
+                            String name = x.name() + (x instanceof VariadicArgument ? "..." : "");
+                            String open = x.isOptional() ? "[" : "<";
+                            String close = x.isOptional() ? "]" : ">";
+                            return ChatColorUtil.GRAY + open + ChatColorUtil.YELLOW + name + ChatColorUtil.GRAY + close;
+                        })
                         .collect(Collectors.joining(" "));
+    }
+
+    /**
+     * Checks that optional and variadic arguments end the branch, so that each input has one meaning.
+     *
+     * @throws IllegalStateException if they do not
+     */
+    void validateTrailingArguments(CommonCommand<C, ?> parent) {
+        for (int i = 0; i < arguments.size(); i++) {
+            CommonArgument<?, C, ?> argument = arguments.get(i);
+            if (argument instanceof VariadicArgument && i != arguments.size() - 1) {
+                throw new IllegalStateException("Variadic argument '" + argument.name() + "' of command '"
+                        + parent.name() + "' must be the last argument of its branch");
+            }
+            if (i > 0 && arguments.get(i - 1)
+                                  .isOptional()
+                    && !argument.isOptional()) {
+                throw new IllegalStateException("Argument '" + argument.name() + "' of command '" + parent.name()
+                        + "' follows optional argument '" + arguments.get(i - 1)
+                                                                     .name()
+                        + "'; optional arguments must be the last arguments of their branch");
+            }
+        }
+        CommonArgument<?, C, ?> last = arguments.get(arguments.size() - 1);
+        if (!children.isEmpty() && (last.isOptional() || last instanceof VariadicArgument)) {
+            throw new IllegalStateException("The branch of command '" + parent.name() + "' ending with argument '"
+                    + last.name() + "' cannot have child commands, since the argument is optional or variadic");
+        }
+    }
+
+    /**
+     * Whether the branch runs without any of its arguments typed.
+     */
+    boolean isAllOptional() {
+        return arguments.stream()
+                        .allMatch(CommonArgument::isOptional);
+    }
+
+    CommonArgument<?, C, ?> first() {
+        return arguments.get(0);
     }
 
     int size() {
@@ -84,8 +135,12 @@ final class Arguments<C extends CommonCommandContext<?, ?>> {
 
     @Nullable
     CommandExecutor<C> executorFor(CommonArgument<?, C, ?> argument) {
-        boolean isLast = !arguments.isEmpty() && arguments.get(arguments.size() - 1) == argument;
-        if (isLast && executor != null) {
+        // The branch can end at an argument when every argument after it is optional.
+        int index = arguments.indexOf(argument);
+        boolean endsBranch = index >= 0 && arguments.subList(index + 1, arguments.size())
+                                                    .stream()
+                                                    .allMatch(CommonArgument::isOptional);
+        if (endsBranch && executor != null) {
             return executor;
         }
         return argument.executor();

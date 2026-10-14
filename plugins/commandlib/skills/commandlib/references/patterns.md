@@ -41,6 +41,27 @@ class MyCommand extends Command {
 }
 ```
 
+Use `optional(defaultValue)` and `variadic()` for trailing arguments that can
+be omitted or repeated instead of declaring one branch per form:
+
+```java
+class MyCommand extends Command {
+    MyCommand() {
+        super("kick");
+
+        // /kick <targets...> [reason]  is not allowed: a variadic argument must be last.
+        // /kick <reason> <targets...>
+        argument(new StringArgument("reason"), new PlayerArgument("targets").variadic()).execute((reason, targets, ctx) -> {
+            targets.forEach(x -> x.kickPlayer(reason));
+        });
+    }
+}
+```
+
+`optional(Command.playerRequirer())` defaults a player argument to the sender.
+Only the last arguments of a branch can be optional or variadic, and such a
+branch cannot have child commands.
+
 ## Subcommand Shape
 
 Prefer literal-first subcommands for ordinary plugin commands:

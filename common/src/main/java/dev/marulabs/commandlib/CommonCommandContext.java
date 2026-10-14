@@ -1,5 +1,6 @@
 package dev.marulabs.commandlib;
 
+import com.mojang.brigadier.context.ParsedCommandNode;
 import dev.marulabs.commandlib.util.ChatColorUtil;
 import dev.marulabs.commandlib.util.text.RichText;
 import org.jetbrains.annotations.NotNull;
@@ -8,7 +9,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 public abstract class CommonCommandContext<S, C> {
-    protected final com.mojang.brigadier.context.CommandContext<S> handle;
+    // Replaced only while a variadic argument parses one of its values.
+    protected com.mojang.brigadier.context.CommandContext<S> handle;
     private final Map<String, String> argumentNameToInputArgMap = new LinkedHashMap<>();
     private final LinkedHashMap<String, Object> parsedArgMap = new LinkedHashMap<>();
     private final Map<CommandOption<?, ?>, Object> optionValues = new LinkedHashMap<>();
@@ -23,18 +25,26 @@ public abstract class CommonCommandContext<S, C> {
     private void collectInputs(com.mojang.brigadier.context.CommandContext<S> ctx) {
         // Brigadier splits /a <n> <p> sub <b> across parent and child contexts. CommandLib keeps a flat name-to-token
         // map so argument-child executors can still read parent arguments.
-        ctx.getNodes()
-           .forEach(x -> {
-               String name = x.getNode()
-                              .getName();
-               if (name.startsWith("-") || name.startsWith(CommandOption.INTERNAL_NAME_PREFIX)) {
-                   return;
-               }
+        @Nullable
+        String previousName = null;
+        for (ParsedCommandNode<S> x : ctx.getNodes()) {
+            String name = x.getNode()
+                           .getName();
+            String input = x.getRange()
+                            .get(ctx.getInput());
+            boolean repeated = name.equals(previousName);
+            previousName = name;
+            if (name.startsWith("-") || name.startsWith(CommandOption.INTERNAL_NAME_PREFIX)) {
+                continue;
+            }
 
-               argumentNameToInputArgMap.put(name,
-                                             x.getRange()
-                                              .get(ctx.getInput()));
-           });
+            if (repeated) {
+                // A variadic argument repeats its node, so its input is all of its tokens.
+                argumentNameToInputArgMap.merge(name, input, (a, b) -> a + " " + b);
+            } else {
+                argumentNameToInputArgMap.put(name, input);
+            }
+        }
 
         com.mojang.brigadier.context.CommandContext<S> child = ctx.getChild();
         if (child != null) {
@@ -212,6 +222,15 @@ public abstract class CommonCommandContext<S, C> {
 
     final void setParsedArgument(String name, Object parsedArgument) {
         parsedArgMap.put(name, parsedArgument);
+    }
+
+    /**
+     * Replaces the handle and the input of the argument {@code name}, so that a variadic argument's element parses one
+     * value as if it were the only one.
+     */
+    final void replaceHandle(com.mojang.brigadier.context.CommandContext<S> handle, String name, String input) {
+        this.handle = Objects.requireNonNull(handle);
+        argumentNameToInputArgMap.put(name, input);
     }
 
     final void setOptionValue(CommandOption<?, ?> option, Object value) {
