@@ -126,7 +126,7 @@ public argument class, add a case to its `ArgumentTest`; `:integration-test:test
    root publication lists.
 7. Create `integration-test/shared/modded/versions/<node>/gradle.properties`
    (`loom.platform` and `deps.forgeLoader`, the mod loader version range lower
-   bound), and add an `integration-test/targets/<node>` target registered in the
-   `minecraftIntegrationTest` aggregate task.
+   bound), and add an `integration-test/targets/<node>` target. `settings.gradle.kts`
+   and the `minecraftIntegrationTest` aggregate task pick up every target directory.
 8. Update the supported versions in `README.md` and
    `docs/design/forge-version-support.md`.

@@ -127,7 +127,15 @@ abstract class BuildToolsTask : DefaultTask() {
 
         val stillMissing = missingArtifacts()
         if (stillMissing.isNotEmpty()) {
-            error("BuildTools finished but did not install: ${stillMissing.joinToString()}")
+            val installed = repository.resolve("org/spigotmc/spigot")
+                .listFiles { file -> file.isDirectory && file.name.startsWith("${minecraftVersion.get()}-R") }
+                .orEmpty()
+                .map(File::getName)
+            error(
+                "BuildTools finished but did not install: ${stillMissing.joinToString()}" +
+                    if (installed.isEmpty()) "" else
+                        ". It installed ${installed.joinToString()}; update spigotArtifactVersion in buildSrc if the API revision changed.",
+            )
         }
         revisionRecord().apply { parentFile.mkdirs() }.writeText(revision.get())
     }

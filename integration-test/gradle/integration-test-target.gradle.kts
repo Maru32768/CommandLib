@@ -632,8 +632,14 @@ tasks.register<Test>("minecraftIntegrationTest") {
     testClassesDirs = sourceSets["test"].output.classesDirs
     // The test reads Adventure only by reflection. Its own Adventure 4 goes first for bots that bring none or an older
     // one, and MCProtocolLib first for bots built on Adventure 5 (26.2 and later), which Adventure 4 would shadow.
-    classpath = if (botJavaVersion >= 21) files(mcProtocol, sourceSets["test"].runtimeClasspath)
-    else files(sourceSets["test"].runtimeClasspath, mcProtocol)
+    classpath = files(provider {
+        val botUsesAdventure5 = mcProtocol.get().incoming.resolutionResult.allComponents.any {
+            val module = it.moduleVersion
+            module != null && module.group == "net.kyori" && module.name == "adventure-api" && module.version.startsWith("5.")
+        }
+        if (botUsesAdventure5) listOf(mcProtocol, sourceSets["test"].runtimeClasspath)
+        else listOf(sourceSets["test"].runtimeClasspath, mcProtocol)
+    })
     useJUnitPlatform()
     filter {
         includeTestsMatching("dev.marulabs.commandlib.integration.IntegrationTest")

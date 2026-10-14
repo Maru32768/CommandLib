@@ -449,10 +449,6 @@ public final class ArgumentTest extends TestBase {
         return !"1.16.5".equals(BukkitUtil.getMinecraftVersion());
     }
 
-    /**
-     * The input for a Bukkit type that was an enum and became registry-backed during 1.21. Spigot made the change in a
-     * later release than the one Paper's API did, so the type itself decides.
-     */
     private boolean isLessThan(String version, String other) {
         String[] versionUnits = normalizeVersion(version).split("\\.");
         String[] otherUnits = normalizeVersion(other).split("\\.");

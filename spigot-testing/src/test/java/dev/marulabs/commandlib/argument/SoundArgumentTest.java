@@ -21,4 +21,17 @@ class SoundArgumentTest {
 
         assertThat(sender.getSentMessageTexts()).containsExactly("minecraft:block.anvil.land");
     }
+
+    @Test
+    void unknown_sound_sends_failure_message() {
+        FakeSender sender = FakeSender.player("Alice");
+
+        try (CommandTester tester = new CommandTester(() -> new Command("sound") {{
+            argument(new SoundArgument("value")).execute((sound, ctx) -> ctx.sendMessage("unreachable"));
+        }}, "test.command")) {
+            tester.execute("sound commandlib:missing", sender);
+        }
+
+        assertThat(sender.getSentMessageTexts()).containsExactly("commandlib:missing is not a known sound");
+    }
 }
