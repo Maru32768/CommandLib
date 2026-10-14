@@ -9,15 +9,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class AttributeArgumentTest {
     @Test
-    void attribute_is_parsed_case_insensitively() {
+    void attribute_is_resolved_by_registry_key() {
         FakeSender sender = FakeSender.player("Alice");
 
-        try (CommandTester tester = new CommandTester(new Command("attribute") {{
-            argument(new AttributeArgument("value")).execute((attribute, ctx) -> ctx.sendMessage(attribute.name()));
+        try (CommandTester tester = new CommandTester(() -> new Command("attribute") {{
+            argument(new AttributeArgument("value")).execute((attribute, ctx) -> ctx.sendMessage(attribute.getKey()
+                                                                                                          .toString()));
         }}, "test.command")) {
-            tester.execute("attribute generic_max_health", sender);
+            tester.execute("attribute generic.max_health", sender);
         }
 
-        assertThat(sender.getSentMessageTexts()).containsExactly("GENERIC_MAX_HEALTH");
+        assertThat(sender.getSentMessageTexts()).containsExactly("minecraft:generic.max_health");
     }
 }

@@ -97,21 +97,23 @@ public final class ArgumentTest extends TestBase {
     public List<String> attributeArgument() {
         String name = getMethodName();
         String key = getKey();
+        // 1.21.2 dropped the "generic." prefix of attribute ids.
+        String attribute = isLessThan(BukkitUtil.getMinecraftVersion(), "1.21.2") ? "generic.max_health" : "max_health";
 
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name) {{
             argument(new AttributeArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
             })).execute((a, ctx) -> {
-                putResult(key, a.toString(), "GENERIC_MAX_HEALTH");
+                // Keyed, since Attribute is an enum before 1.21.3 and a registry interface from then.
+                putResult(key,
+                          ((Keyed) a).getKey()
+                                     .getKey(),
+                          attribute);
             });
         }});
 
-        return List.of(buildCommand(command,
-                                    name + " "
-                                            + registryInput(org.bukkit.attribute.Attribute.class,
-                                                            "generic_max_health",
-                                                            "generic.max_health")));
+        return List.of(buildCommand(command, name + " " + attribute));
     }
 
     public List<String> blockDataArgument() {
@@ -142,7 +144,10 @@ public final class ArgumentTest extends TestBase {
             argument(new BiomeArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
             })).execute((a, ctx) -> {
-                putResult(key, a.toString(), "PLAINS");
+                putResult(key,
+                          ((Keyed) a).getKey()
+                                     .getKey(),
+                          "plains");
             });
         }});
 
@@ -448,10 +453,6 @@ public final class ArgumentTest extends TestBase {
      * The input for a Bukkit type that was an enum and became registry-backed during 1.21. Spigot made the change in a
      * later release than the one Paper's API did, so the type itself decides.
      */
-    private String registryInput(Class<?> type, String legacyName, String registryName) {
-        return type.isEnum() ? legacyName : registryName;
-    }
-
     private boolean isLessThan(String version, String other) {
         String[] versionUnits = normalizeVersion(version).split("\\.");
         String[] otherUnits = normalizeVersion(other).split("\\.");
@@ -696,15 +697,14 @@ public final class ArgumentTest extends TestBase {
             argument(new SoundArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
             })).execute((a, ctx) -> {
-                putResult(key, a.toString(), "BLOCK_ANVIL_LAND");
+                putResult(key,
+                          ((Keyed) a).getKey()
+                                     .getKey(),
+                          "block.anvil.land");
             });
         }});
 
-        return List.of(buildCommand(command,
-                                    name + " "
-                                            + registryInput(org.bukkit.Sound.class,
-                                                            "block_anvil_land",
-                                                            "block.anvil.land")));
+        return List.of(buildCommand(command, name + " minecraft:block.anvil.land"));
     }
 
     public List<String> stringArgument() {

@@ -55,7 +55,7 @@ This document summarizes the current state of CommandLib's built-in arguments an
 | `UUIDsArgument` | `Implemented` | multiple UUIDs / selector path. |
 | `LocationArgument` | `Implemented` | Bukkit `Location`. |
 | `WorldArgument` | `Implemented` | Bukkit / Paper `World`. Spigot uses NMS `ArgumentDimension`; Paper uses `ArgumentTypes.world()`. |
-| `BiomeArgument` | `Implemented` | Bukkit / Paper `Biome`. Spigot uses an enum argument; Paper uses a native registry argument. |
+| `BiomeArgument` | `Implemented` | Bukkit / Paper `Biome`, by registry key. Spigot reads Bukkit's `Registry`; Paper uses a native registry argument. |
 | `BlockDataArgument` | `Implemented` | Bukkit `BlockData`. |
 | `ItemStackArgument` | `Implemented` | Bukkit `ItemStack`. |
 | `EnchantmentArgument` | `Implemented` | Bukkit `Enchantment`. |
@@ -63,9 +63,9 @@ This document summarizes the current state of CommandLib's built-in arguments an
 | `ParticleArgument` | `Implemented` | Bukkit particle data. |
 | `TeamArgument` | `Implemented` | Bukkit scoreboard team. `scoreboard(Supplier<Scoreboard>)` selects the scoreboard looked up on each parse / suggestion (defaults to the main scoreboard). |
 | `NamespacedKeyArgument` | `Implemented` | Bukkit `NamespacedKey`. The namespace defaults to `minecraft`. |
-| `SoundArgument` | `Implemented` | Bukkit / Paper `Sound` enum. |
+| `SoundArgument` | `Implemented` | Bukkit / Paper `Sound`, by registry key. |
 | `EntityTypeArgument` | `Implemented` | Bukkit / Paper `EntityType` enum. |
-| `AttributeArgument` | `Implemented` | Bukkit / Paper `Attribute` enum. |
+| `AttributeArgument` | `Implemented` | Bukkit / Paper `Attribute`, by registry key. |
 | `AdvancementArgument` | `Implemented` | Bukkit / Paper `Advancement` lookup by `NamespacedKey`. |
 | `LootTableArgument` | `Implemented` | Bukkit / Paper `LootTable` lookup by `NamespacedKey`. |
 | `RecipeArgument` | `Implemented` | Bukkit / Paper `Recipe` lookup by `NamespacedKey`. |
