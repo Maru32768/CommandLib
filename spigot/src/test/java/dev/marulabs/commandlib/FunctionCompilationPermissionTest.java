@@ -32,6 +32,14 @@ class FunctionCompilationPermissionTest {
         }
     }
 
+    @Test
+    void recognizesOnlyCraftBukkitsNullCommandSender() {
+        assertThat(PlatformAdapterImpl.isCraftBukkitNullSender("org.bukkit.craftbukkit.v1_21_R7.command.NullCommandSender")).isTrue();
+        assertThat(PlatformAdapterImpl.isCraftBukkitNullSender("org.bukkit.craftbukkit.command.NullCommandSender")).isTrue();
+        assertThat(PlatformAdapterImpl.isCraftBukkitNullSender("com.example.command.NullCommandSender")).isFalse();
+        assertThat(PlatformAdapterImpl.isCraftBukkitNullSender("org.bukkit.craftbukkit.command.ConsoleCommandSender")).isFalse();
+    }
+
     /**
      * Stands in for CraftBukkit's CommandSource.NULL, the source of data pack function compilation.
      */

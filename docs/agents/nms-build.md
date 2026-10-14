@@ -31,8 +31,8 @@ server. They follow CommandAPI's build layout:
   target or module builds the last build of the release by its Spigot build number
   (`commandlib.integration.buildToolsRevision`, `spigotNms.buildToolsRevision`).
 - From 26.1 Spigot runs with Mojang names and keeps CraftBukkit in the unversioned `org.bukkit.craftbukkit` package,
-  so `spigot-26.1.2` compiles against the server jar as it is, without remapping or a `MappingProbe`. Mojang names do
-  not change between releases the way obfuscated ones do, so the module covers every 26.x release whose target passes.
+  so `spigot-26.1.2` compiles against the server jar as it is, without remapping. Mojang names do not change between
+  releases the way obfuscated ones do, so the module covers every 26.x release whose target passes.
 - BuildTools installs the artifacts of 1.21.11 as `1.21.11-R0.2-SNAPSHOT`, and of every other version as
   `<version>-R0.1-SNAPSHOT` (`spigotArtifactVersion` in `buildSrc`).
 - The supported range is 1.16.4 to 26.3. A server outside every module's versions has no NMS implementation, and
@@ -46,8 +46,9 @@ server. They follow CommandAPI's build layout:
   is shaded into plugins of both kinds. Some Spigot names are Mojang names of other classes (Spigot `MobEffect` is
   Mojang `MobEffectInstance`), so Mojang-named classes break in a remapped plugin. A Paper module therefore ships its
   Mojang-named jar and its paperweight `reobfJar`, moved to the `<package>_spigot` package. Each package has a
-  `MappingProbe`, and `NMSClassRegistry` uses the package whose probe matches. The Spigot modules for 1.20.5 to
-  1.21.11 have a probe that matches only on Spigot, so Paper uses its own modules.
+  `MappingProbe`, and `NMSClassRegistry` uses the package whose probe matches. The Spigot modules from 1.20.5 have a
+  probe that matches only on Spigot (the Spigot name `MobEffectList` up to 1.21.11, no Paper lifecycle API from
+  26.1), so the spigot jar on a later Paper throws `NMSClassNotFoundException` instead of running Spigot code.
 
 The typed classes target Java 11 up to 1.16.5 and Java 16 after (`typedNmsRelease`), the oldest releases that
 compile, while the toolchain follows the server jar. A plugin's shading tool reads every class of the spigot jar, so
