@@ -1,5 +1,6 @@
 package dev.marulabs.commandlib;
 
+import dev.marulabs.commandlib.command.Extractor;
 import dev.marulabs.commandlib.exception.CommandPrerequisiteException;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
@@ -15,20 +16,30 @@ public class Command extends CommonCommand<CommandContext, Command> {
         super(name);
     }
 
-    public final void requirePlayer() {
-        addPrerequisite(ctx -> {
+    public static Extractor<CommandContext, Player> playerRequirer() {
+        return ctx -> {
             if (!(ctx.getSender() instanceof Player)) {
                 throw new CommandPrerequisiteException("This command can only be executed by a player.");
             }
-        });
+            return (Player) ctx.getSender();
+        };
     }
 
-    public final void requireConsole() {
-        addPrerequisite(ctx -> {
+    public static Extractor<CommandContext, ConsoleCommandSender> consoleRequirer() {
+        return ctx -> {
             if (!(ctx.getSender() instanceof ConsoleCommandSender)) {
                 throw new CommandPrerequisiteException("This command can only be executed from the console.");
             }
-        });
+            return (ConsoleCommandSender) ctx.getSender();
+        };
+    }
+
+    public final void requirePlayer() {
+        addPrerequisite(playerRequirer()::extract);
+    }
+
+    public final void requireConsole() {
+        addPrerequisite(consoleRequirer()::extract);
     }
 
     public final void permission(@NotNull PermissionDefault defaultPermission) {

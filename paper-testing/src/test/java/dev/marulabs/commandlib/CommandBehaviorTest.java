@@ -43,6 +43,22 @@ class CommandBehaviorTest {
     }
 
     @Test
+    void playerRequirerPassesThePlayerToTheExecutor() {
+        Command command = new Command("whoami") {{
+            require(Command.playerRequirer()).execute((player, ctx) -> ctx.sendSuccess(player.getName()));
+        }};
+        CommandTester tester = new CommandTester(command, "test.command");
+        FakeSender player = FakeSender.player("Steve");
+        FakeSender console = FakeSender.console();
+
+        tester.execute("whoami", player);
+        tester.execute("whoami", console);
+
+        assertThat(player.getSentMessageTexts()).containsExactly("Steve");
+        assertThat(console.getSentMessageTexts()).containsExactly("This command can only be executed by a player.");
+    }
+
+    @Test
     void requireConsoleAllowsConsoleAndRejectsPlayers() {
         Command command = new Command("consoleonly") {{
             requireConsole();
