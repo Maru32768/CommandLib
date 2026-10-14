@@ -35,7 +35,7 @@
 | Fabric support                      | `[ ]` | なし。                                                                                                                                     | Fabric command registration / Brigadier integration 設計、Stonecutter matrix への追加（方針案: Pillar 11）。                    |
 | Brigadier / NMS hiding              | `[~]` | 利用者 API から Brigadier / NMS を隠している。                                                                                                      | capability detection、公式 API 優先、fallback policy。                            |
 | `/execute` integration              | `[~]` | README と Bukkit registration path で `/execute run` 連携を扱っている。spigot module と paper module の command は `/minecraft:reload` 後や runtime 登録後も data pack function から使える（`/minecraft:reload` 後は両 module に integration test あり）。paper module で plugin から登録した command は次 tick の function 再 compile 後に使える（bootstrap 登録は server の compile 時点から使える）。 | command block / tag での保証と tests。 |
-| Built-in arguments                  | `[~]` | 基本的な primitive、string、player、entity、location、item などがある。                                                                                | CommandAPI / Paper との挙動別 catalog、NBT / SNBT、range、duration、component 等の不足補完。    |
+| Built-in arguments                  | `[~]` | 基本的な primitive、string、player、entity、location、item などがある。CommandAPI / Paper との挙動別 catalog は [`docs/arguments.md`](arguments.md)。 | catalog の missing 一覧（optional / variadic、range、duration、component、block position、predicate、NBT、registry 等）の補完。 |
 | Argument validation                 | `[x]` | `validator(...)` と `ArgumentValidator` がある。                                                                                             | reusable condition registry、error customization。                           |
 | Argument transform                  | `[x]` | `transformer(...)` がある。                                                                                                                 | docs と examples。                                                           |
 | Custom parsing fallback             | `[x]` | `additionalParser(...)` がある。                                                                                                            | behavior spec と tests。                                                     |
@@ -44,9 +44,9 @@
 | Permission-aware execution          | `[x]` | command / argument branch permission が実行時に使われる。                                                                                         | option permission、diagnostics、export。                                      |
 | Permission registration             | `[~]` | Bukkit / Forge の permission registration がある。                                                                                           | reload safety の integration tests、LuckPerms guide。                         |
 | Permission-aware help / suggestions | `[~]` | argument branch permission を help / tab completion に反映する設計がある。                                                                          | 網羅 tests と docs。                                                           |
-| Typed command options               | `[~]` | flag / value option、default、dependency、`ctx.getOption(...)` がある。                                                                        | repeatable、multi-value、alias、required、mutual exclusion。                    |
+| Typed command options               | `[~]` | flag / value / count option、default、dependency、repeatable（`List<T>`）、alias、required、`mutuallyExclusive(...)`、`OptionParseException`、help の option section がある（[`docs/options.md`](options.md)）。 | subcommand への継承、positional argument の後の option、固定 arity の multi-value、排他 group の専用 error message。 |
 | Generated usage / help              | `[~]` | README と snapshot tests に usage / help がある。server の `/help` 用の text は `serverHelp(...)` で指定でき、Bukkit 系では plugin の index に載る。 | formatter API、theme、locale、MiniMessage / Adventure。                        |
-| Error taxonomy                      | `[~]` | parse / validation / prerequisite 系の例外がある。                                                                                              | option error、unknown subcommand、missing argument などの公開仕様。                  |
+| Error taxonomy                      | `[~]` | parse / validation / prerequisite / option 系の例外があり、各 error で sender に見える message を [`docs/errors.md`](errors.md) で公開仕様化した。 | unknown subcommand、missing argument の専用 error、platform 間の vanilla error 表示差（Spigot / Paper / modded）の統一、error formatter API。 |
 | Exception handling                  | `[~]` | uncaught exception handler の仕組みがある。                                                                                                     | exception mapping、result handling、docs。                                    |
 | Preprocess / prerequisite           | `[~]` | `addPreprocess(...)`、`addPrerequisite(...)`、`requirePlayer()` 等がある。                                                                     | reusable registry、middleware 化、diagnostics。                                |
 | Middleware / interceptor            | `[ ]` | なし。                                                                                                                                     | execution pipeline API。                                                    |
@@ -60,16 +60,14 @@
 | Adventure / MiniMessage             | `[~]` | platform 非依存の rich text 値型 `RichText`（色、装飾、hover text、click、translatable 引数）を全 platform で送れる（Phase 1 完了）。Paper / modded は native component の `sendSuccess/Warn/Failure` もある。 | rich help、rich suggestion tooltip の統一、MiniMessage。設計: [`docs/design/rich-text-messages.md`](design/rich-text-messages.md)。 |
 | Multi-version integration tests     | `[~]` | `integration-test` aggregator と Spigot（1.16.5〜26.3 の全 release）/ Paper / Mohist / Forge / NeoForge fixtures がある。                                                             | CI matrix、`IntegrationTarget` への platform フィールド追加、result docs、test kit 化。  |
 | NMS Reflection test strategy        | `[~]` | `CommandTester` が `Mockito.mockStatic` で `NMSClassRegistry` をスタブし、軽量な Mock 実装クラス方式で NMS なしテストを実現している。                 | Builder / mock 差し込みの保証拡充、新引数の Mock + Test ルールの継続適用。              |
-| Documentation                       | `[~]` | README、`docs/compatibility.md`、design docs がある。                                                                                                               | compatibility の結果公開・更新、arguments、suggestions、permissions、migration、troubleshooting。 |
-| Migration guides                    | `[ ]` | なし。                                                                                                                                     | CommandAPI、Cloud、Lamp、ACF からの移行 guide。                                     |
+| Documentation                       | `[~]` | README（Why CommandLib、比較表）、`docs/compatibility.md`、`arguments` / `errors` / `options` / `suggestions` / `permissions` / `testing` / `troubleshooting` と design docs がある。 | compatibility の結果公開・更新、documentation site。 |
+| Migration guides                    | `[~]` | CommandAPI からの移行 guide（[`docs/migration/from-commandapi.md`](migration/from-commandapi.md)）がある。 | Cloud、Lamp、ACF からの移行 guide。 |
 | Runtime diagnostics                 | `[ ]` | なし。                                                                                                                                     | command tree、permissions、platform capability report。                       |
 | Generated docs / exports            | `[ ]` | なし。                                                                                                                                     | command docs、permission tree Markdown / JSON。                              |
 
 ## 優先度別バックログ
 
 ### P3: Minecraft 連携で CommandAPI を上回る
-
-- `[ ]` 公式資料を基準に argument / vanilla behavior の比較 catalog を作り、未対応と未確認を分けて追跡する。
 
 - `[~]` missing built-in arguments を catalog に基づいて実装する（NMS 依存引数は `MockNMSArgumentXxx` + `XxxArgumentTest`
   をセットで追加する）。`GameModeArgument`（Spigot / Paper）、`BiomeArgument`（Spigot / Paper）、`WorldArgument`（Spigot /
@@ -86,8 +84,8 @@
 - `[ ]` vanilla-style feedback を追加する。`ctx.sendSuccess(message, broadcastToOps)` 相当で
   `sendCommandFeedback` / `logAdminCommands` gamerule を尊重し、selector で複数 target に適用した場合の集計 message も扱う。
 - `[ ]` `RangeArgument`（`1..10`、`..5`、`3..`）と `DurationArgument`（`1h30m`、`20t` 等）を追加する。
-- `[ ]` error taxonomy を公開仕様として整理する。
-- `[ ]` CommandAPI migration guide を追加する。
+- `[ ]` error を platform 間で揃える。実行中の vanilla error は Spigot が翻訳 component、Paper が英語の `getMessage()`、
+  modded が vanilla component で表示が異なり、selector が誰にも一致しない時の message も Spigot と Paper で異なる。
 
 ### P4: Cloud / Lamp / ACF を上回る developer experience
 
@@ -107,7 +105,8 @@ annotation API / Kotlin DSL の `@Optional` や default args はこの土台の�
 - `[ ]` Kotlin DSL を設計・実装する。
 - `[ ]` middleware / interceptor API を追加する。
 - `[ ]` 8 引数以上を raw types / casts なしで扱える表現と explicit Java builder API を追加する。
-- `[ ]` options の repeatable / multi-value / aliases / required / 排他・継承と配置拡張を実装する。
+- `[~]` options の継承と配置拡張（subcommand への継承、positional argument の後の option、固定 arity の multi-value）を実装する。
+  repeatable / count / aliases / required / 排他は実装済み。
 - `[ ]` reusable condition registry、help / usage / error formatter、rich help / MiniMessage を追加する。
 - `[ ]` dependency injection hooks を追加する。
 - `[ ]` sender mapper / context enrichment を追加する。

@@ -7,7 +7,7 @@
 ### P0: 方針を固定する（完了）
 
 - `[x]` `docs/compatibility.md` を追加し、supported / tested / best-effort / unsupported を分ける。
-- `[x]` `docs/design/argument-catalog.md` を追加し、CommandLib / CommandAPI / Paper の argument 対応表を作る。
+- `[x]` `docs/design/argument-catalog.md` を追加し、CommandLib / CommandAPI / Paper の argument 対応表を作る（2026-10-15 に behavior 別の `docs/arguments.md` へ置き換え）。
 - `[x]` 現行 `bukkit` module は Spigot 互換実装として扱う方針に決める。
 - `[x]` GA 前 module split plan を作り、`bukkit` artifact は削除する方針に決める。
 - `[x]` spigot / paper 向け test module と integration-test の整理方針を決める。
@@ -38,6 +38,15 @@
   `PaperMessages.toMessage(Component)` でリッチ tooltip が使える。
 - `[x]` suggestions / tooltip の spigot-test coverage を追加する。`CommandTester.suggestions()` を追加し、tooltip
   テストを追加済み。
+- `[x]` 公式資料を基準に argument / vanilla behavior の比較 catalog を作り、未対応と未確認を分けて追跡する
+  （`docs/arguments.md`、2026-10-15）。
+- `[x]` error taxonomy を公開仕様として整理する（`docs/errors.md`、2026-10-15）。
+- `[x]` CommandAPI migration guide を追加する（`docs/migration/from-commandapi.md`、2026-10-15）。
+
+### P4: Developer experience（完了分）
+
+- `[x]` options の repeatable / count / aliases / required / mutually exclusive、`OptionParseException`、help の option
+  section を実装する（`docs/options.md`、2026-10-15）。
 
 ### P6: Ecosystem と tooling（完了分）
 

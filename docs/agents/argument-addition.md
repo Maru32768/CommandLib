@@ -9,6 +9,8 @@ Use this checklist whenever adding a public `*Argument` class.
 - Keep Spigot-only NMS or Bukkit internals in `spigot`.
 - Use Paper official `ArgumentTypes` in `paper` when available.
 - Use Forge/Minecraft native argument types in `modded` when available.
+- For registry-backed Bukkit/Paper values, use Paper's registry key semantics (`minecraft:...` input and suggestions,
+  like `ArgumentTypes.resource(RegistryKey...)`), with Spigot adapting to the same behavior.
 
 ## 2. Implement The Argument
 
@@ -74,7 +76,8 @@ Use this checklist whenever adding a public `*Argument` class.
 
 ## 5. Update Docs
 
-- Update `docs/design/argument-catalog.md` status and priority.
+- Update the argument's row and the missing list in `docs/arguments.md`: return type, accepted syntax, suggestions,
+  supported platforms, and the status against CommandAPI and Paper.
 - Update `docs/roadmap.md` when the roadmap explicitly names the argument.
 - Add user-facing docs later if the argument changes public adoption guidance.
 
