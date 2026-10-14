@@ -8,7 +8,7 @@ public final class CommandPrerequisiteException extends Exception {
     private final Consumer<CommonCommandContext<?, ?>> sendMessage;
 
     public CommandPrerequisiteException() {
-        this("You don't have permission to execute this command.");
+        this("You do not have permission to execute this command.");
     }
 
     public CommandPrerequisiteException(String message, String... additionalMessages) {

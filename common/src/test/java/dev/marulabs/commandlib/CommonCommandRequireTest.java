@@ -37,6 +37,20 @@ class CommonCommandRequireTest {
     }
 
     @Test
+    void default_prerequisite_failure_matches_the_permission_message() throws Exception {
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("cmd") {{
+            addPrerequisite(ctx -> {
+                throw new CommandPrerequisiteException();
+            });
+            execute(ctx -> ctx.sendMessage("executed"));
+        }});
+
+        TestCommandContext ctx = runner.execute("cmd");
+
+        assertThat(ctx.messages()).containsExactly("You do not have permission to execute this command.");
+    }
+
+    @Test
     void require_on_argument_runs_execute_with_arg_and_extracted_value() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("cmd") {{
             argument(new CommonStringArgument<>("name")).require(SUCCEEDING_EXTRACTOR)
