@@ -123,7 +123,7 @@ class HealCommand extends Command {
 | CommandAPI | CommandLib |
 |---|---|
 | `executes((sender, args) -> ...)` | `execute(ctx -> ...)` or the typed `execute((a, b, ctx) -> ...)`; the sender is `ctx.getSender()` |
-| `executesPlayer((player, args) -> ...)` | `requirePlayer()` on the command, then `ctx.getPlayer()`; or `require(Command.playerRequirer())` (Spigot) for a typed player |
+| `executesPlayer((player, args) -> ...)` | `requirePlayer()` on the command, then `ctx.getPlayer()`; or `require(Command.playerRequirer())` for a typed player |
 | `executesConsole(...)` | `requireConsole()`, then `ctx.getConsole()` |
 | `executesCommandBlock`, `executesProxy`, `executesNative`, `executesEntity` | **Not available** as separate executors; check `ctx.getSender()` (`BlockCommandSender`, ...) yourself |
 | Resulting executors (`return 1`), `/execute store` | **Not available** yet; the command returns `1` when the executor runs |
@@ -142,7 +142,7 @@ class HomeCommand extends Command {
 }
 ```
 
-`Command.playerRequirer()` is in the `spigot` artifact. On Paper, use `requirePlayer()` and `ctx.getPlayer()`.
+`Command.playerRequirer()` and `consoleRequirer()` exist in the `spigot` and `paper` artifacts. Forge / NeoForge have neither, nor `requirePlayer()`.
 
 ## Subcommands
 

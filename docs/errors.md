@@ -174,8 +174,8 @@ Thrown by a `Prerequisite` (`addPrerequisite`), an `Extractor` (`require(...)`),
 | `new CommandPrerequisiteException()` | `You do not have permission to execute this command.` |
 | `new CommandPrerequisiteException("message", "more lines"...)` | each string, in red |
 | `new CommandPrerequisiteException(ctx -> ...)` | whatever the consumer sends |
-| `requirePlayer()` (Spigot, Paper), `Command.playerRequirer()` (Spigot) | `This command can only be executed by a player.` |
-| `requireConsole()` (Spigot, Paper), `Command.consoleRequirer()` (Spigot) | `This command can only be executed from the console.` |
+| `requirePlayer()`, `Command.playerRequirer()` (Spigot, Paper) | `This command can only be executed by a player.` |
+| `requireConsole()`, `Command.consoleRequirer()` (Spigot, Paper) | `This command can only be executed from the console.` |
 
 Prerequisites of a parent command apply to its children unless the child calls `disableParentPrerequisite()`.
 
