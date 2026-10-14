@@ -1,5 +1,6 @@
 package dev.marulabs.commandlib;
 
+import com.mojang.brigadier.Message;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.marulabs.commandlib.exception.ArgumentParseException;
 import net.minecraft.commands.CommandSourceStack;
@@ -43,8 +44,15 @@ public final class PlatformAdapterImpl implements PlatformAdapter<CommandSourceS
 
     @Override
     public ArgumentParseException convertCommandSyntaxException(CommandSyntaxException e) {
+        Message message = e.getRawMessage();
         return new ArgumentParseException(ctx -> {
-            ((CommandContext) ctx).sendMessage((Component) e.getRawMessage());
+            // Vanilla sends command errors as failures: red, and still shown where success feedback is silenced.
+            if (message instanceof Component) {
+                ((CommandContext) ctx).sendFailure((Component) message);
+            } else {
+                // Custom argument types may throw with a plain Brigadier message.
+                ctx.sendFailure(message.getString());
+            }
         });
     }
 }

@@ -308,6 +308,23 @@ class CommandTesterTest {
         }
 
         @Test
+        void vanilla_error_while_resolving_is_sent_as_failure() {
+            FakeSender sender = FakeSender.player("Steve")
+                                          .op(true);
+            try (CommandTester tester = new CommandTester(new Command("arg") {{
+                argument(new PlayerArgument("a")).execute((a, ctx) -> ctx.sendMessage("unreachable"));
+            }}, "test")) {
+                // The selector parses, but no online player has the name, so resolving it fails.
+                tester.execute("arg Nobody", sender);
+            }
+            assertThat(sender.getSentMessageTexts()).containsExactly("No player was found");
+            assertThat(sender.getSentMessages()
+                             .get(0)
+                             .getStyle()
+                             .getColor()).isEqualTo(TextColor.fromLegacyFormat(ChatFormatting.RED));
+        }
+
+        @Test
         void game_profile_and_uuid_by_name() {
             FakeSender steve = FakeSender.player("Steve");
             UUID uuid = steve.getUniqueId()
