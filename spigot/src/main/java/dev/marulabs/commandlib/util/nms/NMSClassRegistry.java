@@ -149,7 +149,8 @@ public final class NMSClassRegistry {
         throw new NMSClassNotFoundException(String.format("%s has no implementation for Minecraft %s (%s)",
                                                           lookUpClass.getSimpleName(),
                                                           version,
-                                                          String.join("; ", reasons)) + paperHint(version));
+                                                          String.join("; ", reasons))
+                + paperHint(version));
     }
 
     private String paperHint(String version) {

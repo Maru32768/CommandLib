@@ -81,8 +81,7 @@ public class NMSClassRegistryTest {
                                                "26.3")).hasMessage("TypedLookUp has no implementation for Minecraft 26.3: no typed NMS module supports this "
                                                        + "version. The spigot artifact of CommandLib supports Paper up to 1.21.1; use the paper "
                                                        + "artifact on Paper 26.3");
-        assertThatThrownBy(() -> registry.find(TypedLookUp.class,
-                                               "1.18.2")).hasMessageNotContaining("paper artifact");
+        assertThatThrownBy(() -> registry.find(TypedLookUp.class, "1.18.2")).hasMessageNotContaining("paper artifact");
     }
 
     @Test

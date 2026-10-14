@@ -83,8 +83,8 @@ class IntegrationTest {
                 Awaitility.await()
                           .atMost(Duration.ofSeconds(60))
                           .untilAsserted(() -> assertThat(container.getLogs()).as("server log")
-                                                                             .contains("COMMANDLIB_TEST_PLUGIN_ENABLE_FAILED")
-                                                                             .contains(expectedEnableFailure));
+                                                                              .contains("COMMANDLIB_TEST_PLUGIN_ENABLE_FAILED")
+                                                                              .contains(expectedEnableFailure));
             }
             return;
         }
