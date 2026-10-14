@@ -5,6 +5,8 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.marulabs.commandlib.argument.CommonStringArgument;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -413,5 +415,147 @@ class CommandOptionTest {
 
         assertThat(runner.suggest("scan -")).contains("-f", "--force");
         assertThat(runner.suggest("scan --")).containsExactly("--force");
+    }
+
+    @Test
+    void alias_works_like_the_long_name() throws Exception {
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("scan") {{
+            CommandOption<Boolean, TestCommandContext> force = option(Options.flag("force", 'f')
+                                                                             .aliases("yes"));
+            CommandOption<Integer, TestCommandContext> limit = option(Options.integer("limit", 10)
+                                                                             .aliases("max"));
+            execute(ctx -> ctx.sendMessage(ctx.getOption(force) + ":" + ctx.getOption(limit)));
+        }});
+
+        assertThat(runner.execute("scan --yes --max 3")
+                         .messages()).containsExactly("true:3");
+        assertThat(runner.suggest("scan --")).contains("--force", "--yes", "--limit", "--max");
+        // An alias is the same option, so it cannot be given after the long name.
+        assertThatThrownBy(() -> runner.execute("scan --force --yes")).isInstanceOf(CommandSyntaxException.class);
+    }
+
+    @Test
+    void alias_cannot_reuse_a_name_of_another_option() {
+        assertThatThrownBy(() -> new TestCommand("scan") {{
+            option(Options.flag("force"));
+            option(Options.flag("yes")
+                          .aliases("force"));
+        }}).isInstanceOf(IllegalArgumentException.class)
+           .hasMessageContaining("force");
+        assertThatThrownBy(() -> Options.flag("force")
+                                        .aliases("force")).isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void option_name_must_be_a_single_unquoted_word() {
+        assertThatThrownBy(() -> Options.flag("dry run")).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> Options.flag("tag#2")).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> Options.flag("ok", ' ')).isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void required_option_fails_with_option_error_when_missing() throws Exception {
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("deploy") {{
+            CommandOption<String, TestCommandContext> env = option(Options.string("env", 'e', "")
+                                                                          .required());
+            argument(new CommonStringArgument<>("target")).execute((target, ctx) -> {
+                ctx.sendMessage(target + ":" + ctx.getOption(env));
+            });
+        }});
+
+        assertThat(runner.execute("deploy app")
+                         .messages()).containsExactly("Missing required option --env.");
+        assertThat(runner.execute("deploy -e prod app")
+                         .messages()).containsExactly("app:prod");
+        // The bare command has no executor and shows help instead of asking for the option.
+        assertThat(runner.execute("deploy")
+                         .messages()).anyMatch(x -> x.contains("Usage:"));
+    }
+
+    @Test
+    void count_option_counts_occurrences() throws Exception {
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("scan") {{
+            CommandOption<Integer, TestCommandContext> verbose = option(Options.count("verbose", 'v', 3));
+            CommandOption<Boolean, TestCommandContext> force = option(Options.flag("force", 'f'));
+            execute(ctx -> ctx.sendMessage(ctx.getOption(verbose) + ":" + ctx.getOption(force) + ":"
+                    + ctx.hasOption(verbose)));
+        }});
+
+        assertThat(runner.execute("scan")
+                         .messages()).containsExactly("0:false:false");
+        assertThat(runner.execute("scan -v")
+                         .messages()).containsExactly("1:false:true");
+        assertThat(runner.execute("scan -vvv")
+                         .messages()).containsExactly("3:false:true");
+        assertThat(runner.execute("scan -v --verbose -fv")
+                         .messages()).containsExactly("3:true:true");
+        assertThatThrownBy(() -> runner.execute("scan -vv -vv")).isInstanceOf(CommandSyntaxException.class);
+        assertThatThrownBy(() -> runner.execute("scan -vvvv")).isInstanceOf(CommandSyntaxException.class);
+    }
+
+    @Test
+    void repeatable_value_option_collects_values_in_input_order() throws Exception {
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("tag") {{
+            CommandOption<List<String>, TestCommandContext> tags = option(Options.string("tag", 't', "")
+                                                                                 .aliases("label")
+                                                                                 .description("Tag to add")
+                                                                                 .repeatable(3));
+            CommandOption<Integer, TestCommandContext> limit = option(Options.integer("limit", 'n', 10));
+            argument(new CommonStringArgument<>("target")).execute((target, ctx) -> {
+                List<String> values = ctx.getOption(tags);
+                ctx.sendMessage(target + ":" + values + ":" + ctx.getOption(limit));
+            });
+        }});
+
+        assertThat(runner.execute("tag Alex")
+                         .messages()).containsExactly("Alex:[]:10");
+        assertThat(runner.execute("tag -t red Alex")
+                         .messages()).containsExactly("Alex:[red]:10");
+        assertThat(runner.execute("tag -t red -n 2 --label blue --tag green Alex")
+                         .messages()).containsExactly("Alex:[red, blue, green]:2");
+        assertThatThrownBy(() -> runner.execute("tag -t a -t b -t c -t d Alex")).isInstanceOf(CommandSyntaxException.class);
+    }
+
+    @Test
+    void repeatable_needs_a_value_option() {
+        assertThatThrownBy(() -> Options.flag("force")
+                                        .repeatable(2)).isInstanceOf(IllegalStateException.class);
+        assertThatThrownBy(() -> Options.string("tag", "")
+                                        .repeatable(0)).isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void mutually_exclusive_options_cannot_be_given_together() throws Exception {
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("export") {{
+            CommandOption<Boolean, TestCommandContext> json = option(Options.flag("json", 'j'));
+            CommandOption<Boolean, TestCommandContext> yaml = option(Options.flag("yaml", 'y'));
+            CommandOption<String, TestCommandContext> format = option(Options.string("format", 'F', "text"));
+            CommandOption<Boolean, TestCommandContext> force = option(Options.flag("force", 'f'));
+            mutuallyExclusive(json, yaml, format);
+            execute(ctx -> ctx.sendMessage(ctx.getOption(json) + ":" + ctx.getOption(yaml) + ":"
+                    + ctx.getOption(format) + ":" + ctx.getOption(force)));
+        }});
+
+        assertThat(runner.execute("export -jf")
+                         .messages()).containsExactly("true:false:text:true");
+        assertThat(runner.execute("export -f -F csv")
+                         .messages()).containsExactly("false:false:csv:true");
+        assertThatThrownBy(() -> runner.execute("export --json --yaml")).isInstanceOf(CommandSyntaxException.class);
+        assertThatThrownBy(() -> runner.execute("export -jy")).isInstanceOf(CommandSyntaxException.class);
+        assertThatThrownBy(() -> runner.execute("export -y -F csv")).isInstanceOf(CommandSyntaxException.class);
+        assertThat(runner.suggest("export --json --")).containsExactly("--force");
+    }
+
+    @Test
+    void mutually_exclusive_needs_registered_options() {
+        assertThatThrownBy(() -> new TestCommand("export") {{
+            CommandOption<Boolean, TestCommandContext> json = option(Options.flag("json"));
+            mutuallyExclusive(json, Options.flag("yaml"));
+        }}).isInstanceOf(IllegalArgumentException.class)
+           .hasMessageContaining("--yaml");
+        assertThatThrownBy(() -> new TestCommand("export") {{
+            CommandOption<Boolean, TestCommandContext> json = option(Options.flag("json"));
+            mutuallyExclusive(json);
+        }}).isInstanceOf(IllegalArgumentException.class);
     }
 }

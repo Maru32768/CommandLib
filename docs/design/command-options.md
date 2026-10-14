@@ -76,6 +76,17 @@ closed over in the executor lambda.
 Every factory has an overload that also takes a `char shortName` as a second
 parameter.
 
+Two more shapes build on these:
+
+| Factory or modifier             | Java type  | Notes                                       |
+|---------------------------------|------------|---------------------------------------------|
+| `count(name, max)`              | `Integer`  | Flag counted per occurrence; default `0`    |
+| `valueOption.repeatable(max)`   | `List<T>`  | Values of up to `max` occurrences; `[]`     |
+
+Further modifiers: `aliases(String...)` adds long names, `required()` makes a
+missing option fail, and `CommonCommand#mutuallyExclusive(...)` allows at most
+one option of a group. The user-facing reference is `docs/options.md`.
+
 ### Command Syntax
 
 Options must be placed before positional arguments. The caller may use either
@@ -198,17 +209,22 @@ Descriptions appear in the help output under the `Options:` section.
 
 Stores:
 
-- `name`: long name, used as `--name` token and as a human-readable label.
+- `name` and `aliases`: long names, each used as a `--name` token. `name` is
+  also the human-readable label. Names must be unquoted Brigadier words.
 - `shortName`: optional single `Character`, used as `-x` token.
 - `defaultValue`: returned by `getOption` when the option was not supplied.
 - `type`: Brigadier `ArgumentType<?>` for value options; `null` for flags.
-- `parser`: `BiFunction<C, String, T>` that reads the value from the Brigadier
-  context when the option was supplied.
-- `internalName`: `"__commandlib_option_" + name`; used as the Brigadier node
-  name for the value argument to avoid collisions with user argument names.
-- `validators`: accumulated `requires(...)` constraints.
+- `maxOccurrences`: how often the option may be given; `1` unless it was made
+  by `count(...)` or `repeatable(...)`.
+- `reader`: `BiFunction<C, List<String>, T>` that turns the internal argument
+  names of the occurrences, in input order, into the value. A flag returns
+  `true`, a count returns the number of occurrences, a value option reads the
+  first name with its parser, and a repeatable option reads every name.
+- `required` and `validators`: checked after parsing.
 
-`hasValue()` returns `true` when `type != null`.
+`hasValue()` returns `true` when `type != null`. `internalName(i)` is
+`"__commandlib_option_" + name` for the first occurrence and appends `#n` for
+the n-th, since Brigadier keeps one parsed value per argument name.
 
 ### `Options` (factory)
 
@@ -216,11 +232,14 @@ Stateless utility class. Each factory method creates a `CommandOption` with the
 appropriate Brigadier `ArgumentType` and the matching `getBool`/`getInteger`/…
 extractor as the parser function.
 
-### `CommonCommand#option(...)`
+### `CommonCommand#option(...)` and `mutuallyExclusive(...)`
 
-Validates uniqueness of `name` and `shortName` within the command, then adds the
-option to an internal `List<CommandOption<?, C>>`. Duplicate names or short names
-throw `IllegalArgumentException`.
+`option(...)` validates that no long name, alias or short name is used by
+another option of the command, then adds the option to an internal
+`List<CommandOption<?, C>>`. Duplicates throw `IllegalArgumentException`.
+
+`mutuallyExclusive(...)` stores a group of registered options;
+`excludes(a, b)` tells the node creator whether two options share a group.
 
 ### `CommonCommandContext` — option storage
 
@@ -242,16 +261,21 @@ argument nodes. `CommandNodeCreator.createOptionCommands(...)` generates them.
 
 ### Token Generation
 
-For each remaining (not yet selected) option, two literal tokens are created:
+The node creator tracks how often each option was used on the path so far. An
+option remains available while it was used fewer than `maxOccurrences` times
+and no option of one of its mutually exclusive groups was used. For each
+available option these literal tokens are created:
 
-- `--name` (always)
+- `--name` for the name and every alias
 - `-x` if a short name exists
+- `-xx`, `-xxx`, … up to the remaining occurrences, for a counted flag
 
-For all pairs, triples, … of no-value options with short names, every
-permutation of combined tokens is created (`-fv`, `-vf`, `-fvw`, `-fwv`, …).
-This is done by `collectShortOptionPermutations`. The permutation approach lets
-Brigadier match any combined flag regardless of character order without requiring
-a custom parser.
+For all pairs, triples, … of available no-value options with short names that
+do not exclude each other, every permutation of combined tokens is created
+(`-fv`, `-vf`, `-fvw`, `-fwv`, …). This is done by
+`collectShortOptionPermutations`. The permutation approach lets Brigadier match
+any combined flag regardless of character order without requiring a custom
+parser.
 
 ### Node Structure
 
@@ -272,17 +296,24 @@ a custom parser.
     <remaining option tokens>
 ```
 
+A second `--limit` on the same path, when the option is repeatable, leads to
+`__commandlib_option_limit#2`.
+
 The internal name prefix `__commandlib_option_` prevents the argument node name
 from appearing in `argumentNameToInputArgMap`, which is filtered in
 `CommonCommandContext.collectInputs`.
 
 #### Recursive combinations
 
-`createOptionCommands` is called recursively with a `selectedOptions` set that
-grows on each descent. This means that after matching `-f`, the subtree offers
-`--verbose`, `-v`, and any remaining option tokens, but not `-f` or `--force`
-again. The result is a combinatorial tree that accepts any subset of options in
-any order.
+`createOptionCommands` is called recursively with the occurrence counts of the
+path. After matching `-f`, the subtree offers `--verbose`, `-v`, and any
+remaining option tokens, but not `-f` or `--force` again unless the option is
+repeatable. The nodes after a path depend only on those counts, so every path
+with the same counts shares one list of child nodes (the argument node and the
+remaining option tokens). The server tree then grows with the number of count
+combinations, not with every order the options can be given in. Players still
+receive the expanded tree, because the vanilla command packet copies a node
+for every path, so the number of options and their maximums must stay small.
 
 ### Why Options Precede Arguments
 
@@ -311,25 +342,35 @@ class CommandOptionTest {
 }
 ```
 
+A loop back to the command node through a Brigadier redirect would allow
+unbounded repetition, but the redirected context loses the arguments parsed
+before it, which argument-child commands need. Repeated occurrences are
+therefore bounded and unrolled.
+
 ## Execution Flow
 
 `CommandRunner.parseOptions(ctx)` reads the already-matched Brigadier nodes
-from `ctx.getHandle().getNodes()`:
+from `ctx.getHandle().getNodes()` in input order and collects the occurrences
+of each option:
 
-1. **Flag options** — any node whose name starts with `-` but is not an internal
-   name. Long tokens are matched against a `--name` → `CommandOption` map.
-   Short tokens (`-x…`) iterate characters and match each against a `Character`
-   → `CommandOption` map. For each matched no-value option,
-   `ctx.setOptionValue(option, true)` is called.
+1. **Value options** — a node named `internalName(i)` of a value option is one
+   occurrence of it.
 
-2. **Value options** — any node whose name starts with
-   `__commandlib_option_`. The matching option is found, and `option.parse(ctx)`
-   calls the extractor function to read the value from the Brigadier context.
+2. **Flags** — any other node whose name starts with `-`. Long tokens are
+   matched against a `--name` → `CommandOption` map that includes the aliases.
+   Short tokens (`-x…`) iterate characters and match each against a
+   `Character` → `CommandOption` map, so `-vvf` is two occurrences of `-v` and
+   one of `-f`.
 
-`validateOptions(ctx)` runs all `CommandOption.validate(ctx)` calls after
-parsing. A constraint violation throws `ArgumentParseException` which is caught
-by `CommandRunner.run`, sends the error message to the caller, and returns
-without executing the command body.
+Each option with occurrences gets `ctx.setOptionValue(option, option.read(ctx,
+names))`.
+
+`validateOptions(ctx)` then checks every option: a required option that is
+missing fails unless the runner has no executor (it shows help instead), and
+the `requires(...)` constraints of a given option run. A violation throws
+`OptionParseException`, which `CommandRunner` catches before parsing any
+argument; it sends the messages as failures and returns without executing the
+command body. Argument failures use `ArgumentParseException`.
 
 ## Help Output
 
@@ -354,7 +395,10 @@ Format rules:
 
 - If a short name exists: `-x <name>, --name <name>: description`
 - If no short name:       `--name: description`
+- Each alias follows as `--alias <name>`.
 - The `<name>` value tag is only emitted for value options (`hasValue() == true`).
+- Notes follow the names in parentheses: `required` for a required option and
+  `up to N times` when `maxOccurrences > 1`.
 - If the description is empty, the colon and description are omitted.
 
 ## Design Decisions
@@ -371,6 +415,8 @@ command are exactly the ones accepted by that command, no more.
 Every option must have a default value. This avoids `null` returns from
 `getOption` and keeps callers from needing null checks. Use `hasOption` when
 distinguishing "supplied with value X" from "omitted, defaulted to X" matters.
+A required option keeps its default value but never returns it, and a
+repeatable option ignores the element default and defaults to an empty list.
 
 ### Validation tied to presence
 
@@ -378,6 +424,14 @@ Constraints in `requires(...)` are only checked when the option was actually
 supplied. This allows additive constraints ("if you pass `--reason` you must
 also pass `--force`") without requiring callers to always supply both options or
 think about which validation paths are active.
+
+### Mutual exclusion in the tree, not at runtime
+
+A mutually exclusive option is left out of the tree once another option of its
+group was used, as an option that may not repeat is. The client then neither
+suggests nor accepts it, which is consistent with the existing handling of a
+repeated option, and the tree gets smaller. The cost is that the sender sees
+Brigadier's generic "incorrect argument" message instead of a named conflict.
 
 ### Permutation-based combination matching
 
@@ -414,3 +468,9 @@ Key cases:
 - Option after argument rejected
 - Child command uses its own options, not parent options
 - Help output includes `[options]` placeholder and `Options:` section
+- Aliases parse and are suggested; duplicate names and aliases are rejected
+- Required option missing fails with an option error; help still shows
+- Count via `-vvv` and mixed tokens; occurrences above the maximum rejected
+- Repeatable value option collects values in input order
+- Mutually exclusive options rejected together, also in combined flags, and
+  not suggested after one of them

@@ -31,6 +31,7 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
     private final List<String> aliases = new ArrayList<>();
     private final List<Arguments<C>> argumentsList = new ArrayList<>();
     private final List<CommandOption<?, C>> options = new ArrayList<>();
+    private final List<Set<CommandOption<?, ?>>> exclusiveOptionGroups = new ArrayList<>();
     private Prerequisite<C> prerequisite = ctx -> {
     };
     private Predicate<C> preprocess = ctx -> true;
@@ -165,14 +166,23 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
         }
     }
 
+    /**
+     * Registers {@code option} on this command and returns it typed for this command's context. Configure the
+     * option, including its aliases, before registering it.
+     *
+     * @throws IllegalArgumentException if a long name or the short name of {@code option} is already used by
+     *                                  another option of this command
+     */
     @SuppressWarnings("unchecked")
     public final <E> CommandOption<E, C> option(@NotNull CommandOption<E, ? super C> option) {
         Objects.requireNonNull(option);
-        boolean duplicatedName = options.stream()
-                                        .anyMatch(x -> x.name()
-                                                        .equals(option.name()));
-        if (duplicatedName) {
-            throw new IllegalArgumentException("Duplicate option name: " + option.name());
+        for (String name : option.names()) {
+            boolean duplicatedName = options.stream()
+                                            .anyMatch(x -> x.names()
+                                                            .contains(name));
+            if (duplicatedName) {
+                throw new IllegalArgumentException("Duplicate option name: " + name);
+            }
         }
 
         Character shortName = option.shortName();
@@ -189,6 +199,28 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
         CommandOption<E, C> typedOption = (CommandOption<E, C>) option;
         options.add(typedOption);
         return typedOption;
+    }
+
+    /**
+     * Allows at most one of {@code options} in one input. Once one of them is given, the command tree no longer
+     * offers the others, so they are neither suggested nor accepted.
+     *
+     * @throws IllegalArgumentException if fewer than two options are given or one of them is not registered on this
+     *                                  command
+     */
+    @SafeVarargs
+    public final void mutuallyExclusive(@NotNull CommandOption<?, ? super C>... options) {
+        Set<CommandOption<?, ?>> group = new LinkedHashSet<>(Arrays.asList(options));
+        if (group.size() < 2) {
+            throw new IllegalArgumentException("A mutually exclusive group needs at least two options.");
+        }
+        for (CommandOption<?, ?> option : group) {
+            if (!this.options.contains(Objects.requireNonNull(option))) {
+                throw new IllegalArgumentException("Option " + option.formatName() + " is not registered on " + name
+                        + ".");
+            }
+        }
+        exclusiveOptionGroups.add(Set.copyOf(group));
     }
 
     public final void disableParentPrerequisite() {
@@ -480,6 +512,14 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
 
     final List<CommandOption<?, C>> options() {
         return List.copyOf(options);
+    }
+
+    /**
+     * Returns whether {@code a} and {@code b} are different options in one mutually exclusive group.
+     */
+    final boolean excludes(CommandOption<?, ?> a, CommandOption<?, ?> b) {
+        return !a.equals(b) && exclusiveOptionGroups.stream()
+                                                    .anyMatch(x -> x.contains(a) && x.contains(b));
     }
 
     final List<String> aliases() {

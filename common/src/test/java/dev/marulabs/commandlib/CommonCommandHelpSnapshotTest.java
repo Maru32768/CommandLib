@@ -91,6 +91,28 @@ class CommonCommandHelpSnapshotTest {
     }
 
     @Test
+    void option_kinds_help_matches_snapshot() throws Exception {
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("tag") {{
+            description("Tag command");
+            option(Options.flag("force", 'f')
+                          .aliases("yes")
+                          .description("Skip confirmation"));
+            option(Options.count("verbose", 'v', 3)
+                          .description("More output"));
+            option(Options.string("tag", 't', "")
+                          .description("Tag to add")
+                          .repeatable(5)
+                          .required());
+            argument(new CommonStringArgument<>("target")).execute((target, ctx) -> {
+            });
+        }});
+
+        TestCommandContext ctx = runner.execute("tag");
+
+        SnapshotAssertions.assertMatchesSnapshot("command-help-option-kinds.snap", ctx.messages());
+    }
+
+    @Test
     void parent_options_with_child_help_matches_snapshot() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(createParentAndChildOptionsHelpCommand());
 

@@ -1,0 +1,10 @@
+§7--------------------------------------------------
+Tag command
+§cUsage:
+  §b/tag §7[§eoptions§7] §7<§etarget§7>
+
+§cOptions:
+§e  -f§7, §e--force§7, §e--yes§7: Skip confirmation
+§e  -v§7, §e--verbose§7 (up to 3 times)§7: More output
+§e  -t §7<§etag§7>§7, §e--tag §7<§etag§7>§7 (required, up to 5 times)§7: Tag to add
+§7--------------------------------------------------

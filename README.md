@@ -417,7 +417,8 @@ Valid inputs:
 <details>
 <summary>Defining Command Options</summary>
 
-Command options can be placed immediately after the command name and before regular arguments.
+Command options can be placed immediately after the command name and before regular arguments. The full reference is
+[docs/options.md](docs/options.md).
 
 ```java
 public final class ScanCommand extends Command {
@@ -541,6 +542,40 @@ Invalid:
 
 `requires(otherOption)` checks whether the other option was explicitly specified. `requires(otherOption, value)` checks
 the value returned by `ctx.getOption(otherOption)`, so the other option's default value can also satisfy the condition.
+
+Options can also have aliases, be required, be given more than once, and exclude each other:
+
+```java
+public final class TagCommand extends Command {
+    public TagCommand() {
+        super("tag");
+
+        CommandOption<Boolean, CommandContext> force = option(Options.flag("force", 'f')
+                                                                     .aliases("yes"));
+        CommandOption<Integer, CommandContext> verbose = option(Options.count("verbose", 'v', 3));
+        CommandOption<List<String>, CommandContext> tags = option(Options.string("tag", 't', "")
+                                                                         .repeatable(5)
+                                                                         .required());
+        CommandOption<Boolean, CommandContext> json = option(Options.flag("json", 'j'));
+        CommandOption<Boolean, CommandContext> yaml = option(Options.flag("yaml", 'y'));
+        mutuallyExclusive(json, yaml);
+
+        argument(new PlayerArgument("target")).execute((target, ctx) -> {
+            boolean isForce = ctx.getOption(force);     // --force or --yes
+            int verbosity = ctx.getOption(verbose);     // 2 for -vv
+            List<String> tagList = ctx.getOption(tags); // [red, blue] for -t red --tag blue
+        });
+    }
+}
+```
+
+```text
+/tag --yes -vv -t red --tag blue -j Steve
+```
+
+`/tag Steve` fails with `Missing required option --tag.`, and `/tag -t red -j -y Steve` is rejected because `--json`
+and `--yaml` are mutually exclusive. See [docs/options.md](docs/options.md) for every option kind, the errors, the help
+output and the limits.
 
 </details>
 

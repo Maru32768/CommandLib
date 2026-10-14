@@ -8,12 +8,31 @@ public final class Options {
     }
 
     public static <C extends CommonCommandContext<?, ?>> CommandOption<Boolean, C> flag(@NotNull String name) {
-        return new CommandOption<>(name, null, false);
+        return CommandOption.flag(name, null);
     }
 
     public static <C extends CommonCommandContext<?, ?>> CommandOption<Boolean, C> flag(@NotNull String name,
                                                                                         char shortName) {
-        return new CommandOption<>(name, shortName, false);
+        return CommandOption.flag(name, shortName);
+    }
+
+    /**
+     * Returns a flag whose value is how many times it is given, such as 3 for {@code -vvv} or
+     * {@code -v --verbose -v}, and 0 when it is not given. It can be given up to {@code maxCount} times.
+     */
+    public static <C extends CommonCommandContext<?, ?>> CommandOption<Integer, C> count(@NotNull String name,
+                                                                                         int maxCount) {
+        return CommandOption.counter(name, null, maxCount);
+    }
+
+    /**
+     * Returns a flag whose value is how many times it is given, such as 3 for {@code -vvv} or
+     * {@code -v --verbose -v}, and 0 when it is not given. It can be given up to {@code maxCount} times.
+     */
+    public static <C extends CommonCommandContext<?, ?>> CommandOption<Integer, C> count(@NotNull String name,
+                                                                                         char shortName,
+                                                                                         int maxCount) {
+        return CommandOption.counter(name, shortName, maxCount);
     }
 
     public static <C extends CommonCommandContext<?, ?>> CommandOption<Boolean, C> bool(@NotNull String name,

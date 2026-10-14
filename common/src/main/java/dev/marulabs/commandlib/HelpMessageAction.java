@@ -237,7 +237,8 @@ final class HelpMessageAction<S, T, C extends CommonCommandContext<S, T>, U exte
         // Examples:
         //   "  --force: Force execution"
         //   "  -n <limit>, --limit <limit>: Maximum count"
-        String s = ChatColorUtil.YELLOW + padding + formatOptionNames(option);
+        //   "  -t <tag>, --tag <tag> (required, up to 3 times): Tags"
+        String s = ChatColorUtil.YELLOW + padding + formatOptionNames(option) + formatOptionNotes(option);
         if (option.description()
                   .isEmpty()) {
             return s;
@@ -250,17 +251,33 @@ final class HelpMessageAction<S, T, C extends CommonCommandContext<S, T>, U exte
         // Examples:
         //   "--force"
         //   "-n <limit>, --limit <limit>"
-        String valueTag = "";
-        if (option.hasValue()) {
-            valueTag = " " + ChatColorUtil.GRAY + "<" + ChatColorUtil.YELLOW + option.name() + ChatColorUtil.GRAY + ">";
-        }
+        //   "-f, --force, --yes"
+        String valueTag = option.hasValue()
+                ? " " + ChatColorUtil.GRAY + "<" + ChatColorUtil.YELLOW + option.name() + ChatColorUtil.GRAY + ">" : "";
 
-        String longName = "--" + option.name() + valueTag;
-        if (option.shortName() == null) {
-            return longName;
+        List<String> names = new ArrayList<>();
+        if (option.shortName() != null) {
+            names.add("-" + option.shortName() + valueTag);
         }
+        for (String name : option.names()) {
+            names.add("--" + name + valueTag);
+        }
+        return String.join(ChatColorUtil.GRAY + ", " + ChatColorUtil.YELLOW, names);
+    }
 
-        return "-" + option.shortName() + valueTag + ChatColorUtil.GRAY + ", " + ChatColorUtil.YELLOW + longName;
+    private String formatOptionNotes(CommandOption<?, C> option) {
+        // Examples: "", " (required)", " (up to 3 times)"
+        List<String> notes = new ArrayList<>();
+        if (option.isRequired()) {
+            notes.add("required");
+        }
+        if (option.maxOccurrences() > 1) {
+            notes.add("up to " + option.maxOccurrences() + " times");
+        }
+        if (notes.isEmpty()) {
+            return "";
+        }
+        return ChatColorUtil.GRAY + " (" + String.join(", ", notes) + ")";
     }
 
     @SuppressWarnings("unchecked")

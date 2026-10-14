@@ -105,7 +105,7 @@ final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U ext
                                                              command.executor(),
                                                              command.uncaughtExceptionHandlers());
             builder.executes(runner);
-            createOptionCommands(command.options(), () -> null, runner).forEach(builder::then);
+            createOptionCommands(command, () -> null, runner).forEach(builder::then);
             return builder.build();
         }
 
@@ -144,9 +144,7 @@ final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U ext
                                                                                                                                                    command,
                                                                                                                                                    childNodes);
                          builder.then(argumentNodeSupplier.get());
-                         createOptionCommands(command.options(),
-                                              argumentNodeSupplier,
-                                              bareRunner).forEach(builder::then);
+                         createOptionCommands(command, argumentNodeSupplier, bareRunner).forEach(builder::then);
                      });
 
         return builder.build();
@@ -163,39 +161,51 @@ final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U ext
         return (U) command;
     }
 
-    private List<CommandNode<S>> createOptionCommands(List<CommandOption<?, C>> options,
+    private List<CommandNode<S>> createOptionCommands(U command,
                                                       Supplier<ArgumentCommandNode<S, ?>> argumentNodeSupplier,
                                                       CommandRunner<S, C> executor) {
-        if (options.isEmpty()) {
+        if (command.options()
+                   .isEmpty()) {
             return List.of();
         }
 
-        return createOptionCommands(options, new HashSet<>(), argumentNodeSupplier, executor);
+        return createOptionCommands(command, Map.of(), argumentNodeSupplier, executor, new HashMap<>());
     }
 
-    private List<CommandNode<S>> createOptionCommands(List<CommandOption<?, C>> options,
-                                                      Set<CommandOption<?, C>> selectedOptions,
+    // usedOptions counts the occurrences of each option on the path to the nodes being created. The nodes after a
+    // path depend only on those counts, so every path with the same counts shares them through childrenByUsedOptions.
+    // Otherwise the tree would grow with every order the options can be given in.
+    private List<CommandNode<S>> createOptionCommands(U command,
+                                                      Map<CommandOption<?, C>, Integer> usedOptions,
                                                       Supplier<ArgumentCommandNode<S, ?>> argumentNodeSupplier,
-                                                      CommandRunner<S, C> executor) {
+                                                      CommandRunner<S, C> executor,
+                                                      Map<Map<CommandOption<?, C>, Integer>, List<CommandNode<S>>> childrenByUsedOptions) {
         List<CommandNode<S>> nodes = new ArrayList<>();
 
-        for (OptionToken<C> optionToken : createOptionTokens(options, selectedOptions)) {
+        for (OptionToken<C> optionToken : createOptionTokens(command, usedOptions)) {
             List<CommandOption<?, C>> tokenOptions = optionToken.options();
-            Set<CommandOption<?, C>> nextSelectedOptions = new HashSet<>(selectedOptions);
-            nextSelectedOptions.addAll(tokenOptions);
+            Map<CommandOption<?, C>, Integer> nextUsedOptions = new HashMap<>(usedOptions);
+            tokenOptions.forEach(x -> nextUsedOptions.merge(x, 1, Integer::sum));
+            List<CommandNode<S>> children = createOptionChildren(command,
+                                                                 nextUsedOptions,
+                                                                 argumentNodeSupplier,
+                                                                 executor,
+                                                                 childrenByUsedOptions);
 
             LiteralArgumentBuilder<S> builder = LiteralArgumentBuilder.literal(optionToken.token());
-            if (!isValueOptionToken(tokenOptions)) {
+            if (isValueOptionToken(tokenOptions)) {
+                CommandOption<?, C> option = tokenOptions.get(0);
+                // Each occurrence needs its own argument name, since Brigadier keeps one value per name.
+                RequiredArgumentBuilder<S, ?> valueBuilder = RequiredArgumentBuilder.argument(option.internalName(usedOptions.getOrDefault(option,
+                                                                                                                                           0)),
+                                                                                              option.type());
+                valueBuilder.executes(executor);
+                children.forEach(valueBuilder::then);
+                builder.then(valueBuilder);
+            } else {
                 builder.executes(executor);
+                children.forEach(builder::then);
             }
-
-            addArgumentAndOptionChildren(builder,
-                                         tokenOptions,
-                                         argumentNodeSupplier.get(),
-                                         options,
-                                         nextSelectedOptions,
-                                         argumentNodeSupplier,
-                                         executor);
 
             nodes.add(builder.build());
         }
@@ -203,33 +213,29 @@ final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U ext
         return nodes;
     }
 
-    private void addArgumentAndOptionChildren(LiteralArgumentBuilder<S> builder,
-                                              List<CommandOption<?, C>> tokenOptions,
-                                              ArgumentCommandNode<S, ?> argumentNode,
-                                              List<CommandOption<?, C>> options,
-                                              Set<CommandOption<?, C>> nextSelectedOptions,
-                                              Supplier<ArgumentCommandNode<S, ?>> argumentNodeSupplier,
-                                              CommandRunner<S, C> executor) {
-        if (isValueOptionToken(tokenOptions)) {
-            CommandOption<?, C> option = tokenOptions.get(0);
-            RequiredArgumentBuilder<S, ?> valueBuilder = RequiredArgumentBuilder.argument(option.internalName(),
-                                                                                          option.type());
-            valueBuilder.executes(executor);
-            if (argumentNode != null) {
-                valueBuilder.then(argumentNode);
-            }
-            createOptionCommands(options,
-                                 nextSelectedOptions,
-                                 argumentNodeSupplier,
-                                 executor).forEach(valueBuilder::then);
-            builder.then(valueBuilder);
-            return;
+    // The nodes that may follow the options counted by usedOptions: the argument node and the remaining options.
+    private List<CommandNode<S>> createOptionChildren(U command,
+                                                      Map<CommandOption<?, C>, Integer> usedOptions,
+                                                      Supplier<ArgumentCommandNode<S, ?>> argumentNodeSupplier,
+                                                      CommandRunner<S, C> executor,
+                                                      Map<Map<CommandOption<?, C>, Integer>, List<CommandNode<S>>> childrenByUsedOptions) {
+        List<CommandNode<S>> cached = childrenByUsedOptions.get(usedOptions);
+        if (cached != null) {
+            return cached;
         }
 
+        List<CommandNode<S>> children = new ArrayList<>();
+        ArgumentCommandNode<S, ?> argumentNode = argumentNodeSupplier.get();
         if (argumentNode != null) {
-            builder.then(argumentNode);
+            children.add(argumentNode);
         }
-        createOptionCommands(options, nextSelectedOptions, argumentNodeSupplier, executor).forEach(builder::then);
+        children.addAll(createOptionCommands(command,
+                                             usedOptions,
+                                             argumentNodeSupplier,
+                                             executor,
+                                             childrenByUsedOptions));
+        childrenByUsedOptions.put(usedOptions, children);
+        return children;
     }
 
     private boolean isValueOptionToken(List<CommandOption<?, C>> tokenOptions) {
@@ -237,17 +243,36 @@ final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U ext
                                                        .hasValue();
     }
 
-    private List<OptionToken<C>> createOptionTokens(List<CommandOption<?, C>> options,
-                                                    Set<CommandOption<?, C>> selectedOptions) {
+    private List<OptionToken<C>> createOptionTokens(U command, Map<CommandOption<?, C>, Integer> usedOptions) {
         List<OptionToken<C>> optionTokens = new ArrayList<>();
-        List<CommandOption<?, C>> remainingOptions = options.stream()
-                                                            .filter(x -> !selectedOptions.contains(x))
+        List<CommandOption<?, C>> remainingOptions = command.options()
+                                                            .stream()
+                                                            .filter(x -> usedOptions.getOrDefault(x,
+                                                                                                  0) < x.maxOccurrences())
+                                                            .filter(x -> usedOptions.keySet()
+                                                                                    .stream()
+                                                                                    .noneMatch(y -> command.excludes(x,
+                                                                                                                     y)))
                                                             .collect(Collectors.toList());
 
         for (CommandOption<?, C> option : remainingOptions) {
-            optionTokens.add(new OptionToken<>("--" + option.name(), List.of(option)));
-            if (option.shortName() != null) {
-                optionTokens.add(new OptionToken<>("-" + option.shortName(), List.of(option)));
+            for (String name : option.names()) {
+                optionTokens.add(new OptionToken<>("--" + name, List.of(option)));
+            }
+            Character shortName = option.shortName();
+            if (shortName == null) {
+                continue;
+            }
+            optionTokens.add(new OptionToken<>("-" + shortName, List.of(option)));
+            if (option.hasValue()) {
+                continue;
+            }
+            // A counted flag can repeat its short name in one token, such as -vvv.
+            int remaining = option.maxOccurrences() - usedOptions.getOrDefault(option, 0);
+            for (int count = 2; count <= remaining; count++) {
+                optionTokens.add(new OptionToken<>("-" + String.valueOf(shortName)
+                                                               .repeat(count),
+                                                   Collections.nCopies(count, option)));
             }
         }
 
@@ -255,13 +280,14 @@ final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U ext
                                                                  .filter(x -> x.shortName() != null && !x.hasValue())
                                                                  .collect(Collectors.toList());
         for (int size = 2; size <= shortOptions.size(); size++) {
-            collectShortOptionPermutations(shortOptions, size, new ArrayList<>(), optionTokens);
+            collectShortOptionPermutations(command, shortOptions, size, new ArrayList<>(), optionTokens);
         }
 
         return optionTokens;
     }
 
-    private void collectShortOptionPermutations(List<CommandOption<?, C>> options,
+    private void collectShortOptionPermutations(U command,
+                                                List<CommandOption<?, C>> options,
                                                 int size,
                                                 List<CommandOption<?, C>> current,
                                                 List<OptionToken<C>> dest) {
@@ -275,11 +301,12 @@ final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U ext
         }
 
         for (CommandOption<?, C> option : options) {
-            if (current.contains(option)) {
+            if (current.contains(option) || current.stream()
+                                                   .anyMatch(x -> command.excludes(x, option))) {
                 continue;
             }
             current.add(option);
-            collectShortOptionPermutations(options, size, current, dest);
+            collectShortOptionPermutations(command, options, size, current, dest);
             current.remove(current.size() - 1);
         }
     }
