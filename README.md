@@ -34,6 +34,42 @@ with ease.
 6. **Seamless Integration with the `/execute` command**   
    Allow your commands to be executed seamlessly from the `/execute` command, just like built-in commands.
 
+## Why CommandLib
+
+- **One command model for Spigot, Paper, Forge, and NeoForge.** The same `Command` / `argument(...)` code compiles
+  against each platform artifact, from Minecraft 1.16.5 to 26.x.
+- **Typed values in the executor.** `argument(new PlayerArgument("target"), new IntegerArgument("amount"))` hands a
+  `Player` and an `Integer` to the lambda: no lookup by name, no casts.
+- **Brigadier-native.** Commands are real Brigadier nodes, so they get client-side validation, vanilla selectors,
+  `/execute` and data pack function support, and per-player command trees.
+- **Permissions without boilerplate.** Every command, subcommand, and argument branch gets a registered permission
+  node with a default, which also hides what a sender cannot use.
+- **Options, generated help, and test utilities built in.**
+
+| | CommandLib | CommandAPI | Paper command API |
+|---|---|---|---|
+| Platforms | Spigot, Paper, Forge, NeoForge | Spigot, Paper (others: see its docs) | Paper |
+| Executor arguments | typed parameters | `args.get("name")` + cast | `ctx.getArgument("name", Type.class)` |
+| Generated permission nodes | every command and branch | manual | manual |
+| Flags and options (`-f`, `--limit 10`) | built in | — | — |
+| Generated usage / help | built in | `/help` entries | `/help` entries |
+| Server-free test utilities | `spigot-testing`, `paper-testing`, `forge-` / `neoforge-testing` | test toolkit (MockBukkit) | — |
+| Optional arguments, result values, chat / NBT / range arguments | not yet | yes | yes |
+
+See the [argument catalog](docs/arguments.md) for an argument-by-argument comparison and
+[compatibility](docs/compatibility.md) for the tested server versions.
+
+## Documentation
+
+- [Arguments](docs/arguments.md): built-in arguments, comparison with CommandAPI and Paper, and gaps.
+- [Suggestions](docs/suggestions.md): default, custom, asynchronous, and tooltip suggestions.
+- [Permissions](docs/permissions.md): node names, defaults per platform, registration, and LuckPerms.
+- [Errors](docs/errors.md): what the sender sees when a command fails.
+- [Testing](docs/testing.md): `CommandTester` and `FakeSender` for plugin and mod tests.
+- [Troubleshooting](docs/troubleshooting.md).
+- [Migrating from CommandAPI](docs/migration/from-commandapi.md).
+- [Compatibility](docs/compatibility.md): tested platforms and versions.
+
 ## Installation
 
 To ensure stability, we recommend replacing `latest.release` with a specific version such as `0.16.0`.  
@@ -288,13 +324,17 @@ share package-level helper names.
 class Test {
     void test() {
         FakeSender sender = FakeSender.player("Steve");
-        try (CommandTester tester = new CommandTester(new MyCommand(), "myplugin.command")) {
+        try (CommandTester tester = new CommandTester(MyCommand::new, "myplugin.command")) {
             tester.execute("mycmd arg", sender);
         }
         assertThat(sender.getSentMessageTexts()).containsExactly("expected message");
     }
 }
 ```
+
+Pass the command as a `Supplier` (`MyCommand::new`) so that platform argument types are created while the tester's
+mocks are active. See [testing](docs/testing.md) for fake players, permissions, suggestions, and what each artifact
+mocks.
 
 `paper-testing` stubs Paper `ArgumentTypes`, selector resolvers, and several
 registry-backed argument paths for command-level tests. Paper lifecycle
@@ -851,7 +891,8 @@ CommandLib delegates permission checks to the platform permission system:
   `PermissionAPI.hasPermission(player, permissionNode)`)
 
 LuckPerms can provide those platform permissions. Configure the same generated or custom permission nodes in LuckPerms;
-CommandLib does not need additional LuckPerms-specific integration.
+CommandLib does not need additional LuckPerms-specific integration. On Forge 1.18+ and NeoForge the nodes are in the
+`commandlib` namespace, so grant `commandlib.<node>` there. See [permissions](docs/permissions.md).
 
 ## Claude Code Skill
 
