@@ -317,14 +317,15 @@ tasks.register("downloadPluginJars") {
     }
 }
 
-fun resolvePlugManXDownloadUrl(minecraftServerVersion: String): String =
-    when (minecraftServerVersion) {
-        "1.20.4", "1.20.5", "1.20.6", "1.21", "1.21.4" ->
-            "https://cdn.modrinth.com/data/yro4niHu/versions/bYRNAPF0/PlugManX-3.0.2.jar"
-
-        else ->
-            "https://edge.forgecdn.net/files/4529/697/PlugManX.jar"
+fun resolvePlugManXDownloadUrl(minecraftServerVersion: String): String {
+    val (major, minor, patch) = (minecraftServerVersion.split(".").map(String::toInt) + 0).take(3)
+    val before1204 = major == 1 && (minor < 20 || minor == 20 && patch < 4)
+    return if (before1204) {
+        "https://edge.forgecdn.net/files/4529/697/PlugManX.jar"
+    } else {
+        "https://cdn.modrinth.com/data/yro4niHu/versions/bYRNAPF0/PlugManX-3.0.2.jar"
     }
+}
 
 fun parseDownloadEntry(download: String, propertyName: String): Pair<String, String> =
     download.split("=>", limit = 2).let { parts ->

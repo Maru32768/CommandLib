@@ -125,13 +125,20 @@ dependencies {
     "testImplementation"("org.awaitility:awaitility:4.2.1")
     "testImplementation"("org.testcontainers:junit-jupiter:1.21.4")
     "testImplementation"("org.testcontainers:testcontainers:1.21.4")
-    "testRuntimeOnly"("org.slf4j:slf4j-simple:1.7.36")
+    "testRuntimeOnly"("org.slf4j:slf4j-simple:2.0.17")
     "testImplementation"("net.kyori:adventure-text-serializer-gson:4.15.0")
     "testImplementation"("net.kyori:adventure-text-serializer-json-legacy-impl:4.15.0")
 }
 
+// Java release of the test JVM, which runs the MCProtocolLib bot. MCProtocolLib needs Java 21 from 26.2.
+val botJavaVersion = if (extra.has("commandlib.integration.botJavaVersion")) {
+    extra["commandlib.integration.botJavaVersion"].toString().toInt()
+} else {
+    17
+}
+
 configure<JavaPluginExtension> {
-    toolchain.languageVersion.set(JavaLanguageVersion.of(17))
+    toolchain.languageVersion.set(JavaLanguageVersion.of(botJavaVersion))
     sourceSets.named("test") {
         java.srcDir(rootProject.file("integration-test/src/test/java"))
     }
@@ -248,7 +255,11 @@ if (targetPlatform == "spigot") {
     }
     val buildSpigotServer = registerBuildTools("buildSpigotServer", provider { spigotVersion }) {
         revision.set(buildToolsRevision)
-        remapped.set(!spigotVersion.startsWith("1.16") && rootProject.file("nms/spigot-$spigotVersion").isDirectory)
+        // Spigot 1.16.5 and 26.1+ have no remapped artifacts: their modules compile against the server jar as it is.
+        remapped.set(
+            spigotVersion.startsWith("1.") && !spigotVersion.startsWith("1.16")
+                && rootProject.file("nms/spigot-$spigotVersion").isDirectory
+        )
         serverJar.set(testPluginDir.resolve("$serverDirectory/$serverJarName"))
     }
     prepareTask.configure {
@@ -619,7 +630,10 @@ tasks.register<Test>("minecraftIntegrationTest") {
     usesService(minecraftIntegrationSlot)
     outputs.upToDateWhen { false }
     testClassesDirs = sourceSets["test"].output.classesDirs
-    classpath = files(sourceSets["test"].runtimeClasspath, mcProtocol)
+    // The test reads Adventure only by reflection. Its own Adventure 4 goes first for bots that bring none or an older
+    // one, and MCProtocolLib first for bots built on Adventure 5 (26.2 and later), which Adventure 4 would shadow.
+    classpath = if (botJavaVersion >= 21) files(mcProtocol, sourceSets["test"].runtimeClasspath)
+    else files(sourceSets["test"].runtimeClasspath, mcProtocol)
     useJUnitPlatform()
     filter {
         includeTestsMatching("dev.marulabs.commandlib.integration.IntegrationTest")

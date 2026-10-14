@@ -44,12 +44,21 @@ public final class DataPackFunctionTest extends TestBase {
     }
 
     private void writeDataPack() {
-        Path pack = Bukkit.getWorlds()
-                          .get(0)
-                          .getWorldFolder()
-                          .toPath()
-                          .resolve("datapacks")
-                          .resolve("commandlibtest");
+        Path world = Bukkit.getWorlds()
+                           .get(0)
+                           .getWorldFolder()
+                           .toPath();
+        // From 26.1 the world folder is the dimension's, <level>/dimensions/minecraft/overworld, and data packs stay in
+        // the level folder.
+        Path dimensions = world.getParent() == null ? null : world.getParent()
+                                                                  .getParent();
+        if (dimensions != null && dimensions.getFileName()
+                                            .toString()
+                                            .equals("dimensions")) {
+            world = dimensions.getParent();
+        }
+        Path pack = world.resolve("datapacks")
+                         .resolve("commandlibtest");
         String function = command.name() + " " + PROBE + "\n";
         try {
             // pack_format 6 is 1.16.5's; later versions load the pack anyway and read supported_formats.

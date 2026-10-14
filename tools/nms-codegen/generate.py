@@ -45,6 +45,15 @@ MODULES = {
     "spigot-1.20.4": Module("1.20.4", "1.20.4", "v1_20_R3"),
     "spigot-1.20.6": Module("1.20.5", "1.20.6", "v1_20_R4"),
     "spigot-1.21.1": Module("1.21", "1.21.1", "v1_21_R1"),
+    "spigot-1.21.3": Module("1.21.2", "1.21.3", "v1_21_R2"),
+    "spigot-1.21.4": Module("1.21.4", "1.21.4", "v1_21_R3"),
+    "spigot-1.21.5": Module("1.21.5", "1.21.5", "v1_21_R4"),
+    "spigot-1.21.6": Module("1.21.6", "1.21.6", "v1_21_R5"),
+    "spigot-1.21.8": Module("1.21.7", "1.21.8", "v1_21_R5"),
+    "spigot-1.21.10": Module("1.21.9", "1.21.10", "v1_21_R6"),
+    "spigot-1.21.11": Module("1.21.11", "1.21.11", "v1_21_R7"),
+    # Spigot runs with Mojang names and an unversioned CraftBukkit package from 26.1.
+    "spigot-26.1.2": Module("26.1", "26.3"),
     "paper-1.20.6": Module("1.20.5", "1.20.6"),
     "paper-1.21.1": Module("1.21", "1.21.1"),
 }

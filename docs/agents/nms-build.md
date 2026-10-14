@@ -12,7 +12,8 @@ server. They follow CommandAPI's build layout:
 |----------------------------------------------|------------------------------------------------------------|----------------------------|-----------------------------------------|
 | `nms:spigot-1.16.5`                          | `org.spigotmc:spigot:1.16.5-R0.1-SNAPSHOT` (BuildTools)    | Spigot                     | Spigot / Paper 1.16.4-1.16.5            |
 | `nms:spigot-<version>` (1.17 to 1.20.4)      | same artifact, `remapped-mojang` classifier (BuildTools)   | Spigot (remapped)          | Spigot / Paper `<version>`              |
-| `nms:spigot-1.20.6`, `nms:spigot-1.21.1`     | same artifact, `remapped-mojang` classifier (BuildTools)   | Spigot (remapped)          | Spigot 1.20.5-1.20.6, 1.21-1.21.1       |
+| `nms:spigot-<version>` (1.20.6 to 1.21.11)   | same artifact, `remapped-mojang` classifier (BuildTools)   | Spigot (remapped)          | Spigot, see the module table            |
+| `nms:spigot-26.1.2`                          | `org.spigotmc:spigot:26.1.2-R0.1-SNAPSHOT` (BuildTools)    | Mojang                     | Spigot 26.1-26.3                        |
 | `nms:paper-1.20.6`, `nms:paper-1.21.1`       | paperweight userdev dev bundle `<version>-R0.1-SNAPSHOT`   | Mojang, and Spigot (reobf) | Paper 1.20.5-1.20.6, 1.21-1.21.1        |
 
 - Up to 1.16.5 the Spigot-mapped server jar names members readably, so the module compiles against it directly.
@@ -25,23 +26,28 @@ server. They follow CommandAPI's build layout:
   its classes work there and an integration target shows `TypedNmsTest` passing: `spigot-1.20.1` covers 1.20 (the
   `paper-1.20` target runs the Spigot names of 1.20), and `spigot-1.20.6` and `spigot-1.21.1` cover 1.20.5 and 1.21,
   whose mappings remap the modules' Mojang-named jars to the same classes (targets `spigot-1.20.5` and `spigot-1.21`).
-  BuildTools now resolves those releases, and 1.20.3, to the following hotfix build, so a target or module builds the
-  last build of the release by its Spigot build number (`commandlib.integration.buildToolsRevision`,
-  `spigotNms.buildToolsRevision`).
-- The supported range is 1.16.4 to 1.21.1. A server outside every module's versions has no NMS implementation, and
+  Likewise `spigot-1.21.3` covers 1.21.2, `spigot-1.21.8` 1.21.7 and `spigot-1.21.10` 1.21.9.
+  BuildTools now resolves those releases, and 1.20.3, 1.20, 26.1 and 26.1.1, to the following hotfix build, so a
+  target or module builds the last build of the release by its Spigot build number
+  (`commandlib.integration.buildToolsRevision`, `spigotNms.buildToolsRevision`).
+- From 26.1 Spigot runs with Mojang names and keeps CraftBukkit in the unversioned `org.bukkit.craftbukkit` package,
+  so `spigot-26.1.2` compiles against the server jar as it is, without remapping or a `MappingProbe`. Mojang names do
+  not change between releases the way obfuscated ones do, so the module covers every 26.x release whose target passes.
+- BuildTools installs the artifacts of 1.21.11 as `1.21.11-R0.2-SNAPSHOT`, and of every other version as
+  `<version>-R0.1-SNAPSHOT` (`spigotArtifactVersion` in `buildSrc`).
+- The supported range is 1.16.4 to 26.3. A server outside every module's versions has no NMS implementation, and
   the first wrapper it uses throws `NMSClassNotFoundException`.
 - `spigot-1.17` has no integration target: no MCProtocolLib release speaks the 1.17 protocol (755), and the 1.17.1
   bot (756) is rejected by a 1.17 server. The module is only checked by its compilation against the 1.17 server jar.
-- Spigot support ends at 1.21.1. From 1.21.3 Bukkit's `Attribute`, `Biome` and `Sound` are registry interfaces, which
-  the spigot module's enum-based arguments do not support (see `docs/roadmap.md`). On Paper the spigot module ends at
-  1.21.1 too; later Paper releases use the `paper` module.
+- On Paper the spigot module ends at 1.21.1, the last release with a Paper module; later Paper releases use the
+  `paper` module.
 - From 1.20.5 Paper runs with Mojang names. The Paper modules use paperweight userdev. Paper still remaps a plugin
   from Spigot names to Mojang names when the plugin does not declare Mojang mappings in its manifest, and CommandLib
   is shaded into plugins of both kinds. Some Spigot names are Mojang names of other classes (Spigot `MobEffect` is
   Mojang `MobEffectInstance`), so Mojang-named classes break in a remapped plugin. A Paper module therefore ships its
   Mojang-named jar and its paperweight `reobfJar`, moved to the `<package>_spigot` package. Each package has a
-  `MappingProbe`, and `NMSClassRegistry` uses the package whose probe matches. The Spigot modules for 1.20.5 and
-  later have a probe that matches only on Spigot, so Paper uses its own modules.
+  `MappingProbe`, and `NMSClassRegistry` uses the package whose probe matches. The Spigot modules for 1.20.5 to
+  1.21.11 have a probe that matches only on Spigot, so Paper uses its own modules.
 
 The typed classes target Java 11 up to 1.16.5 and Java 16 after (`typedNmsRelease`), the oldest releases that
 compile, while the toolchain follows the server jar. A plugin's shading tool reads every class of the spigot jar, so
@@ -76,7 +82,8 @@ lacks the jars (and, for remapped modules, the `minecraft-server` mappings):
 - Each run records the BuildTools revision (`revisions/spigot-<version>.txt` in the BuildTools directory). A module or
   integration target that changes the revision runs BuildTools again; artifacts installed before the record existed
   are taken to match.
-- The Java toolchain follows the Minecraft version: 8 before 1.17, 16 for 1.17, 17 up to 1.20.4, and 21 after.
+- The Java toolchain follows the Minecraft version: 8 before 1.17, 16 for 1.17, 17 up to 1.20.4, 21 up to 1.21.11,
+  and 25 from 26.1.
 - A BuildTools run takes several minutes and needs network access. Later builds reuse the local Maven repository,
   and the BuildTools JDK is resolved only when BuildTools runs.
 - `-Pcommandlib.buildToolsUrl=<url>` overrides the BuildTools download URL.

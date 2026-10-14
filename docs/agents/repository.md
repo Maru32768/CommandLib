@@ -17,7 +17,7 @@ instructions.
   BuildTools and remapping build logic. Read `docs/agents/nms-build.md` before
   editing them.
 - `paper`: Paper-facing API using Paper official command/lifecycle API and
-  Adventure components. Targets Paper 1.20.6+.
+  Adventure components. Targets Paper 1.21+.
 - `spigot-testing`: test utilities for downstream plugins and this repository.
 - `modded-testing`: test utilities for downstream Forge / NeoForge mods, built
   per loader and Minecraft version like `modded`.

@@ -5,7 +5,7 @@ build) and Paper 1.20.5 and later. Run as `generate.py <module>`, for example `g
 from codegen import module_package, write, write_class_list, write_source
 
 TARGET = MODULE  # noqa: F821 - set by generate.py
-CRAFTBUKKIT_PACKAGE = CRAFTBUKKIT  # noqa: F821 - set by generate.py, None for Paper
+CRAFTBUKKIT_PACKAGE = CRAFTBUKKIT  # noqa: F821 - set by generate.py, None for Paper and Spigot 26.1+
 
 
 def ver(text):
@@ -17,7 +17,7 @@ V = ver(version)
 M = TARGET
 SUFFIX = TARGET.replace("-", "_").replace(".", "_")
 PAPER = platform == "paper"
-CB = "org.bukkit.craftbukkit" if PAPER else "org.bukkit.craftbukkit." + CRAFTBUKKIT_PACKAGE
+CB = "org.bukkit.craftbukkit" if CRAFTBUKKIT_PACKAGE is None else "org.bukkit.craftbukkit." + CRAFTBUKKIT_PACKAGE
 
 # API changes between the supported releases.
 HAS_BUILD_CONTEXT = V >= (1, 19)
@@ -34,6 +34,28 @@ HAS_PARTICLE_MINECRAFT_TO_BUKKIT = V >= (1, 20, 2)
 # Spigot keeps the build context of ReloadableServerResources in a private field. From 1.20.5 the modules build one from
 # public API instead, as the reflection implementation for Paper, whose names those releases already used, did.
 BUILDS_CONTEXT_FROM_PUBLIC_API = V >= (1, 20, 5)
+# ServerFunctionLibrary#reload lost its profilers in 1.21.2 and takes a SharedState in place of the resource manager
+# from 1.21.9.
+RELOAD_DROPPED_PROFILERS = V >= (1, 21, 2)
+RELOAD_HAS_SHARED_STATE = V >= (1, 21, 9)
+
+RESOURCE_MANAGER = "server.resources.resourceManager()" if HAS_RELOADABLE_RESOURCES \
+    else "server.resources.getResourceManager()"
+BARRIER = """new PreparableReloadListener.PreparationBarrier() {
+                           @Override
+                           public <T> CompletableFuture<T> wait(T value) {
+                               return CompletableFuture.completedFuture(value);
+                           }
+                       }"""
+_SEP = ",\n" + " " * 23
+if RELOAD_HAS_SHARED_STATE:
+    RELOAD_ARGUMENTS = _SEP.join([f"new PreparableReloadListener.SharedState({RESOURCE_MANAGER})", "Runnable::run",
+                                  BARRIER, "Runnable::run"])
+elif RELOAD_DROPPED_PROFILERS:
+    RELOAD_ARGUMENTS = _SEP.join([BARRIER, RESOURCE_MANAGER, "Runnable::run", "Runnable::run"])
+else:
+    RELOAD_ARGUMENTS = _SEP.join([BARRIER, RESOURCE_MANAGER, "InactiveProfiler.INSTANCE", "InactiveProfiler.INSTANCE",
+                                  "Runnable::run", "Runnable::run"])
 
 classes = []
 CTX = "CommandContext<CommandSourceStack>"
@@ -121,8 +143,10 @@ if HAS_RESOURCE_ARGUMENT:
 else:
     arg("NMSArgumentMobEffect", "commands.arguments.MobEffectArgument", "NMSMobEffectList", "MobEffectArgument.effect()",
         "return NMSMobEffectList.create(MobEffectArgument.getEffect(CTX, name));", throws=False)
-arg("NMSArgumentNamespacedKey", "commands.arguments.ResourceLocationArgument", "String",
-    "ResourceLocationArgument.id()", "return ResourceLocationArgument.getId(CTX, name).toString();", throws=False)
+# 1.21.11 renamed ResourceLocation to Identifier.
+ID_ARGUMENT = "IdentifierArgument" if V >= (1, 21, 11) else "ResourceLocationArgument"
+arg("NMSArgumentNamespacedKey", f"commands.arguments.{ID_ARGUMENT}", "String",
+    f"{ID_ARGUMENT}.id()", f"return {ID_ARGUMENT}.getId(CTX, name).toString();", throws=False)
 arg("NMSArgumentParticle", "commands.arguments.ParticleArgument", "NMSParticleParam",
     "ParticleArgument.particle(BuildContexts.current())" if HAS_RESOURCE_ARGUMENT else "ParticleArgument.particle()",
     "return NMSParticleParam.create(ParticleArgument.getParticle(CTX, name));",
@@ -156,6 +180,7 @@ w("NMSArgumentProfile", '''    public NMSArgumentProfile_SUFFIX() {
     }
 ''', [f"{ARGS}.GameProfileArgument"])
 
+# 26.1 dropped the checkOverStack parameter and always checks the stack size.
 w("NMSArgumentPredicateItemStack", '''    public NMSArgumentPredicateItemStack_SUFFIX(Object handle) {
         super(handle, ItemInput.class);
     }
@@ -163,12 +188,12 @@ w("NMSArgumentPredicateItemStack", '''    public NMSArgumentPredicateItemStack_S
     @Override
     public NMSItemStack createItemStack(int amount, boolean checkOverStack) {
         try {
-            return NMSItemStack.create(((ItemInput) getHandle()).createItemStack(amount, checkOverStack));
+            return NMSItemStack.create(((ItemInput) getHandle()).createItemStack(CREATE_ARGUMENTS));
         } catch (CommandSyntaxException e) {
             throw new UncheckedCommandSyntaxException(e);
         }
     }
-''', [f"{ARGS}.item.ItemInput"])
+'''.replace("CREATE_ARGUMENTS", "amount" if V >= (26,) else "amount, checkOverStack"), [f"{ARGS}.item.ItemInput"])
 
 w("NMSArgumentTileLocation", '''    public NMSArgumentTileLocation_SUFFIX(Object handle) {
         super(handle, BlockInput.class);
@@ -394,17 +419,7 @@ w("NMSDedicatedServer", f'''    public NMSDedicatedServer_SUFFIX(Object handle) 
         DedicatedServer server = (DedicatedServer) getHandle();
         ServerFunctionLibrary library = server.{"resources.managers()" if HAS_RELOADABLE_RESOURCES else "resources"}.getFunctionLibrary();
         setFunctionDispatcher(library, ServerFunctionLibrary.class, dispatcher);
-        library.reload(new PreparableReloadListener.PreparationBarrier() {{
-                           @Override
-                           public <T> CompletableFuture<T> wait(T value) {{
-                               return CompletableFuture.completedFuture(value);
-                           }}
-                       }},
-                       server.{"resources.resourceManager()" if HAS_RELOADABLE_RESOURCES else "resources.getResourceManager()"},
-                       InactiveProfiler.INSTANCE,
-                       InactiveProfiler.INSTANCE,
-                       Runnable::run,
-                       Runnable::run)
+        library.reload({RELOAD_ARGUMENTS})
                .join();
         keepPendingLoad(server.getFunctions(), () -> server.getFunctions().replaceLibrary(library));
     }}
@@ -417,7 +432,7 @@ w("NMSDedicatedServer", f'''    public NMSDedicatedServer_SUFFIX(Object handle) 
       *(["net.minecraft.server.MinecraftServer"] if PAPER else []),
       "net.minecraft.server.ServerFunctionLibrary",
       "net.minecraft.server.packs.resources.PreparableReloadListener",
-      "net.minecraft.util.profiling.InactiveProfiler",
+      *([] if RELOAD_DROPPED_PROFILERS else ["net.minecraft.util.profiling.InactiveProfiler"]),
       "java.util.concurrent.CompletableFuture"])
 
 if BUILDS_CONTEXT_FROM_PUBLIC_API:
@@ -599,7 +614,8 @@ final class BuildContexts {{
 }}
 """)
 
-if V >= (1, 20, 5) and not PAPER:
+# Spigot runs with Mojang names from 26.1, where no remapping can make a Mojang-named class mismatch.
+if (1, 20, 5) <= V < (26,) and not PAPER:
     write_source(M, HELPER_PACKAGE, "MappingProbe", f"""package {HELPER_PACKAGE};
 
 /**

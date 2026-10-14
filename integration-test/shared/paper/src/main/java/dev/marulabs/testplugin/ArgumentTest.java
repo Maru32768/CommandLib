@@ -144,7 +144,11 @@ public final class ArgumentTest extends TestBase {
             argument(new BiomeArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
             })).execute((a, ctx) -> {
-                putResult(key, a.toString(), "PLAINS");
+                // Keyed, since Biome is an enum before 1.21.3 and a registry interface from then.
+                putResult(key,
+                          ((Keyed) a).getKey()
+                                     .getKey(),
+                          "plains");
             });
         }});
 

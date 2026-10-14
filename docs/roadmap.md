@@ -23,7 +23,7 @@
 | Async execution                     | `[ ]` | async suggestions のみ。実行は同期。                                                                                                            | `CompletableFuture` ベースの非同期実行と main / region thread への復帰。                      |
 | Dynamic command tree refresh        | `[ ]` | なし。                                                                                                                                     | permission / state 変化時に対象 player へ command tree を再送する API。                       |
 | Vanilla-style feedback              | `[ ]` | なし。                                                                                                                                     | `sendCommandFeedback` / `logAdminCommands` gamerule を尊重する success feedback と op broadcast。 |
-| Bukkit / Spigot / Paper support     | `[~]` | 現行 `bukkit` module は実質的な Spigot 互換実装。複数 version 向け NMS bridge がある。                                                                      | `spigot` への rename / move、Paper 公式 API module、Folia 対応。                    |
+| Bukkit / Spigot / Paper support     | `[~]` | `spigot` module（Spigot 1.16.5〜26.3 を Tested）と `paper` module（Paper 1.21〜26.3 を Tested）がある。 | Folia 対応。 |
 | Paper 1.20.6+ registration          | `[x]` | `LifecycleEvents.COMMANDS` + `Commands registrar` + `CommandSourceStack` を使った公式 API 登録が実装済み。Adventure component を標準 message path として利用。 | bootstrap compatibility。                                                   |
 | Spigot / Paper module split         | `[x]` | `bukkit` を `spigot` へ rename / move し、`paper` module を新設済み。                                                                               | —                                                                          |
 | Forge support                       | `[~]` | Forge 1.16.5 / 1.20.1 module がある（version ごとのソースコピー）。                                                                                                                | Architectury Loom + Stonecutter による単一ソース化、1.16.5+ 全 version 対応、Bukkit との差分整理。                                     |
@@ -57,7 +57,7 @@
 | Localization / captions             | `[ ]` | なし。                                                                                                                                     | locale-aware help / errors / suggestions。                                  |
 | Public testing framework            | `[~]` | `spigot-testing` module と repository tests がある。`CommandTester` / `FakeSender` / NMS mock クラス群を整備済み。`CommandTester.builder()` と `FakeSender.playerBuilder()` / `consoleBuilder()` あり。 | downstream guide、JUnit extension、assertion utilities。                     |
 | Adventure / MiniMessage             | `[~]` | platform 非依存の rich text 値型 `RichText`（色、装飾、hover text、click、translatable 引数）を全 platform で送れる（Phase 1 完了）。Paper / modded は native component の `sendSuccess/Warn/Failure` もある。 | rich help、suggestion tooltip、MiniMessage。設計: [`docs/design/rich-text-messages.md`](design/rich-text-messages.md)。 |
-| Multi-version integration tests     | `[~]` | `integration-test` aggregator と Spigot / Mohist fixtures（1.16.5〜1.21.0）がある。                                                             | CI matrix、`IntegrationTarget` への platform フィールド追加、result docs、test kit 化。  |
+| Multi-version integration tests     | `[~]` | `integration-test` aggregator と Spigot（1.16.5〜26.3 の全 release）/ Paper / Mohist / Forge / NeoForge fixtures がある。                                                             | CI matrix、`IntegrationTarget` への platform フィールド追加、result docs、test kit 化。  |
 | NMS Reflection test strategy        | `[~]` | `CommandTester` が `Mockito.mockStatic` で `NMSClassRegistry` をスタブし、軽量な Mock 実装クラス方式で NMS なしテストを実現している。                 | `CommandTester` Builder パターン化、新引数追加時の Mock + Test セット作成ルール整備。              |
 | Documentation                       | `[~]` | README と design docs がある。                                                                                                               | compatibility、arguments、suggestions、permissions、migration、troubleshooting。 |
 | Migration guides                    | `[ ]` | なし。                                                                                                                                     | CommandAPI、Cloud、Lamp、ACF からの移行 guide。                                     |
@@ -74,9 +74,9 @@
   Paper）、`EntityTypeArgument`（Spigot / Paper）、`AttributeArgument`（Spigot / Paper）、`AdvancementArgument`（Spigot /
   Paper）、`LootTableArgument`（Spigot / Paper）、`RecipeArgument`（Spigot / Paper）、`ObjectiveArgument`（Spigot /
   Paper）、`ScoreboardDisplaySlotArgument`（Spigot / Paper）、`ChatColorArgument`（Spigot / Paper）を追加済み。
-- `[ ]` registry-backed arguments の入力形式を Paper native の registry key semantics に寄せる。`SoundArgument`、
-  `EntityTypeArgument`、`AttributeArgument` などは Paper の `ArgumentTypes.resource(RegistryKey...)` と同等の
-  `minecraft:...` 入力・補完を基準にし、Spigot 側も可能な限り同じ public behavior に合わせる。
+- `[~]` registry-backed arguments の入力形式を Paper native の registry key semantics に寄せる。Spigot の
+  `SoundArgument`、`AttributeArgument`、`BiomeArgument` は Bukkit `Registry` による `minecraft:...` 入力・補完に移行済み。
+  `EntityTypeArgument` などの残りも Paper の `ArgumentTypes.resource(RegistryKey...)` と同じ public behavior に合わせる。
 - `[ ]` `/execute`、command blocks、functions、tags の挙動を検証して docs / tests に落とす。
 - `[ ]` execution result を返せるようにする。`ctx.result(int)` または int を返す executor variant を追加し、
   `/execute store result` / `store success` に反映する。成功 / 失敗の区別も扱う。
@@ -133,11 +133,6 @@ annotation API / Kotlin DSL の `@Optional` や default args はこの土台の�
 - `[ ]` runtime diagnostics command を追加する。
 - `[ ]` example plugin collection を整備する。
 - `[ ]` documentation site を作る。
-- `[ ]` Spigot 1.21.3 以降に対応する。Bukkit の `Attribute` / `Biome` / `Sound` が registry-backed interface になり、
-  spigot module の `AttributeArgument` / `BiomeArgument` / `SoundArgument`（`EnumArgument` 継承）が動かない。Bukkit
-  `Registry` を使う実装に作り直し（入力は Paper 版と同じ NamespacedKey、public API の破壊的変更）、その上で 1.21.3 以降の
-  CraftBukkit revision ごとに typed NMS module と Spigot target を追加する。Spigot 26.x は難読化がなく再マップ不要だが
-  Java 25 が必要。
 - `[ ]` CI を整備する。typed NMS module（`nms/*`）は初回 build で BuildTools を version ごとに実行し（1 version あたり
   10 分前後）、paperweight の dev bundle も取得するため、`~/.m2` の Spigot artifact と paperweight cache を CI 間で
   保持する方法を決める。cache がない job や PR では `-Pcommandlib.typedNms=false` で module を外して unit test だけを

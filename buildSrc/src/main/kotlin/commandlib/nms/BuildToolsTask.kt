@@ -202,7 +202,7 @@ abstract class BuildToolsTask : DefaultTask() {
     }
 
     private fun missingArtifacts(): List<File> {
-        val version = "${minecraftVersion.get()}-R0.1-SNAPSHOT"
+        val version = spigotArtifactVersion(minecraftVersion.get())
         val repository = mavenLocalDirectory.get().asFile
         val spigot = repository.resolve("org/spigotmc/spigot/$version")
         val required = mutableListOf(spigot.resolve("spigot-$version.jar"))

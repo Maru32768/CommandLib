@@ -31,8 +31,8 @@ CommandLib の長期目標は、Minecraft `1.16.5` から各リリース時点�
 
 | Platform | Status | Current coverage | Notes |
 |---|---:|---|---|
-| Spigot | `Best effort` | `spigot` module。compile target は Spigot API `1.16.5`。typed NMS module により `1.16.5`〜`1.21.1` を扱う。 | Bukkit API 互換を基準にし、Paper-specific API に依存しない。 |
-| Paper | `Best effort` | `paper` module と `paper-testing`。Paper 公式 command API と Adventure component を使う。 | Paper `1.16.5`〜`1.21.1` と `1.21.4` の integration target がある（`1.21.0` と `1.21.4` は paper module）。 |
+| Spigot | `Tested` | `spigot` module。compile target は Spigot API `1.16.5`。typed NMS module により `1.16.4`〜`26.3` を扱う。Spigot integration target は `1.16.5`、`1.17.1`、`1.18`〜`26.3` の全 release。 | Bukkit API 互換を基準にし、Paper-specific API に依存しない。Paper 上でも `1.16.5`〜`1.21.1` を integration target で確認している。 |
+| Paper | `Tested` | `paper` module と `paper-testing`。Paper 公式 command API と Adventure component を使う。paper module の integration target は `1.21`、`1.21.3`〜`1.21.11`、`26.1.1`〜`26.3`（Paper `1.21.2` と `26.1` の build はない）。 | Paper `1.20.6` 以前は spigot module を使い、`1.16.5`〜`1.21.1` の Paper integration target で確認している。 |
 | Folia | `Planned` | なし。 | scheduler、threading、command registration の安全性確認が必要。 |
 | Mohist | `Best effort` | integration fixture: `1.16.5`, `1.20.1`。README に tested version として記載あり。 | Bukkit compatibility 上で動かす方針。Forge side との干渉確認が必要。 |
 | Velocity | `Planned` | なし。 | proxy command model と Minecraft server command model の差分設計が必要。 |
@@ -46,21 +46,21 @@ CommandLib は `1.16.5` から最新安定版までのサポートを目標に�
 
 | Minecraft version | Current evidence | Target |
 |---|---|---|
-| `1.16.5` | Paper fixture、Mohist fixture、Forge node。 | Core supported baseline。 |
-| `1.17.x` | Paper `1.17.1` fixture、typed NMS module（`1.17`、`1.17.1`）。`1.17` は MCProtocolLib が 1.17 の protocol に未対応のため fixture なし（module のコンパイルのみで確認）。 | `1.17.1` は Tested、`1.17` は Supported。 |
-| `1.18.x` | Paper `1.18` / `1.18.1` / `1.18.2` fixture、typed NMS module。 | Tested。 |
-| `1.19.x` | Paper `1.19`〜`1.19.4` fixture、typed NMS module。 | Tested。 |
-| `1.20` / `1.20.1` | Paper fixture、Mohist `1.20.1` fixture、typed NMS module（`1.20` は `1.20.1` の module）。 | Tested。 |
-| `1.20.2` | Paper fixture、typed NMS module。 | Tested。 |
+| `1.16.5` | Spigot / Paper / Mohist fixture、Forge node、typed NMS module。 | Core supported baseline。Tested。 |
+| `1.17.x` | Spigot / Paper `1.17.1` fixture、typed NMS module（`1.17`、`1.17.1`）。`1.17` は MCProtocolLib が 1.17 の protocol に未対応のため fixture なし（module のコンパイルのみで確認）。 | `1.17.1` は Tested、`1.17` は Supported。 |
+| `1.18.x` | Spigot / Paper `1.18`〜`1.18.2` fixture、typed NMS module。 | Tested。 |
+| `1.19.x` | Spigot / Paper `1.19`〜`1.19.4` fixture、typed NMS module。 | Tested。 |
+| `1.20` / `1.20.1` | Spigot / Paper fixture、Mohist `1.20.1` fixture、typed NMS module（`1.20` は `1.20.1` の module）。 | Tested。 |
+| `1.20.2` | Spigot / Paper fixture、typed NMS module。 | Tested。 |
 | `1.20.3` | Spigot fixture、typed NMS module。Paper 1.20.3 は存在しない。 | Tested。 |
-| `1.20.4` | Paper / Spigot fixture、typed NMS module。 | Tested。 |
-| `1.20.5` | Paper / Spigot fixture、typed NMS module。 | Tested。 |
-| `1.20.6` | Paper / Spigot fixture、typed NMS module。Paper 1.20.6+ registration path がある。 | Tested。Paper official API path の候補。 |
-| `1.21` / `1.21.1` | Paper `1.21.0` fixture（paper module）、Paper `1.21.1` fixture（spigot module）、Spigot `1.21` / `1.21.1` fixture、typed NMS module。 | Tested。 |
-| `1.21.4` | Paper `1.21.4` fixture（paper module）。1.21.2 で変わった `ServerFunctionLibrary#reload` の引数など、paper module が reflection で読む内部を確認する。 | paper module で Tested。 |
-| spigot module の `1.21.2+` | 未対応。`Attribute` / `Biome` / `Sound` が registry interface になり、spigot module の引数が動かない。typed NMS module もないため NMS を使う引数は `NMSClassNotFoundException` になる。Paper では paper module を使う。 | roadmap 参照。 |
+| `1.20.4`〜`1.20.6` | Spigot / Paper fixture（spigot module）、typed NMS module。 | Tested。 |
+| `1.21` / `1.21.1` | Spigot fixture、Paper `1.21` fixture（paper module）、Paper `1.21.1` fixture（spigot module）、typed NMS module。 | Tested。 |
+| `1.21.2` / `1.21.3` | Spigot fixture、Paper `1.21.3` fixture（paper module）、typed NMS module（`spigot-1.21.3`）。Paper 1.21.2 は存在しない。1.21.2 で attribute id の `generic.` prefix がなくなった。 | Tested。 |
+| `1.21.4`〜`1.21.11` | Spigot / Paper fixture（Paper は paper module）、typed NMS module（`1.21.6` と `1.21.7`〜`1.21.8`、`1.21.9`〜`1.21.10` はそれぞれ 1 module）。1.21.11 で `ResourceLocation` が `Identifier` になり、CraftBukkit の function compile 用 source が `NullCommandSender` を返すようになった。 | Tested。 |
+| `26.1`〜`26.3` | Spigot fixture（`26.1`、`26.1.1`、`26.1.2`、`26.2`、`26.3`）、Paper fixture（`26.1.1`〜`26.3`、paper module）、typed NMS module（`spigot-26.1.2` が全 26.x を扱う）。Spigot も Mojang 名で動き、CraftBukkit の package に version が付かない。Java 25 が必要。 | Tested。 |
+| spigot module on Paper `1.21.2+` | 未対応。typed NMS module は Spigot 用のみ。Paper では paper module を使う。 | 対応予定なし。 |
 | spigot module の `1.16.3` 以前 | 未対応。typed NMS module がない。 | 対応予定なし。 |
-| latest stable | 未固定。 | 各 release 時点の最新安定版を追従対象にする。 |
+| latest stable | `26.3`（2026-10 時点）。 | 各 release 時点の最新安定版を追従対象にする。 |
 
 ## Support policy
 

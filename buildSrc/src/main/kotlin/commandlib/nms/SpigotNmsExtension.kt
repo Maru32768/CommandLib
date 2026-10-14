@@ -19,6 +19,13 @@ abstract class SpigotNmsExtension {
     abstract val remapped: Property<Boolean>
 }
 
+/** Version of the `org.spigotmc` artifacts that BuildTools installs for the given Minecraft version. */
+fun spigotArtifactVersion(minecraftVersion: String): String {
+    // Spigot moved the API revision of 1.21.11 to R0.2 during the release.
+    val apiRevision = if (minecraftVersion == "1.21.11") "R0.2" else "R0.1"
+    return "$minecraftVersion-$apiRevision-SNAPSHOT"
+}
+
 /** Java release that BuildTools needs to build the given Minecraft version, and that the server runs on. */
 fun buildToolsJavaVersion(minecraftVersion: String): Int {
     val parts = minecraftVersion.split(".").map { it.toIntOrNull() ?: 0 }

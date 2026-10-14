@@ -14,7 +14,7 @@ dependencies {
     testImplementation("org.awaitility:awaitility:4.2.1")
     testImplementation("org.testcontainers:junit-jupiter:1.21.4")
     testImplementation("org.testcontainers:testcontainers:1.21.4")
-    testRuntimeOnly("org.slf4j:slf4j-simple:1.7.36")
+    testRuntimeOnly("org.slf4j:slf4j-simple:2.0.17")
     testImplementation("net.kyori:adventure-text-serializer-gson:4.15.0")
     testImplementation("net.kyori:adventure-text-serializer-json-legacy-impl:4.15.0")
 }
@@ -65,6 +65,46 @@ tasks.register("minecraftIntegrationTest") {
         ":integration-test:targets:spigot-1.21:minecraftIntegrationTest",
         ":integration-test:targets:spigot-1.20.3:minecraftIntegrationTest",
         ":integration-test:targets:paper-1.21.1:minecraftIntegrationTest",
+        ":integration-test:targets:spigot-1.16.5:minecraftIntegrationTest",
+        ":integration-test:targets:spigot-1.17.1:minecraftIntegrationTest",
+        ":integration-test:targets:spigot-1.18:minecraftIntegrationTest",
+        ":integration-test:targets:spigot-1.18.1:minecraftIntegrationTest",
+        ":integration-test:targets:spigot-1.18.2:minecraftIntegrationTest",
+        ":integration-test:targets:spigot-1.19:minecraftIntegrationTest",
+        ":integration-test:targets:spigot-1.19.1:minecraftIntegrationTest",
+        ":integration-test:targets:spigot-1.19.2:minecraftIntegrationTest",
+        ":integration-test:targets:spigot-1.19.3:minecraftIntegrationTest",
+        ":integration-test:targets:spigot-1.19.4:minecraftIntegrationTest",
+        ":integration-test:targets:spigot-1.20:minecraftIntegrationTest",
+        ":integration-test:targets:spigot-1.20.1:minecraftIntegrationTest",
+        ":integration-test:targets:spigot-1.20.2:minecraftIntegrationTest",
+        ":integration-test:targets:paper-1.21.3:minecraftIntegrationTest",
+        ":integration-test:targets:paper-1.21.5:minecraftIntegrationTest",
+        ":integration-test:targets:paper-1.21.6:minecraftIntegrationTest",
+        ":integration-test:targets:paper-1.21.7:minecraftIntegrationTest",
+        ":integration-test:targets:paper-1.21.8:minecraftIntegrationTest",
+        ":integration-test:targets:paper-1.21.9:minecraftIntegrationTest",
+        ":integration-test:targets:paper-1.21.10:minecraftIntegrationTest",
+        ":integration-test:targets:paper-1.21.11:minecraftIntegrationTest",
+        ":integration-test:targets:paper-26.1.1:minecraftIntegrationTest",
+        ":integration-test:targets:paper-26.1.2:minecraftIntegrationTest",
+        ":integration-test:targets:paper-26.2:minecraftIntegrationTest",
+        ":integration-test:targets:paper-26.3:minecraftIntegrationTest",
+        ":integration-test:targets:spigot-1.21.2:minecraftIntegrationTest",
+        ":integration-test:targets:spigot-1.21.3:minecraftIntegrationTest",
+        ":integration-test:targets:spigot-1.21.4:minecraftIntegrationTest",
+        ":integration-test:targets:spigot-1.21.5:minecraftIntegrationTest",
+        ":integration-test:targets:spigot-1.21.6:minecraftIntegrationTest",
+        ":integration-test:targets:spigot-1.21.7:minecraftIntegrationTest",
+        ":integration-test:targets:spigot-1.21.8:minecraftIntegrationTest",
+        ":integration-test:targets:spigot-1.21.9:minecraftIntegrationTest",
+        ":integration-test:targets:spigot-1.21.10:minecraftIntegrationTest",
+        ":integration-test:targets:spigot-1.21.11:minecraftIntegrationTest",
+        ":integration-test:targets:spigot-26.1:minecraftIntegrationTest",
+        ":integration-test:targets:spigot-26.1.1:minecraftIntegrationTest",
+        ":integration-test:targets:spigot-26.1.2:minecraftIntegrationTest",
+        ":integration-test:targets:spigot-26.2:minecraftIntegrationTest",
+        ":integration-test:targets:spigot-26.3:minecraftIntegrationTest",
     )
 }
 

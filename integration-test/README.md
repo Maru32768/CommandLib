@@ -99,12 +99,20 @@ For example:
 :integration-test:targets:paper-1.20.4:minecraftIntegrationTest
 ```
 
-Bukkit-family targets: `paper-1.16.5`, `paper-1.17.1`, `paper-1.18`, `paper-1.18.1`, `paper-1.18.2`, `paper-1.19`,
-`paper-1.19.1`, `paper-1.19.2`, `paper-1.19.3`, `paper-1.19.4`, `paper-1.20`, `paper-1.20.1`, `paper-1.20.2`,
-`paper-1.20.4`, `paper-1.20.5`, `paper-1.20.6`, `paper-1.21.1`, `mohist-1.16.5`, `mohist-1.20.1`, `spigot-1.20.3`,
-`spigot-1.20.4`, `spigot-1.20.5`, `spigot-1.20.6`, `spigot-1.21` and `spigot-1.21.1` run the `spigot` module, and
-`paper-1.21.0` and `paper-1.21.4` run the `paper` module. `paper-1.21.4` covers the server internals that changed in
-1.21.2, such as the parameters of `ServerFunctionLibrary#reload`, which the paper module reads by reflection.
+Bukkit-family targets run the `spigot` module, except the `paper-<version>` targets from 1.21, which run the `paper`
+module:
+
+- `spigot-<version>`: every Spigot release from 1.16.5 to 26.3 except 1.17.
+- `paper-<version>` with the `spigot` module: 1.16.5, 1.17.1, 1.18 to 1.20.2, 1.20.4 to 1.20.6 and 1.21.1.
+- `paper-<version>` with the `paper` module: `paper-1.21.0` (Minecraft 1.21), 1.21.3 to 1.21.11 and 26.1.1 to 26.3.
+  Paper has no 1.20.3, 1.21.2 or 26.1 build. `paper-1.21.4` and later cover the server internals that changed in
+  1.21.2 and 1.21.9, such as the parameters of `ServerFunctionLibrary#reload`, which the paper module reads by
+  reflection.
+- `mohist-1.16.5` and `mohist-1.20.1`.
+
+From 26.1 the servers need Java 25, and from 26.2 MCProtocolLib needs Java 21 and Adventure 5, so those targets set
+`commandlib.integration.botJavaVersion` to 21, which also puts MCProtocolLib before the test's own Adventure 4 on the
+test classpath.
 
 Minecraft 1.17 has no target: no MCProtocolLib release speaks its protocol (755), and a 1.17 server rejects the 1.17.1
 bot (756). The `nms:spigot-1.17` module is only checked by its compilation (see `docs/agents/nms-build.md`).
@@ -112,8 +120,8 @@ bot (756). The `nms:spigot-1.17` module is only checked by its compilation (see 
 Spigot targets (`spigot-<version>`) run the `spigot` module on a plain Spigot server. Spigot server jars are only
 produced by BuildTools, so the target's `buildSpigotServer` task runs it (through the same BuildTools setup as the typed
 NMS modules, see `docs/agents/nms-build.md`) and copies the jar to `test-plugin/server/server.jar`. BuildTools resolves
-1.20.3, 1.20.5 and 1.21 to the build of the following hotfix release, so those targets set the Spigot build number of
-the last build of their release in `commandlib.integration.buildToolsRevision`. BuildTools also installs the remapped
+1.20, 1.20.3, 1.20.5, 1.21, 1.21.2, 1.21.7, 1.21.9, 26.1 and 26.1.1 to the build of the following hotfix release, so those
+targets set the Spigot build number of the last build of their release in `commandlib.integration.buildToolsRevision`. BuildTools also installs the remapped
 artifacts only for a version that has a typed NMS module. The first run of a version takes several minutes.
 
 `minecraftIntegrationTest` is the aggregate task for all configured targets.

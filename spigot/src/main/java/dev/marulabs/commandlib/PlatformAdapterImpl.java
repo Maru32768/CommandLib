@@ -45,6 +45,12 @@ public final class PlatformAdapterImpl implements PlatformAdapter<Object, BaseCo
             // for vanilla commands, the function permission level guards them.
             return true;
         }
+        // From 1.21.11 CraftBukkit's CommandSource.NULL returns a NullCommandSender, which has no permission.
+        if (sender.getClass()
+                  .getName()
+                  .endsWith(".command.NullCommandSender")) {
+            return true;
+        }
         return sender.hasPermission(permissionNode);
     }
 
