@@ -200,15 +200,22 @@ arg("NMSArgumentBlockPredicate", "commands.arguments.blocks.BlockPredicateArgume
     ["java.util.function.Predicate", "org.bukkit.block.Block", "net.minecraft.core.BlockPos",
      "net.minecraft.world.level.block.state.pattern.BlockInWorld", f"{CB}.CraftWorld"])
 # MinMaxBounds turned into records with Optional bounds in 1.20.2. `var` keeps its package, which 1.21.11 renamed from
-# advancements.critereon to advancements.criterion, out of the imports.
-BOUNDS = "bounds.min().orElse(null), bounds.max().orElse(null)" if V >= (1, 20, 2) \
-    else "bounds.getMin(), bounds.getMax()"
+# advancements.critereon to advancements.criterion, out of the imports. 26.2 moved it to advancements.predicates, and
+# the 26.x module runs on both, so it does not name the class and reads min() and max() of its interface by reflection.
+if V >= (26,):
+    INT_BOUNDS = ("Object bounds = CTX.getArgument(name, Object.class);\n"
+                  '        return range((Integer) bound(bounds, "min"), (Integer) bound(bounds, "max"));')
+    FLOAT_BOUNDS = ("Object bounds = CTX.getArgument(name, Object.class);\n"
+                    '        return doubleRange((Number) bound(bounds, "min"), (Number) bound(bounds, "max"));')
+else:
+    BOUNDS = "bounds.min().orElse(null), bounds.max().orElse(null)" if V >= (1, 20, 2) \
+        else "bounds.getMin(), bounds.getMax()"
+    INT_BOUNDS = f"var bounds = RangeArgument.Ints.getRange(CTX, name);\n        return range({BOUNDS});"
+    FLOAT_BOUNDS = f"var bounds = RangeArgument.Floats.getRange(CTX, name);\n        return doubleRange({BOUNDS});"
 arg("NMSArgumentIntRange", "commands.arguments.RangeArgument", "Range<Integer>", "RangeArgument.intRange()",
-    "var bounds = RangeArgument.Ints.getRange(CTX, name);\n"
-    f"        return range({BOUNDS});", ["com.google.common.collect.Range"], throws=False)
+    INT_BOUNDS, ["com.google.common.collect.Range"], throws=False)
 arg("NMSArgumentFloatRange", "commands.arguments.RangeArgument", "Range<Double>", "RangeArgument.floatRange()",
-    "var bounds = RangeArgument.Floats.getRange(CTX, name);\n"
-    f"        return doubleRange({BOUNDS});", ["com.google.common.collect.Range"], throws=False)
+    FLOAT_BOUNDS, ["com.google.common.collect.Range"], throws=False)
 # Vanilla components reach Bungee through the JSON that CraftChatMessage writes, which is one object or string, so
 # ComponentSerializer.parse returns one component. ComponentArgument takes the registries from 1.20.5 and reads SNBT,
 # with getRawComponent in place of getComponent, from 1.21.5.

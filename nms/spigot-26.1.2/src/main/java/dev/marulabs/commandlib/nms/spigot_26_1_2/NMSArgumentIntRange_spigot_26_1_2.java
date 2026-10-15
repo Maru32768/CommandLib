@@ -21,7 +21,7 @@ public class NMSArgumentIntRange_spigot_26_1_2 extends NMSArgumentIntRange {
     @SuppressWarnings("unchecked")
     protected Range<Integer> parseImpl(CommandContext<?> ctx, String name) {
         CommandContext<CommandSourceStack> context = (CommandContext<CommandSourceStack>) ctx;
-        var bounds = RangeArgument.Ints.getRange(context, name);
-        return range(bounds.min().orElse(null), bounds.max().orElse(null));
+        Object bounds = context.getArgument(name, Object.class);
+        return range((Integer) bound(bounds, "min"), (Integer) bound(bounds, "max"));
     }
 }

@@ -8,6 +8,8 @@ import dev.marulabs.commandlib.util.nms.NMSClass;
 import dev.marulabs.commandlib.util.nms.exception.UncheckedCommandSyntaxException;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Optional;
+
 public abstract class NMSArgument<T> extends NMSClass {
     public NMSArgument(@Nullable Object handle, Class<?> serverClass) {
         super(handle, serverClass);
@@ -33,5 +35,22 @@ public abstract class NMSArgument<T> extends NMSClass {
             return max == null ? Range.all() : Range.atMost(max);
         }
         return max == null ? Range.atLeast(min) : Range.closed(min, max);
+    }
+
+    /**
+     * A bound of a vanilla range from 1.20.2, read through the public {@code min()} or {@code max()} of the
+     * {@code MinMaxBounds} interface, whose package 26.2 renamed, so a module for both releases cannot name it.
+     *
+     * @return the bound, or null when the range is unbounded on that side
+     */
+    @Nullable
+    protected static Object bound(Object bounds, String method) {
+        try {
+            return ((Optional<?>) bounds.getClass()
+                                        .getMethod(method)
+                                        .invoke(bounds)).orElse(null);
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException(e);
+        }
     }
 }

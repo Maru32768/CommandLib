@@ -21,7 +21,7 @@ public class NMSArgumentFloatRange_spigot_26_1_2 extends NMSArgumentFloatRange {
     @SuppressWarnings("unchecked")
     protected Range<Double> parseImpl(CommandContext<?> ctx, String name) {
         CommandContext<CommandSourceStack> context = (CommandContext<CommandSourceStack>) ctx;
-        var bounds = RangeArgument.Floats.getRange(context, name);
-        return doubleRange(bounds.min().orElse(null), bounds.max().orElse(null));
+        Object bounds = context.getArgument(name, Object.class);
+        return doubleRange((Number) bound(bounds, "min"), (Number) bound(bounds, "max"));
     }
 }
