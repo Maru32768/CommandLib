@@ -21,15 +21,15 @@
 | 型安全な argument callback              | `[x]` | `Unary` から `Hept` までの typed branch callback がある。                                                                                        | 8 個以上の引数。                                     |
 | Variadic / optional arguments       | `[x]` | 末尾の `optional(default)` / `optional(Extractor)` と `variadic([max])`（`List<T>`）がある。配置違反は登録時に `IllegalStateException`（[`docs/design/optional-variadic-arguments.md`](design/optional-variadic-arguments.md)）。 | 上限なしの variadic、`Optional<T>` 形式、実サーバーでの検証。 |
 | Execution result                    | `[x]` | `ctx.setResult(int)` が `/execute store result` に、失敗（例外・権限・prerequisite 等）が `store success 0` に反映される。spigot-1.16.5 / paper-26.3 の integration test あり。 | Forge / NeoForge の実サーバー検証。 |
-| Async execution                     | `[x]` | `executeAsync(...)`（全 typed branch）と `ctx.supplyAsync` / `runAsync`、platform 別の `CommandScheduler` で sync thread へ復帰する（[`docs/execution.md`](execution.md)）。 | Folia の region / entity scheduler、実サーバーでの scheduler 検証。 |
+| Async execution                     | `[x]` | `executeAsync(...)`（全 typed branch）と `ctx.supplyAsync` / `runAsync`、platform 別の `CommandScheduler` で sync thread へ復帰する（[`docs/execution.md`](execution.md)）。 | 実サーバーでの scheduler 検証（Bukkit / Forge / Folia）。 |
 | Dynamic command tree refresh        | `[x]` | `CommandLib.refresh(player)` / `refreshAll()` が Spigot / Paper / Forge / NeoForge にある（[`docs/permissions.md`](permissions.md)）。 | permission 以外の state による表示切替 predicate、実 client での検証。 |
 | Vanilla-style feedback              | `[x]` | `ctx.sendSuccess(message, broadcastToOps)` が全 platform で vanilla の `CommandSourceStack#sendSuccess` を通り、gamerule と silent source を尊重する。 | selector で複数 target に適用した場合の集計 message、gamerule の tests。 |
-| Bukkit / Spigot / Paper support     | `[~]` | `spigot` module（Spigot 1.16.5〜26.3 を Tested）と `paper` module（Paper 1.21〜26.3 を Tested）がある。 | Folia 対応。 |
+| Bukkit / Spigot / Paper support     | `[~]` | `spigot` module（Spigot 1.16.5〜26.3 を Tested）と `paper` module（Paper 1.21〜26.3 を Tested、Folia は best effort）がある。 | Folia の実サーバー検証。 |
 | Paper 1.20.6+ registration          | `[x]` | `LifecycleEvents.COMMANDS` + `Commands registrar` + `CommandSourceStack` を使った公式 API 登録が実装済み。Adventure component を標準 message path として利用。 | bootstrap 登録の互換性保証・docs / tests の拡充（`CommandLib.bootstrap(BootstrapContext, ...)` は実装済み）。                                                   |
 | Spigot / Paper module split         | `[x]` | `bukkit` を `spigot` へ rename / move し、`paper` module を新設済み。                                                                               | —                                                                          |
 | Forge support                       | `[~]` | Forge 1.16.5 / 1.20.1 を Architectury Loom + Stonecutter による `modded` の単一ソースから build。                                                                                                                | 1.16.5+ の対象 version 拡充、loader 非依存層の分離、Bukkit との差分整理。                                     |
 | Mohist support                      | `[~]` | README 上で tested version が記載されている。                                                                                                      | integration test の明文化、非対応ケースの整理。                                           |
-| Folia support                       | `[ ]` | なし。                                                                                                                                     | scheduler / threading model を踏まえた Paper 互換性確認。                             |
+| Folia support                       | `[~]` | `paper` artifact が Folia を検出し、`FoliaCommandScheduler` で entity / region / global scheduler に戻す。`spigot` artifact は Folia で登録を拒否する。 | 実 Folia server の integration target（Folia 用 fixture が必要）、region thread からの runtime 登録の guard。 |
 | Velocity support                    | `[~]` | `velocity` / `velocity-testing` module（Velocity 3.4.0+、`PlayerArgument` / `ServerArgument`）がある。Velocity 3.4.0 / 4.2.0 の proxy で手動 smoke test 済み。 | 実 proxy + backend + client の integration target、Velocity sample。 |
 | NeoForge support                    | `[~]` | NeoForge 1.21.1 を Forge と共有の `modded` Stonecutter tree から build（`neoforge-1.21.1`、`neoforge-testing-1.21.1`、integration target あり）。 | 1.21.1 以外の NeoForge version。 |
 | Fabric support                      | `[ ]` | なし。                                                                                                                                     | Fabric command registration / Brigadier integration 設計、Stonecutter matrix への追加（方針案: Pillar 11）。                    |
@@ -112,7 +112,7 @@
 
 ### P5: Platform expansion
 
-- `[ ]` Folia support 方針を決める。
+- `[ ]` Folia の integration target を追加する（共有 paper fixture は `Bukkit.getScheduler()` を使うため Folia 用 fixture が必要）。
 - `[x]` Forge testing strategy を決め、`forge-testing` を追加する。実サーバーの integration targets（`forge-1.16.5`、`forge-1.20.1`）と、サーバーなしの `forge-testing-<version>`（`CommandTester` / `FakeSender`）を追加済み。
 - `[~]` NeoForge / Fabric / Forge の module 方針を決める。方針案は
   [11. Platform Architecture](#11-platform-architecture) を参照。
