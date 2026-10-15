@@ -279,6 +279,8 @@ public final class CommandTester implements AutoCloseable {
                .thenReturn(sender);
         Mockito.when(source.getLocation())
                .thenReturn(new Location(null, 0, 0, 0));
+        Mockito.when(source.getExecutor())
+               .thenReturn(sender instanceof Entity ? (Entity) sender : null);
         return source;
     }
 

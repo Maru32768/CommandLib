@@ -29,6 +29,25 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class CommandContextTest {
     @Test
+    void entity_is_the_executing_entity_and_location_is_the_source_location() {
+        List<Object> seen = new ArrayList<>();
+        FakeSender steve = FakeSender.player("Steve");
+
+        try (CommandTester tester = new CommandTester(new Command("where") {{
+            execute(ctx -> {
+                seen.add(ctx.getEntity());
+                seen.add(ctx.getLocation()
+                            .getX());
+            });
+        }}, "test.command")) {
+            tester.execute("where", steve);
+            tester.execute("where", FakeSender.console());
+        }
+
+        assertThat(seen).containsExactly(steve.asSender(), 0.0, null, 0.0);
+    }
+
+    @Test
     void actor_type_is_detected_for_every_sender_kind() {
         List<String> types = new ArrayList<>();
         Zombie zombie = permitted(Zombie.class);

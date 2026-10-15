@@ -7,8 +7,11 @@ import io.papermc.paper.command.brigadier.CommandSourceStack;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -24,6 +27,31 @@ import java.util.function.Supplier;
 public final class CommandContext extends CommonCommandContext<CommandSourceStack, Component> {
     public CommandContext(com.mojang.brigadier.context.CommandContext<CommandSourceStack> ctx) {
         super(ctx);
+    }
+
+    /**
+     * The entity the command runs as, such as the target of {@code /execute as}, which {@link #getSender()} does not
+     * change to. Null when no entity runs it, as for the console or a command block.
+     */
+    @Nullable
+    public Entity getEntity() {
+        return handle.getSource()
+                     .getExecutor();
+    }
+
+    @Nullable
+    public World getWorld() {
+        return getLocation().getWorld();
+    }
+
+    /**
+     * The location the command runs at, as {@code /execute at}, {@code positioned}, {@code rotated} and {@code in} set
+     * it, with the source's rotation as the yaw and pitch.
+     */
+    @NotNull
+    public Location getLocation() {
+        return handle.getSource()
+                     .getLocation();
     }
 
     @NotNull
