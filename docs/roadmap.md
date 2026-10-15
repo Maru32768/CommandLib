@@ -20,10 +20,10 @@
 | Fluent / tree API                   | `[x]` | `Command`、`argument(...)`、`addChildren(...)` による command tree 定義がある。                                                                    | API stability policy と migration guide。                                    |
 | 型安全な argument callback              | `[x]` | `Unary` から `Hept` までの typed branch callback がある。                                                                                        | 8 個以上の引数。                                     |
 | Variadic / optional arguments       | `[x]` | 末尾の `optional(default)` / `optional(Extractor)` と `variadic([max])`（`List<T>`）がある。配置違反は登録時に `IllegalStateException`（[`docs/design/optional-variadic-arguments.md`](design/optional-variadic-arguments.md)）。 | 上限なしの variadic、`Optional<T>` 形式、実サーバーでの検証。 |
-| Execution result                    | `[ ]` | `CommandExecutor` は `void` を返す。                                                                                                          | int result / success を返し `/execute store result / success` に反映する。                |
+| Execution result                    | `[x]` | `ctx.setResult(int)` が `/execute store result` に、失敗（例外・権限・prerequisite 等）が `store success 0` に反映される。spigot-1.16.5 / paper-26.3 の integration test あり。 | Forge / NeoForge の実サーバー検証。 |
 | Async execution                     | `[ ]` | async suggestions のみ。実行は同期。                                                                                                            | `CompletableFuture` ベースの非同期実行と main / region thread への復帰。                      |
 | Dynamic command tree refresh        | `[x]` | `CommandLib.refresh(player)` / `refreshAll()` が Spigot / Paper / Forge / NeoForge にある（[`docs/permissions.md`](permissions.md)）。 | permission 以外の state による表示切替 predicate、実 client での検証。 |
-| Vanilla-style feedback              | `[ ]` | なし。                                                                                                                                     | `sendCommandFeedback` / `logAdminCommands` gamerule を尊重する success feedback と op broadcast。 |
+| Vanilla-style feedback              | `[x]` | `ctx.sendSuccess(message, broadcastToOps)` が全 platform で vanilla の `CommandSourceStack#sendSuccess` を通り、gamerule と silent source を尊重する。 | selector で複数 target に適用した場合の集計 message、gamerule の tests。 |
 | Bukkit / Spigot / Paper support     | `[~]` | `spigot` module（Spigot 1.16.5〜26.3 を Tested）と `paper` module（Paper 1.21〜26.3 を Tested）がある。 | Folia 対応。 |
 | Paper 1.20.6+ registration          | `[x]` | `LifecycleEvents.COMMANDS` + `Commands registrar` + `CommandSourceStack` を使った公式 API 登録が実装済み。Adventure component を標準 message path として利用。 | bootstrap 登録の互換性保証・docs / tests の拡充（`CommandLib.bootstrap(BootstrapContext, ...)` は実装済み）。                                                   |
 | Spigot / Paper module split         | `[x]` | `bukkit` を `spigot` へ rename / move し、`paper` module を新設済み。                                                                               | —                                                                          |
@@ -79,10 +79,9 @@
 - `[ ]` Spigot の `ScoreboardDisplaySlotArgument` / `ChatColorArgument` を vanilla の argument type で送る（現在は string
   argument のため client 側で検証されない）。
 - `[ ]` `/execute`、command blocks、functions、tags の挙動を検証して docs / tests に落とす。
-- `[ ]` execution result を返せるようにする。`ctx.result(int)` または int を返す executor variant を追加し、
-  `/execute store result` / `store success` に反映する。成功 / 失敗の区別も扱う。
-- `[ ]` vanilla-style feedback を追加する。`ctx.sendSuccess(message, broadcastToOps)` 相当で
-  `sendCommandFeedback` / `logAdminCommands` gamerule を尊重し、selector で複数 target に適用した場合の集計 message も扱う。
+- `[ ]` selector で複数 target に適用した場合の集計 feedback message（vanilla の "Applied to 3 players" 相当）を扱う。
+- `[ ]` typed executor（`(a, ctx) -> ...`）から command を失敗させる手段を用意する。現在は `ctx ->` 形式でしか
+  `CommandPrerequisiteException` を投げられない。
 - `[ ]` `RangeArgument`（`1..10`、`..5`、`3..`）と `DurationArgument`（`1h30m`、`20t` 等）を追加する。
 - `[ ]` error を platform 間で揃える。実行中の vanilla error は Spigot が翻訳 component、Paper が英語の `getMessage()`、
   modded が vanilla component で表示が異なり、selector が誰にも一致しない時の message も Spigot と Paper で異なる。

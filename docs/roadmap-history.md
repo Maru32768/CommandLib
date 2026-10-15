@@ -43,6 +43,10 @@
 - `[x]` registry-backed arguments の入力形式を Paper native の registry key semantics に寄せる。Spigot の `SoundArgument`、
   `AttributeArgument`、`BiomeArgument`、`EntityTypeArgument` は Bukkit `Registry` による `minecraft:...` 入力・補完、
   `ScoreboardDisplaySlotArgument` / `ChatColorArgument` は vanilla 名に統一（Paper は `NamedTextColor` を返す、2026-10-15）。
+- `[x]` execution result を返せるようにする。`ctx.setResult(int)` を `/execute store result` に、失敗を `store success 0` に
+  反映する（spigot-1.16.5 / paper-26.3 の integration test、2026-10-15）。
+- `[x]` vanilla-style feedback を追加する。`ctx.sendSuccess(message, broadcastToOps)` が `sendCommandFeedback` /
+  `logAdminCommands` gamerule を尊重する（2026-10-15）。
 - `[x]` error taxonomy を公開仕様として整理する（`docs/errors.md`、2026-10-15）。
 - `[x]` CommandAPI migration guide を追加する（`docs/migration/from-commandapi.md`、2026-10-15）。
 
