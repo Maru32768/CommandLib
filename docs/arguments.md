@@ -33,6 +33,9 @@ or suggestions with the references.
 | `BooleanArgument` | `Boolean` | `true` / `false`, suggested by Brigadier | `BooleanArgument` | Brigadier `bool()` | equivalent | equivalent | equivalent |
 | `IntegerArgument(name[, min, max])` | `Integer` | Brigadier integer; out-of-range input is a Brigadier error | `IntegerArgument` | Brigadier `integer()` | equivalent | equivalent | equivalent |
 | `LongArgument`, `FloatArgument`, `DoubleArgument` | `Long`, `Float`, `Double` | as above | same names | Brigadier | equivalent | equivalent | equivalent |
+| `IntegerRangeArgument` | Guava `Range<Integer>` | vanilla `int_range`: `1..10`, `..5`, `3..`, `5`; parsed and highlighted by the client; a minimum above the maximum is a syntax error | `IntegerRangeArgument` (`IntegerRange`) | `integerRange()` | equivalent | equivalent | equivalent |
+| `DoubleRangeArgument` | Guava `Range<Double>` | vanilla `float_range`: `0.5..10`, `..5`, `3.5..`, `5` | `DoubleRangeArgument` (`DoubleRange`) | `doubleRange()` | equivalent | equivalent | equivalent |
+| `DurationArgument` | `java.time.Duration` | a word of amounts with units `d h m s t`, each at most once from the largest: `1h30m`, `20t`, `2d`; a typed number is suggested with each unit | `TimeArgument` (`Integer` ticks) | `time()` (`Integer` ticks) | partial | partial | partial |
 | `StringArgument(name, Type.WORD)` | `String` | one unquoted word (`a-z A-Z 0-9 _ - . +`) | `StringArgument` | Brigadier `word()` | equivalent | equivalent | equivalent |
 | `StringArgument(name)` / `Type.PHRASE_QUOTED` | `String` | a word or a `"quoted phrase"`; **the default** | `TextArgument` | Brigadier `string()` | equivalent | equivalent | equivalent |
 | `StringArgument(name, Type.PHRASE)` | `String` | the rest of the input | `GreedyStringArgument` | Brigadier `greedyString()` | equivalent | equivalent | equivalent |
@@ -52,6 +55,14 @@ Notes:
   are parsed by the server but get no client-side completion, so put it last.
 - `EnumArgument`, `ObjectArgument`, `NameableObjectArgument`, `LiteralArgument` filter suggestions with
   case-insensitive "contains" matching, not prefix matching.
+- The range arguments return a closed Guava `Range`, unbounded on an open side (`3..` is `[3..+∞)`, `5` is
+  `[5..5]`), the type Paper's range providers return. Spigot reads them through NMS `RangeArgument`, Forge / NeoForge
+  through Minecraft's `RangeArgument`.
+- `DurationArgument` counts real time: `t` is 50 ms (a tick at 20 TPS) and `d` is 24 hours. Vanilla `time` (CommandAPI
+  `TimeArgument`, Paper `time()`) counts game ticks, means the 24000 ticks of a Minecraft day by `d`, accepts decimals
+  such as `1.5d` and a bare number of ticks, and takes one unit only. `DurationArgument` rejects decimals and bare
+  numbers but combines units. The client sees a word, so malformed input fails when the command runs with
+  "Incorrect argument for command". Convert with `duration.toMillis() / 50` for a tick count.
 
 ## Entities and players
 
@@ -186,8 +197,6 @@ Notes:
 | signed chat message | `ChatArgument` | `signedMessage()` | missing | missing | missing |
 | style, hex color | — | `style()`, `hexColor()` | missing | missing | missing |
 | NBT / SNBT compound | `NBTCompoundArgument` | — | missing | missing | missing |
-| integer / double range (`1..10`) | `IntegerRangeArgument`, `DoubleRangeArgument` | `integerRange()`, `doubleRange()` | missing | missing | missing |
-| time / duration (`1d`, `20t`) | `TimeArgument` | `time()` | missing | missing | missing |
 | function / function tag | `FunctionArgument` | — | missing | missing | missing |
 | command | `CommandArgument` | — | missing | missing | missing |
 | list | `ListArgument` | — | partial | partial | partial |
@@ -224,23 +233,23 @@ These points are open, separate from the missing arguments below:
 
 The order weighs plugin demand, the CommandAPI / Paper parity gap, and how much of the work already exists.
 
-1. **Integer / double range** (`1..10`, `..5`, `3..`) and **time / duration**. Common in admin commands; Paper has native
-   types for both.
-2. **Text component and signed message** for Paper (`component()`, `signedMessage()`), and a portable component
+1. **Text component and signed message** for Paper (`component()`, `signedMessage()`), and a portable component
    argument for Spigot and Forge / NeoForge.
-3. **Block position on Bukkit** and an uncentered location option. The Spigot NMS bridge (`NMSArgumentTileLocation`)
+2. **Block position on Bukkit** and an uncentered location option. The Spigot NMS bridge (`NMSArgumentTileLocation`)
    and its test mock already exist.
-4. **Item predicate and block predicate.** The Spigot NMS bridge for item predicates (`NMSArgumentPredicateItemStack`)
+3. **Item predicate and block predicate.** The Spigot NMS bridge for item predicates (`NMSArgumentPredicateItemStack`)
    and its mock already exist.
-5. **NBT / SNBT compound.**
-6. **Generic registry argument** (Paper `resource(RegistryKey)` / `resourceKey(RegistryKey)` equivalent) on both
+4. **NBT / SNBT compound.**
+5. **Generic registry argument** (Paper `resource(RegistryKey)` / `resourceKey(RegistryKey)` equivalent) on both
    Bukkit modules.
-7. **Forge / NeoForge parity**: dimension / world, sound, biome, attribute, entity type, objective, game mode, and the
+6. **Forge / NeoForge parity**: dimension / world, sound, biome, attribute, entity type, objective, game mode, and the
    other Bukkit-only registry arguments.
-8. **Rotation, angle, 2D location, axes.**
-9. **Score holder, objective criteria, math operation**, the remaining scoreboard set.
-10. **Function, command, list, map** arguments.
-11. `style`, `hexColor`, `heightMap`, `entityAnchor`, structure mirror / rotation.
+7. **Rotation, angle, 2D location, axes.**
+8. **Score holder, objective criteria, math operation**, the remaining scoreboard set.
+9. **Function, command, list, map** arguments.
+10. `style`, `hexColor`, `heightMap`, `entityAnchor`, structure mirror / rotation.
+11. **Vanilla `time` in game ticks** (`TimeArgument`, `time()`), for commands that schedule ticks rather than real time;
+    `DurationArgument` covers real-time durations.
 
 ## Testing each argument
 

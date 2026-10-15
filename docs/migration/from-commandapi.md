@@ -88,7 +88,9 @@ Typed executors take up to seven arguments. Beyond that, use `argument(builder -
 | `ScoreboardSlotArgument` | `ScoreboardDisplaySlotArgument` |
 | `CustomArgument` | `ObjectArgument`, `NameableObjectArgument`, `EnumArgument`, or a subclass of `Argument` |
 | `ListArgument` | `variadic()` on the element argument (see [optional arguments](#optional-arguments)) |
-| `IntegerRangeArgument`, `DoubleRangeArgument`, `TimeArgument`, `RotationArgument`, `AngleArgument`, `AxisArgument`, `Location2DArgument`, `ChatComponentArgument`, `ChatArgument`, `NBTCompoundArgument`, `BlockPredicateArgument`, `ItemStackPredicateArgument`, `FunctionArgument`, `CommandArgument`, `MapArgument`, `MathOperationArgument`, `ObjectiveCriteriaArgument`, `ScoreHolderArgument` | **Not available.** See [missing arguments](../arguments.md#missing-arguments-by-priority) |
+| `IntegerRangeArgument` / `DoubleRangeArgument` | Same names; they return Guava `Range<Integer>` / `Range<Double>` instead of `IntegerRange` / `DoubleRange` |
+| `TimeArgument` | `DurationArgument` (a real-time `java.time.Duration` such as `1h30m`; `d` is 24 hours, not 24000 ticks) |
+| `RotationArgument`, `AngleArgument`, `AxisArgument`, `Location2DArgument`, `ChatComponentArgument`, `ChatArgument`, `NBTCompoundArgument`, `BlockPredicateArgument`, `ItemStackPredicateArgument`, `FunctionArgument`, `CommandArgument`, `MapArgument`, `MathOperationArgument`, `ObjectiveCriteriaArgument`, `ScoreHolderArgument` | **Not available.** See [missing arguments](../arguments.md#missing-arguments-by-priority) |
 
 ### Optional arguments
 
