@@ -11,6 +11,6 @@ public class NMSIChatMutableComponent_spigot_1_21_11 extends NMSIChatMutableComp
 
     @Override
     public NMSTranslatableContents getContentsAsTranslatable() {
-        return NMSTranslatableContents.create(((MutableComponent) getHandle()).getContents());
+        return NMSTranslatableContents.create(((MutableComponent) requireHandle()).getContents());
     }
 }

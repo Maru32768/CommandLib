@@ -30,6 +30,7 @@ IMPLICIT_IMPORTS = [
     ("List<", "java.util.List"),
     ("Collectors.", "java.util.stream.Collectors"),
     ("Supplier<", "java.util.function.Supplier"),
+    ("@Nullable", "org.jetbrains.annotations.Nullable"),
 ]
 
 

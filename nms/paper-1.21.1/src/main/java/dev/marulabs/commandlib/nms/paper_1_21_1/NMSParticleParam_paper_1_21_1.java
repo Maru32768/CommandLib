@@ -11,6 +11,6 @@ public class NMSParticleParam_paper_1_21_1 extends NMSParticleParam {
 
     @Override
     public NMSParticle getParticle() {
-        return NMSParticle.create(((ParticleOptions) getHandle()).getType());
+        return NMSParticle.create(((ParticleOptions) requireHandle()).getType());
     }
 }

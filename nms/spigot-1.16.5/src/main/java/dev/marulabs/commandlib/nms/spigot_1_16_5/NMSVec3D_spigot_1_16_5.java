@@ -10,16 +10,16 @@ public class NMSVec3D_spigot_1_16_5 extends NMSVec3D {
 
     @Override
     public double x() {
-        return ((Vec3D) getHandle()).x;
+        return ((Vec3D) requireHandle()).x;
     }
 
     @Override
     public double y() {
-        return ((Vec3D) getHandle()).y;
+        return ((Vec3D) requireHandle()).y;
     }
 
     @Override
     public double z() {
-        return ((Vec3D) getHandle()).z;
+        return ((Vec3D) requireHandle()).z;
     }
 }

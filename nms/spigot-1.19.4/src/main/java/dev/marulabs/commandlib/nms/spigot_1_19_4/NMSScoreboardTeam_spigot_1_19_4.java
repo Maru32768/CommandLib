@@ -10,6 +10,6 @@ public class NMSScoreboardTeam_spigot_1_19_4 extends NMSScoreboardTeam {
 
     @Override
     public String getName() {
-        return ((PlayerTeam) getHandle()).getName();
+        return ((PlayerTeam) requireHandle()).getName();
     }
 }

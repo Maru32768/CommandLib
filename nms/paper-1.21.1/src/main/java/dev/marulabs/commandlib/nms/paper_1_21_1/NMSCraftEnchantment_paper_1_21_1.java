@@ -12,6 +12,6 @@ public class NMSCraftEnchantment_paper_1_21_1 extends NMSCraftEnchantment {
 
     @Override
     public Enchantment createInstance(NMSEnchantment nms) {
-        return CraftEnchantment.minecraftToBukkit((net.minecraft.world.item.enchantment.Enchantment) nms.getHandle());
+        return CraftEnchantment.minecraftToBukkit((net.minecraft.world.item.enchantment.Enchantment) nms.requireHandle());
     }
 }

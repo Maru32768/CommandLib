@@ -11,6 +11,6 @@ public class NMSIChatMutableComponent_paper_1_21_1 extends NMSIChatMutableCompon
 
     @Override
     public NMSTranslatableContents getContentsAsTranslatable() {
-        return NMSTranslatableContents.create(((MutableComponent) getHandle()).getContents());
+        return NMSTranslatableContents.create(((MutableComponent) requireHandle()).getContents());
     }
 }

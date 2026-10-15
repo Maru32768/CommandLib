@@ -13,6 +13,6 @@ public class NMSCraftParticle_spigot_26_1_2 extends NMSCraftParticle {
 
     @Override
     public Particle toBukkit(NMSParticleParam nms) {
-        return CraftParticle.minecraftToBukkit(((ParticleOptions) nms.getHandle()).getType());
+        return CraftParticle.minecraftToBukkit(((ParticleOptions) nms.requireHandle()).getType());
     }
 }

@@ -10,11 +10,11 @@ public class NMSTranslatableContents_spigot_1_21_11 extends NMSTranslatableConte
 
     @Override
     public String getKey() {
-        return ((TranslatableContents) getHandle()).getKey();
+        return ((TranslatableContents) requireHandle()).getKey();
     }
 
     @Override
     public Object[] getArgs() {
-        return ((TranslatableContents) getHandle()).getArgs();
+        return ((TranslatableContents) requireHandle()).getArgs();
     }
 }

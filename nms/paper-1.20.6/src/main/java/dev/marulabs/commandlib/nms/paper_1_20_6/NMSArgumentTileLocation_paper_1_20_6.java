@@ -11,6 +11,6 @@ public class NMSArgumentTileLocation_paper_1_20_6 extends NMSArgumentTileLocatio
 
     @Override
     public NMSIBlockData getBlockData() {
-        return NMSIBlockData.create(((BlockInput) getHandle()).getState());
+        return NMSIBlockData.create(((BlockInput) requireHandle()).getState());
     }
 }

@@ -115,7 +115,7 @@ w("NMSArgumentPredicateItemStack", '''    public NMSArgumentPredicateItemStack_S
     @Override
     public NMSItemStack createItemStack(int amount, boolean checkOverStack) {
         try {
-            return NMSItemStack.create(((ArgumentPredicateItemStack) getHandle()).a(amount, checkOverStack));
+            return NMSItemStack.create(((ArgumentPredicateItemStack) requireHandle()).a(amount, checkOverStack));
         } catch (CommandSyntaxException e) {
             throw new UncheckedCommandSyntaxException(e);
         }
@@ -128,7 +128,7 @@ w("NMSArgumentTileLocation", '''    public NMSArgumentTileLocation_SUFFIX(Object
 
     @Override
     public NMSIBlockData getBlockData() {
-        return NMSIBlockData.create(((ArgumentTileLocation) getHandle()).a());
+        return NMSIBlockData.create(((ArgumentTileLocation) requireHandle()).a());
     }
 ''', [f"{NMS}.ArgumentTileLocation"])
 
@@ -138,12 +138,12 @@ w("NMSChatMessage", '''    public NMSChatMessage_SUFFIX(Message handle) {
 
     @Override
     public String getKey() {
-        return ((ChatMessage) getHandle()).getKey();
+        return ((ChatMessage) requireHandle()).getKey();
     }
 
     @Override
     public Object[] getArgs() {
-        return ((ChatMessage) getHandle()).getArgs();
+        return ((ChatMessage) requireHandle()).getArgs();
     }
 ''', [f"{NMS}.ChatMessage", "com.mojang.brigadier.Message"])
 
@@ -153,7 +153,7 @@ w("NMSCommandDispatcher", '''    public NMSCommandDispatcher_SUFFIX(Object handl
 
     @Override
     public com.mojang.brigadier.CommandDispatcher<?> getBrigadier() {
-        return ((CommandDispatcher) getHandle()).a();
+        return ((CommandDispatcher) requireHandle()).a();
     }
 ''', [f"{NMS}.CommandDispatcher"])
 
@@ -167,24 +167,28 @@ w("NMSCommandListenerWrapper", '''    public NMSCommandListenerWrapper_SUFFIX(Ob
     }
 
     @Override
+    @Nullable
     public org.bukkit.entity.Entity getBukkitEntity() {
         Entity entity = wrapper().getEntity();
         return entity != null ? entity.getBukkitEntity() : null;
     }
 
     @Override
+    @Nullable
     public World getBukkitWorld() {
         WorldServer world = wrapper().getWorld();
         return world != null ? world.getWorld() : null;
     }
 
     @Override
+    @Nullable
     protected NMSVec3D getPosition() {
         Vec3D position = wrapper().getPosition();
         return position != null ? NMSVec3D.create(position) : null;
     }
 
     @Override
+    @Nullable
     protected NMSVec2D getRotation() {
         Vec2F rotation = wrapper().i();
         return rotation != null ? NMSVec2D.create(rotation) : null;
@@ -205,7 +209,7 @@ w("NMSCommandListenerWrapper", '''    public NMSCommandListenerWrapper_SUFFIX(Ob
     }
 
     private CommandListenerWrapper wrapper() {
-        return (CommandListenerWrapper) getHandle();
+        return (CommandListenerWrapper) requireHandle();
     }
 ''', [f"{NMS}.CommandListenerWrapper", f"{NMS}.Entity", f"{NMS}.Vec2F", f"{NMS}.Vec3D", f"{NMS}.WorldServer",
       "org.bukkit.World", "org.bukkit.command.CommandSender", f"{NMS}.IChatBaseComponent", f"{CB}.util.CraftChatMessage",
@@ -219,7 +223,7 @@ w("NMSVanillaCommandWrapper", '''    public NMSVanillaCommandWrapper_SUFFIX() {
     @Override
     @SuppressWarnings("unchecked")
     public BukkitCommand createInstance(NMSCommandDispatcher dispatcher, CommandNode<?> command) {
-        return new VanillaCommandWrapper((CommandDispatcher) dispatcher.getHandle(),
+        return new VanillaCommandWrapper((CommandDispatcher) dispatcher.requireHandle(),
                                          (CommandNode<CommandListenerWrapper>) command);
     }
 ''', [f"{NMS}.CommandDispatcher", f"{NMS}.CommandListenerWrapper", f"{CB}.command.VanillaCommandWrapper",
@@ -231,7 +235,7 @@ w("NMSParticleParam", '''    public NMSParticleParam_SUFFIX(Object handle) {
 
     @Override
     public NMSParticle getParticle() {
-        return NMSParticle.create(((ParticleParam) getHandle()).getParticle());
+        return NMSParticle.create(((ParticleParam) requireHandle()).getParticle());
     }
 ''', [f"{NMS}.ParticleParam"])
 
@@ -241,7 +245,7 @@ w("NMSCraftParticle", '''    public NMSCraftParticle_SUFFIX() {
 
     @Override
     public Particle toBukkit(NMSParticleParam nms) {
-        return CraftParticle.toBukkit((ParticleParam) nms.getHandle());
+        return CraftParticle.toBukkit((ParticleParam) nms.requireHandle());
     }
 ''', [f"{NMS}.ParticleParam", f"{CB}.CraftParticle", "org.bukkit.Particle"])
 
@@ -251,12 +255,12 @@ w("NMSCraftServer", '''    public NMSCraftServer_SUFFIX(Server handle) {
 
     @Override
     public NMSDedicatedServer getServer() {
-        return NMSDedicatedServer.create(((CraftServer) getHandle()).getServer());
+        return NMSDedicatedServer.create(((CraftServer) requireHandle()).getServer());
     }
 
     @Override
     public SimpleCommandMap getCommandMap() {
-        return ((CraftServer) getHandle()).getCommandMap();
+        return ((CraftServer) requireHandle()).getCommandMap();
     }
 ''', [f"{CB}.CraftServer", "org.bukkit.Server", "org.bukkit.command.SimpleCommandMap"])
 
@@ -266,12 +270,12 @@ w("NMSDedicatedServer", '''    public NMSDedicatedServer_SUFFIX(Object handle) {
 
     @Override
     public NMSCommandDispatcher getCommandDispatcher() {
-        return NMSCommandDispatcher.create(((DedicatedServer) getHandle()).getCommandDispatcher());
+        return NMSCommandDispatcher.create(((DedicatedServer) requireHandle()).getCommandDispatcher());
     }
 
     @Override
     public NMSCommandDispatcher getVanillaCommandDispatcher() {
-        return NMSCommandDispatcher.create(((DedicatedServer) getHandle()).vanillaCommandDispatcher);
+        return NMSCommandDispatcher.create(((DedicatedServer) requireHandle()).vanillaCommandDispatcher);
     }
 
     @Override
@@ -281,12 +285,12 @@ w("NMSDedicatedServer", '''    public NMSDedicatedServer_SUFFIX(Object handle) {
 
     @Override
     public Object getDataPackResourcesHandle() {
-        return ((DedicatedServer) getHandle()).dataPackResources;
+        return ((DedicatedServer) requireHandle()).dataPackResources;
     }
 
     @Override
     public void recompileFunctions(NMSCommandDispatcher dispatcher) {
-        DedicatedServer server = (DedicatedServer) getHandle();
+        DedicatedServer server = (DedicatedServer) requireHandle();
         CustomFunctionManager library = server.dataPackResources.a();
         setFunctionDispatcher(library, CustomFunctionManager.class, dispatcher);
         // Mohist remaps IReloadListener but not its inner barrier interface, so a class implementing it fails to link
@@ -332,7 +336,7 @@ w("NMSDedicatedServer", '''    public NMSDedicatedServer_SUFFIX(Object handle) {
 
     @Override
     public boolean isRunning() {
-        return ((DedicatedServer) getHandle()).isRunning();
+        return ((DedicatedServer) requireHandle()).isRunning();
     }
 ''', [f"{NMS}.DedicatedServer",
       f"{NMS}.CustomFunctionManager",
@@ -348,7 +352,7 @@ w("NMSCraftBlockData", '''    public NMSCraftBlockData_SUFFIX() {
 
     @Override
     public BlockData createData(NMSIBlockData nms) {
-        return CraftBlockData.fromData((IBlockData) nms.getHandle());
+        return CraftBlockData.fromData((IBlockData) nms.requireHandle());
     }
 ''', [f"{NMS}.IBlockData", f"{CB}.block.data.CraftBlockData", "org.bukkit.block.data.BlockData"])
 
@@ -358,7 +362,7 @@ w("NMSCraftEnchantment", '''    public NMSCraftEnchantment_SUFFIX() {
 
     @Override
     public Enchantment createInstance(NMSEnchantment nms) {
-        return new CraftEnchantment((net.minecraft.server.v1_16_R3.Enchantment) nms.getHandle());
+        return new CraftEnchantment((net.minecraft.server.v1_16_R3.Enchantment) nms.requireHandle());
     }
 ''', [f"{CB}.enchantments.CraftEnchantment", "org.bukkit.enchantments.Enchantment"])
 
@@ -368,12 +372,12 @@ w("NMSCraftItemStack", '''    public NMSCraftItemStack_SUFFIX() {
 
     @Override
     public org.bukkit.inventory.ItemStack asCraftMirror(NMSItemStack nms) {
-        return CraftItemStack.asCraftMirror((ItemStack) nms.getHandle());
+        return CraftItemStack.asCraftMirror((ItemStack) nms.requireHandle());
     }
 ''', [f"{NMS}.ItemStack", f"{CB}.inventory.CraftItemStack"])
 
 w("NMSCraftPotionEffectType", '''    public NMSCraftPotionEffectType_SUFFIX() {
-        this(null);
+        super(null, CraftPotionEffectType.class);
     }
 
     public NMSCraftPotionEffectType_SUFFIX(Object handle) {
@@ -382,7 +386,7 @@ w("NMSCraftPotionEffectType", '''    public NMSCraftPotionEffectType_SUFFIX() {
 
     @Override
     public PotionEffectType createInstance(NMSMobEffectList nms) {
-        return new CraftPotionEffectType((MobEffectList) nms.getHandle());
+        return new CraftPotionEffectType((MobEffectList) nms.requireHandle());
     }
 ''', [f"{NMS}.MobEffectList", f"{CB}.potion.CraftPotionEffectType", "org.bukkit.potion.PotionEffectType"])
 
@@ -392,7 +396,7 @@ w("NMSEntity", '''    public NMSEntity_SUFFIX(Object handle) {
 
     @Override
     public org.bukkit.entity.Entity getBukkitEntity() {
-        return ((Entity) getHandle()).getBukkitEntity();
+        return ((Entity) requireHandle()).getBukkitEntity();
     }
 ''', [f"{NMS}.Entity"])
 
@@ -402,7 +406,7 @@ w("NMSScoreboardTeam", '''    public NMSScoreboardTeam_SUFFIX(Object handle) {
 
     @Override
     public String getName() {
-        return ((ScoreboardTeam) getHandle()).getName();
+        return ((ScoreboardTeam) requireHandle()).getName();
     }
 ''', [f"{NMS}.ScoreboardTeam"])
 
@@ -412,17 +416,17 @@ w("NMSVec3D", '''    public NMSVec3D_SUFFIX(Object handle) {
 
     @Override
     public double x() {
-        return ((Vec3D) getHandle()).x;
+        return ((Vec3D) requireHandle()).x;
     }
 
     @Override
     public double y() {
-        return ((Vec3D) getHandle()).y;
+        return ((Vec3D) requireHandle()).y;
     }
 
     @Override
     public double z() {
-        return ((Vec3D) getHandle()).z;
+        return ((Vec3D) requireHandle()).z;
     }
 ''', [f"{NMS}.Vec3D"])
 
@@ -433,12 +437,12 @@ w("NMSVec2D", '''    public NMSVec2D_SUFFIX(Object handle) {
 
     @Override
     public float x() {
-        return ((Vec2F) getHandle()).i;
+        return ((Vec2F) requireHandle()).i;
     }
 
     @Override
     public float y() {
-        return ((Vec2F) getHandle()).j;
+        return ((Vec2F) requireHandle()).j;
     }
 ''', [f"{NMS}.Vec2F"])
 

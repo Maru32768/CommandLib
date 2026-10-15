@@ -11,6 +11,6 @@ public class NMSCommandDispatcher_spigot_26_1_2 extends NMSCommandDispatcher {
 
     @Override
     public CommandDispatcher<?> getBrigadier() {
-        return ((Commands) getHandle()).getDispatcher();
+        return ((Commands) requireHandle()).getDispatcher();
     }
 }

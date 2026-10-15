@@ -10,6 +10,6 @@ public class NMSEntity_paper_1_21_1 extends NMSEntity {
 
     @Override
     public org.bukkit.entity.Entity getBukkitEntity() {
-        return ((Entity) getHandle()).getBukkitEntity();
+        return ((Entity) requireHandle()).getBukkitEntity();
     }
 }

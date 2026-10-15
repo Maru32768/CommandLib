@@ -8,7 +8,7 @@ import org.bukkit.potion.PotionEffectType;
 
 public class NMSCraftPotionEffectType_spigot_26_1_2 extends NMSCraftPotionEffectType {
     public NMSCraftPotionEffectType_spigot_26_1_2() {
-        this(null);
+        super(null, CraftPotionEffectType.class);
     }
 
     public NMSCraftPotionEffectType_spigot_26_1_2(Object handle) {
@@ -17,6 +17,6 @@ public class NMSCraftPotionEffectType_spigot_26_1_2 extends NMSCraftPotionEffect
 
     @Override
     public PotionEffectType createInstance(NMSMobEffectList nms) {
-        return CraftPotionEffectType.minecraftToBukkit((MobEffect) nms.getHandle());
+        return CraftPotionEffectType.minecraftToBukkit((MobEffect) nms.requireHandle());
     }
 }

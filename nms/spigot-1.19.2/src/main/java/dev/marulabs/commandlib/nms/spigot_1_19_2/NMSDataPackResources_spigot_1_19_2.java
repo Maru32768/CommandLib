@@ -18,7 +18,7 @@ public class NMSDataPackResources_spigot_1_19_2 extends NMSDataPackResources {
             if (CommandBuildContext.class.isAssignableFrom(field.getType())) {
                 try {
                     field.setAccessible(true);
-                    return NMSCommandBuildContext.create(field.get(getHandle()));
+                    return NMSCommandBuildContext.create(field.get(requireHandle()));
                 } catch (IllegalAccessException e) {
                     throw new IllegalStateException(e);
                 }

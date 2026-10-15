@@ -10,11 +10,11 @@ public class NMSTranslatableContents_paper_1_21_1 extends NMSTranslatableContent
 
     @Override
     public String getKey() {
-        return ((TranslatableContents) getHandle()).getKey();
+        return ((TranslatableContents) requireHandle()).getKey();
     }
 
     @Override
     public Object[] getArgs() {
-        return ((TranslatableContents) getHandle()).getArgs();
+        return ((TranslatableContents) requireHandle()).getArgs();
     }
 }

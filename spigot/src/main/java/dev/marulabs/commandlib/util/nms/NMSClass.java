@@ -33,6 +33,18 @@ public abstract class NMSClass {
     }
 
     /**
+     * The wrapped server object of a wrapper that wraps one.
+     *
+     * @throws IllegalStateException if the wrapper has no handle
+     */
+    public final Object requireHandle() {
+        if (handle == null) {
+            throw new IllegalStateException(getClass().getName() + " has no handle");
+        }
+        return handle;
+    }
+
+    /**
      * The server class the wrapper wraps, which the handle, if any, is an instance of.
      */
     public final Class<?> getServerClass() {

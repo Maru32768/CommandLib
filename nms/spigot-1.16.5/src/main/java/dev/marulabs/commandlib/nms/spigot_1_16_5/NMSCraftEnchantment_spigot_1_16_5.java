@@ -12,6 +12,6 @@ public class NMSCraftEnchantment_spigot_1_16_5 extends NMSCraftEnchantment {
 
     @Override
     public Enchantment createInstance(NMSEnchantment nms) {
-        return new CraftEnchantment((net.minecraft.server.v1_16_R3.Enchantment) nms.getHandle());
+        return new CraftEnchantment((net.minecraft.server.v1_16_R3.Enchantment) nms.requireHandle());
     }
 }

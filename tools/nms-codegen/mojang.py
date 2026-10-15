@@ -200,7 +200,7 @@ w("NMSArgumentPredicateItemStack", '''    public NMSArgumentPredicateItemStack_S
     @Override
     public NMSItemStack createItemStack(int amount, boolean checkOverStack) {
         try {
-            return NMSItemStack.create(((ItemInput) getHandle()).createItemStack(CREATE_ARGUMENTS));
+            return NMSItemStack.create(((ItemInput) requireHandle()).createItemStack(CREATE_ARGUMENTS));
         } catch (CommandSyntaxException e) {
             throw new UncheckedCommandSyntaxException(e);
         }
@@ -213,7 +213,7 @@ w("NMSArgumentTileLocation", '''    public NMSArgumentTileLocation_SUFFIX(Object
 
     @Override
     public NMSIBlockData getBlockData() {
-        return NMSIBlockData.create(((BlockInput) getHandle()).getState());
+        return NMSIBlockData.create(((BlockInput) requireHandle()).getState());
     }
 ''', [f"{ARGS}.blocks.BlockInput"])
 
@@ -251,7 +251,7 @@ if HAS_COMPONENT_CONTENTS:
 
     @Override
     public NMSTranslatableContents getContentsAsTranslatable() {
-        return NMSTranslatableContents.create(((MutableComponent) getHandle()).getContents());
+        return NMSTranslatableContents.create(((MutableComponent) requireHandle()).getContents());
     }
 ''', ["net.minecraft.network.chat.MutableComponent"])
 
@@ -261,12 +261,12 @@ if HAS_COMPONENT_CONTENTS:
 
     @Override
     public String getKey() {
-        return ((TranslatableContents) getHandle()).getKey();
+        return ((TranslatableContents) requireHandle()).getKey();
     }
 
     @Override
     public Object[] getArgs() {
-        return ((TranslatableContents) getHandle()).getArgs();
+        return ((TranslatableContents) requireHandle()).getArgs();
     }
 ''', ["net.minecraft.network.chat.contents.TranslatableContents"])
 else:
@@ -276,12 +276,12 @@ else:
 
     @Override
     public String getKey() {
-        return ((TranslatableComponent) getHandle()).getKey();
+        return ((TranslatableComponent) requireHandle()).getKey();
     }
 
     @Override
     public Object[] getArgs() {
-        return ((TranslatableComponent) getHandle()).getArgs();
+        return ((TranslatableComponent) requireHandle()).getArgs();
     }
 ''', ["net.minecraft.network.chat.TranslatableComponent", "com.mojang.brigadier.Message"])
 
@@ -294,7 +294,7 @@ w("NMSCommandDispatcher", '''    public NMSCommandDispatcher_SUFFIX(Object handl
 
     @Override
     public CommandDispatcher<?> getBrigadier() {
-        return ((Commands) getHandle()).getDispatcher();
+        return ((Commands) requireHandle()).getDispatcher();
     }
 ''', ["net.minecraft.commands.Commands", "com.mojang.brigadier.CommandDispatcher"])
 
@@ -309,24 +309,28 @@ w("NMSCommandListenerWrapper", '''    public NMSCommandListenerWrapper_SUFFIX(Ob
     }
 
     @Override
+    @Nullable
     public org.bukkit.entity.Entity getBukkitEntity() {
         Entity entity = source().getEntity();
         return entity != null ? entity.getBukkitEntity() : null;
     }
 
     @Override
+    @Nullable
     public World getBukkitWorld() {
         ServerLevel level = source().getLevel();
         return level != null ? level.getWorld() : null;
     }
 
     @Override
+    @Nullable
     protected NMSVec3D getPosition() {
         Vec3 position = source().getPosition();
         return position != null ? NMSVec3D.create(position) : null;
     }
 
     @Override
+    @Nullable
     protected NMSVec2D getRotation() {
         Vec2 rotation = source().getRotation();
         return rotation != null ? NMSVec2D.create(rotation) : null;
@@ -348,7 +352,7 @@ w("NMSCommandListenerWrapper", '''    public NMSCommandListenerWrapper_SUFFIX(Ob
     }
 
     private CommandSourceStack source() {
-        return (CommandSourceStack) getHandle();
+        return (CommandSourceStack) requireHandle();
     }
 '''.replace("SEND_SUCCESS", "source().sendSuccess(() -> message, broadcastToOps);" if SEND_SUCCESS_TAKES_SUPPLIER
             else "source().sendSuccess(message, broadcastToOps);"),
@@ -364,7 +368,7 @@ w("NMSVanillaCommandWrapper", '''    public NMSVanillaCommandWrapper_SUFFIX() {
     @Override
     @SuppressWarnings("unchecked")
     public BukkitCommand createInstance(NMSCommandDispatcher dispatcher, CommandNode<?> command) {
-        return new VanillaCommandWrapper((Commands) dispatcher.getHandle(), (CommandNode<CommandSourceStack>) command);
+        return new VanillaCommandWrapper((Commands) dispatcher.requireHandle(), (CommandNode<CommandSourceStack>) command);
     }
 ''', ["net.minecraft.commands.Commands", CSS, f"{CB}.command.VanillaCommandWrapper",
       "com.mojang.brigadier.tree.CommandNode", "org.bukkit.command.defaults.BukkitCommand"])
@@ -377,7 +381,7 @@ w("NMSParticleParam", '''    public NMSParticleParam_SUFFIX(Object handle) {
 
     @Override
     public NMSParticle getParticle() {
-        return NMSParticle.create(((ParticleOptions) getHandle()).getType());
+        return NMSParticle.create(((ParticleOptions) requireHandle()).getType());
     }
 ''', ["net.minecraft.core.particles.ParticleOptions"])
 
@@ -389,8 +393,8 @@ w("NMSCraftParticle", ('''    public NMSCraftParticle_SUFFIX() {
     public Particle toBukkit(NMSParticleParam nms) {
         return CraftParticle.CONVERSION;
     }
-''').replace("CONVERSION", "minecraftToBukkit(((ParticleOptions) nms.getHandle()).getType())"
-             if HAS_PARTICLE_MINECRAFT_TO_BUKKIT else "toBukkit((ParticleOptions) nms.getHandle())"),
+''').replace("CONVERSION", "minecraftToBukkit(((ParticleOptions) nms.requireHandle()).getType())"
+             if HAS_PARTICLE_MINECRAFT_TO_BUKKIT else "toBukkit((ParticleOptions) nms.requireHandle())"),
   ["net.minecraft.core.particles.ParticleOptions", f"{CB}.CraftParticle", "org.bukkit.Particle"])
 
 w("NMSCraftServer", '''    public NMSCraftServer_SUFFIX(Server handle) {
@@ -399,18 +403,18 @@ w("NMSCraftServer", '''    public NMSCraftServer_SUFFIX(Server handle) {
 
     @Override
     public NMSDedicatedServer getServer() {
-        return NMSDedicatedServer.create(((CraftServer) getHandle()).getServer());
+        return NMSDedicatedServer.create(((CraftServer) requireHandle()).getServer());
     }
 
     @Override
     public SimpleCommandMap getCommandMap() {
-        return ((CraftServer) getHandle()).getCommandMap();
+        return ((CraftServer) requireHandle()).getCommandMap();
     }
 ''', [f"{CB}.CraftServer", "org.bukkit.Server", "org.bukkit.command.SimpleCommandMap"])
 
 # Paper 1.20.6 dropped MinecraftServer.vanillaCommandDispatcher with its Brigadier command API and keeps one dispatcher.
 # The Paper 1.20.6 module also runs on Paper 1.20.5, so it reads the CraftBukkit field when the server still has it.
-VANILLA_DISPATCHER = '''        DedicatedServer server = (DedicatedServer) getHandle();
+VANILLA_DISPATCHER = '''        DedicatedServer server = (DedicatedServer) requireHandle();
         try {
             return NMSCommandDispatcher.create(MinecraftServer.class.getField("vanillaCommandDispatcher")
                                                                     .get(server));
@@ -419,7 +423,7 @@ VANILLA_DISPATCHER = '''        DedicatedServer server = (DedicatedServer) getHa
         } catch (IllegalAccessException e) {
             throw new IllegalStateException(e);
         }
-''' if PAPER else '''        return NMSCommandDispatcher.create(((DedicatedServer) getHandle()).vanillaCommandDispatcher);
+''' if PAPER else '''        return NMSCommandDispatcher.create(((DedicatedServer) requireHandle()).vanillaCommandDispatcher);
 '''
 
 w("NMSDedicatedServer", f'''    public NMSDedicatedServer_SUFFIX(Object handle) {{
@@ -428,7 +432,7 @@ w("NMSDedicatedServer", f'''    public NMSDedicatedServer_SUFFIX(Object handle) 
 
     @Override
     public NMSCommandDispatcher getCommandDispatcher() {{
-        return NMSCommandDispatcher.create(((DedicatedServer) getHandle()).getCommands());
+        return NMSCommandDispatcher.create(((DedicatedServer) requireHandle()).getCommands());
     }}
 
     @Override
@@ -442,12 +446,12 @@ w("NMSDedicatedServer", f'''    public NMSDedicatedServer_SUFFIX(Object handle) 
 
     @Override
     public Object getDataPackResourcesHandle() {{
-        return ((DedicatedServer) getHandle()).{"resources.managers()" if HAS_RELOADABLE_RESOURCES else "resources"};
+        return ((DedicatedServer) requireHandle()).{"resources.managers()" if HAS_RELOADABLE_RESOURCES else "resources"};
     }}
 
     @Override
     public void recompileFunctions(NMSCommandDispatcher dispatcher) {{
-        DedicatedServer server = (DedicatedServer) getHandle();
+        DedicatedServer server = (DedicatedServer) requireHandle();
         ServerFunctionLibrary library = server.{"resources.managers()" if HAS_RELOADABLE_RESOURCES else "resources"}.getFunctionLibrary();
         setFunctionDispatcher(library, ServerFunctionLibrary.class, dispatcher);
         library.reload({RELOAD_ARGUMENTS})
@@ -457,7 +461,7 @@ w("NMSDedicatedServer", f'''    public NMSDedicatedServer_SUFFIX(Object handle) 
 
     @Override
     public boolean isRunning() {{
-        return ((DedicatedServer) getHandle()).isRunning();
+        return ((DedicatedServer) requireHandle()).isRunning();
     }}
 ''', ["net.minecraft.server.dedicated.DedicatedServer",
       *(["net.minecraft.server.MinecraftServer"] if PAPER else []),
@@ -492,7 +496,7 @@ elif HAS_BUILD_CONTEXT:
             if (CommandBuildContext.class.isAssignableFrom(field.getType())) {
                 try {
                     field.setAccessible(true);
-                    return NMSCommandBuildContext.create(field.get(getHandle()));
+                    return NMSCommandBuildContext.create(field.get(requireHandle()));
                 } catch (IllegalAccessException e) {
                     throw new IllegalStateException(e);
                 }
@@ -518,7 +522,7 @@ w("NMSCraftBlockData", '''    public NMSCraftBlockData_SUFFIX() {
 
     @Override
     public BlockData createData(NMSIBlockData nms) {
-        return CraftBlockData.fromData((BlockState) nms.getHandle());
+        return CraftBlockData.fromData((BlockState) nms.requireHandle());
     }
 ''', ["net.minecraft.world.level.block.state.BlockState", f"{CB}.block.data.CraftBlockData",
       "org.bukkit.block.data.BlockData"])
@@ -529,7 +533,7 @@ w("NMSCraftEnchantment", ('''    public NMSCraftEnchantment_SUFFIX() {
 
     @Override
     public Enchantment createInstance(NMSEnchantment nms) {
-        return CONVERSION((net.minecraft.world.item.enchantment.Enchantment) nms.getHandle());
+        return CONVERSION((net.minecraft.world.item.enchantment.Enchantment) nms.requireHandle());
     }
 ''').replace("CONVERSION", "CraftEnchantment.minecraftToBukkit" if HAS_MINECRAFT_TO_BUKKIT else "new CraftEnchantment"),
   [f"{CB}.enchantments.CraftEnchantment", "org.bukkit.enchantments.Enchantment"])
@@ -540,12 +544,12 @@ w("NMSCraftItemStack", '''    public NMSCraftItemStack_SUFFIX() {
 
     @Override
     public org.bukkit.inventory.ItemStack asCraftMirror(NMSItemStack nms) {
-        return CraftItemStack.asCraftMirror((ItemStack) nms.getHandle());
+        return CraftItemStack.asCraftMirror((ItemStack) nms.requireHandle());
     }
 ''', ["net.minecraft.world.item.ItemStack", f"{CB}.inventory.CraftItemStack"])
 
 w("NMSCraftPotionEffectType", ('''    public NMSCraftPotionEffectType_SUFFIX() {
-        this(null);
+        super(null, CraftPotionEffectType.class);
     }
 
     public NMSCraftPotionEffectType_SUFFIX(Object handle) {
@@ -554,7 +558,7 @@ w("NMSCraftPotionEffectType", ('''    public NMSCraftPotionEffectType_SUFFIX() {
 
     @Override
     public PotionEffectType createInstance(NMSMobEffectList nms) {
-        return CONVERSION((MobEffect) nms.getHandle());
+        return CONVERSION((MobEffect) nms.requireHandle());
     }
 ''').replace("CONVERSION",
              "CraftPotionEffectType.minecraftToBukkit" if HAS_MINECRAFT_TO_BUKKIT else "new CraftPotionEffectType"),
@@ -568,7 +572,7 @@ w("NMSEntity", '''    public NMSEntity_SUFFIX(Object handle) {
 
     @Override
     public org.bukkit.entity.Entity getBukkitEntity() {
-        return ((Entity) getHandle()).getBukkitEntity();
+        return ((Entity) requireHandle()).getBukkitEntity();
     }
 ''', ["net.minecraft.world.entity.Entity"])
 
@@ -582,7 +586,7 @@ w("NMSScoreboardTeam", '''    public NMSScoreboardTeam_SUFFIX(Object handle) {
 
     @Override
     public String getName() {
-        return ((PlayerTeam) getHandle()).getName();
+        return ((PlayerTeam) requireHandle()).getName();
     }
 ''', ["net.minecraft.world.scores.PlayerTeam"])
 
@@ -592,17 +596,17 @@ w("NMSVec3D", '''    public NMSVec3D_SUFFIX(Object handle) {
 
     @Override
     public double x() {
-        return ((Vec3) getHandle()).x;
+        return ((Vec3) requireHandle()).x;
     }
 
     @Override
     public double y() {
-        return ((Vec3) getHandle()).y;
+        return ((Vec3) requireHandle()).y;
     }
 
     @Override
     public double z() {
-        return ((Vec3) getHandle()).z;
+        return ((Vec3) requireHandle()).z;
     }
 ''', ["net.minecraft.world.phys.Vec3"])
 
@@ -612,12 +616,12 @@ w("NMSVec2D", '''    public NMSVec2D_SUFFIX(Object handle) {
 
     @Override
     public float x() {
-        return ((Vec2) getHandle()).x;
+        return ((Vec2) requireHandle()).x;
     }
 
     @Override
     public float y() {
-        return ((Vec2) getHandle()).y;
+        return ((Vec2) requireHandle()).y;
     }
 ''', ["net.minecraft.world.phys.Vec2"])
 
@@ -640,7 +644,7 @@ final class BuildContexts {{
                                                    .getServer()
                                                    .getDataPackResources()
                                                    .getCommandBuildContext()
-                                                   .getHandle();
+                                                   .requireHandle();
     }}
 }}
 """)

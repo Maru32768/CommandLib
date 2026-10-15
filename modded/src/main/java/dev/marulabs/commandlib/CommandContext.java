@@ -68,14 +68,17 @@ public final class CommandContext extends CommonCommandContext<CommandSourceStac
         }
 
         for (String methodName : new String[]{"getLanguage", "getLocale"}) {
+            Object value;
             try {
                 Method method = source.getClass()
                                       .getMethod(methodName);
-                Object value = method.invoke(source);
-                if (value != null) {
-                    return value.toString();
-                }
-            } catch (ReflectiveOperationException ignored) {
+                value = method.invoke(source);
+            } catch (ReflectiveOperationException e) {
+                // The source has no such accessor, so try the next one.
+                value = null;
+            }
+            if (value != null) {
+                return value.toString();
             }
         }
 

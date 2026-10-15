@@ -15,6 +15,6 @@ final class BuildContexts {
                                                    .getServer()
                                                    .getDataPackResources()
                                                    .getCommandBuildContext()
-                                                   .getHandle();
+                                                   .requireHandle();
     }
 }

@@ -12,6 +12,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.server.players.PlayerList;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.mockito.Mockito;
 import org.mockito.MockedStatic;
 
@@ -285,6 +286,7 @@ public final class CommandTester implements AutoCloseable {
 
     public static final class Builder {
         private final List<Supplier<? extends Command>> commandSuppliers = new ArrayList<>();
+        @Nullable
         private String permissionPrefix;
 
         private Builder() {
@@ -328,7 +330,8 @@ public final class CommandTester implements AutoCloseable {
     private static final class MinecraftBootstrap {
         private static boolean bootstrapped;
         //? if >=1.20.5 {
-        /*private static RegistryAccess.Frozen registryAccess;
+        /*@Nullable
+        private static RegistryAccess.Frozen registryAccess;
 
         // The server's registries, including data-driven ones such as enchantments, built from vanilla's
         // registry bootstrap code instead of loading the vanilla data pack.

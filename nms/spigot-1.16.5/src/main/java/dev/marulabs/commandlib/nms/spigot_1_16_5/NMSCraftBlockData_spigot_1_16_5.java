@@ -13,6 +13,6 @@ public class NMSCraftBlockData_spigot_1_16_5 extends NMSCraftBlockData {
 
     @Override
     public BlockData createData(NMSIBlockData nms) {
-        return CraftBlockData.fromData((IBlockData) nms.getHandle());
+        return CraftBlockData.fromData((IBlockData) nms.requireHandle());
     }
 }

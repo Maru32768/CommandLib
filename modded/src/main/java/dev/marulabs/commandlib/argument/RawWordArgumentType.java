@@ -31,6 +31,9 @@ class RawWordArgumentType implements ArgumentType<String> {
     }
 
     //? if >=1.19 {
+    // ArgumentTypeInfos keeps its registrations in a plain map, and every mod that shades CommandLib registers its
+    // own copy of this class, so the copies lock on the class they share.
+    @SuppressWarnings("LockOnNonEnclosingClassLiteral")
     static void ensureRegistered() {
         synchronized (ArgumentTypeInfos.class) {
             if (!ArgumentTypeInfos.isClassRecognized(RawWordArgumentType.class)) {

@@ -15,12 +15,12 @@ public class NMSDedicatedServer_spigot_26_1_2 extends NMSDedicatedServer {
 
     @Override
     public NMSCommandDispatcher getCommandDispatcher() {
-        return NMSCommandDispatcher.create(((DedicatedServer) getHandle()).getCommands());
+        return NMSCommandDispatcher.create(((DedicatedServer) requireHandle()).getCommands());
     }
 
     @Override
     public NMSCommandDispatcher getVanillaCommandDispatcher() {
-        return NMSCommandDispatcher.create(((DedicatedServer) getHandle()).vanillaCommandDispatcher);
+        return NMSCommandDispatcher.create(((DedicatedServer) requireHandle()).vanillaCommandDispatcher);
     }
 
     @Override
@@ -30,12 +30,12 @@ public class NMSDedicatedServer_spigot_26_1_2 extends NMSDedicatedServer {
 
     @Override
     public Object getDataPackResourcesHandle() {
-        return ((DedicatedServer) getHandle()).resources.managers();
+        return ((DedicatedServer) requireHandle()).resources.managers();
     }
 
     @Override
     public void recompileFunctions(NMSCommandDispatcher dispatcher) {
-        DedicatedServer server = (DedicatedServer) getHandle();
+        DedicatedServer server = (DedicatedServer) requireHandle();
         ServerFunctionLibrary library = server.resources.managers().getFunctionLibrary();
         setFunctionDispatcher(library, ServerFunctionLibrary.class, dispatcher);
         library.reload(new PreparableReloadListener.SharedState(server.resources.resourceManager()),
@@ -53,6 +53,6 @@ public class NMSDedicatedServer_spigot_26_1_2 extends NMSDedicatedServer {
 
     @Override
     public boolean isRunning() {
-        return ((DedicatedServer) getHandle()).isRunning();
+        return ((DedicatedServer) requireHandle()).isRunning();
     }
 }

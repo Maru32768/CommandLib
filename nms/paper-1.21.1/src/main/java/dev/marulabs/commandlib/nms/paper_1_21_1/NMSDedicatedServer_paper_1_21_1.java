@@ -17,12 +17,12 @@ public class NMSDedicatedServer_paper_1_21_1 extends NMSDedicatedServer {
 
     @Override
     public NMSCommandDispatcher getCommandDispatcher() {
-        return NMSCommandDispatcher.create(((DedicatedServer) getHandle()).getCommands());
+        return NMSCommandDispatcher.create(((DedicatedServer) requireHandle()).getCommands());
     }
 
     @Override
     public NMSCommandDispatcher getVanillaCommandDispatcher() {
-        DedicatedServer server = (DedicatedServer) getHandle();
+        DedicatedServer server = (DedicatedServer) requireHandle();
         try {
             return NMSCommandDispatcher.create(MinecraftServer.class.getField("vanillaCommandDispatcher")
                                                                     .get(server));
@@ -40,12 +40,12 @@ public class NMSDedicatedServer_paper_1_21_1 extends NMSDedicatedServer {
 
     @Override
     public Object getDataPackResourcesHandle() {
-        return ((DedicatedServer) getHandle()).resources.managers();
+        return ((DedicatedServer) requireHandle()).resources.managers();
     }
 
     @Override
     public void recompileFunctions(NMSCommandDispatcher dispatcher) {
-        DedicatedServer server = (DedicatedServer) getHandle();
+        DedicatedServer server = (DedicatedServer) requireHandle();
         ServerFunctionLibrary library = server.resources.managers().getFunctionLibrary();
         setFunctionDispatcher(library, ServerFunctionLibrary.class, dispatcher);
         library.reload(new PreparableReloadListener.PreparationBarrier() {
@@ -65,6 +65,6 @@ public class NMSDedicatedServer_paper_1_21_1 extends NMSDedicatedServer {
 
     @Override
     public boolean isRunning() {
-        return ((DedicatedServer) getHandle()).isRunning();
+        return ((DedicatedServer) requireHandle()).isRunning();
     }
 }

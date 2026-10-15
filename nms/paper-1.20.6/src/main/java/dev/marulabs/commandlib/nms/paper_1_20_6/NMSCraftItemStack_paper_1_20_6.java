@@ -12,6 +12,6 @@ public class NMSCraftItemStack_paper_1_20_6 extends NMSCraftItemStack {
 
     @Override
     public org.bukkit.inventory.ItemStack asCraftMirror(NMSItemStack nms) {
-        return CraftItemStack.asCraftMirror((ItemStack) nms.getHandle());
+        return CraftItemStack.asCraftMirror((ItemStack) nms.requireHandle());
     }
 }

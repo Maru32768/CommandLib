@@ -10,6 +10,6 @@ public class NMSCommandDispatcher_spigot_1_16_5 extends NMSCommandDispatcher {
 
     @Override
     public com.mojang.brigadier.CommandDispatcher<?> getBrigadier() {
-        return ((CommandDispatcher) getHandle()).a();
+        return ((CommandDispatcher) requireHandle()).a();
     }
 }

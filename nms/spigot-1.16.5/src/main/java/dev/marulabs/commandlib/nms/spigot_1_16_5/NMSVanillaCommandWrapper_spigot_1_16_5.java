@@ -16,7 +16,7 @@ public class NMSVanillaCommandWrapper_spigot_1_16_5 extends NMSVanillaCommandWra
     @Override
     @SuppressWarnings("unchecked")
     public BukkitCommand createInstance(NMSCommandDispatcher dispatcher, CommandNode<?> command) {
-        return new VanillaCommandWrapper((CommandDispatcher) dispatcher.getHandle(),
+        return new VanillaCommandWrapper((CommandDispatcher) dispatcher.requireHandle(),
                                          (CommandNode<CommandListenerWrapper>) command);
     }
 }

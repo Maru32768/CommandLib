@@ -11,6 +11,6 @@ public class NMSCommandDispatcher_paper_1_20_6 extends NMSCommandDispatcher {
 
     @Override
     public CommandDispatcher<?> getBrigadier() {
-        return ((Commands) getHandle()).getDispatcher();
+        return ((Commands) requireHandle()).getDispatcher();
     }
 }

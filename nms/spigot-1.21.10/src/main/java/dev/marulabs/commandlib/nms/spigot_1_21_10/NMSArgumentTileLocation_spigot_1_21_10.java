@@ -11,6 +11,6 @@ public class NMSArgumentTileLocation_spigot_1_21_10 extends NMSArgumentTileLocat
 
     @Override
     public NMSIBlockData getBlockData() {
-        return NMSIBlockData.create(((BlockInput) getHandle()).getState());
+        return NMSIBlockData.create(((BlockInput) requireHandle()).getState());
     }
 }

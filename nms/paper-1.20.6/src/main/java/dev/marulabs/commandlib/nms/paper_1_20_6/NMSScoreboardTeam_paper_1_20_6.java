@@ -10,6 +10,6 @@ public class NMSScoreboardTeam_paper_1_20_6 extends NMSScoreboardTeam {
 
     @Override
     public String getName() {
-        return ((PlayerTeam) getHandle()).getName();
+        return ((PlayerTeam) requireHandle()).getName();
     }
 }

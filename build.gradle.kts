@@ -182,46 +182,49 @@ class DoubleBraceInitialization : com.diffplug.spotless.FormatterFunc, java.io.S
     }
 }
 
-// Error Prone and the javadoc jar cover the Bukkit-side modules. The typed NMS modules and the modded nodes build with
-// their own toolchains and plugins, so they are left out.
-val bukkitProjectPaths = setOf(
-    ":common",
-    ":common-testing",
-    ":spigot",
-    ":spigot-testing",
-    ":paper",
-    ":paper-testing",
-)
-
-configure(subprojects.filter { it.path in bukkitProjectPaths }) {
-    apply(plugin = "net.ltgt.errorprone")
-
-    // Building the javadoc jar runs doclint, which fails on broken Javadoc. Undocumented members are allowed.
+// The published modules ship a javadoc jar. Building it runs doclint, which fails on broken Javadoc. Undocumented
+// members are allowed.
+configure(subprojects.filter { it.path in publishedProjectPaths }) {
     the<JavaPluginExtension>().withJavadocJar()
     tasks.named<Javadoc>("javadoc") {
         options.encoding = "UTF-8"
         (options as StandardJavadocDocletOptions).addBooleanOption("Xdoclint:all,-missing", true)
     }
+}
+
+// Error Prone and NullAway cover the published modules and the typed NMS modules bundled into :spigot.
+configure(subprojects.filter { it.path in publishedProjectPaths || it.path.startsWith(":nms:") }) {
+    apply(plugin = "net.ltgt.errorprone")
 
     dependencies {
         "errorprone"("com.google.errorprone:error_prone_core:2.50.0")
         "errorprone"("com.uber.nullaway:nullaway:0.14.2")
     }
 
+    val typedNms = path.startsWith(":nms:")
     val toolchainVersion = the<JavaPluginExtension>().toolchain.languageVersion
-    val errorProneCompiler = the<JavaToolchainService>().compilerFor { languageVersion.set(JavaLanguageVersion.of(21)) }
+    // Error Prone runs only on JDK 21+. The typed NMS module of 26.x compiles against a server jar of Java 25.
+    val errorProneCompiler = the<JavaToolchainService>().compilerFor {
+        languageVersion.set(toolchainVersion.map { JavaLanguageVersion.of(maxOf(it.asInt(), 21)) })
+    }
     tasks.withType<JavaCompile>().configureEach {
-        // Error Prone runs only on JDK 21+. --release keeps the bytecode and the JDK API at the module's toolchain
-        // version, which tests and javadoc still use.
         javaCompiler.set(errorProneCompiler)
-        options.release.set(toolchainVersion.map { it.asInt() })
+        // --release keeps the bytecode and the JDK API at the module's toolchain version, which tests and javadoc still
+        // use. The typed NMS modules set their own release (typedNmsRelease).
+        if (!typedNms) {
+            options.release.set(toolchainVersion.map { it.asInt() })
+        }
         options.errorprone.disableWarningsInGeneratedCode.set(true)
         // Brigadier nodes, dispatchers and commands are compared by identity on purpose.
         options.errorprone.disable("ReferenceEquality")
-        // common and spigot stay on Java 11, and paper keeps their style.
+        // common, spigot and the Forge 1.16.5 node of the shared modded sources stay on Java 11, and the rest keeps
+        // their style.
         options.errorprone.disable("PatternMatchingInstanceof", "StatementSwitchToExpressionSwitch")
-        // Bukkit calls event handlers through reflection.
-        options.errorprone.option("UnusedMethod:ExemptingMethodAnnotations", "org.bukkit.event.EventHandler")
+        // Bukkit, Forge and NeoForge call event handlers through reflection.
+        options.errorprone.option(
+            "UnusedMethod:ExemptingMethodAnnotations",
+            "org.bukkit.event.EventHandler,net.minecraftforge.eventbus.api.SubscribeEvent,net.neoforged.bus.api.SubscribeEvent",
+        )
         // Tests pass null on purpose, so NullAway checks only the main sources.
         options.errorprone.check("NullAway", if (name == "compileJava") CheckSeverity.ERROR else CheckSeverity.OFF)
         options.errorprone.option("NullAway:AnnotatedPackages", "dev.marulabs.commandlib")

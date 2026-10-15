@@ -13,6 +13,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.flag.FeatureFlags;
+import org.jetbrains.annotations.Nullable;
 //? if neoforge {
 /*import net.neoforged.neoforge.server.ServerLifecycleHooks;
 *///?} else
@@ -78,6 +79,7 @@ final class BuiltInCommandBuildContext implements CommandBuildContext {
     // The resolved lookup is reused while the registries and the enabled feature flags stay the same.
     private static final class LazyRegistryLookup<T> implements HolderLookup.RegistryLookup.Delegate<T> {
         private final ResourceKey<? extends Registry<? extends T>> key;
+        @Nullable
         private volatile Resolved<T> resolved;
 
         private LazyRegistryLookup(ResourceKey<? extends Registry<? extends T>> key) {
@@ -150,6 +152,7 @@ final class BuiltInCommandBuildContext implements CommandBuildContext {
     // The filtered lookup is reused while the enabled feature flags stay the same.
     private static final class LazyHolderLookup<T> implements HolderLookup<T> {
         private final HolderLookup.RegistryLookup<T> registry;
+        @Nullable
         private volatile Filtered<T> filtered;
 
         private LazyHolderLookup(HolderLookup.RegistryLookup<T> registry) {

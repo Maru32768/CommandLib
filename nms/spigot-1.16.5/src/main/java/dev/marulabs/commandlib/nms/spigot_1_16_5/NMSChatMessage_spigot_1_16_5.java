@@ -11,11 +11,11 @@ public class NMSChatMessage_spigot_1_16_5 extends NMSChatMessage {
 
     @Override
     public String getKey() {
-        return ((ChatMessage) getHandle()).getKey();
+        return ((ChatMessage) requireHandle()).getKey();
     }
 
     @Override
     public Object[] getArgs() {
-        return ((ChatMessage) getHandle()).getArgs();
+        return ((ChatMessage) requireHandle()).getArgs();
     }
 }

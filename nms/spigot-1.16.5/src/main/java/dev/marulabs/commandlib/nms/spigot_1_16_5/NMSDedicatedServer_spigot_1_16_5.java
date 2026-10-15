@@ -18,12 +18,12 @@ public class NMSDedicatedServer_spigot_1_16_5 extends NMSDedicatedServer {
 
     @Override
     public NMSCommandDispatcher getCommandDispatcher() {
-        return NMSCommandDispatcher.create(((DedicatedServer) getHandle()).getCommandDispatcher());
+        return NMSCommandDispatcher.create(((DedicatedServer) requireHandle()).getCommandDispatcher());
     }
 
     @Override
     public NMSCommandDispatcher getVanillaCommandDispatcher() {
-        return NMSCommandDispatcher.create(((DedicatedServer) getHandle()).vanillaCommandDispatcher);
+        return NMSCommandDispatcher.create(((DedicatedServer) requireHandle()).vanillaCommandDispatcher);
     }
 
     @Override
@@ -33,12 +33,12 @@ public class NMSDedicatedServer_spigot_1_16_5 extends NMSDedicatedServer {
 
     @Override
     public Object getDataPackResourcesHandle() {
-        return ((DedicatedServer) getHandle()).dataPackResources;
+        return ((DedicatedServer) requireHandle()).dataPackResources;
     }
 
     @Override
     public void recompileFunctions(NMSCommandDispatcher dispatcher) {
-        DedicatedServer server = (DedicatedServer) getHandle();
+        DedicatedServer server = (DedicatedServer) requireHandle();
         CustomFunctionManager library = server.dataPackResources.a();
         setFunctionDispatcher(library, CustomFunctionManager.class, dispatcher);
         // Mohist remaps IReloadListener but not its inner barrier interface, so a class implementing it fails to link
@@ -84,6 +84,6 @@ public class NMSDedicatedServer_spigot_1_16_5 extends NMSDedicatedServer {
 
     @Override
     public boolean isRunning() {
-        return ((DedicatedServer) getHandle()).isRunning();
+        return ((DedicatedServer) requireHandle()).isRunning();
     }
 }

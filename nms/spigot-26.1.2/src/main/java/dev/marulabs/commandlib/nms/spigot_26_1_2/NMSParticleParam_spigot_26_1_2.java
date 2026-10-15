@@ -11,6 +11,6 @@ public class NMSParticleParam_spigot_26_1_2 extends NMSParticleParam {
 
     @Override
     public NMSParticle getParticle() {
-        return NMSParticle.create(((ParticleOptions) getHandle()).getType());
+        return NMSParticle.create(((ParticleOptions) requireHandle()).getType());
     }
 }

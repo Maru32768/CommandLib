@@ -15,6 +15,7 @@ import net.minecraft.server.v1_16_R3.WorldServer;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.craftbukkit.v1_16_R3.util.CraftChatMessage;
+import org.jetbrains.annotations.Nullable;
 
 public class NMSCommandListenerWrapper_spigot_1_16_5 extends NMSCommandListenerWrapper {
     public NMSCommandListenerWrapper_spigot_1_16_5(Object handle) {
@@ -27,24 +28,28 @@ public class NMSCommandListenerWrapper_spigot_1_16_5 extends NMSCommandListenerW
     }
 
     @Override
+    @Nullable
     public org.bukkit.entity.Entity getBukkitEntity() {
         Entity entity = wrapper().getEntity();
         return entity != null ? entity.getBukkitEntity() : null;
     }
 
     @Override
+    @Nullable
     public World getBukkitWorld() {
         WorldServer world = wrapper().getWorld();
         return world != null ? world.getWorld() : null;
     }
 
     @Override
+    @Nullable
     protected NMSVec3D getPosition() {
         Vec3D position = wrapper().getPosition();
         return position != null ? NMSVec3D.create(position) : null;
     }
 
     @Override
+    @Nullable
     protected NMSVec2D getRotation() {
         Vec2F rotation = wrapper().i();
         return rotation != null ? NMSVec2D.create(rotation) : null;
@@ -65,6 +70,6 @@ public class NMSCommandListenerWrapper_spigot_1_16_5 extends NMSCommandListenerW
     }
 
     private CommandListenerWrapper wrapper() {
-        return (CommandListenerWrapper) getHandle();
+        return (CommandListenerWrapper) requireHandle();
     }
 }

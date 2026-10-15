@@ -10,6 +10,6 @@ public class NMSEntity_spigot_1_21_11 extends NMSEntity {
 
     @Override
     public org.bukkit.entity.Entity getBukkitEntity() {
-        return ((Entity) getHandle()).getBukkitEntity();
+        return ((Entity) requireHandle()).getBukkitEntity();
     }
 }

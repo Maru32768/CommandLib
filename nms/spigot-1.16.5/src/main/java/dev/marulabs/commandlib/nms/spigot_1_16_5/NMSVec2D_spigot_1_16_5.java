@@ -10,11 +10,11 @@ public class NMSVec2D_spigot_1_16_5 extends NMSVec2D {
 
     @Override
     public float x() {
-        return ((Vec2F) getHandle()).i;
+        return ((Vec2F) requireHandle()).i;
     }
 
     @Override
     public float y() {
-        return ((Vec2F) getHandle()).j;
+        return ((Vec2F) requireHandle()).j;
     }
 }

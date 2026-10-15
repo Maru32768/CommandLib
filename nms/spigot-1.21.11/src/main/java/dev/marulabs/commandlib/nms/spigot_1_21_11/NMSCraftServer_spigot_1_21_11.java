@@ -13,11 +13,11 @@ public class NMSCraftServer_spigot_1_21_11 extends NMSCraftServer {
 
     @Override
     public NMSDedicatedServer getServer() {
-        return NMSDedicatedServer.create(((CraftServer) getHandle()).getServer());
+        return NMSDedicatedServer.create(((CraftServer) requireHandle()).getServer());
     }
 
     @Override
     public SimpleCommandMap getCommandMap() {
-        return ((CraftServer) getHandle()).getCommandMap();
+        return ((CraftServer) requireHandle()).getCommandMap();
     }
 }

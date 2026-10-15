@@ -4,6 +4,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 //? if >=1.18 {
 import net.minecraft.server.level.ServerPlayer;
 //?} else {
@@ -114,6 +115,7 @@ final class ForgeCommandActor implements CommandActor {
         return Optional.empty();
     }
 
+    @Nullable
     private Object findRawSource() {
         //? if >=1.18 {
         return source.source;
@@ -132,8 +134,10 @@ final class ForgeCommandActor implements CommandActor {
     //? if <1.18 {
     /*// The field is private here and named differently in development (Mojang) and production (SRG),
     // so look it up by its type. CommandSourceStack has exactly one CommandSource field.
+    @Nullable
     private static final Field RAW_SOURCE_FIELD = findRawSourceField();
 
+    @Nullable
     private static Field findRawSourceField() {
         for (Field field : CommandSourceStack.class.getDeclaredFields()) {
             if (field.getType() == CommandSource.class) {

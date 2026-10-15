@@ -9,6 +9,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.mockito.Mockito;
 
 import java.nio.charset.StandardCharsets;
@@ -17,6 +18,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -34,8 +36,11 @@ public final class FakeSender {
     private static final String CONSOLE_NAME = "Server";
 
     private final List<Component> sentMessages = new ArrayList<>();
+    // null for the console.
+    @Nullable
     private final ServerPlayer player;
     private String name;
+    @Nullable
     private UUID uniqueId;
     private boolean op;
     private Predicate<String> permissionCheck = permission -> true;
@@ -75,7 +80,7 @@ public final class FakeSender {
         return new Builder(true, CONSOLE_NAME, true);
     }
 
-    private FakeSender(ServerPlayer player, String name, UUID uniqueId, boolean op) {
+    private FakeSender(@Nullable ServerPlayer player, String name, @Nullable UUID uniqueId, boolean op) {
         this.player = player;
         this.name = name;
         this.uniqueId = uniqueId;
@@ -187,6 +192,8 @@ public final class FakeSender {
     }
 
     private void stubPlayer() {
+        ServerPlayer player = Objects.requireNonNull(this.player, "sender is not a player");
+        UUID uniqueId = Objects.requireNonNull(this.uniqueId, "uniqueId");
         Component displayName = Component.nullToEmpty(name);
         Mockito.when(player.getName())
                .thenReturn(displayName);
@@ -230,8 +237,11 @@ public final class FakeSender {
     public static final class Builder {
         private final boolean console;
         private String name;
+        @Nullable
         private UUID uniqueId;
         private boolean op;
+        // null grants every permission node.
+        @Nullable
         private Set<String> permissions;
         private final Set<String> deniedPermissions = new HashSet<>();
 

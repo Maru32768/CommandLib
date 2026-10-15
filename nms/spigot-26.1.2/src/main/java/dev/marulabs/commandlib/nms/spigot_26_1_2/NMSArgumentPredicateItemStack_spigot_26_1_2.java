@@ -14,7 +14,7 @@ public class NMSArgumentPredicateItemStack_spigot_26_1_2 extends NMSArgumentPred
     @Override
     public NMSItemStack createItemStack(int amount, boolean checkOverStack) {
         try {
-            return NMSItemStack.create(((ItemInput) getHandle()).createItemStack(amount));
+            return NMSItemStack.create(((ItemInput) requireHandle()).createItemStack(amount));
         } catch (CommandSyntaxException e) {
             throw new UncheckedCommandSyntaxException(e);
         }

@@ -7,12 +7,14 @@ import dev.marulabs.commandlib.exception.ArgumentParseException;
 import dev.marulabs.commandlib.util.StringUtil;
 import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.Scoreboard;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 import java.util.function.Supplier;
 
 public class TeamArgument extends Argument<PlayerTeam, TeamArgument> {
     // null keeps the vanilla lookup against the server scoreboard.
+    @Nullable
     private Supplier<Scoreboard> scoreboardSupplier;
 
     public TeamArgument(String name) {
@@ -27,7 +29,7 @@ public class TeamArgument extends Argument<PlayerTeam, TeamArgument> {
         this.scoreboardSupplier = Objects.requireNonNull(scoreboardSupplier);
         // The vanilla suggestions list the server scoreboard's teams.
         replaceDefaultSuggestions(sb -> {
-            Scoreboard scoreboard = this.scoreboardSupplier.get();
+            Scoreboard scoreboard = scoreboardSupplier.get();
             if (scoreboard == null) {
                 return;
             }

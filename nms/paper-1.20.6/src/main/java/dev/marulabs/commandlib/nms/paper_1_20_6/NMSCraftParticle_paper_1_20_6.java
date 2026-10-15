@@ -13,6 +13,6 @@ public class NMSCraftParticle_paper_1_20_6 extends NMSCraftParticle {
 
     @Override
     public Particle toBukkit(NMSParticleParam nms) {
-        return CraftParticle.minecraftToBukkit(((ParticleOptions) nms.getHandle()).getType());
+        return CraftParticle.minecraftToBukkit(((ParticleOptions) nms.requireHandle()).getType());
     }
 }

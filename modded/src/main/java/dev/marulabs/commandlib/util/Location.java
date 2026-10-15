@@ -6,11 +6,14 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
+import java.util.Objects;
 
 public class Location implements Cloneable {
+    @Nullable
     private Reference<Level> world;
     private double x;
     private double y;
@@ -18,15 +21,15 @@ public class Location implements Cloneable {
     private float pitch;
     private float yaw;
 
-    public Location(Level world, Vec3 vec) {
+    public Location(@Nullable Level world, Vec3 vec) {
         this(world, vec.x, vec.y, vec.z);
     }
 
-    public Location(Level world, double x, double y, double z) {
+    public Location(@Nullable Level world, double x, double y, double z) {
         this(world, x, y, z, 0.0F, 0.0F);
     }
 
-    public Location(Level world, double x, double y, double z, float yaw, float pitch) {
+    public Location(@Nullable Level world, double x, double y, double z, float yaw, float pitch) {
         if (world != null) {
             this.world = new WeakReference<>(world);
         }
@@ -38,7 +41,7 @@ public class Location implements Cloneable {
         this.pitch = pitch;
     }
 
-    public void setWorld(Level world) {
+    public void setWorld(@Nullable Level world) {
         if (world == null) {
             this.world = null;
             return;
@@ -47,6 +50,7 @@ public class Location implements Cloneable {
         this.world = new WeakReference<>(world);
     }
 
+    @Nullable
     public Level getWorld() {
         if (world == null) {
             return null;
@@ -56,11 +60,15 @@ public class Location implements Cloneable {
     }
 
     public LevelChunk getChunk() {
-        return getWorld().getChunk(getBlockX() >> 4, getBlockZ() >> 4);
+        return requireWorld().getChunk(getBlockX() >> 4, getBlockZ() >> 4);
     }
 
     public BlockState getBlockState() {
-        return getWorld().getBlockState(toBlockPos());
+        return requireWorld().getBlockState(toBlockPos());
+    }
+
+    private Level requireWorld() {
+        return Objects.requireNonNull(getWorld(), "The location has no world, or its world was unloaded");
     }
 
     public BlockPos toBlockPos() {
