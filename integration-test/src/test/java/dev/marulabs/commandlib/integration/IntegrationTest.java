@@ -148,14 +148,20 @@ class IntegrationTest {
                                                .doesNotContain("ConcurrentModificationException");
                 // On /minecraft:reload the server compiles the fixture's function before CommandLib's commands are
                 // in its dispatcher, and CommandLib compiles it again, so only the function that is really broken is
-                // reported, by CommandLib's compilation. Only errors from then count: a server that starts with the
-                // data pack, such as a Mohist image made from a bootstrap run, compiles it before plugins load.
-                String logs = container.getLogs();
-                String reloadMarker = "Reloading data packs to verify registered commands survive.";
-                String afterReload = logs.substring(Math.max(0, logs.indexOf(reloadMarker)));
-                assertThat(afterReload).as("server log after the reload")
-                                       .doesNotContain("Failed to load function commandlibtest:probe")
-                                       .contains("Failed to load function commandlibtest:broken");
+                // reported, by CommandLib's compilation. The function tags that list the fixture's functions are built
+                // again with them, so their errors are dropped as well. Only errors from then count: a server that
+                // starts with the data pack, such as a Mohist image made from a bootstrap run, compiles it before
+                // plugins load. The Forge and NeoForge fixture has no data pack and does not reload.
+                if (isBukkitPlatform(System.getProperty("commandlib.platform", ""))) {
+                    String logs = container.getLogs();
+                    String reloadMarker = "Reloading data packs to verify registered commands survive.";
+                    assertThat(logs).as("server log")
+                                    .contains(reloadMarker);
+                    String afterReload = logs.substring(logs.indexOf(reloadMarker));
+                    assertThat(afterReload).as("server log after the reload")
+                                           .doesNotContain("Failed to load function commandlibtest:probe")
+                                           .contains("Failed to load function commandlibtest:broken");
+                }
 
                 // Bot-side checks need the messages a player receives, which the console-driven report cannot see.
                 // Help message prefix: the usage must start with the typed command, not a token like an argument name.
@@ -190,6 +196,11 @@ class IntegrationTest {
                 client.disconnect("Test completed");
             }
         }
+    }
+
+    private static boolean isBukkitPlatform(String platform) {
+        // The same platforms as isBukkitPlatform in integration-test-target.gradle.kts.
+        return platform.equals("paper") || platform.equals("mohist") || platform.equals("spigot");
     }
 
     @Test
