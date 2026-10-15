@@ -5,6 +5,7 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.tree.ArgumentCommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import dev.marulabs.commandlib.command.CommandExecutor;
+import dev.marulabs.commandlib.command.Extractor;
 import dev.marulabs.commandlib.suggestion.SuggestionBuilder;
 import dev.marulabs.commandlib.suggestion.SuggestionProvider;
 import dev.marulabs.commandlib.util.UncaughtExceptionHandler;
@@ -13,6 +14,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -41,6 +43,7 @@ final class ArgumentCommandNodeCreator<S, T, C extends CommonCommandContext<S, T
         builder.requires(source -> platformAdapter.hasPermission(source,
                                                                  arguments.permissionName(parent, permissionPrefix)));
 
+        Map<ContextKey<?>, ? extends Extractor<?, ?>> providers = parent.providers();
         builder.suggests((context, sb) -> {
             try {
                 if (!platformAdapter.hasPermission(context.getSource(),
@@ -48,6 +51,7 @@ final class ArgumentCommandNodeCreator<S, T, C extends CommonCommandContext<S, T
                     return Suggestions.empty();
                 }
                 C ctx = platformAdapter.createCommandContext(context);
+                ctx.providers(providers);
                 SuggestionBuilder<C> suggestionBuilder = new SuggestionBuilder<>(ctx, sb.getRemaining());
                 List<CompletableFuture<Suggestions>> defaultFutures = new ArrayList<>();
                 // Parsing runs user code (validators, transformers) too, so it shares the current context with the

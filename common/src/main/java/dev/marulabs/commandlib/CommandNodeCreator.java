@@ -5,6 +5,7 @@ import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.tree.ArgumentCommandNode;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import dev.marulabs.commandlib.command.Extractor;
 
 import java.util.*;
 import java.util.function.Supplier;
@@ -72,11 +73,13 @@ final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U ext
     }
 
     private LiteralCommandNode<S> createHelpNode(U command, HelpMessageAction<S, T, C, U> helpAction) {
+        Map<ContextKey<?>, ? extends Extractor<?, ?>> providers = command.providers();
         return LiteralArgumentBuilder.<S>literal("help")
                                      .requires(x -> platformAdapter.hasPermission(command, x, permissionPrefix))
                                      .executes(context -> {
                                          try {
                                              C ctx = platformAdapter.createCommandContext(context);
+                                             ctx.providers(providers);
                                              CurrentCommandContext.run(ctx, () -> helpAction.accept(ctx));
                                              return 1;
                                          } catch (Exception e) {

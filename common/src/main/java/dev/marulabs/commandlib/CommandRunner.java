@@ -5,6 +5,7 @@ import com.mojang.brigadier.context.CommandContext;
 import dev.marulabs.commandlib.command.AsyncCommandExecutor;
 import dev.marulabs.commandlib.command.CommandExecutor;
 import dev.marulabs.commandlib.command.CommandMiddleware;
+import dev.marulabs.commandlib.command.Extractor;
 import dev.marulabs.commandlib.command.Prerequisite;
 import dev.marulabs.commandlib.exception.ArgumentParseException;
 import dev.marulabs.commandlib.exception.CommandPrerequisiteException;
@@ -39,6 +40,7 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
     // Null when the command or branch has no executor; the help action runs instead, without the middlewares.
     private final @Nullable AsyncCommandExecutor<C> executor;
     private final List<UncaughtExceptionHandler<C>> uncaughtExceptionHandlers;
+    private final Map<ContextKey<?>, Extractor<? super C, ?>> providers;
 
     CommandRunner(PlatformAdapter<S, ?, C, ?> platformAdapter,
                   CommandScheduler scheduler,
@@ -62,6 +64,7 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
         this.middlewares = List.copyOf(middlewares);
         this.executor = executor;
         this.uncaughtExceptionHandlers = uncaughtExceptionHandlers;
+        this.providers = command.providers();
     }
 
     @Override
@@ -70,6 +73,7 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
             C ctx = platformAdapter.createCommandContext(context);
             ctx.scheduler(scheduler);
             ctx.captions(command.captions());
+            ctx.providers(providers);
             return CurrentCommandContext.call(ctx, () -> runInContext(ctx));
         } catch (CommandFailure e) {
             throw e;

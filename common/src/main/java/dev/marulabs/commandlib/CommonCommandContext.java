@@ -3,6 +3,8 @@ package dev.marulabs.commandlib;
 import com.mojang.brigadier.Message;
 import com.mojang.brigadier.context.ParsedCommandNode;
 import com.mojang.brigadier.tree.ArgumentCommandNode;
+import dev.marulabs.commandlib.command.Extractor;
+import dev.marulabs.commandlib.exception.CommandPrerequisiteException;
 import dev.marulabs.commandlib.util.ChatColorUtil;
 import dev.marulabs.commandlib.util.text.RichText;
 import org.jetbrains.annotations.NotNull;
@@ -35,6 +37,12 @@ public abstract class CommonCommandContext<S, C> {
     private @Nullable CommandScheduler scheduler;
     // Set by CommandRunner and the help to those of the command; the default in suggestion contexts.
     private Captions captions = Captions.DEFAULT;
+    // The values put by middlewares and those the providers gave so far.
+    private final Map<ContextKey<?>, Object> values = new HashMap<>();
+    // Set by the node creators from the command, before any user code runs.
+    private Map<ContextKey<?>, ? extends Extractor<?, ?>> providers = Map.of();
+    // The keys whose provider is running, to report a provider that needs its own value.
+    private final Set<ContextKey<?>> resolving = new HashSet<>();
 
     protected CommonCommandContext(@NotNull com.mojang.brigadier.context.CommandContext<S> ctx) {
         this.handle = Objects.requireNonNull(ctx);
@@ -438,6 +446,101 @@ public abstract class CommonCommandContext<S, C> {
 
     final void scheduler(CommandScheduler scheduler) {
         this.scheduler = Objects.requireNonNull(scheduler);
+    }
+
+    /**
+     * Sets the value of {@code key} for the rest of this execution, replacing the value the command's provider gives,
+     * so that later middlewares, the executor and the parameters of annotated methods read it with
+     * {@link #get(ContextKey)}. Like the sender, the values belong to the sync thread.
+     */
+    public final <T> void put(@NotNull ContextKey<T> key, @NotNull T value) {
+        values.put(Objects.requireNonNull(key), key.cast(Objects.requireNonNull(value)));
+    }
+
+    /**
+     * Same as {@link #put(ContextKey, Object)} with the key of {@code type}.
+     */
+    public final <T> void put(@NotNull Class<T> type, @NotNull T value) {
+        put(ContextKey.of(type), value);
+    }
+
+    /**
+     * Returns the value of {@code key}: the one a middleware put, or else the one the command's provider gives, which
+     * runs once per execution (see {@link CommonCommand#provide(ContextKey, Extractor)}).
+     * <p>
+     * A {@link CommandPrerequisiteException} thrown by the provider, such as for a sender who is not a player, is
+     * thrown from this method as it is, although the method does not declare it, so that the command fails with its
+     * message also when it is called from a lambda that cannot throw it.
+     *
+     * @throws IllegalStateException if nothing provides or put the value
+     */
+    @NotNull
+    public final <T> T get(@NotNull ContextKey<T> key) {
+        return find(key).orElseThrow(() -> new IllegalStateException("No value for " + key
+                + " in this command execution; provide one with provide(...) on the command or put(...) in a "
+                + "middleware"));
+    }
+
+    /**
+     * Same as {@link #get(ContextKey)} with the key of {@code type}, such as {@code ctx.get(GamePlayer.class)}.
+     */
+    @NotNull
+    public final <T> T get(@NotNull Class<T> type) {
+        return get(ContextKey.of(type));
+    }
+
+    /**
+     * Same as {@link #get(ContextKey)}, but empty when nothing provides or put the value.
+     */
+    @NotNull
+    public final <T> Optional<T> find(@NotNull ContextKey<T> key) {
+        Objects.requireNonNull(key);
+        Object value = values.get(key);
+        if (value != null) {
+            return Optional.of(key.cast(value));
+        }
+        Extractor<?, ?> provider = providers.get(key);
+        if (provider == null) {
+            return Optional.empty();
+        }
+        if (!resolving.add(key)) {
+            throw new IllegalStateException("The provider of " + key + " reads its own value");
+        }
+        Object provided;
+        try {
+            provided = extract(provider);
+        } catch (CommandPrerequisiteException e) {
+            throw CommonCommandContext.<RuntimeException>sneakyThrow(e);
+        } finally {
+            resolving.remove(key);
+        }
+        T typed = key.cast(Objects.requireNonNull(provided, () -> "The provider of " + key + " returned null"));
+        values.put(key, typed);
+        return Optional.of(typed);
+    }
+
+    /**
+     * Same as {@link #find(ContextKey)} with the key of {@code type}.
+     */
+    @NotNull
+    public final <T> Optional<T> find(@NotNull Class<T> type) {
+        return find(ContextKey.of(type));
+    }
+
+    // The providers come from a command of this context's type, as the node creators set them.
+    @SuppressWarnings("unchecked")
+    private Object extract(Extractor<?, ?> provider) throws CommandPrerequisiteException {
+        return ((Extractor<CommonCommandContext<S, C>, ?>) provider).extract(this);
+    }
+
+    // Rethrows a checked exception without declaring it; the cast is erased, so nothing is checked.
+    @SuppressWarnings("unchecked")
+    private static <E extends Throwable> RuntimeException sneakyThrow(Throwable e) throws E {
+        throw (E) e;
+    }
+
+    final void providers(Map<ContextKey<?>, ? extends Extractor<?, ?>> providers) {
+        this.providers = Objects.requireNonNull(providers);
     }
 
     /**

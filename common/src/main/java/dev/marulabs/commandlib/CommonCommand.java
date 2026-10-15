@@ -41,6 +41,7 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
     private Prerequisite<C> prerequisite = ctx -> {
     };
     private final List<CommandMiddleware<? super C>> middlewares = new ArrayList<>();
+    private final Map<ContextKey<?>, Extractor<? super C, ?>> providers = new LinkedHashMap<>();
     private @Nullable Confirmation confirmation = null;
     private @Nullable Cooldown cooldown = null;
     private @Nullable Captions captions = null;
@@ -502,6 +503,42 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
      */
     public final void addMiddleware(@NotNull CommandMiddleware<? super C> middleware) {
         this.middlewares.add(Objects.requireNonNull(middleware));
+    }
+
+    /**
+     * Provides the value of {@code key} to the executions of this command, its argument branches and its child
+     * commands: {@link CommonCommandContext#get(ContextKey)} calls {@code provider} the first time it reads the key in
+     * an execution and keeps the value for the rest of it. A child's provider of the same key replaces the parent's,
+     * and a value a middleware puts with {@link CommonCommandContext#put(ContextKey, Object)} replaces both.
+     * <p>
+     * Use it to map the sender to a type of the plugin once ({@code provide(GamePlayer.class, ctx -> ...)}), or to
+     * give the commands a service ({@code provide(Economy.class, ctx -> economy)}). A
+     * {@link dev.marulabs.commandlib.exception.CommandPrerequisiteException} thrown by {@code provider} fails the
+     * command with its message. Unlike middlewares, providers are inherited also by a child that calls
+     * {@link #disableParentMiddleware()}.
+     */
+    public final <V> void provide(@NotNull ContextKey<V> key, @NotNull Extractor<? super C, ? extends V> provider) {
+        this.providers.put(Objects.requireNonNull(key), Objects.requireNonNull(provider));
+    }
+
+    /**
+     * Same as {@link #provide(ContextKey, Extractor)} with the key of {@code type}, which
+     * {@link CommonCommandContext#get(Class)} reads.
+     */
+    public final <V> void provide(@NotNull Class<V> type, @NotNull Extractor<? super C, ? extends V> provider) {
+        provide(ContextKey.of(type), provider);
+    }
+
+    /**
+     * The providers of an execution of this command, the parent's replaced by this command's for the same key.
+     */
+    final Map<ContextKey<?>, Extractor<? super C, ?>> providers() {
+        if (parent == null) {
+            return Map.copyOf(providers);
+        }
+        Map<ContextKey<?>, Extractor<? super C, ?>> result = new HashMap<>(parent.providers());
+        result.putAll(providers);
+        return Map.copyOf(result);
     }
 
     /**
