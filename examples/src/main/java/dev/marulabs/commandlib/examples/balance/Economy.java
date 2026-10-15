@@ -32,10 +32,10 @@ public final class Economy {
         public int balance() {
             return balances.get(owner);
         }
+    }
 
-        public void pay(String to, int amount) {
-            balances.merge(owner, -amount, Integer::sum);
-            balances.merge(to, amount, Integer::sum);
-        }
+    public void pay(Account from, String to, int amount) {
+        balances.merge(from.owner, -amount, Integer::sum);
+        balances.merge(to, amount, Integer::sum);
     }
 }
