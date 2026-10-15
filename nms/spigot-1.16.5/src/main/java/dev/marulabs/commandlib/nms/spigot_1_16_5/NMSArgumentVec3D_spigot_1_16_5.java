@@ -29,4 +29,9 @@ public class NMSArgumentVec3D_spigot_1_16_5 extends NMSArgumentVec3D {
             throw new UncheckedCommandSyntaxException(e);
         }
     }
+
+    @Override
+    public ArgumentType<?> argument(boolean centerIntegers) {
+        return ArgumentVec3.a(centerIntegers);
+    }
 }

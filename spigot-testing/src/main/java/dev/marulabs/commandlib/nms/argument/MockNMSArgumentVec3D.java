@@ -19,6 +19,12 @@ public class MockNMSArgumentVec3D extends NMSArgumentVec3D {
     }
 
     @Override
+    public ArgumentType<?> argument(boolean centerIntegers) {
+        // The mock never centers coordinates.
+        return argument();
+    }
+
+    @Override
     protected NMSVec3D parseImpl(CommandContext<?> ctx, String name) {
         double[] coords = (double[]) ctx.getArgument(name, Object.class);
         return new MockNMSVec3D(coords[0], coords[1], coords[2]);

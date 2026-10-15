@@ -75,7 +75,7 @@ def simple(name):
     return name.split(".")[-1]
 
 
-def arg(wrapper, nms, ret, argument, parse, imports=(), throws=True):
+def arg(wrapper, nms, ret, argument, parse, imports=(), throws=True, extra=""):
     parse = parse.replace("CTX", "context")
     cast = f"        {CTX} context = ({CTX}) ctx;\n"
     if throws:
@@ -101,7 +101,7 @@ def arg(wrapper, nms, ret, argument, parse, imports=(), throws=True):
     protected {ret} parseImpl(CommandContext<?> ctx, String name) {{
 {parse_body}
     }}
-'''
+{extra}'''
     w(wrapper, body, [f"net.minecraft.{nms}", CSS, *imports])
 
 
@@ -165,7 +165,40 @@ arg("NMSArgumentTile", "commands.arguments.blocks.BlockStateArgument", "NMSArgum
     "BlockStateArgument.block(BuildContexts.current())" if HAS_BUILD_CONTEXT else "BlockStateArgument.block()",
     "return NMSArgumentTileLocation.create(BlockStateArgument.getBlock(CTX, name));", throws=False)
 arg("NMSArgumentVec3D", "commands.arguments.coordinates.Vec3Argument", "NMSVec3D", "Vec3Argument.vec3()",
-    "return NMSVec3D.create(Vec3Argument.getVec3(CTX, name));", throws=False)
+    "return NMSVec3D.create(Vec3Argument.getVec3(CTX, name));", throws=False, extra='''
+    @Override
+    public ArgumentType<?> argument(boolean centerIntegers) {
+        return Vec3Argument.vec3(centerIntegers);
+    }
+''')
+# Coordinates#getBlockPos, unlike BlockPosArgument#getLoadedBlockPos, checks neither that the position is loaded nor
+# that it is inside the world, as Paper's blockPosition() resolver.
+arg("NMSArgumentBlockPosition", "commands.arguments.coordinates.BlockPosArgument", "BlockVector",
+    "BlockPosArgument.blockPos()",
+    "BlockPos pos = CTX.getArgument(name, Coordinates.class)\n"
+    "                           .getBlockPos(CTX.getSource());\n"
+    "        return new BlockVector(pos.getX(), pos.getY(), pos.getZ());",
+    ["net.minecraft.commands.arguments.coordinates.Coordinates", "net.minecraft.core.BlockPos",
+     "org.bukkit.util.BlockVector"], throws=False)
+# getItemPredicate resolves item tags, and fails on an unknown one, until 1.19, which resolves them while parsing.
+arg("NMSArgumentItemPredicate", "commands.arguments.item.ItemPredicateArgument", "Predicate<ItemStack>",
+    "ItemPredicateArgument.itemPredicate(BuildContexts.current())" if HAS_BUILD_CONTEXT
+    else "ItemPredicateArgument.itemPredicate()",
+    "Predicate<net.minecraft.world.item.ItemStack> predicate = ItemPredicateArgument.getItemPredicate(CTX, name);\n"
+    + (" " * 8 if HAS_BUILD_CONTEXT else " " * 12) + "return item -> predicate.test(CraftItemStack.asNMSCopy(item));",
+    ["java.util.function.Predicate", "org.bukkit.inventory.ItemStack", f"{CB}.inventory.CraftItemStack"],
+    throws=not HAS_BUILD_CONTEXT)
+# The block is tested in its world, loading its chunk as /execute if block does. getBlockPredicate fails on an unknown
+# block tag.
+arg("NMSArgumentBlockPredicate", "commands.arguments.blocks.BlockPredicateArgument", "Predicate<Block>",
+    "BlockPredicateArgument.blockPredicate(BuildContexts.current())" if HAS_BUILD_CONTEXT
+    else "BlockPredicateArgument.blockPredicate()",
+    "Predicate<BlockInWorld> predicate = BlockPredicateArgument.getBlockPredicate(CTX, name);\n"
+    "            return block -> predicate.test(new BlockInWorld(((CraftWorld) block.getWorld()).getHandle(),\n"
+    "                                                            new BlockPos(block.getX(), block.getY(), block.getZ()),\n"
+    "                                                            true));",
+    ["java.util.function.Predicate", "org.bukkit.block.Block", "net.minecraft.core.BlockPos",
+     "net.minecraft.world.level.block.state.pattern.BlockInWorld", f"{CB}.CraftWorld"])
 # MinMaxBounds turned into records with Optional bounds in 1.20.2. `var` keeps its package, which 1.21.11 renamed from
 # advancements.critereon to advancements.criterion, out of the imports.
 BOUNDS = "bounds.min().orElse(null), bounds.max().orElse(null)" if V >= (1, 20, 2) \

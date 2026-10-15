@@ -11,12 +11,15 @@ public final class TypedNmsClasses {
     }
 
     public static List<Class<?>> classes() {
-        return List.of(NMSArgumentDimension_paper_1_20_6.class,
+        return List.of(NMSArgumentBlockPosition_paper_1_20_6.class,
+                       NMSArgumentBlockPredicate_paper_1_20_6.class,
+                       NMSArgumentDimension_paper_1_20_6.class,
                        NMSArgumentEnchantment_paper_1_20_6.class,
                        NMSArgumentEntities_paper_1_20_6.class,
                        NMSArgumentEntity_paper_1_20_6.class,
                        NMSArgumentFloatRange_paper_1_20_6.class,
                        NMSArgumentIntRange_paper_1_20_6.class,
+                       NMSArgumentItemPredicate_paper_1_20_6.class,
                        NMSArgumentItemStack_paper_1_20_6.class,
                        NMSArgumentMobEffect_paper_1_20_6.class,
                        NMSArgumentNamespacedKey_paper_1_20_6.class,

@@ -11,12 +11,15 @@ public final class TypedNmsClasses {
     }
 
     public static List<Class<?>> classes() {
-        return List.of(NMSArgumentDimension_spigot_26_1_2.class,
+        return List.of(NMSArgumentBlockPosition_spigot_26_1_2.class,
+                       NMSArgumentBlockPredicate_spigot_26_1_2.class,
+                       NMSArgumentDimension_spigot_26_1_2.class,
                        NMSArgumentEnchantment_spigot_26_1_2.class,
                        NMSArgumentEntities_spigot_26_1_2.class,
                        NMSArgumentEntity_spigot_26_1_2.class,
                        NMSArgumentFloatRange_spigot_26_1_2.class,
                        NMSArgumentIntRange_spigot_26_1_2.class,
+                       NMSArgumentItemPredicate_spigot_26_1_2.class,
                        NMSArgumentItemStack_spigot_26_1_2.class,
                        NMSArgumentMobEffect_spigot_26_1_2.class,
                        NMSArgumentNamespacedKey_spigot_26_1_2.class,

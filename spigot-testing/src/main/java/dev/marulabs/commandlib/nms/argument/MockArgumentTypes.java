@@ -3,13 +3,20 @@ package dev.marulabs.commandlib.nms.argument;
 import com.mojang.brigadier.LiteralMessage;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
+import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import com.mojang.brigadier.suggestion.Suggestions;
+import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import dev.marulabs.commandlib.util.nms.exception.UncheckedCommandSyntaxException;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Locale;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 /**
@@ -38,19 +45,46 @@ public final class MockArgumentTypes {
      * @param exists receives the normalized key
      */
     public static ArgumentType<String> resourceKey(String kind, Predicate<String> exists) {
-        return reader -> {
-            int start = reader.getCursor();
-            String key = normalizeKey(readToken(reader));
-            if (!RESOURCE_LOCATION.matcher(key)
-                                  .matches()) {
-                reader.setCursor(start);
-                throw syntaxError("Invalid ID", reader);
+        return resourceKey(kind, exists, Collections::emptyList);
+    }
+
+    /**
+     * Like {@link #resourceKey(String, Predicate)}, and suggests the keys that start with the input, with or without
+     * the {@code minecraft} namespace, as a server suggests registry keys.
+     *
+     * @param keys the normalized keys to suggest
+     */
+    public static ArgumentType<String> resourceKey(String kind,
+                                                   Predicate<String> exists,
+                                                   Supplier<? extends Collection<String>> keys) {
+        return new ArgumentType<String>() {
+            @Override
+            public String parse(StringReader reader) throws CommandSyntaxException {
+                int start = reader.getCursor();
+                String key = normalizeKey(readToken(reader));
+                if (!RESOURCE_LOCATION.matcher(key)
+                                      .matches()) {
+                    reader.setCursor(start);
+                    throw syntaxError("Invalid ID", reader);
+                }
+                if (!exists.test(key)) {
+                    reader.setCursor(start);
+                    throw syntaxError("Unknown " + kind + " '" + key + "'", reader);
+                }
+                return key;
             }
-            if (!exists.test(key)) {
-                reader.setCursor(start);
-                throw syntaxError("Unknown " + kind + " '" + key + "'", reader);
+
+            @Override
+            public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context,
+                                                                      SuggestionsBuilder builder) {
+                String input = builder.getRemaining();
+                for (String key : keys.get()) {
+                    if (key.startsWith(input) || key.startsWith("minecraft:" + input)) {
+                        builder.suggest(key);
+                    }
+                }
+                return builder.buildFuture();
             }
-            return key;
         };
     }
 

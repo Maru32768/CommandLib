@@ -18,7 +18,7 @@ def w(wrapper, body, imports=()):
 CTX = "CommandContext<CommandListenerWrapper>"
 
 
-def arg(wrapper, nms_class, class_name, ret, argument, parse, extra_imports=(), throws=True):
+def arg(wrapper, nms_class, class_name, ret, argument, parse, extra_imports=(), throws=True, extra=""):
     cast = f"        {CTX} context = ({CTX}) ctx;\n"
     if throws:
         parse_body = cast + f"""        try {{
@@ -42,7 +42,7 @@ def arg(wrapper, nms_class, class_name, ret, argument, parse, extra_imports=(), 
     protected {ret} parseImpl(CommandContext<?> ctx, String name) {{
 {parse_body}
     }}
-'''
+{extra}'''
     w(wrapper, body, [f"{NMS}.{nms_class}", f"{NMS}.CommandListenerWrapper", *extra_imports])
 
 
@@ -79,7 +79,37 @@ arg("NMSArgumentScoreboardTeam", "ArgumentScoreboardTeam", "ArgumentScoreboardTe
 arg("NMSArgumentTile", "ArgumentTile", "ArgumentTile", "NMSArgumentTileLocation", "ArgumentTile.a()",
     c("return NMSArgumentTileLocation.create(ArgumentTile.a(CTX, name));"), throws=False)
 arg("NMSArgumentVec3D", "ArgumentVec3", "ArgumentVec3", "NMSVec3D", "ArgumentVec3.a()",
-    c("return NMSVec3D.create(ArgumentVec3.a(CTX, name));"))
+    c("return NMSVec3D.create(ArgumentVec3.a(CTX, name));"), extra='''
+    @Override
+    public ArgumentType<?> argument(boolean centerIntegers) {
+        return ArgumentVec3.a(centerIntegers);
+    }
+''')
+# ArgumentPosition is Mojang's BlockPosArgument, IVectorPosition its Coordinates, and c() Coordinates#getBlockPos,
+# which checks neither that the position is loaded nor that it is inside the world.
+arg("NMSArgumentBlockPosition", "ArgumentPosition", "ArgumentPosition", "BlockVector", "ArgumentPosition.a()",
+    c("BlockPosition pos = CTX.getArgument(name, IVectorPosition.class)\n"
+      "                                .c(CTX.getSource());\n"
+      "        return new BlockVector(pos.getX(), pos.getY(), pos.getZ());"),
+    [f"{NMS}.BlockPosition", f"{NMS}.IVectorPosition", "org.bukkit.util.BlockVector"], throws=False)
+# ArgumentItemPredicate is Mojang's ItemPredicateArgument; a() is getItemPredicate, which fails on an unknown tag.
+arg("NMSArgumentItemPredicate", "ArgumentItemPredicate", "ArgumentItemPredicate",
+    "Predicate<org.bukkit.inventory.ItemStack>", "ArgumentItemPredicate.a()",
+    c("Predicate<ItemStack> predicate = ArgumentItemPredicate.a(CTX, name);\n"
+      "            return item -> predicate.test(CraftItemStack.asNMSCopy(item));"),
+    ["java.util.function.Predicate", f"{NMS}.ItemStack", f"{CB}.inventory.CraftItemStack"])
+# ArgumentBlockPredicate is Mojang's BlockPredicateArgument and ShapeDetectorBlock its BlockInWorld. The block is tested
+# in its world, loading its chunk as /execute if block does.
+arg("NMSArgumentBlockPredicate", "ArgumentBlockPredicate", "ArgumentBlockPredicate", "Predicate<Block>",
+    "ArgumentBlockPredicate.a()",
+    c("Predicate<ShapeDetectorBlock> predicate = ArgumentBlockPredicate.a(CTX, name);\n"
+      "            return block -> predicate.test(new ShapeDetectorBlock(((CraftWorld) block.getWorld()).getHandle(),\n"
+      "                                                                  new BlockPosition(block.getX(),\n"
+      "                                                                                    block.getY(),\n"
+      "                                                                                    block.getZ()),\n"
+      "                                                                  true));"),
+    ["java.util.function.Predicate", "org.bukkit.block.Block", f"{NMS}.BlockPosition", f"{NMS}.ShapeDetectorBlock",
+     f"{CB}.CraftWorld"])
 # ArgumentCriterionValue is Mojang's RangeArgument and CriterionConditionValue its MinMaxBounds, whose a() and b() are
 # getMin() and getMax(). The float range has no static getter.
 arg("NMSArgumentIntRange", "ArgumentCriterionValue", "ArgumentCriterionValue", "Range<Integer>",

@@ -23,4 +23,9 @@ public class NMSArgumentVec3D_paper_1_20_6 extends NMSArgumentVec3D {
         CommandContext<CommandSourceStack> context = (CommandContext<CommandSourceStack>) ctx;
         return NMSVec3D.create(Vec3Argument.getVec3(context, name));
     }
+
+    @Override
+    public ArgumentType<?> argument(boolean centerIntegers) {
+        return Vec3Argument.vec3(centerIntegers);
+    }
 }
