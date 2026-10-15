@@ -35,7 +35,7 @@
 | Fabric support                      | `[~]` | `modded` の Stonecutter tree から `fabric-1.20.1` / `fabric-1.21.1` を build（`CommandRegistrationCallback` v2、fabric-permissions-api 任意対応）。`modded-testing` も全 node で通る。 | 実サーバーの integration target、Fabric sample、Fabric 用 Kotlin module、metadata の `minecraft` version range。 |
 | Brigadier / NMS hiding              | `[~]` | 利用者 API から Brigadier / NMS を隠している。                                                                                                      | capability detection、公式 API 優先、fallback policy。                            |
 | `/execute` integration              | `[~]` | README と Bukkit registration path で `/execute run` 連携を扱っている。spigot module と paper module の command は `/minecraft:reload` 後や runtime 登録後も data pack function から使える（`/minecraft:reload` 後は両 module に integration test あり）。paper module で plugin から登録した command は次 tick の function 再 compile 後に使える（bootstrap 登録は server の compile 時点から使える）。 | command block / tag での保証と tests。 |
-| Built-in arguments                  | `[~]` | 基本的な primitive、string、player、entity、location、item などがある。CommandAPI / Paper との挙動別 catalog は [`docs/arguments.md`](arguments.md)。 | catalog の missing 一覧（component、NBT、registry 等）の補完。 |
+| Built-in arguments                  | `[~]` | 基本的な primitive、string、player、entity、location、item などがある。CommandAPI / Paper との挙動別 catalog は [`docs/arguments.md`](arguments.md)。 | catalog の missing 一覧（汎用 registry、vanilla `time` 等）の補完。 |
 | Argument validation                 | `[x]` | `validator(...)` と `ArgumentValidator` がある。                                                                                             | reusable condition registry、error customization。                           |
 | Argument transform                  | `[x]` | `transformer(...)` がある。                                                                                                                 | docs と examples。                                                           |
 | Custom parsing fallback             | `[x]` | `additionalParser(...)` がある。                                                                                                            | behavior spec と tests。                                                     |
@@ -91,6 +91,9 @@
   MCProtocolLib bot が `int_range` / `float_range` を decode できるか、NMS range class の link）。
 - `[ ]` `BlockPositionArgument` / `ItemPredicateArgument` / `BlockPredicateArgument` を実サーバーで検証する（新しい NMS class の
   link、Paper 1.21.8+ の `blockInWorldPredicate` の reflection、vanilla argument type の補完が client に届くこと）。
+- `[ ]` `ComponentArgument` / `MessageArgument` / `NBTCompoundArgument` を実サーバーで検証する（Paper 1.21.3〜26.x での message の
+  reflection と vanilla NBT type、旧 bot の parser decode）。modded-testing の fake source は level を持たないため selector を解決できず、
+  `docs/arguments.md` の「real selectors」の記述を見直す。
 - `[ ]` game tick 基準の vanilla `time` argument を追加する（`DurationArgument` は実時間で単位を組み合わせる別仕様）。
 - `[ ]` Paper で resolve error の translatable component が実 client で翻訳されること、`MessageComponentSerializer` が
   Paper 1.21.3〜26.x で動くことを integration test（`CommandSyntaxExceptionTest`）で確認する。
