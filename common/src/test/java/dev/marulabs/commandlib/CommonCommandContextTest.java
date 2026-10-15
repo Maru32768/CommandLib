@@ -27,6 +27,18 @@ class CommonCommandContextTest {
     }
 
     @Test
+    void argument_named_like_its_command_keeps_its_own_input() throws Exception {
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("amount") {{
+            argument(new CommonIntegerArgument<>("amount")).execute((amount, ctx) -> {
+                ctx.sendMessage(ctx.getInput("amount"));
+            });
+        }});
+
+        assertThat(runner.execute("amount 5")
+                         .messages()).containsExactly("5");
+    }
+
+    @Test
     void missing_argument_lookups_fail_clearly() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("sum") {{
             argument(new CommonIntegerArgument<>("value")).execute((value, ctx) -> {

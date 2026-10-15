@@ -2,6 +2,7 @@ package dev.marulabs.commandlib;
 
 import com.mojang.brigadier.Message;
 import com.mojang.brigadier.context.ParsedCommandNode;
+import com.mojang.brigadier.tree.ArgumentCommandNode;
 import dev.marulabs.commandlib.util.ChatColorUtil;
 import dev.marulabs.commandlib.util.text.RichText;
 import org.jetbrains.annotations.NotNull;
@@ -31,14 +32,16 @@ public abstract class CommonCommandContext<S, C> {
         // Brigadier splits /a <n> <p> sub <b> across parent and child contexts. CommandLib keeps a flat name-to-token
         // map so argument-child executors can still read parent arguments.
         @Nullable
-        String previousName = null;
+        String previousArgumentName = null;
         for (ParsedCommandNode<S> x : ctx.getNodes()) {
             String name = x.getNode()
                            .getName();
             String input = x.getRange()
                             .get(ctx.getInput());
-            boolean repeated = name.equals(previousName);
-            previousName = name;
+            // Only an argument repeats: a command literal followed by an argument of the same name is not variadic.
+            boolean isArgument = x.getNode() instanceof ArgumentCommandNode;
+            boolean repeated = isArgument && name.equals(previousArgumentName);
+            previousArgumentName = isArgument ? name : null;
             if (name.startsWith("-") || name.startsWith(CommandOption.INTERNAL_NAME_PREFIX)) {
                 continue;
             }
