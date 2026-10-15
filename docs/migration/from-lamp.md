@@ -389,4 +389,4 @@ Tracked in the roadmap: registration
 hooks, response handlers, global parameter types and suggestion
 providers, and options with non-primitive values.
 
-See also: [Migrating from CommandAPI](from-commandapi.md), [Cloud](from-cloud.md), [ACF](from-acf.md).
+See also: the [comparison of seven use cases](../comparison.md), [Migrating from CommandAPI](from-commandapi.md), [Cloud](from-cloud.md), [ACF](from-acf.md).

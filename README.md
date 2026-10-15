@@ -79,8 +79,9 @@ with ease.
 | Server-free test utilities | `spigot-testing`, `paper-testing`, `velocity-testing`, `forge-` / `neoforge-` / `fabric-testing` | test toolkit (MockBukkit) | — |
 | Chat / NBT arguments | text component, message, NBT compound (SNBT string on Bukkit) | yes | component, signed message; no NBT |
 
-See the [argument catalog](docs/arguments.md) for an argument-by-argument comparison and
-[compatibility](docs/compatibility.md) for the tested server versions.
+See the [comparison](docs/comparison.md) for seven use cases written with CommandLib, CommandAPI, Cloud, Lamp, ACF
+and Paper's command API, including where the others are better, the [argument catalog](docs/arguments.md) for an
+argument-by-argument comparison and [compatibility](docs/compatibility.md) for the tested server versions.
 
 ## Documentation
 
@@ -101,6 +102,8 @@ See the [argument catalog](docs/arguments.md) for an argument-by-argument compar
 - [Documentation exports and diagnostics](docs/diagnostics.md): Markdown / JSON of the commands and permission nodes,
   and a runtime report of the platform and the registrations.
 - [Troubleshooting](docs/troubleshooting.md).
+- [Comparison](docs/comparison.md): seven use cases in CommandLib, CommandAPI, Cloud, Lamp, ACF and Paper, with the
+  CommandLib side compiled and tested in [`examples`](examples).
 - [Migrating from CommandAPI](docs/migration/from-commandapi.md).
 - [Migrating from Cloud](docs/migration/from-cloud.md).
 - [Migrating from Lamp](docs/migration/from-lamp.md).

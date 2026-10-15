@@ -327,4 +327,4 @@ Tracked in the roadmap: reusable named conditions, catch-unknown handlers, hidde
 for subcommands, and global contexts and completions by type. Asynchronous execution is `executeAsync(...)`, see
 [execution](../execution.md#async-executors).
 
-See also: [Migrating from CommandAPI](from-commandapi.md), [Cloud](from-cloud.md), [Lamp](from-lamp.md).
+See also: the [comparison of seven use cases](../comparison.md), [Migrating from CommandAPI](from-commandapi.md), [Cloud](from-cloud.md), [Lamp](from-lamp.md).

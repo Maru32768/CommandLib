@@ -314,4 +314,4 @@ See [testing](../testing.md).
 
 Tracked in the roadmap: requirement-based visibility, per-sender executor variants, and the arguments listed as missing in the [catalog](../arguments.md).
 
-See also: [Migrating from Cloud](from-cloud.md), [Lamp](from-lamp.md), [ACF](from-acf.md).
+See also: the [comparison of seven use cases](../comparison.md), [Migrating from Cloud](from-cloud.md), [Lamp](from-lamp.md), [ACF](from-acf.md).
