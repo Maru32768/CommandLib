@@ -99,6 +99,9 @@
   1.16.5〜26.3 の全 release、Paper 1.21.3〜26.3（paper module）の integration target を追加した。
 - `[x]` command tree documentation generator と permission tree exporter（`CommandDocs` の Markdown / JSON）、runtime
   platform capability diagnostics と opt-in の diagnostics command を追加する（`docs/diagnostics.md`、2026-10-15）。
+- `[x]` downstream 向けの packaging 方針を決めて docs に書く。全 platform で shade + relocate を推奨し、JarJar / `include()` は
+  minor version を固定する代替として記載（`docs/packaging.md`、2026-10-16）。
+- `[x]` example plugin collection を整備する（`samples/` の spigot / paper / paper-kotlin / velocity / forge / fabric、2026-10-16）。
 - `[x]` Error Prone / NullAway を typed NMS module（27 module、generator 側で修正）と modded / modded-testing の node に
   広げ、modded node に javadoc jar と doclint を追加する（2026-10-15）。
 

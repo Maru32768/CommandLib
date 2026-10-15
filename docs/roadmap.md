@@ -117,23 +117,21 @@
 - `[x]` Forge testing strategy を決め、`forge-testing` を追加する。実サーバーの integration targets（`forge-1.16.5`、`forge-1.20.1`）と、サーバーなしの `forge-testing-<version>`（`CommandTester` / `FakeSender`）を追加済み。
 - `[~]` NeoForge / Fabric / Forge の module 方針を決める。方針案は
   [11. Platform Architecture](#11-platform-architecture) を参照。
-- `[ ]` Velocity の integration target（proxy + backend + bot）と sample を追加する。`ServerArgument` の補完で quote が必要な名前を quote する。
+- `[ ]` Velocity の integration target（proxy + backend + bot）を追加する。`ServerArgument` の補完で quote が必要な名前を quote する。
 - `[x]` Architectury Loom + Stonecutter の PoC として、`forge:1.16.5` と `forge:1.20.1` を単一ソースから build する。
 - `[?]` mod loader 系 module を `minecraft`（MC version 依存・loader 非依存）と `loader/*`（loader 依存）に分割する。Fabric 追加時点では
   loader 依存部分が登録・permission・server 取得・reflection 2 箇所と metadata だけで、分割は不要だった。
-- `[ ]` Fabric の integration target（test mod と server setup の Fabric 対応）と sample を追加する。
+- `[ ]` Fabric の integration target（test mod と server setup の Fabric 対応）を追加し、`samples/fabric` の shade jar を実サーバーで読み込む。
 - `[~]` sender / message abstraction（Adventure と vanilla `Component` の差分吸収）を Velocity 着手前に設計する。
   message 側は `RichText` と platform ごとの変換（`RichTexts.toBungee` / `toAdventure` / `toVanilla`）で Phase 1 を実装済み
   （[`docs/design/rich-text-messages.md`](design/rich-text-messages.md)）。sender 側は未着手。
 - `[~]` public API の binary compatibility check（japicmp 等）を CI に追加する。`:common:japicmp` / `:spigot:japicmp` は
   root `build.gradle.kts` の `apiBaselines` にある JitPack の release と比較できる。基準の 0.17.2 は `net.kunmc.lab`
   package のままなので、0.18.0 の release 後に基準を移し、paper と `*-testing` を加え、CI で実行する。
-- `[ ]` downstream mod 向けに JarJar / `include()` と shade + relocate の推奨方針を決めて docs に書く。
 - `[ ]` capability-based registration に移行する。
 
 ### P6: Ecosystem と tooling
 
-- `[ ]` example plugin collection を整備する。
 - `[ ]` documentation site を作る。
 - `[ ]` CI を整備する。typed NMS module（`nms/*`）は初回 build で BuildTools を version ごとに実行し（1 version あたり
   10 分前後）、paperweight の dev bundle も取得するため、`~/.m2` の Spigot artifact と paperweight cache を CI 間で
