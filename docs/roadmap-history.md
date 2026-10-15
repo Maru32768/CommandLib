@@ -40,6 +40,9 @@
   テストを追加済み。
 - `[x]` 公式資料を基準に argument / vanilla behavior の比較 catalog を作り、未対応と未確認を分けて追跡する
   （`docs/arguments.md`、2026-10-15）。
+- `[x]` registry-backed arguments の入力形式を Paper native の registry key semantics に寄せる。Spigot の `SoundArgument`、
+  `AttributeArgument`、`BiomeArgument`、`EntityTypeArgument` は Bukkit `Registry` による `minecraft:...` 入力・補完、
+  `ScoreboardDisplaySlotArgument` / `ChatColorArgument` は vanilla 名に統一（Paper は `NamedTextColor` を返す、2026-10-15）。
 - `[x]` error taxonomy を公開仕様として整理する（`docs/errors.md`、2026-10-15）。
 - `[x]` CommandAPI migration guide を追加する（`docs/migration/from-commandapi.md`、2026-10-15）。
 

@@ -75,9 +75,9 @@
   Paper）、`EntityTypeArgument`（Spigot / Paper）、`AttributeArgument`（Spigot / Paper）、`AdvancementArgument`（Spigot /
   Paper）、`LootTableArgument`（Spigot / Paper）、`RecipeArgument`（Spigot / Paper）、`ObjectiveArgument`（Spigot /
   Paper）、`ScoreboardDisplaySlotArgument`（Spigot / Paper）、`ChatColorArgument`（Spigot / Paper）を追加済み。
-- `[~]` registry-backed arguments の入力形式を Paper native の registry key semantics に寄せる。Spigot の
-  `SoundArgument`、`AttributeArgument`、`BiomeArgument` は Bukkit `Registry` による `minecraft:...` 入力・補完に移行済み。
-  `EntityTypeArgument` などの残りも Paper の `ArgumentTypes.resource(RegistryKey...)` と同じ public behavior に合わせる。
+- `[ ]` 汎用の registry argument（Paper の `ArgumentTypes.resource(RegistryKey...)` 相当）を Spigot / Paper に追加する。
+- `[ ]` Spigot の `ScoreboardDisplaySlotArgument` / `ChatColorArgument` を vanilla の argument type で送る（現在は string
+  argument のため client 側で検証されない）。
 - `[ ]` `/execute`、command blocks、functions、tags の挙動を検証して docs / tests に落とす。
 - `[ ]` execution result を返せるようにする。`ctx.result(int)` または int を返す executor variant を追加し、
   `/execute store result` / `store success` に反映する。成功 / 失敗の区別も扱う。
