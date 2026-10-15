@@ -1,0 +1,4 @@
+# The documentation site generator (mkdocs.yml). Pinned so that a build gives the same site.
+mkdocs==1.6.1
+mkdocs-material==9.7.7
+pymdown-extensions==12.3

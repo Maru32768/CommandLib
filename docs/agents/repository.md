@@ -55,6 +55,28 @@ Design notes under `docs/design` are written in English. Temporary working
 documents such as `docs/roadmap.md` and `docs/compatibility.md` are written in
 Japanese.
 
+## Documentation Site
+
+`mkdocs.yml` builds the user docs under `docs` into a site with MkDocs Material, pinned in
+`tools/docs-site/requirements.txt`. `README.md` is the home page, and `docs/agents`, `docs/roadmap.md` and
+`docs/roadmap-history.md` are left out. `tools/docs-site/hooks.py` keeps the Markdown readable on GitHub: relative
+links into `docs` work on the site, and links to other repository files become GitHub links, so write links as
+GitHub resolves them. A new user page also needs an entry in the `nav` of `mkdocs.yml`.
+
+Install the generator in a virtual environment outside the repository, then build or preview from the repository
+root:
+
+```bash
+python -m venv ~/.venvs/commandlib-docs
+~/.venvs/commandlib-docs/bin/pip install -r tools/docs-site/requirements.txt   # Scripts\pip on Windows
+~/.venvs/commandlib-docs/bin/mkdocs build --strict   # writes site/, which Git ignores
+~/.venvs/commandlib-docs/bin/mkdocs serve            # previews at http://127.0.0.1:8000
+```
+
+`--strict` fails on links to missing pages or anchors. The site is not published yet: `mkdocs gh-deploy` would push
+it to the `gh-pages` branch, and that waits until publishing and CI are set up. MkDocs stays pinned to 1.x, because
+MkDocs 2.0 drops the plugin and theme system Material depends on.
+
 ## Formatting
 
 Java sources are formatted with Spotless and the Eclipse JDT formatter. The

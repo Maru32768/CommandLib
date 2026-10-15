@@ -1,0 +1,98 @@
+# The documentation site. Build and preview it as docs/agents/repository.md describes.
+site_name: CommandLib
+site_description: A type-safe command API for Spigot, Paper, Velocity, Forge, NeoForge and Fabric.
+repo_url: https://github.com/Maru32768/CommandLib
+repo_name: Maru32768/CommandLib
+edit_uri: ""
+docs_dir: docs
+site_dir: site
+
+theme:
+  name: material
+  features:
+    - navigation.sections
+    - navigation.top
+    - search.suggest
+    - content.code.copy
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+# The home page is README.md, and links that leave the site point at GitHub; see the hook.
+hooks:
+  - tools/docs-site/hooks.py
+
+exclude_docs: |
+  agents/
+  roadmap.md
+  roadmap-history.md
+
+validation:
+  omitted_files: warn
+  absolute_links: warn
+  unrecognized_links: warn
+  anchors: warn
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.highlight
+  - pymdownx.superfences
+
+nav:
+  - Getting started:
+      - Overview: index.md
+      - Packaging and shading: packaging.md
+      - Comparison: comparison.md
+  - Guides:
+      - Suggestions: suggestions.md
+      - Options: options.md
+      - Permissions: permissions.md
+      - Errors: errors.md
+      - Help, usage and error formatting: help.md
+      - Localization: localization.md
+      - Execution: execution.md
+      - Context values: context-values.md
+      - Annotated commands: annotations.md
+      - Kotlin DSL: kotlin.md
+      - Java builder: java-builder.md
+      - Testing: testing.md
+  - Reference:
+      - Arguments: arguments.md
+      - Javadoc: javadoc.md
+      - Diagnostics: diagnostics.md
+      - Troubleshooting: troubleshooting.md
+      - Benchmarks: benchmarks.md
+  - Migration:
+      - From CommandAPI: migration/from-commandapi.md
+      - From Cloud: migration/from-cloud.md
+      - From Lamp: migration/from-lamp.md
+      - From ACF: migration/from-acf.md
+  - Platform notes:
+      - Vanilla integration: vanilla-integration.md
+      - Compatibility (Japanese): compatibility.md
+  - Design:
+      - Module structure: design/module-structure.md
+      - Execution pipeline: design/execution-pipeline.md
+      - Annotation API: design/annotation-api.md
+      - Argument child commands: design/argument-child-command.md
+      - Command options: design/command-options.md
+      - Optional and variadic arguments: design/optional-variadic-arguments.md
+      - Rich text messages: design/rich-text-messages.md
+      - Command registration audit: design/command-registration-audit.md
+      - Typed NMS versioning: design/typed-nms-versioning.md
+      - Forge version support: design/forge-version-support.md
+      - Testing strategy: design/testing-strategy.md
+      - Testing module structure: design/testing-module-structure.md

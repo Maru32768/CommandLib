@@ -102,6 +102,7 @@ argument-by-argument comparison and [compatibility](docs/compatibility.md) for t
 - [Documentation exports and diagnostics](docs/diagnostics.md): Markdown / JSON of the commands and permission nodes,
   and a runtime report of the platform and the registrations.
 - [Troubleshooting](docs/troubleshooting.md).
+- [Javadoc](docs/javadoc.md): where to browse the Javadoc of each module.
 - [Comparison](docs/comparison.md): seven use cases in CommandLib, CommandAPI, Cloud, Lamp, ACF and Paper, with the
   CommandLib side compiled and tested in [`examples`](examples).
 - [Migrating from CommandAPI](docs/migration/from-commandapi.md).
