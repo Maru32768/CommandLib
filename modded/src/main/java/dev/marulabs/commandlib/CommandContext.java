@@ -12,14 +12,13 @@ import net.minecraft.network.chat.MutableComponent;
 //? if <1.19
 /*import net.minecraft.network.chat.TextComponent;*/
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -58,47 +57,13 @@ public final class CommandContext extends CommonCommandContext<CommandSourceStac
     @Override
     @NotNull
     public String getLanguage() {
-        String language = findLanguage(getSender());
-        if (language == null) {
-            language = findLanguage(getEntity());
-        }
+        // Forge and NeoForge add getLanguage to ServerPlayer; a mock or a player that sent no settings returns null.
+        String language = getEntity() instanceof ServerPlayer ? ((ServerPlayer) getEntity()).getLanguage() : null;
         if (language == null || language.isEmpty()) {
             return super.getLanguage();
         }
 
         return language.toLowerCase(Locale.ROOT);
-    }
-
-    @Nullable
-    private static String findLanguage(@Nullable Object source) {
-        if (source == null) {
-            return null;
-        }
-
-        for (String methodName : new String[]{"getLanguage", "getLocale"}) {
-            Object value;
-            try {
-                Method method = source.getClass()
-                                      .getMethod(methodName);
-                value = method.invoke(source);
-            } catch (ReflectiveOperationException e) {
-                // The source has no such accessor, so try the next one.
-                value = null;
-            }
-            if (value != null) {
-                return value.toString();
-            }
-        }
-
-        try {
-            Field field = source.getClass()
-                                .getDeclaredField("language");
-            field.setAccessible(true);
-            Object value = field.get(source);
-            return value == null ? null : value.toString();
-        } catch (ReflectiveOperationException ignored) {
-            return null;
-        }
     }
 
     @Override
