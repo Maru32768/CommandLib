@@ -8,6 +8,7 @@ import dev.marulabs.commandlib.util.UncaughtExceptionHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.Duration;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -35,6 +36,8 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
     private Prerequisite<C> prerequisite = ctx -> {
     };
     private Predicate<C> preprocess = ctx -> true;
+    private @Nullable Confirmation confirmation = null;
+    private @Nullable Cooldown cooldown = null;
     // Null until execute is called; the command then runs its help action.
     private @Nullable CommandExecutor<C> executor;
     private final List<UncaughtExceptionHandler<C>> uncaughtExceptionHandlers = new ArrayList<>();
@@ -457,6 +460,40 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
         this.preprocess = this.preprocess.and(Objects.requireNonNull(preprocess));
     }
 
+    /**
+     * Asks the sender to run the command again within 10 seconds before it executes. See {@link Confirmation}.
+     */
+    public final void confirm() {
+        confirm(Confirmation.within(Duration.ofSeconds(10)));
+    }
+
+    /**
+     * Asks the sender to confirm before the command executes, as {@code confirmation} describes. Like a preprocess,
+     * it applies to the argument branches and, unless they call {@link #disableParentPreprocess()}, to the child
+     * commands that set none of their own. It replaces the confirmation set before.
+     */
+    public final void confirm(@NotNull Confirmation confirmation) {
+        this.confirmation = Objects.requireNonNull(confirmation);
+    }
+
+    /**
+     * Keeps a sender from executing the command again for {@code duration}. See {@link Cooldown}.
+     */
+    public final void cooldown(@NotNull Duration duration) {
+        cooldown(Cooldown.of(duration));
+    }
+
+    /**
+     * Keeps a sender from executing the command again until {@code cooldown} ends. Like a preprocess, it applies to the
+     * argument branches and, unless they call {@link #disableParentPreprocess()}, to the child commands that set none
+     * of their own, which then share it. It replaces the cooldown set before.
+     * <p>
+     * The cooldown is checked before the confirmation and the preprocess, and starts only when they all pass.
+     */
+    public final void cooldown(@NotNull Cooldown cooldown) {
+        this.cooldown = Objects.requireNonNull(cooldown);
+    }
+
     public final void execute(@NotNull CommandExecutor<C> executor) {
         this.executor = Objects.requireNonNull(executor);
     }
@@ -498,12 +535,49 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
     }
 
     final Predicate<C> preprocess() {
+        Predicate<C> preprocess = inheritedPreprocess();
+        Cooldown cooldown = effectiveCooldown();
+        Confirmation confirmation = effectiveConfirmation();
+        return ctx -> {
+            if (cooldown != null && !cooldown.check(ctx)) {
+                return false;
+            }
+            if (confirmation != null && !confirmation.confirm(ctx)) {
+                return false;
+            }
+            if (!preprocess.test(ctx)) {
+                return false;
+            }
+            if (cooldown != null) {
+                cooldown.start(ctx);
+            }
+            return true;
+        };
+    }
+
+    final Predicate<C> inheritedPreprocess() {
         if (!inheritParentPreprocess || parent == null) {
             return preprocess;
         }
 
-        return parent.preprocess()
+        return parent.inheritedPreprocess()
                      .and(preprocess);
+    }
+
+    @Nullable
+    final Cooldown effectiveCooldown() {
+        if (cooldown != null || !inheritParentPreprocess || parent == null) {
+            return cooldown;
+        }
+        return parent.effectiveCooldown();
+    }
+
+    @Nullable
+    final Confirmation effectiveConfirmation() {
+        if (confirmation != null || !inheritParentPreprocess || parent == null) {
+            return confirmation;
+        }
+        return parent.effectiveConfirmation();
     }
 
     final List<Arguments<C>> argumentsList() {

@@ -192,6 +192,23 @@ class MyPlugin extends JavaPlugin {
 }
 ```
 
+Use `confirm()` for destructive commands and `cooldown(Duration)` to throttle
+players. Both run after prerequisites, apply to children like a preprocess, and
+take a `Confirmation` / `Cooldown` to change the timeout, the messages, the clock
+(for tests), or a cooldown bypass permission:
+
+```java
+class ResetCommand extends Command {
+    ResetCommand() {
+        super("reset");
+        confirm();
+        cooldown(Cooldown.of(Duration.ofMinutes(5))
+                         .bypassPermission("myplugin.cooldown.bypass"));
+        execute(ctx -> ctx.sendSuccess("Reset."));
+    }
+}
+```
+
 Argument chains can also have child commands. Prefer this only for vanilla-like
 or compatibility syntax where the target comes before the action.
 

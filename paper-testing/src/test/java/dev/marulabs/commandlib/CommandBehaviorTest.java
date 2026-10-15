@@ -4,6 +4,11 @@ import dev.marulabs.commandlib.argument.StringArgument;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.ZoneOffset;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 class CommandBehaviorTest {
@@ -70,5 +75,27 @@ class CommandBehaviorTest {
 
         assertThat(console.getSentMessageTexts()).containsExactly("console");
         assertThat(player.getSentMessageTexts()).containsExactly("This command can only be executed from the console.");
+    }
+
+    @Test
+    void confirmAndCooldownApplyToTheSender() {
+        Clock clock = Clock.fixed(Instant.EPOCH, ZoneOffset.UTC);
+        Command command = new Command("reset") {{
+            confirm(Confirmation.within(Duration.ofSeconds(10))
+                                .clock(clock));
+            cooldown(Cooldown.of(Duration.ofSeconds(30))
+                             .clock(clock));
+            execute(ctx -> ctx.sendMessage("reset"));
+        }};
+        CommandTester tester = new CommandTester(command, "test.command");
+        FakeSender player = FakeSender.player("Steve");
+
+        tester.execute("reset", player);
+        tester.execute("reset", player);
+        tester.execute("reset", player);
+
+        assertThat(player.getSentMessageTexts()).containsExactly("Run the command again within 10s to confirm. [Confirm]",
+                                                                 "reset",
+                                                                 "You must wait 30s before using this command again.");
     }
 }

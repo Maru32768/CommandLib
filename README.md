@@ -740,6 +740,51 @@ public final class CountCommand extends Command {
 returns the result, and 0 for a failure, whose messages it sends to the `FakeSender`. See
 [errors](docs/errors.md#results-and-failures) for each failure.
 
+## Confirmation and Cooldown
+
+`confirm()` makes a command ask before it runs, and `cooldown(Duration)` keeps a sender from running it again too soon:
+
+```java
+public final class ResetCommand extends Command {
+    public ResetCommand() {
+        super("reset");
+
+        // The first /reset only asks; running exactly the same input again within 10 seconds runs it.
+        confirm();
+        // Players wait 5 minutes between two resets.
+        cooldown(Duration.ofMinutes(5));
+        execute(ctx -> ctx.sendSuccess("Reset."));
+    }
+}
+```
+
+The first execution sends "Run the command again within 10s to confirm. [Confirm]", where `[Confirm]` runs the same
+command when clicked. Each sender has one pending confirmation: another input, or the same one after the timeout, asks
+again. A sender on cooldown gets "You must wait 4m 59s before using this command again." Both are checked after the
+permissions, the arguments and the prerequisites, in this order: the cooldown, the confirmation, the preprocess. The
+cooldown starts only when all of them pass, so a sender on cooldown is not asked to confirm and an unconfirmed
+execution does not start the cooldown. Both messages make the command fail like an error, see
+[errors](docs/errors.md#cooldown-and-confirmation).
+
+`Confirmation` and `Cooldown` change the timeout, the messages, the clock, and the permission that skips the cooldown:
+
+```java
+confirm(Confirmation.within(Duration.ofSeconds(30))
+                    .message((ctx, command) -> ctx.sendWarn("Type " + command + " again to delete everything.")));
+cooldown(Cooldown.of(Duration.ofSeconds(30))
+                 .bypassPermission("myplugin.cooldown.bypass")
+                 .message((ctx, remaining) -> ctx.sendFailure("Wait " + remaining.toSeconds() + " more seconds.")));
+```
+
+- The cooldown is kept per unique id, so it applies to players and entities. The console, remote consoles and command
+  blocks have no unique id and are never on cooldown. Confirmations are kept per unique id too, and per sender type and
+  name for senders without one, so the console has to confirm as well.
+- Like a preprocess, both apply to the command's argument branches and to child commands that set none of their own,
+  unless the child calls `disableParentPreprocess()`. Children that inherit a cooldown share it, as do commands given
+  the same `Cooldown` instance.
+- The state lives in memory and is lost when the server restarts.
+- In tests, pass a `Clock` with `clock(...)` instead of waiting for the time to pass.
+
 ## Server Help
 
 The server's `/help` lists each Bukkit command with a short text under the plugin's index, and `/help <command>` shows

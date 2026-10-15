@@ -25,7 +25,7 @@ The runner works in this order and stops at the first failure:
 | 3 | For each argument branch on the path: branch permission, then each argument's parse → `validator` → `transformer`, or the default of an omitted optional argument | The permission message, the argument's `ArgumentParseException`, or the `CommandPrerequisiteException` of an `optional(extractor)` default |
 | 4 | Prerequisites (`addPrerequisite`, `require(...)`, `requirePlayer()`, `requireConsole()`) | The `CommandPrerequisiteException` message |
 | 5 | No executor on this node: the generated help is sent instead | (help text, not an error) |
-| 6 | Preprocesses (`addPreprocess`) | The messages the preprocess sent before returning `false` |
+| 6 | `cooldown(...)`, then `confirm(...)`, then the preprocesses (`addPreprocess`) | The cooldown message, the confirmation request, or the messages the preprocess sent before returning `false` |
 | 7 | The executor | A `CommandPrerequisiteException` message, or the generic unexpected-error message |
 
 ## Results and failures
@@ -205,6 +205,15 @@ checked exceptions. Calling `ctx.sendFailure(...)` and returning sends the messa
 `addPreprocess(Predicate)` returning `false` makes the command fail with the messages the preprocess sent before
 returning, and stops it without a message when it sent none. A preprocess that returns `true` has its messages sent
 when it returns. Preprocesses run only when the node has an executor; the generated help skips them.
+
+### Cooldown and confirmation
+
+`cooldown(...)` and `confirm(...)` run as the first part of the preprocess step, so they too run only when the node has
+an executor. A sender on cooldown gets `You must wait 1m 30s before using this command again.`, and a first execution
+of a command with a confirmation gets `Run the command again within 10s to confirm. [Confirm]` in yellow, where
+`[Confirm]` runs the command again when clicked. Both make the command [fail](#results-and-failures), so a function or
+each target of a forked `/execute as @a ... run` does not get them. `Cooldown#message` and `Confirmation#message`
+replace them. The cooldown starts only when the confirmation and the preprocesses pass. See the README for the API.
 
 ### Option errors
 

@@ -13,6 +13,10 @@ import org.bukkit.entity.Player;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.*;
@@ -111,6 +115,26 @@ class CommandTesterTest {
                 FakeSender sender = FakeSender.player("Steve");
                 tester.execute("hello", sender);
                 assertThat(sender.getSentMessageTexts()).containsExactly("Hello!");
+            }
+        }
+
+        @Test
+        void confirm_and_cooldown_apply_to_the_sender() {
+            Clock clock = Clock.fixed(Instant.EPOCH, ZoneOffset.UTC);
+            try (CommandTester tester = new CommandTester(new Command("reset") {{
+                confirm(Confirmation.within(Duration.ofSeconds(10))
+                                    .clock(clock));
+                cooldown(Cooldown.of(Duration.ofSeconds(30))
+                                 .clock(clock));
+                execute(ctx -> ctx.sendMessage("reset"));
+            }}, "test.command")) {
+                FakeSender sender = FakeSender.player("Steve");
+                tester.execute("reset", sender);
+                tester.execute("reset", sender);
+                tester.execute("reset", sender);
+                assertThat(sender.getSentMessageTexts()).containsExactly("Run the command again within 10s to confirm. [Confirm]",
+                                                                         "reset",
+                                                                         "You must wait 30s before using this command again.");
             }
         }
 
