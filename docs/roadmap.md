@@ -18,7 +18,7 @@
 | 領域                                  |    状況 | 現状                                                                                                                                      | 足りないもの                                                                     |
 |-------------------------------------|------:|-----------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------|
 | Fluent / tree API                   | `[x]` | `Command`、`argument(...)`、`addChildren(...)` による command tree 定義がある。                                                                    | API stability policy と migration guide。                                    |
-| 型安全な argument callback              | `[x]` | `Unary` から `Hept` までの typed branch callback と、任意個の引数を `argument(a, b, ..., i)` / `argument(List)` で受けて `ctx.getArgument(arg)` で型付きに読む形がある。 | Kotlin DSL の 8 引数以上の overload。 |
+| 型安全な argument callback              | `[x]` | `Unary` から `Hept` までの typed branch callback と、任意個の引数を `argument(a, b, ..., i)` / `argument(List)` で受けて `ctx.getArgument(arg)` で型付きに読む形がある。 | — |
 | Variadic / optional arguments       | `[x]` | 末尾の `optional(default)` / `optional(Extractor)` と `variadic([max])`（`List<T>`）がある。配置違反は登録時に `IllegalStateException`（[`docs/design/optional-variadic-arguments.md`](design/optional-variadic-arguments.md)）。 | 上限なしの variadic、`Optional<T>` 形式、実サーバーでの検証。 |
 | Execution result                    | `[x]` | `ctx.setResult(int)` が `/execute store result` に、失敗（例外・権限・prerequisite 等）が `store success 0` に反映される。spigot-1.16.5 / paper-26.3 の integration test あり。 | Forge / NeoForge の実サーバー検証。 |
 | Async execution                     | `[x]` | `executeAsync(...)`（全 typed branch）と `ctx.supplyAsync` / `runAsync`、platform 別の `CommandScheduler` で sync thread へ復帰する（[`docs/execution.md`](execution.md)）。 | 実サーバーでの scheduler 検証（Bukkit / Forge / Folia）。 |
@@ -53,17 +53,17 @@
 | Sender abstraction                  | `[x]` | `provide(Type, ctx -> ...)` で sender を plugin の型に変換し、`ctx.get(Type)` で cast なしに読める。middleware は `ctx.put` で値を足せる（[`docs/context-values.md`](context-values.md)）。 | platform 単位の provider 登録。 |
 | Dependency injection                | `[x]` | context value の provider と、annotation API の `registerDependency` / `@Dependency` field がある。DI framework 非依存。 | platform 単位の provider 登録、`require(Class)` の短縮形。 |
 | Annotation API                      | `[~]` | `AnnotationParser` と `@Command` / `@Subcommand` / `@Permission` / `@Optional` / `@Default` / `@Range` / `@Suggest` / `@Flag` / `@Option` / `@Confirm` / `@Cooldown` 等、custom annotation の拡張点が Spigot / Paper / Velocity / modded にある。fluent と同じ help / permission / 実行結果を snapshot で確認（[`docs/annotations.md`](annotations.md)）。 | middleware / option 依存（`requires`・排他）/ argument-first child の annotation。 |
-| Kotlin DSL                          | `[~]` | `common-kotlin` + `spigot-kotlin` / `paper-kotlin` / `velocity-kotlin` に型推論の効く builder、delegated option、`executeSuspend`、suspend suggestions がある（[`docs/kotlin.md`](kotlin.md)）。 | Forge / NeoForge 版、Kotlin 関数の default 引数から command を作る形、suspend middleware。`common-kotlin` は package-private の `CurrentCommandContext` を同じ package から読むため `common` と同じ class loader が必要。 |
+| Kotlin DSL                          | `[~]` | `common-kotlin` + `spigot-kotlin` / `paper-kotlin` / `velocity-kotlin` に型推論の効く builder、delegated option、`executeSuspend`、suspend suggestions がある（[`docs/kotlin.md`](kotlin.md)）。 | Forge / NeoForge 版、Kotlin 関数の default 引数から command を作る形。`common-kotlin` は package-private の `CurrentCommandContext` を同じ package から読むため `common` と同じ class loader が必要。 |
 | Java builder API                    | `[x]` | `Command.builder(name)`（common の `CommandBuilder`）が全 platform にあり、fluent と同じ command tree / permission / 結果を snapshot で確認（[`docs/java-builder.md`](java-builder.md)）。 | — |
 | Localization / captions             | `[~]` | `Caption` / `Captions` で組み込み message を key 化し、sender の locale で解決する（en / ja 同梱、override、ResourceBundle、`CaptionSender`。[`docs/localization.md`](localization.md)）。 | help / usage formatter API、diagnostics / `CommandDocs` の文言、Fabric node での locale 取得の確認。 |
-| Public testing framework            | `[~]` | `common-testing` / `spigot-testing` / `paper-testing` / loader 別 `modded-testing` がある。`CommandTester`（`suggest()`、int を返す `execute`、`assertCommandTreeMatchesSnapshot`）、`FakeSender`、NMS mock、JUnit 5 の `CommandLibExtension` + `@Sender`（velocity-testing 以外）と downstream guide（[`docs/testing.md`](testing.md)）がある。 | velocity-testing の JUnit extension、testing artifact 間の共通化、gamerule / silent source の模擬。 |
+| Public testing framework            | `[~]` | `common-testing` / `spigot-testing` / `paper-testing` / loader 別 `modded-testing` がある。`CommandTester`（`suggest()`、int を返す `execute`、`assertCommandTreeMatchesSnapshot`）、`FakeSender`、NMS mock、JUnit 5 の `CommandLibExtension` + `@Sender`（全 testing artifact）と downstream guide（[`docs/testing.md`](testing.md)）がある。 | testing artifact 間の共通化、gamerule / silent source の模擬。 |
 | Adventure / MiniMessage             | `[~]` | platform 非依存の rich text 値型 `RichText`（色、装飾、hover text、click、translatable 引数）を全 platform で送れる（Phase 1 完了）。Paper / modded は native component の `sendSuccess/Warn/Failure` もある。 | rich help、rich suggestion tooltip の統一、MiniMessage。設計: [`docs/design/rich-text-messages.md`](design/rich-text-messages.md)。 |
 | Multi-version integration tests     | `[~]` | `integration-test` aggregator と Spigot（1.16.5〜26.3 の全 release）/ Paper / Mohist / Forge / NeoForge fixtures がある。                                                             | CI matrix、`IntegrationTarget` への platform フィールド追加、result docs、test kit 化。  |
 | NMS Reflection test strategy        | `[~]` | `CommandTester` が `Mockito.mockStatic` で `NMSClassRegistry` をスタブし、軽量な Mock 実装クラス方式で NMS なしテストを実現している。                 | Builder / mock 差し込みの保証拡充、新引数の Mock + Test ルールの継続適用。              |
 | Documentation                       | `[~]` | README（Why CommandLib、比較表）、`docs/compatibility.md`、`arguments` / `errors` / `options` / `suggestions` / `permissions` / `testing` / `troubleshooting` と design docs がある。 | compatibility の結果公開・更新、documentation site。 |
 | Migration guides                    | `[x]` | CommandAPI、Cloud、Lamp、ACF からの移行 guide が `docs/migration/` にある。 | 未実装機能（annotation、Kotlin、DI、locale 等）の実装に合わせた更新。 |
 | Runtime diagnostics                 | `[x]` | `CommandLib.diagnostics()` と opt-in の `CommandLibDiagnosticsCommand` が Spigot / Paper / Forge / NeoForge にある（[`docs/diagnostics.md`](diagnostics.md)）。 | 実サーバーでの検証、plugin 別 filter。 |
-| Generated docs / exports            | `[x]` | `CommandDocs` が command docs と permission tree を Markdown / JSON で出力する。 | 排他 option group と option の `requires` の出力、sender 依存の description。 |
+| Generated docs / exports            | `[x]` | `CommandDocs` が command docs と permission tree を Markdown / JSON で出力する。 | 排他 option group と option の `requires` の出力、sender 依存の description（examples は出力済み）。 |
 
 ## 優先度別バックログ
 
@@ -100,7 +100,8 @@
 - `[ ]` 比較で劣った点を埋める: positional argument の後の option、option 単位の permission、primitive / string 以外の value option、
   annotation での argument-first tree、CommandLib 組み込み message の他言語 bundle。
 - `[ ]` middleware / option の `requires`・排他 / argument-first child 用の annotation を追加する。
-- `[ ]` Kotlin DSL を Forge / NeoForge に広げ、suspend middleware と Kotlin 関数の default 引数からの command 生成を追加する。
+- `[ ]` Kotlin DSL を Forge / NeoForge に広げ（module 化には Stonecutter の Loom node 5 つ分が必要）、Kotlin 関数の default 引数から
+  command を作る形を追加する。
 - `[~]` options の継承と配置拡張（subcommand への継承、positional argument の後の option、固定 arity の multi-value）を実装する。
   repeatable / count / aliases / required / 排他は実装済み。
 - `[ ]` rich help（hover / click の usage line）と MiniMessage を追加する。
