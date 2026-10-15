@@ -90,6 +90,11 @@ public final class CommandLib implements Listener {
     }
 
     private CommandLib(Plugin plugin, Collection<? extends Command> commands, String permissionPrefix) {
+        if (isFolia()) {
+            // The Bukkit scheduler throws on Folia, and the command map and NMS injection assume one main thread.
+            throw new UnsupportedOperationException("The spigot artifact of CommandLib does not support Folia; use the "
+                    + "paper artifact");
+        }
         this.plugin = Objects.requireNonNull(plugin);
         this.commands = Objects.requireNonNull(commands);
         this.permissionPrefix = Objects.requireNonNull(permissionPrefix);
@@ -116,6 +121,17 @@ public final class CommandLib implements Listener {
               .registerEvents(this, plugin);
         registerResourcesReloadListener();
         INSTANCES.add(this);
+    }
+
+    private static boolean isFolia() {
+        try {
+            Class.forName("io.papermc.paper.threadedregions.RegionizedServer",
+                          false,
+                          CommandLib.class.getClassLoader());
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
     }
 
     /**
