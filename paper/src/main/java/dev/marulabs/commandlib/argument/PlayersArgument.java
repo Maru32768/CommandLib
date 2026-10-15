@@ -25,7 +25,8 @@ public class PlayersArgument extends Argument<List<Player>, PlayersArgument> {
     protected List<Player> parseImpl(CommandContext ctx) throws ArgumentParseException, CommandSyntaxException {
         PlayerSelectorArgumentResolver resolver = ctx.getHandle()
                                                      .getArgument(name(), PlayerSelectorArgumentResolver.class);
-        return resolver.resolve(ctx.getHandle()
-                                   .getSource());
+        return SelectorResults.requireAny(resolver.resolve(ctx.getHandle()
+                                                              .getSource()),
+                                          SelectorResults.NO_PLAYER);
     }
 }

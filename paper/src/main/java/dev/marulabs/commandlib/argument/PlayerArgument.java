@@ -8,7 +8,6 @@ import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
 import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver;
 import org.bukkit.entity.Player;
 
-import java.util.List;
 
 @SuppressWarnings("UnstableApiUsage")
 public class PlayerArgument extends Argument<Player, PlayerArgument> {
@@ -25,11 +24,10 @@ public class PlayerArgument extends Argument<Player, PlayerArgument> {
     protected Player parseImpl(CommandContext ctx) throws ArgumentParseException, CommandSyntaxException {
         PlayerSelectorArgumentResolver resolver = ctx.getHandle()
                                                      .getArgument(name(), PlayerSelectorArgumentResolver.class);
-        List<Player> players = resolver.resolve(ctx.getHandle()
-                                                   .getSource());
-        if (players.isEmpty()) {
-            throw new ArgumentParseException(x -> x.sendFailure("no player found"));
-        }
-        return players.get(0);
+        // Paper's player() resolver throws vanilla's error itself; this covers a resolver that returns no player.
+        return SelectorResults.requireAny(resolver.resolve(ctx.getHandle()
+                                                              .getSource()),
+                                          SelectorResults.NO_PLAYER)
+                              .get(0);
     }
 }

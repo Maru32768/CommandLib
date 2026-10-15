@@ -1,10 +1,17 @@
 package dev.marulabs.commandlib.argument;
 
+import com.mojang.brigadier.LiteralMessage;
+import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestion;
+import dev.marulabs.commandlib.Argument;
 import dev.marulabs.commandlib.Command;
+import dev.marulabs.commandlib.CommandContext;
 import dev.marulabs.commandlib.CommandTester;
 import dev.marulabs.commandlib.FakeSender;
+import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.scoreboard.Scoreboard;
@@ -15,6 +22,7 @@ import org.mockito.Mockito;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -118,5 +126,86 @@ class ArgumentFailureTest {
         }
 
         assertThat(sender.getSentMessageTexts()).containsExactly("@p[limit=1]|tail");
+    }
+
+    @Test
+    void selector_matching_nothing_sends_vanilla_not_found_error() {
+        FakeSender sender = FakeSender.player("Alice");
+        AtomicInteger executed = new AtomicInteger();
+
+        try (CommandTester tester = CommandTester.builder()
+                                                 .command(() -> new Command("player") {{
+                                                     argument(new PlayerArgument("p")).execute((p,
+                                                                                                ctx) -> executed.incrementAndGet());
+                                                 }})
+                                                 .command(() -> new Command("players") {{
+                                                     argument(new PlayersArgument("p")).execute((p,
+                                                                                                 ctx) -> executed.incrementAndGet());
+                                                 }})
+                                                 .command(() -> new Command("entity") {{
+                                                     argument(new EntityArgument("e")).execute((e,
+                                                                                                ctx) -> executed.incrementAndGet());
+                                                 }})
+                                                 .command(() -> new Command("entities") {{
+                                                     argument(new EntitiesArgument("e")).execute((e,
+                                                                                                  ctx) -> executed.incrementAndGet());
+                                                 }})
+                                                 .permissionPrefix("test.command")
+                                                 .build()) {
+            assertThat(tester.execute("player Nobody", sender)).isZero();
+            assertThat(tester.execute("players @a", sender)).isZero();
+            assertThat(tester.execute("entity Nobody", sender)).isZero();
+            assertThat(tester.execute("entities @a", sender)).isZero();
+        }
+
+        assertThat(executed).hasValue(0);
+        assertThat(sender.getSentMessageTexts()).containsExactly("argument.entity.notfound.player",
+                                                                 "argument.entity.notfound.player",
+                                                                 "argument.entity.notfound.entity",
+                                                                 "argument.entity.notfound.entity");
+        assertThat(sender.getSentMessages()).allSatisfy(message -> {
+            assertThat(message).isInstanceOf(TranslatableComponent.class);
+            assertThat(message.color()).isEqualTo(NamedTextColor.RED);
+        });
+    }
+
+    @Test
+    void syntax_exception_while_resolving_sends_its_message_and_context() {
+        FakeSender sender = FakeSender.player("Alice");
+
+        try (CommandTester tester = new CommandTester(() -> new Command("check") {{
+            argument(new ResolvingArgument("value")).execute((value, ctx) -> ctx.sendMessage("unreachable"));
+        }}, "test.command")) {
+            tester.execute("check bad", sender);
+        }
+
+        assertThat(sender.getSentMessageTexts()).containsExactly("Bad value", "check bad" + "command.context.here");
+        assertThat(sender.getSentMessages()
+                         .get(0)
+                         .color()).isEqualTo(NamedTextColor.RED);
+    }
+
+    /**
+     * Throws a Brigadier exception carrying the input while resolving, as a custom argument type may.
+     */
+    static final class ResolvingArgument extends Argument<String, ResolvingArgument> {
+        ResolvingArgument(String name) {
+            super(name, StringArgumentType.word());
+        }
+
+        @Override
+        public String cast(Object parsedArgument) {
+            return (String) parsedArgument;
+        }
+
+        @Override
+        protected String parseImpl(CommandContext ctx) throws CommandSyntaxException {
+            StringReader reader = new StringReader(ctx.getHandle()
+                                                      .getInput());
+            reader.setCursor(reader.getString()
+                                   .indexOf(' ')
+                    + 1);
+            throw new SimpleCommandExceptionType(new LiteralMessage("Bad value")).createWithContext(reader);
+        }
     }
 }

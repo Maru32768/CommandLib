@@ -1,8 +1,11 @@
 package dev.marulabs.commandlib;
 
+import com.mojang.brigadier.LiteralMessage;
+import com.mojang.brigadier.Message;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.marulabs.commandlib.exception.ArgumentParseException;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
+import io.papermc.paper.command.brigadier.MessageComponentSerializer;
 import net.kyori.adventure.text.Component;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -29,8 +32,12 @@ public final class PlatformAdapterImpl implements PlatformAdapter<CommandSourceS
 
     @Override
     public ArgumentParseException convertCommandSyntaxException(CommandSyntaxException e) {
-        String message = e.getMessage();
-        return new ArgumentParseException(ctx -> ctx.sendFailure(message != null ? message : e.getClass()
-                                                                                              .getSimpleName()));
+        Message message = e.getRawMessage();
+        // A vanilla message is a Minecraft component, which only the server's serializer converts. A plain Brigadier
+        // message, as custom argument types throw, needs no server, so it also converts in tests.
+        Component component = message instanceof LiteralMessage ? Component.text(message.getString())
+                : MessageComponentSerializer.message()
+                                            .deserialize(message);
+        return new ArgumentParseException(ctx -> ((CommandContext) ctx).sendFailure(component));
     }
 }

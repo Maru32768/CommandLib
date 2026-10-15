@@ -116,22 +116,24 @@ If the argument has an `additionalParser(...)`, it gets the raw input first; the
 ### Argument value rejected by Minecraft while resolving (`CommandSyntaxException` in `parseImpl`)
 
 Some vanilla argument types parse the token during Brigadier parsing but only resolve it when the command runs, and
-throw a `CommandSyntaxException` then. Examples: a player name or selector that matches nobody (`PlayerArgument`,
-`EntityArgument` on Spigot and Forge / NeoForge), an unknown team for Spigot's or Forge's `TeamArgument` without a custom
-scoreboard, an unknown dimension for Spigot's `WorldArgument`.
+throw a `CommandSyntaxException` then. Examples: a player name or selector that matches nobody (the four selector
+arguments), an unknown team for Spigot's or Forge's `TeamArgument` without a custom scoreboard, an unknown dimension for
+Spigot's `WorldArgument`.
 
-CommandLib converts the exception into an `ArgumentParseException` through the platform adapter:
+CommandLib reports the exception as vanilla reports a command error, the same on every platform: the exception's
+message in red, kept as the translatable component vanilla made so that the client translates it (`No player was
+found` is `argument.entity.notfound.player`), then, when the exception carries its input and cursor, the context line
+`...<input before the cursor><rest of the input underlined><--[HERE]`. The exceptions vanilla throws while resolving
+carry no input, so they show only the message, as for a vanilla command. A plain Brigadier message (`LiteralMessage`,
+from a custom argument type) is sent as its text. Each platform adapter converts the message: Spigot to a Bungee
+`TranslatableComponent`, Paper to an Adventure component through `MessageComponentSerializer`, Forge / NeoForge keep
+the vanilla component.
 
-| Platform | Sender sees |
-|---|---|
-| Spigot | The vanilla message as a Bungee `TranslatableComponent` (translated by the client), in red, without the context line. A message that is not translatable (from a custom argument type) is sent as its plain text. |
-| Paper | `CommandSyntaxException#getMessage()` as plain red text: the message rendered on the server (English), followed by ` at position N: ...<--[HERE]` when the exception carries the input |
-| Forge / NeoForge | The vanilla component, in red (`sendFailure`). A plain Brigadier message is sent as its text. |
-
-Paper resolves player and entity selectors itself. CommandLib's `PlayerArgument` and `EntityArgument` send
-`no player found` / `no entity found` for an empty result there; for `PlayersArgument` and `EntitiesArgument` on Paper
-the empty-result behavior has not been checked (see [arguments](arguments.md#entities-and-players)). On Spigot and
-Forge / NeoForge the vanilla resolver reports `No player was found` / `No entity was found` for all four.
+A player or entity selector that matches nothing fails with vanilla's `No player was found` / `No entity was found` on
+every platform, for `PlayerArgument`, `PlayersArgument`, `EntityArgument`, and `EntitiesArgument`, as vanilla's
+`EntityArgument.getPlayers` / `getEntities` reject an empty result. Spigot and Forge / NeoForge read the selector with
+those methods. On Paper, `player()` / `entity()` throw the vanilla error themselves, while `players()` / `entities()`
+return an empty list, so CommandLib's `PlayersArgument` / `EntitiesArgument` reject it with the same translatable error.
 
 ### Validator rejected the value (`ArgumentValidationException`)
 

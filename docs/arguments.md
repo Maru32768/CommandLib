@@ -69,9 +69,9 @@ Notes:
 | CommandLib | Result (Spigot, Paper / Forge, NeoForge) | Input | CommandAPI | Paper | Spigot | Paper | Forge / NeoForge |
 |---|---|---|---|---|---|---|---|
 | `PlayerArgument` | `Player` / `ServerPlayer` | vanilla single-player selector: name, UUID, `@p`, `@s`, `@r`, `@a[limit=1]` | `EntitySelectorArgument.OnePlayer` | `player()` | equivalent | equivalent | equivalent |
-| `PlayersArgument` | `List<Player>` / `List<ServerPlayer>` | vanilla player selector | `EntitySelectorArgument.ManyPlayers` | `players()` | equivalent | unverified | equivalent |
+| `PlayersArgument` | `List<Player>` / `List<ServerPlayer>` | vanilla player selector | `EntitySelectorArgument.ManyPlayers` | `players()` | equivalent | equivalent | equivalent |
 | `EntityArgument` | `Entity` | vanilla single-entity selector | `EntitySelectorArgument.OneEntity` | `entity()` | equivalent | equivalent | equivalent |
-| `EntitiesArgument` | `List<Entity>` | vanilla entity selector | `EntitySelectorArgument.ManyEntities` | `entities()` | equivalent | unverified | equivalent |
+| `EntitiesArgument` | `List<Entity>` | vanilla entity selector | `EntitySelectorArgument.ManyEntities` | `entities()` | equivalent | equivalent | equivalent |
 | `OfflinePlayerArgument` (Bukkit) | `OfflinePlayer` | a name of a player who has played before; suggests known names | — | — | — | — | — |
 | `OfflinePlayersArgument` (Bukkit) | `List<OfflinePlayer>` | a known name, `@a` (all known players), `@r` (one random known player) | `PlayerProfileArgument` | `playerProfiles()` | partial | partial | — |
 | `GameProfileArgument` (Forge / NeoForge) | `GameProfile` | the name of an online player, case-insensitive; suggests online players | `PlayerProfileArgument` | `playerProfiles()` | — | — | partial |
@@ -83,12 +83,11 @@ Notes:
 
 - Selectors are parsed and resolved by Minecraft on Spigot and Forge / NeoForge, and by Paper's resolvers on Paper.
   Selector permissions (operator level 2 for `@e` etc.) are vanilla's.
-- When a selector or name matches nothing, Spigot and Forge / NeoForge report vanilla's `No player was found` /
-  `No entity was found` for all four selector arguments. On Paper, `PlayerArgument` / `EntityArgument` check the
-  resolved list themselves and send CommandLib's `no player found` / `no entity found`. `PlayersArgument` /
-  `EntitiesArgument` on Paper do not check it: whether Paper's resolver rejects an empty result or passes an empty
-  list to the executor has not been checked, hence `unverified`. (CommandAPI's `ManyPlayers` / `ManyEntities` allow
-  empty results by default.)
+- When a selector or name matches nothing, all four selector arguments fail with vanilla's translatable
+  `No player was found` / `No entity was found` on every platform, as vanilla's `EntityArgument.getPlayers` /
+  `getEntities` do; the executor never gets an empty list. Paper's `players()` / `entities()` resolvers return an empty
+  list, so CommandLib's `PlayersArgument` / `EntitiesArgument` reject it there. (CommandAPI's `ManyPlayers` /
+  `ManyEntities` allow empty results by default.)
 - `UUIDArgument` is `partial` because it also accepts player names, which vanilla's `uuid` argument and CommandAPI's
   `UUIDArgument` do not. A UUID string always works.
 - `OfflinePlayersArgument` and `UUIDsArgument` implement `@a` / `@r` themselves over `Bukkit.getOfflinePlayers()`;

@@ -25,7 +25,8 @@ public class EntitiesArgument extends Argument<List<Entity>, EntitiesArgument> {
     protected List<Entity> parseImpl(CommandContext ctx) throws ArgumentParseException, CommandSyntaxException {
         EntitySelectorArgumentResolver resolver = ctx.getHandle()
                                                      .getArgument(name(), EntitySelectorArgumentResolver.class);
-        return resolver.resolve(ctx.getHandle()
-                                   .getSource());
+        return SelectorResults.requireAny(resolver.resolve(ctx.getHandle()
+                                                              .getSource()),
+                                          SelectorResults.NO_ENTITY);
     }
 }
