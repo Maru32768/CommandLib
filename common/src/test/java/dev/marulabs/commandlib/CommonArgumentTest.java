@@ -216,6 +216,17 @@ class CommonArgumentTest {
         assertThat(restoredRunner.suggest("pick d")).containsExactly("default");
     }
 
+    @Test
+    void default_suggestions_built_on_another_builder_are_kept() {
+        // Vanilla parsers such as the item and entity selector arguments suggest through builder.createOffset(...).
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("pick") {{
+            argument(new DefaultSuggestingArg("value", new OffsetSuggestingType())).execute((value, ctx) -> {
+            });
+        }});
+
+        assertThat(runner.suggest("pick o")).containsExactly("offset");
+    }
+
     private static final class IntArg extends CommonIntegerArgument<TestCommandContext, IntArg> {
         IntArg(String name) {
             super(name);
@@ -236,7 +247,11 @@ class CommonArgumentTest {
 
     private static final class DefaultSuggestingArg extends CommonArgument<String, TestCommandContext, DefaultSuggestingArg> {
         DefaultSuggestingArg(String name) {
-            super(name, new DefaultSuggestingType());
+            this(name, new DefaultSuggestingType());
+        }
+
+        DefaultSuggestingArg(String name, ArgumentType<String> type) {
+            super(name, type);
         }
 
         @Override
@@ -261,6 +276,21 @@ class CommonArgumentTest {
                                                                   SuggestionsBuilder builder) {
             builder.suggest("default");
             return builder.buildFuture();
+        }
+    }
+
+    private static final class OffsetSuggestingType implements ArgumentType<String> {
+        @Override
+        public String parse(StringReader reader) {
+            return reader.readUnquotedString();
+        }
+
+        @Override
+        public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context,
+                                                                  SuggestionsBuilder builder) {
+            return builder.createOffset(builder.getStart())
+                          .suggest("offset")
+                          .buildFuture();
         }
     }
 

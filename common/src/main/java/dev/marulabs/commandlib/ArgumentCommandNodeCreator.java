@@ -79,7 +79,14 @@ final class ArgumentCommandNodeCreator<S, T, C extends CommonCommandContext<S, T
                                                                         });
                 CompletableFuture<Void> defaultFuture = CompletableFuture.allOf(defaultFutures.toArray(CompletableFuture[]::new));
 
-                return customFuture.thenCombine(defaultFuture, (ignored, suggestions) -> sb.build());
+                // Vanilla parsers suggest through builders of their own (createOffset), so their results are merged
+                // with what the providers added to sb.
+                return customFuture.thenCombine(defaultFuture, (ignored, suggestions) -> {
+                    List<Suggestions> all = new ArrayList<>();
+                    all.add(sb.build());
+                    defaultFutures.forEach(future -> all.add(future.join()));
+                    return Suggestions.merge(sb.getInput(), all);
+                });
             } catch (Throwable e) {
                 e.printStackTrace();
                 throw e;
