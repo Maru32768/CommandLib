@@ -983,6 +983,17 @@ See [localization](docs/localization.md) for the lookup order, the keys, and `Ca
 also broadcasts it to the other operators in gray italics and to the server log when `logAdminCommands` is on, like
 `/gamemode`. `sendMessage`, `sendWarn`, and `sendFailure` always reach the sender.
 
+`sendSuccessFor` words the feedback of a command on a selector the way vanilla does, naming the target when there is one
+and counting them otherwise:
+
+```java
+argument(new PlayersArgument("targets")).execute((targets, ctx) -> {
+    targets.forEach(x -> x.setHealth(20));
+    // "Healed Steve" or "Healed 3 players"
+    ctx.sendSuccessFor(targets, x -> "Healed " + x.getName(), count -> "Healed " + count + " players", true);
+});
+```
+
 `ctx.setResult(int)` sets the value that `/execute store result` stores (1 unless set). A command fails, storing 0 for
 both `store result` and `store success`, when its executor throws `CommandPrerequisiteException`, its preprocess returns
 false, or a permission, argument, or prerequisite check fails. Its failure messages then reach the sender the way a

@@ -13,6 +13,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.function.Function;
+import java.util.function.IntFunction;
 import java.util.function.Supplier;
 
 /**
@@ -201,6 +203,31 @@ public abstract class CommonCommandContext<S, C> {
      * feedback, such as a test sender, gets it as a plain message.
      */
     public abstract void sendSuccess(@Nullable String message, boolean broadcastToOps);
+
+    /**
+     * Sends the feedback of a command that acted on {@code targets} the way vanilla commands word it, such as
+     * "Applied effect Speed to Steve" and "Applied effect Speed to 3 targets": {@code single} with the target when
+     * there is exactly one, else {@code multiple} with their number. Same as
+     * {@link #sendSuccessFor(Collection, Function, IntFunction, boolean)} without broadcasting it.
+     */
+    public final <T> void sendSuccessFor(@NotNull Collection<? extends T> targets,
+                                         @NotNull Function<? super T, String> single,
+                                         @NotNull IntFunction<String> multiple) {
+        sendSuccessFor(targets, single, multiple, false);
+    }
+
+    /**
+     * Same as {@link #sendSuccessFor(Collection, Function, IntFunction)}, sent as {@link #sendSuccess(String, boolean)}
+     * does. Use {@link #caption(Caption, Map)} in the functions for a localized text.
+     */
+    public final <T> void sendSuccessFor(@NotNull Collection<? extends T> targets,
+                                         @NotNull Function<? super T, String> single,
+                                         @NotNull IntFunction<String> multiple,
+                                         boolean broadcastToOps) {
+        sendSuccess(targets.size() == 1 ? single.apply(targets.iterator()
+                                                              .next())
+                : multiple.apply(targets.size()), broadcastToOps);
+    }
 
     public final void sendWarn(@Nullable Object obj) {
         sendWarn(Objects.toString(obj));
