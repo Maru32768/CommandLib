@@ -46,7 +46,7 @@
 | Permission-aware help / suggestions | `[~]` | argument branch permission を help / tab completion に反映する設計がある。                                                                          | 網羅 tests と docs。                                                           |
 | Typed command options               | `[~]` | flag / value / count option、default、dependency、repeatable（`List<T>`）、alias、required、`mutuallyExclusive(...)`、`OptionParseException`、help の option section がある（[`docs/options.md`](options.md)）。 | subcommand への継承、positional argument の後の option、固定 arity の multi-value、排他 group の専用 error message。 |
 | Generated usage / help              | `[~]` | README と snapshot tests に usage / help がある。server の `/help` 用の text は `serverHelp(...)` で指定でき、Bukkit 系では plugin の index に載る。 | formatter API、theme、locale、MiniMessage / Adventure。                        |
-| Error taxonomy                      | `[~]` | parse / validation / prerequisite / option 系の例外があり、各 error で sender に見える message を [`docs/errors.md`](errors.md) で公開仕様化した。 | unknown subcommand、missing argument の専用 error、platform 間の vanilla error 表示差（Spigot / Paper / modded）の統一、error formatter API。 |
+| Error taxonomy                      | `[~]` | parse / validation / prerequisite / option 系の例外があり、各 error で sender に見える message を [`docs/errors.md`](errors.md) で公開仕様化した。 | unknown subcommand、missing argument の専用 error、error formatter API。 |
 | Exception handling                  | `[~]` | uncaught exception handler の仕組みがある。                                                                                                     | exception mapping、result handling、docs。                                    |
 | Preprocess / prerequisite           | `[~]` | `addPreprocess(...)`、`addPrerequisite(...)`、`requirePlayer()` 等がある。                                                                     | reusable registry、middleware 化、diagnostics。                                |
 | Middleware / interceptor            | `[ ]` | なし。                                                                                                                                     | execution pipeline API。                                                    |
@@ -85,13 +85,8 @@
 - `[ ]` `IntegerRangeArgument` / `DoubleRangeArgument` / `DurationArgument` を実サーバーで検証する（旧 target の
   MCProtocolLib bot が `int_range` / `float_range` を decode できるか、NMS range class の link）。
 - `[ ]` game tick 基準の vanilla `time` argument を追加する（`DurationArgument` は実時間で単位を組み合わせる別仕様）。
-- `[ ]` error を platform 間で揃える。実行中の vanilla error は Spigot が翻訳 component、Paper が英語の `getMessage()`、
-  modded が vanilla component で表示が異なり、selector が誰にも一致しない時の message も Spigot と Paper で異なる。
-
-### P4: Cloud / Lamp / ACF を上回る developer experience
-
-annotation API / Kotlin DSL の `@Optional` や default args は optional / variadic argument（実装済み）の上に載せる。
-
+- `[ ]` Paper で resolve error の translatable component が実 client で翻訳されること、`MessageComponentSerializer` が
+  Paper 1.21.3〜26.x で動くことを integration test（`CommandSyntaxExceptionTest`）で確認する。
 - `[ ]` optional / variadic argument を実サーバー（Spigot / Paper / modded の integration test）で検証する。各 token を
   platform の `ArgumentType#parse` で読み直す実装のため、command tree の大きさ（`maxCount` × option の展開）も確認する。
 - `[ ]` async execution を追加する。`executeAsync(ctx -> CompletableFuture<...>)` で重い処理を非同期化し、結果を
