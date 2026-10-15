@@ -56,7 +56,7 @@
 | Kotlin DSL                          | `[ ]` | なし。                                                                                                                                     | Kotlin-first builder、default args、coroutine suggestions。                   |
 | Java builder API                    | `[ ]` | 現状は subclass / initializer / fluent API 中心。                                                                                             | explicit builder style。                                                    |
 | Localization / captions             | `[ ]` | なし。                                                                                                                                     | locale-aware help / errors / suggestions。                                  |
-| Public testing framework            | `[~]` | `common-testing` / `spigot-testing` / `paper-testing` / loader 別 `modded-testing` と repository tests がある。`CommandTester` / `FakeSender` / NMS mock クラス群を整備済み。`CommandTester.builder()` と `FakeSender.playerBuilder()` / `consoleBuilder()` あり。 | downstream guide、JUnit extension、assertion utilities。                     |
+| Public testing framework            | `[~]` | `common-testing` / `spigot-testing` / `paper-testing` / loader 別 `modded-testing` がある。`CommandTester`（`suggest()`、int を返す `execute`、`assertCommandTreeMatchesSnapshot`）、`FakeSender`、NMS mock、JUnit 5 の `CommandLibExtension` + `@Sender`（modded 以外）と downstream guide（[`docs/testing.md`](testing.md)）がある。 | modded-testing の JUnit extension、testing artifact 間の共通化、gamerule / silent source の模擬。 |
 | Adventure / MiniMessage             | `[~]` | platform 非依存の rich text 値型 `RichText`（色、装飾、hover text、click、translatable 引数）を全 platform で送れる（Phase 1 完了）。Paper / modded は native component の `sendSuccess/Warn/Failure` もある。 | rich help、rich suggestion tooltip の統一、MiniMessage。設計: [`docs/design/rich-text-messages.md`](design/rich-text-messages.md)。 |
 | Multi-version integration tests     | `[~]` | `integration-test` aggregator と Spigot（1.16.5〜26.3 の全 release）/ Paper / Mohist / Forge / NeoForge fixtures がある。                                                             | CI matrix、`IntegrationTarget` への platform フィールド追加、result docs、test kit 化。  |
 | NMS Reflection test strategy        | `[~]` | `CommandTester` が `Mockito.mockStatic` で `NMSClassRegistry` をスタブし、軽量な Mock 実装クラス方式で NMS なしテストを実現している。                 | Builder / mock 差し込みの保証拡充、新引数の Mock + Test ルールの継続適用。              |
@@ -438,7 +438,7 @@ Required:
 
 Required downstream testing（Phase 5）:
 
-- JUnit extension（`@ExtendWith(CommandLibExtension.class)`）。
+- JUnit extension（`CommandLibExtension`。common / spigot / paper の testing artifact は実装済み、modded-testing は未実装）。
 - golden command tree snapshots。
 - downstream plugin authors 向け compatibility test kit。
 - Paper 公式 test-framework（`io.papermc:paper-api-test-framework`）の利用調査。

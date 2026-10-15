@@ -58,6 +58,8 @@
   section を実装する（`docs/options.md`、2026-10-15）。
 - `[x]` 末尾の optional argument（`optional(default)`）と variadic argument（`variadic()` で `List<T>`）を追加し、
   配置違反を登録時の runtime error にする（`docs/design/optional-variadic-arguments.md`、2026-10-15）。
+- `[x]` testing artifact に JUnit 5 の `CommandLibExtension` / `@Sender`、`CommandTester#suggest`、command tree snapshot
+  （`assertCommandTreeMatchesSnapshot`）を追加する（common / spigot / paper、2026-10-15）。
 - `[x]` dynamic command tree refresh を追加する。`CommandLib.refresh(player)` / `refreshAll()`（Spigot / Paper / Forge /
   NeoForge、2026-10-15）。
 
