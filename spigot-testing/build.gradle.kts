@@ -40,3 +40,8 @@ configurations.testRuntimeClasspath {
         attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, objects.named(LibraryElements.CLASSES))
     }
 }
+
+dependencies {
+    // The classes leave out the resources, such as the caption bundles of :common.
+    testRuntimeOnly(files(rootProject.file("common/build/resources/main")).builtBy(":common:processResources"))
+}

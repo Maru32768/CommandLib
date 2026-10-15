@@ -91,12 +91,15 @@ public final class Confirmation {
     }
 
     private void sendDefaultMessage(CommonCommandContext<?, ?> ctx, String command) {
-        RichText button = RichText.text("[Confirm]")
+        RichText button = RichText.text(ctx.caption(Caption.CONFIRMATION_BUTTON))
                                   .color(Objects.requireNonNull(ChatColorUtil.GREEN.getRGB()))
                                   .hover(RichText.text(command))
                                   .click(ClickAction.runCommand(command));
-        ctx.sendWarn(RichText.text("Run the command again within " + Cooldown.format(timeout) + " to confirm. ")
-                             .append(button));
+        ctx.sendCaption(Caption.CONFIRMATION_REQUEST,
+                        Map.of("timeout", Cooldown.format(timeout, ctx.captions(), ctx.getLocale())),
+                        RichText.text(" ")
+                                .append(button),
+                        ctx::sendWarn);
     }
 
     private static final class Pending {

@@ -22,7 +22,7 @@ public class Command extends CommonCommand<CommandContext, Command> {
     public static Extractor<CommandContext, Player> playerRequirer() {
         return ctx -> {
             if (!(ctx.getSender() instanceof Player)) {
-                throw new CommandPrerequisiteException("This command can only be executed by a player.");
+                throw new CommandPrerequisiteException(Caption.REQUIRE_PLAYER);
             }
             return (Player) ctx.getSender();
         };
@@ -31,7 +31,7 @@ public class Command extends CommonCommand<CommandContext, Command> {
     public static Extractor<CommandContext, ConsoleCommandSource> consoleRequirer() {
         return ctx -> {
             if (!(ctx.getSender() instanceof ConsoleCommandSource)) {
-                throw new CommandPrerequisiteException("This command can only be executed from the console.");
+                throw new CommandPrerequisiteException(Caption.REQUIRE_CONSOLE);
             }
             return (ConsoleCommandSource) ctx.getSender();
         };

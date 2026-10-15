@@ -1,7 +1,9 @@
 package dev.marulabs.commandlib.exception;
 
+import dev.marulabs.commandlib.Caption;
 import dev.marulabs.commandlib.CommonCommandContext;
 
+import java.util.Map;
 import java.util.function.Consumer;
 
 public class ArgumentValidationException extends ArgumentParseException {
@@ -12,7 +14,15 @@ public class ArgumentValidationException extends ArgumentParseException {
     }
 
     public ArgumentValidationException() {
-        super("Invalid value.");
+        this(Caption.INVALID_VALUE, Map.of());
+    }
+
+    /**
+     * Rejects the value with {@code caption} in the sender's locale with its placeholders replaced, see
+     * {@link CommonCommandContext#sendFailure(Caption, Map)}.
+     */
+    public ArgumentValidationException(Caption caption, Map<String, ?> placeholders) {
+        super(caption, placeholders);
     }
 
     public ArgumentValidationException(String message, String... messages) {

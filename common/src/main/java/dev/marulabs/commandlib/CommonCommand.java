@@ -43,6 +43,7 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
     private final List<CommandMiddleware<? super C>> middlewares = new ArrayList<>();
     private @Nullable Confirmation confirmation = null;
     private @Nullable Cooldown cooldown = null;
+    private @Nullable Captions captions = null;
     // Null until execute is called; the command then runs its help action.
     private @Nullable AsyncCommandExecutor<C> executor;
     private final List<UncaughtExceptionHandler<C>> uncaughtExceptionHandlers = new ArrayList<>();
@@ -552,6 +553,22 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
      */
     public final void cooldown(@NotNull Cooldown cooldown) {
         this.cooldown = Objects.requireNonNull(cooldown);
+    }
+
+    /**
+     * Sets the texts of CommandLib's messages and of {@code ctx.sendFailure(caption)} for this command, its argument
+     * branches and the child commands that set none of their own. Without it, the commands use
+     * {@link Captions#create()}. See {@link Captions}.
+     */
+    public final void captions(@NotNull Captions captions) {
+        this.captions = Objects.requireNonNull(captions);
+    }
+
+    final Captions captions() {
+        if (captions != null) {
+            return captions;
+        }
+        return parent != null ? parent.captions() : Captions.DEFAULT;
     }
 
     public final void execute(@NotNull CommandExecutor<C> executor) {

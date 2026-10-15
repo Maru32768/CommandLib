@@ -1,6 +1,7 @@
 package dev.marulabs.commandlib.argument;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import dev.marulabs.commandlib.Caption;
 import dev.marulabs.commandlib.CommandContext;
 import dev.marulabs.commandlib.exception.ArgumentParseException;
 import dev.marulabs.commandlib.suggestion.SuggestionBuilder;
@@ -11,6 +12,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
 
 import java.util.Iterator;
+import java.util.Map;
 
 final class NamespacedKeyArgumentSupport {
     private NamespacedKeyArgumentSupport() {
@@ -19,7 +21,7 @@ final class NamespacedKeyArgumentSupport {
     static NamespacedKey parseKey(String value) throws ArgumentParseException {
         NamespacedKey key = value.contains(":") ? NamespacedKey.fromString(value) : NamespacedKey.minecraft(value);
         if (key == null) {
-            throw new ArgumentParseException(x -> x.sendFailure(value + " is not valid namespaced key"));
+            throw new ArgumentParseException(Caption.INVALID_KEY, Map.of("value", value));
         }
         return key;
     }
@@ -27,12 +29,12 @@ final class NamespacedKeyArgumentSupport {
     static <T extends Keyed> T parseRegistryValue(CommandContext ctx,
                                                   String name,
                                                   Registry<T> registry,
-                                                  String description) throws ArgumentParseException, CommandSyntaxException {
+                                                  Caption unknown) throws ArgumentParseException, CommandSyntaxException {
         String value = NMSArgumentNamespacedKey.create()
                                                .parse(ctx.getHandle(), name);
         T t = registry.get(parseKey(value));
         if (t == null) {
-            throw new ArgumentParseException(x -> x.sendFailure(value + " is not a known " + description));
+            throw new ArgumentParseException(unknown, Map.of("value", value));
         }
         return t;
     }

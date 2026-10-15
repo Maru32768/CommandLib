@@ -4,12 +4,14 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.context.ParsedCommandNode;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.ArgumentCommandNode;
+import dev.marulabs.commandlib.Caption;
 import dev.marulabs.commandlib.CommonCommandContext;
 import dev.marulabs.commandlib.PlatformAdapter;
 import dev.marulabs.commandlib.util.ChatColorUtil;
 import dev.marulabs.commandlib.util.text.RichText;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
 
@@ -126,6 +128,14 @@ public class ArgumentParseException extends Exception {
                 ctx.sendFailure(s);
             }
         });
+    }
+
+    /**
+     * Rejects the argument with {@code caption} in the sender's locale with its placeholders replaced, see
+     * {@link CommonCommandContext#sendFailure(Caption, Map)}.
+     */
+    public ArgumentParseException(Caption caption, Map<String, ?> placeholders) {
+        this(ctx -> ctx.sendFailure(caption, placeholders));
     }
 
     public ArgumentParseException(Consumer<CommonCommandContext<?, ?>> sendMessages) {

@@ -105,6 +105,6 @@ class CommandResultTest {
         }});
 
         assertThatThrownBy(() -> runner.dispatch("boom")).isInstanceOf(CommandSyntaxException.class)
-                                                         .hasMessage("An unexpected error occurred trying to execute that command.\nCheck the console for details.");
+                                                         .hasMessage("command.failed\nCheck the console for details.");
     }
 }

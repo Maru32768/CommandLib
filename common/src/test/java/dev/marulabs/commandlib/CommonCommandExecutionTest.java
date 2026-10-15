@@ -295,8 +295,7 @@ class CommonCommandExecutionTest {
 
         TestCommandContext ctx = runner.execute("boom");
 
-        assertThat(ctx.messages()).containsExactly("An unexpected error occurred trying to execute that command.",
-                                                   "Check the console for details.");
+        assertThat(ctx.messages()).containsExactly("command.failed", "Check the console for details.");
     }
 
     @Test

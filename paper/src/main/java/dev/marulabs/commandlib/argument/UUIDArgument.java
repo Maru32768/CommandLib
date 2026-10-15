@@ -2,6 +2,7 @@ package dev.marulabs.commandlib.argument;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import dev.marulabs.commandlib.Argument;
+import dev.marulabs.commandlib.Caption;
 import dev.marulabs.commandlib.CommandContext;
 import dev.marulabs.commandlib.exception.ArgumentParseException;
 import dev.marulabs.commandlib.util.StringUtil;
@@ -62,7 +63,7 @@ public class UUIDArgument extends Argument<UUID, UUIDArgument> {
         try {
             return UUID.fromString(s);
         } catch (IllegalArgumentException e) {
-            throw new ArgumentParseException(x -> x.sendFailure(s + " is not found or not valid UUID"));
+            throw new ArgumentParseException(Caption.UNKNOWN_PLAYER_OR_UUID, Map.of("value", s));
         }
     }
 }

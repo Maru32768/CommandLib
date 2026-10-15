@@ -5,6 +5,7 @@ import dev.marulabs.commandlib.Argument;
 import dev.marulabs.commandlib.CommandContext;
 import dev.marulabs.commandlib.exception.ArgumentParseException;
 import dev.marulabs.commandlib.util.nms.argument.NMSArgumentNamespacedKey;
+import dev.marulabs.commandlib.util.text.RichText;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.advancement.Advancement;
@@ -29,7 +30,8 @@ public class AdvancementArgument extends Argument<Advancement, AdvancementArgume
         NamespacedKey key = NamespacedKeyArgumentSupport.parseKey(value);
         Advancement advancement = Bukkit.getAdvancement(key);
         if (advancement == null) {
-            throw new ArgumentParseException(x -> x.sendFailure(value + " is not a known advancement"));
+            throw new ArgumentParseException(x -> x.sendFailure(RichText.translatable("advancement.advancementNotFound",
+                                                                                      RichText.text(value))));
         }
         return advancement;
     }

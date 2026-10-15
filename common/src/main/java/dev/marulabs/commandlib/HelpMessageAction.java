@@ -7,6 +7,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -23,6 +24,7 @@ final class HelpMessageAction<S, T, C extends CommonCommandContext<S, T>, U exte
 
     @Override
     public void accept(C ctx) {
+        ctx.captions(command.captions());
         String border = ChatColorUtil.GRAY + "-".repeat(50);
         String padding = " ".repeat(2);
         String usagePrefix = createUsagePrefix(command, ctx);
@@ -33,7 +35,7 @@ final class HelpMessageAction<S, T, C extends CommonCommandContext<S, T>, U exte
                     .isEmpty()) {
             ctx.sendMessage(command.description(ctx));
         }
-        ctx.sendMessage(ChatColorUtil.RED + "Usage:");
+        ctx.sendMessage(ChatColorUtil.RED + ctx.caption(Caption.HELP_USAGE));
 
         List<String> childUsages = createChildUsages(command, ctx, padding, usagePrefix);
         childUsages.forEach(ctx::sendMessage);
@@ -52,16 +54,16 @@ final class HelpMessageAction<S, T, C extends CommonCommandContext<S, T>, U exte
 
         List<String> optionDescriptions = command.options()
                                                  .stream()
-                                                 .map(x -> formatOptionDescription(padding, x))
+                                                 .map(x -> formatOptionDescription(padding, x, ctx))
                                                  .collect(Collectors.toList());
         if (childUsages.isEmpty() && argumentUsages.isEmpty() && !optionDescriptions.isEmpty()) {
-            ctx.sendMessage(ChatColorUtil.AQUA + padding + "/" + usagePrefix + concatOptionUsage(command));
+            ctx.sendMessage(ChatColorUtil.AQUA + padding + "/" + usagePrefix + concatOptionUsage(command, ctx));
         }
         if (!optionDescriptions.isEmpty()) {
             if (!childUsages.isEmpty() || !argumentUsages.isEmpty()) {
                 ctx.sendMessage("");
             }
-            ctx.sendMessage(ChatColorUtil.RED + "Options:");
+            ctx.sendMessage(ChatColorUtil.RED + ctx.caption(Caption.HELP_OPTIONS));
             optionDescriptions.forEach(ctx::sendMessage);
         }
 
@@ -75,7 +77,7 @@ final class HelpMessageAction<S, T, C extends CommonCommandContext<S, T>, U exte
         }
 
         // Example: "  /scan [options] <target>: Scan target"
-        String s = padding + ChatColorUtil.AQUA + "/" + usagePrefix + concatOptionUsage(command) + " " + tagNames;
+        String s = padding + ChatColorUtil.AQUA + "/" + usagePrefix + concatOptionUsage(command, ctx) + " " + tagNames;
         if (arguments.description(ctx)
                      .isEmpty()) {
             return s;
@@ -87,7 +89,7 @@ final class HelpMessageAction<S, T, C extends CommonCommandContext<S, T>, U exte
         // Examples:
         //   "/game start: Start game"
         //   "/config <key> set <value>: Set config value"
-        String commandPrefix = ChatColorUtil.AQUA + padding + "/" + usagePrefix + concatOptionUsage(command);
+        String commandPrefix = ChatColorUtil.AQUA + padding + "/" + usagePrefix + concatOptionUsage(command, ctx);
         List<String> childUsages = command.children()
                                           .stream()
                                           .filter(x -> platformAdapter.hasPermission(x, ctx, permissionPrefix))
@@ -223,22 +225,23 @@ final class HelpMessageAction<S, T, C extends CommonCommandContext<S, T>, U exte
                     .collect(Collectors.joining(" "));
     }
 
-    private String concatOptionUsage(U command) {
+    private String concatOptionUsage(U command, C ctx) {
         // Example: " [options]"
         if (command.options()
                    .isEmpty()) {
             return "";
         }
 
-        return " " + ChatColorUtil.GRAY + "[" + ChatColorUtil.YELLOW + "options" + ChatColorUtil.GRAY + "]";
+        return " " + ChatColorUtil.GRAY + "[" + ChatColorUtil.YELLOW + ctx.caption(Caption.HELP_OPTIONS_TAG)
+                + ChatColorUtil.GRAY + "]";
     }
 
-    private String formatOptionDescription(String padding, CommandOption<?, C> option) {
+    private String formatOptionDescription(String padding, CommandOption<?, C> option, C ctx) {
         // Examples:
         //   "  --force: Force execution"
         //   "  -n <limit>, --limit <limit>: Maximum count"
         //   "  -t <tag>, --tag <tag> (required, up to 3 times): Tags"
-        String s = ChatColorUtil.YELLOW + padding + formatOptionNames(option) + formatOptionNotes(option);
+        String s = ChatColorUtil.YELLOW + padding + formatOptionNames(option) + formatOptionNotes(option, ctx);
         if (option.description()
                   .isEmpty()) {
             return s;
@@ -265,14 +268,14 @@ final class HelpMessageAction<S, T, C extends CommonCommandContext<S, T>, U exte
         return String.join(ChatColorUtil.GRAY + ", " + ChatColorUtil.YELLOW, names);
     }
 
-    private String formatOptionNotes(CommandOption<?, C> option) {
+    private String formatOptionNotes(CommandOption<?, C> option, C ctx) {
         // Examples: "", " (required)", " (up to 3 times)"
         List<String> notes = new ArrayList<>();
         if (option.isRequired()) {
-            notes.add("required");
+            notes.add(ctx.caption(Caption.HELP_REQUIRED));
         }
         if (option.maxOccurrences() > 1) {
-            notes.add("up to " + option.maxOccurrences() + " times");
+            notes.add(ctx.caption(Caption.HELP_MAX_OCCURRENCES, Map.of("count", option.maxOccurrences())));
         }
         if (notes.isEmpty()) {
             return "";

@@ -1,5 +1,6 @@
 package dev.marulabs.commandlib.argument;
 
+import dev.marulabs.commandlib.Caption;
 import dev.marulabs.commandlib.exception.ArgumentParseException;
 import dev.marulabs.commandlib.suggestion.SuggestionBuilder;
 import dev.marulabs.commandlib.util.StringUtil;
@@ -7,6 +8,7 @@ import org.bukkit.Keyed;
 import org.bukkit.NamespacedKey;
 
 import java.util.Iterator;
+import java.util.Map;
 
 final class NamespacedKeyArgumentSupport {
     private NamespacedKeyArgumentSupport() {
@@ -15,7 +17,7 @@ final class NamespacedKeyArgumentSupport {
     static NamespacedKey parseKey(String value) throws ArgumentParseException {
         NamespacedKey key = value.contains(":") ? NamespacedKey.fromString(value) : NamespacedKey.minecraft(value);
         if (key == null) {
-            throw new ArgumentParseException(x -> x.sendFailure(value + " is not valid namespaced key"));
+            throw new ArgumentParseException(Caption.INVALID_KEY, Map.of("value", value));
         }
         return key;
     }

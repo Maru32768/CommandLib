@@ -5,6 +5,7 @@ import dev.marulabs.commandlib.Argument;
 import dev.marulabs.commandlib.CommandContext;
 import dev.marulabs.commandlib.exception.ArgumentParseException;
 import dev.marulabs.commandlib.util.nms.argument.NMSArgumentNamespacedKey;
+import dev.marulabs.commandlib.util.text.RichText;
 import org.bukkit.Bukkit;
 import org.bukkit.Keyed;
 import org.bukkit.NamespacedKey;
@@ -36,7 +37,8 @@ public class RecipeArgument extends Argument<Recipe, RecipeArgument> {
         NamespacedKey key = NamespacedKeyArgumentSupport.parseKey(value);
         Recipe recipe = Bukkit.getRecipe(key);
         if (recipe == null) {
-            throw new ArgumentParseException(x -> x.sendFailure(value + " is not a known recipe"));
+            throw new ArgumentParseException(x -> x.sendFailure(RichText.translatable("recipe.notFound",
+                                                                                      RichText.text(value))));
         }
         return recipe;
     }

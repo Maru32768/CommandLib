@@ -166,7 +166,7 @@ class CommandMiddlewareTest {
         }});
 
         assertThatThrownBy(() -> runner.dispatch("run")).isInstanceOf(CommandSyntaxException.class)
-                                                        .hasMessageContaining("An unexpected error occurred");
+                                                        .hasMessageContaining("command.failed");
         assertThat(uncaught).singleElement()
                             .isInstanceOf(IllegalStateException.class);
     }

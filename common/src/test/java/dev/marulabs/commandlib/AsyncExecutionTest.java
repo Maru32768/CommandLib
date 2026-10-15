@@ -111,8 +111,7 @@ class AsyncExecutionTest {
         scheduler.runSyncTasks();
 
         assertThat(TestCommandContext.latest()
-                                     .messages()).containsExactly("An unexpected error occurred trying to execute that command.",
-                                                                  "Check the console for details.");
+                                     .messages()).containsExactly("command.failed", "Check the console for details.");
         assertThat(uncaught).singleElement()
                             .isInstanceOf(IllegalStateException.class);
         assertThat(handlerOnSyncThread).containsExactly(true);

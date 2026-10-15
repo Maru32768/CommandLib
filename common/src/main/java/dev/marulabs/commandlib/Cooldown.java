@@ -6,6 +6,7 @@ import org.jetbrains.annotations.Nullable;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -26,9 +27,11 @@ public final class Cooldown {
     private final Map<UUID, Instant> endsAt = new ConcurrentHashMap<>();
     private @Nullable String bypassPermission = null;
     private BiConsumer<CommonCommandContext<?, ?>, Duration> message = (ctx,
-                                                                        remaining) -> ctx.sendFailure("You must wait "
-                                                                                + format(remaining)
-                                                                                + " before using this command again.");
+                                                                        remaining) -> ctx.sendFailure(Caption.COOLDOWN,
+                                                                                                      Map.of("remaining",
+                                                                                                             format(remaining,
+                                                                                                                    ctx.captions(),
+                                                                                                                    ctx.getLocale())));
     private Clock clock = Clock.systemUTC();
 
     private Cooldown(Duration duration) {
@@ -114,24 +117,23 @@ public final class Cooldown {
     }
 
     /**
-     * Formats a duration rounded up to whole seconds, such as {@code 1h 2m 3s}.
+     * Formats a duration rounded up to whole seconds, such as {@code 1h 2m 3s}, in the sender's locale.
      */
-    static String format(Duration duration) {
+    static String format(Duration duration, Captions captions, Locale locale) {
         long seconds = duration.getSeconds() + (duration.getNano() > 0 ? 1 : 0);
         long hours = seconds / 3600;
         long minutes = seconds % 3600 / 60;
         StringBuilder sb = new StringBuilder();
         if (hours > 0) {
-            sb.append(hours)
-              .append("h ");
+            sb.append(captions.format(locale, Caption.DURATION_HOURS, Map.of("value", hours)))
+              .append(' ');
         }
         if (minutes > 0) {
-            sb.append(minutes)
-              .append("m ");
+            sb.append(captions.format(locale, Caption.DURATION_MINUTES, Map.of("value", minutes)))
+              .append(' ');
         }
         if (seconds % 60 > 0 || sb.length() == 0) {
-            sb.append(seconds % 60)
-              .append('s');
+            sb.append(captions.format(locale, Caption.DURATION_SECONDS, Map.of("value", seconds % 60)));
         }
         return sb.toString()
                  .trim();

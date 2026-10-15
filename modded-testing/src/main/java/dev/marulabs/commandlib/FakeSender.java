@@ -43,6 +43,8 @@ public final class FakeSender {
     @Nullable
     private UUID uniqueId;
     private boolean op;
+    @Nullable
+    private String locale;
     private Predicate<String> permissionCheck = permission -> true;
 
     /**
@@ -141,6 +143,27 @@ public final class FakeSender {
     }
 
     /**
+     * Sets the player's language code, such as {@code ja_jp}, which {@link CommandContext#getLanguage()} reads.
+     *
+     * @throws IllegalStateException for the console
+     */
+    public FakeSender locale(@NotNull String locale) {
+        if (player == null) {
+            throw new IllegalStateException("sender is not a player");
+        }
+        this.locale = Objects.requireNonNull(locale);
+        stubPlayer();
+        return this;
+    }
+
+    /**
+     * Returns the player's language code, or empty for the console or a player without one.
+     */
+    public Optional<String> getLocale() {
+        return Optional.ofNullable(locale);
+    }
+
+    /**
      * Grants only the given permission nodes.
      */
     public FakeSender permissions(@NotNull String... permissions) {
@@ -209,6 +232,8 @@ public final class FakeSender {
                .thenReturn(uniqueId);
         Mockito.when(player.getStringUUID())
                .thenReturn(uniqueId.toString());
+        Mockito.when(player.getLanguage())
+               .thenReturn(locale);
         Mockito.when(player.isAlive())
                .thenReturn(true);
         Mockito.when(player.hasPermissions(Mockito.anyInt()))
@@ -242,6 +267,8 @@ public final class FakeSender {
         @Nullable
         private UUID uniqueId;
         private boolean op;
+        @Nullable
+        private String locale;
         // null grants every permission node.
         @Nullable
         private Set<String> permissions;
@@ -275,6 +302,15 @@ public final class FakeSender {
         }
 
         /**
+         * Sets the player's language code. {@link #build()} throws for the console, like
+         * {@link FakeSender#locale(String)}.
+         */
+        public Builder locale(@NotNull String locale) {
+            this.locale = locale;
+            return this;
+        }
+
+        /**
          * Grants only the given permission nodes, replacing any earlier call.
          */
         public Builder permissions(@NotNull String... permissions) {
@@ -296,6 +332,9 @@ public final class FakeSender {
                   .op(op);
             if (uniqueId != null) {
                 sender.uniqueId(uniqueId);
+            }
+            if (locale != null) {
+                sender.locale(locale);
             }
             Set<String> granted = permissions;
             Set<String> denied = Set.copyOf(deniedPermissions);

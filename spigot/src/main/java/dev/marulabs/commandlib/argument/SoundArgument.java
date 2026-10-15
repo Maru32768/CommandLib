@@ -2,6 +2,7 @@ package dev.marulabs.commandlib.argument;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.marulabs.commandlib.Argument;
+import dev.marulabs.commandlib.Caption;
 import dev.marulabs.commandlib.CommandContext;
 import dev.marulabs.commandlib.exception.ArgumentParseException;
 import dev.marulabs.commandlib.util.nms.argument.NMSArgumentNamespacedKey;
@@ -23,6 +24,6 @@ public class SoundArgument extends Argument<Sound, SoundArgument> {
 
     @Override
     protected Sound parseImpl(CommandContext ctx) throws ArgumentParseException, CommandSyntaxException {
-        return NamespacedKeyArgumentSupport.parseRegistryValue(ctx, name(), Registry.SOUNDS, "sound");
+        return NamespacedKeyArgumentSupport.parseRegistryValue(ctx, name(), Registry.SOUNDS, Caption.UNKNOWN_SOUND);
     }
 }

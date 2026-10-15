@@ -8,6 +8,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
@@ -187,7 +188,8 @@ public final class CommandOption<T, C extends CommonCommandContext<?, ?>> {
         Objects.requireNonNull(option);
         validators.add(ctx -> {
             if (!ctx.hasOption(option)) {
-                throw new OptionParseException(formatName() + " requires " + option.formatName() + ".");
+                throw new OptionParseException(Caption.OPTION_REQUIRES,
+                                               Map.of("option", formatName(), "required", option.formatName()));
             }
         });
         return this;
@@ -208,8 +210,13 @@ public final class CommandOption<T, C extends CommonCommandContext<?, ?>> {
         validators.add(ctx -> {
             E value = ctx.getOption(option);
             if (!predicate.test(value)) {
-                throw new OptionParseException(formatName() + " requires " + option.formatName() + " to be "
-                        + expectedDescription + ".");
+                throw new OptionParseException(Caption.OPTION_REQUIRES_VALUE,
+                                               Map.of("option",
+                                                      formatName(),
+                                                      "required",
+                                                      option.formatName(),
+                                                      "value",
+                                                      expectedDescription));
             }
         });
         return this;
@@ -256,7 +263,7 @@ public final class CommandOption<T, C extends CommonCommandContext<?, ?>> {
     void validate(C ctx, boolean checkRequired) throws OptionParseException {
         if (!ctx.hasOption(this)) {
             if (checkRequired && required) {
-                throw new OptionParseException("Missing required option " + formatName() + ".");
+                throw new OptionParseException(Caption.OPTION_MISSING, Map.of("option", formatName()));
             }
             return;
         }

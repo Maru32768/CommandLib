@@ -4,6 +4,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.marulabs.commandlib.Argument;
 import dev.marulabs.commandlib.CommandContext;
 import dev.marulabs.commandlib.exception.ArgumentParseException;
+import dev.marulabs.commandlib.util.text.RichText;
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
@@ -27,7 +28,8 @@ public class AdvancementArgument extends Argument<Advancement, AdvancementArgume
                                .getArgument(name(), NamespacedKey.class);
         Advancement advancement = Bukkit.getAdvancement(key);
         if (advancement == null) {
-            throw new ArgumentParseException(x -> x.sendFailure(key + " is not a known advancement"));
+            throw new ArgumentParseException(x -> x.sendFailure(RichText.translatable("advancement.advancementNotFound",
+                                                                                      RichText.text(key.toString()))));
         }
         return advancement;
     }

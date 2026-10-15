@@ -118,6 +118,12 @@ subprojects {
         options.encoding = "UTF-8"
     }
 
+    // A console sender's locale is the JVM's, so the tests pin it to get CommandLib's English texts on any machine.
+    tasks.withType<Test>().configureEach {
+        systemProperty("user.language", "en")
+        systemProperty("user.country", "US")
+    }
+
     if (project.path in publishedProjectPaths) {
         apply(plugin = "maven-publish")
 

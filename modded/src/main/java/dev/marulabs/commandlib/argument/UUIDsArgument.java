@@ -3,10 +3,12 @@ package dev.marulabs.commandlib.argument;
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.marulabs.commandlib.Argument;
+import dev.marulabs.commandlib.Caption;
 import dev.marulabs.commandlib.CommandContext;
 import dev.marulabs.commandlib.exception.ArgumentParseException;
 import dev.marulabs.commandlib.util.CurrentServer;
 import dev.marulabs.commandlib.util.StringUtil;
+import dev.marulabs.commandlib.util.text.RichText;
 import net.minecraft.commands.arguments.GameProfileArgument;
 import net.minecraft.server.players.GameProfileCache;
 
@@ -87,16 +89,16 @@ public class UUIDsArgument extends Argument<List<UUID>, UUIDsArgument> {
                 if (!uuids.isEmpty()) {
                     return uuids;
                 }
-                throw new ArgumentParseException(x -> x.sendFailure("no player found"));
+                throw new ArgumentParseException(x -> x.sendFailure(RichText.translatable("argument.entity.notfound.player")));
             }
             if (s.equals("@r")) {
                 Collections.shuffle(uuids, ThreadLocalRandom.current());
                 return List.of(uuids.stream()
                                     .findFirst()
-                                    .orElseThrow(() -> new ArgumentParseException(x -> x.sendFailure("no player found"))));
+                                    .orElseThrow(() -> new ArgumentParseException(x -> x.sendFailure(RichText.translatable("argument.entity.notfound.player")))));
             }
 
-            throw new ArgumentParseException(x -> x.sendFailure(s + " is invalid selector"));
+            throw new ArgumentParseException(Caption.INVALID_SELECTOR, Map.of("value", s));
         }
 
         //? if >=1.17 {
@@ -115,7 +117,7 @@ public class UUIDsArgument extends Argument<List<UUID>, UUIDsArgument> {
         try {
             return List.of(UUID.fromString(s));
         } catch (IllegalArgumentException e) {
-            throw new ArgumentParseException(x -> x.sendFailure(s + " is not found or not valid UUID"));
+            throw new ArgumentParseException(Caption.UNKNOWN_PLAYER_OR_UUID, Map.of("value", s));
         }
     }
 

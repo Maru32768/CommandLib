@@ -33,6 +33,8 @@ public abstract class CommonCommandContext<S, C> {
     private @Nullable List<Runnable> failureSends;
     // Set by CommandRunner before the command runs; null in suggestion contexts.
     private @Nullable CommandScheduler scheduler;
+    // Set by CommandRunner and the help to those of the command; the default in suggestion contexts.
+    private Captions captions = Captions.DEFAULT;
 
     protected CommonCommandContext(@NotNull com.mojang.brigadier.context.CommandContext<S> ctx) {
         this.handle = Objects.requireNonNull(ctx);
@@ -242,6 +244,103 @@ public abstract class CommonCommandContext<S, C> {
     }
 
     public abstract void sendComponent(C component);
+
+    /**
+     * Returns the text of {@code caption} for the sender's {@link #getLocale() locale}, from the {@link Captions} of
+     * the command.
+     */
+    @NotNull
+    public final String caption(@NotNull Caption caption) {
+        return caption(caption, Map.of());
+    }
+
+    /**
+     * Returns the text of {@code caption} for the sender's {@link #getLocale() locale}, from the {@link Captions} of
+     * the command, with each {@code {name}} replaced by the value of {@code name} in {@code placeholders}.
+     */
+    @NotNull
+    public final String caption(@NotNull Caption caption, @NotNull Map<String, ?> placeholders) {
+        return captions.format(getLocale(), caption, placeholders);
+    }
+
+    /**
+     * Sends {@code caption} as {@link #sendMessage(RichText)} does, through the {@link CaptionSender} of the
+     * command's {@link Captions}.
+     */
+    public final void sendMessage(@NotNull Caption caption) {
+        sendMessage(caption, Map.of());
+    }
+
+    /**
+     * Sends {@code caption} with its placeholders replaced as {@link #sendMessage(RichText)} does, through the
+     * {@link CaptionSender} of the command's {@link Captions}.
+     */
+    public final void sendMessage(@NotNull Caption caption, @NotNull Map<String, ?> placeholders) {
+        sendCaption(caption, placeholders, null, this::sendMessage);
+    }
+
+    /**
+     * Sends {@code caption} as {@link #sendSuccess(RichText)} does, through the {@link CaptionSender} of the
+     * command's {@link Captions}.
+     */
+    public final void sendSuccess(@NotNull Caption caption) {
+        sendSuccess(caption, Map.of());
+    }
+
+    /**
+     * Sends {@code caption} with its placeholders replaced as {@link #sendSuccess(RichText)} does, through the
+     * {@link CaptionSender} of the command's {@link Captions}.
+     */
+    public final void sendSuccess(@NotNull Caption caption, @NotNull Map<String, ?> placeholders) {
+        sendCaption(caption, placeholders, null, this::sendSuccess);
+    }
+
+    /**
+     * Sends {@code caption} as {@link #sendWarn(RichText)} does, through the {@link CaptionSender} of the command's
+     * {@link Captions}.
+     */
+    public final void sendWarn(@NotNull Caption caption) {
+        sendWarn(caption, Map.of());
+    }
+
+    /**
+     * Sends {@code caption} with its placeholders replaced as {@link #sendWarn(RichText)} does, through the
+     * {@link CaptionSender} of the command's {@link Captions}.
+     */
+    public final void sendWarn(@NotNull Caption caption, @NotNull Map<String, ?> placeholders) {
+        sendCaption(caption, placeholders, null, this::sendWarn);
+    }
+
+    /**
+     * Sends {@code caption} as {@link #sendFailure(RichText)} does, through the {@link CaptionSender} of the
+     * command's {@link Captions}.
+     */
+    public final void sendFailure(@NotNull Caption caption) {
+        sendFailure(caption, Map.of());
+    }
+
+    /**
+     * Sends {@code caption} with its placeholders replaced as {@link #sendFailure(RichText)} does, through the
+     * {@link CaptionSender} of the command's {@link Captions}.
+     */
+    public final void sendFailure(@NotNull Caption caption, @NotNull Map<String, ?> placeholders) {
+        sendCaption(caption, placeholders, null, this::sendFailure);
+    }
+
+    final void sendCaption(Caption caption,
+                           Map<String, ?> placeholders,
+                           @Nullable RichText suffix,
+                           java.util.function.Consumer<RichText> send) {
+        captions.send(this, caption, placeholders, suffix, send);
+    }
+
+    final Captions captions() {
+        return captions;
+    }
+
+    final void captions(Captions captions) {
+        this.captions = Objects.requireNonNull(captions);
+    }
 
     @NotNull
     public abstract CommandActor getActor();

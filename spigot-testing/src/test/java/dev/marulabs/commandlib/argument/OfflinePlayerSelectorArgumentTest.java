@@ -46,10 +46,10 @@ class OfflinePlayerSelectorArgumentTest {
 
         run(sender, new OfflinePlayer[0], "players @a", "players @r", "uuids @a", "uuids @r");
 
-        assertThat(sender.getSentMessageTexts()).containsExactly("no player found.",
-                                                                 "no player found.",
-                                                                 "no player found",
-                                                                 "no player found");
+        assertThat(sender.getSentMessageTexts()).containsExactly("No player was found",
+                                                                 "No player was found",
+                                                                 "No player was found",
+                                                                 "No player was found");
     }
 
     @Test
@@ -58,7 +58,8 @@ class OfflinePlayerSelectorArgumentTest {
 
         run(sender, new OfflinePlayer[]{player("Steve", STEVE_ID)}, "players @p", "uuids @s");
 
-        assertThat(sender.getSentMessageTexts()).containsExactly("@p is invalid selector.", "@s is invalid selector");
+        assertThat(sender.getSentMessageTexts()).containsExactly("@p is not a valid selector",
+                                                                 "@s is not a valid selector");
     }
 
     @Test
@@ -78,7 +79,7 @@ class OfflinePlayerSelectorArgumentTest {
 
         assertThat(sender.getSentMessageTexts()).containsExactly("Incorrect argument for command",
                                                                  "players nobody<--[HERE]",
-                                                                 "nobody is not found or not valid UUID");
+                                                                 "nobody is neither a known player nor a valid UUID");
     }
 
     @Test

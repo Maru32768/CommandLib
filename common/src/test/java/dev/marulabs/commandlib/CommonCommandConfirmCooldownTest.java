@@ -8,6 +8,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 
@@ -201,10 +202,11 @@ class CommonCommandConfirmCooldownTest {
 
     @Test
     void formats_durations_rounded_up_to_seconds() {
-        assertThat(Cooldown.format(Duration.ofMillis(1))).isEqualTo("1s");
-        assertThat(Cooldown.format(Duration.ofMinutes(1))).isEqualTo("1m");
-        assertThat(Cooldown.format(Duration.ofSeconds(3723))).isEqualTo("1h 2m 3s");
-        assertThat(Cooldown.format(Duration.ofHours(1))).isEqualTo("1h");
+        assertThat(Cooldown.format(Duration.ofMillis(1), Captions.DEFAULT, Locale.ENGLISH)).isEqualTo("1s");
+        assertThat(Cooldown.format(Duration.ofMinutes(1), Captions.DEFAULT, Locale.ENGLISH)).isEqualTo("1m");
+        assertThat(Cooldown.format(Duration.ofSeconds(3723), Captions.DEFAULT, Locale.ENGLISH)).isEqualTo("1h 2m 3s");
+        assertThat(Cooldown.format(Duration.ofHours(1), Captions.DEFAULT, Locale.ENGLISH)).isEqualTo("1h");
+        assertThat(Cooldown.format(Duration.ofSeconds(3723), Captions.DEFAULT, Locale.JAPAN)).isEqualTo("1時間 2分 3秒");
     }
 
     private static TestCommandSource console() {

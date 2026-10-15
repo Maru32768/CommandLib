@@ -6,6 +6,7 @@ import dev.marulabs.commandlib.Argument;
 import dev.marulabs.commandlib.CommandContext;
 import dev.marulabs.commandlib.exception.ArgumentParseException;
 import dev.marulabs.commandlib.util.StringUtil;
+import dev.marulabs.commandlib.util.text.RichText;
 import org.bukkit.Bukkit;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
@@ -52,7 +53,8 @@ public class ObjectiveArgument extends Argument<Objective, ObjectiveArgument> {
         Scoreboard scoreboard = scoreboardSupplier.get();
         Objective objective = scoreboard == null ? null : scoreboard.getObjective(value);
         if (objective == null) {
-            throw new ArgumentParseException(x -> x.sendFailure(value + " is not a known objective"));
+            throw new ArgumentParseException(x -> x.sendFailure(RichText.translatable("arguments.objective.notFound",
+                                                                                      RichText.text(value))));
         }
         return objective;
     }

@@ -41,9 +41,9 @@ class KeyedArgumentFailureTest {
             tester.execute("recipe missing", sender);
         }
 
-        assertThat(sender.getSentMessageTexts()).containsExactly("story/missing is not a known advancement",
+        assertThat(sender.getSentMessageTexts()).containsExactly("Unknown advancement: story/missing",
                                                                  "commandlib:missing is not a known loot table",
-                                                                 "missing is not a known recipe");
+                                                                 "Unknown recipe: missing");
     }
 
     @Test
@@ -57,7 +57,7 @@ class KeyedArgumentFailureTest {
             tester.execute("recipe Bad:Key", sender);
         }
 
-        assertThat(sender.getSentMessageTexts()).containsExactly("Bad:Key is not valid namespaced key");
+        assertThat(sender.getSentMessageTexts()).containsExactly("Bad:Key is not a valid namespaced key");
     }
 
     @Test
@@ -77,7 +77,7 @@ class KeyedArgumentFailureTest {
             tester.execute("score kills", sender);
         }
 
-        assertThat(sender.getSentMessageTexts()).containsExactly("kills is not a known objective");
+        assertThat(sender.getSentMessageTexts()).containsExactly("Unknown scoreboard objective 'kills'");
     }
 
     @Test
@@ -91,6 +91,6 @@ class KeyedArgumentFailureTest {
             tester.execute("score kills", sender);
         }
 
-        assertThat(sender.getSentMessageTexts()).containsExactly("kills is not a known objective");
+        assertThat(sender.getSentMessageTexts()).containsExactly("Unknown scoreboard objective 'kills'");
     }
 }

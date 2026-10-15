@@ -69,6 +69,7 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
         try {
             C ctx = platformAdapter.createCommandContext(context);
             ctx.scheduler(scheduler);
+            ctx.captions(command.captions());
             return CurrentCommandContext.call(ctx, () -> runInContext(ctx));
         } catch (CommandFailure e) {
             throw e;
@@ -81,7 +82,7 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
     private int runInContext(C ctx) throws CommandFailure {
         try {
             if (!platformAdapter.hasPermission(ctx, command.permissionName(permissionPrefix))) {
-                return fail(ctx, () -> ctx.sendFailure("You do not have permission to execute this command."));
+                return fail(ctx, () -> ctx.sendFailure(Caption.PERMISSION_DENIED));
             }
 
             try {
@@ -93,7 +94,7 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
 
             for (Arguments<C> arguments : argumentsList) {
                 if (!platformAdapter.hasPermission(ctx, arguments.permissionName(permissionPrefix))) {
-                    return fail(ctx, () -> ctx.sendFailure("You do not have permission to execute this command."));
+                    return fail(ctx, () -> ctx.sendFailure(Caption.PERMISSION_DENIED));
                 }
 
                 try {
@@ -235,14 +236,14 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
             });
         }
         if (e instanceof TimeoutException) {
-            CommandFailure failure = ctx.captureFailure(() -> ctx.sendFailure("The command timed out."));
+            CommandFailure failure = ctx.captureFailure(() -> ctx.sendFailure(Caption.TIMEOUT));
             notifyUncaughtExceptionHandlers(e, ctx);
             return failure;
         }
         e.printStackTrace();
         CommandFailure failure = ctx.captureFailure(() -> {
-            ctx.sendFailure("An unexpected error occurred trying to execute that command.");
-            ctx.sendFailure("Check the console for details.");
+            ctx.sendFailure(Caption.UNEXPECTED_ERROR);
+            ctx.sendFailure(Caption.SEE_CONSOLE);
         });
         notifyUncaughtExceptionHandlers(e, ctx);
         return failure;
