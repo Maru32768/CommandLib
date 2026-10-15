@@ -1,8 +1,8 @@
 package dev.marulabs.commandlib.nms.spigot_1_20_1;
 
-import java.lang.reflect.Field;
 import dev.marulabs.commandlib.util.nms.command.NMSCommandBuildContext;
 import dev.marulabs.commandlib.util.nms.server.NMSDataPackResources;
+import java.lang.reflect.Field;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.server.ReloadableServerResources;
 

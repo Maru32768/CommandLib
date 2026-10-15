@@ -1,8 +1,8 @@
 package dev.marulabs.commandlib.nms.spigot_1_20_1;
 
 import com.mojang.brigadier.arguments.ArgumentType;
-import java.util.function.Supplier;
 import dev.marulabs.commandlib.util.nms.argument.NMSArgumentTypeRegistrar;
+import java.util.function.Supplier;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.commands.synchronization.ArgumentTypeInfos;
 

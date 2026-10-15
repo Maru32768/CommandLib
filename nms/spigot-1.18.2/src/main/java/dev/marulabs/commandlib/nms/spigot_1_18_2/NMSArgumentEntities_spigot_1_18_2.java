@@ -3,10 +3,10 @@ package dev.marulabs.commandlib.nms.spigot_1_18_2;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import java.util.List;
-import java.util.stream.Collectors;
 import dev.marulabs.commandlib.util.nms.argument.NMSArgumentEntities;
 import dev.marulabs.commandlib.util.nms.exception.UncheckedCommandSyntaxException;
+import java.util.List;
+import java.util.stream.Collectors;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.EntityArgument;
 
