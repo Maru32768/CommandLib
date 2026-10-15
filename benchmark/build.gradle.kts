@@ -30,6 +30,23 @@ tasks.register<JavaExec>("jmh") {
     outputs.upToDateWhen { false }
 }
 
+tasks.register("jmhBaseline") {
+    group = "benchmark"
+    description = "Writes build/results/jmh/results.json to baseline.json without the raw samples."
+    val resultsFile = jmhResults.get().asFile
+    val baselineFile = file("baseline.json")
+    doLast {
+        @Suppress("UNCHECKED_CAST")
+        val results = groovy.json.JsonSlurper().parse(resultsFile) as List<MutableMap<String, Any?>>
+        results.forEach { result ->
+            (listOf(result["primaryMetric"]) + (result["secondaryMetrics"] as Map<*, *>).values).forEach {
+                (it as MutableMap<*, *>).keys.removeAll(listOf("rawData", "rawDataHistogram"))
+            }
+        }
+        baselineFile.writeText(groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(results)) + "\n")
+    }
+}
+
 // The regression tolerances of docs/benchmarks.md: the allowed relative change in the worse direction.
 val tolerances = mapOf(
     "p50" to 0.10,
