@@ -92,7 +92,7 @@
 - `[ ]` async execution を追加する。`executeAsync(ctx -> CompletableFuture<...>)` で重い処理を非同期化し、結果を
   main thread（Folia では entity / region thread）で返す。例外は既存の `UncaughtExceptionHandler` に流す。
   Folia support の thread 抽象と設計を共有する。
-- `[ ]` confirmation / cooldown を middleware を待たずに標準機能として追加する（`confirm()`、`cooldown(Duration)`）。
+- `[ ]` cooldown の reset / query API と永続化（現在は memory 上のみ）、argument branch 単位の confirm / cooldown。
 - `[ ]` permission 以外の state で command の表示を切り替える visibility predicate を追加する（現在は permission を付け外しして
   `CommandLib.refresh(player)` する方式を docs で案内）。
 - `[ ]` annotation API を設計・実装する。

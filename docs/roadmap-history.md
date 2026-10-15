@@ -62,6 +62,8 @@
   配置違反を登録時の runtime error にする（`docs/design/optional-variadic-arguments.md`、2026-10-15）。
 - `[x]` testing artifact に JUnit 5 の `CommandLibExtension` / `@Sender`、`CommandTester#suggest`、command tree snapshot
   （`assertCommandTreeMatchesSnapshot`）を追加する（common / spigot / paper、2026-10-15）。
+- `[x]` confirmation / cooldown を標準機能として追加する（`confirm()`、`cooldown(Duration)`、bypass permission、
+  差し替え可能な message と clock、2026-10-15）。
 - `[x]` dynamic command tree refresh を追加する。`CommandLib.refresh(player)` / `refreshAll()`（Spigot / Paper / Forge /
   NeoForge、2026-10-15）。
 
