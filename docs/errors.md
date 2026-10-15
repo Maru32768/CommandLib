@@ -102,7 +102,9 @@ child is named or aliased `help`.
 The token is syntactically valid, but converting it to the Java value fails in the argument's `parseImpl`. Examples:
 an unknown name for `EnumArgument`, `LiteralArgument`, `ObjectArgument`, `NameableObjectArgument`, `TeamArgument`,
 `ObjectiveArgument`, `OfflinePlayerArgument`; an unknown key for `AdvancementArgument`, `LootTableArgument`,
-`RecipeArgument`; an unknown registry key for Spigot's `SoundArgument`, `BiomeArgument`, `AttributeArgument`.
+`RecipeArgument`; an unknown registry key for Spigot's `SoundArgument`, `BiomeArgument`, `AttributeArgument`, and
+for `RegistryArgument` on Spigot and Forge / NeoForge; fewer ticks than the minimum of `TimeArgument` on servers before
+1.19.4.
 
 CommandLib uses two message shapes:
 
