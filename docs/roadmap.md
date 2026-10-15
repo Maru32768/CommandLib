@@ -21,7 +21,7 @@
 | 型安全な argument callback              | `[x]` | `Unary` から `Hept` までの typed branch callback がある。                                                                                        | 8 個以上の引数。                                     |
 | Variadic / optional arguments       | `[x]` | 末尾の `optional(default)` / `optional(Extractor)` と `variadic([max])`（`List<T>`）がある。配置違反は登録時に `IllegalStateException`（[`docs/design/optional-variadic-arguments.md`](design/optional-variadic-arguments.md)）。 | 上限なしの variadic、`Optional<T>` 形式、実サーバーでの検証。 |
 | Execution result                    | `[x]` | `ctx.setResult(int)` が `/execute store result` に、失敗（例外・権限・prerequisite 等）が `store success 0` に反映される。spigot-1.16.5 / paper-26.3 の integration test あり。 | Forge / NeoForge の実サーバー検証。 |
-| Async execution                     | `[ ]` | async suggestions のみ。実行は同期。                                                                                                            | `CompletableFuture` ベースの非同期実行と main / region thread への復帰。                      |
+| Async execution                     | `[x]` | `executeAsync(...)`（全 typed branch）と `ctx.supplyAsync` / `runAsync`、platform 別の `CommandScheduler` で sync thread へ復帰する（[`docs/execution.md`](execution.md)）。 | Folia の region / entity scheduler、実サーバーでの scheduler 検証。 |
 | Dynamic command tree refresh        | `[x]` | `CommandLib.refresh(player)` / `refreshAll()` が Spigot / Paper / Forge / NeoForge にある（[`docs/permissions.md`](permissions.md)）。 | permission 以外の state による表示切替 predicate、実 client での検証。 |
 | Vanilla-style feedback              | `[x]` | `ctx.sendSuccess(message, broadcastToOps)` が全 platform で vanilla の `CommandSourceStack#sendSuccess` を通り、gamerule と silent source を尊重する。 | selector で複数 target に適用した場合の集計 message、gamerule の tests。 |
 | Bukkit / Spigot / Paper support     | `[~]` | `spigot` module（Spigot 1.16.5〜26.3 を Tested）と `paper` module（Paper 1.21〜26.3 を Tested）がある。 | Folia 対応。 |
@@ -47,9 +47,9 @@
 | Typed command options               | `[~]` | flag / value / count option、default、dependency、repeatable（`List<T>`）、alias、required、`mutuallyExclusive(...)`、`OptionParseException`、help の option section がある（[`docs/options.md`](options.md)）。 | subcommand への継承、positional argument の後の option、固定 arity の multi-value、排他 group の専用 error message。 |
 | Generated usage / help              | `[~]` | README と snapshot tests に usage / help がある。server の `/help` 用の text は `serverHelp(...)` で指定でき、Bukkit 系では plugin の index に載る。 | formatter API、theme、locale、MiniMessage / Adventure。                        |
 | Error taxonomy                      | `[~]` | parse / validation / prerequisite / option 系の例外があり、各 error で sender に見える message を [`docs/errors.md`](errors.md) で公開仕様化した。 | unknown subcommand、missing argument の専用 error、error formatter API。 |
-| Exception handling                  | `[~]` | uncaught exception handler の仕組みがある。                                                                                                     | exception mapping、result handling、docs。                                    |
-| Preprocess / prerequisite           | `[~]` | `addPreprocess(...)`、`addPrerequisite(...)`、`requirePlayer()` 等がある。                                                                     | reusable registry、middleware 化、diagnostics。                                |
-| Middleware / interceptor            | `[ ]` | なし。                                                                                                                                     | execution pipeline API。                                                    |
+| Exception handling                  | `[x]` | uncaught exception handler と、middleware での exception mapping / result handling がある。 | global な exception handler。 |
+| Preprocess / prerequisite           | `[~]` | `addPreprocess(...)`（middleware 化済み）、`addPrerequisite(...)`、`requirePlayer()` 等がある。 | reusable condition registry、diagnostics。 |
+| Middleware / interceptor            | `[x]` | `addMiddleware(CommandMiddleware)` で pre / post hook、exception mapping、result handling を合成でき、child と argument branch に継承される。`confirm()` / `cooldown()` / preprocess も middleware 上にある。 | platform 単位の global middleware。 |
 | Sender abstraction                  | `[ ]` | platform context に依存。                                                                                                                   | sender mapper、custom sender、context enrichment。                            |
 | Dependency injection                | `[ ]` | なし。                                                                                                                                     | constructor / method parameter injection、extension point。                  |
 | Annotation API                      | `[ ]` | なし。                                                                                                                                     | `@Command`、`@Subcommand`、`@Permission`、`@Suggest`、`@Option` 等。             |
@@ -96,15 +96,12 @@
   Paper 1.21.3〜26.x で動くことを integration test（`CommandSyntaxExceptionTest`）で確認する。
 - `[ ]` optional / variadic argument を実サーバー（Spigot / Paper / modded の integration test）で検証する。各 token を
   platform の `ArgumentType#parse` で読み直す実装のため、command tree の大きさ（`maxCount` × option の展開）も確認する。
-- `[ ]` async execution を追加する。`executeAsync(ctx -> CompletableFuture<...>)` で重い処理を非同期化し、結果を
-  main thread（Folia では entity / region thread）で返す。例外は既存の `UncaughtExceptionHandler` に流す。
-  Folia support の thread 抽象と設計を共有する。
+- `[ ]` platform 単位の global middleware を追加する（現在は top-level command ごとに `addMiddleware`）。
 - `[ ]` cooldown の reset / query API と永続化（現在は memory 上のみ）、argument branch 単位の confirm / cooldown。
 - `[ ]` permission 以外の state で command の表示を切り替える visibility predicate を追加する（現在は permission を付け外しして
   `CommandLib.refresh(player)` する方式を docs で案内）。
 - `[ ]` annotation API を設計・実装する。
 - `[ ]` Kotlin DSL を設計・実装する。
-- `[ ]` middleware / interceptor API を追加する。
 - `[ ]` 8 引数以上を raw types / casts なしで扱える表現と explicit Java builder API を追加する。
 - `[~]` options の継承と配置拡張（subcommand への継承、positional argument の後の option、固定 arity の multi-value）を実装する。
   repeatable / count / aliases / required / 排他は実装済み。

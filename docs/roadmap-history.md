@@ -68,6 +68,9 @@
   （`assertCommandTreeMatchesSnapshot`）を追加する（common / spigot / paper、2026-10-15）。
 - `[x]` confirmation / cooldown を標準機能として追加する（`confirm()`、`cooldown(Duration)`、bypass permission、
   差し替え可能な message と clock、2026-10-15）。
+- `[x]` middleware / interceptor API（`addMiddleware`）と async execution（`executeAsync`、`CommandScheduler` による sync thread
+  への復帰）を追加し、preprocess / confirm / cooldown を middleware 上に載せる（`docs/execution.md`、
+  `docs/design/execution-pipeline.md`、2026-10-15）。
 - `[x]` dynamic command tree refresh を追加する。`CommandLib.refresh(player)` / `refreshAll()`（Spigot / Paper / Forge /
   NeoForge、2026-10-15）。
 
