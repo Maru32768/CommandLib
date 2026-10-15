@@ -108,13 +108,38 @@ public final class StatsCommand extends Command {
 | Platform | Sync executor | Async executor |
 |---|---|---|
 | Spigot, Paper | The main thread, through the Bukkit scheduler of the registering plugin; a task given on the main thread runs at once | The Bukkit scheduler's async pool |
+| Folia (`paper` artifact) | The thread that owns the source: the entity scheduler of the entity the command runs as, the region of a command block, or the global region for the console; a task given on that thread runs at once | Folia's async scheduler |
 | Forge, NeoForge | The server of the command's source (`MinecraftServer#execute`), which runs a task at once on the server thread | A pool of daemon threads owned by CommandLib, growing with the work |
 | Velocity | The calling thread: the proxy has no main thread and its API may be used from any thread | The proxy's scheduler, under the registering plugin |
 | Testers | `Runnable::run` unless the builder's `scheduler(...)` sets another | `Runnable::run` unless set |
 
 The Bukkit scheduler refuses the tasks of a disabled plugin, so the follow-up of a command still running when its
 plugin is disabled is dropped. The scheduler is an interface, `CommandScheduler`, whose sync executor is chosen per
-command context, so that Folia's region and entity threads can be supported later; Folia itself is not supported yet.
+command context, which is how Folia gets the thread of each command.
+
+### Folia
+
+Use the `paper` artifact. It detects Folia at runtime and needs no other setup; the `spigot` artifact refuses Folia
+with an `UnsupportedOperationException` from `CommandLib.register`. Folia loads only plugins that declare it, in
+`plugin.yml` or `paper-plugin.yml`:
+
+```yaml
+folia-supported: true
+```
+
+- **Sync thread**: Folia runs a command on the thread of its source, and the sync executor is that thread. For
+  `/execute as <entity>`, it is the entity's scheduler, so a follow-up such as `ctx.supplyAsync(...).thenAccept(...)`
+  may touch that entity and its surroundings. A command block's follow-up runs in the block's region, the console's on
+  the global region thread. Blocks and entities of other regions are not safe to touch from any of them; use Folia's
+  own schedulers for those.
+- **Removed entities**: Folia drops the tasks of an entity that was removed, so the follow-up of a command run by a
+  player who left is dropped, without the post-hooks of the middlewares.
+- **Registration**: register commands during the plugin's initialization, as on Paper. A later `register` or
+  `unregister` must run on the global region thread (`Bukkit.getGlobalRegionScheduler()`).
+- **`CommandLib.refresh` / `refreshAll`**: call them on any region thread or the global region thread; Folia sends the
+  tree on each player's own thread.
+- **Functions**: Folia runs no data pack functions and has no `/minecraft:reload`, so CommandLib does not compile them
+  again there.
 
 ### The result for `/execute store`
 

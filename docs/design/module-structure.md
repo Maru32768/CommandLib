@@ -143,15 +143,18 @@ These platforms have no module. Adding one should follow the rules above (platfo
 
 | Platform | Notes |
 |---|---|
-| Folia | Paper-family; the scheduler / threading model must be handled. |
 | Fabric | Command registration / Brigadier integration; may become another `modded` loader or a separate module. |
 
 Mohist has no module of its own. It is handled through `spigot` compatibility and the Mohist integration targets.
 
+Folia has no module of its own either: Folia keeps Paper's command and lifecycle API, so the `paper` artifact detects
+Folia at runtime and schedules async commands on its region and entity threads (`docs/execution.md#folia`). The
+`spigot` artifact refuses Folia, since the Bukkit scheduler throws there and its command map and NMS paths assume one
+main thread.
+
 ## Open Questions
 
 - Should `paper` share any source with `spigot`, or should duplication be accepted until a true neutral abstraction appears?
-- Should `folia` be a separate artifact or a Paper runtime mode?
 - Should `mohist` stay tested under `spigot`, or become its own artifact if its differences grow?
 - Should message APIs expose CommandLib's own abstraction, Adventure, or platform-native components?
 - Should `modded` be split into a Minecraft-version module and loader modules once Fabric is added (see `docs/roadmap.md`)?

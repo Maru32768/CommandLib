@@ -33,7 +33,7 @@ CommandLib の長期目標は、Minecraft `1.16.5` から各リリース時点�
 |---|---:|---|---|
 | Spigot | `Tested` | `spigot` module。compile target は Spigot API `1.16.5`。typed NMS module により `1.16.4`〜`26.3` を扱う。Spigot integration target は `1.16.5`、`1.17.1`、`1.18`〜`26.3` の全 release。 | Bukkit API 互換を基準にし、Paper-specific API に依存しない。Paper 上でも `1.16.5`〜`1.21.1` を integration target で確認している。 |
 | Paper | `Tested` | `paper` module と `paper-testing`。Paper 公式 command API と Adventure component を使う。paper module の integration target は `1.21`、`1.21.3`〜`1.21.11`、`26.1.1`〜`26.3`（Paper `1.21.2` と `26.1` の build はない）。 | Paper `1.20.6` 以前は spigot module を使い、`1.16.5`〜`1.21.1` の Paper integration target で確認している。それより新しい Paper で spigot module を使うと paper artifact を案内する `NMSClassNotFoundException` になり、`paper-26.3-spigot-jar` で確認している。 |
-| Folia | `Planned` | なし。 | scheduler、threading、command registration の安全性確認が必要。 |
+| Folia | `Best effort` | `paper` module が実行時に Folia を検出し、async command の sync executor を entity / region / global region scheduler、async executor を async scheduler にする。`paper-testing` の `FoliaCommandSchedulerTest` で mock した scheduler に対して確認。 | 実 Folia server の integration target はまだない（fixture が Bukkit scheduler を使うため Folia 用 fixture が必要）。`spigot` module は Folia では `CommandLib.register` が `UnsupportedOperationException` になる。plugin 側で `folia-supported: true` を宣言する。Folia は function を実行せず reload もないため、function の再 compile はしない。詳細は [execution.md](execution.md#folia)。 |
 | Mohist | `Best effort` | integration fixture: `1.16.5`, `1.20.1`。README に tested version として記載あり。 | Bukkit compatibility 上で動かす方針。Forge side との干渉確認が必要。 |
 | Velocity | `Best effort` | `velocity` module と `velocity-testing`。Velocity API `3.4.0`（Java 17）に対して compile し、command を `BrigadierCommand` で登録する。unit test は Velocity の Brigadier fork 上で実行。 | repository に実 proxy の integration target はない。2026-10-15 に Velocity `3.4.0`（Java 17）と `4.2.0`（Adventure 5、Java 25）の実 proxy で、plugin から登録・実行・失敗 message・permission default・RichText の click・補完・登録解除を client なしの command source で手動確認した。player client からの command tree 送信は未確認。argument は Brigadier の基本型、`DurationArgument`、`LiteralArgument` / `EnumArgument` / `ObjectArgument` / `NameableObjectArgument` と proxy 用の `PlayerArgument`（online player）、`ServerArgument`（`RegisteredServer`）に限る。world / entity / location 系 argument は提供しない。Velocity には operator も permission の default 登録もないため、`DefaultPermission.ALL` 以外は permission plugin が付与しない限り player に許可されない（console は常に許可）。command tree を再送する API がないため `CommandLib.refresh` はない。 |
 | Forge | `Best effort` | `modded` の Stonecutter tree の `forge-1.16.5` / `forge-1.20.1` node（artifact: `forge-1.16.5` / `forge-1.20.1`）。`forge-testing-<version>` と integration target あり。 | 上記以外の Forge version は未対応。 |
@@ -69,7 +69,7 @@ CommandLib は `1.16.5` から最新安定版までのサポートを目標に�
 - Bukkit family は `spigot` module と `paper` module に分かれている。`bukkit` module / artifact は存在しない（"Bukkit" は API family 名としてのみ使う）。
 - Spigot module は Bukkit/Spigot API 互換を基準にし、Paper-specific API を使わない。
 - Paper module は Paper 公式 API を基準にし、Paper の command API、Adventure component、lifecycle API を優先する。
-- Folia は Paper 互換として扱わず、Paper/Folia の差分と threading model を別途確認する。
+- Folia は専用 module を持たず `paper` module で扱う。Paper の command / lifecycle API はそのまま使い、thread が分かれる部分（async command の scheduler、function の再 compile、data reload）だけ実行時に切り替える。`spigot` module は Folia を拒否する。
 - Mohist は Bukkit compatibility を前提にしつつ、Forge 連携部分の干渉を別途確認する。
 - Forge と NeoForge は `modded` module（Stonecutter node）で扱う。Fabric は platform-specific module または loader の追加で扱う。
 - unsupported version / platform でも偶然動く可能性はあるが、test と docs で確認するまでは supported としない。
@@ -90,7 +90,7 @@ CommandLib は `1.16.5` から最新安定版までのサポートを目標に�
 | `common-testing` / `spigot-testing` / `paper-testing` / `velocity-testing` / `modded-testing` | 各 platform 向けの公開 testing artifact。 |
 | `integration-test` | 非公開の実サーバー integration test aggregator。 |
 
-未実装の module（`folia` / `fabric`）は Planned。Mohist は専用 module を持たず、`spigot` 互換と integration target で扱う。
+未実装の module（`fabric`）は Planned。Mohist は専用 module を持たず、`spigot` 互換と integration target で扱う。Folia も専用 module を持たず、`paper` module で扱う。
 
 方針:
 
@@ -127,7 +127,7 @@ CommandLib は `1.16.5` から最新安定版までのサポートを目標に�
 
 ### P2
 
-- Folia 対応方針を決める。
+- Folia の実サーバー integration target を追加する（Folia の scheduler を使う fixture が必要）。
 - Velocity の実 proxy integration target を追加する。
 - NeoForge / Fabric module の分割方針を決める。
 

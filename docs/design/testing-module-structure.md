@@ -89,7 +89,6 @@ Not responsibilities:
 Open questions:
 
 - Whether CommandLib should have its own Adventure component assertions or rely on Kyori test utilities.
-- Whether to include Folia-safe behavior in `paper-testing` or create a separate `folia-test`.
 
 ## `modded-testing`
 
@@ -183,7 +182,9 @@ Split later when:
 ## Remaining Work
 
 - Decide whether the platform metadata should become a typed model instead of the current per-script `platform` property.
-- Add Fabric / Folia testing targets when those platforms are added, and a real Velocity proxy target.
+- Add a Fabric testing target when that platform is added, a real Folia server target (it needs a fixture that uses
+  Folia's schedulers instead of the Bukkit scheduler), and a real Velocity proxy target. Folia's scheduling is tested in
+  `paper-testing` with mocked schedulers (`FoliaCommandSchedulerTest`).
 - Split `paper-integration-test` or `modded-integration-test` out of the aggregator when the "Split later when" conditions above hold.
 
 ## Roadmap Checklist

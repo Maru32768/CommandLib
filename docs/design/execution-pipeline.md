@@ -12,7 +12,7 @@ executor, async executors, and the thread abstraction they share. User documenta
   the sender without the command author managing schedulers.
 - One mechanism for both: a middleware's post-execution hook sees the end of an async executor's work, not the moment
   it was started.
-- The thread abstraction is narrow enough for Folia's region and entity threads to implement later.
+- The thread abstraction is narrow enough for Folia's region and entity threads.
 - Synchronous commands keep their exact behavior, including `/execute store result|success` and failure messages.
 
 ## Stages
@@ -140,10 +140,31 @@ The scheduler is passed to `CommandNodeCreator` by each platform's `CommandLib` 
 future on the sync executor, so non-async dependent stages (`thenAccept`) run on the sync thread whether they were
 attached before or after completion.
 
-**Folia**: `sync(ctx)` takes the context so that an implementation can pick the sender's entity scheduler (players,
-entities) or the region / global scheduler (console, command blocks), and the contract "runs inline when already on
-that thread" maps to Folia's ownership checks such as `Bukkit.isOwnedByCurrentRegion(entity)`. Nothing else in the pipeline assumes a single
-server thread. Folia itself is out of scope.
+**Folia**: the paper module picks `FoliaCommandScheduler` when `io.papermc.paper.threadedregions.RegionizedServer`
+exists. `sync(ctx)` reads the context's `CommandSourceStack` and returns the executor of the thread Folia dispatched the
+command on:
+
+| Source | Sync executor | Runs inline when |
+|---|---|---|
+| An executor entity (players, `/execute as`, command minecarts) | `entity.getScheduler().execute(plugin, task, null, 1)` | `Bukkit.isOwnedByCurrentRegion(entity)` |
+| A `BlockCommandSender` (command blocks) | `Bukkit.getRegionScheduler().execute(plugin, blockLocation, task)` | `Bukkit.isOwnedByCurrentRegion(blockLocation)` |
+| Anything else (console, RCON) | `Bukkit.getGlobalRegionScheduler().execute(plugin, task)` | `RegionizedServer.isGlobalTickThread()` |
+
+Async is `Bukkit.getAsyncScheduler().runNow`. All of these are in Paper's API from 1.20 except the global tick thread
+check, which Paper's API has only from 1.21.1 and is called reflectively on Folia's `RegionizedServer`. The executor
+entity comes before the sender because it is what Folia's dispatch ran on and what the command acts on.
+
+The entity scheduler takes no retired callback, so a task for an entity that was removed (a player who left) is dropped,
+like a task of a disabled plugin on the Bukkit scheduler. Running it elsewhere would complete the stages but run the
+executor or the post-hooks off the entity's thread, where Folia's thread checks may throw.
+
+Elsewhere in the paper module: the command tree update and the function work were already scheduled on the global
+region scheduler; Folia's `Commands#sendCommands` sends the tree through the player's own scheduler, so
+`updateCommands()` from the global region or another region thread is safe, and `refresh` accepts any tick thread
+(`Bukkit.isPrimaryThread()` is true on each of them on Folia). Folia runs no data pack functions and has no data reload,
+so `ServerFunctions` does not compile them again there, and a registration that missed the `COMMANDS` event logs a
+warning instead of calling `Bukkit.reloadData()`. The spigot module throws `UnsupportedOperationException` from
+`CommandLib.register` on Folia.
 
 ## Thread safety of the context
 
@@ -159,7 +180,8 @@ still requires the sync thread.
 - `common` tests use `FakeScheduler`, which queues sync tasks only when they come from an async task or another
   thread, mirroring the platforms' "inline on the sync thread" contract, and lets a test run the async and sync queues
   step by step (`AsyncExecutionTest`, `CommandMiddlewareTest`).
-- `spigot` and `paper-testing` mock `Bukkit`'s scheduler to check `BukkitCommandScheduler`; `modded-testing` checks
+- `spigot` and `paper-testing` mock `Bukkit`'s scheduler to check `BukkitCommandScheduler`, and `paper-testing` mocks
+  Folia's schedulers to check `FoliaCommandScheduler`; `modded-testing` checks
   `ServerCommandScheduler` with a mocked source and server; `velocity-testing` checks `VelocityCommandScheduler` with
   a mocked proxy.
 - Each tester has an `AsyncCommandTest` with a queued async executor. `spigot-testing` passes the sender as the
@@ -167,7 +189,6 @@ still requires the sync thread.
 
 ## Not done
 
-- Folia scheduling.
 - A platform-wide middleware registration.
 - Dependency injection hooks, sender mappers and context enrichment beyond what a middleware can do with the existing
   context.
