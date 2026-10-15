@@ -743,7 +743,9 @@ Valid inputs:
 ```
 
 Any argument can be an option's value, with its type, suggestions and validation:
-`option(Options.of("world", 'w', new WorldArgument("world")))` reads `--world world_nether` as a `World`.
+`option(Options.of("world", 'w', new WorldArgument("world")))` reads `--world world_nether` as a `World`. An option
+can need its own permission node: `Options.flag("silent", 's').permission(DefaultPermission.OP)` hides `-s` from
+senders without `<command node>.option.silent` ([permissions](docs/permissions.md#options)).
 
 Options must appear before regular arguments. This is invalid:
 

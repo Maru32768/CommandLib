@@ -27,12 +27,17 @@ final class CommandTree {
     private static CommandEntry command(CommonCommand<?, ?> command, String route, String prefix) {
         List<OptionEntry> options = new ArrayList<>();
         for (CommandOption<?, ?> option : command.options()) {
+            PermissionConfig permission = option.permissionConfig(command, prefix);
             options.add(new OptionEntry(option.names(),
                                         option.shortName(),
                                         option.hasValue() ? option.name() : null,
                                         option.isRequired(),
                                         option.maxOccurrences(),
-                                        option.description()));
+                                        option.description(),
+                                        permission == null ? null
+                                                : new PermissionEntry(permission,
+                                                                      route + " --" + option.name(),
+                                                                      PermissionEntry.OPTION)));
         }
         List<BranchEntry> branches = new ArrayList<>();
         for (Arguments<?> arguments : command.argumentsList()) {
@@ -100,8 +105,8 @@ final class CommandTree {
     }
 
     /**
-     * Every permission node of the commands, each command followed by its argument branches, the commands under each
-     * branch, and then its child commands.
+     * Every permission node of the commands, each command followed by its options that need a permission, its argument
+     * branches, the commands under each branch, and then its child commands.
      */
     static List<PermissionEntry> permissions(List<CommandEntry> commands) {
         List<PermissionEntry> permissions = new ArrayList<>();
@@ -111,6 +116,11 @@ final class CommandTree {
 
     private static void addPermissions(List<PermissionEntry> permissions, CommandEntry command) {
         permissions.add(command.permission);
+        for (OptionEntry option : command.options) {
+            if (option.permission != null) {
+                permissions.add(option.permission);
+            }
+        }
         for (BranchEntry branch : command.branches) {
             permissions.add(branch.permission);
             branch.children.forEach(x -> addPermissions(permissions, x));
@@ -257,19 +267,23 @@ final class CommandTree {
         final boolean required;
         final int maxOccurrences;
         final String description;
+        // Null for an option that needs no permission.
+        final @Nullable PermissionEntry permission;
 
         OptionEntry(List<String> names,
                     @Nullable Character shortName,
                     @Nullable String valueName,
                     boolean required,
                     int maxOccurrences,
-                    String description) {
+                    String description,
+                    @Nullable PermissionEntry permission) {
             this.names = List.copyOf(names);
             this.shortName = shortName;
             this.valueName = valueName;
             this.required = required;
             this.maxOccurrences = maxOccurrences;
             this.description = description;
+            this.permission = permission;
         }
 
         /**
@@ -299,16 +313,18 @@ final class CommandTree {
     static final class PermissionEntry {
         static final String COMMAND = "command";
         static final String ARGUMENT = "argument";
+        static final String OPTION = "option";
 
         final String node;
         final DefaultPermission defaultPermission;
         final String description;
         /**
-         * The route the node guards: a command's, or an argument branch's with its argument tags.
+         * The route the node guards: a command's, an argument branch's with its argument tags, or a command's with the
+         * option's long name.
          */
         final String route;
         /**
-         * {@link #COMMAND} or {@link #ARGUMENT}.
+         * {@link #COMMAND}, {@link #ARGUMENT} or {@link #OPTION}.
          */
         final String kind;
 

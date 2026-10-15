@@ -44,6 +44,11 @@ public final class CommandOption<T, C extends CommonCommandContext<?, ?>> {
     private final List<OptionValidator<C>> validators = new ArrayList<>();
     private String description = "";
     private boolean required;
+    // Whether the option needs a permission; the node is generated unless permissionNode is set.
+    private boolean restricted;
+    private @Nullable String permissionNode;
+    // Null to take the default of the command.
+    private @Nullable DefaultPermission defaultPermission;
 
     /**
      * An option that takes a value of {@code type}, which {@code parser} reads from the context by the option's
@@ -192,13 +197,69 @@ public final class CommandOption<T, C extends CommonCommandContext<?, ?>> {
     }
 
     /**
+     * Makes the option need the permission {@code <command node>.option.<name>}, such as
+     * {@code myplugin.command.ban.option.silent}, with the given default. A sender without it neither sees nor can give
+     * the option, and the node is registered and exported with the command's nodes.
+     */
+    public CommandOption<T, C> permission(@NotNull DefaultPermission defaultPermission) {
+        this.restricted = true;
+        this.defaultPermission = Objects.requireNonNull(defaultPermission);
+        return this;
+    }
+
+    /**
+     * Same as {@link #permission(DefaultPermission)} with this exact node, without the prefix, and the default of the
+     * command.
+     */
+    public CommandOption<T, C> permission(@NotNull String node) {
+        this.restricted = true;
+        this.permissionNode = Objects.requireNonNull(node);
+        return this;
+    }
+
+    /**
+     * Same as {@link #permission(DefaultPermission)} with this exact node, without the prefix.
+     */
+    public CommandOption<T, C> permission(@NotNull String node, @NotNull DefaultPermission defaultPermission) {
+        permission(node);
+        this.defaultPermission = Objects.requireNonNull(defaultPermission);
+        return this;
+    }
+
+    /**
+     * The node the option needs on {@code command}, or null when it needs none.
+     */
+    @Nullable
+    String permissionName(CommonCommand<?, ?> command, String prefix) {
+        if (!restricted) {
+            return null;
+        }
+        if (permissionNode != null) {
+            return permissionNode;
+        }
+        return prefix + "." + command.permissionNameWithoutPrefix() + ".option." + name;
+    }
+
+    @Nullable
+    PermissionConfig permissionConfig(CommonCommand<?, ?> command, String prefix) {
+        String node = permissionName(command, prefix);
+        if (node == null) {
+            return null;
+        }
+        return new PermissionConfig(node,
+                                    defaultPermission != null ? defaultPermission
+                                            : command.effectiveDefaultPermission(),
+                                    "");
+    }
+
+    /**
      * Returns an option that can be given up to {@code maxCount} times, such as {@code --tag a --tag b}, and whose
      * value is the list of the given values in input order. The list is empty when the option is not given, so the
      * default value of this option is not used. Each further occurrence adds a level of option nodes to the command
      * tree, so keep {@code maxCount} small.
      * <p>
      * Call this before {@link #requires(CommandOption)} and the other modifiers, which the returned option does not
-     * copy except for the aliases and the description.
+     * copy except for the aliases, the description and the permission.
      *
      * @throws IllegalStateException if this option is a flag
      */
@@ -218,6 +279,9 @@ public final class CommandOption<T, C extends CommonCommandContext<?, ?>> {
                                                                    return List.copyOf(values);
                                                                });
         option.suggestionArgument = suggestionArgument();
+        option.restricted = restricted;
+        option.permissionNode = permissionNode;
+        option.defaultPermission = defaultPermission;
         option.aliases.addAll(aliases);
         option.description = description;
         return option;

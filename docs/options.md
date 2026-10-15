@@ -132,6 +132,25 @@ public final class DeployCommand extends Command {
 The default value of a required option is never returned. Input that ends where the command has no executor, such as
 `/deploy` above, shows help instead of asking for the option.
 
+## Permissions
+
+`permission(DefaultPermission)` gives an option its own node, `<command node>.option.<name>`; `permission(node)` and
+`permission(node, DefaultPermission)` use an exact node instead, with the command's default unless one is given. A
+sender without the node does not see the option in the command tree, in suggestions or in help, cannot give it (also
+not inside a combined token such as `-fs`), and the runner checks it again before the command runs. The node is
+registered and exported with the command's other nodes; see [permissions](permissions.md#options).
+
+```java
+public final class BanCommand extends Command {
+    public BanCommand() {
+        super("ban");
+
+        option(Options.flag("silent", 's')
+                      .permission(DefaultPermission.OP));    // myplugin.command.ban.option.silent
+    }
+}
+```
+
 ## Mutually Exclusive Options
 
 `mutuallyExclusive(a, b, ...)` on the command allows at most one of the options in one input. Once one is given, the

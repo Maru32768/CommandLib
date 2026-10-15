@@ -7,29 +7,33 @@ import java.util.Map;
 import java.util.function.Predicate;
 
 /**
- * The requirement of an option node. It lets everyone use the node and tells the runner what the node gives.
- * Platforms keep a node's requirement when they copy or convert the node, as Paper's dispatcher mirror does, so the
- * requirement identifies an option node where the node object itself does not.
+ * The requirement of an option node. It lets a sender use the node when the sender has the permissions of the node's
+ * options, and tells the runner what the node gives. Platforms keep a node's requirement when they copy or convert
+ * the node, as Paper's dispatcher mirror does, so the requirement identifies an option node where the node object
+ * itself does not.
  */
 final class OptionNode<S> implements Predicate<S> {
     private final OptionGraph<S, ?> graph;
     private final List<? extends CommandOption<?, ?>> flags;
     private final @Nullable CommandOption<?, ?> value;
     private final @Nullable Map<? extends CommandOption<?, ?>, Integer> state;
+    private final Predicate<S> permitted;
 
     OptionNode(OptionGraph<S, ?> graph,
                List<? extends CommandOption<?, ?>> flags,
                @Nullable CommandOption<?, ?> value,
-               @Nullable Map<? extends CommandOption<?, ?>, Integer> state) {
+               @Nullable Map<? extends CommandOption<?, ?>, Integer> state,
+               Predicate<S> permitted) {
         this.graph = graph;
         this.flags = List.copyOf(flags);
         this.value = value;
         this.state = state;
+        this.permitted = permitted;
     }
 
     @Override
     public boolean test(S source) {
-        return true;
+        return permitted.test(source);
     }
 
     OptionGraph<S, ?> graph() {

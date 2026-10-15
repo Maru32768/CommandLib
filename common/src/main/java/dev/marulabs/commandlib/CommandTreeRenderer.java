@@ -42,7 +42,7 @@ final class CommandTreeRenderer {
             line(out,
                  depth + 1,
                  String.join(", ", names) + (option.valueName == null ? "" : " <" + option.valueName + ">")
-                         + notes(option.notes()));
+                         + notes(option.notes()) + (option.permission == null ? "" : permission(option.permission)));
         }
         for (BranchEntry branch : command.branches) {
             String arguments = branch.arguments.stream()

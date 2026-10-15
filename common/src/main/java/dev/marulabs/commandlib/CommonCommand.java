@@ -865,6 +865,10 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
     final List<PermissionConfig> permissionConfigs(@NotNull String prefix) {
         List<PermissionConfig> configs = new ArrayList<>();
         configs.add(permissionConfig(prefix));
+        options.stream()
+               .map(x -> x.permissionConfig(this, prefix))
+               .filter(Objects::nonNull)
+               .forEach(configs::add);
         argumentsList.stream()
                      .map(x -> x.permissionConfig(this, prefix))
                      .forEach(configs::add);

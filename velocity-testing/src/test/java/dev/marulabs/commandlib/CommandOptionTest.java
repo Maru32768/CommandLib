@@ -3,9 +3,11 @@ package dev.marulabs.commandlib;
 import com.velocitypowered.api.proxy.Player;
 import dev.marulabs.commandlib.argument.IntegerArgument;
 import dev.marulabs.commandlib.argument.PlayerArgument;
+import dev.marulabs.commandlib.argument.StringArgument;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class CommandOptionTest {
     @Test
@@ -32,5 +34,28 @@ class CommandOptionTest {
                                                                  "Steve:6:true",
                                                                  "Missing required option --target.");
         assertThat(tester.suggest("heal -f -t ", sender)).contains("Steve");
+    }
+
+    @Test
+    void an_option_with_a_permission_is_rejected_without_it() {
+        CommandTester tester = new CommandTester(new Command("ban") {{
+            CommandOption<Boolean, CommandContext> silent = option(Options.flag("silent", 's')
+                                                                          .permission(DefaultPermission.OP));
+            CommandOption<Boolean, CommandContext> force = option(Options.flag("force", 'f'));
+            argument(new StringArgument("target")).execute((target, ctx) -> {
+                ctx.sendMessage(target + ":" + ctx.getOption(silent) + ":" + ctx.getOption(force));
+            });
+        }}, "proxy.command");
+        FakeSender admin = FakeSender.player("Admin");
+        FakeSender mod = FakeSender.player("Mod")
+                                   .denyPermissions("proxy.command.ban.option.silent");
+
+        tester.execute("ban -fs Steve", admin);
+        tester.execute("ban -f Steve", mod);
+
+        assertThatThrownBy(() -> tester.execute("ban -f -s Steve", mod)).hasMessageContaining("Command syntax error");
+        assertThat(admin.getSentMessageTexts()).containsExactly("Steve:true:true");
+        assertThat(mod.getSentMessageTexts()).containsExactly("Steve:false:true");
+        assertThat(tester.commandTree()).contains("--silent, -s [proxy.command.ban.option.silent, OP]");
     }
 }

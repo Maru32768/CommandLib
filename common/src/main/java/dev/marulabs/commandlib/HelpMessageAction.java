@@ -71,7 +71,14 @@ final class HelpMessageAction<S, T, C extends CommonCommandContext<S, T>, U exte
         }
         usages.forEach(x -> x.format(ctx, formatter));
 
-        return new CommandHelp(path, command.description(ctx), usages, command.options(), command.examples());
+        List<CommandOption<?, C>> options = new ArrayList<>();
+        for (CommandOption<?, C> option : command.options()) {
+            String permission = option.permissionName(command, permissionPrefix);
+            if (permission == null || platformAdapter.hasPermission(ctx, permission)) {
+                options.add(option);
+            }
+        }
+        return new CommandHelp(path, command.description(ctx), usages, options, command.examples());
     }
 
     private void addArgumentChildUsages(List<Usage> usages,

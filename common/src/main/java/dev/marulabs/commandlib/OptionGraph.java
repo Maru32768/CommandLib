@@ -26,6 +26,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
@@ -57,18 +58,25 @@ final class OptionGraph<S, C extends CommonCommandContext<S, ?>> {
     private final int maxTokens;
     // The suggestions of the value of an option of an argument.
     private final Function<CommonArgument<?, C, ?>, SuggestionProvider<S>> suggestions;
+    // The permission node of each option that needs one.
+    private final Map<CommandOption<?, C>, String> permissions;
+    private final BiPredicate<S, String> hasPermission;
     private final Map<Map<CommandOption<?, C>, Integer>, Map<String, Transition<S, C>>> transitions = new HashMap<>();
 
     private OptionGraph(List<CommandOption<?, C>> options,
                         BiPredicate<CommandOption<?, C>, CommandOption<?, C>> excludes,
                         boolean redirects,
                         List<Set<String>> path,
-                        Function<CommonArgument<?, C, ?>, SuggestionProvider<S>> suggestions) {
+                        Function<CommonArgument<?, C, ?>, SuggestionProvider<S>> suggestions,
+                        Map<CommandOption<?, C>, String> permissions,
+                        BiPredicate<S, String> hasPermission) {
         this.options = List.copyOf(options);
         this.excludes = excludes;
         this.redirects = redirects;
         this.path = List.copyOf(path);
         this.suggestions = suggestions;
+        this.permissions = Map.copyOf(permissions);
+        this.hasPermission = hasPermission;
         this.maxTokens = options.stream()
                                 .mapToInt(x -> (x.hasValue() ? 2 : 1) * x.maxOccurrences())
                                 .sum();
@@ -80,8 +88,16 @@ final class OptionGraph<S, C extends CommonCommandContext<S, ?>> {
      */
     static <S, C extends CommonCommandContext<S, ?>> OptionGraph<S, C> of(PlatformAdapter<S, ?, C, ?> platformAdapter,
                                                                           CommonCommand<C, ?> command,
-                                                                          List<Arguments<C>> inheritedArguments) {
+                                                                          List<Arguments<C>> inheritedArguments,
+                                                                          String permissionPrefix) {
         List<CommandOption<?, C>> options = command.options();
+        Map<CommandOption<?, C>, String> permissions = new HashMap<>();
+        for (CommandOption<?, C> option : options) {
+            String permission = option.permissionName(command, permissionPrefix);
+            if (permission != null) {
+                permissions.put(option, permission);
+            }
+        }
         boolean redirects = inheritedArguments.isEmpty();
         Deque<Set<String>> path = new ArrayDeque<>();
         for (CommonCommand<C, ?> current = command; current != null; current = current.parent()) {
@@ -99,11 +115,35 @@ final class OptionGraph<S, C extends CommonCommandContext<S, ?>> {
                                                                                     argument,
                                                                                     null,
                                                                                     providers,
-                                                                                    inheritedArguments));
+                                                                                    inheritedArguments),
+                                 permissions,
+                                 platformAdapter::hasPermission);
     }
 
     List<CommandOption<?, C>> options() {
         return options;
+    }
+
+    /**
+     * The permission node of the option, or null when it needs none.
+     */
+    @Nullable
+    String permissionName(CommandOption<?, C> option) {
+        return permissions.get(option);
+    }
+
+    // The requirement of a token of the given options: the sender has the permission of each.
+    private Predicate<S> permitted(List<CommandOption<?, C>> tokenOptions) {
+        List<String> nodes = tokenOptions.stream()
+                                         .map(permissions::get)
+                                         .filter(Objects::nonNull)
+                                         .distinct()
+                                         .collect(Collectors.toList());
+        if (nodes.isEmpty()) {
+            return source -> true;
+        }
+        return source -> nodes.stream()
+                              .allMatch(x -> hasPermission.test(source, x));
     }
 
     boolean usesRedirects() {
@@ -152,7 +192,8 @@ final class OptionGraph<S, C extends CommonCommandContext<S, ?>> {
                                                                                  .requires(new OptionNode<>(OptionGraph.this,
                                                                                                             List.of(),
                                                                                                             option,
-                                                                                                            next))
+                                                                                                            next,
+                                                                                                            permitted(List.of())))
                                                                                  .executes(executor);
                     CommonArgument<?, C, ?> argument = option.suggestionArgument();
                     if (argument != null) {
@@ -163,7 +204,8 @@ final class OptionGraph<S, C extends CommonCommandContext<S, ?>> {
                                                                           .requires(new OptionNode<>(OptionGraph.this,
                                                                                                      List.of(),
                                                                                                      null,
-                                                                                                     null))
+                                                                                                     null,
+                                                                                                     permitted(token.options)))
                                                                           .build();
                     literal.addChild(valueNode);
                     nodes.add(literal);
@@ -173,7 +215,8 @@ final class OptionGraph<S, C extends CommonCommandContext<S, ?>> {
                                                                               .requires(new OptionNode<>(OptionGraph.this,
                                                                                                          token.options,
                                                                                                          null,
-                                                                                                         next))
+                                                                                                         next,
+                                                                                                         permitted(token.options)))
                                                                               .executes(executor);
                     CommandNode<S> node = target(literal, next);
                     nodes.add(node);

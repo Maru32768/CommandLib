@@ -95,6 +95,17 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
 
             try {
                 parseOptions(ctx);
+                for (CommandOption<?, C> option : optionGraph.options()) {
+                    String permission = optionGraph.permissionName(option);
+                    if (permission != null && ctx.hasOption(option)
+                            && !platformAdapter.hasPermission(ctx, permission)) {
+                        return fail(ctx,
+                                    CommandError.Kind.PERMISSION_DENIED,
+                                    null,
+                                    null,
+                                    () -> ctx.sendFailure(Caption.PERMISSION_DENIED));
+                    }
+                }
                 validateOptions(ctx);
             } catch (OptionParseException e) {
                 return fail(ctx, CommandError.Kind.OPTION, e, null, () -> e.sendMessage(ctx));

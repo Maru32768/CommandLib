@@ -123,7 +123,7 @@ public final class CommandDocs {
     /**
      * Returns every permission node as a JSON object: {@code permissionPrefix} and a {@code permissions} array of
      * {@code node}, {@code default} ({@code ALL}, {@code OP} or {@code NONE}), {@code description}, {@code route} and
-     * {@code kind} ({@code command} or {@code argument}).
+     * {@code kind} ({@code command}, {@code argument} or {@code option}).
      */
     public String permissionsJson() {
         Map<String, Object> root = new LinkedHashMap<>();
@@ -263,7 +263,7 @@ public final class CommandDocs {
                    .append(" | ")
                    .append(option.valueName == null ? "" : code("<" + option.valueName + ">"))
                    .append(" | ")
-                   .append(String.join(", ", option.notes()))
+                   .append(String.join(", ", optionNotes(option)))
                    .append(" | ")
                    .append(cell(plain(option.description)))
                    .append(" |\n");
@@ -363,7 +363,18 @@ public final class CommandDocs {
         json.put("required", option.required);
         json.put("maxOccurrences", option.maxOccurrences);
         json.put("description", plain(option.description));
+        if (option.permission != null) {
+            json.put("permission", permissionJson(option.permission));
+        }
         return json;
+    }
+
+    private static List<String> optionNotes(OptionEntry option) {
+        List<String> notes = new ArrayList<>(option.notes());
+        if (option.permission != null) {
+            notes.add("permission " + permissionCell(option.permission));
+        }
+        return notes;
     }
 
     private static Map<String, Object> permissionJson(PermissionEntry permission) {

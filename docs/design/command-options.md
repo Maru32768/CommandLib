@@ -318,14 +318,28 @@ The internal name prefix `__commandlib_option_` prevents the argument node name
 from appearing in `argumentNameToInputArgMap`, which is filtered in
 `CommonCommandContext.collectInputs`.
 
-Every option node has an `OptionNode` requirement, which lets everyone use the
-node and names the command's graph, the options a literal gives, the option a
+Every option node has an `OptionNode` requirement, which lets a sender use the
+node when the sender has the permission node of each option of the token (an
+option made with `permission(...)`; every flag of a combined token counts), and
+names the command's graph, the options a literal gives, the option a
 value node holds, and the state after the node. The runner identifies the
 command's own option nodes by it, so the option tokens of a parent command on
 the same path (an argument child such as `/config -f <key> set -f`) are not
 counted for the child. Platforms keep a node's requirement object when they copy
 or convert the node, as Paper's dispatcher mirror (`ApiMirrorRootNode`) does,
 while the node object itself is replaced.
+
+An option permission works with the redirects below: every token that reaches a
+state gives only options of that state, and the hub of the state and the hubs
+above it give only options of the state as well. A sender who may reach a state
+by any token may therefore use its hub, so vanilla's per-player copy, which
+copies only the nodes the player can use and resolves a redirect to the copy of
+its target, always finds the hub of a redirect it copies. The runner checks the
+node of each given option again before it parses the arguments, as it checks the
+command and branch nodes. The node is `<command path>.option.<name>` unless the
+option names an exact node; `CommonCommand#permissionConfigs` lists it after the
+command's own node, so the platforms register it, and `CommandTree` gives it to
+the exports with the kind `option` and the route `/<command> --<name>`.
 
 #### States and redirects
 
@@ -630,6 +644,10 @@ Key cases:
 - An argument child does not count the option tokens of its parent
 - The tree size of short flags, counts and repeatable options, and the shared
   argument nodes (`OptionTreeSizeTest`)
+- Option permissions: hidden and rejected without the node, also inside
+  combined flags, rejected by the runner when the node is gone at execution,
+  left out of help, registered and exported (`OptionPermissionTest`, and the
+  Spigot, Paper and Velocity testers)
 - Options of arguments: parsed, validated and suggested by the argument, read
   back after redirects for a type that is none of Brigadier's, the default of an
   optional argument, required otherwise, a shared name with a positional

@@ -25,6 +25,7 @@ The path is built from names, not from aliases:
 | `/config <key>` (argument branch) | `config.key` | `myplugin.command.config.key` |
 | `/msg <target> <text>` (one branch with two arguments) | `msg.target.text` | `myplugin.command.msg.target.text` |
 | `/config <key> get` (child of an argument branch) | `config.get` | `myplugin.command.config.get` |
+| `/ban --silent` (option with `permission(DefaultPermission)`) | `ban.option.silent` | `myplugin.command.ban.option.silent` |
 
 Running a route needs the node of every step on it. `/config <key> get` needs `myplugin.command.config`,
 `myplugin.command.config.key`, and `myplugin.command.config.get`. An alias such as `/sp` for `/spawn` uses the node of
@@ -52,6 +53,33 @@ class SpawnCommand extends Command {
 
 An overridden node replaces only that step; children keep building their own path from names
 (`/spawn` children still get `<prefix>.spawn.<child>`).
+
+### Options
+
+Options need no node of their own unless they ask for one. `permission(...)` on an option makes a sender without the
+node unable to see or give it:
+
+```java
+class BanCommand extends Command {
+    BanCommand() {
+        super("ban");
+        permission(DefaultPermission.ALL);
+
+        // myplugin.command.ban.option.silent, operators only
+        option(Options.flag("silent", 's').permission(DefaultPermission.OP));
+        // this exact node, with the command's default (ALL)
+        option(Options.string("reason", 'r', "").permission("myplugin.ban.reason"));
+        // this exact node and default
+        option(Options.flag("broadcast", 'b').permission("myplugin.ban.broadcast", DefaultPermission.NONE));
+
+        argument(new PlayerArgument("target")).execute((target, ctx) -> target.kickPlayer("Banned"));
+    }
+}
+```
+
+The generated node is the command's path (from names, as for children) followed by `.option.<name>`. Option nodes are
+registered, removed and exported like the other nodes of the command. Giving the option still needs the nodes of the
+route it is on.
 
 ## Defaults
 
@@ -147,10 +175,10 @@ no permission plugin sets the node. A `TRUE` or `FALSE` value always wins.
 
 | Place | Check |
 |---|---|
-| Client command tree, parsing | Each literal and argument node has a `requires` predicate. A sender without the node does not see it and the server parses the input as if it did not exist, reporting an unknown command or argument. |
+| Client command tree, parsing | Each literal and argument node has a `requires` predicate. A sender without the node does not see it and the server parses the input as if it did not exist, reporting an unknown command or argument. Each option token requires the nodes of its options, including every flag of a combined token such as `-fs`. |
 | Tab completion | Hidden nodes are not completed, and an argument's suggestions are empty without its branch node. |
-| Generated help | Only routes the sender may use are listed. |
-| Execution | The runner checks the command node and every argument branch node on the route again before parsing; a failure sends `You do not have permission to execute this command.` |
+| Generated help | Only routes the sender may use are listed, and only options the sender may give. |
+| Execution | The runner checks the command node, the node of every given option and every argument branch node on the route again before parsing; a failure sends `You do not have permission to execute this command.` |
 
 See [errors](errors.md#permission-denied) for what the sender sees.
 
