@@ -20,6 +20,8 @@ final class Arguments<C extends CommonCommandContext<?, ?>> {
     private final List<? extends CommonArgument<?, C, ?>> arguments;
     private final List<CommonCommand<C, ?>> children;
     private Function<C, String> description = ctx -> "";
+    // The text of description(String), or null when a function gives the description.
+    private @Nullable String staticDescription = "";
     private @Nullable String permissionNodeOverride = null;
     private @Nullable DefaultPermission defaultPermissionOverride = null;
     private String permissionDescription = "";
@@ -148,10 +150,17 @@ final class Arguments<C extends CommonCommandContext<?, ?>> {
 
     void description(String description) {
         this.description = ctx -> description;
+        this.staticDescription = description;
     }
 
     void description(Function<C, String> description) {
         this.description = Objects.requireNonNull(description);
+        this.staticDescription = null;
+    }
+
+    @Nullable
+    String staticDescription() {
+        return staticDescription;
     }
 
     String description(C ctx) {
@@ -201,6 +210,17 @@ final class Arguments<C extends CommonCommandContext<?, ?>> {
         return new PermissionConfig(permissionName(parent, prefix),
                                     effectiveDefaultPermission(),
                                     permissionDescription);
+    }
+
+    PermissionConfig permissionConfig(@NotNull String prefix) {
+        return permissionConfig(owner, prefix);
+    }
+
+    /**
+     * Whether the command runs when the input ends with this branch, instead of needing a child command.
+     */
+    boolean isExecutable() {
+        return arguments.isEmpty() ? executor != null : executorFor(arguments.get(arguments.size() - 1)) != null;
     }
 
     DefaultPermission effectiveDefaultPermission() {

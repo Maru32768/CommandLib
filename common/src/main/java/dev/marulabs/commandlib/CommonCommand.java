@@ -17,6 +17,8 @@ import java.util.function.Predicate;
 public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T extends CommonCommand<C, T>> {
     private final String name;
     private Function<C, String> description = ctx -> "";
+    // The text of description(String), or null when a function gives the description.
+    private @Nullable String staticDescription = "";
     private @Nullable String serverHelpShortText = null;
     private @Nullable String serverHelpFullText = null;
     private @Nullable String permissionNodeOverride = null;
@@ -61,10 +63,21 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
     public final void description(@NotNull String description) {
         Objects.requireNonNull(description);
         this.description = ctx -> description;
+        this.staticDescription = description;
     }
 
     public final void description(@NotNull Function<C, String> description) {
         this.description = Objects.requireNonNull(description);
+        this.staticDescription = null;
+    }
+
+    /**
+     * The text set with {@link #description(String)}, or null when {@link #description(Function)} set a function,
+     * whose text depends on the sender.
+     */
+    @Nullable
+    final String staticDescription() {
+        return staticDescription;
     }
 
     /**

@@ -1,0 +1,205 @@
+{
+  "permissionPrefix": "myplugin.command",
+  "commands": [
+    {
+      "name": "config",
+      "route": "/config",
+      "aliases": [
+        "cfg"
+      ],
+      "description": "Manage the configuration",
+      "permission": {
+        "node": "myplugin.command.config",
+        "default": "ALL",
+        "description": "Use /config"
+      },
+      "executable": true,
+      "usages": [
+        "/config [options]",
+        "/config [options] <key>"
+      ],
+      "options": [
+        {
+          "name": "force",
+          "aliases": [
+            "yes"
+          ],
+          "shortName": "f",
+          "value": null,
+          "required": false,
+          "maxOccurrences": 1,
+          "description": "Skip confirmation"
+        },
+        {
+          "name": "tag",
+          "aliases": [],
+          "shortName": "t",
+          "value": "tag",
+          "required": true,
+          "maxOccurrences": 3,
+          "description": "Tag to add"
+        }
+      ],
+      "branches": [
+        {
+          "route": "/config <key>",
+          "arguments": [
+            {
+              "name": "key",
+              "type": "CommonStringArgument",
+              "optional": false,
+              "variadic": false
+            }
+          ],
+          "description": "Show a key",
+          "permission": {
+            "node": "myplugin.command.config.key",
+            "default": "OP",
+            "description": "Access config keys"
+          },
+          "executable": true,
+          "children": [
+            {
+              "name": "set",
+              "route": "/config <key> set",
+              "aliases": [],
+              "description": "Set a key",
+              "permission": {
+                "node": "myplugin.command.config.set",
+                "default": "OP",
+                "description": ""
+              },
+              "executable": false,
+              "usages": [
+                "/config <key> set [value]"
+              ],
+              "options": [],
+              "branches": [
+                {
+                  "route": "/config <key> set [value]",
+                  "arguments": [
+                    {
+                      "name": "value",
+                      "type": "IntArg",
+                      "optional": true,
+                      "variadic": false
+                    }
+                  ],
+                  "description": "",
+                  "permission": {
+                    "node": "myplugin.command.config.set.value",
+                    "default": "OP",
+                    "description": ""
+                  },
+                  "executable": true,
+                  "children": []
+                }
+              ],
+              "children": []
+            }
+          ]
+        }
+      ],
+      "children": [
+        {
+          "name": "reload",
+          "route": "/config reload",
+          "aliases": [],
+          "description": "Reload the configuration",
+          "permission": {
+            "node": "myplugin.admin",
+            "default": "NONE",
+            "description": ""
+          },
+          "executable": true,
+          "usages": [
+            "/config reload"
+          ],
+          "options": [],
+          "branches": [],
+          "children": []
+        }
+      ]
+    },
+    {
+      "name": "msg",
+      "route": "/msg",
+      "aliases": [],
+      "description": "",
+      "permission": {
+        "node": "myplugin.command.msg",
+        "default": "OP",
+        "description": ""
+      },
+      "executable": false,
+      "usages": [
+        "/msg <target> <words...>"
+      ],
+      "options": [],
+      "branches": [
+        {
+          "route": "/msg <target> <words...>",
+          "arguments": [
+            {
+              "name": "target",
+              "type": "CommonStringArgument",
+              "optional": false,
+              "variadic": false
+            },
+            {
+              "name": "words",
+              "type": "WordArg",
+              "optional": false,
+              "variadic": true,
+              "maxCount": 4
+            }
+          ],
+          "description": "Send a message",
+          "permission": {
+            "node": "myplugin.command.msg.target.words",
+            "default": "OP",
+            "description": ""
+          },
+          "executable": true,
+          "children": []
+        }
+      ],
+      "children": []
+    },
+    {
+      "name": "game",
+      "route": "/game",
+      "aliases": [],
+      "description": "",
+      "permission": {
+        "node": "myplugin.command.game",
+        "default": "OP",
+        "description": ""
+      },
+      "executable": false,
+      "usages": [],
+      "options": [],
+      "branches": [],
+      "children": [
+        {
+          "name": "start",
+          "route": "/game start",
+          "aliases": [],
+          "description": "",
+          "permission": {
+            "node": "myplugin.command.game.start",
+            "default": "OP",
+            "description": ""
+          },
+          "executable": true,
+          "usages": [
+            "/game start"
+          ],
+          "options": [],
+          "branches": [],
+          "children": []
+        }
+      ]
+    }
+  ]
+}

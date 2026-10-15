@@ -1,0 +1,68 @@
+{
+  "permissionPrefix": "myplugin.command",
+  "permissions": [
+    {
+      "node": "myplugin.command.config",
+      "default": "ALL",
+      "description": "Use /config",
+      "route": "/config",
+      "kind": "command"
+    },
+    {
+      "node": "myplugin.command.config.key",
+      "default": "OP",
+      "description": "Access config keys",
+      "route": "/config <key>",
+      "kind": "argument"
+    },
+    {
+      "node": "myplugin.command.config.set",
+      "default": "OP",
+      "description": "",
+      "route": "/config <key> set",
+      "kind": "command"
+    },
+    {
+      "node": "myplugin.command.config.set.value",
+      "default": "OP",
+      "description": "",
+      "route": "/config <key> set [value]",
+      "kind": "argument"
+    },
+    {
+      "node": "myplugin.admin",
+      "default": "NONE",
+      "description": "",
+      "route": "/config reload",
+      "kind": "command"
+    },
+    {
+      "node": "myplugin.command.msg",
+      "default": "OP",
+      "description": "",
+      "route": "/msg",
+      "kind": "command"
+    },
+    {
+      "node": "myplugin.command.msg.target.words",
+      "default": "OP",
+      "description": "",
+      "route": "/msg <target> <words...>",
+      "kind": "argument"
+    },
+    {
+      "node": "myplugin.command.game",
+      "default": "OP",
+      "description": "",
+      "route": "/game",
+      "kind": "command"
+    },
+    {
+      "node": "myplugin.command.game.start",
+      "default": "OP",
+      "description": "",
+      "route": "/game start",
+      "kind": "command"
+    }
+  ]
+}

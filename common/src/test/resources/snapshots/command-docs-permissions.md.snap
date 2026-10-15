@@ -1,0 +1,11 @@
+| Permission | Default | Route | Description |
+| --- | --- | --- | --- |
+| `myplugin.command.config` | `ALL` | `/config` | Use /config |
+| `myplugin.command.config.key` | `OP` | `/config <key>` | Access config keys |
+| `myplugin.command.config.set` | `OP` | `/config <key> set` |  |
+| `myplugin.command.config.set.value` | `OP` | `/config <key> set [value]` |  |
+| `myplugin.admin` | `NONE` | `/config reload` |  |
+| `myplugin.command.msg` | `OP` | `/msg` |  |
+| `myplugin.command.msg.target.words` | `OP` | `/msg <target> <words...>` |  |
+| `myplugin.command.game` | `OP` | `/game` |  |
+| `myplugin.command.game.start` | `OP` | `/game start` |  |

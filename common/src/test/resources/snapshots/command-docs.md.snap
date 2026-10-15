@@ -1,0 +1,79 @@
+## /config
+
+Manage the configuration
+
+- Aliases: `cfg`
+- Permission: `myplugin.command.config` (default `ALL`)
+
+| Usage | Description | Permission |
+| --- | --- | --- |
+| `/config [options]` | Manage the configuration | `myplugin.command.config` (`ALL`) |
+| `/config [options] <key>` | Show a key | `myplugin.command.config.key` (`OP`) |
+
+Arguments:
+
+| Argument | Type | Notes |
+| --- | --- | --- |
+| `key` | `CommonStringArgument` |  |
+
+Options:
+
+| Option | Value | Notes | Description |
+| --- | --- | --- | --- |
+| `-f`, `--force`, `--yes` |  |  | Skip confirmation |
+| `-t`, `--tag` | `<tag>` | required, up to 3 times | Tag to add |
+
+## /config <key> set
+
+Set a key
+
+- Permission: `myplugin.command.config.set` (default `OP`)
+
+| Usage | Description | Permission |
+| --- | --- | --- |
+| `/config <key> set [value]` |  | `myplugin.command.config.set.value` (`OP`) |
+
+Arguments:
+
+| Argument | Type | Notes |
+| --- | --- | --- |
+| `value` | `IntArg` | optional |
+
+## /config reload
+
+Reload the configuration
+
+- Permission: `myplugin.admin` (default `NONE`)
+
+| Usage | Description | Permission |
+| --- | --- | --- |
+| `/config reload` | Reload the configuration | `myplugin.admin` (`NONE`) |
+
+## /msg
+
+- Permission: `myplugin.command.msg` (default `OP`)
+
+| Usage | Description | Permission |
+| --- | --- | --- |
+| `/msg <target> <words...>` | Send a message | `myplugin.command.msg.target.words` (`OP`) |
+
+Arguments:
+
+| Argument | Type | Notes |
+| --- | --- | --- |
+| `target` | `CommonStringArgument` |  |
+| `words` | `WordArg` | variadic, up to 4 |
+
+## /game
+
+- Permission: `myplugin.command.game` (default `OP`)
+
+`/game` shows the help of its subcommands.
+
+## /game start
+
+- Permission: `myplugin.command.game.start` (default `OP`)
+
+| Usage | Description | Permission |
+| --- | --- | --- |
+| `/game start` |  | `myplugin.command.game.start` (`OP`) |

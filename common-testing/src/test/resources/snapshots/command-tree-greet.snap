@@ -1,6 +1,6 @@
 greet (aliases: hi) [myplugin.command.greet, OP]
   --loud, -l
-  --times, -t <value>
+  --times, -t <times>
   <name: CommonStringArgument> [myplugin.command.greet.name, ALL]
   admin [myplugin.command.greet.admin, OP]
     <level: CommonIntegerArgument> <reason: CommonStringArgument> [myplugin.command.greet.admin.level.reason, OP]

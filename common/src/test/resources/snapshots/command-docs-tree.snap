@@ -1,0 +1,11 @@
+config (aliases: cfg) [myplugin.command.config, ALL]
+  --force, --yes, -f
+  --tag, -t <tag> (required, up to 3 times)
+  <key: CommonStringArgument> [myplugin.command.config.key, OP]
+    set [myplugin.command.config.set, OP]
+      [value: IntArg] [myplugin.command.config.set.value, OP]
+  reload [myplugin.admin, NONE]
+msg [myplugin.command.msg, OP]
+  <target: CommonStringArgument> <words...: WordArg> [myplugin.command.msg.target.words, OP]
+game [myplugin.command.game, OP]
+  start [myplugin.command.game.start, OP]

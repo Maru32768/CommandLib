@@ -45,6 +45,10 @@ public final class VariadicArgument<T, C extends CommonCommandContext<?, ?>> ext
         copySuggestionProviders(element);
     }
 
+    CommonArgument<T, C, ?> element() {
+        return element;
+    }
+
     @Override
     int nodeCount() {
         return maxCount;
