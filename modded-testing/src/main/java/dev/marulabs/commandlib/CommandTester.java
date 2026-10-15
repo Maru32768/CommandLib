@@ -3,32 +3,39 @@ package dev.marulabs.commandlib;
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.Suggestions;
 import dev.marulabs.commandlib.util.CurrentServer;
 import net.minecraft.SharedConstants;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.Level;
 import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.server.players.PlayerList;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.mockito.Mockito;
 import org.mockito.MockedStatic;
-//? if >=1.19.3
-import net.minecraft.core.registries.BuiltInRegistries;
-
-//? if >=1.20.5 {
-/*import com.mojang.serialization.Lifecycle;
+//? if >=1.19.3 {
+import com.mojang.serialization.Lifecycle;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.MappedRegistry;
-import net.minecraft.core.RegistrationInfo;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.registries.VanillaRegistries;
-import net.minecraft.resources.ResourceKey;
-*///?}
+//?}
+//? if >=1.20.5 {
+/*import net.minecraft.core.RegistrationInfo;
+*///?} elif >=1.19.3 {
+import net.minecraft.resources.RegistryDataLoader;
+
+import java.util.stream.Stream;
+//?}
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -39,7 +46,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 //? if neoforge {
 /*import net.neoforged.neoforge.common.util.flag.FeatureFlagLoader;
 *///?} elif forge && >=1.17 {
@@ -63,14 +72,19 @@ import net.minecraftforge.common.ForgeHooks;
  *
  * <p>Minecraft's registries are bootstrapped once per JVM, so vanilla argument types such as items, blocks, and
  * effects parse for real. The server's {@code registryAccess()} holds the built-in registries (before 1.19.3 its built-in
- * data-driven ones, with the others in {@code Registry.REGISTRY}), and on 1.20.5+ also the data-driven registries such
- * as enchantments, built from vanilla's registry bootstrap code. Tags are not loaded. The server is a Mockito
- * mock whose player list contains the fake players added with {@link #withPlayer(FakeSender)} and the player executing
- * each command, so player and entity arguments resolve those players by name. Permission nodes are answered by the executing {@link FakeSender}.</p>
+ * data-driven ones, with the others in {@code Registry.REGISTRY}), and from 1.19.3 also the data-driven registries such
+ * as biomes and enchantments, built from vanilla's registry bootstrap code. Tags are not loaded. The server is a
+ * Mockito mock whose player list contains the fake players added with {@link #withPlayer(FakeSender)} and the player
+ * executing each command, so player and entity arguments resolve those players by name, and whose levels are those
+ * added with {@link #withLevel(ServerLevel)}. {@link #withServer(Consumer)} stubs more of it. Permission nodes are
+ * answered by the executing {@link FakeSender}.</p>
  */
 public final class CommandTester implements AutoCloseable {
     private final CommandDispatcher<CommandSourceStack> dispatcher = new CommandDispatcher<>();
     private final Map<String, FakeSender> players = new LinkedHashMap<>();
+    private final Map<ResourceKey<Level>, ServerLevel> levels = new LinkedHashMap<>();
+    private final List<Consumer<MinecraftServer>> serverSetups = new ArrayList<>();
+    private final List<Command> commands = new ArrayList<>();
     private final String permissionPrefix;
 
     public static Builder builder() {
@@ -99,8 +113,9 @@ public final class CommandTester implements AutoCloseable {
         }
 
         MinecraftBootstrap.ensureBootstrapped();
-        new CommandNodeCreator<>(builder.createCommands(), permissionPrefix, builder.scheduler).build()
-                                                                                               .forEach(dispatcher.getRoot()::addChild);
+        commands.addAll(builder.createCommands());
+        new CommandNodeCreator<>(commands, permissionPrefix, builder.scheduler).build()
+                                                                               .forEach(dispatcher.getRoot()::addChild);
     }
 
     /**
@@ -138,6 +153,35 @@ public final class CommandTester implements AutoCloseable {
     }
 
     /**
+     * Returns the texts of the suggestions for the given partial input.
+     */
+    public List<String> suggest(@NotNull String input, @NotNull FakeSender sender) {
+        return suggestions(input, sender).join()
+                                         .getList()
+                                         .stream()
+                                         .map(Suggestion::getText)
+                                         .collect(Collectors.toList());
+    }
+
+    /**
+     * Renders the registered commands as indented text: each command with its aliases and permission node, then its
+     * options, argument branches and child commands.
+     */
+    public String commandTree() {
+        return CommandTreeRenderer.render(commands, permissionPrefix);
+    }
+
+    /**
+     * Compares {@link #commandTree()} with {@code src/test/resources/snapshots/<snapshotName>}. A missing snapshot
+     * is written and fails the test; the environment variable {@code COMMANDLIB_UPDATE_SNAPSHOTS=true} rewrites it.
+     *
+     * @throws AssertionError if the tree differs from the snapshot
+     */
+    public void assertCommandTreeMatchesSnapshot(@NotNull String snapshotName) {
+        Snapshots.assertMatches(snapshotName, commandTree());
+    }
+
+    /**
      * Adds a fake player to the server's player list, so player and entity arguments can find it by name.
      */
     public CommandTester withPlayer(@NotNull FakeSender player) {
@@ -145,6 +189,25 @@ public final class CommandTester implements AutoCloseable {
             throw new IllegalArgumentException("sender is not a player");
         }
         players.put(player.getName(), player);
+        return this;
+    }
+
+    /**
+     * Adds a level to the server under its {@link ServerLevel#dimension()}, so {@code WorldArgument} parses and
+     * suggests it. The level is usually a Mockito mock.
+     */
+    public CommandTester withLevel(@NotNull ServerLevel level) {
+        levels.put(Objects.requireNonNull(level.dimension(), "level.dimension()"), level);
+        return this;
+    }
+
+    /**
+     * Runs {@code setup} on the server mock of every command execution and suggestion request, after the tester has
+     * stubbed it. Stub what an argument reads from the server with it, such as {@code getScoreboard()},
+     * {@code getAdvancements()} or {@code getRecipeManager()}.
+     */
+    public CommandTester withServer(@NotNull Consumer<MinecraftServer> setup) {
+        serverSetups.add(Objects.requireNonNull(setup, "setup"));
         return this;
     }
 
@@ -172,7 +235,8 @@ public final class CommandTester implements AutoCloseable {
             if (sender.isPlayer()) {
                 onlinePlayers.putIfAbsent(sender.getName(), sender);
             }
-            server = createServer(onlinePlayers);
+            server = createServer(onlinePlayers, levels);
+            serverSetups.forEach(setup -> setup.accept(server));
 
             try {
                 MockedStatic<CurrentServer> currentServer = Mockito.mockStatic(CurrentServer.class);
@@ -240,7 +304,8 @@ public final class CommandTester implements AutoCloseable {
                             .orElse(false);
     }
 
-    private static MinecraftServer createServer(Map<String, FakeSender> onlinePlayers) {
+    private static MinecraftServer createServer(Map<String, FakeSender> onlinePlayers,
+                                                Map<ResourceKey<Level>, ServerLevel> levels) {
         List<ServerPlayer> playerList = new ArrayList<>();
         onlinePlayers.values()
                      .forEach(sender -> sender.asPlayer()
@@ -283,6 +348,13 @@ public final class CommandTester implements AutoCloseable {
                .thenReturn(profileCache);
         Mockito.when(server.getPlayerNames())
                .thenReturn(playerNames);
+        Map<ResourceKey<Level>, ServerLevel> levelMap = Map.copyOf(levels);
+        Mockito.when(server.getLevel(Mockito.any()))
+               .thenAnswer(invocation -> levelMap.get(invocation.<ResourceKey<Level>>getArgument(0)));
+        Mockito.when(server.levelKeys())
+               .thenReturn(levelMap.keySet());
+        Mockito.when(server.getAllLevels())
+               .thenReturn(levelMap.values());
         //? if >=1.18 {
         WorldData worldData = Mockito.mock(WorldData.class);
         Mockito.when(worldData.enabledFeatures())
@@ -290,10 +362,8 @@ public final class CommandTester implements AutoCloseable {
         Mockito.when(server.getWorldData())
                .thenReturn(worldData);
         //?}
-        //? if >=1.20.5 {
-        /*RegistryAccess.Frozen registryAccess = MinecraftBootstrap.registryAccess();
-        *///?} elif >=1.19.3 {
-        RegistryAccess.Frozen registryAccess = RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY);
+        //? if >=1.19.3 {
+        RegistryAccess.Frozen registryAccess = MinecraftBootstrap.registryAccess();
         //?} else
         /*RegistryAccess registryAccess = RegistryAccess.builtin();*/
         Mockito.when(server.registryAccess())
@@ -376,11 +446,11 @@ public final class CommandTester implements AutoCloseable {
 
     static final class MinecraftBootstrap {
         private static boolean bootstrapped;
-        //? if >=1.20.5 {
-        /*@Nullable
+        //? if >=1.19.3 {
+        @Nullable
         private static RegistryAccess.Frozen registryAccess;
 
-        // The server's registries, including data-driven ones such as enchantments, built from vanilla's
+        // The server's registries, including data-driven ones such as biomes and enchantments, built from vanilla's
         // registry bootstrap code instead of loading the vanilla data pack.
         private static synchronized RegistryAccess.Frozen registryAccess() {
             if (registryAccess != null) {
@@ -389,9 +459,19 @@ public final class CommandTester implements AutoCloseable {
             List<Registry<?>> registries = new ArrayList<>();
             BuiltInRegistries.REGISTRY.forEach(registries::add);
             HolderLookup.Provider vanilla = VanillaRegistries.createLookup();
-            vanilla.listRegistries()
+            //? if >=1.20.5 {
+            /*vanilla.listRegistries()
                    .filter(key -> !BuiltInRegistries.REGISTRY.containsKey(key.location()))
                    .forEach(key -> registries.add(copy(vanilla.lookupOrThrow(key))));
+            *///?} else {
+               // The lookup cannot list its registries before 1.20.5, so ask it for each data-driven one.
+            Stream.concat(RegistryDataLoader.WORLDGEN_REGISTRIES.stream(),
+                          RegistryDataLoader.DIMENSION_REGISTRIES.stream())
+                  .map(RegistryDataLoader.RegistryData::key)
+                  .filter(key -> !BuiltInRegistries.REGISTRY.containsKey(key.location()))
+                  .forEach(key -> vanilla.lookup(key)
+                                         .ifPresent(lookup -> registries.add(copy(lookup))));
+            //?}
             registryAccess = new RegistryAccess.ImmutableRegistryAccess(registries).freeze();
             return registryAccess;
         }
@@ -400,11 +480,16 @@ public final class CommandTester implements AutoCloseable {
         private static <T> Registry<T> copy(HolderLookup.RegistryLookup<T> lookup) {
             MappedRegistry<T> registry = new MappedRegistry<>((ResourceKey<? extends Registry<T>>) lookup.key(),
                                                               Lifecycle.stable());
-            lookup.listElements()
+            //? if >=1.20.5 {
+            /*lookup.listElements()
                   .forEach(holder -> registry.register(holder.key(), holder.value(), RegistrationInfo.BUILT_IN));
+            *///?} else {
+            lookup.listElements()
+                  .forEach(holder -> registry.register(holder.key(), holder.value(), Lifecycle.stable()));
+            //?}
             return registry.freeze();
         }
-        *///?}
+        //?}
 
         static synchronized void ensureBootstrapped() {
             if (bootstrapped) {
