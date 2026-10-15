@@ -204,7 +204,6 @@ Integration tests (Layer 3) guarantee real NMS behavior, so this division of wor
 ### Long Term (P3 and later)
 
 - **Paper module tests**: `paper-testing` verifies command-level behavior, Adventure components, suggestions / tooltips, and the fake paths for Paper `ArgumentTypes` / selectors / registry-backed arguments. Official Paper lifecycle registration is guaranteed by the real Paper server targets in `integration-test`, so `paper-testing` does not reproduce it.
-- **JUnit extension**: let `CommandTester` be used declaratively with `@ExtendWith(CommandLibExtension.class)` + the `@RegisterCommand` annotation (for downstream users).
 - **Forge / Fabric**: `NMSClassRegistry` is Bukkit-only. Forge / Fabric use Brigadier directly, so they need a separate test design (to be considered in P4).
 
 ---
@@ -218,5 +217,34 @@ Integration tests (Layer 3) guarantee real NMS behavior, so this division of wor
 - `[ ]` Add spigot-testing coverage for suggestions / tooltips.
 - `[ ]` Add integration tests for `/execute` and command blocks.
 - `[x]` Start the `paper-testing` design (after the Paper module API is settled).
-- `[ ]` Add a JUnit extension (for downstream users).
+- `[x]` Add a JUnit extension (for downstream users). See "Downstream Test Helpers" below.
 - `[x]` Add Forge testing. Real-server integration targets (Forge Targets in `integration-test/README.md`) and the serverless `forge-testing-<version>` have been added.
+
+---
+
+## Downstream Test Helpers
+
+`common-testing`, `spigot-testing` and `paper-testing` add three helpers on top of `CommandTester` / `FakeSender`.
+`docs/testing.md` documents their use.
+
+- **`CommandLibExtension`**: a JUnit 5 `ParameterResolver` registered with `@RegisterExtension` and a
+  `Supplier<CommandTester>`. It creates the tester lazily in the store of the method's `ExtensionContext`, so a
+  `@BeforeEach` method and its test share one tester and the store closes it after the test. `@Sender` configures
+  injected `FakeSender`s; on Spigot and Paper an injected player is registered with `withFakePlayer`. A field with a
+  factory was chosen over `@ExtendWith` plus a `@RegisterCommand` annotation, because commands often take
+  constructor arguments and the Spigot tester must build them while its NMS mocks are active. The artifacts declare
+  `junit-jupiter-api` as `compileOnly`, so they add no test framework to downstream classpaths.
+- **`CommandTester#suggest`**: returns the suggestion texts, so tests assert on a `List<String>` with their own
+  assertion library. No CommandLib assertion classes are provided; AssertJ (or any list assertion) already covers
+  messages (`getSentMessageTexts()`), results (`execute` returns an `int`) and suggestions.
+- **Command tree snapshots**: `CommandTreeRenderer` in `common` renders the CommandLib command model (not the
+  Brigadier tree, whose option permutations would bury the structure) with aliases, permission nodes, default
+  permissions, options and argument branches. `Snapshots` in `common` compares text with
+  `src/test/resources/snapshots/<name>`, writes a missing snapshot and fails, and rewrites snapshots when
+  `COMMANDLIB_UPDATE_SNAPSHOTS=true` or `-Dcommandlib.updateSnapshots=true` is set. Both are package-private; the
+  testing artifacts reach them from the same package, as they do `CommandNodeCreator`. The help snapshot tests of
+  `common` use the same `Snapshots`.
+
+The three testing artifacts each have their own copy of `CommandLibExtension` and `@Sender`, because each has its
+own `CommandTester` and `FakeSender` with the same names, and one test classpath holds only one of them.
+`modded-testing` does not have these helpers yet.

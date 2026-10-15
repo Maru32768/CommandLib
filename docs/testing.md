@@ -23,7 +23,8 @@ dependencies {
 }
 ```
 
-The artifacts do not bring a test framework; the examples use JUnit 5 and AssertJ.
+The artifacts do not bring a test framework; the examples use JUnit 5 and AssertJ. `CommandLibExtension` needs JUnit
+5 (`junit-jupiter-api` 5.8 or later) on the test classpath; the rest of the artifacts work with any framework.
 
 ## `CommandTester`
 
@@ -47,6 +48,8 @@ class HealCommandTest {
 | `CommandTester.builder().command(...).commands(...).permissionPrefix(...).build()` | Several commands, or extra setup (`mockNmsClass` in `spigot-testing`). |
 | `execute(input, sender)` | Runs the input as the sender and returns the result `/execute store result` would store (`0` for a failure). No leading `/`. |
 | `suggestions(input, sender)` | Returns Brigadier's `CompletableFuture<Suggestions>` for a partial input. |
+| `suggest(input, sender)` | Returns the suggestion texts for a partial input as a `List<String>`. Not in `modded-testing`. |
+| `commandTree()`, `assertCommandTreeMatchesSnapshot(name)` | Renders the registered commands as text and compares it with a snapshot file. See [command tree snapshots](#command-tree-snapshots). Not in `modded-testing`. |
 | `close()` | Ends the tester. Use try-with-resources. |
 
 Build commands through the `Supplier` form (`HealCommand::new`, `() -> new Command("x") {{ ... }}`). Argument
@@ -99,7 +102,52 @@ void finds_offline_player() {
 ```
 
 `spigot-testing` and `paper-testing` also accept plain Bukkit `CommandSender`s, such as MockBukkit's `PlayerMock`, in
-`execute` and `suggestions`.
+`execute`, `suggestions` and `suggest`.
+
+## JUnit 5 extension
+
+`common-testing`, `spigot-testing` and `paper-testing` have `CommandLibExtension`. Register it on a field with the
+tester to create; it creates one tester per test, closes it after the test, and injects `CommandTester` and
+`FakeSender` parameters into test methods and `@BeforeEach` / `@AfterEach` methods. A lifecycle method and the test
+it runs around get the same tester.
+
+```java
+class HealCommandTest {
+    @RegisterExtension
+    final CommandLibExtension commandLib = new CommandLibExtension(() -> new CommandTester(HealCommand::new,
+                                                                                          "myplugin.command"));
+
+    @Test
+    void heals_the_target(CommandTester tester, @Sender("Steve") FakeSender steve, @Sender("Admin") FakeSender admin) {
+        tester.execute("heal Steve", admin);
+        assertThat(admin.getSentMessageTexts()).containsExactly("Healed Steve");
+    }
+
+    @Test
+    void guests_cannot_heal(CommandTester tester,
+                            @Sender(value = "Guest", permissions = "myplugin.command.heal") FakeSender guest) {
+        assertThatThrownBy(() -> tester.execute("heal Guest", guest)).isInstanceOf(RuntimeException.class);
+    }
+}
+```
+
+The factory is any `Supplier<CommandTester>`, so it can use `CommandTester.builder()` for several commands or
+`mockNmsClass`.
+
+`@Sender` configures an injected sender:
+
+| Element | Default | Effect |
+|---|---|---|
+| `value` | `"Player"` | The player's name |
+| `console` | `false` | Injects the console, an operator, instead of a player |
+| `op` | `false` | Makes a player an operator |
+| `permissions` | `{}` (every permission) | Grants only these nodes |
+| `denyPermissions` | `{}` | Denies these nodes, even to operators |
+
+A `FakeSender` parameter without `@Sender` is a non-operator player named `Player` with every permission. In
+`spigot-testing` and `paper-testing`, every injected player is also registered with `withFakePlayer`, so player and
+entity arguments resolve it by name. Build senders that need more, such as a UUID or a locale, with
+`FakeSender.playerBuilder(name)` in the test.
 
 ## `FakeSender`
 
@@ -186,18 +234,47 @@ void suggests_modes() {
     try (CommandTester tester = new CommandTester(() -> new Command("mode") {{
         argument(new LiteralArgument("mode", List.of("auto", "manual"))).execute((mode, ctx) -> ctx.sendMessage(mode));
     }}, "test.command")) {
-        List<String> texts = tester.suggestions("mode au", sender)
-                                   .join()
-                                   .getList()
-                                   .stream()
-                                   .map(Suggestion::getText)
-                                   .collect(Collectors.toList());
-        assertThat(texts).containsExactly("auto");
+        assertThat(tester.suggest("mode au", sender)).containsExactly("auto");
     }
 }
 ```
 
-`Suggestion` is `com.mojang.brigadier.suggestion.Suggestion`.
+`suggest` waits for the suggestions and returns their texts. For tooltips or ranges, read the `Suggestions` that
+`suggestions(input, sender).join()` returns.
+
+### Command tree snapshots
+
+`commandTree()` renders the registered commands: each command with its aliases, permission node and
+`DefaultPermission`, then its options, argument branches (argument names and classes, and the branch's permission)
+and child commands, indented by depth. The generated `help` children are left out.
+
+```text
+heal (aliases: h) [myplugin.command.heal, OP]
+  --silent, -s
+  <target: PlayerArgument> <amount: IntegerArgument> [myplugin.command.heal.target.amount, OP]
+```
+
+`assertCommandTreeMatchesSnapshot(name)` compares the tree with `src/test/resources/snapshots/<name>`, relative to the
+working directory (the project directory under Gradle and Maven), so a change to the tree, a permission node, or an
+alias fails a test:
+
+```java
+@Test
+void command_tree_is_unchanged() {
+    try (CommandTester tester = new CommandTester(HealCommand::new, "myplugin.command")) {
+        tester.assertCommandTreeMatchesSnapshot("heal.snap");
+    }
+}
+```
+
+The first run writes the missing snapshot and fails; review the file, commit it, and run the test again. After an
+intended change, run the tests once with the environment variable `COMMANDLIB_UPDATE_SNAPSHOTS=true` (or the system
+property `commandlib.updateSnapshots=true` in the test JVM) to rewrite the snapshots, and review the diff. Gradle does
+not pass its own `-D` options to the test JVM, so use the environment variable there:
+
+```bash
+COMMANDLIB_UPDATE_SNAPSHOTS=true ./gradlew test
+```
 
 ## What the artifacts do not cover
 

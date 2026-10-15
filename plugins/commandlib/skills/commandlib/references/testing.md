@@ -50,6 +50,31 @@ class MyCommandTest {
 }
 ```
 
+`tester.suggest(input, sender)` returns the suggestion texts as a `List<String>`.
+`tester.assertCommandTreeMatchesSnapshot("name.snap")` compares the command tree
+(aliases, permission nodes, options, argument branches) with
+`src/test/resources/snapshots/name.snap`; the first run writes it, and
+`COMMANDLIB_UPDATE_SNAPSHOTS=true` rewrites it.
+
+With JUnit 5, `CommandLibExtension` creates and closes a tester per test and
+injects it and `FakeSender` parameters (configured with `@Sender`; injected
+players are registered with `withFakePlayer`):
+
+```java
+class HealCommandTest {
+    @RegisterExtension
+    final CommandLibExtension commandLib = new CommandLibExtension(() -> new CommandTester(HealCommand::new, "myplugin.command"));
+
+    @Test
+    void heal(CommandTester tester, @Sender("Steve") FakeSender steve, @Sender("Admin") FakeSender admin) {
+        tester.execute("heal Steve", admin);
+        assertThat(admin.getSentMessageTexts()).containsExactly("healed Steve");
+    }
+}
+```
+
+See `docs/testing.md` in the CommandLib repository for the full guide.
+
 ## NMS-backed Arguments
 
 This section applies to `spigot-testing`.
