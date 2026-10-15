@@ -257,14 +257,15 @@ public abstract class CommonCommandContext<S, C> {
 ## Brigadier Integration
 
 Options are realized as literal `CommandNode` branches placed before the
-argument nodes. `CommandNodeCreator.createOptionCommands(...)` generates them.
+argument nodes. `OptionGraph` (built by `CommandNodeCreator` for each command)
+generates them.
 
 ### Token Generation
 
-The node creator tracks how often each option was used on the path so far. An
-option remains available while it was used fewer than `maxOccurrences` times
-and no option of one of its mutually exclusive groups was used. For each
-available option these literal tokens are created:
+The graph tracks how often each option was used on the path so far, the
+*state*. An option remains available while it was used fewer than
+`maxOccurrences` times and no option of one of its mutually exclusive groups
+was used. For each available option these literal tokens are created:
 
 - `--name` for the name and every alias
 - `-x` if a short name exists
@@ -272,8 +273,7 @@ available option these literal tokens are created:
 
 For all pairs, triples, … of available no-value options with short names that
 do not exclude each other, every permutation of combined tokens is created
-(`-fv`, `-vf`, `-fvw`, `-fwv`, …). This is done by
-`collectShortOptionPermutations`. The permutation approach lets Brigadier match
+(`-fv`, `-vf`, `-fvw`, `-fwv`, …). The permutation approach lets Brigadier match
 any combined flag regardless of character order without requiring a custom
 parser.
 
@@ -303,17 +303,115 @@ The internal name prefix `__commandlib_option_` prevents the argument node name
 from appearing in `argumentNameToInputArgMap`, which is filtered in
 `CommonCommandContext.collectInputs`.
 
-#### Recursive combinations
+Every option node has an `OptionNode` requirement, which lets everyone use the
+node and names the command's graph, the options a literal gives, the option a
+value node holds, and the state after the node. The runner identifies the
+command's own option nodes by it, so the option tokens of a parent command on
+the same path (an argument child such as `/config -f <key> set -f`) are not
+counted for the child. Platforms keep a node's requirement object when they copy
+or convert the node, as Paper's dispatcher mirror (`ApiMirrorRootNode`) does,
+while the node object itself is replaced.
 
-`createOptionCommands` is called recursively with the occurrence counts of the
-path. After matching `-f`, the subtree offers `--verbose`, `-v`, and any
-remaining option tokens, but not `-f` or `--force` again unless the option is
-repeatable. The nodes after a path depend only on those counts, so every path
-with the same counts shares one list of child nodes (the argument node and the
-remaining option tokens). The server tree then grows with the number of count
-combinations, not with every order the options can be given in. Players still
-receive the expanded tree, because the vanilla command packet copies a node
-for every path, so the number of options and their maximums must stay small.
+#### States and redirects
+
+The nodes after a token depend only on the state it reaches, not on the order
+in which the options were given. The graph is built depth first, children in
+order. The first token that reaches a state holds that state's children, the
+*hub* of the state; every other token that reaches the same state is built with
+`redirect(hub)` and has no children of its own. A value token keeps its literal
+and value node, and the value node redirects.
+
+```
+/scan
+  <argument nodes>
+  --force          (hub of {force})
+    <argument nodes>
+    --verbose      (hub of {force, verbose})
+      <argument nodes>
+    -v             → redirect to the hub of {force, verbose}
+  -f               → redirect to the hub of {force}
+  --verbose        (hub of {verbose})
+    <argument nodes>
+    --force        → redirect to the hub of {force, verbose}
+    -f             → redirect to the hub of {force, verbose}
+  -v               → redirect to the hub of {verbose}
+  -fv, -vf         → redirect to the hub of {force, verbose}
+```
+
+The argument nodes of every branch are built once, merged as the command literal
+would merge branches whose first arguments share a name, and added to every
+state as the same node objects.
+
+The server tree then has one node per token of each state, and so has what a
+player receives. Vanilla's `Commands#sendCommands` copies the tree for each
+player and copies a node once for every path that reaches it
+(`fillUsableCommands`), but sends a redirect as a reference to the copy of its
+target. Without redirects, a command with six short flags made 5,490 server
+nodes and 491,607 copies for each player; with them it makes 5,490 copies.
+
+The copy resolves a redirect through a map from server node to copied node,
+filled as it goes, so a hub must be copied before any redirect to it. The graph
+only redirects to hubs built earlier in its depth-first order, and the argument
+nodes, which are first in each state, contain no option nodes of the command.
+Every walk of the shared subtree, under the command literal, an alias, or a
+`<plugin>:<label>` copy, therefore meets each hub first. The states form a DAG
+(each token raises a count), so no redirect loops back.
+
+#### Reading the options after a redirect
+
+A redirect makes Brigadier parse the rest of the input in a new context, the
+child of the context before it. Brigadier executes the last context of the
+chain, which has no link back to its parents, so after `/scan -f -v Alex` the
+runner's context holds only `Alex`. Suggestions get the first context of the
+input, with the chain below it.
+
+`OptionGraph#recover` restores the options at execution. The executed context's
+root node is the hub of the state the options reached, which its `OptionNode`
+requirement names. The options end at the space before the context, and the
+graph parses them again from the input, from the empty state, as Brigadier
+matched them: each token is a literal of the state up to the next space, and a
+value literal is followed by its value, parsed with the option's argument type.
+The start is one of the last `Σ maxOccurrences × (1 or 2)` token starts; the
+earliest start that parses to the hub's state is taken, since the token before
+the true start is the command's literal and no option token. The literals of the
+command's path (its name or an alias, optionally with a namespace, and the
+names of its parent commands) typed before the options are added back, so
+`CommandContext#getInputs()` stays `[scan, Alex]`. The runner then works on a
+`ChainedCommandContext` of the options and the executed context, which reads an
+argument from the last part with an argument node of that name, since
+Brigadier's context does not expose its argument map. Suggestions read the chain
+from the first context as one `ChainedCommandContext` as well.
+
+A command keeps the tree without redirects, in which the paths with the same
+state share their children, when its options cannot be parsed again from the
+input:
+
+- an argument child (a command under an argument, such as `/config <key> set`),
+  whose inherited arguments are parsed before its options and would be lost by
+  the redirect too; parsing them again would need the platform's argument types
+  and the original source;
+- a command with a value option whose type is not one of Brigadier's primitives
+  (`bool`, `integer`, `long`, `float`, `double`, and `string` other than greedy),
+  since a platform type may parse differently on the server than in common.
+
+The re-parse runs only when options were given, and only over the option
+tokens.
+
+#### Platforms
+
+- Spigot and modded register the nodes in the vanilla dispatcher, which parses,
+  executes and sends them as described above, also on 1.16.5, whose
+  `fillUsableCommands` uses the same map.
+- Paper converts the nodes into its vanilla dispatcher with
+  `ApiMirrorRootNode#unwrapNode`, which caches each conversion, so the DAG and
+  the redirects keep their shape. It drops a node's redirect modifier, which is
+  why the recovery uses none. Paper's `fillUsableCommands` would flatten a
+  redirect whose target was not copied yet; the order above avoids that.
+- Velocity executes with its Brigadier fork, which parses redirects as Mojang's
+  does and, when input ends at a redirect node, runs the target's command; a
+  redirecting option token has the same runner as its hub. Its
+  `CommandGraphInjector` copies each node once (`done` map) and copies the
+  redirect target, so the client tree keeps the shape too.
 
 ### Why Options Precede Arguments
 
@@ -342,25 +440,18 @@ class CommandOptionTest {
 }
 ```
 
-A loop back to the command node through a Brigadier redirect would allow
-unbounded repetition, but the redirected context loses the arguments parsed
-before it, which argument-child commands need. Repeated occurrences are
-therefore bounded and unrolled.
+Options after arguments would need option tokens under every argument node, and
+the arguments of a branch can be optional or variadic, so the tree would grow
+with the arguments as well.
 
 ## Execution Flow
 
-`CommandRunner.parseOptions(ctx)` reads the already-matched Brigadier nodes
-from `ctx.getHandle().getNodes()` in input order and collects the occurrences
-of each option:
-
-1. **Value options** — a node named `internalName(i)` of a value option is one
-   occurrence of it.
-
-2. **Flags** — any other node whose name starts with `-`. Long tokens are
-   matched against a `--name` → `CommandOption` map that includes the aliases.
-   Short tokens (`-x…`) iterate characters and match each against a
-   `Character` → `CommandOption` map, so `-vvf` is two occurrences of `-v` and
-   one of `-f`.
+`CommandRunner.run` first asks the option graph to recover the options before
+the last redirect (see above). `parseOptions(ctx)` then reads the parsed nodes
+from `ctx.getHandle().getNodes()` in input order and collects the occurrences of
+each option from the nodes whose `OptionNode` requirement names the command's
+graph: a literal gives its flags, once per occurrence (`-vv` is two occurrences
+of `-v`, `-fv` one of each), and a value node gives the internal name of its value.
 
 Each option with occurrences gets `ctx.setOptionValue(option, option.read(ctx,
 names))`.
@@ -439,6 +530,45 @@ Generating all short-flag permutations is O(n!) in the worst case, but in
 practice the number of no-value options with short names on a single command
 is small (typically ≤ 4). The permutation approach requires no custom Brigadier
 parsing and keeps the matching behavior consistent with single-option tokens.
+The tokens of each state still grow with the permutations (1,962 tokens for six
+short flags before any is given), so the docs keep recommending few short flags.
+
+### Redirects between option states
+
+The option states share their nodes through redirects rather than by repeating
+the subtree after every order of the options. Alternatives that were considered:
+
+- **Shared children without redirects.** The server keeps one node per token of
+  each state, but every platform copies the tree for each player per path, so the
+  copy grows with the orders of the options (491,607 nodes for six short flags).
+  Commands that cannot be read back after a redirect still use it.
+- **One hub for all states.** A single node whose option tokens redirect to
+  itself would make the tree linear in the number of tokens, but the tree would
+  then accept an option more often than allowed and mutually exclusive options
+  together, and keep suggesting them. Moving those checks to the runner would
+  change Brigadier's errors into option errors and break the client's marking.
+- **A greedy string or a custom argument type for the options.** A greedy tail
+  would make the client stop highlighting and suggesting the positional
+  arguments after the options. A custom argument type for combined flags would
+  compete with a word argument for the same token, and needs a type the client
+  knows on every platform, which Spigot's NMS and the modded loaders do not offer
+  for library types.
+- **A redirect modifier that passes the options on.** A modifier sees the context
+  before the redirect and could store it for the runner, but Paper's dispatcher
+  mirror drops redirect modifiers when it converts a literal node, and a stored
+  context needs a side channel keyed by Brigadier's internal lists.
+
+The cost of the redirects is the re-parse of the option tokens in the runner
+when options are given. Brigadier also follows a redirect as soon as one
+character follows the token, where it leaves the rest of other tokens unread, so
+a trailing space after an option (`/scan -f `) makes it parse the empty rest
+after the redirect. A word argument accepts the empty rest; the runner rejects
+such an execution with Brigadier's "Incorrect argument" error, as Brigadier
+rejected the unread space before. An argument that does not accept it, such as
+an integer, leaves Brigadier with an empty context, which it reports as an
+unknown command instead. Clients trim chat commands, and Bukkit's command map
+and Velocity drop trailing spaces, so only input that reaches the dispatcher
+unchanged sees the different message.
 
 ### `hasValue` driven by `ArgumentType` presence
 
@@ -474,3 +604,10 @@ Key cases:
 - Repeatable value option collects values in input order
 - Mutually exclusive options rejected together, also in combined flags, and
   not suggested after one of them
+- Options before the last redirect read back in input order, also after an
+  alias, a leading slash, a redirect before the command (`execute run`) and for
+  a child command, with option values that look like option tokens
+  (`OptionRedirectTest`)
+- An argument child does not count the option tokens of its parent
+- The tree size of short flags, counts and repeatable options, and the shared
+  argument nodes (`OptionTreeSizeTest`)

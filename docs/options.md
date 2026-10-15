@@ -181,8 +181,14 @@ inherit the options of its parent:
 ## Limits
 
 Options are literal nodes in the Brigadier command tree, so the client can suggest and check them. The tree has a
-branch for each set of options already given, and players receive the tree expanded into every order of those
-options. Keep the number of options per command and the maximums of counts and repeatable options small; a few
-options with maximums of 3 to 5 are fine.
+branch for each set of options already given; the tokens that reach the same set redirect to one branch, so neither the
+server nor the players get a copy for every order of the options. Each set still offers every token of the options left,
+and combined short flags are a token for each order of the flags (`-fv`, `-vf`), so keep the number of options per
+command and the maximums of counts and repeatable options small: a few options with maximums of 3 to 5 are fine, and
+six short flags already make about 5,500 nodes.
+
+An argument child (a command under an argument) and a command with a value option of another type than `bool`,
+`integer`, `longValue`, `floatValue`, `doubleValue` and `string` keep a tree without redirects, which players receive
+with a copy for every order of the options. Keep their options fewer still.
 
 Options cannot follow positional arguments, and one occurrence of an option takes exactly one value.
