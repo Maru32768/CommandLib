@@ -13,7 +13,7 @@ Pick the artifact for the CommandLib artifact your code uses, one per test sourc
 | `common` (platform-neutral) | `common-testing` | Commands are `TestCommand`; arguments are the `Common...Argument` classes. |
 | `spigot` | `spigot-testing` | NMS argument types are replaced by mocks. Uses Mockito. |
 | `paper` | `paper-testing` | Paper's `ArgumentTypes` and resolvers are stubbed. Uses Mockito. |
-| `velocity` | `velocity-testing` | Senders and the `ProxyServer` are Mockito mocks; every argument parses for real. No `CommandLibExtension`. |
+| `velocity` | `velocity-testing` | Senders and the `ProxyServer` are Mockito mocks; every argument parses for real. |
 | `forge-<version>` | `forge-testing-<version>` | Minecraft's registries are bootstrapped; vanilla arguments parse for real. |
 | `neoforge-<version>` | `neoforge-testing-<version>` | Same as Forge. |
 | `fabric-<version>` | `fabric-testing-<version>` | Same as Forge. |
@@ -115,8 +115,7 @@ void finds_offline_player() {
 
 ## JUnit 5 extension
 
-`common-testing`, `spigot-testing`, `paper-testing` and the Forge / NeoForge / Fabric testing artifacts have
-`CommandLibExtension`. Register it on a field with the
+Every testing artifact has `CommandLibExtension`. Register it on a field with the
 tester to create; it creates one tester per test, closes it after the test, and injects `CommandTester` and
 `FakeSender` parameters into test methods and `@BeforeEach` / `@AfterEach` methods. A lifecycle method and the test
 it runs around get the same tester.
@@ -150,14 +149,14 @@ The factory is any `Supplier<CommandTester>`, so it can use `CommandTester.build
 |---|---|---|
 | `value` | `"Player"` | The player's name |
 | `console` | `false` | Injects the console, an operator, instead of a player |
-| `op` | `false` | Makes a player an operator |
+| `op` | `false` | Makes a player an operator (not in `velocity-testing`, since Velocity has no operators) |
 | `permissions` | `{}` (every permission) | Grants only these nodes |
 | `denyPermissions` | `{}` | Denies these nodes, even to operators |
 
 A `FakeSender` parameter without `@Sender` is a non-operator player named `Player` with every permission. In
-`spigot-testing` and `paper-testing`, every injected player is also registered with `withFakePlayer` (`withPlayer` in
-the Forge / NeoForge / Fabric artifacts), so player and entity arguments resolve it by name. Build senders that need more, such as a UUID or a locale, with
-`FakeSender.playerBuilder(name)` in the test.
+`spigot-testing`, `paper-testing` and `velocity-testing`, every injected player is also registered with `withFakePlayer`
+(`withPlayer` in the Forge / NeoForge / Fabric artifacts), so player and entity arguments resolve it by name. Build senders that need more, such as a UUID or a locale, with
+`FakeSender.playerBuilder(name)` (`FakeSender.player(name, uuid)` in `velocity-testing`) in the test.
 
 ## `FakeSender`
 
@@ -170,7 +169,8 @@ the Forge / NeoForge / Fabric artifacts), so player and entity arguments resolve
 
 Adjust a sender with `op(boolean)`, `permissions(nodes...)` (only these nodes), `denyPermissions(nodes...)` (all but
 these), `uniqueId(uuid)`, `locale(tag)` (a `Locale` in `velocity-testing`), and `name(name)` (not in
-`common-testing`). The builders have the same methods. A player's locale decides the language of CommandLib's messages
+`common-testing`). The builders have the same methods. `velocity-testing` has no builders and only `permissions`,
+`denyPermissions` and `locale`. A player's locale decides the language of CommandLib's messages
 and of your [captions](localization.md); the console uses the JVM's default locale.
 
 Keep the returned sender: in `common-testing` these methods return a new `FakeSender`, in the other artifacts they
