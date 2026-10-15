@@ -35,6 +35,29 @@ public final class Options {
         return CommandOption.counter(name, shortName, maxCount);
     }
 
+    /**
+     * Returns an option whose value any CommandLib argument parses, such as
+     * {@code Options.of("target", new PlayerArgument("target"))} for {@code --target Steve}. The value gets the
+     * argument's type, suggestions, validator and transformer. When the option is not given, the default of an
+     * {@linkplain CommonArgument#optional(Object) optional} argument applies; the option of an argument that is not
+     * optional is {@linkplain CommandOption#required() required}.
+     *
+     * @throws IllegalArgumentException if the argument is variadic; use {@link CommandOption#repeatable(int)} instead
+     */
+    public static <T, C extends CommonCommandContext<?, ?>> CommandOption<T, C> of(@NotNull String name,
+                                                                                   @NotNull CommonArgument<T, C, ?> argument) {
+        return CommandOption.of(name, null, argument);
+    }
+
+    /**
+     * Same as {@link #of(String, CommonArgument)}, with a short name.
+     */
+    public static <T, C extends CommonCommandContext<?, ?>> CommandOption<T, C> of(@NotNull String name,
+                                                                                   char shortName,
+                                                                                   @NotNull CommonArgument<T, C, ?> argument) {
+        return CommandOption.of(name, shortName, argument);
+    }
+
     public static <C extends CommonCommandContext<?, ?>> CommandOption<Boolean, C> bool(@NotNull String name,
                                                                                         boolean defaultValue) {
         return new CommandOption<>(name,

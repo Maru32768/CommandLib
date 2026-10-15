@@ -48,11 +48,35 @@ public final class ScanCommand extends Command {
 | `Options.flag(name[, short])`          | `Boolean`        | `false`        | `--force`, `-f`                    |
 | `Options.count(name[, short], max)`    | `Integer`        | `0`            | `-vvv`, `-v --verbose`             |
 | `Options.bool/integer/longValue/...`   | the value type   | the default    | `--limit 20`, `-n 20`              |
+| `Options.of(name[, short], argument)`  | the argument's   | see below      | `--target Steve`, `-t @p`          |
 | `valueOption.repeatable(max)`          | `List<T>`        | empty list     | `--tag a -t b`                     |
 
 The value factories are `bool`, `integer` (optionally with a range), `longValue`, `floatValue`, `doubleValue` and
 `string`. Each takes the default value returned when the option is not given, and has an overload with a `char`
 short name.
+
+`Options.of` takes any CommandLib argument as the value, with the argument's type, suggestions, validator and
+transformer:
+
+```java
+public final class HealCommand extends Command {
+    public HealCommand() {
+        super("heal");
+
+        CommandOption<Player, CommandContext> target = option(Options.of("target", 't',
+                                                                         new PlayerArgument("target").optional(playerRequirer())));
+        CommandOption<World, CommandContext> world = option(Options.of("world", new WorldArgument("world")));
+        execute(ctx -> {
+            Player player = ctx.getOption(target);    // the sender when -t is not given
+            World in = ctx.getOption(world);          // required: the argument is not optional
+        });
+    }
+}
+```
+
+When the option is not given, the default of an `optional(...)` argument applies (computed for each execution, so
+`playerRequirer()` works); the option of an argument that is not optional is `required()`. A value the argument rejects
+fails like a positional argument. A variadic argument is rejected; use `repeatable(max)`.
 
 - A value option takes one value token after its name: `--limit 20` or `-n 20`. `--limit=20` and `-n20` are not
   supported.
@@ -187,8 +211,7 @@ and combined short flags are a token for each order of the flags (`-fv`, `-vf`),
 command and the maximums of counts and repeatable options small: a few options with maximums of 3 to 5 are fine, and
 six short flags already make about 5,500 nodes.
 
-An argument child (a command under an argument) and a command with a value option of another type than `bool`,
-`integer`, `longValue`, `floatValue`, `doubleValue` and `string` keep a tree without redirects, which players receive
-with a copy for every order of the options. Keep their options fewer still.
+An argument child (a command under an argument) keeps a tree without redirects, which players receive with a copy for
+every order of the options. Keep its options fewer still.
 
 Options cannot follow positional arguments, and one occurrence of an option takes exactly one value.

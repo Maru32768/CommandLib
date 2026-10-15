@@ -1,7 +1,11 @@
 package dev.marulabs.commandlib;
 
+import dev.marulabs.commandlib.argument.IntegerArgument;
+import dev.marulabs.commandlib.argument.PlayerArgument;
 import dev.marulabs.commandlib.argument.StringArgument;
+import org.bukkit.entity.Player;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -20,6 +24,37 @@ class CommandOptionTest {
         tester.execute("scan -f -n 20 Alex", sender);
 
         assertThat(sender.getSentMessageTexts()).containsExactly("Alex:true:20");
+    }
+
+    @Test
+    void anOptionTakesAPlayerArgument() {
+        CommandTester tester = new CommandTester(() -> new Command("heal") {{
+            CommandOption<Player, CommandContext> target = option(Options.of("target",
+                                                                             't',
+                                                                             new PlayerArgument("target")));
+            CommandOption<Boolean, CommandContext> force = option(Options.flag("force", 'f'));
+            argument(new IntegerArgument("amount")).execute((amount, ctx) -> {
+                ctx.sendMessage(ctx.getOption(target)
+                                   .getName()
+                        + ":" + amount + ":" + ctx.getOption(force));
+            });
+        }}, "test.command").withFakePlayer(player("Steve"));
+        FakeSender sender = FakeSender.player("Admin");
+
+        tester.execute("heal -t Steve -f 5", sender);
+        tester.execute("heal -f --target Steve 6", sender);
+        tester.execute("heal 7", sender);
+
+        assertThat(sender.getSentMessageTexts()).containsExactly("Steve:5:true",
+                                                                 "Steve:6:true",
+                                                                 "Missing required option --target.");
+    }
+
+    private static Player player(String name) {
+        Player player = Mockito.mock(Player.class);
+        Mockito.when(player.getName())
+               .thenReturn(name);
+        return player;
     }
 
     @Test

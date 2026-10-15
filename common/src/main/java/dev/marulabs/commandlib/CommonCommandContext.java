@@ -168,7 +168,11 @@ public abstract class CommonCommandContext<S, C> {
     @NotNull
     public final <T> T getOption(@NotNull CommandOption<T, ?> option) {
         Objects.requireNonNull(option);
-        Object value = optionValues.getOrDefault(option, option.defaultValue());
+        Object value = optionValues.containsKey(option) ? optionValues.get(option) : option.defaultValue();
+        if (value == null) {
+            // An option of an argument has no default outside an execution, or none at all when it is required.
+            throw new IllegalStateException(option.formatName() + " was not given and has no default value here.");
+        }
         return option.cast(value);
     }
 
@@ -658,13 +662,26 @@ public abstract class CommonCommandContext<S, C> {
      * Replaces the handle and the input of the argument {@code name}, so that a variadic argument's element parses one
      * value as if it were the only one.
      */
-    final void replaceHandle(com.mojang.brigadier.context.CommandContext<S> handle, String name, String input) {
+    final void replaceHandle(com.mojang.brigadier.context.CommandContext<S> handle,
+                             String name,
+                             @Nullable String input) {
         this.handle = Objects.requireNonNull(handle);
-        argumentNameToInputArgMap.put(name, input);
+        if (input == null) {
+            argumentNameToInputArgMap.remove(name);
+        } else {
+            argumentNameToInputArgMap.put(name, input);
+        }
     }
 
     final void setOptionValue(CommandOption<?, ?> option, Object value) {
         optionValues.put(option, value);
         presentOptions.add(option);
+    }
+
+    /**
+     * Sets the value of an option that was not given, such as the default of an option of an optional argument.
+     */
+    final void setOptionDefault(CommandOption<?, ?> option, Object value) {
+        optionValues.put(option, value);
     }
 }

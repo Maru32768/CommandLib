@@ -95,7 +95,7 @@ final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U ext
         builder.requires(x -> platformAdapter.hasPermission(x, permission));
 
         List<Arguments<C>> argumentsList = command.argumentsList();
-        OptionGraph<S, C> optionGraph = OptionGraph.of(command, inheritedArguments);
+        OptionGraph<S, C> optionGraph = OptionGraph.of(platformAdapter, command, inheritedArguments);
 
         if (argumentsList.isEmpty()) {
             CommandRunner<S, C> runner = new CommandRunner<>(platformAdapter,

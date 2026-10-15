@@ -46,10 +46,25 @@ final class ArgumentCommandNodeCreator<S, T, C extends CommonCommandContext<S, T
         String permission = arguments.permissionName(parent, permissionPrefix);
         builder.requires(source -> platformAdapter.hasPermission(source, permission));
 
-        Map<ContextKey<?>, ? extends Extractor<?, ?>> providers = parent.providers();
-        builder.suggests((context, sb) -> {
+        builder.suggests(suggestions(platformAdapter, argument, permission, parent.providers(), executorArguments));
+
+        builder.executes(runner(argument, helpAction, parent));
+
+        return builder;
+    }
+
+    /**
+     * The suggestions of an argument node: the argument's suggestion providers, with the arguments parsed before it.
+     * Without {@code permission} (null for an option value) they are empty.
+     */
+    static <S, C extends CommonCommandContext<S, ?>> com.mojang.brigadier.suggestion.SuggestionProvider<S> suggestions(PlatformAdapter<S, ?, C, ?> platformAdapter,
+                                                                                                                       CommonArgument<?, C, ?> argument,
+                                                                                                                       @Nullable String permission,
+                                                                                                                       Map<ContextKey<?>, ? extends Extractor<?, ?>> providers,
+                                                                                                                       List<Arguments<C>> executorArguments) {
+        return (context, sb) -> {
             try {
-                if (!platformAdapter.hasPermission(context.getSource(), permission)) {
+                if (permission != null && !platformAdapter.hasPermission(context.getSource(), permission)) {
                     return Suggestions.empty();
                 }
                 // Brigadier suggests with the first context of the input, which has the nodes before the first
@@ -105,11 +120,7 @@ final class ArgumentCommandNodeCreator<S, T, C extends CommonCommandContext<S, T
                 e.printStackTrace();
                 throw e;
             }
-        });
-
-        builder.executes(runner(argument, helpAction, parent));
-
-        return builder;
+        };
     }
 
     /**

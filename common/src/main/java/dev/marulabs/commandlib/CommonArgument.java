@@ -1,7 +1,12 @@
 package dev.marulabs.commandlib;
 
 import com.mojang.brigadier.arguments.ArgumentType;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.context.ParsedArgument;
+import com.mojang.brigadier.context.ParsedCommandNode;
+import com.mojang.brigadier.context.StringRange;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.tree.ArgumentCommandNode;
 import dev.marulabs.commandlib.argument.ArgumentValidator;
 import dev.marulabs.commandlib.command.AsyncCommandExecutor;
 import dev.marulabs.commandlib.command.CommandExecutor;
@@ -16,6 +21,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -284,6 +290,55 @@ public abstract class CommonArgument<T, C extends CommonCommandContext<?, ?>, SE
 
         validator.validate(t, ctx);
         return transformer.apply(t, ctx);
+    }
+
+    /**
+     * Parses the value of the argument node {@code nodeName}, such as the value node of an option, as if it were this
+     * argument's own node.
+     */
+    final T parseNode(C ctx, String nodeName) throws ArgumentParseException {
+        CommonCommandContext<?, ?> sameCtx = ctx;
+        return parseNode(ctx, sameCtx, nodeName);
+    }
+
+    // sameCtx is ctx, typed to name its source type.
+    private <S> T parseNode(C ctx, CommonCommandContext<S, ?> sameCtx, String nodeName) throws ArgumentParseException {
+        CommandContext<S> handle = sameCtx.getHandle();
+        ParsedCommandNode<S> node = null;
+        for (ParsedCommandNode<S> x : handle.getNodes()) {
+            if (x.getNode() instanceof ArgumentCommandNode && x.getNode()
+                                                               .getName()
+                                                               .equals(nodeName)) {
+                node = x;
+            }
+        }
+        if (node == null) {
+            throw new IllegalStateException("No argument node " + nodeName + " in the context");
+        }
+        StringRange range = node.getRange();
+        Object value = handle.getArgument(nodeName, Object.class);
+        // The argument reads its value from the handle by its own name, so it gets a handle with only this value.
+        CommandContext<S> valueHandle = new CommandContext<>(handle.getSource(),
+                                                             handle.getInput(),
+                                                             Map.of(name,
+                                                                    new ParsedArgument<>(range.getStart(),
+                                                                                         range.getEnd(),
+                                                                                         value)),
+                                                             handle.getCommand(),
+                                                             handle.getRootNode(),
+                                                             List.of(node),
+                                                             range,
+                                                             null,
+                                                             handle.getRedirectModifier(),
+                                                             handle.isForked());
+        @Nullable
+        String input = sameCtx.hasInput(name) ? sameCtx.getInput(name) : null;
+        sameCtx.replaceHandle(valueHandle, name, range.get(handle.getInput()));
+        try {
+            return parse(ctx);
+        } finally {
+            sameCtx.replaceHandle(handle, name, input);
+        }
     }
 
     protected abstract T parseImpl(C ctx) throws CommandSyntaxException, ArgumentParseException;

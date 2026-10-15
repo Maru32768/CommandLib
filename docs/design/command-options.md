@@ -76,6 +76,15 @@ closed over in the executor lambda.
 Every factory has an overload that also takes a `char shortName` as a second
 parameter.
 
+`Options.of(name, argument)` takes any `CommonArgument` as the value: the
+value node has the argument's `ArgumentType` and suggestion providers, and the
+value is read by the argument's own parser, validator and transformer, so
+platform types (`PlayerArgument`, `WorldArgument`, ...) work as option values.
+An option of an optional argument defaults to the argument's default, computed
+by the runner for each execution; an option of any other argument is required,
+since there is no default to return. A variadic argument is rejected, since one
+occurrence takes one value node.
+
 Two more shapes build on these:
 
 | Factory or modifier             | Java type  | Notes                                       |
@@ -212,7 +221,13 @@ Stores:
 - `name` and `aliases`: long names, each used as a `--name` token. `name` is
   also the human-readable label. Names must be unquoted Brigadier words.
 - `shortName`: optional single `Character`, used as `-x` token.
-- `defaultValue`: returned by `getOption` when the option was not supplied.
+- `defaultValue`: returned by `getOption` when the option was not supplied;
+  `null` for an option of an argument.
+- `argument`: the `CommonArgument` of an option made by `Options.of`, whose
+  `parseNode` reads the value node under the option's internal name as if it
+  were the argument's own node (a handle with only that value, as a variadic
+  argument's element gets), and whose default the runner sets with
+  `setOptionDefault` when the option is not given.
 - `type`: Brigadier `ArgumentType<?>` for value options; `null` for flags.
 - `maxOccurrences`: how often the option may be given; `1` unless it was made
   by `count(...)` or `repeatable(...)`.
@@ -384,17 +399,19 @@ argument from the last part with an argument node of that name, since
 Brigadier's context does not expose its argument map. Suggestions read the chain
 from the first context as one `ChainedCommandContext` as well.
 
-A command keeps the tree without redirects, in which the paths with the same
-state share their children, when its options cannot be parsed again from the
-input:
+The values are parsed again with the option's `ArgumentType` on the server, as
+a variadic argument parses its values again, so any type works, including the
+platform types of `Options.of`. The re-parse calls `ArgumentType#parse(reader)`
+without the source; a type whose `parse(reader, source)` overload differs (such
+as vanilla's entity argument, which checks the selector permission there) has
+already been accepted by Brigadier with the source, so only the value is read
+again. A greedy value consumes the rest of the input, so nothing follows it and
+it never comes before a redirect.
 
-- an argument child (a command under an argument, such as `/config <key> set`),
-  whose inherited arguments are parsed before its options and would be lost by
-  the redirect too; parsing them again would need the platform's argument types
-  and the original source;
-- a command with a value option whose type is not one of Brigadier's primitives
-  (`bool`, `integer`, `long`, `float`, `double`, and `string` other than greedy),
-  since a platform type may parse differently on the server than in common.
+An argument child (a command under an argument, such as `/config <key> set`)
+keeps the tree without redirects, in which the paths with the same state share
+their children: its inherited arguments are parsed before its options and would
+be lost by the redirect too.
 
 The re-parse runs only when options were given, and only over the option
 tokens.
@@ -613,3 +630,8 @@ Key cases:
 - An argument child does not count the option tokens of its parent
 - The tree size of short flags, counts and repeatable options, and the shared
   argument nodes (`OptionTreeSizeTest`)
+- Options of arguments: parsed, validated and suggested by the argument, read
+  back after redirects for a type that is none of Brigadier's, the default of an
+  optional argument, required otherwise, a shared name with a positional
+  argument, repeatable (`OptionArgumentTest`, and a player option in the
+  Spigot, Paper and Velocity testers)

@@ -98,6 +98,17 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
                 validateOptions(ctx);
             } catch (OptionParseException e) {
                 return fail(ctx, CommandError.Kind.OPTION, e, null, () -> e.sendMessage(ctx));
+            } catch (ArgumentParseException e) {
+                // The value of an option of an argument failed the argument's parsing or validation.
+                return fail(ctx,
+                            e instanceof ArgumentValidationException ? CommandError.Kind.VALIDATION
+                                    : CommandError.Kind.ARGUMENT,
+                            e,
+                            null,
+                            () -> e.sendMessage(ctx));
+            } catch (CommandPrerequisiteException e) {
+                // The default of an option of an optional argument can need a prerequisite.
+                return fail(ctx, CommandError.Kind.PREREQUISITE, e, null, () -> e.sendMessage(ctx));
             }
 
             for (Arguments<C> arguments : argumentsList) {
@@ -317,9 +328,23 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
         }
     }
 
-    private void parseOptions(C ctx) {
-        optionGraph.occurrences(ctx.getHandle())
-                   .forEach((option, names) -> ctx.setOptionValue(option, option.read(ctx, names)));
+    private void parseOptions(C ctx) throws ArgumentParseException, CommandPrerequisiteException {
+        Map<CommandOption<?, C>, List<String>> occurrences = optionGraph.occurrences(ctx.getHandle());
+        for (Map.Entry<CommandOption<?, C>, List<String>> entry : occurrences.entrySet()) {
+            ctx.setOptionValue(entry.getKey(),
+                               entry.getKey()
+                                    .read(ctx, entry.getValue()));
+        }
+        if (executor == null) {
+            // Help reads no option, and the default of an argument may need a prerequisite help does not.
+            return;
+        }
+        for (CommandOption<?, C> option : optionGraph.options()) {
+            Object value = occurrences.containsKey(option) ? null : option.defaultValue(ctx);
+            if (value != null) {
+                ctx.setOptionDefault(option, value);
+            }
+        }
     }
 
     private void validateOptions(C ctx) throws OptionParseException {

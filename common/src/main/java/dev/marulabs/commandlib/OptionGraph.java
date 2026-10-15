@@ -3,12 +3,6 @@ package dev.marulabs.commandlib;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
-import com.mojang.brigadier.arguments.BoolArgumentType;
-import com.mojang.brigadier.arguments.DoubleArgumentType;
-import com.mojang.brigadier.arguments.FloatArgumentType;
-import com.mojang.brigadier.arguments.IntegerArgumentType;
-import com.mojang.brigadier.arguments.LongArgumentType;
-import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
@@ -17,8 +11,10 @@ import com.mojang.brigadier.context.ParsedArgument;
 import com.mojang.brigadier.context.ParsedCommandNode;
 import com.mojang.brigadier.context.StringRange;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import dev.marulabs.commandlib.command.Extractor;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayDeque;
@@ -32,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiPredicate;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -48,8 +45,8 @@ import java.util.stream.Collectors;
  * {@link #recover} parses the options before it again from the input.
  * <p>
  * The re-parse needs a command whose path is literals only, as an argument child's inherited arguments would be lost
- * too, and option values that parse the same without a server. Other commands keep a tree without redirects, in which
- * the paths with the same counts share their child nodes.
+ * too. An argument child keeps a tree without redirects, in which the paths with the same counts share their child
+ * nodes.
  */
 final class OptionGraph<S, C extends CommonCommandContext<S, ?>> {
     private final List<CommandOption<?, C>> options;
@@ -58,16 +55,20 @@ final class OptionGraph<S, C extends CommonCommandContext<S, ?>> {
     // The names (and aliases) of the literals on the path to the command, from the root.
     private final List<Set<String>> path;
     private final int maxTokens;
+    // The suggestions of the value of an option of an argument.
+    private final Function<CommonArgument<?, C, ?>, SuggestionProvider<S>> suggestions;
     private final Map<Map<CommandOption<?, C>, Integer>, Map<String, Transition<S, C>>> transitions = new HashMap<>();
 
     private OptionGraph(List<CommandOption<?, C>> options,
                         BiPredicate<CommandOption<?, C>, CommandOption<?, C>> excludes,
                         boolean redirects,
-                        List<Set<String>> path) {
+                        List<Set<String>> path,
+                        Function<CommonArgument<?, C, ?>, SuggestionProvider<S>> suggestions) {
         this.options = List.copyOf(options);
         this.excludes = excludes;
         this.redirects = redirects;
         this.path = List.copyOf(path);
+        this.suggestions = suggestions;
         this.maxTokens = options.stream()
                                 .mapToInt(x -> (x.hasValue() ? 2 : 1) * x.maxOccurrences())
                                 .sum();
@@ -77,12 +78,11 @@ final class OptionGraph<S, C extends CommonCommandContext<S, ?>> {
      * The graph of the command's options. {@code inheritedArguments} are the arguments parsed before the command, which
      * an argument child has.
      */
-    static <S, C extends CommonCommandContext<S, ?>> OptionGraph<S, C> of(CommonCommand<C, ?> command,
+    static <S, C extends CommonCommandContext<S, ?>> OptionGraph<S, C> of(PlatformAdapter<S, ?, C, ?> platformAdapter,
+                                                                          CommonCommand<C, ?> command,
                                                                           List<Arguments<C>> inheritedArguments) {
         List<CommandOption<?, C>> options = command.options();
-        boolean redirects = inheritedArguments.isEmpty() && options.stream()
-                                                                   .filter(CommandOption::hasValue)
-                                                                   .allMatch(x -> parsesWithoutServer(x.type()));
+        boolean redirects = inheritedArguments.isEmpty();
         Deque<Set<String>> path = new ArrayDeque<>();
         for (CommonCommand<C, ?> current = command; current != null; current = current.parent()) {
             Set<String> names = new LinkedHashSet<>();
@@ -90,16 +90,16 @@ final class OptionGraph<S, C extends CommonCommandContext<S, ?>> {
             names.addAll(current.aliases());
             path.addFirst(names);
         }
-        return new OptionGraph<>(options, command::excludes, redirects, new ArrayList<>(path));
-    }
-
-    private static boolean parsesWithoutServer(ArgumentType<?> type) {
-        if (type instanceof StringArgumentType) {
-            return ((StringArgumentType) type).getType() != StringArgumentType.StringType.GREEDY_PHRASE;
-        }
-        return type instanceof BoolArgumentType || type instanceof IntegerArgumentType
-                || type instanceof LongArgumentType || type instanceof FloatArgumentType
-                || type instanceof DoubleArgumentType;
+        Map<ContextKey<?>, ? extends Extractor<?, ?>> providers = command.providers();
+        return new OptionGraph<>(options,
+                                 command::excludes,
+                                 redirects,
+                                 new ArrayList<>(path),
+                                 argument -> ArgumentCommandNodeCreator.suggestions(platformAdapter,
+                                                                                    argument,
+                                                                                    null,
+                                                                                    providers,
+                                                                                    inheritedArguments));
     }
 
     List<CommandOption<?, C>> options() {
@@ -154,6 +154,10 @@ final class OptionGraph<S, C extends CommonCommandContext<S, ?>> {
                                                                                                             option,
                                                                                                             next))
                                                                                  .executes(executor);
+                    CommonArgument<?, C, ?> argument = option.suggestionArgument();
+                    if (argument != null) {
+                        value.suggests(suggestions.apply(argument));
+                    }
                     CommandNode<S> valueNode = target(value, next);
                     LiteralCommandNode<S> literal = LiteralArgumentBuilder.<S>literal(token.token)
                                                                           .requires(new OptionNode<>(OptionGraph.this,

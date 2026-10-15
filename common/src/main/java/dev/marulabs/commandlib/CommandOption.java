@@ -2,6 +2,8 @@ package dev.marulabs.commandlib;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
+import dev.marulabs.commandlib.exception.ArgumentParseException;
+import dev.marulabs.commandlib.exception.CommandPrerequisiteException;
 import dev.marulabs.commandlib.exception.OptionParseException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -12,7 +14,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 /**
  * A typed option of a command, such as {@code -f}, {@code --force} or {@code --limit 10}. Create one with
@@ -29,11 +30,16 @@ public final class CommandOption<T, C extends CommonCommandContext<?, ?>> {
     private final List<String> aliases = new ArrayList<>();
     // Null for an option without a short name.
     private final @Nullable Character shortName;
-    private final T defaultValue;
+    // Null for an option of an argument, whose default the argument gives or which is required.
+    private final @Nullable T defaultValue;
     // Null for a flag, which takes no value.
     private final @Nullable ArgumentType<?> type;
     // Reads the value from the internal argument names of the occurrences, one name per occurrence.
-    private final BiFunction<C, List<String>, T> reader;
+    private final Reader<C, T> reader;
+    // The argument of an option made with Options.of, or null.
+    private @Nullable CommonArgument<T, C, ?> argument;
+    // The argument of the option a repeatable option was made from, for its suggestions.
+    private @Nullable CommonArgument<?, C, ?> suggestionArgument;
     private final int maxOccurrences;
     private final List<OptionValidator<C>> validators = new ArrayList<>();
     private String description = "";
@@ -48,21 +54,26 @@ public final class CommandOption<T, C extends CommonCommandContext<?, ?>> {
                          @NotNull T defaultValue,
                          @NotNull ArgumentType<?> type,
                          @NotNull BiFunction<C, String, T> parser) {
-        this(name, shortName, defaultValue, Objects.requireNonNull(type), 1, readFirst(Objects.requireNonNull(parser)));
+        this(name,
+             shortName,
+             Objects.requireNonNull(defaultValue),
+             Objects.requireNonNull(type),
+             1,
+             readFirst(Objects.requireNonNull(parser)));
     }
 
     private CommandOption(String name,
                           @Nullable Character shortName,
-                          T defaultValue,
+                          @Nullable T defaultValue,
                           @Nullable ArgumentType<?> type,
                           int maxOccurrences,
-                          BiFunction<C, List<String>, T> reader) {
+                          Reader<C, T> reader) {
         this.name = validateName(name);
         if (shortName != null && !StringReader.isAllowedInUnquotedString(shortName)) {
             throw new IllegalArgumentException("Invalid option short name: " + shortName);
         }
         this.shortName = shortName;
-        this.defaultValue = Objects.requireNonNull(defaultValue);
+        this.defaultValue = defaultValue;
         this.type = type;
         if (maxOccurrences < 1) {
             throw new IllegalArgumentException("maxOccurrences must be at least 1: " + maxOccurrences);
@@ -71,8 +82,32 @@ public final class CommandOption<T, C extends CommonCommandContext<?, ?>> {
         this.reader = reader;
     }
 
-    private static <C, T> BiFunction<C, List<String>, T> readFirst(BiFunction<C, String, T> parser) {
+    private static <C, T> Reader<C, T> readFirst(BiFunction<C, String, T> parser) {
         return (ctx, names) -> parser.apply(ctx, names.get(0));
+    }
+
+    /**
+     * Returns an option whose value {@code argument} parses, with the argument's type, suggestions, validator and
+     * transformer. When the option is not given, the default of an optional argument applies; an option of an
+     * argument that is not optional is required.
+     */
+    static <T, C extends CommonCommandContext<?, ?>> CommandOption<T, C> of(String name,
+                                                                            @Nullable Character shortName,
+                                                                            CommonArgument<T, C, ?> argument) {
+        Objects.requireNonNull(argument);
+        if (argument instanceof VariadicArgument) {
+            throw new IllegalArgumentException("An option takes one value; use repeatable(max) instead of the variadic argument "
+                    + argument.name());
+        }
+        CommandOption<T, C> option = new CommandOption<>(name,
+                                                         shortName,
+                                                         null,
+                                                         argument.type(),
+                                                         1,
+                                                         (ctx, names) -> argument.parseNode(ctx, names.get(0)));
+        option.argument = argument;
+        option.required = !argument.isOptional();
+        return option;
     }
 
     private static String validateName(String name) {
@@ -169,16 +204,20 @@ public final class CommandOption<T, C extends CommonCommandContext<?, ?>> {
      */
     public CommandOption<List<T>, C> repeatable(int maxCount) {
         ArgumentType<?> valueType = type();
-        BiFunction<C, List<String>, T> single = reader;
+        Reader<C, T> single = reader;
         CommandOption<List<T>, C> option = new CommandOption<>(name,
                                                                shortName,
                                                                List.of(),
                                                                valueType,
                                                                maxCount,
-                                                               (ctx, names) -> names.stream()
-                                                                                    .map(x -> single.apply(ctx,
-                                                                                                           List.of(x)))
-                                                                                    .collect(Collectors.toUnmodifiableList()));
+                                                               (ctx, names) -> {
+                                                                   List<T> values = new ArrayList<>();
+                                                                   for (String x : names) {
+                                                                       values.add(single.read(ctx, List.of(x)));
+                                                                   }
+                                                                   return List.copyOf(values);
+                                                               });
+        option.suggestionArgument = suggestionArgument();
         option.aliases.addAll(aliases);
         option.description = description;
         return option;
@@ -234,8 +273,29 @@ public final class CommandOption<T, C extends CommonCommandContext<?, ?>> {
         return maxOccurrences;
     }
 
+    /**
+     * The default value, or null for an option of an argument.
+     */
+    @Nullable
     T defaultValue() {
         return defaultValue;
+    }
+
+    /**
+     * The default of an option of an optional argument, computed for the context, or null for any other option.
+     */
+    @Nullable
+    T defaultValue(C ctx) throws CommandPrerequisiteException {
+        CommonArgument<T, C, ?> argument = this.argument;
+        return argument != null && argument.isOptional() ? argument.defaultValue(ctx) : null;
+    }
+
+    /**
+     * The argument whose suggestions the value of this option takes, or null to take those of its type.
+     */
+    @Nullable
+    CommonArgument<?, C, ?> suggestionArgument() {
+        return argument != null ? argument : suggestionArgument;
     }
 
     /**
@@ -259,8 +319,8 @@ public final class CommandOption<T, C extends CommonCommandContext<?, ?>> {
         return INTERNAL_NAME_PREFIX + name + (occurrence == 0 ? "" : "#" + (occurrence + 1));
     }
 
-    T read(C ctx, List<String> occurrenceNames) {
-        return reader.apply(ctx, occurrenceNames);
+    T read(C ctx, List<String> occurrenceNames) throws ArgumentParseException {
+        return reader.read(ctx, occurrenceNames);
     }
 
     void validate(C ctx, boolean checkRequired) throws OptionParseException {
@@ -287,5 +347,9 @@ public final class CommandOption<T, C extends CommonCommandContext<?, ?>> {
 
     private interface OptionValidator<C extends CommonCommandContext<?, ?>> {
         void validate(C ctx) throws OptionParseException;
+    }
+
+    private interface Reader<C, T> {
+        T read(C ctx, List<String> occurrenceNames) throws ArgumentParseException;
     }
 }

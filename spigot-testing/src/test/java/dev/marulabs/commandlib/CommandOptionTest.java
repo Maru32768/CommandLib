@@ -1,7 +1,10 @@
 package dev.marulabs.commandlib;
 
 import com.mojang.brigadier.suggestion.Suggestion;
+import dev.marulabs.commandlib.argument.IntegerArgument;
+import dev.marulabs.commandlib.argument.PlayerArgument;
 import dev.marulabs.commandlib.argument.StringArgument;
+import org.bukkit.entity.Player;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -51,6 +54,31 @@ class CommandOptionTest {
                                         .doesNotContain("-y", "--yaml")
                                         .contains("-t", "--tag");
         }
+    }
+
+    @Test
+    void an_option_takes_a_player_argument() {
+        FakeSender steve = FakeSender.player("Steve");
+        FakeSender admin = FakeSender.player("Admin");
+
+        try (CommandTester tester = new CommandTester(() -> new Command("heal") {{
+            CommandOption<Player, CommandContext> target = option(Options.of("target",
+                                                                             't',
+                                                                             new PlayerArgument("target").optional(playerRequirer())));
+            CommandOption<Boolean, CommandContext> force = option(Options.flag("force", 'f'));
+            argument(new IntegerArgument("amount")).execute((amount, ctx) -> {
+                ctx.sendMessage(ctx.getOption(target)
+                                   .getName()
+                        + ":" + amount + ":" + ctx.getOption(force));
+            });
+        }}, "test.command")) {
+            tester.withFakePlayer((Player) steve.asSender());
+            tester.execute("heal -t Steve -f 5", admin);
+            tester.execute("heal -f --target Steve 6", admin);
+            tester.execute("heal 7", admin);
+        }
+
+        assertThat(admin.getSentMessageTexts()).containsExactly("Steve:5:true", "Steve:6:true", "Admin:7:false");
     }
 
     @Test
