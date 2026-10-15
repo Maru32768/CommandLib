@@ -5,15 +5,10 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.marulabs.commandlib.Argument;
 import dev.marulabs.commandlib.CommandContext;
 import dev.marulabs.commandlib.exception.ArgumentParseException;
+import dev.marulabs.commandlib.util.CurrentServer;
 import dev.marulabs.commandlib.util.StringUtil;
 import net.minecraft.commands.arguments.GameProfileArgument;
 import net.minecraft.server.players.GameProfileCache;
-//? if neoforge {
-/*import net.neoforged.neoforge.server.ServerLifecycleHooks;
-*///?} elif >=1.17 {
-import net.minecraftforge.server.ServerLifecycleHooks;
-//?} else
-/*import net.minecraftforge.fml.server.ServerLifecycleHooks;*/
 
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
@@ -125,7 +120,7 @@ public class UUIDsArgument extends Argument<List<UUID>, UUIDsArgument> {
     }
 
     private static GameProfileCache getProfileCache() {
-        return ServerLifecycleHooks.getCurrentServer()
-                                   .getProfileCache();
+        return Objects.requireNonNull(CurrentServer.get(), "no server is running")
+                      .getProfileCache();
     }
 }

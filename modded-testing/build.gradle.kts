@@ -11,7 +11,7 @@ apply(from = rootProject.file("gradle/modded-node.gradle.kts"))
 val loader = extra["modded.loader"].toString()
 
 stonecutter {
-    constants.match(loader, "forge", "neoforge")
+    constants.match(loader, "forge", "neoforge", "fabric")
 }
 
 repositories {

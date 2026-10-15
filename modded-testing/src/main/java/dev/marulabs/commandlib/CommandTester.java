@@ -4,6 +4,7 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
+import dev.marulabs.commandlib.util.CurrentServer;
 import net.minecraft.SharedConstants;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.Bootstrap;
@@ -40,12 +41,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 //? if neoforge {
 /*import net.neoforged.neoforge.common.util.flag.FeatureFlagLoader;
-import net.neoforged.neoforge.server.ServerLifecycleHooks;
-*///?} elif >=1.17 {
+*///?} elif forge && >=1.17 {
 import net.minecraftforge.network.NetworkHooks;
-import net.minecraftforge.server.ServerLifecycleHooks;
-//?} else
-/*import net.minecraftforge.fml.server.ServerLifecycleHooks;*/
+//?}
 //? if >=1.18 {
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.level.storage.WorldData;
@@ -53,7 +51,7 @@ import net.minecraft.world.level.storage.WorldData;
 /*import net.minecraftforge.server.permission.PermissionAPI;*/
 
 /**
- * Runs CommandLib Forge / NeoForge commands without a Minecraft server.
+ * Runs CommandLib Forge / NeoForge / Fabric commands without a Minecraft server.
  *
  * <p>Minecraft's registries are bootstrapped once per JVM, so vanilla argument types such as items, blocks, and
  * effects parse for real. On 1.20.5+ the server's {@code registryAccess()} also contains the data-driven registries
@@ -168,10 +166,10 @@ public final class CommandTester implements AutoCloseable {
             server = createServer(onlinePlayers);
 
             try {
-                MockedStatic<ServerLifecycleHooks> lifecycleHooks = Mockito.mockStatic(ServerLifecycleHooks.class);
-                staticMocks.add(lifecycleHooks);
-                lifecycleHooks.when(ServerLifecycleHooks::getCurrentServer)
-                              .thenReturn(server);
+                MockedStatic<CurrentServer> currentServer = Mockito.mockStatic(CurrentServer.class);
+                staticMocks.add(currentServer);
+                currentServer.when(CurrentServer::get)
+                             .thenReturn(server);
 
                 //? if >=1.18 {
                 MockedStatic<CommandLib> commandLib = Mockito.mockStatic(CommandLib.class, Mockito.CALLS_REAL_METHODS);
@@ -382,7 +380,7 @@ public final class CommandTester implements AutoCloseable {
             try (MockedStatic<FeatureFlagLoader> ignored = Mockito.mockStatic(FeatureFlagLoader.class)) {
                 Bootstrap.bootStrap();
             }
-            *///?} elif >=1.17 {
+            *///?} elif forge && >=1.17 {
                // Forge's Bootstrap patch initializes networking, whose event classes need FML's class transformer.
                // Commands do not use networking, so skip it outside a real Forge launch.
             try (MockedStatic<NetworkHooks> ignored = Mockito.mockStatic(NetworkHooks.class)) {

@@ -20,6 +20,11 @@ import java.util.Map;
 
 import java.util.Arrays;
 import java.util.Collection;
+//? if fabric {
+/*import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.Map;
+*///?}
 
 class RawWordArgumentType implements ArgumentType<String> {
     private static final Collection<String> EXAMPLES = Arrays.asList("@p", "@../config/value", "hello");
@@ -30,6 +35,31 @@ class RawWordArgumentType implements ArgumentType<String> {
         return new RawWordArgumentType();
     }
 
+    //? if fabric {
+    /*// registerByClass is Forge's. Vanilla keeps the class map private, under an intermediary name in production,
+    // so find it by its content. Fabric API's ArgumentTypeRegistry would add a registry entry as well, which is not
+    // needed because Info hands clients vanilla's string type.
+    @SuppressWarnings("unchecked")
+    private static void addToClassMap() {
+        try {
+            for (Field field : ArgumentTypeInfos.class.getDeclaredFields()) {
+                if (Modifier.isStatic(field.getModifiers()) && Map.class.isAssignableFrom(field.getType())) {
+                    field.setAccessible(true);
+                    Map<Class<?>, ArgumentTypeInfo<?, ?>> byClass = (Map<Class<?>, ArgumentTypeInfo<?, ?>>) field.get(null);
+                    if (byClass.containsKey(StringArgumentType.class)) {
+                        byClass.put(RawWordArgumentType.class, new Info());
+                        return;
+                    }
+                }
+            }
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException("Cannot register UnparsedArgument's argument type", e);
+        }
+        // Without the entry, sending the command tree to a client fails on the unknown argument type.
+        throw new IllegalStateException("Cannot find the argument type class map of ArgumentTypeInfos");
+    }
+    *///?}
+
     //? if >=1.19 {
     // ArgumentTypeInfos keeps its registrations in a plain map, and every mod that shades CommandLib registers its
     // own copy of this class, so the copies lock on the class they share.
@@ -37,6 +67,9 @@ class RawWordArgumentType implements ArgumentType<String> {
     static void ensureRegistered() {
         synchronized (ArgumentTypeInfos.class) {
             if (!ArgumentTypeInfos.isClassRecognized(RawWordArgumentType.class)) {
+                //? if fabric {
+                /*addToClassMap();
+                *///?} else
                 ArgumentTypeInfos.registerByClass(RawWordArgumentType.class, new Info());
             }
         }

@@ -1,11 +1,17 @@
 package dev.marulabs.commandlib;
 
 import com.mojang.brigadier.tree.RootCommandNode;
+import dev.marulabs.commandlib.util.CurrentServer;
 import net.minecraft.SharedConstants;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-//? if neoforge {
+//? if fabric {
+/*import me.lucko.fabric.api.permissions.v0.Permissions;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.ModContainer;
+*///?} elif neoforge {
 /*import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.common.NeoForge;
@@ -26,12 +32,10 @@ import java.util.concurrent.CopyOnWriteArrayList;
 //? if >=1.18 {
 //? if neoforge {
 /*import net.neoforged.neoforge.event.RegisterCommandsEvent;
-import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import net.neoforged.neoforge.server.permission.events.PermissionGatherEvent;
 import net.neoforged.neoforge.server.permission.nodes.PermissionNode;
-*///?} else {
+*///?} elif !fabric {
 import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.server.ServerLifecycleHooks;
 import net.minecraftforge.server.permission.events.PermissionGatherEvent;
 import net.minecraftforge.server.permission.nodes.PermissionNode;
 //?}
@@ -42,12 +46,14 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 //?} else {
 /*import net.minecraftforge.fml.event.server.FMLServerStartedEvent;
-import net.minecraftforge.fml.server.ServerLifecycleHooks;
 *///?}
 
 public final class CommandLib {
-    //? if >=1.18
+    //? if fabric {
+    /*private static final Map<String, DefaultPermission> PERMISSIONS = new ConcurrentHashMap<>();
+    *///?} elif >=1.18 {
     private static final Map<String, PermissionNode<Boolean>> PERMISSIONS = new ConcurrentHashMap<>();
+    //?}
 
     // The registrations of this copy of CommandLib, which last for the game's lifetime.
     private static final List<CommandLib> REGISTRATIONS = new CopyOnWriteArrayList<>();
@@ -74,7 +80,7 @@ public final class CommandLib {
     /**
      * Returns the documentation of this registration's commands with its permission prefix: Markdown and JSON of the
      * commands and of the permission nodes registered for them. On 1.18+ the nodes that permission handlers see have
-     * a {@code commandlib.} namespace in front.
+     * a {@code commandlib.} namespace in front on Forge and NeoForge.
      */
     public CommandDocs docs() {
         return CommandDocs.of(permissionPrefix, commands);
@@ -86,19 +92,31 @@ public final class CommandLib {
      * its permission prefix. {@link CommandLibDiagnosticsCommand} sends it to a source.
      */
     public static CommandLibDiagnostics diagnostics() {
-        boolean running = ServerLifecycleHooks.getCurrentServer() != null;
+        boolean running = CurrentServer.get() != null;
         List<String> platform = new ArrayList<>();
-        //? if neoforge {
+        //? if fabric {
+        /*String loader = "fabric";
+        *///?} elif neoforge {
         /*String loader = "neoforge";
         *///?} else
         String loader = "forge";
         platform.add("Artifact: " + loader);
         platform.add("CommandLib package: " + CommandLib.class.getPackage()
                                                               .getName());
+        //? if fabric {
+        /*platform.add("Loader: " + loader + " " + loaderVersion("fabricloader"));
+        *///?} else
         platform.add("Loader: " + loader + " " + loaderVersion(loader));
         platform.add("Minecraft: " + minecraftVersion());
         platform.add("Java: " + System.getProperty("java.version"));
-        //? if >=1.18 {
+        //? if fabric {
+        /*platform.add("Command registration: CommandRegistrationCallback on every data reload, or the running server's "
+                + "dispatcher when registered later");
+        platform.add("Permission nodes: fabric-permissions-api "
+                + (FabricLoader.getInstance()
+                               .isModLoaded("fabric-permissions-api-v0") ? "loaded" : "not loaded, defaults decide")
+                + ", named <node>");
+        *///?} elif >=1.18 {
         platform.add("Command registration: RegisterCommandsEvent on every data reload, or the running server's "
                 + "dispatcher when registered later");
         platform.add("Permission nodes: PermissionGatherEvent.Nodes, named commandlib.<node>");
@@ -120,6 +138,16 @@ public final class CommandLib {
         return new CommandLibDiagnostics(platform, registrations);
     }
 
+    //? if fabric {
+    /*private static String loaderVersion(String modId) {
+        return FabricLoader.getInstance()
+                           .getModContainer(modId)
+                           .map(ModContainer::getMetadata)
+                           .map(x -> x.getVersion()
+                                      .getFriendlyString())
+                           .orElse("(unknown)");
+    }
+    *///?} else {
     private static String loaderVersion(String modId) {
         ModList mods = ModList.get();
         if (mods == null) {
@@ -131,6 +159,7 @@ public final class CommandLib {
                               .toString())
                    .orElse("(unknown)");
     }
+    //?}
 
     private static String minecraftVersion() {
         try {
@@ -159,7 +188,7 @@ public final class CommandLib {
      * Same as {@link #refresh(ServerPlayer)} for every player on the running server. Does nothing when no server runs.
      */
     public static void refreshAll() {
-        MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+        MinecraftServer server = CurrentServer.get();
         if (server == null) {
             return;
         }
@@ -169,7 +198,47 @@ public final class CommandLib {
                                                             .sendCommands(player)));
     }
 
-    //? if >=1.18 {
+    //? if fabric {
+    /*private CommandLib(Collection<? extends Command> commands, String permissionPrefix) {
+        this.commands = commands;
+        this.permissionPrefix = permissionPrefix;
+        // The first command that declares a node decides its default, as on Forge.
+        commands.forEach(command -> command.permissionConfigs(permissionPrefix)
+                                           .forEach(c -> PERMISSIONS.putIfAbsent(c.node(), c.defaultPermission())));
+
+        // The callback fires again on /reload and on every integrated server start.
+        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> register(dispatcher.getRoot()));
+
+        MinecraftServer server = CurrentServer.get();
+        if (server != null) {
+            // The current dispatcher has already been built, so add the commands to it directly.
+            register(server.getCommands()
+                           .getDispatcher()
+                           .getRoot());
+            server.getPlayerList()
+                  .getPlayers()
+                  .forEach(player -> server.getCommands()
+                                           .sendCommands(player));
+        }
+    }
+
+    private void register(RootCommandNode<CommandSourceStack> root) {
+        new CommandNodeCreator<>(commands, permissionPrefix, ServerCommandScheduler.INSTANCE).build()
+                                                                                             .forEach(root::addChild);
+    }
+
+    static boolean hasPermission(CommandSourceStack source, ServerPlayer player, String node) {
+        DefaultPermission defaultPermission = PERMISSIONS.get(node);
+        boolean fallback = defaultPermission == null ? source.hasPermission(4)
+                                                     : Command.resolveDefault(defaultPermission, player);
+        // fabric-permissions-api is optional: a mod that wants permission handlers such as LuckPerms ships it.
+        if (FabricLoader.getInstance()
+                        .isModLoaded("fabric-permissions-api-v0")) {
+            return Permissions.check(player, node, fallback);
+        }
+        return fallback;
+    }
+    *///?} elif >=1.18 {
     private CommandLib(Collection<? extends Command> commands, String permissionPrefix) {
         this.commands = commands;
         this.permissionPrefix = permissionPrefix;
@@ -181,7 +250,7 @@ public final class CommandLib {
         *///?} else
         MinecraftForge.EVENT_BUS.register(this);
 
-        MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+        MinecraftServer server = CurrentServer.get();
         if (server != null) {
             // The current dispatcher has already been built, so add the commands to it directly.
             // Nodes that miss PermissionGatherEvent.Nodes are resolved by their default resolver.
@@ -246,24 +315,23 @@ public final class CommandLib {
         this.commands = commands;
         this.permissionPrefix = permissionPrefix;
 
-        MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+        MinecraftServer server = CurrentServer.get();
         if (server == null) {
             MinecraftForge.EVENT_BUS.register(this);
         } else {
-            register();
+            register(server);
         }
     }
 
     @SubscribeEvent
     public void onRegisterCommands(FMLServerStartedEvent e) {
-        register();
+        register(e.getServer());
     }
 
-    private void register() {
-        RootCommandNode<CommandSourceStack> root = ServerLifecycleHooks.getCurrentServer()
-                                                                       .getCommands()
-                                                                       .getDispatcher()
-                                                                       .getRoot();
+    private void register(MinecraftServer server) {
+        RootCommandNode<CommandSourceStack> root = server.getCommands()
+                                                         .getDispatcher()
+                                                         .getRoot();
 
         new CommandNodeCreator<>(commands, permissionPrefix, ServerCommandScheduler.INSTANCE).build()
                                                             .forEach(root::addChild);

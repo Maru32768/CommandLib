@@ -1,13 +1,13 @@
 /*
- * Shared setup for the Forge / NeoForge Stonecutter nodes: :modded, :modded-testing and the integration test mod.
- * Apply it right after the Architectury Loom plugin:
+ * Shared setup for the Forge / NeoForge / Fabric Stonecutter nodes: :modded, :modded-testing and the integration test
+ * mod. Apply it right after the Architectury Loom plugin:
  *
  *   apply(from = rootProject.file("gradle/modded-node.gradle.kts"))
  *   val loader = extra["modded.loader"].toString()
  *
  * Nodes are named <loader>-<minecraft version>. The loader build of every node is read from
  * modded/versions/<node>/gradle.properties, so the library, the testing artifact, the test mod and the integration
- * server are all built against the same Forge / NeoForge build.
+ * server are all built against the same Forge / NeoForge / Fabric build.
  */
 
 import java.util.Properties
@@ -62,9 +62,12 @@ val officialMojangMappings = loom.javaClass
 dependencies {
     "minecraft"("com.mojang:minecraft:$minecraftVersion")
     "mappings"(officialMojangMappings)
-    if (loader == "neoforge") {
-        "neoForge"("net.neoforged:neoforge:${nodeProperties.getProperty("deps.neoforge")}")
-    } else {
-        "forge"("net.minecraftforge:forge:$minecraftVersion-${nodeProperties.getProperty("deps.forge")}")
+    when (loader) {
+        "neoforge" -> "neoForge"("net.neoforged:neoforge:${nodeProperties.getProperty("deps.neoforge")}")
+        "fabric" -> {
+            "modImplementation"("net.fabricmc:fabric-loader:${nodeProperties.getProperty("deps.fabricLoader")}")
+            "modImplementation"("net.fabricmc.fabric-api:fabric-api:${nodeProperties.getProperty("deps.fabricApi")}")
+        }
+        else -> "forge"("net.minecraftforge:forge:$minecraftVersion-${nodeProperties.getProperty("deps.forge")}")
     }
 }

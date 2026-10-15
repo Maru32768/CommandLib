@@ -5,17 +5,17 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.stream.Collectors;
-//? if >=1.18 {
+//? if >=1.18 && !fabric
 import net.minecraft.network.chat.Component;
+//? if >=1.18
 import net.minecraft.server.level.ServerPlayer;
-//?}
 //? if neoforge {
 /*import net.neoforged.neoforge.server.permission.nodes.PermissionNode;
 import net.neoforged.neoforge.server.permission.nodes.PermissionTypes;
-*///?} elif >=1.18 {
+*///?} elif forge && >=1.18 {
 import net.minecraftforge.server.permission.nodes.PermissionNode;
 import net.minecraftforge.server.permission.nodes.PermissionTypes;
-//?} else {
+//?} elif <1.18 {
 /*import net.minecraftforge.server.permission.DefaultPermissionLevel;
 
 import java.util.AbstractMap;
@@ -28,6 +28,7 @@ public class Command extends CommonCommand<CommandContext, Command> {
     }
 
     //? if >=1.18 {
+    //? if !fabric {
     final List<PermissionNode<Boolean>> permissionEntries(@NotNull String prefix) {
         return permissionConfigs(prefix).stream()
                                         .map(c -> {
@@ -36,7 +37,7 @@ public class Command extends CommonCommand<CommandContext, Command> {
                                                                                                 PermissionTypes.BOOLEAN,
                                                                                                 (player,
                                                                                                  playerId,
-                                                                                                 context) -> toForgeDefault(c.defaultPermission(),
+                                                                                                 context) -> resolveDefault(c.defaultPermission(),
                                                                                                                             player));
                                             node.setInformation(Component.literal(c.node()),
                                                                 Component.literal(c.description()));
@@ -44,8 +45,10 @@ public class Command extends CommonCommand<CommandContext, Command> {
                                         })
                                         .collect(Collectors.toList());
     }
+    //?}
 
-    private static boolean toForgeDefault(@NotNull DefaultPermission common, ServerPlayer player) {
+    // The default of a node, for a permission handler that does not know it.
+    static boolean resolveDefault(@NotNull DefaultPermission common, ServerPlayer player) {
         switch (common) {
             case ALL:
                 return true;

@@ -1,6 +1,7 @@
 package dev.marulabs.commandlib.argument;
 
 //? if >=1.19.3 {
+import dev.marulabs.commandlib.util.CurrentServer;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
@@ -14,10 +15,6 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.flag.FeatureFlags;
 import org.jetbrains.annotations.Nullable;
-//? if neoforge {
-/*import net.neoforged.neoforge.server.ServerLifecycleHooks;
-*///?} else
-import net.minecraftforge.server.ServerLifecycleHooks;
 //? if >=1.20.5 {
 /*import com.mojang.serialization.Lifecycle;
 import net.minecraft.resources.RegistryDataLoader;
@@ -50,7 +47,7 @@ final class BuiltInCommandBuildContext implements CommandBuildContext {
     @Override
     public Stream<ResourceKey<? extends Registry<?>>> listRegistries() {
         Stream<ResourceKey<? extends Registry<?>>> keys = Stream.concat(BUILT_IN.listRegistries(), DATA_DRIVEN.stream());
-        MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+        MinecraftServer server = CurrentServer.get();
         if (server != null) {
             keys = Stream.concat(keys,
                                  server.registryAccess()
@@ -68,7 +65,7 @@ final class BuiltInCommandBuildContext implements CommandBuildContext {
     }
 
     private static HolderLookup.Provider registries() {
-        MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+        MinecraftServer server = CurrentServer.get();
         if (server == null) {
             return BUILT_IN;
         }
@@ -196,7 +193,7 @@ final class BuiltInCommandBuildContext implements CommandBuildContext {
     //?}
 
     private static FeatureFlagSet enabledFeatures() {
-        MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+        MinecraftServer server = CurrentServer.get();
         if (server == null) {
             return FeatureFlags.DEFAULT_FLAGS;
         }
