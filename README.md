@@ -33,7 +33,9 @@ with ease.
    Define command options such as `-f`, `--force`, or `--limit 10` and read them from the command context in a
    type-safe way.
 5. **Automatic Usage and Help Generation**  
-   Generate usage and help messages from the command tree, including arguments, subcommands, options, and descriptions.
+   Generate usage and help messages from the command tree, including arguments, subcommands, options, descriptions,
+   and examples, and replace how the help, the usage lines and the errors look with formatters
+   ([docs](docs/help.md)).
 6. **Seamless Integration with the `/execute` command**   
    Allow your commands to be executed seamlessly from the `/execute` command, just like built-in commands.
 7. **Documentation Exports and Diagnostics**  
@@ -86,6 +88,8 @@ See the [argument catalog](docs/arguments.md) for an argument-by-argument compar
 - [Suggestions](docs/suggestions.md): default, custom, asynchronous, and tooltip suggestions.
 - [Permissions](docs/permissions.md): node names, defaults per platform, registration, and LuckPerms.
 - [Errors](docs/errors.md): what the sender sees when a command fails.
+- [Help, usage and error formatting](docs/help.md): the generated help, examples, and the help, usage and error
+  formatters.
 - [Localization](docs/localization.md): captions, the sender's locale, translations, and caption formatting.
 - [Vanilla integration](docs/vanilla-integration.md): `/execute`, command blocks, functions, and tags.
 - [Execution](docs/execution.md): middlewares, async executors, threads, and `/execute store` for async commands.
@@ -1138,6 +1142,32 @@ last `List<T>` parameter is variadic, `@Optional` / `@Default` make arguments op
 `CompletionStage` runs as `executeAsync`. Argument names come from the parameter names, so compile with `-parameters`
 or use `@Name`. See [annotated commands](docs/annotations.md) for every annotation, custom types and annotations, and
 the fluent equivalent.
+
+## Help and Error Formatting
+
+The generated help can list examples, and three formatters replace how the help, each usage line and each failure
+CommandLib reports look. Like captions, they apply to the child commands that set none of their own:
+
+```java
+public final class ArenaCommand extends Command {
+    public ArenaCommand() {
+        super("arena");
+        examples("/arena create lobby 16");
+        // The whole help, from a typed model: path, description, usage lines, options, examples.
+        helpFormatter((ctx, help) -> help.usages()
+                                         .forEach(usage -> ctx.sendMessage("§e" + usage.plainText())));
+        // Each failure: its kind, its exception, and the default messages.
+        errorFormatter((ctx, error) -> {
+            ctx.sendFailure("[Arena] The command failed:");
+            error.sendDefault();
+        });
+        // ...
+    }
+}
+```
+
+`errorFormatter(ErrorFormatter.SYNTAX_ADVICE)` adds the usage line of the argument branch that failed after an argument
+error. See [help, usage and error formatting](docs/help.md).
 
 ## Server Help
 

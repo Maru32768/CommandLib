@@ -272,7 +272,8 @@ keeps a player from running it again too soon. See [confirmation and cooldown](.
 |---|---|
 | `@HelpCommand` + `CommandHelp help` + `help.showHelp()`, `enableUnstableAPI("help")` | Built in: `/<command> help`; a command without an executor sends its usage |
 | `@Description` | `description(...)`; it appears in the generated usage |
-| Syntax advice on wrong input | Brigadier's vanilla error with the `...<--[HERE]` context line; see [errors](../errors.md) |
+| Syntax advice on wrong input | Brigadier's vanilla error with the `...<--[HERE]` context line; see [errors](../errors.md). For a value CommandLib rejects, `errorFormatter(ErrorFormatter.SYNTAX_ADVICE)` adds the usage line of the branch; see [help](../help.md#syntax-advice) |
+| `CommandHelpFormatter`, `setHelpFormatter(...)` | `helpFormatter(...)` and `usageFormatter(...)` on a command; see [help](../help.md) |
 | Bukkit `/help` entry | `serverHelp(shortText[, fullText])` |
 
 ## Locales and messages
@@ -287,7 +288,7 @@ keeps a player from running it again too soon. See [confirmation and cooldown](.
 | `usePerIssuerLocale(true)` | Always on: captions follow `ctx.getLocale()`, the sender's client locale, and the JVM's default locale for the console |
 | `{@@key}` in `@Description` | `description(ctx -> messages.get(ctx.getLocale(), "key"))` |
 | `setFormat(MessageType.ERROR, ...)` | `Captions#sender((ctx, caption, message, send) -> ...)` formats every caption; otherwise failures are red, `sendSuccess` green, `sendWarn` yellow |
-| `setDefaultExceptionHandler(...)` | **Not available** globally; `addUncaughtExceptionHandler((e, ctx) -> ...)` on a command or argument |
+| `setDefaultExceptionHandler(...)` | `errorFormatter((ctx, error) -> ...)` on each top-level command for what the sender gets; `addUncaughtExceptionHandler((e, ctx) -> ...)` on a command or argument for unexpected exceptions |
 
 ```java
 class HelloCommand extends Command {
@@ -322,7 +323,7 @@ fields of `JoinCommand` annotated `@Dependency` (from `dev.marulabs.commandlib.a
 
 ## Not available yet
 
-Tracked in the roadmap: reusable named conditions, message formats, catch-unknown handlers, hidden commands, root aliases
+Tracked in the roadmap: reusable named conditions, catch-unknown handlers, hidden commands, root aliases
 for subcommands, and global contexts and completions by type. Asynchronous execution is `executeAsync(...)`, see
 [execution](../execution.md#async-executors).
 

@@ -28,7 +28,9 @@ The runner works in this order and stops at the first failure:
 | 6 | The middlewares: `cooldown(...)`, then `confirm(...)`, then the middlewares and preprocesses (`addMiddleware`, `addPreprocess`) in the order they were added | The cooldown message, the confirmation request, the messages a preprocess sent before returning `false`, a middleware's `CommandPrerequisiteException` message, or the generic unexpected-error message |
 | 7 | The executor (`execute` or `executeAsync`) | A `CommandPrerequisiteException` message, `The command timed out.` for a `TimeoutException`, or the generic unexpected-error message |
 
-A middleware can map the failure of the steps after it, see [execution](execution.md#middleware).
+A middleware can map the failure of the steps after it, see [execution](execution.md#middleware). An
+`errorFormatter(...)` replaces what the sender gets for each failure CommandLib reports at these steps, and can add the
+usage line of the argument branch that failed; see [help, usage and error formatting](help.md#error-formatter).
 
 ## Results and failures
 
@@ -95,7 +97,7 @@ help** of the command (the `Usage:` list), after checking permissions, options, 
 prerequisites. A command that has its own `execute(...)` runs that executor for the bare `/command` input instead.
 
 The same help is available as `/<command> help` when the command has children, argument branches, or options, unless a
-child is named or aliased `help`.
+child is named or aliased `help`. See [help](help.md) for what it lists and how to format it.
 
 ### Argument value rejected by CommandLib (`ArgumentParseException`)
 

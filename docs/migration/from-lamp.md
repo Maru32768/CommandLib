@@ -354,7 +354,7 @@ class ArenaCommand extends Command {
 | Lamp | CommandLib |
 |---|---|
 | Response handlers (a returned value is sent) | **Not available**; send it with `ctx.sendMessage(...)`. `ctx.setResult(int)` sets the value `/execute store result` stores |
-| `ExceptionHandler`, `@HandleException` | **Not available** globally. `addUncaughtExceptionHandler((e, ctx) -> ...)` on a command or argument handles unexpected exceptions |
+| `ExceptionHandler`, `@HandleException` | `errorFormatter((ctx, error) -> ...)` on a command decides what the sender gets for each failure CommandLib reports (see [help](../help.md#error-formatter)); `addUncaughtExceptionHandler((e, ctx) -> ...)` on a command or argument handles unexpected exceptions |
 | Lamp's built-in error messages, `Translator` / `LocaleReader` | CommandLib's messages are captions in the sender's locale, replaceable with `Captions`; see [localization](../localization.md) and [errors](../errors.md) |
 | `Help.ChildrenCommands` / `Help.RelatedCommands` parameter | Built in: `/<command> help`, and the usage is sent when a node has no executor |
 | `@Description("...")` | `description("...")` on commands and branches |

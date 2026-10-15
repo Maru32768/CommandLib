@@ -311,7 +311,7 @@ See [confirmation and cooldown](../../README.md#confirmation-and-cooldown) in th
 
 | Cloud | CommandLib |
 |---|---|
-| `exceptionController().registerHandler(...)` for `NoPermissionException`, `InvalidSyntaxException`, `InvalidCommandSenderException`, ... | **Not available**. CommandLib sends its messages as captions that you can replace (see below); Brigadier syntax errors are the platform's vanilla messages. See [errors](../errors.md) |
+| `exceptionController().registerHandler(...)` for `NoPermissionException`, `InvalidSyntaxException`, `InvalidCommandSenderException`, ... | `errorFormatter((ctx, error) -> ...)` gets each failure CommandLib reports with its `kind()`; Brigadier syntax errors are the platform's vanilla messages. See [help](../help.md#error-formatter) and [errors](../errors.md) |
 | An exception thrown by the handler | `addUncaughtExceptionHandler((e, ctx) -> ...)` on the command or argument |
 | `ArgumentParseResult.failure(...)` from a parser | `throw new ArgumentValidationException("...")` from `validator(...)` |
 | Failing from the handler | `throw new CommandPrerequisiteException("...")` from `execute(ctx -> ...)`, or `ctx.sendFailure("..."); return;` |
@@ -334,7 +334,7 @@ argument(new IntegerArgument("amount").validator((amount, ctx) -> {
 
 | Cloud | CommandLib |
 |---|---|
-| `MinecraftHelp` (minecraft-extras), `createHelpHandler()` | Built in: `/<command> help`, and the usage is sent when a node has no executor |
+| `MinecraftHelp` (minecraft-extras), `createHelpHandler()` | Built in: `/<command> help`, and the usage is sent when a node has no executor; `helpFormatter(...)` replaces how it looks, see [help](../help.md) |
 | `CommandDescription` / `Description.of(...)` on a command or component | `description(...)` on commands and branches |
 | Bukkit `/help` entry | `serverHelp(shortText[, fullText])` |
 

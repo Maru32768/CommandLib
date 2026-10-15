@@ -116,8 +116,9 @@ captions.sender((ctx, caption, message, send) -> {
 What the sender sends while a command fails is part of the failure, as with `ctx.sendFailure`: a silent source does not
 get it and `/execute store success` stores 0.
 
-The generated help is not sent through the `CaptionSender`: its headings and notes (`Usage:`, `Options:`, `options`,
-`required`, `up to {count} times`) are captions, but each line combines several of them with the command's usage.
+The generated help is not sent through the `CaptionSender`: its headings and notes (`Usage:`, `Options:`, `Examples:`,
+`options`, `required`, `up to {count} times`) are captions, but each line combines several of them with the command's
+usage. A `HelpFormatter` replaces the whole help, see [help](help.md).
 
 ## Vanilla translation keys
 
@@ -176,6 +177,7 @@ message is not translatable either) and the option errors, so they are captions.
 | `HELP_OPTIONS_TAG` | `commandlib.help.options_tag` | options |
 | `HELP_REQUIRED` | `commandlib.help.required` | required |
 | `HELP_MAX_OCCURRENCES` | `commandlib.help.max_occurrences` | up to {count} times |
+| `HELP_EXAMPLES` | `commandlib.help.examples` | Examples: |
 
 The durations join their parts with a space, such as `1h 2m 3s` or `1時間 2分 3秒`. The English and Japanese files are
 `dev/marulabs/commandlib/lang/commandlib_en.properties` and `commandlib_ja.properties` in the `common` jar; copy the
