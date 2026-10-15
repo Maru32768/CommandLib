@@ -342,12 +342,14 @@ The argument nodes of every branch are built once, merged as the command literal
 would merge branches whose first arguments share a name, and added to every
 state as the same node objects.
 
-The server tree then has one node per token of each state, and so has what a
-player receives. Vanilla's `Commands#sendCommands` copies the tree for each
-player and copies a node once for every path that reaches it
-(`fillUsableCommands`), but sends a redirect as a reference to the copy of its
+The server tree then has one node per token of each state, and so has the copy
+the server builds for each player. Vanilla's `Commands#sendCommands` copies the
+tree for each player and copies a node once for every path that reaches it
+(`fillUsableCommands`), but copies a redirect as a reference to the copy of its
 target. Without redirects, a command with six short flags made 5,490 server
-nodes and 491,607 copies for each player; with them it makes 5,490 copies.
+nodes and 491,607 copies for each player; with them it makes 5,490 copies. The
+packet encoder then looks the copies up in a hash map, whose `CommandNode`
+equality hashes a node's whole subtree, so the copies also cost the hashing.
 
 The copy resolves a redirect through a map from server node to copied node,
 filled as it goes, so a hub must be copied before any redirect to it. The graph

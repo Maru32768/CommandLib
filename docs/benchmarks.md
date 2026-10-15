@@ -88,7 +88,7 @@ The baseline in `benchmark/baseline.json`, recorded with the default `jmh` optio
   machine before gating on the time metrics.
 
 Tree size (`Trees.command`): 61 nodes per command (610 for 10 commands, 61,000 for 1000), 305 nodes per command when
-every path is expanded, as the vanilla command packet sends it.
+every path is expanded, as vanilla's `Commands#sendCommands` copies the tree for each player.
 
 Execute (µs per operation; throughput in operations per µs; allocation in bytes per operation):
 
@@ -138,14 +138,85 @@ Findings:
   registering 1000 commands takes 90 to 130 ms, so the JMH averages above are inflated by the load.
 - Suggesting at the root walks every command: Brigadier builds a context and a future for each root child, about
   0.9 KB and 1.3 µs per command at the median.
-- Each short flag multiplies the option tree, because every permutation of the combined flags is a literal. Six short
-  flags on one command make 5,490 nodes and 23 MB of allocation to register, and 491,607 nodes once the paths are
-  expanded, which is what each player receives in the command packet. Keep commands to four short flags or fewer, or
-  give the others no short name.
-- The option states share their children, but each state still builds its own copy of the argument nodes
-  (`argumentNodeSupplier` in `CommandNodeCreator`): 16 of the 61 nodes of this shape, where 2 would do. Building
-  them once would remove about a fifth of the nodes to register; the expanded tree that players receive would stay
-  the same.
+- Each short flag multiplied the option tree, because every permutation of the combined flags is a literal and each
+  order of the options had its own path. Six short flags on one command made 5,490 nodes and 23 MB of allocation to
+  register, and 491,607 nodes once the paths are expanded, which the server copies for each player.
+- The option states shared their children, but each state still built its own copy of the argument nodes
+  (`argumentNodeSupplier` in `CommandNodeCreator`): 16 of the 61 nodes of this shape, where 2 would do.
+
+## After option redirects
+
+The option states now redirect to one node per state, and the argument nodes are built once (see
+`docs/design/command-options.md`). `OptionTreeSizeTest` in `common` keeps the sizes below limits. Recorded with the
+default `jmh` options on the same machine and JDK as the baseline, which `baseline.json` still holds:
+
+- CommandLib: the option redirect commits on top of `e5eefc70`, so the comparison with the baseline (`647ca7c4`)
+  also includes the commits between them.
+- Load: the parallel Gradle builds of other agents kept the CPU at about 97% with a dozen JVMs during the run, more
+  than during the baseline. The time metrics are noisier still: `jmhCompare` reports regressions only for metrics
+  whose error exceeds the change (throughput of `cmd5 -fv --limit 20 Alex 3` and `cmd5 admin` at 1000 commands,
+  `RegistrationBenchmark` at 100 commands, the p95 of two suggestions), while every allocation is lower or within
+  1.2%.
+
+Tree size:
+
+| tree | nodes before | nodes after | expanded before | expanded after |
+|---|---|---|---|---|
+| `Trees.command` (per command) | 61 | 47 | 305 | 61 |
+| `Trees.flags(2)` | 16 | 13 | 31 | 16 |
+| `Trees.flags(4)` | 202 | 187 | 2,395 | 202 |
+| `Trees.flags(6)` | 5,490 | 5,427 | 491,607 | 5,490 |
+
+Execute (µs per operation; throughput in operations per µs; allocation in bytes per operation):
+
+| commands | input | p50 | p95 | p99 | throughput | alloc |
+|---|---|---|---|---|---|---|
+| 10 | `cmd5 Alex` | 1.5 | 1.9 | 26 | 0.405 ± 0.591 | 3,169 |
+| 10 | `cmd5 Alex 3` | 1.9 | 3.0 | 53 | 0.260 ± 0.403 | 3,946 |
+| 10 | `cmd5 -fv --limit 20 Alex 3` | 4.0 | 6.7 | 33 | 0.121 ± 0.179 | 8,554 |
+| 10 | `cmd5 list a b c d` | 3.5 | 5.6 | 84 | 0.214 ± 0.155 | 7,151 |
+| 10 | `cmd5 admin` | 0.9 | 1.2 | 15 | 0.911 ± 0.415 | 2,257 |
+| 1000 | `cmd5 Alex` | 1.6 | 2.0 | 14 | 0.142 ± 0.336 | 3,193 |
+| 1000 | `cmd5 Alex 3` | 2.2 | 3.3 | 50 | 0.352 ± 0.164 | 4,065 |
+| 1000 | `cmd5 -fv --limit 20 Alex 3` | 4.4 | 6.4 | 44 | 0.068 ± 0.197 | 8,730 |
+| 1000 | `cmd5 list a b c d` | 3.8 | 5.2 | 44 | 0.164 ± 0.229 | 7,298 |
+| 1000 | `cmd5 admin` | 0.9 | 1.3 | 48 | 0.163 ± 0.273 | 2,258 |
+
+Suggest (µs per operation, bytes per operation):
+
+| commands | input | p50 | p95 | p99 | alloc |
+|---|---|---|---|---|---|
+| 10 | `` | 4.2 | 4.9 | 32 | 8,626 |
+| 10 | `cmd5 ` | 19.3 | 40.4 | 184 | 26,249 |
+| 10 | `cmd5 -` | 20.5 | 83.6 | 518 | 26,353 |
+| 10 | `cmd5 A` | 16.2 | 36.5 | 166 | 21,040 |
+| 1000 | `` | 1,225 | 2,630 | 5,169 | 968,066 |
+| 1000 | `cmd5 ` | 21.1 | 90.0 | 481 | 26,698 |
+| 1000 | `cmd5 -` | 20.3 | 70.7 | 717 | 26,793 |
+| 1000 | `cmd5 A` | 16.8 | 49.3 | 434 | 21,606 |
+
+Registration (average µs per operation, bytes per operation):
+
+| benchmark | parameter | average | alloc |
+|---|---|---|---|
+| `RegistrationBenchmark` | 10 commands | 5,993 ± 20,968 | 1,003,425 |
+| `RegistrationBenchmark` | 100 commands | 53,575 ± 208,783 | 9,930,626 |
+| `RegistrationBenchmark` | 1000 commands | 354,086 ± 945,006 | 100,203,665 |
+| `OptionTreeBenchmark` | 2 flags | 81 ± 81 | 33,334 |
+| `OptionTreeBenchmark` | 4 flags | 1,007 ± 2,160 | 469,772 |
+| `OptionTreeBenchmark` | 6 flags | 15,880 ± 9,962 | 17,097,794 |
+
+Findings:
+
+- The expanded tree, which the server copies for each player, has as many nodes as the server tree: 61 instead of 305
+  per command of this shape, 5,490 instead of 491,607 for six short flags. The server tree itself shrank less (by the
+  argument copies), since each state still has a node for each of its tokens; six short flags still make 1,962 tokens
+  before any is given, so keep few short flags.
+- Registering allocates about a fifth less (100 MB instead of 126 MB for 1000 commands), and the option trees 12 to
+  25% less.
+- Execution with options re-parses the option tokens before the last redirect: `cmd5 -fv --limit 20 Alex 3` allocates
+  about as much as before (+0.3 to +1.2%) and its median did not rise, while the inputs without options allocate a
+  quarter to a third less, which includes the commits since the baseline.
 
 ## Future work
 
