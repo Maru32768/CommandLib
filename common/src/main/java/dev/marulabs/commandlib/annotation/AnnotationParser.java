@@ -771,7 +771,7 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
             } catch (NumberFormatException e) {
                 throw error(method,
                             parameter,
-                            "has @Default(\"" + text + "\"), which is not a " + valueType.getSimpleName());
+                            "has @Default(\"" + text + "\"), which is not a valid " + valueType.getSimpleName());
             }
             if (valueType == Boolean.class && (text.equals("true") || text.equals("false"))) {
                 return Boolean.valueOf(text);
@@ -787,7 +787,7 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
             }
             throw error(method,
                         parameter,
-                        "has @Default(\"" + text + "\"), which is not a " + valueType.getName()
+                        "has @Default(\"" + text + "\"), which is not a valid " + valueType.getName()
                                 + "; @Default takes strings, numbers, booleans and enum constants");
         }
 

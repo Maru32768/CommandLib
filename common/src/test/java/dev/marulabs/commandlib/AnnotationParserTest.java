@@ -353,7 +353,7 @@ class AnnotationParserTest {
         assertThatThrownBy(() -> parser.parse(new UnnamedParameter())).hasMessage("UnnamedParameter#run(String): parameter arg0 has no name; compile with -parameters or annotate it with @Name");
         assertThatThrownBy(() -> parser.parse(new UnknownType())).hasMessageContaining("has no argument type for java.lang.Thread");
         assertThatThrownBy(() -> parser.parse(new RangeOnString())).hasMessageContaining("has @Range, but java.lang.String is not a number");
-        assertThatThrownBy(() -> parser.parse(new BadDefault())).hasMessageContaining("has @Default(\"ten\"), which is not a Integer");
+        assertThatThrownBy(() -> parser.parse(new BadDefault())).hasMessageContaining("has @Default(\"ten\"), which is not a valid Integer");
         assertThatThrownBy(() -> parser.parse(new DescribedExecutor())).hasMessageContaining("put them on the class");
         assertThatThrownBy(() -> parser.parse(new TwiceConfigured())).hasMessageContaining("which TwiceConfigured#one() already configures");
         assertThatThrownBy(() -> parser.parse(new BadReturnType())).hasMessageContaining("must return void, int or a CompletionStage");
