@@ -11,6 +11,7 @@ import dev.marulabs.commandlib.Options;
 import dev.marulabs.commandlib.branch.ArgumentBranch;
 import dev.marulabs.commandlib.command.AsyncCommandExecutor;
 import dev.marulabs.commandlib.command.Extractor;
+import dev.marulabs.commandlib.command.Prerequisite;
 import dev.marulabs.commandlib.exception.CommandPrerequisiteException;
 import dev.marulabs.commandlib.suggestion.SuggestionBuilder;
 import dev.marulabs.commandlib.suggestion.SuggestionProvider;
@@ -103,6 +104,7 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
     private final Set<Class<?>> contextTypes = new HashSet<>();
     private final Map<Class<?>, Extractor<C, ?>> contextValues = new LinkedHashMap<>();
     private final Map<Class<?>, Object> dependencies = new HashMap<>();
+    private final Map<String, Prerequisite<C>> conditions = new HashMap<>();
     // In registration order, which is the order the handlers apply in.
     private final Map<Class<? extends Annotation>, RegisteredHandler<?, ?, C>> annotationHandlers = new LinkedHashMap<>();
 
@@ -166,6 +168,16 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
         Objects.requireNonNull(instance);
         dependencies.put(box(type), instance);
         return registerContextValue(type, ctx -> instance);
+    }
+
+    /**
+     * Registers {@code prerequisite} under {@code name}, so that {@link Condition @Condition("name")} on a class or a
+     * subcommand method adds it to the command, replacing the one registered before under the name. A fluent command
+     * adds the same {@code Prerequisite} constant with {@code addPrerequisite(...)}.
+     */
+    public AnnotationParser<C, T> registerCondition(@NotNull String name, @NotNull Prerequisite<C> prerequisite) {
+        conditions.put(Objects.requireNonNull(name), Objects.requireNonNull(prerequisite));
+        return this;
     }
 
     /**
@@ -267,7 +279,8 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
             for (Class<? extends Annotation> x : List.of(Description.class,
                                                          Permission.class,
                                                          Confirm.class,
-                                                         Cooldown.class)) {
+                                                         Cooldown.class,
+                                                         Condition.class)) {
                 if (method.isAnnotationPresent(x)) {
                     throw error(method, "has @" + x.getSimpleName() + " but neither @Execute nor @Subcommand");
                 }
@@ -292,7 +305,7 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
                 configure(command, method, describe(method), subcommand.aliases());
             } else {
                 command = root;
-                for (Class<? extends Annotation> x : List.of(Confirm.class, Cooldown.class)) {
+                for (Class<? extends Annotation> x : List.of(Confirm.class, Cooldown.class, Condition.class)) {
                     if (method.isAnnotationPresent(x)) {
                         throw error(method, "has @" + x.getSimpleName() + "; put it on the class");
                     }
@@ -371,7 +384,8 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
             Permission permission = element.getAnnotation(Permission.class);
             Confirm confirm = element.getAnnotation(Confirm.class);
             Cooldown cooldown = element.getAnnotation(Cooldown.class);
-            if (description == null && permission == null && confirm == null && cooldown == null
+            Condition condition = element.getAnnotation(Condition.class);
+            if (description == null && permission == null && confirm == null && cooldown == null && condition == null
                     && aliases.length == 0) {
                 return;
             }
@@ -401,6 +415,17 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
                 command.cooldown(Duration.of(cooldown.value(),
                                              cooldown.unit()
                                                      .toChronoUnit()));
+            }
+            if (condition != null) {
+                for (String name : condition.value()) {
+                    Prerequisite<C> prerequisite = conditions.get(name);
+                    if (prerequisite == null) {
+                        throw new IllegalArgumentException(source + " has @Condition(\"" + name
+                                + "\"), but no condition of that name is registered; register one with "
+                                + "registerCondition");
+                    }
+                    command.addPrerequisite(prerequisite);
+                }
             }
         }
 

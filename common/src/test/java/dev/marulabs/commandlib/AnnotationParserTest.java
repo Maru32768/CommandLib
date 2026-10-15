@@ -234,6 +234,53 @@ class AnnotationParserTest {
         assertThat(runner.executeAndGetResult("calc fail")).isZero();
     }
 
+    @Command("arena")
+    @Condition("open")
+    static final class ConditionCommand {
+        @Subcommand("join")
+        void join(TestCommandContext ctx) {
+            ctx.sendMessage("joined");
+        }
+
+        @Subcommand("start")
+        @Condition({"open", "staff"})
+        void start(TestCommandContext ctx) {
+            ctx.sendMessage("started");
+        }
+    }
+
+    @Command("arena")
+    static final class UnknownCondition {
+        @Subcommand("join")
+        @Condition("closed")
+        void join() {
+        }
+    }
+
+    @Test
+    void conditions_add_the_registered_prerequisites() throws Exception {
+        boolean[] open = {false};
+        TestCommand command = parser().registerCondition("open", ctx -> {
+            if (!open[0]) {
+                throw new CommandPrerequisiteException("The arena is closed.");
+            }
+        })
+                                      .registerCondition("staff", ctx -> {
+                                          throw new CommandPrerequisiteException("Staff only.");
+                                      })
+                                      .parse(new ConditionCommand());
+        TestCommandRunner runner = new TestCommandRunner(command);
+
+        assertThat(runner.execute("arena join")
+                         .messages()).containsExactly("The arena is closed.");
+        open[0] = true;
+        assertThat(runner.execute("arena join")
+                         .messages()).containsExactly("joined");
+        assertThat(runner.execute("arena start")
+                         .messages()).containsExactly("Staff only.");
+        assertThatThrownBy(() -> parser().parse(new UnknownCondition())).hasMessageContaining("@Condition(\"closed\")");
+    }
+
     @Retention(RetentionPolicy.RUNTIME)
     @interface Upper {
     }

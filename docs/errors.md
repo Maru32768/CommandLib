@@ -212,6 +212,27 @@ raised with `ctx.fail(...)`. The message is sent in red and the command [fails](
 
 Prerequisites of a parent command apply to its children unless the child calls `disableParentPrerequisite()`.
 
+#### Reusable conditions
+
+A condition shared by several commands is a `Prerequisite` constant; it is typed, so it reads the platform's context
+without casts, and `and` combines two:
+
+```java
+public final class Conditions {
+    public static final Prerequisite<CommandContext> DAYTIME = ctx -> {
+        if (Command.playerRequirer().extract(ctx).getWorld().getTime() >= 12000) {
+            throw new CommandPrerequisiteException("This command works only by day.");
+        }
+    };
+    public static final Prerequisite<CommandContext> STAFF_BY_DAY = DAYTIME.and(ctx -> { /* ... */ });
+}
+
+addPrerequisite(Conditions.DAYTIME);
+```
+
+Annotated commands name it: `AnnotationParser#registerCondition("daytime", Conditions.DAYTIME)` and
+`@Condition("daytime")` on the class or a `@Subcommand` method ([annotations](annotations.md#customizing-the-parser)).
+
 The typed executors (`execute((a, b, ctx) -> ...)`) take `java.util.function` style consumers that cannot throw
 checked exceptions. `ctx.fail(...)` throws the `CommandPrerequisiteException` without declaring it, so it fails them
 like any other executor; it never returns, and `throw ctx.fail(...)` lets the compiler see that the branch ends:

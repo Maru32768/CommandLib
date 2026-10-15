@@ -213,7 +213,7 @@ CommandLib does not filter what a provider adds; filter by `sb.getLatestInput()`
 
 | ACF | CommandLib |
 |---|---|
-| `addCondition("daytime", c -> ...)` + `@Conditions("daytime")` | A `Prerequisite<CommandContext>` added with `addPrerequisite(...)` |
+| `addCondition("daytime", c -> ...)` + `@Conditions("daytime")` | A `Prerequisite<CommandContext>` added with `addPrerequisite(...)`; annotated commands use `registerCondition("daytime", ...)` + `@Condition("daytime")` |
 | Parameter conditions `@Conditions("limits:min=5,max=10")` | `validator(...)` on the argument, or `new IntegerArgument(name, 5, 10)` |
 | `throw new ConditionFailedException("...")` | `throw new CommandPrerequisiteException("...")` in a prerequisite, `ArgumentValidationException("...")` in a validator |
 

@@ -127,11 +127,12 @@ Without it, name each argument with `@Name("target")`, and give `@Flag` and `@Op
 | `@Permission(value, defaultPermission, description)` | class, method | `permission(...)` of the command, the subcommand, or the branch of an `@Execute` method; attributes left out keep the generated node and the inherited default |
 | `@Confirm(seconds = 10)` | class, `@Subcommand` method | `confirm(Confirmation.within(...))` |
 | `@Cooldown(value, unit)` | class, `@Subcommand` method | `cooldown(Duration)` |
+| `@Condition({"daytime", ...})` | class, `@Subcommand` method | `addPrerequisite(...)` with each prerequisite registered under the name with `registerCondition` |
 
 - Every method with arguments adds an argument branch to its command, so several methods can share a path:
   `@Subcommand("give") void give(Player target)` and `@Subcommand("give") void give(Player target, int count)`.
   At most one of them may run the command without arguments, and only one may give `@Description`, `@Permission`,
-  `@Confirm`, `@Cooldown` or aliases for the subcommand.
+  `@Confirm`, `@Cooldown`, `@Condition` or aliases for the subcommand.
 - The class describes the command itself. On an `@Execute` method, `@Description` and `@Permission` describe its
   argument branch, so a method without arguments cannot have them.
 - Methods are added in the order of their path and then their name, because reflection does not give the order of the
@@ -223,6 +224,8 @@ Command command = AnnotatedCommands.parser()
         .registerDependency(Economy.class, economy)
         // A custom annotation that configures the argument of a parameter.
         .registerAnnotation(Online.class, Player.class, (online, argument) -> argument.validator(Player::isOnline))
+        // A named prerequisite for @Condition("daytime").
+        .registerCondition("daytime", Conditions.DAYTIME)
         .parse(new ShopCommand());
 ```
 
@@ -232,6 +235,9 @@ Command command = AnnotatedCommands.parser()
 - `registerAnnotation(annotation, valueType, handler)` applies after the factory and `@Suggest`, in registration order,
   and before the argument is made variadic or optional, so on a `List` parameter it configures each value. It returns
   the argument to use, which keeps the parameter's name.
+- `registerCondition(name, prerequisite)` names a `Prerequisite` for `@Condition`. Parsing fails for a name nobody
+  registered. Fluent commands add the same constant with `addPrerequisite`, see
+  [errors](errors.md#reusable-conditions).
 - `registerContextValue` and `registerDependency` are described in [context values](context-values.md#annotated-commands):
   the parsed command provides the registered values, so fluent code added to it reads them with `ctx.get(type)`.
 - The parsed command is an ordinary `Command`: add middlewares, prerequisites or children with the fluent API before

@@ -55,7 +55,7 @@ Consequences of reflection:
 | `@Subcommand("a b")` | child commands along the path, created once and shared by the methods of that path |
 | method without argument parameters | `execute` / `executeAsync` on its command (at most one per command) |
 | method with argument parameters | one `argument(...)` branch on its command |
-| `@Description`, `@Permission`, `@Confirm`, `@Cooldown`, `aliases` | on the command: from the class for the root, from one `@Subcommand` method for a subcommand |
+| `@Description`, `@Permission`, `@Confirm`, `@Cooldown`, `@Condition`, `aliases` | on the command: from the class for the root, from one `@Subcommand` method for a subcommand |
 | `@Description`, `@Permission` on an `@Execute` method | on its argument branch |
 | `@Flag` / `@Option` parameter | `Options.flag` / `count` / `bool` / `integer` / `longValue` / `floatValue` / `doubleValue` / `string`, `aliases`, `description`, `repeatable`, `required`, registered on the method's command |
 | other parameter | an argument from the factory of its type; `List<T>` → `variadic()`; `@Default` → `optional(value)`; `@Optional` → `optional(contextValue)` or the empty value of the type |
