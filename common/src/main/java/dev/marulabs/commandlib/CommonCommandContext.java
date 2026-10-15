@@ -48,8 +48,14 @@ public abstract class CommonCommandContext<S, C> {
         for (ParsedCommandNode<S> x : ctx.getNodes()) {
             String name = x.getNode()
                            .getName();
-            String input = x.getRange()
-                            .get(ctx.getInput());
+            // Up to 1.20.2 vanilla's text component argument ends its range one past the end of the input.
+            String input = ctx.getInput()
+                              .substring(x.getRange()
+                                          .getStart(),
+                                         Math.min(x.getRange()
+                                                   .getEnd(),
+                                                  ctx.getInput()
+                                                     .length()));
             // Only an argument repeats: a command literal followed by an argument of the same name is not variadic.
             boolean isArgument = x.getNode() instanceof ArgumentCommandNode;
             boolean repeated = isArgument && name.equals(previousArgumentName);
