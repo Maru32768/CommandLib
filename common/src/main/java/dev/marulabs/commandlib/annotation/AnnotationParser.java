@@ -5,6 +5,7 @@ import dev.marulabs.commandlib.CommonArgument;
 import dev.marulabs.commandlib.CommonCommand;
 import dev.marulabs.commandlib.CommonCommandContext;
 import dev.marulabs.commandlib.Confirmation;
+import dev.marulabs.commandlib.ContextKey;
 import dev.marulabs.commandlib.DefaultPermission;
 import dev.marulabs.commandlib.Options;
 import dev.marulabs.commandlib.branch.ArgumentBranch;
@@ -54,6 +55,10 @@ import java.util.stream.Collectors;
  * parameter is a variadic argument of its element type;</li>
  * <li>a context value registered for its type, such as the sender.</li>
  * </ol>
+ * A context value is read with {@link CommonCommandContext#get(Class)}, so the method gets what the command's
+ * provider gives or what a middleware put for the type, the same value fluent code of the command reads. The parsed
+ * command provides the context values registered with an extractor, and its fields annotated {@link Dependency} are
+ * set to the instances registered with {@link #registerDependency}.
  * Methods are added in the order of their subcommand path, then their name, since reflection does not report the
  * order of the source, so the generated help lists subcommands and branches in that order.
  * <p>
@@ -94,7 +99,10 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
     private final Class<C> contextType;
     private final Function<String, ? extends T> commandFactory;
     private final Map<Class<?>, ArgumentFactory<C>> argumentFactories = new HashMap<>();
-    private final Map<Class<?>, Extractor<C, ?>> contextValues = new HashMap<>();
+    // Every type registered as a context value, and the extractors of those the parsed command provides.
+    private final Set<Class<?>> contextTypes = new HashSet<>();
+    private final Map<Class<?>, Extractor<C, ?>> contextValues = new LinkedHashMap<>();
+    private final Map<Class<?>, Object> dependencies = new HashMap<>();
     // In registration order, which is the order the handlers apply in.
     private final Map<Class<? extends Annotation>, RegisteredHandler<?, ?, C>> annotationHandlers = new LinkedHashMap<>();
 
@@ -122,11 +130,42 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
      * Resolves parameters of {@code type} from the context with {@code extractor}: those annotated {@link Sender},
      * those whose type has no argument factory, and the value of an omitted {@link Optional} argument of the type. A
      * {@link CommandPrerequisiteException} thrown by the extractor fails the command with its message.
+     * <p>
+     * The parsed command provides the value with {@link CommonCommand#provide(Class, Extractor)}, so the extractor
+     * runs at most once per execution, a middleware can replace the value with
+     * {@link CommonCommandContext#put(Class, Object)}, and fluent code of the command reads it with
+     * {@link CommonCommandContext#get(Class)}. This is how to map the sender to a type of your own:
+     * {@code registerContextValue(GamePlayer.class, ctx -> games.of(ctx.getActor()))}.
      */
     public <V> AnnotationParser<C, T> registerContextValue(@NotNull Class<V> type,
                                                            @NotNull Extractor<C, ? extends V> extractor) {
+        contextTypes.add(box(type));
         contextValues.put(box(type), Objects.requireNonNull(extractor));
         return this;
+    }
+
+    /**
+     * Resolves parameters of {@code type} as {@link #registerContextValue(Class, Extractor)} does, from a value
+     * something else gives the context: a middleware that puts it, or the provider of a command the parsed command is
+     * added to. An execution that reaches the method without the value fails with an {@link IllegalStateException}.
+     * It replaces an extractor registered for the type.
+     */
+    public AnnotationParser<C, T> registerContextValue(@NotNull Class<?> type) {
+        contextTypes.add(box(type));
+        contextValues.remove(box(type));
+        return this;
+    }
+
+    /**
+     * Registers {@code instance} as the dependency of {@code type}: fields of the type annotated {@link Dependency} are
+     * set to it when a class is parsed, and it is a context value of the type
+     * ({@link #registerContextValue(Class, Extractor)}), so methods can take it as a parameter and fluent code of the
+     * command can read it with {@link CommonCommandContext#get(Class)}.
+     */
+    public <V> AnnotationParser<C, T> registerDependency(@NotNull Class<V> type, @NotNull V instance) {
+        Objects.requireNonNull(instance);
+        dependencies.put(box(type), instance);
+        return registerContextValue(type, ctx -> instance);
     }
 
     /**
@@ -176,6 +215,8 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
         }
 
         T run() {
+            injectDependencies();
+            contextValues.forEach((x, extractor) -> provide(root, x, extractor));
             commands.put("", root);
             configure(root, type, "class " + type.getSimpleName(), new String[0]);
 
@@ -189,6 +230,34 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
                                          .collect(Collectors.toList());
             methods.forEach(this::addMethod);
             return root;
+        }
+
+        private void injectDependencies() {
+            for (Class<?> x = type; x != null && x != Object.class; x = x.getSuperclass()) {
+                for (Field field : x.getDeclaredFields()) {
+                    if (!field.isAnnotationPresent(Dependency.class)) {
+                        continue;
+                    }
+                    String name = x.getSimpleName() + "." + field.getName();
+                    int modifiers = field.getModifiers();
+                    if (Modifier.isStatic(modifiers) || Modifier.isFinal(modifiers)) {
+                        throw new IllegalArgumentException(name + " has @Dependency, but is static or final");
+                    }
+                    Object dependency = dependencies.get(box(field.getType()));
+                    if (dependency == null) {
+                        throw new IllegalArgumentException(name
+                                + " has @Dependency, but no dependency of type " + field.getType()
+                                                                                        .getName()
+                                + " is registered; register one with registerDependency");
+                    }
+                    try {
+                        field.setAccessible(true);
+                        field.set(instance, dependency);
+                    } catch (IllegalAccessException | RuntimeException e) {
+                        throw new IllegalArgumentException(name + " is not accessible", e);
+                    }
+                }
+            }
         }
 
         private boolean isCommandMethod(Method method) {
@@ -371,14 +440,13 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
                        parameter,
                        "a @Sender parameter",
                        PARAMETER_ANNOTATIONS.subList(0, PARAMETER_ANNOTATIONS.size() - 1));
-                Extractor<C, ?> value = contextValues.get(box(rawType));
-                if (value == null) {
+                if (!contextTypes.contains(box(rawType))) {
                     throw error(method,
                                 parameter,
                                 "has no context value for " + rawType.getName()
                                         + "; register one with registerContextValue");
                 }
-                return value;
+                return contextValue(box(rawType));
             }
             if (parameter.isAnnotationPresent(Flag.class) || parameter.isAnnotationPresent(Option.class)) {
                 CommandOption<?, C> option = option(method, parameter, command);
@@ -392,15 +460,14 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
                 factory = argumentFactories.get(Enum.class);
             }
             if (factory == null) {
-                Extractor<C, ?> value = variadic ? null : contextValues.get(valueType);
-                if (value == null) {
+                if (variadic || !contextTypes.contains(valueType)) {
                     throw error(method,
                                 parameter,
                                 "has no argument type for " + valueType.getName()
                                         + "; register one with registerArgument");
                 }
                 reject(method, parameter, "a context value", PARAMETER_ANNOTATIONS);
-                return value;
+                return contextValue(valueType);
             }
             CommonArgument<?, C, ?> argument = argument(method, parameter, factory, valueType, variadic);
             arguments.add(argument);
@@ -460,7 +527,8 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
                 Object value = parseDefault(method, parameter, valueType, defaultValue.value());
                 makeOptional(argument, ctx -> value);
             } else if (parameter.isAnnotationPresent(Optional.class)) {
-                Extractor<C, ?> fromContext = variadic ? null : contextValues.get(valueType);
+                Extractor<C, ?> fromContext = !variadic && contextTypes.contains(valueType) ? contextValue(valueType)
+                        : null;
                 Object empty = variadic ? List.of() : emptyValue(valueType);
                 if (fromContext != null) {
                     makeOptional(argument, fromContext);
@@ -825,6 +893,19 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
         String value = subcommand.value()
                                  .trim();
         return value.isEmpty() ? List.of() : Arrays.asList(value.split("\\s+"));
+    }
+
+    private static <D extends CommonCommandContext<?, ?>> Extractor<D, ?> contextValue(Class<?> type) {
+        ContextKey<?> key = ContextKey.of(type);
+        return ctx -> ctx.get(key);
+    }
+
+    // The extractor was registered for the type with an extractor of a subtype.
+    @SuppressWarnings("unchecked")
+    private static <V, D extends CommonCommandContext<?, ?>, U extends CommonCommand<D, U>> void provide(U command,
+                                                                                                         Class<V> type,
+                                                                                                         Extractor<D, ?> extractor) {
+        command.provide(type, (Extractor<D, ? extends V>) extractor);
     }
 
     @SuppressWarnings("unchecked")

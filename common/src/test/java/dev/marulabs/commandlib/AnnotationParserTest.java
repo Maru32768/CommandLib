@@ -361,4 +361,125 @@ class AnnotationParserTest {
         assertThatThrownBy(() -> parser.parse(new MissingSender())).hasMessageContaining("has no context value for java.lang.Thread");
         assertThatThrownBy(() -> parser.parse(new UnmarkedMethod())).hasMessageContaining("has @Description but neither @Execute nor @Subcommand");
     }
+
+    static final class GamePlayer {
+        private final String name;
+
+        GamePlayer(String name) {
+            this.name = name;
+        }
+    }
+
+    static final class Economy {
+        int balance(String name) {
+            return name.length();
+        }
+    }
+
+    static final class Arena {
+        private final String name;
+
+        Arena(String name) {
+            this.name = name;
+        }
+    }
+
+    abstract static class EconomyCommand {
+        @Dependency
+        Economy economy;
+    }
+
+    @Command("game")
+    static final class GameCommand extends EconomyCommand {
+        @Dependency
+        private GamePlayer admin;
+
+        @Subcommand("me")
+        void me(TestCommandContext ctx, GamePlayer player) {
+            ctx.sendMessage(player.name + " has " + economy.balance(player.name) + " admin " + admin.name);
+        }
+
+        @Subcommand("sender")
+        void sender(TestCommandContext ctx, @Sender GamePlayer player, Economy economy) {
+            ctx.sendMessage(player.name + " " + (economy == this.economy));
+        }
+
+        @Subcommand("arena")
+        void arena(TestCommandContext ctx, Arena arena) {
+            ctx.sendMessage("in " + arena.name);
+        }
+    }
+
+    @Test
+    void parameters_and_fields_read_context_values_providers_and_dependencies() throws Exception {
+        List<String> mapped = new ArrayList<>();
+        Economy economy = new Economy();
+        TestCommand command = parser().registerDependency(Economy.class, economy)
+                                      // The field gets the dependency; the parameters get the sender mapped below.
+                                      .registerDependency(GamePlayer.class, new GamePlayer("root"))
+                                      .registerContextValue(GamePlayer.class, ctx -> {
+                                          mapped.add(ctx.getActor()
+                                                        .getName());
+                                          return new GamePlayer(ctx.getActor()
+                                                                   .getName());
+                                      })
+                                      .registerContextValue(Arena.class)
+                                      .parse(new GameCommand());
+        // The parsed command provides the values to fluent code, and a middleware can put the declared ones.
+        command.addMiddleware((ctx, next) -> {
+            mapped.add("middleware " + ctx.get(GamePlayer.class).name);
+            ctx.put(Arena.class, new Arena("lobby"));
+            return next.proceed();
+        });
+        command.addChildren(new TestCommand("fluent") {{
+            execute(ctx -> ctx.sendMessage("fluent " + ctx.get(GamePlayer.class).name + " " + ctx.get(Economy.class)
+                                                                                                 .balance("abc")));
+        }});
+        TestCommandRunner runner = new TestCommandRunner(command);
+
+        assertThat(runner.execute("game me")
+                         .messages()).containsExactly("test has 4 admin root");
+        assertThat(runner.execute("game sender")
+                         .messages()).containsExactly("test true");
+        assertThat(runner.execute("game arena")
+                         .messages()).containsExactly("in lobby");
+        assertThat(runner.execute("game fluent")
+                         .messages()).containsExactly("fluent test 3");
+        // The sender is mapped once per execution.
+        assertThat(mapped).containsExactly("test",
+                                           "middleware test",
+                                           "test",
+                                           "middleware test",
+                                           "test",
+                                           "middleware test",
+                                           "test",
+                                           "middleware test");
+    }
+
+    @Test
+    void a_declared_context_value_nobody_gives_fails_the_execution() throws Exception {
+        TestCommand command = parser().registerContextValue(Arena.class)
+                                      .registerDependency(Economy.class, new Economy())
+                                      .registerDependency(GamePlayer.class, new GamePlayer("root"))
+                                      .registerContextValue(GamePlayer.class, ctx -> new GamePlayer("x"))
+                                      .parse(new GameCommand());
+
+        assertThat(new TestCommandRunner(command).execute("game arena")
+                                                 .messages()).containsExactly("command.failed",
+                                                                              "Check the console for details.");
+    }
+
+    @Command("x")
+    static final class FinalDependency {
+        @Dependency
+        final Economy economy = new Economy();
+    }
+
+    @Test
+    void dependencies_must_be_registered_and_settable() {
+        assertThatThrownBy(() -> parser().parse(new GameCommand())).hasMessage("GameCommand.admin has @Dependency, but no dependency of type "
+                + GamePlayer.class.getName() + " is registered; register one with registerDependency");
+        assertThatThrownBy(() -> parser().registerDependency(Economy.class, new Economy())
+                                         .parse(new FinalDependency())).hasMessage("FinalDependency.economy has @Dependency, but is static or final");
+    }
 }
