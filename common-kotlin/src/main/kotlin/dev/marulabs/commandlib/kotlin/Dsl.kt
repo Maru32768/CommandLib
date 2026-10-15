@@ -7,6 +7,8 @@ import dev.marulabs.commandlib.CommonCommand
 import dev.marulabs.commandlib.CommonCommandContext
 import dev.marulabs.commandlib.Options
 import dev.marulabs.commandlib.branch.ArgumentBranch
+import dev.marulabs.commandlib.branch.RequiredArgumentBranch
+import dev.marulabs.commandlib.command.Extractor
 import dev.marulabs.commandlib.currentCommandContext
 import kotlin.reflect.KProperty
 
@@ -182,6 +184,30 @@ fun <C : CommonCommandContext<*, *>, T : CommonCommand<C, T>> T.arguments(
 private fun <C : CommonCommandContext<*, *>, T : CommonCommand<C, T>> T.branch(
     vararg arguments: CommonArgument<*, C, *>,
 ): ArgumentBranch<C, T> = argument(*arguments)
+
+/**
+ * Adds a branch that runs only when [extractor] gives a value, and configures it in [block]. Its executor receives the
+ * value; a `subcommand` of it is checked by the extractor too, and reads the value again from its context:
+ *
+ * ```kotlin
+ * require(Command.playerRequirer()) {
+ *     execute { player, ctx -> player.health = 20.0 }
+ *     subcommand("food") { execute { ctx -> ctx.player.foodLevel = 20 } }
+ * }
+ * ```
+ */
+fun <S, C : CommonCommandContext<*, *>, T : CommonCommand<C, T>> T.require(
+    extractor: Extractor<C, S>,
+    block: (@CommandLibDsl RequiredArgumentBranch<S, C, T>).() -> Unit,
+): RequiredArgumentBranch<S, C, T> = require(extractor).apply(block)
+
+/**
+ * Same as [CommonCommand.require] with a block, after the arguments of this branch.
+ */
+fun <S, C : CommonCommandContext<*, *>, T : CommonCommand<C, T>> ArgumentBranch<C, T>.require(
+    extractor: Extractor<C, S>,
+    block: (@CommandLibDsl RequiredArgumentBranch<S, C, T>).() -> Unit,
+): RequiredArgumentBranch<S, C, T> = require(extractor).apply(block)
 
 /**
  * The value of [ref] in this context.

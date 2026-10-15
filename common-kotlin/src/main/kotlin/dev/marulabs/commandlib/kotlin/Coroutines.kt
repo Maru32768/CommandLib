@@ -5,10 +5,12 @@ import dev.marulabs.commandlib.CommonArgument
 import dev.marulabs.commandlib.CommonCommand
 import dev.marulabs.commandlib.CommonCommandContext
 import dev.marulabs.commandlib.branch.ArgumentBranch
+import dev.marulabs.commandlib.branch.RequiredArgumentBranch
 import dev.marulabs.commandlib.runInCommandContext
 import dev.marulabs.commandlib.suggestion.SuggestionBuilder
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.future.await
 import kotlinx.coroutines.future.future
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executor
@@ -69,6 +71,33 @@ fun <C : CommonCommandContext<*, *>> CommonCommand<C, *>.executeSuspend(action: 
 fun <C : CommonCommandContext<*, *>, T : CommonCommand<C, T>> ArgumentBranch<C, T>.executeSuspend(
     action: suspend CoroutineScope.(C) -> Unit,
 ): ArgumentBranch<C, T> = executeAsync { ctx -> ctx.startCommand(action) }
+
+/**
+ * Same as [CommonCommand.executeSuspend] for a `require(...)` branch, whose block also receives the extracted value.
+ */
+fun <S, C : CommonCommandContext<*, *>, T : CommonCommand<C, T>> RequiredArgumentBranch<S, C, T>.executeSuspend(
+    action: suspend CoroutineScope.(S, C) -> Unit,
+): RequiredArgumentBranch<S, C, T> = executeAsync { value, ctx -> ctx.startCommand { action(value, it) } }
+
+/**
+ * Adds a suspending middleware, run like one added with [addMiddleware][CommonCommand.addMiddleware]. It starts on the
+ * sync thread and resumes there; calling `next()` runs the remaining middlewares and the executor and returns once
+ * they are done, throwing what they threw. Return without calling `next()` to skip the executor, or throw a
+ * `CommandPrerequisiteException` to fail the command with its message.
+ *
+ * ```kotlin
+ * addMiddlewareSuspend { ctx, next ->
+ *     val allowed = withContext(ctx.asyncDispatcher) { bans.isAllowed(ctx.actor.name) }
+ *     if (!allowed) throw CommandPrerequisiteException("You are banned.")
+ *     next()
+ * }
+ * ```
+ */
+fun <C : CommonCommandContext<*, *>> CommonCommand<C, *>.addMiddlewareSuspend(
+    middleware: suspend CoroutineScope.(C, next: suspend () -> Unit) -> Unit,
+) {
+    addMiddleware { ctx, next -> ctx.startCommand { middleware(it) { next.proceed().await() } } }
+}
 
 /**
  * Adds a suspending suggestion provider. It starts on the thread asking for suggestions, may suspend, for example

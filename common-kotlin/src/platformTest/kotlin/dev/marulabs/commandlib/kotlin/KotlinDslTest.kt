@@ -206,6 +206,73 @@ class KotlinDslTest {
         assertThat(suggestions).containsExactlyInAnyOrder("spawn", "shop")
     }
 
+    @Test
+    fun `a require block gives the value to its executor and checks its subcommands`() {
+        val sender = FakeSender.player("Steve")
+        val guest = FakeSender.player("Guest")
+        val vip =
+            command("vip") {
+                require({ ctx ->
+                    ctx.actor.name.takeIf { it != "Guest" } ?: throw CommandPrerequisiteException("VIPs only.")
+                }) {
+                    execute { name, ctx -> ctx.sendMessage("Welcome $name") }
+                    executeSuspend { name, ctx -> ctx.sendMessage("Welcome back $name") }
+                    subcommand("lounge") { execute { ctx -> ctx.sendMessage("Lounge") } }
+                }
+            }
+
+        CommandTester(vip, "test.command").use { tester ->
+            tester.execute("vip", sender)
+            tester.execute("vip lounge", sender)
+            tester.execute("vip lounge", guest)
+        }
+
+        assertThat(sender.sentMessageTexts).containsExactly("Welcome back Steve", "Lounge")
+        assertThat(guest.sentMessageTexts).containsExactly("VIPs only.")
+    }
+
+    @Test
+    fun `a suspending middleware wraps the executor and can fail or skip it`() {
+        val log = mutableListOf<String>()
+        val sender = FakeSender.player("Steve")
+        val guarded =
+            command("guarded") {
+                addMiddlewareSuspend { ctx, next ->
+                    val name = withContext(ctx.asyncDispatcher) { ctx.actor.name }
+                    log += "before $name"
+                    next()
+                    log += "after"
+                }
+                subcommand("run") { execute { log += "run" } }
+                subcommand("deny") {
+                    addMiddlewareSuspend { _, _ -> throw CommandPrerequisiteException("Denied.") }
+                    execute { log += "never" }
+                }
+                subcommand("skip") {
+                    addMiddlewareSuspend { _, _ -> log += "skipped" }
+                    execute { log += "never" }
+                }
+            }
+
+        CommandTester(guarded, "test.command").use { tester ->
+            tester.execute("guarded run", sender)
+            tester.execute("guarded deny", sender)
+            tester.execute("guarded skip", sender)
+        }
+
+        assertThat(log).containsExactly(
+            "before Steve",
+            "run",
+            "after",
+            // next() throws the inner middleware's failure.
+            "before Steve",
+            "before Steve",
+            "skipped",
+            "after",
+        )
+        assertThat(sender.sentMessageTexts).containsExactly("Denied.")
+    }
+
     class GamePlayer(
         val name: String,
     )

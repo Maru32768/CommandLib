@@ -5,6 +5,7 @@ package dev.marulabs.commandlib.kotlin
 import dev.marulabs.commandlib.Command
 import dev.marulabs.commandlib.CommandContext
 import dev.marulabs.commandlib.branch.ArgumentBranch
+import dev.marulabs.commandlib.branch.RequiredArgumentBranch
 
 /**
  * Creates a command and configures it in [block], whose receiver is the command:
@@ -38,6 +39,15 @@ fun Command.subcommand(
  * arguments of the branch through the references the branch block received.
  */
 fun ArgumentBranch<CommandContext, Command>.subcommand(
+    name: String,
+    block: CommandBlock<Command>,
+): Command = command(name, block).also { child(it) }
+
+/**
+ * Adds a child command to a `require(...)` branch, `/<parent> <name>`, which runs only when the branch's extractor gives
+ * a value.
+ */
+fun <S> RequiredArgumentBranch<S, CommandContext, Command>.subcommand(
     name: String,
     block: CommandBlock<Command>,
 ): Command = command(name, block).also { child(it) }

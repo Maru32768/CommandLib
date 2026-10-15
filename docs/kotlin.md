@@ -63,7 +63,7 @@ class MyPlugin : JavaPlugin() {
 ```kotlin
 dependencies {
     implementation("com.github.Maru32768.CommandLib:spigot-kotlin:latest.release")
-    // Only for executeSuspend, addSuggestionProviderSuspend and the dispatchers.
+    // Only for executeSuspend, addMiddlewareSuspend, addSuggestionProviderSuspend and the dispatchers.
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
 }
 ```
@@ -154,6 +154,21 @@ argument(PlayerArgument("target").optional { ctx -> ctx.player }) { target -> ..
 
 Only the last arguments of a branch can be optional or variadic, as in Java ([arguments](arguments.md)).
 
+### Required values
+
+`require(extractor) { }` adds a branch that runs only when the extractor gives a value, as the fluent `require(...)`
+does, and runs the block with the branch as its receiver. Its `execute { value, ctx -> }` and
+`executeSuspend { value, ctx -> }` receive the value; a `subcommand` of it is checked by the extractor too:
+
+```kotlin
+require(Command.playerRequirer()) {
+    execute { player, ctx -> player.health = 20.0 }
+    subcommand("food") { execute { ctx -> ctx.player.foodLevel = 20 } }
+}
+```
+
+It also works inside an `argument(...)` block, after the branch's arguments.
+
 ## Options
 
 `flag(name, shortName, description)` registers a flag. Any registered option, as `option(...)` returns it, is also a
@@ -212,6 +227,18 @@ executor ([execution](execution.md)) whose stage is a coroutine started with kot
 - The coroutine has no parent job, so disabling the plugin does not cancel it; the Bukkit scheduler then refuses its
   remaining sync work. Bound slow work with `withTimeout`.
 
+`addMiddlewareSuspend { ctx, next -> }` adds a suspending [middleware](execution.md#middleware). It starts on the sync thread
+and resumes there, like `executeSuspend`; `next()` runs the remaining middlewares and the executor and returns once
+they are done, throwing what they threw. Return without calling `next()` to skip the executor:
+
+```kotlin
+addMiddlewareSuspend { ctx, next ->
+    val banned = withContext(ctx.asyncDispatcher) { bans.contains(ctx.actor.name) }
+    if (banned) throw CommandPrerequisiteException("You are banned.")
+    next()
+}
+```
+
 `addSuggestionProviderSuspend { sb -> }` adds a suspending suggestion provider to an argument:
 
 ```kotlin
@@ -251,6 +278,8 @@ between, give the builder a scheduler that queues the async tasks, as in [execut
 | `argument(a) { ra -> subcommand("get") { ... } }` | `argument(a).child(ra -> new Command("get") {{ ... }})` |
 | `val force by flag("force", 'f')` and `force` | `option(Options.flag("force", 'f'))` and `ctx.getOption(force)` |
 | `executeSuspend { ctx -> ... }` | `executeAsync(ctx -> ctx.supplyAsync(...).thenAccept(...))` |
+| `require(extractor) { execute { value, ctx -> ... } }` | `require(extractor).execute((value, ctx) -> ...)` |
+| `addMiddlewareSuspend { ctx, next -> ...; next() }` | `addMiddleware((ctx, next) -> ... next.proceed() ...)` |
 | `provide { ctx -> games.of(ctx.player) }`, `ctx.get<GamePlayer>()` | `provide(GamePlayer.class, ctx -> ...)`, `ctx.get(GamePlayer.class)` |
 | `arg.addSuggestionProviderSuspend { sb -> ... }` | `arg.addSuggestionProvider(sb -> sb.await(...))` |
 
