@@ -52,7 +52,7 @@
 | Middleware / interceptor            | `[x]` | `addMiddleware(CommandMiddleware)` で pre / post hook、exception mapping、result handling を合成でき、child と argument branch に継承される。`confirm()` / `cooldown()` / preprocess も middleware 上にある。 | platform 単位の global middleware。 |
 | Sender abstraction                  | `[ ]` | platform context に依存。                                                                                                                   | sender mapper、custom sender、context enrichment。                            |
 | Dependency injection                | `[ ]` | なし。                                                                                                                                     | constructor / method parameter injection、extension point。                  |
-| Annotation API                      | `[ ]` | なし。                                                                                                                                     | `@Command`、`@Subcommand`、`@Permission`、`@Suggest`、`@Option` 等。             |
+| Annotation API                      | `[~]` | `AnnotationParser` と `@Command` / `@Subcommand` / `@Permission` / `@Optional` / `@Default` / `@Range` / `@Suggest` / `@Flag` / `@Option` / `@Confirm` / `@Cooldown` 等、custom annotation の拡張点が Spigot / Paper / Velocity にある。fluent と同じ help / permission / 実行結果を snapshot で確認（[`docs/annotations.md`](annotations.md)）。 | Forge / NeoForge の `AnnotatedCommands`、middleware / prerequisite / option 依存の annotation。 |
 | Kotlin DSL                          | `[~]` | `common-kotlin` + `spigot-kotlin` / `paper-kotlin` / `velocity-kotlin` に型推論の効く builder、delegated option、`executeSuspend`、suspend suggestions がある（[`docs/kotlin.md`](kotlin.md)）。 | Forge / NeoForge 版、Kotlin 関数の default 引数から command を作る形、suspend middleware。`common-kotlin` は package-private の `CurrentCommandContext` を同じ package から読むため `common` と同じ class loader が必要。 |
 | Java builder API                    | `[ ]` | 現状は subclass / initializer / fluent API 中心。                                                                                             | explicit builder style。                                                    |
 | Localization / captions             | `[ ]` | なし。                                                                                                                                     | locale-aware help / errors / suggestions。                                  |
@@ -100,7 +100,8 @@
 - `[ ]` cooldown の reset / query API と永続化（現在は memory 上のみ）、argument branch 単位の confirm / cooldown。
 - `[ ]` permission 以外の state で command の表示を切り替える visibility predicate を追加する（現在は permission を付け外しして
   `CommandLib.refresh(player)` する方式を docs で案内）。
-- `[ ]` annotation API を設計・実装する。
+- `[ ]` annotation API を Forge / NeoForge に広げ、middleware / prerequisite / option の `requires`・排他 / argument-first child 用の
+  annotation を追加する。
 - `[ ]` Kotlin DSL を Forge / NeoForge に広げ、suspend middleware と Kotlin 関数の default 引数からの command 生成を追加する。
 - `[ ]` 8 引数以上を raw types / casts なしで扱える表現と explicit Java builder API を追加する。
 - `[~]` options の継承と配置拡張（subcommand への継承、positional argument の後の option、固定 arity の multi-value）を実装する。
