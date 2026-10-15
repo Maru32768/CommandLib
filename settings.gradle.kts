@@ -44,6 +44,8 @@ val includedTypedNmsModules = when (typedNmsSelection) {
 includedTypedNmsModules.forEach { include("nms:$it") }
 include("common")
 include("common-testing", "spigot-testing", "paper-testing", "velocity-testing")
+// The Kotlin DSL: the platform-independent part, and the command factories of each platform.
+include("common-kotlin", "spigot-kotlin", "paper-kotlin", "velocity-kotlin")
 // Forge and NeoForge share one source tree. Nodes are named <loader>-<minecraft version>.
 include("modded")
 include("modded-testing")

@@ -5,6 +5,7 @@ plugins {
     id("com.diffplug.spotless") version "8.10.3"
     id("net.ltgt.errorprone") version "5.1.1" apply false
     id("me.champeau.gradle.japicmp") version "0.4.6" apply false
+    kotlin("jvm") version "2.3.20" apply false
 }
 
 allprojects {
@@ -52,6 +53,10 @@ spotless {
         target(javaSources(*stonecutterSources))
         formatJava()
     }
+    kotlin {
+        target(javaSources("*-kotlin/src/**/*.kt"))
+        ktlint()
+    }
 }
 
 val publishedArtifactIds = mapOf(
@@ -72,6 +77,10 @@ val publishedProjectPaths = setOf(
     ":paper-testing",
     ":velocity",
     ":velocity-testing",
+    ":common-kotlin",
+    ":spigot-kotlin",
+    ":paper-kotlin",
+    ":velocity-kotlin",
     ":modded:forge-1.16.5",
     ":modded:forge-1.20.1",
     ":modded:neoforge-1.21.1",
@@ -142,6 +151,38 @@ subprojects {
 
     tasks.named<Jar>("sourcesJar") {
         from(rootProject.file("README.md"))
+    }
+}
+
+// The Kotlin DSL: common-kotlin and the <platform>-kotlin modules.
+configure(subprojects.filter { it.name.endsWith("-kotlin") }) {
+    apply(plugin = "org.jetbrains.kotlin.jvm")
+
+    configure<org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension> {
+        // Plugins built with Kotlin 2.0 and later can read the DSL (a compiler reads metadata one version ahead), and the POM asks for no newer standard library.
+        coreLibrariesVersion = "2.1.21"
+        compilerOptions {
+            apiVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_1)
+            languageVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_1)
+        }
+    }
+
+    // Maven Central requires a javadoc jar. These modules have no Java sources, so it is empty; the KDoc is in the
+    // sources jar.
+    the<JavaPluginExtension>().withJavadocJar()
+
+    dependencies {
+        // Only executeSuspend and the other coroutine functions need it, so a plugin that does not call them does not
+        // need it either.
+        "compileOnly"("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
+        "testImplementation"("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
+        "testImplementation"("org.junit.jupiter:junit-jupiter:5.10.2")
+        "testRuntimeOnly"("org.junit.platform:junit-platform-launcher")
+        "testImplementation"("org.assertj:assertj-core:3.25.3")
+    }
+
+    tasks.named<Test>("test") {
+        useJUnitPlatform()
     }
 }
 
