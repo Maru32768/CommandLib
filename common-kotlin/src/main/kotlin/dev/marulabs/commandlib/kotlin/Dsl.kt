@@ -8,7 +8,6 @@ import dev.marulabs.commandlib.CommonCommandContext
 import dev.marulabs.commandlib.Options
 import dev.marulabs.commandlib.branch.ArgumentBranch
 import dev.marulabs.commandlib.currentCommandContext
-import java.util.function.Consumer
 import kotlin.reflect.KProperty
 
 /**
@@ -161,10 +160,10 @@ fun <C : CommonCommandContext<*, *>, T : CommonCommand<C, T>, A1, A2, A3, A4, A5
         )
     }
 
-// The builder form adds the same branch as the typed argument(...) overloads of the fluent API.
+// The varargs form adds the same branch as the typed argument(...) overloads of the fluent API.
 private fun <C : CommonCommandContext<*, *>, T : CommonCommand<C, T>> T.branch(
     vararg arguments: CommonArgument<*, C, *>,
-): ArgumentBranch<C, T> = argument(Consumer { builder -> arguments.forEach { builder.argument(it) } })
+): ArgumentBranch<C, T> = argument(*arguments)
 
 /**
  * The value of [ref] in this context.

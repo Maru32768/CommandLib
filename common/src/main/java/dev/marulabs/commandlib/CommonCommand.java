@@ -255,20 +255,31 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
         this.inheritParentMiddleware = false;
     }
 
-    public final ArgumentBranch<C, T> argument(@NotNull Consumer<ArgumentBuilder<C>> buildArguments) {
-        ArgumentBuilder<C> builder = new ArgumentBuilder<>();
-        buildArguments.accept(builder);
-        List<CommonArgument<?, C, ?>> builtArguments = builder.build();
-        if (builtArguments.isEmpty()) {
-            throw new IllegalArgumentException("ArgumentBuilder must add at least one argument.");
+    /**
+     * Adds a branch of any number of arguments, such as one of eight or more, which the typed overloads do not take.
+     * Its executor reads each value typed with {@link CommonCommandContext#getArgument(CommonArgument)}:
+     *
+     * <pre>{@code
+     * argument(x, y, z, yaw, pitch, world, speed, label).execute(ctx -> {
+     *     double value = ctx.getArgument(x);
+     * });
+     * }</pre>
+     *
+     * @throws IllegalArgumentException if no argument is given or two of them have the same name
+     */
+    @SafeVarargs
+    public final ArgumentBranch<C, T> argument(@NotNull CommonArgument<?, C, ?>... arguments) {
+        return argument(Arrays.asList(arguments));
+    }
+
+    /**
+     * Same as {@link #argument(CommonArgument[])} with the arguments in a list, for a branch built at runtime.
+     */
+    public final ArgumentBranch<C, T> argument(@NotNull List<? extends CommonArgument<?, C, ?>> arguments) {
+        if (arguments.isEmpty()) {
+            throw new IllegalArgumentException("An argument branch needs at least one argument.");
         }
-        Arguments<C> arguments = addArguments(builtArguments, List.of());
-        AsyncCommandExecutor<C> executor = builder.executor();
-        if (executor != null && builtArguments.get(builtArguments.size() - 1)
-                                              .executor() == null) {
-            arguments.executor(executor);
-        }
-        return new ArgumentBranch<>(delegateFor(arguments));
+        return new ArgumentBranch<>(delegateFor(addArguments(List.copyOf(arguments))));
     }
 
     public final <T1> UnaryArgumentBranch<T1, C, T> argument(@NotNull CommonArgument<T1, C, ?> argument) {

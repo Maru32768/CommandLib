@@ -9,14 +9,14 @@ options, suggestions, execution and tests. User documentation: [annotations.md](
 ## Approach: a translator onto the fluent API
 
 `AnnotationParser<C, T>` in `common` reads a class and calls the public fluent API of `CommonCommand`:
-`new Command(name)`, `addAliases`, `addChildren`, `option`, `argument(builder -> ...)`, `execute`/`executeAsync`,
+`new Command(name)`, `addAliases`, `addChildren`, `option`, `argument(List)`, `execute`/`executeAsync`,
 `permission`, `description`, `confirm`, `cooldown`. The result is an ordinary platform `Command`; nothing below it knows
 it came from annotations. That gives the equivalence by construction: the command tree, the help, the permission
 configs and the docs exports are computed from the same objects as for a fluent command, and every rule of the core
 (optional arguments last, a variadic argument last, unique option names, command name validation) is checked by the
 same code at the same time.
 
-The parser uses the builder form `argument(Consumer<ArgumentBuilder<C>>)`, which takes any number of arguments, and an
+The parser uses the list form `argument(List<CommonArgument<?, C, ?>>)`, which takes any number of arguments, and an
 `AsyncCommandExecutor` that reads each value with `ctx.getArgument(argument)` / `ctx.getOption(option)` and invokes
 the method. The typed `Unary`…`Hept` branches are not needed, so methods are not limited to seven arguments.
 

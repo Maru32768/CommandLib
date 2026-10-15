@@ -41,74 +41,56 @@ class CommandStructureTest {
     }
 
     @Test
-    void argument_builder_branch_executes_with_builder_executor() throws Exception {
+    void branch_of_nine_arguments_reads_each_value_typed() throws Exception {
+        List<IntArg> numbers = new ArrayList<>();
+        for (int i = 1; i <= 8; i++) {
+            numbers.add(new IntArg("n" + i));
+        }
+        StrArg label = new StrArg("label");
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("sum") {{
-            argument(builder -> {
-                builder.argument(new CommonIntegerArgument<>("left"))
-                       .argument(new CommonIntegerArgument<>("right"));
-                builder.execute(ctx -> ctx.sendMessage((int) ctx.getArgument("left")
-                        + (int) ctx.getArgument("right")));
-            });
+            argument(numbers.get(0),
+                     numbers.get(1),
+                     numbers.get(2),
+                     numbers.get(3),
+                     numbers.get(4),
+                     numbers.get(5),
+                     numbers.get(6),
+                     numbers.get(7),
+                     label).execute(ctx -> {
+                         int sum = 0;
+                         for (IntArg number : numbers) {
+                             sum += ctx.getArgument(number);
+                         }
+                         String text = ctx.getArgument(label);
+                         ctx.sendMessage(text + ":" + sum);
+                     });
         }});
 
-        assertThat(runner.execute("sum 20 22")
-                         .messages()).containsExactly("42");
+        assertThat(runner.execute("sum 1 2 3 4 5 6 7 8 total")
+                         .messages()).containsExactly("total:36");
     }
 
     @Test
-    void argument_builder_branch_without_executor_keeps_argument_executor_set_later() throws Exception {
+    void argument_list_branch_without_executor_keeps_argument_executor_set_later() throws Exception {
         StrArg value = new StrArg("value");
         TestCommand command = new TestCommand("set") {{
-            argument(builder -> builder.argument(value));
+            argument(List.of(new IntArg("index"), value));
         }};
         value.execute(ctx -> ctx.sendMessage("argument executor"));
         TestCommandRunner runner = new TestCommandRunner(command);
 
-        assertThat(runner.execute("set x")
+        assertThat(runner.execute("set 1 x")
                          .messages()).containsExactly("argument executor");
     }
 
     @Test
-    void argument_builder_branch_execute_overrides_builder_executor() throws Exception {
-        TestCommandRunner runner = new TestCommandRunner(new TestCommand("sum") {{
-            argument(builder -> {
-                builder.argument(new CommonIntegerArgument<>("value"));
-                builder.execute(ctx -> ctx.sendMessage("builder"));
-            }).execute(ctx -> ctx.sendMessage("branch"));
-        }});
-
-        assertThat(runner.execute("sum 1")
-                         .messages()).containsExactly("branch");
-    }
-
-    @Test
-    void argument_builder_keeps_executor_set_directly_on_last_argument() throws Exception {
-        TestCommandRunner runner = new TestCommandRunner(new TestCommand("sum") {{
-            argument(builder -> {
-                builder.argument(new IntArg("value").execute(ctx -> ctx.sendMessage("argument")));
-                builder.execute(ctx -> ctx.sendMessage("builder"));
-            });
-        }});
-
-        assertThat(runner.execute("sum 1")
-                         .messages()).containsExactly("argument");
-    }
-
-    @Test
-    void empty_argument_builder_is_rejected() {
+    void empty_argument_branch_is_rejected() {
         assertThatThrownBy(() -> new TestCommand("empty") {{
-            argument(builder -> {
-            });
+            argument();
         }}).isInstanceOf(IllegalArgumentException.class);
-    }
-
-    @Test
-    void argument_builder_rejects_duplicate_argument_names() {
-        assertThatThrownBy(() -> new TestCommand("dup") {{
-            argument(builder -> builder.argument(new CommonIntegerArgument<>("value"))
-                                       .argument(new CommonStringArgument<>("value")));
-        }}).isInstanceOf(IllegalArgumentException.class)
-           .hasMessageContaining("value");
+        assertThatThrownBy(() -> new TestCommand("empty") {{
+            argument(List.<IntArg>of());
+        }}).isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test

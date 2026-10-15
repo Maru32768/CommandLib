@@ -110,6 +110,10 @@ with the branch (`ArgumentBranch`) as its receiver. Each lambda parameter is an 
 so `PlayerArgument` gives `ArgRef<Player>` and `PlayerArgument(...).variadic()` gives `ArgRef<List<Player>>`; no
 casts and no lookups by name.
 
+For eight or more arguments, call `argument(arg1, ..., argN)` without a block, which returns the branch, and read each
+value typed with `ctx.getArgument(arg)`: `argument(x1, y1, z1, x2, y2, z2, world, name).execute { ctx ->
+ctx.getArgument(world) }`.
+
 Read a value in any callback of the command (executor, suggestion provider, prerequisite, help) with `ref.get()`.
 `ctx[ref]` reads it from a context, which also works where no callback is running on the thread, such as in work given
 to an executor of your own:

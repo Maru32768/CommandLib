@@ -128,6 +128,22 @@ class KotlinDslTest {
     }
 
     @Test
+    fun `a branch of eight arguments reads each value typed from its argument`() {
+        val numbers = (1..7).map { IntegerArgument("n$it") }
+        val label = StringArgument("label")
+        val sum =
+            command("sum") {
+                argument(numbers[0], numbers[1], numbers[2], numbers[3], numbers[4], numbers[5], numbers[6], label)
+                    .execute { ctx -> ctx.sendMessage(ctx.getArgument(label) + ":" + numbers.sumOf { ctx.getArgument(it) }) }
+            }
+        val sender = FakeSender.player("Steve")
+
+        CommandTester(sum, "test.command").use { it.execute("sum 1 2 3 4 5 6 7 total", sender) }
+
+        assertThat(sender.sentMessageTexts).containsExactly("total:28")
+    }
+
+    @Test
     fun `executeSuspend finishes on the sync thread after the async work`() {
         val asyncTasks = ArrayDeque<Runnable>()
         val sender = FakeSender.player("Steve")

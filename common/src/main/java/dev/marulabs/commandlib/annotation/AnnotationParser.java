@@ -257,10 +257,8 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
                 command.executeAsync(executor);
                 return;
             }
-            ArgumentBranch<C, T> branch = command.argument(builder -> {
-                arguments.forEach(builder::argument);
-                builder.executeAsync(executor);
-            });
+            ArgumentBranch<C, T> branch = command.argument(arguments)
+                                                 .executeAsync(executor);
             if (execute != null) {
                 Description description = method.getAnnotation(Description.class);
                 if (description != null) {
