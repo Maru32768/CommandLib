@@ -140,7 +140,7 @@ becomes `variadic()` on the element argument, such as `new PlayerArgument("targe
 | `executesConsole(...)` | `requireConsole()`, then `ctx.getConsole()` |
 | `executesCommandBlock`, `executesProxy`, `executesNative`, `executesEntity` | **Not available** as separate executors; check `ctx.getSender()` (`BlockCommandSender`, ...) yourself |
 | Resulting executors (`return n`), `/execute store` | `ctx.setResult(n)` in the executor; `1` unless set, `0` for a failure. See [errors](../errors.md#results-and-failures) |
-| `throw CommandAPI.failWithString("...")` | `throw new CommandPrerequisiteException("...")` from `execute(ctx -> ...)`, or `ctx.sendFailure("..."); return;` |
+| `throw CommandAPI.failWithString("...")` | `throw new CommandPrerequisiteException("...")` from `execute(ctx -> ...)`, `throw ctx.fail("...")` from any executor, or `ctx.sendFailure("..."); return;` |
 | Message helpers | `ctx.sendMessage`, `sendSuccess` (green), `sendWarn` (yellow), `sendFailure` (red), with `String`, a native component, or `RichText` |
 
 ```java

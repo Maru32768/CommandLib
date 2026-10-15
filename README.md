@@ -995,7 +995,7 @@ public final class CountCommand extends Command {
 
         argument(new PlayersArgument("targets")).execute((targets, ctx) -> {
             if (targets.isEmpty()) {
-                throw new CommandPrerequisiteException("No player was found");
+                throw ctx.fail("No player was found");
             }
             ctx.sendSuccess("Counted " + targets.size() + " players", true);
             ctx.setResult(targets.size());

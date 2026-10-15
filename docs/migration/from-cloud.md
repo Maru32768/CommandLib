@@ -314,7 +314,7 @@ See [confirmation and cooldown](../../README.md#confirmation-and-cooldown) in th
 | `exceptionController().registerHandler(...)` for `NoPermissionException`, `InvalidSyntaxException`, `InvalidCommandSenderException`, ... | `errorFormatter((ctx, error) -> ...)` gets each failure CommandLib reports with its `kind()`; Brigadier syntax errors are the platform's vanilla messages. See [help](../help.md#error-formatter) and [errors](../errors.md) |
 | An exception thrown by the handler | `addUncaughtExceptionHandler((e, ctx) -> ...)` on the command or argument |
 | `ArgumentParseResult.failure(...)` from a parser | `throw new ArgumentValidationException("...")` from `validator(...)` |
-| Failing from the handler | `throw new CommandPrerequisiteException("...")` from `execute(ctx -> ...)`, or `ctx.sendFailure("..."); return;` |
+| Failing from the handler | `throw new CommandPrerequisiteException("...")` from `execute(ctx -> ...)`, `throw ctx.fail("...")` from any executor, or `ctx.sendFailure("..."); return;` |
 | `Caption.of(key)`, `StandardCaptionKeys` | `Caption.of(key, englishDefault)`, CommandLib's own keys as `Caption` constants. See [localization](../localization.md) |
 | `captionRegistry().registerProvider(...)` | `Captions.create().set(locale, caption, text)`, `bundle(baseName, classLoader)` or `load(locale, resourceBundle)`, given to the command with `captions(...)` |
 | `cloud-translations` bundles | CommandLib ships English and Japanese |

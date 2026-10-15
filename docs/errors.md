@@ -197,8 +197,8 @@ Non-player sources:
 
 ### Prerequisite failed (`CommandPrerequisiteException`)
 
-Thrown by a `Prerequisite` (`addPrerequisite`), an `Extractor` (`require(...)`), or by an executor written as
-`execute(ctx -> ...)`. The message is sent in red and the command [fails](#results-and-failures).
+Thrown by a `Prerequisite` (`addPrerequisite`), an `Extractor` (`require(...)`), a middleware, or an executor, or
+raised with `ctx.fail(...)`. The message is sent in red and the command [fails](#results-and-failures).
 
 | Source | Message |
 |---|---|
@@ -206,15 +206,27 @@ Thrown by a `Prerequisite` (`addPrerequisite`), an `Extractor` (`require(...)`),
 | `new CommandPrerequisiteException("message", "more lines"...)` | each string, in red |
 | `new CommandPrerequisiteException(caption[, placeholders])` | the [caption](localization.md) in the sender's locale, in red |
 | `new CommandPrerequisiteException(ctx -> ...)` | whatever the consumer sends |
+| `ctx.fail("message", "more lines"...)`, `ctx.fail(caption[, placeholders])` | the same as the constructor with those arguments |
 | `requirePlayer()`, `Command.playerRequirer()` (Spigot, Paper) | `This command can only be executed by a player.` |
 | `requireConsole()`, `Command.consoleRequirer()` (Spigot, Paper) | `This command can only be executed from the console.` |
 
 Prerequisites of a parent command apply to its children unless the child calls `disableParentPrerequisite()`.
 
 The typed executors (`execute((a, b, ctx) -> ...)`) take `java.util.function` style consumers that cannot throw
-checked exceptions. Calling `ctx.sendFailure(...)` and returning sends the message but does not fail the command
-(`store success` stores `1`). To fail it, use the `execute(ctx -> ...)` form and read the values with
-`ctx.getArgument(argument)`.
+checked exceptions. `ctx.fail(...)` throws the `CommandPrerequisiteException` without declaring it, so it fails them
+like any other executor; it never returns, and `throw ctx.fail(...)` lets the compiler see that the branch ends:
+
+```java
+argument(new PlayersArgument("targets")).execute((targets, ctx) -> {
+    if (targets.isEmpty()) {
+        throw ctx.fail("No player was found");
+    }
+    targets.forEach(x -> x.setHealth(20));
+});
+```
+
+Calling `ctx.sendFailure(...)` and returning sends the message but does not fail the command (`store success` stores
+`1`).
 
 ### Preprocess cancelled
 

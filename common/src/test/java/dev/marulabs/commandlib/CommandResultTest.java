@@ -49,6 +49,33 @@ class CommandResultTest {
     }
 
     @Test
+    void ctx_fail_fails_a_typed_executor_like_a_prerequisite_exception() throws Exception {
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("count") {{
+            argument(new CommonStringArgument<>("word")).execute((word, ctx) -> {
+                if (word.equals("none")) {
+                    throw ctx.fail("nothing to count", "try another word");
+                }
+                ctx.setResult(word.length());
+            });
+            addChildren(new TestCommand("player") {{
+                execute(ctx -> {
+                    throw ctx.fail(Caption.REQUIRE_PLAYER);
+                });
+            }});
+        }});
+
+        assertThatThrownBy(() -> runner.dispatch("count none")).isInstanceOf(CommandSyntaxException.class)
+                                                               .hasMessage("nothing to count\ntry another word");
+        assertThat(runner.executeAndGetResult("count none")).isZero();
+        assertThat(TestCommandContext.latest()
+                                     .messages()).containsExactly("nothing to count", "try another word");
+        assertThat(runner.executeAndGetResult("count player")).isZero();
+        assertThat(TestCommandContext.latest()
+                                     .messages()).containsExactly("This command can only be executed by a player.");
+        assertThat(runner.dispatch("count four")).isEqualTo(4);
+    }
+
+    @Test
     void parse_failure_is_thrown_to_the_platform() {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("go") {{
             argument(new CommonLiteralArgument<>("dir", List.of("north"))).execute((dir, ctx) -> {

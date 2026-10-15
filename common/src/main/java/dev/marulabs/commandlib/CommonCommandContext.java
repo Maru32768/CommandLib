@@ -342,6 +342,42 @@ public abstract class CommonCommandContext<S, C> {
         captions.send(this, caption, placeholders, suffix, send);
     }
 
+    /**
+     * Fails the command with {@code message} and each of {@code additionalMessages} in red, as throwing
+     * {@link CommandPrerequisiteException} does, also from a typed executor ({@code (target, ctx) -> ...}) or another
+     * lambda that cannot throw it. It never returns; write {@code throw ctx.fail(...)} to end a branch.
+     */
+    @NotNull
+    public final RuntimeException fail(@NotNull String message, @NotNull String... additionalMessages) {
+        throw fail(new CommandPrerequisiteException(message, additionalMessages));
+    }
+
+    /**
+     * Same as {@link #fail(String, String...)} with {@code caption} in the sender's locale.
+     */
+    @NotNull
+    public final RuntimeException fail(@NotNull Caption caption) {
+        throw fail(new CommandPrerequisiteException(caption));
+    }
+
+    /**
+     * Same as {@link #fail(String, String...)} with {@code caption} in the sender's locale and its placeholders
+     * replaced.
+     */
+    @NotNull
+    public final RuntimeException fail(@NotNull Caption caption, @NotNull Map<String, ?> placeholders) {
+        throw fail(new CommandPrerequisiteException(caption, placeholders));
+    }
+
+    /**
+     * Throws {@code exception} although the method does not declare it, so that the command fails with its message as
+     * if the caller had thrown it.
+     */
+    @NotNull
+    public final RuntimeException fail(@NotNull CommandPrerequisiteException exception) {
+        throw CommonCommandContext.<RuntimeException>sneakyThrow(Objects.requireNonNull(exception));
+    }
+
     final Captions captions() {
         return captions;
     }

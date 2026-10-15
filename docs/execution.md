@@ -39,8 +39,8 @@ public final class AuditedCommand extends Command {
 }
 ```
 
-- **Pre-execution hooks** run before `next.proceed()`. Throw `CommandPrerequisiteException` to fail the command with
-  its message, as a prerequisite does. Return a stage without calling `proceed()`, such as
+- **Pre-execution hooks** run before `next.proceed()`. Throw `CommandPrerequisiteException`, or `ctx.fail(...)` from
+  a lambda that cannot throw it, to fail the command with its message, as a prerequisite does. Return a stage without calling `proceed()`, such as
   `CompletableFuture.completedFuture(null)`, to skip the executor without failing.
 - **Post-execution hooks** chain on the stage `proceed()` returns: `whenComplete`, `thenRun`, `handle`.
 - **Context values**: `ctx.put(Account.class, account)` before `proceed()` hands a value to the later middlewares and
@@ -103,7 +103,8 @@ public final class StatsCommand extends Command {
   `luckPerms.getUserManager().loadUser(id).thenAcceptAsync(user -> ctx.sendSuccess(...), ctx.syncExecutor())`.
 - `executeAsync(ctx -> ...)` may also throw `CommandPrerequisiteException` before it returns the stage, which fails
   the command at once like a synchronous executor. The typed forms (`(player, ctx) -> ...`) cannot throw checked
-  exceptions; return `CompletableFuture.failedFuture(new CommandPrerequisiteException(...))` instead.
+  exceptions; call `throw ctx.fail(...)` instead, or return
+  `CompletableFuture.failedFuture(new CommandPrerequisiteException(...))`.
 
 ### Threads
 

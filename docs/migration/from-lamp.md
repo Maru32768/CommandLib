@@ -279,7 +279,7 @@ argument(new WorldArgument("world").setSuggestionProvider(sb -> Bukkit.getWorlds
 |---|---|
 | Parameter validators | `validator(...)` on the argument; throw `ArgumentValidationException("...")` for your own message |
 | `CommandCondition` + a custom annotation | A `Prerequisite<CommandContext>` added with `addPrerequisite(...)` |
-| `throw new CommandErrorException("...")` | `throw new CommandPrerequisiteException("...")` from `execute(ctx -> ...)` or a prerequisite |
+| `throw new CommandErrorException("...")` | `throw new CommandPrerequisiteException("...")` from `execute(ctx -> ...)` or a prerequisite, `throw ctx.fail("...")` from any executor |
 | `@Cooldown(value = 3, unit = TimeUnit.SECONDS)` | `cooldown(Duration.ofSeconds(3))` on the command; see [confirmation and cooldown](../../README.md#confirmation-and-cooldown) |
 | Hooks | `addMiddleware((ctx, next) -> ...)` on a command also covers its children; see [execution](../execution.md#middleware) |
 
