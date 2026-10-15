@@ -18,6 +18,7 @@
         "/config [options]",
         "/config [options] <key>"
       ],
+      "examples": [],
       "options": [
         {
           "name": "force",
@@ -73,6 +74,7 @@
               "usages": [
                 "/config <key> set [value]"
               ],
+              "examples": [],
               "options": [],
               "branches": [
                 {
@@ -115,6 +117,7 @@
           "usages": [
             "/config reload"
           ],
+          "examples": [],
           "options": [],
           "branches": [],
           "children": []
@@ -135,6 +138,7 @@
       "usages": [
         "/msg <target> <words...>"
       ],
+      "examples": [],
       "options": [],
       "branches": [
         {
@@ -178,6 +182,7 @@
       },
       "executable": false,
       "usages": [],
+      "examples": [],
       "options": [],
       "branches": [],
       "children": [
@@ -195,6 +200,7 @@
           "usages": [
             "/game start"
           ],
+          "examples": [],
           "options": [],
           "branches": [],
           "children": []

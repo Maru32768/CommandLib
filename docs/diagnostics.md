@@ -24,8 +24,8 @@ Files.writeString(Path.of("permissions.json"), docs.permissionsJson());
 
 | Method | Output |
 |---|---|
-| `markdown()` | A `## /route` section per command and child command, depth first: description, aliases, permission, usages, arguments and options. |
-| `json()` | `permissionPrefix` and a `commands` array with the same content as a tree: each command has `branches` (argument branches with their `arguments` and `children`) and `children`. |
+| `markdown()` | A `## /route` section per command and child command, depth first: description, aliases, permission, usages, arguments, options and the [examples](help.md#examples). |
+| `json()` | `permissionPrefix` and a `commands` array with the same content as a tree: each command has its `examples`, `branches` (argument branches with their `arguments` and `children`) and `children`. |
 | `permissionsMarkdown()` | A table of every permission node with its default, the route it guards and its description. |
 | `permissionsJson()` | The same as a `permissions` array of `node`, `default`, `description`, `route` and `kind` (`command` or `argument`). |
 | `tree()` | Indented text, one line per command, option and argument branch, as `CommandTester#commandTree()` renders it in the [testing artifacts](testing.md#command-tree-snapshots). |

@@ -50,7 +50,11 @@ final class CommandTree {
                                 command.executor() != null,
                                 options,
                                 branches,
-                                children);
+                                children,
+                                command.examples()
+                                       .stream()
+                                       .map(x -> x.startsWith("/") ? x : "/" + x)
+                                       .collect(Collectors.toList()));
     }
 
     private static BranchEntry branch(Arguments<?> arguments, String route, String prefix) {
@@ -131,6 +135,10 @@ final class CommandTree {
         final List<OptionEntry> options;
         final List<BranchEntry> branches;
         final List<CommandEntry> children;
+        /**
+         * The examples set with {@code examples(...)}, each starting with {@code /}.
+         */
+        final List<String> examples;
 
         CommandEntry(String name,
                      String route,
@@ -140,7 +148,8 @@ final class CommandTree {
                      boolean executable,
                      List<OptionEntry> options,
                      List<BranchEntry> branches,
-                     List<CommandEntry> children) {
+                     List<CommandEntry> children,
+                     List<String> examples) {
             this.name = name;
             this.route = route;
             this.aliases = List.copyOf(aliases);
@@ -150,6 +159,7 @@ final class CommandTree {
             this.options = List.copyOf(options);
             this.branches = List.copyOf(branches);
             this.children = List.copyOf(children);
+            this.examples = List.copyOf(examples);
         }
 
         /**

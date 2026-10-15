@@ -75,6 +75,23 @@ class CommandDocsTest {
     }
 
     @Test
+    void examples_are_listed_with_a_leading_slash() {
+        TestCommand command = new TestCommand("arena") {{
+            examples("/arena create lobby 16", "arena lobby join");
+            addChildren(new TestCommand("create") {{
+                execute(ctx -> {
+                });
+            }});
+        }};
+        CommandDocs docs = CommandDocs.of("p", command);
+
+        assertThat(docs.markdown()).contains("Examples:\n\n- `/arena create lobby 16`\n- `/arena lobby join`\n")
+                                   .containsOnlyOnce("Examples:");
+        assertThat(docs.json()).contains("\"examples\": [\n        \"/arena create lobby 16\",\n        \"/arena lobby join\"\n      ]")
+                               .contains("\"examples\": []");
+    }
+
+    @Test
     void empty_prefix_is_rejected() {
         assertThatThrownBy(() -> CommandDocs.of("", List.of())).isInstanceOf(IllegalArgumentException.class);
     }

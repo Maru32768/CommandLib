@@ -72,7 +72,7 @@ public final class CommandDocs {
 
     /**
      * Returns a Markdown section for every command and child command, depth first. Each section is headed
-     * {@code ## /route} and lists the description, aliases, permission, usages, arguments and options.
+     * {@code ## /route} and lists the description, aliases, permission, usages, arguments, options and examples.
      */
     public String markdown() {
         List<String> sections = new ArrayList<>();
@@ -85,7 +85,7 @@ public final class CommandDocs {
     /**
      * Returns the commands as a JSON object: {@code permissionPrefix} and a {@code commands} array, each command with
      * its {@code route}, {@code aliases}, {@code description}, {@code permission}, {@code executable},
-     * {@code usages}, {@code options}, {@code branches} (argument branches with their {@code arguments} and
+     * {@code usages}, {@code examples}, {@code options}, {@code branches} (argument branches with their {@code arguments} and
      * {@code children}) and {@code children}.
      */
     public String json() {
@@ -270,6 +270,14 @@ public final class CommandDocs {
             }
             out.append('\n');
         }
+
+        if (!command.examples.isEmpty()) {
+            out.append("Examples:\n\n");
+            command.examples.forEach(x -> out.append("- ")
+                                             .append(code(x))
+                                             .append('\n'));
+            out.append('\n');
+        }
         return out.toString();
     }
 
@@ -304,6 +312,7 @@ public final class CommandDocs {
                  usages(command).stream()
                                 .map(x -> x.text)
                                 .collect(Collectors.toList()));
+        json.put("examples", command.examples);
         json.put("options",
                  command.options.stream()
                                 .map(CommandDocs::optionJson)

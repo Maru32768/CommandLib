@@ -55,7 +55,7 @@ public final class ArenaCommand extends Command {
 ```
 
 A leading `/` is added when an example has none. The examples belong to the command they are set on; its children
-list their own.
+list their own. [`CommandDocs`](diagnostics.md#command-documentation) lists them too.
 
 ## Help formatter
 
