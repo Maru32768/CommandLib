@@ -10,6 +10,7 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
+import com.velocitypowered.api.util.ProxyVersion;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -71,6 +72,8 @@ public final class CommandTester implements AutoCloseable {
         new CommandNodeCreator<CommandSource, Component, CommandContext, Command>(commands, permissionPrefix).build()
                                                                                                              .forEach(dispatcher.getRoot()::addChild);
 
+        Mockito.when(proxy.getVersion())
+               .thenReturn(new ProxyVersion("Velocity", "CommandLib", "test"));
         Mockito.when(proxy.getAllPlayers())
                .thenAnswer(invocation -> List.copyOf(players.values()));
         Mockito.when(proxy.getPlayerCount())

@@ -15,6 +15,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Entry point for registering CommandLib commands on Velocity 3.4+.
@@ -42,12 +43,28 @@ import java.util.Objects;
  * }</pre>
  */
 public final class CommandLib {
+    // The registrations that are not unregistered, for diagnostics().
+    private static final List<CommandLib> REGISTRATIONS = new CopyOnWriteArrayList<>();
+
+    private final String owner;
+    private final String permissionPrefix;
+    private final List<Command> commands;
     private final CommandManager commandManager;
     private final List<CommandMeta> registered;
+    private final List<String> labels;
 
-    private CommandLib(CommandManager commandManager, List<CommandMeta> registered) {
+    private CommandLib(String owner,
+                       String permissionPrefix,
+                       List<Command> commands,
+                       CommandManager commandManager,
+                       List<CommandMeta> registered,
+                       List<String> labels) {
+        this.owner = owner;
+        this.permissionPrefix = permissionPrefix;
+        this.commands = commands;
         this.commandManager = commandManager;
         this.registered = registered;
+        this.labels = labels;
     }
 
     /**
@@ -107,6 +124,7 @@ public final class CommandLib {
 
         CommandManager commandManager = proxy.getCommandManager();
         List<CommandMeta> registered = new ArrayList<>();
+        List<String> labels = new ArrayList<>();
         for (LiteralCommandNode<CommandSource> node : nodes) {
             BrigadierCommand command = new BrigadierCommand(node);
             CommandMeta meta = commandManager.metaBuilder(command)
@@ -114,8 +132,21 @@ public final class CommandLib {
                                              .build();
             commandManager.register(meta, command);
             registered.add(meta);
+            labels.add(node.getLiteral());
         }
-        return new CommandLib(commandManager, registered);
+        String owner = proxy.getPluginManager()
+                            .fromInstance(plugin)
+                            .map(c -> c.getDescription()
+                                       .getId())
+                            .orElse(permissionPrefix);
+        CommandLib instance = new CommandLib(owner,
+                                             permissionPrefix,
+                                             list,
+                                             commandManager,
+                                             registered,
+                                             List.copyOf(labels));
+        REGISTRATIONS.add(instance);
+        return instance;
     }
 
     /**
@@ -124,6 +155,42 @@ public final class CommandLib {
     public synchronized void unregister() {
         registered.forEach(commandManager::unregister);
         registered.clear();
+        REGISTRATIONS.remove(this);
+    }
+
+    /**
+     * Returns the documentation of this registration's commands with its permission prefix: Markdown and JSON of the
+     * commands and of their permission nodes.
+     */
+    public CommandDocs docs() {
+        return CommandDocs.of(permissionPrefix, commands);
+    }
+
+    /**
+     * Reports the proxy and the registrations of this copy of CommandLib that are not unregistered. A plugin that
+     * shades and relocates CommandLib reports only its own registrations. {@link CommandLibDiagnosticsCommand} sends it
+     * to a sender.
+     */
+    public static CommandLibDiagnostics diagnostics() {
+        List<String> platform = new ArrayList<>();
+        platform.add("Artifact: velocity");
+        platform.add("CommandLib package: " + CommandLib.class.getPackageName());
+        ProxyServer proxy = CommandContext.proxy;
+        platform.add("Proxy: " + (proxy == null ? "unknown (nothing registered yet)" : proxy.getVersion()
+                                                                                            .getName()
+                + " " + proxy.getVersion()
+                             .getVersion()));
+        platform.add("Java: " + System.getProperty("java.version"));
+        platform.add("Command registration: Velocity's CommandManager (one BrigadierCommand per label)");
+
+        List<CommandLibDiagnostics.Registration> registrations = new ArrayList<>();
+        for (CommandLib instance : REGISTRATIONS) {
+            registrations.add(new CommandLibDiagnostics.Registration(instance.owner,
+                                                                     "BrigadierCommand",
+                                                                     instance.labels,
+                                                                     instance.docs()));
+        }
+        return new CommandLibDiagnostics(platform, registrations);
     }
 
     private static List<Command> list(Command command, Command... commands) {

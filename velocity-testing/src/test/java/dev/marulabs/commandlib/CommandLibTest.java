@@ -12,6 +12,7 @@ import com.velocitypowered.api.plugin.PluginDescription;
 import com.velocitypowered.api.plugin.PluginManager;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
+import com.velocitypowered.api.util.ProxyVersion;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -45,6 +46,8 @@ class CommandLibTest {
                .thenReturn(pluginManager);
         Mockito.when(proxy.getCommandManager())
                .thenReturn(commandManager);
+        Mockito.when(proxy.getVersion())
+               .thenReturn(new ProxyVersion("Velocity", "Velocity Contributors", "3.4.0"));
         Mockito.when(commandManager.metaBuilder(Mockito.any(BrigadierCommand.class)))
                .thenAnswer(invocation -> {
                    CommandMeta.Builder builder = Mockito.mock(CommandMeta.Builder.class);
@@ -71,9 +74,17 @@ class CommandLibTest {
                                         .getLiteral())
                              .collect(Collectors.toList())).containsExactly("hub", "lobby");
 
+        assertThat(CommandLib.diagnostics()
+                             .registrations()).anySatisfy(x -> {
+                                 assertThat(x.owner()).isEqualTo("myplugin");
+                                 assertThat(x.labels()).containsExactly("hub", "lobby");
+                             });
+
         commandLib.unregister();
         Mockito.verify(commandManager, Mockito.times(2))
                .unregister(Mockito.any(CommandMeta.class));
+        assertThat(CommandLib.diagnostics()
+                             .registrations()).noneSatisfy(x -> assertThat(x.labels()).containsExactly("hub", "lobby"));
     }
 
     @Test
