@@ -51,6 +51,8 @@
   `DurationArgument`（`1h30m`、`20t`、`java.time.Duration`）を Spigot / Paper / Forge / NeoForge に追加する（2026-10-15）。
 - `[x]` error を platform 間で揃える。実行中の resolve error は全 platform で vanilla の translatable component と context
   line、空の selector は Paper でも vanilla の `argument.entity.notfound.*`（2026-10-15）。
+- `[x]` `BlockPositionArgument` / `ItemPredicateArgument` / `BlockPredicateArgument` と `LocationArgument` の centering 無効化を
+  Spigot / Paper / Forge / NeoForge に追加する（Paper の `BlockPredicateArgument` は 1.21.8+、2026-10-15）。
 - `[x]` error taxonomy を公開仕様として整理する（`docs/errors.md`、2026-10-15）。
 - `[x]` CommandAPI migration guide を追加する（`docs/migration/from-commandapi.md`、2026-10-15）。
 - `[x]` Cloud、Lamp、ACF からの migration guide を追加する（`docs/migration/from-cloud.md` / `from-lamp.md` /
