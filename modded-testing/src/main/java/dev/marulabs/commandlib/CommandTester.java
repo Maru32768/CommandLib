@@ -336,7 +336,7 @@ public final class CommandTester implements AutoCloseable {
         }
     }
 
-    private static final class MinecraftBootstrap {
+    static final class MinecraftBootstrap {
         private static boolean bootstrapped;
         //? if >=1.20.5 {
         /*@Nullable
@@ -368,7 +368,7 @@ public final class CommandTester implements AutoCloseable {
         }
         *///?}
 
-        private static synchronized void ensureBootstrapped() {
+        static synchronized void ensureBootstrapped() {
             if (bootstrapped) {
                 return;
             }

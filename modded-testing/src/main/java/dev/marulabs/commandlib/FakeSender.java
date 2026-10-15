@@ -53,6 +53,8 @@ public final class FakeSender {
     }
 
     public static FakeSender player(@NotNull String name, @NotNull UUID uniqueId) {
+        // Mocking ServerPlayer initializes it, which fails for the rest of the JVM before Minecraft is bootstrapped.
+        CommandTester.MinecraftBootstrap.ensureBootstrapped();
         FakeSender sender = new FakeSender(Mockito.mock(ServerPlayer.class), name, uniqueId, false);
         sender.stubPlayer();
         return sender;
