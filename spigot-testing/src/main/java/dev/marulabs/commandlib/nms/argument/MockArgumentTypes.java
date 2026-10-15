@@ -120,6 +120,43 @@ public final class MockArgumentTypes {
     }
 
     /**
+     * Reads one JSON or SNBT value where the vanilla readers would end it: a quoted string, a value in balanced braces
+     * or brackets whose quoted strings may hold any character, or else everything up to the next whitespace. The value
+     * itself is not checked.
+     */
+    public static String readValue(StringReader reader) throws CommandSyntaxException {
+        int start = reader.getCursor();
+        if (!reader.canRead()
+                || (reader.peek() != '{' && reader.peek() != '[' && !StringReader.isQuotedStringStart(reader.peek()))) {
+            return readToken(reader);
+        }
+        int depth = 0;
+        char quote = 0;
+        while (reader.canRead()) {
+            char c = reader.read();
+            if (quote != 0) {
+                if (c == '\\' && reader.canRead()) {
+                    reader.skip();
+                } else if (c == quote) {
+                    quote = 0;
+                }
+            } else if (StringReader.isQuotedStringStart(c)) {
+                quote = c;
+            } else if (c == '{' || c == '[') {
+                depth++;
+            } else if (c == '}' || c == ']') {
+                depth--;
+            }
+            if (quote == 0 && depth == 0) {
+                return reader.getString()
+                             .substring(start, reader.getCursor());
+            }
+        }
+        reader.setCursor(start);
+        throw syntaxError("Unterminated value", reader);
+    }
+
+    /**
      * Adds the {@code minecraft} namespace when it is missing.
      */
     public static String normalizeKey(String key) {

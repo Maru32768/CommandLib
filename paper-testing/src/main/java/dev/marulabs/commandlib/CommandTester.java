@@ -11,8 +11,10 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import dev.marulabs.commandlib.util.brigadier.VanillaArgumentTypes;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
+import io.papermc.paper.command.brigadier.argument.SignedMessageResolver;
 import io.papermc.paper.command.brigadier.argument.predicate.ItemStackPredicate;
 import io.papermc.paper.command.brigadier.argument.range.DoubleRangeProvider;
 import io.papermc.paper.command.brigadier.argument.range.IntegerRangeProvider;
@@ -22,7 +24,10 @@ import io.papermc.paper.command.brigadier.argument.resolvers.selector.EntitySele
 import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver;
 import io.papermc.paper.math.Position;
 import io.papermc.paper.registry.RegistryKey;
+import net.kyori.adventure.chat.SignedMessage;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -112,7 +117,8 @@ public final class CommandTester implements AutoCloseable {
             throw new IllegalStateException("At least one command must be registered.");
         }
 
-        try (MockedStatic<ArgumentTypes> ignored = mockArgumentTypes()) {
+        try (MockedStatic<ArgumentTypes> ignored = mockArgumentTypes();
+             MockedStatic<VanillaArgumentTypes> ignoredVanilla = mockVanillaArgumentTypes()) {
             commands.addAll(builder.createCommands());
             new CommandNodeCreator<>(commands, permissionPrefix, builder.scheduler).build()
                                                                                    .forEach(dispatcher.getRoot()::addChild);
@@ -336,7 +342,106 @@ public final class CommandTester implements AutoCloseable {
                      .thenReturn(range(Double::valueOf, range -> (DoubleRangeProvider) () -> range));
         argumentTypes.when(() -> ArgumentTypes.resource(Mockito.any(RegistryKey.class)))
                      .thenAnswer(invocation -> word(token -> resourceValue(invocation.getArgument(0))));
+        argumentTypes.when(ArgumentTypes::component)
+                     .thenReturn(component());
+        argumentTypes.when(ArgumentTypes::signedMessage)
+                     .thenReturn(signedMessage());
         return argumentTypes;
+    }
+
+    private static MockedStatic<VanillaArgumentTypes> mockVanillaArgumentTypes() {
+        MockedStatic<VanillaArgumentTypes> vanillaArgumentTypes = Mockito.mockStatic(VanillaArgumentTypes.class);
+        // Finds the end of the compound but does not check its contents, and returns it as written.
+        ArgumentType<String> compoundTag = reader -> {
+            if (!reader.canRead() || reader.peek() != '{') {
+                throw syntaxError("Expected '{'", reader);
+            }
+            return readValue(reader);
+        };
+        vanillaArgumentTypes.when(VanillaArgumentTypes::compoundTag)
+                            .thenReturn(compoundTag);
+        return vanillaArgumentTypes;
+    }
+
+    /**
+     * Reads JSON text with Adventure, so the SNBT-only syntax of 1.21.5 (unquoted keys) is not supported.
+     */
+    private static ArgumentType<Component> component() {
+        return reader -> {
+            int start = reader.getCursor();
+            String json = readValue(reader);
+            try {
+                return GsonComponentSerializer.gson()
+                                              .deserialize(json);
+            } catch (RuntimeException e) {
+                // Gson reports malformed JSON and values of the wrong shape with different runtime exceptions.
+                reader.setCursor(start);
+                throw syntaxError("Invalid chat component: " + e.getMessage(), reader);
+            }
+        };
+    }
+
+    /**
+     * Reads the rest of the input. Selectors are kept as written, and the message resolves as an unsigned system
+     * message.
+     */
+    private static ArgumentType<SignedMessageResolver> signedMessage() {
+        return reader -> {
+            String text = reader.getRemaining();
+            reader.setCursor(reader.getTotalLength());
+            return new SignedMessageResolver() {
+                @Override
+                public String content() {
+                    return text;
+                }
+
+                @Override
+                public CompletableFuture<SignedMessage> resolveSignedMessage(String argumentName,
+                                                                             com.mojang.brigadier.context.CommandContext<CommandSourceStack> context) {
+                    return CompletableFuture.completedFuture(SignedMessage.system(text, Component.text(text)));
+                }
+            };
+        };
+    }
+
+    /**
+     * Reads one JSON or SNBT value where the vanilla readers would end it: a quoted string, a value in balanced braces
+     * or brackets whose quoted strings may hold any character, or else everything up to the next whitespace.
+     */
+    private static String readValue(StringReader reader) throws CommandSyntaxException {
+        int start = reader.getCursor();
+        if (!reader.canRead()
+                || (reader.peek() != '{' && reader.peek() != '[' && !StringReader.isQuotedStringStart(reader.peek()))) {
+            return readUntilWhitespace(reader);
+        }
+        int depth = 0;
+        char quote = 0;
+        while (reader.canRead()) {
+            char c = reader.read();
+            if (quote != 0) {
+                if (c == '\\' && reader.canRead()) {
+                    reader.skip();
+                } else if (c == quote) {
+                    quote = 0;
+                }
+            } else if (StringReader.isQuotedStringStart(c)) {
+                quote = c;
+            } else if (c == '{' || c == '[') {
+                depth++;
+            } else if (c == '}' || c == ']') {
+                depth--;
+            }
+            if (quote == 0 && depth == 0) {
+                return reader.getString()
+                             .substring(start, reader.getCursor());
+            }
+        }
+        reader.setCursor(start);
+        throw syntaxError("Unterminated value", reader);
+    }
+
+    private static CommandSyntaxException syntaxError(String message, StringReader reader) {
+        return new SimpleCommandExceptionType(new LiteralMessage(message)).createWithContext(reader);
     }
 
     private EntitySelectorArgumentResolver entityResolver(String token, boolean multiple) {

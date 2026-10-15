@@ -209,6 +209,20 @@ arg("NMSArgumentIntRange", "commands.arguments.RangeArgument", "Range<Integer>",
 arg("NMSArgumentFloatRange", "commands.arguments.RangeArgument", "Range<Double>", "RangeArgument.floatRange()",
     "var bounds = RangeArgument.Floats.getRange(CTX, name);\n"
     f"        return doubleRange({BOUNDS});", ["com.google.common.collect.Range"], throws=False)
+# Vanilla components reach Bungee through the JSON that CraftChatMessage writes, which is one object or string, so
+# ComponentSerializer.parse returns one component. ComponentArgument takes the registries from 1.20.5 and reads SNBT,
+# with getRawComponent in place of getComponent, from 1.21.5.
+BUNGEE = [f"{CB}.util.CraftChatMessage", "net.md_5.bungee.api.chat.BaseComponent",
+          "net.md_5.bungee.chat.ComponentSerializer"]
+arg("NMSArgumentChatComponent", "commands.arguments.ComponentArgument", "BaseComponent",
+    "ComponentArgument.textComponent(BuildContexts.current())" if V >= (1, 20, 5)
+    else "ComponentArgument.textComponent()",
+    "return ComponentSerializer.parse(CraftChatMessage.toJSON(ComponentArgument.GET(CTX, name)))[0];"
+    .replace("GET", "getRawComponent" if V >= (1, 21, 5) else "getComponent"), BUNGEE, throws=False)
+arg("NMSArgumentChat", "commands.arguments.MessageArgument", "BaseComponent", "MessageArgument.message()",
+    "return ComponentSerializer.parse(CraftChatMessage.toJSON(MessageArgument.getMessage(CTX, name)))[0];", BUNGEE)
+arg("NMSArgumentNBTTag", "commands.arguments.CompoundTagArgument", "String", "CompoundTagArgument.compoundTag()",
+    "return CompoundTagArgument.getCompoundTag(CTX, name).toString();", throws=False)
 
 w("NMSArgumentProfile", '''    public NMSArgumentProfile_SUFFIX() {
         super(null, GameProfileArgument.class);

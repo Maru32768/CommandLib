@@ -122,6 +122,18 @@ arg("NMSArgumentFloatRange", "ArgumentCriterionValue", "ArgumentCriterionValue",
     c("CriterionConditionValue.FloatRange bounds = CTX.getArgument(name, CriterionConditionValue.FloatRange.class);\n"
       "        return doubleRange(bounds.a(), bounds.b());"),
     ["com.google.common.collect.Range", f"{NMS}.CriterionConditionValue"], throws=False)
+# Vanilla components reach Bungee through the JSON that CraftChatMessage writes, which is one object or string, so
+# ComponentSerializer.parse returns one component (the Bungee of 1.16.5 has no ComponentSerializer.deserialize).
+BUNGEE = [f"{CB}.util.CraftChatMessage", "net.md_5.bungee.api.chat.BaseComponent",
+          "net.md_5.bungee.chat.ComponentSerializer"]
+arg("NMSArgumentChatComponent", "ArgumentChatComponent", "ArgumentChatComponent", "BaseComponent",
+    "ArgumentChatComponent.a()",
+    c("return ComponentSerializer.parse(CraftChatMessage.toJSON(ArgumentChatComponent.a(CTX, name)))[0];"), BUNGEE,
+    throws=False)
+arg("NMSArgumentChat", "ArgumentChat", "ArgumentChat", "BaseComponent", "ArgumentChat.a()",
+    c("return ComponentSerializer.parse(CraftChatMessage.toJSON(ArgumentChat.a(CTX, name)))[0];"), BUNGEE)
+arg("NMSArgumentNBTTag", "ArgumentNBTTag", "ArgumentNBTTag", "String", "ArgumentNBTTag.a()",
+    c("return ArgumentNBTTag.a(CTX, name).toString();"), throws=False)
 
 w("NMSArgumentProfile", '''    public NMSArgumentProfile_SUFFIX() {
         super(null, ArgumentProfile.class);

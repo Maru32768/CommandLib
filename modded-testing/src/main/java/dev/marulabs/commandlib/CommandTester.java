@@ -49,6 +49,13 @@ import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.level.storage.WorldData;
 //?} else
 /*import net.minecraftforge.server.permission.PermissionAPI;*/
+//? if neoforge {
+/*import net.minecraft.commands.SharedSuggestionProvider;
+import net.neoforged.neoforge.common.CommonHooks;
+*///?} elif forge && >=1.18 {
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraftforge.common.ForgeHooks;
+//?}
 
 /**
  * Runs CommandLib Forge / NeoForge / Fabric commands without a Minecraft server.
@@ -190,6 +197,21 @@ public final class CommandTester implements AutoCloseable {
                                                                      invocation.getArgument(0),
                                                                      invocation.getArgument(1)));
                 *///?}
+                   // Forge and NeoForge ask their permission API, which has no handler here, whether a player may use
+                   // entity selectors (in a message, for example). Answer as their default does: permission level 2.
+                   //? if neoforge {
+                   /*MockedStatic<CommonHooks> hooks = Mockito.mockStatic(CommonHooks.class, Mockito.CALLS_REAL_METHODS);
+                   staticMocks.add(hooks);
+                   hooks.when(() -> CommonHooks.canUseEntitySelectors(Mockito.any()))
+                        .thenAnswer(invocation -> invocation.<SharedSuggestionProvider>getArgument(0)
+                                                            .hasPermission(2));
+                   *///?} elif forge && >=1.18 {
+                MockedStatic<ForgeHooks> hooks = Mockito.mockStatic(ForgeHooks.class, Mockito.CALLS_REAL_METHODS);
+                staticMocks.add(hooks);
+                hooks.when(() -> ForgeHooks.canUseEntitySelectors(Mockito.any()))
+                     .thenAnswer(invocation -> invocation.<SharedSuggestionProvider>getArgument(0)
+                                                         .hasPermission(2));
+                //?}
             } catch (RuntimeException | Error e) {
                 close();
                 throw e;

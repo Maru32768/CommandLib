@@ -52,6 +52,14 @@ public final class ArgumentTest extends TestBase {
                                  .toString(),
                            "Block{minecraft:stone}"));
         commands.add(check("booleanArgument", new BooleanArgument("a"), "true", String::valueOf, "true"));
+        // JSON, which the SNBT reader of 1.21.5 also accepts.
+        commands.add(check("componentArgument",
+                           new ComponentArgument("a"),
+                           "{\"text\":\"hello\",\"color\":\"red\"}",
+                           x -> x.getString() + " " + x.getStyle()
+                                                       .getColor()
+                                                       .serialize(),
+                           "hello red"));
         commands.add(check("doubleArgument", new DoubleArgument("a"), "1.5", String::valueOf, "1.5"));
         commands.add(check("doubleRangeArgument",
                            new DoubleRangeArgument("a"),
@@ -122,6 +130,12 @@ public final class ArgumentTest extends TestBase {
         // case disconnects the integration bot before tests can run.
         //? if >=1.17
         commands.add(check("longArgument", new LongArgument("a"), "100", String::valueOf, "100"));
+        commands.add(check("messageArgument",
+                           new MessageArgument("a"),
+                           "hello, world!",
+                           x -> x.getString(),
+                           "hello, world!"));
+        commands.add(check("nbtCompoundArgument", new NBTCompoundArgument("a"), "{a:true}", String::valueOf, "{a:1b}"));
         commands.add(check("nameableObjectArgument",
                            new NameableObjectArgument<>("a", List.of(() -> "nameable")),
                            "nameable",

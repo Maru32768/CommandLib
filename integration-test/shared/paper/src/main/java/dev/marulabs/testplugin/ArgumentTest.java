@@ -6,6 +6,7 @@ import dev.marulabs.commandlib.util.bukkit.BukkitUtil;
 import dev.marulabs.integration.core.ExceptionUtil;
 import dev.marulabs.integration.core.TestResult;
 import dev.marulabs.integration.core.TestStatus;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Keyed;
 import org.bukkit.Material;
@@ -42,6 +43,7 @@ public final class ArgumentTest extends TestBase {
         commands.addAll(biomeArgument());
         commands.addAll(booleanArgument());
         commands.addAll(chatColorArgument());
+        commands.addAll(componentArgument());
         commands.addAll(doubleArgument());
         commands.addAll(doubleRangeArgument());
         commands.addAll(durationArgument());
@@ -60,6 +62,8 @@ public final class ArgumentTest extends TestBase {
         commands.addAll(locationArgument());
         commands.addAll(uncenteredLocationArgument());
         commands.addAll(lootTableArgument());
+        commands.addAll(messageArgument());
+        commands.addAll(nbtCompoundArgument());
         if (supportsLongArgumentCommandTree()) {
             commands.addAll(longArgument());
         }
@@ -237,6 +241,27 @@ public final class ArgumentTest extends TestBase {
         }});
 
         return List.of(buildCommand(command, name + " dark_red"));
+    }
+
+    public List<String> componentArgument() {
+        String name = getMethodName();
+        String key = getKey();
+
+        putCommandNotExecutedResult(key);
+        command.addChildren(new Command(name) {{
+            argument(new ComponentArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
+                putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
+            })).execute((a, ctx) -> {
+                putResult(key,
+                          PlainTextComponentSerializer.plainText()
+                                                      .serialize(a)
+                                  + " " + a.color(),
+                          "hello red");
+            });
+        }});
+
+        // JSON, which the SNBT reader of 1.21.5 also accepts.
+        return List.of(buildCommand(command, name + " {\"text\":\"hello\",\"color\":\"red\"}"));
     }
 
     public List<String> doubleArgument() {
@@ -557,6 +582,41 @@ public final class ArgumentTest extends TestBase {
         }});
 
         return List.of(buildCommand(command, name + " minecraft:chests/simple_dungeon"));
+    }
+
+    public List<String> messageArgument() {
+        String name = getMethodName();
+        String key = getKey();
+
+        putCommandNotExecutedResult(key);
+        command.addChildren(new Command(name) {{
+            argument(new MessageArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
+                putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
+            })).execute((a, ctx) -> {
+                putResult(key,
+                          PlainTextComponentSerializer.plainText()
+                                                      .serialize(a),
+                          "hello, world!");
+            });
+        }});
+
+        return List.of(buildCommand(command, name + " hello, world!"));
+    }
+
+    public List<String> nbtCompoundArgument() {
+        String name = getMethodName();
+        String key = getKey();
+
+        putCommandNotExecutedResult(key);
+        command.addChildren(new Command(name) {{
+            argument(new NBTCompoundArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
+                putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
+            })).execute((a, ctx) -> {
+                putResult(key, a, "{a:1b}");
+            });
+        }});
+
+        return List.of(buildCommand(command, name + " {a:true}"));
     }
 
     public List<String> longArgument() {

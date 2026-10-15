@@ -13,6 +13,8 @@ public final class TypedNmsClasses {
     public static List<Class<?>> classes() {
         return List.of(NMSArgumentBlockPosition_spigot_1_20_1.class,
                        NMSArgumentBlockPredicate_spigot_1_20_1.class,
+                       NMSArgumentChatComponent_spigot_1_20_1.class,
+                       NMSArgumentChat_spigot_1_20_1.class,
                        NMSArgumentDimension_spigot_1_20_1.class,
                        NMSArgumentEnchantment_spigot_1_20_1.class,
                        NMSArgumentEntities_spigot_1_20_1.class,
@@ -22,6 +24,7 @@ public final class TypedNmsClasses {
                        NMSArgumentItemPredicate_spigot_1_20_1.class,
                        NMSArgumentItemStack_spigot_1_20_1.class,
                        NMSArgumentMobEffect_spigot_1_20_1.class,
+                       NMSArgumentNBTTag_spigot_1_20_1.class,
                        NMSArgumentNamespacedKey_spigot_1_20_1.class,
                        NMSArgumentParticle_spigot_1_20_1.class,
                        NMSArgumentPlayer_spigot_1_20_1.class,
