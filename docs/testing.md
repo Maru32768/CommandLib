@@ -56,8 +56,8 @@ class HealCommandTest {
 | `CommandTester.builder().command(...).commands(...).permissionPrefix(...).build()` | Several commands, or extra setup (`mockNmsClass` in `spigot-testing`, `defaults(...)` for the registration's [middlewares and providers](execution.md#registration-wide-middlewares-and-providers)). |
 | `execute(input, sender)` | Runs the input as the sender and returns the result `/execute store result` would store (`0` for a failure). No leading `/`. |
 | `suggestions(input, sender)` | Returns Brigadier's `CompletableFuture<Suggestions>` for a partial input. |
-| `suggest(input, sender)` | Returns the suggestion texts for a partial input as a `List<String>`. Not in `modded-testing`. |
-| `commandTree()`, `assertCommandTreeMatchesSnapshot(name)` | Renders the registered commands as text and compares it with a snapshot file. See [command tree snapshots](#command-tree-snapshots). Not in `modded-testing`. |
+| `suggest(input, sender)` | Returns the suggestion texts for a partial input as a `List<String>`. |
+| `commandTree()`, `assertCommandTreeMatchesSnapshot(name)` | Renders the registered commands as text and compares it with a snapshot file. See [command tree snapshots](#command-tree-snapshots). |
 | `close()` | Ends the tester. Use try-with-resources. |
 
 Build commands through the `Supplier` form (`HealCommand::new`, `() -> new Command("x") {{ ... }}`). Argument
@@ -77,7 +77,7 @@ CommandLib reports itself (validation, prerequisites, unexpected errors) is sent
 |---|---|---|
 | `spigot-testing` | `withFakePlayer(Player)`, `withFakeEntity(name, Entity)`, `withFakeWorld(key, World)` | Values for player / entity selectors (names, `@s`, `@p`, `@r`, `@a`, `@e`) and `WorldArgument` |
 | `paper-testing` | `withFakePlayer`, `withFakeEntity`, `withFakeWorld`, `withFakeBlockData`, `withFakeItemStack`, `withFakeEnchantment`, `withFakeParticle`, `withFakePotionEffectType`, `withFakeBiome`, `withFakeAttribute`, `withFakeEntityType`, `withFakeSound` | The value each stubbed Paper argument returns |
-| `forge-testing` / `neoforge-testing` / `fabric-testing` | `withPlayer(FakeSender)` | Online players for selectors, `GameProfileArgument`, `UUIDArgument` |
+| `forge-testing` / `neoforge-testing` / `fabric-testing` | `withPlayer(FakeSender)`, `withLevel(ServerLevel)`, `withServer(Consumer<MinecraftServer>)` | Online players for selectors, `GameProfileArgument`, `UUIDArgument`; levels for `WorldArgument`; any other stub of the server mock, such as `getScoreboard()`, `getAdvancements()`, `getRecipeManager()` or the loot tables |
 | `velocity-testing` | `withFakePlayer(FakeSender)`, `withFakeServer(name)`, `proxy()` | Players and servers of the fake `ProxyServer` for `PlayerArgument` and `ServerArgument` |
 
 The [argument catalog](arguments.md#testing-each-argument) lists, argument by argument, what runs for real, what is
@@ -115,7 +115,8 @@ void finds_offline_player() {
 
 ## JUnit 5 extension
 
-`common-testing`, `spigot-testing` and `paper-testing` have `CommandLibExtension`. Register it on a field with the
+`common-testing`, `spigot-testing`, `paper-testing` and the Forge / NeoForge / Fabric testing artifacts have
+`CommandLibExtension`. Register it on a field with the
 tester to create; it creates one tester per test, closes it after the test, and injects `CommandTester` and
 `FakeSender` parameters into test methods and `@BeforeEach` / `@AfterEach` methods. A lifecycle method and the test
 it runs around get the same tester.
@@ -154,8 +155,8 @@ The factory is any `Supplier<CommandTester>`, so it can use `CommandTester.build
 | `denyPermissions` | `{}` | Denies these nodes, even to operators |
 
 A `FakeSender` parameter without `@Sender` is a non-operator player named `Player` with every permission. In
-`spigot-testing` and `paper-testing`, every injected player is also registered with `withFakePlayer`, so player and
-entity arguments resolve it by name. Build senders that need more, such as a UUID or a locale, with
+`spigot-testing` and `paper-testing`, every injected player is also registered with `withFakePlayer` (`withPlayer` in
+the Forge / NeoForge / Fabric artifacts), so player and entity arguments resolve it by name. Build senders that need more, such as a UUID or a locale, with
 `FakeSender.playerBuilder(name)` in the test.
 
 ## `FakeSender`
