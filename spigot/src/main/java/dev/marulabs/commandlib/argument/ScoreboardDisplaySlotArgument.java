@@ -1,5 +1,10 @@
 package dev.marulabs.commandlib.argument;
 
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import dev.marulabs.commandlib.Argument;
+import dev.marulabs.commandlib.CommandContext;
+import dev.marulabs.commandlib.exception.ArgumentParseException;
+import dev.marulabs.commandlib.util.nms.argument.NMSArgumentScoreboardSlot;
 import org.bukkit.scoreboard.DisplaySlot;
 
 import java.util.Collections;
@@ -8,14 +13,33 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- * A scoreboard display slot by its vanilla name: {@code list}, {@code sidebar}, {@code below_name} (also the pre-1.20.2
- * {@code belowName}), or {@code sidebar.team.<color>} where the server's {@link DisplaySlot} has team slots.
+ * A scoreboard display slot in the vanilla {@code scoreboard_slot} syntax, which the client validates and suggests:
+ * {@code list}, {@code sidebar}, {@code below_name} ({@code belowName} before 1.20.2) or {@code sidebar.team.<color>}.
+ * A team slot fails when the command runs on a server whose {@link DisplaySlot} has no team slots.
  */
-public class ScoreboardDisplaySlotArgument extends ObjectArgument<DisplaySlot> {
+public class ScoreboardDisplaySlotArgument extends Argument<DisplaySlot, ScoreboardDisplaySlotArgument> {
     private static final Map<String, DisplaySlot> SLOTS = slots();
 
     public ScoreboardDisplaySlotArgument(String name) {
-        super(name, SLOTS);
+        super(name,
+              NMSArgumentScoreboardSlot.create()
+                                       .argument());
+    }
+
+    @Override
+    public DisplaySlot cast(Object parsedArgument) {
+        return (DisplaySlot) parsedArgument;
+    }
+
+    @Override
+    protected DisplaySlot parseImpl(CommandContext ctx) throws ArgumentParseException, CommandSyntaxException {
+        String slotName = NMSArgumentScoreboardSlot.create()
+                                                   .parse(ctx.getHandle(), name());
+        DisplaySlot slot = SLOTS.get(slotName);
+        if (slot == null) {
+            throw new ArgumentParseException(x -> x.sendFailure(slotName + " is not a display slot of this server"));
+        }
+        return slot;
     }
 
     private static Map<String, DisplaySlot> slots() {

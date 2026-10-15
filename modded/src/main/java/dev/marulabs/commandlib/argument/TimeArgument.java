@@ -1,0 +1,48 @@
+package dev.marulabs.commandlib.argument;
+
+import dev.marulabs.commandlib.Argument;
+import dev.marulabs.commandlib.CommandContext;
+import dev.marulabs.commandlib.exception.ArgumentParseException;
+
+/**
+ * A number of game ticks in the vanilla {@code time} syntax: a number, decimals allowed, with one optional unit,
+ * {@code t} (ticks, the default), {@code s} (20 ticks) or {@code d} (a Minecraft day, 24000 ticks), such as {@code 20},
+ * {@code 10s} or {@code 0.5d}. The client parses it and suggests the units.
+ *
+ * <p>Use {@link DurationArgument} for real time: it combines units ({@code 1h30m}) and its {@code d} is 24 hours.
+ */
+public class TimeArgument extends Argument<Integer, TimeArgument> {
+    private final int minimum;
+
+    public TimeArgument(String name) {
+        this(name, 0);
+    }
+
+    /**
+     * @param minimum the fewest ticks accepted
+     */
+    public TimeArgument(String name, int minimum) {
+        //? if >=1.19.4 {
+        super(name, net.minecraft.commands.arguments.TimeArgument.time(minimum));
+        //?} else
+        /*super(name, net.minecraft.commands.arguments.TimeArgument.time());*/
+        this.minimum = minimum;
+    }
+
+    @Override
+    public Integer cast(Object parsedArgument) {
+        return (Integer) parsedArgument;
+    }
+
+    @Override
+    protected Integer parseImpl(CommandContext ctx) throws ArgumentParseException {
+        int ticks = ctx.getHandle()
+                       .getArgument(name(), Integer.class);
+        // The vanilla type has no minimum before 1.19.4.
+        if (ticks < minimum) {
+            throw new ArgumentParseException(x -> x.sendFailure("Tick count must not be less than " + minimum
+                    + ", found " + ticks));
+        }
+        return ticks;
+    }
+}

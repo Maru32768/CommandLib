@@ -13,6 +13,7 @@ import dev.marulabs.commandlib.util.nms.exception.UncheckedCommandSyntaxExceptio
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -25,6 +26,8 @@ import java.util.regex.Pattern;
  */
 public final class MockArgumentTypes {
     private static final Pattern RESOURCE_LOCATION = Pattern.compile("[a-z0-9_.-]+:[a-z0-9_./-]+");
+    // No unit means ticks.
+    private static final Map<String, Integer> TIME_UNITS = Map.of("d", 24000, "s", 20, "t", 1, "", 1);
 
     private MockArgumentTypes() {
     }
@@ -154,6 +157,77 @@ public final class MockArgumentTypes {
         }
         reader.setCursor(start);
         throw syntaxError("Unterminated value", reader);
+    }
+
+    /**
+     * Reads one of {@code names}, rejecting other input while parsing with {@code <error> '<input>'}, and suggests the
+     * names that start with the input, like the vanilla arguments over a fixed set of names.
+     */
+    public static ArgumentType<String> names(String error, Collection<String> names) {
+        return new ArgumentType<String>() {
+            @Override
+            public String parse(StringReader reader) throws CommandSyntaxException {
+                int start = reader.getCursor();
+                String name = readToken(reader);
+                if (!names.contains(name)) {
+                    reader.setCursor(start);
+                    throw syntaxError(error + " '" + name + "'", reader);
+                }
+                return name;
+            }
+
+            @Override
+            public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context,
+                                                                      SuggestionsBuilder builder) {
+                for (String name : names) {
+                    if (name.startsWith(builder.getRemaining())) {
+                        builder.suggest(name);
+                    }
+                }
+                return builder.buildFuture();
+            }
+        };
+    }
+
+    /**
+     * Reads a vanilla time such as {@code 20}, {@code 10s} or {@code 0.5d} into ticks, rejecting an unknown unit and
+     * fewer ticks than {@code minimum} while parsing, and suggests the units after a number, like a server from 1.19.4.
+     */
+    public static ArgumentType<Integer> time(int minimum) {
+        return new ArgumentType<Integer>() {
+            @Override
+            public Integer parse(StringReader reader) throws CommandSyntaxException {
+                float amount = reader.readFloat();
+                String unit = reader.readUnquotedString();
+                int ticksPerUnit = TIME_UNITS.getOrDefault(unit, 0);
+                if (ticksPerUnit == 0) {
+                    throw syntaxError("Invalid unit", reader);
+                }
+                int ticks = Math.round(amount * ticksPerUnit);
+                if (ticks < minimum) {
+                    throw syntaxError("Tick count must not be less than " + minimum + ", found " + ticks, reader);
+                }
+                return ticks;
+            }
+
+            @Override
+            public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context,
+                                                                      SuggestionsBuilder builder) {
+                StringReader reader = new StringReader(builder.getRemaining());
+                try {
+                    reader.readFloat();
+                } catch (CommandSyntaxException e) {
+                    return builder.buildFuture();
+                }
+                SuggestionsBuilder units = builder.createOffset(builder.getStart() + reader.getCursor());
+                for (String unit : TIME_UNITS.keySet()) {
+                    if (!unit.isEmpty() && unit.startsWith(units.getRemaining())) {
+                        units.suggest(unit);
+                    }
+                }
+                return units.buildFuture();
+            }
+        };
     }
 
     /**

@@ -6,6 +6,7 @@ import dev.marulabs.commandlib.util.bukkit.BukkitUtil;
 import dev.marulabs.integration.core.ExceptionUtil;
 import dev.marulabs.integration.core.TestResult;
 import dev.marulabs.integration.core.TestStatus;
+import io.papermc.paper.registry.RegistryKey;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Keyed;
@@ -79,10 +80,12 @@ public final class ArgumentTest extends TestBase {
         commands.addAll(playersArgument());
         commands.addAll(potionEffectArgument());
         commands.addAll(recipeArgument());
+        commands.addAll(registryArgument());
         commands.addAll(scoreboardDisplaySlotArgument());
         commands.addAll(soundArgument());
         commands.addAll(stringArgument());
         commands.addAll(teamArgument());
+        commands.addAll(timeArgument());
         commands.addAll(unparsedArgument());
         commands.addAll(uuidArgument());
         commands.addAll(uuidsArgument());
@@ -864,6 +867,25 @@ public final class ArgumentTest extends TestBase {
         return List.of(buildCommand(command, name + " minecraft:stick"));
     }
 
+    public List<String> registryArgument() {
+        String name = getMethodName();
+        String key = getKey();
+
+        putCommandNotExecutedResult(key);
+        command.addChildren(new Command(name) {{
+            argument(new RegistryArgument<>("a", RegistryKey.ENTITY_TYPE).addUncaughtExceptionHandler((e, ctx) -> {
+                putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
+            })).execute((a, ctx) -> {
+                putResult(key,
+                          a.getKey()
+                           .getKey(),
+                          "zombie");
+            });
+        }});
+
+        return List.of(buildCommand(command, name + " minecraft:zombie"));
+    }
+
     public List<String> scoreboardDisplaySlotArgument() {
         String name = getMethodName();
         String key = getKey();
@@ -898,6 +920,22 @@ public final class ArgumentTest extends TestBase {
         }});
 
         return List.of(buildCommand(command, name + " " + registryInput("block_anvil_land", "block.anvil.land")));
+    }
+
+    public List<String> timeArgument() {
+        String name = getMethodName();
+        String key = getKey();
+
+        putCommandNotExecutedResult(key);
+        command.addChildren(new Command(name) {{
+            argument(new TimeArgument("a", 1).addUncaughtExceptionHandler((e, ctx) -> {
+                putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
+            })).execute((a, ctx) -> {
+                putResult(key, a.toString(), "12000");
+            });
+        }});
+
+        return List.of(buildCommand(command, name + " 0.5d"));
     }
 
     public List<String> stringArgument() {

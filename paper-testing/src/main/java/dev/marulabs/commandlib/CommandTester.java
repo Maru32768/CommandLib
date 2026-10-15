@@ -89,6 +89,7 @@ public final class CommandTester implements AutoCloseable {
     private @Nullable Attribute fakeAttribute;
     private EntityType fakeEntityType = EntityType.ZOMBIE;
     private @Nullable Sound fakeSound;
+    private final Map<RegistryKey<?>, Map<String, Object>> fakeRegistryValues = new LinkedHashMap<>();
     private final String permissionPrefix;
     private final List<Command> commands = new ArrayList<>();
 
@@ -273,6 +274,20 @@ public final class CommandTester implements AutoCloseable {
         return this;
     }
 
+    /**
+     * Adds a value that {@code ArgumentTypes.resource(registryKey)}, and so {@code RegistryArgument}, returns for its
+     * key, such as {@code minecraft:sharpness}. Once a registry has a value here, other keys of it fail while parsing.
+     */
+    public <T> CommandTester withFakeRegistryValue(@NotNull RegistryKey<T> registryKey,
+                                                   @NotNull String key,
+                                                   @NotNull T value) {
+        fakeRegistryValues.computeIfAbsent(registryKey, x -> new LinkedHashMap<>())
+                          .put(Objects.requireNonNull(NamespacedKey.fromString(key), "key")
+                                      .toString(),
+                               value);
+        return this;
+    }
+
     public CommandTester withFakeWorld(@NotNull World world) {
         fakeWorlds.put(world.getName(), world);
         return this;
@@ -340,8 +355,12 @@ public final class CommandTester implements AutoCloseable {
                      .thenReturn(range(Integer::valueOf, range -> (IntegerRangeProvider) () -> range));
         argumentTypes.when(ArgumentTypes::doubleRange)
                      .thenReturn(range(Double::valueOf, range -> (DoubleRangeProvider) () -> range));
+        argumentTypes.when(ArgumentTypes::time)
+                     .thenReturn(time(0));
+        argumentTypes.when(() -> ArgumentTypes.time(Mockito.anyInt()))
+                     .thenAnswer(invocation -> time(invocation.getArgument(0)));
         argumentTypes.when(() -> ArgumentTypes.resource(Mockito.any(RegistryKey.class)))
-                     .thenAnswer(invocation -> word(token -> resourceValue(invocation.getArgument(0))));
+                     .thenAnswer(invocation -> word(token -> resourceValue(invocation.getArgument(0), token)));
         argumentTypes.when(ArgumentTypes::component)
                      .thenReturn(component());
         argumentTypes.when(ArgumentTypes::signedMessage)
@@ -467,8 +486,13 @@ public final class CommandTester implements AutoCloseable {
     }
 
     @Nullable
-    private Object resourceValue(RegistryKey<?> key) {
+    private Object resourceValue(RegistryKey<?> key, String token) {
         CommandTester tester = requireCurrent();
+        Map<String, Object> values = tester.fakeRegistryValues.get(key);
+        if (values != null) {
+            NamespacedKey valueKey = NamespacedKey.fromString(token);
+            return valueKey == null ? null : values.get(valueKey.toString());
+        }
         if (RegistryKey.ENCHANTMENT.equals(key)) {
             return tester.fakeEnchantment;
         }
@@ -555,6 +579,50 @@ public final class CommandTester implements AutoCloseable {
             }
             reader.setCursor(start);
             throw new SimpleCommandExceptionType(new LiteralMessage(error)).createWithContext(reader);
+        };
+    }
+
+    /**
+     * Reads a vanilla time such as {@code 20}, {@code 10s} or {@code 0.5d} into ticks, rejecting an unknown unit and
+     * fewer ticks than {@code minimum} while parsing, and suggests the units after a number, like a server.
+     */
+    private static ArgumentType<Integer> time(int minimum) {
+        // No unit means ticks.
+        Map<String, Integer> units = Map.of("d", 24000, "s", 20, "t", 1, "", 1);
+        return new ArgumentType<>() {
+            @Override
+            public Integer parse(StringReader reader) throws CommandSyntaxException {
+                float amount = reader.readFloat();
+                int ticksPerUnit = units.getOrDefault(reader.readUnquotedString(), 0);
+                String error;
+                if (ticksPerUnit == 0) {
+                    error = "Invalid unit";
+                } else {
+                    int ticks = Math.round(amount * ticksPerUnit);
+                    if (ticks >= minimum) {
+                        return ticks;
+                    }
+                    error = "Tick count must not be less than " + minimum + ", found " + ticks;
+                }
+                throw new SimpleCommandExceptionType(new LiteralMessage(error)).createWithContext(reader);
+            }
+
+            @Override
+            public <S> CompletableFuture<Suggestions> listSuggestions(com.mojang.brigadier.context.CommandContext<S> context,
+                                                                      SuggestionsBuilder builder) {
+                StringReader reader = new StringReader(builder.getRemaining());
+                try {
+                    reader.readFloat();
+                } catch (CommandSyntaxException e) {
+                    return builder.buildFuture();
+                }
+                SuggestionsBuilder unitBuilder = builder.createOffset(builder.getStart() + reader.getCursor());
+                units.keySet()
+                     .stream()
+                     .filter(unit -> !unit.isEmpty() && unit.startsWith(unitBuilder.getRemaining()))
+                     .forEach(unitBuilder::suggest);
+                return unitBuilder.buildFuture();
+            }
         };
     }
 

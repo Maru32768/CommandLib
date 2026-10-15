@@ -42,7 +42,8 @@ or suggestions with the references. Fabric has no integration target yet, so its
 | `LongArgument`, `FloatArgument`, `DoubleArgument` | `Long`, `Float`, `Double` | as above | same names | Brigadier | equivalent | equivalent | equivalent |
 | `IntegerRangeArgument` | Guava `Range<Integer>` | vanilla `int_range`: `1..10`, `..5`, `3..`, `5`; parsed and highlighted by the client; a minimum above the maximum is a syntax error | `IntegerRangeArgument` (`IntegerRange`) | `integerRange()` | equivalent | equivalent | equivalent |
 | `DoubleRangeArgument` | Guava `Range<Double>` | vanilla `float_range`: `0.5..10`, `..5`, `3.5..`, `5` | `DoubleRangeArgument` (`DoubleRange`) | `doubleRange()` | equivalent | equivalent | equivalent |
-| `DurationArgument` | `java.time.Duration` | a word of amounts with units `d h m s t`, each at most once from the largest: `1h30m`, `20t`, `2d`; a typed number is suggested with each unit | `TimeArgument` (`Integer` ticks) | `time()` (`Integer` ticks) | partial | partial | partial |
+| `TimeArgument(name[, minimum])` | `Integer` game ticks | vanilla `time`: a number with one optional unit, `t` (default), `s` (20 ticks), `d` (24000 ticks): `20`, `10s`, `0.5d`; the client parses it and suggests the units; fewer ticks than `minimum` (default 0) is an error | `TimeArgument` | `time(mintime)` | equivalent | equivalent | equivalent |
+| `DurationArgument` | `java.time.Duration` | a word of amounts with units `d h m s t`, each at most once from the largest: `1h30m`, `20t`, `2d`; a typed number is suggested with each unit | — (real time; see `TimeArgument` for ticks) | — | — | — | — |
 | `StringArgument(name, Type.WORD)` | `String` | one unquoted word (`a-z A-Z 0-9 _ - . +`) | `StringArgument` | Brigadier `word()` | equivalent | equivalent | equivalent |
 | `StringArgument(name)` / `Type.PHRASE_QUOTED` | `String` | a word or a `"quoted phrase"`; **the default** | `TextArgument` | Brigadier `string()` | equivalent | equivalent | equivalent |
 | `StringArgument(name, Type.PHRASE)` | `String` | the rest of the input | `GreedyStringArgument` | Brigadier `greedyString()` | equivalent | equivalent | equivalent |
@@ -65,11 +66,15 @@ Notes:
 - The range arguments return a closed Guava `Range`, unbounded on an open side (`3..` is `[3..+∞)`, `5` is
   `[5..5]`), the type Paper's range providers return. Spigot reads them through NMS `RangeArgument`, Forge / NeoForge
   through Minecraft's `RangeArgument`.
-- `DurationArgument` counts real time: `t` is 50 ms (a tick at 20 TPS) and `d` is 24 hours. Vanilla `time` (CommandAPI
-  `TimeArgument`, Paper `time()`) counts game ticks, means the 24000 ticks of a Minecraft day by `d`, accepts decimals
-  such as `1.5d` and a bare number of ticks, and takes one unit only. `DurationArgument` rejects decimals and bare
-  numbers but combines units. The client sees a word, so malformed input fails when the command runs with
-  "Incorrect argument for command". Convert with `duration.toMillis() / 50` for a tick count.
+- `TimeArgument` and `DurationArgument` answer different questions. `TimeArgument` is vanilla's `time` (the argument of
+  `/time add` and `/weather`): it counts game ticks, so its `d` is the 24000 ticks of a Minecraft day; it accepts
+  decimals such as `1.5d` and a bare number of ticks, takes one unit only, and the client validates it. Use it for
+  anything scheduled in ticks. `DurationArgument` counts real time: `t` is 50 ms (a tick at 20 TPS) and `d` is 24 hours;
+  it combines units (`1h30m`) but rejects decimals and bare numbers. The client sees a word, so malformed input fails
+  when the command runs with "Incorrect argument for command". Use it for cooldowns, bans and other wall-clock times.
+- `TimeArgument`'s minimum is checked by the client and the parser from 1.19.4. Older Spigot servers and Forge 1.16.5
+  have no minimum in the vanilla type (it only rejects negative values), so CommandLib rejects a smaller value when the
+  command runs with `Tick count must not be less than <minimum>, found <ticks>`.
 
 ## Entities and players
 
@@ -162,7 +167,8 @@ Notes:
 | `AdvancementArgument` (Bukkit) | `Advancement` | advancement key; suggests loaded advancements | `AdvancementArgument` | — | equivalent | equivalent | missing |
 | `LootTableArgument` (Bukkit) | `LootTable` | loot table key; suggests registered loot tables | `LootTableArgument` | — | equivalent | equivalent | missing |
 | `RecipeArgument` (Bukkit) | `Recipe` | recipe key; suggests keyed recipes | `RecipeArgument` (`ComplexRecipe`) | — | equivalent | equivalent | missing |
-| generic registry value | — | — | per-type arguments | `resource(RegistryKey)`, `resourceKey(RegistryKey)` | missing | missing | missing |
+| `RegistryArgument<T>(name, registry)` | `T` | a key of the registry: Bukkit `Registry<T extends Keyed>` (Spigot), Paper `RegistryKey<T>` (Paper), vanilla `ResourceKey<Registry<T>>` (Forge / NeoForge); no namespace means `minecraft`; suggests the registry's keys | per-type arguments | `resource(RegistryKey)` | equivalent | equivalent | equivalent |
+| registry key | — | — | — | `resourceKey(RegistryKey)` (`TypedKey<T>`) | missing | missing | missing |
 
 Notes:
 
@@ -173,7 +179,16 @@ Notes:
 - On Paper, `SoundArgument`, `BiomeArgument`, `AttributeArgument`, `EntityTypeArgument`, `EnchantmentArgument`,
   `PotionEffectArgument`, and `ParticleArgument` use Paper's `ArgumentTypes.resource(...)`, so Paper parses, suggests,
   and rejects unknown keys natively during Brigadier parsing.
-- Forge / NeoForge have only `ResourceLocationArgument`; look the value up in the registry yourself.
+- `RegistryArgument` covers any registry with one class: `new RegistryArgument<>("enchantment", Registry.ENCHANTMENT)`
+  on Spigot, `RegistryKey.ENCHANTMENT` on Paper (Paper's `resource(...)`, so Paper rejects an unknown key while parsing),
+  and `Registries.ENCHANTMENT` (`Registry.ENCHANTMENT_REGISTRY` before 1.19.3) on Forge / NeoForge. The constructor
+  takes the platform's registry type, so the code differs between platforms. On Spigot and Forge / NeoForge it is a
+  resource location looked up when the command runs: an unknown key is `<key> is not a known registry entry` (Spigot)
+  or `Can't find element '<key>' of type '<registry>'` (Forge / NeoForge). Forge / NeoForge look the registry up in the
+  server's registries, so data-driven registries such as biomes work there. The value is the registry entry, not a
+  `Holder`.
+- For a registry key without its value (Paper's `resourceKey(...)`), use `NamespacedKeyArgument` or
+  `ResourceLocationArgument`.
 
 ## Scoreboard and game systems
 
@@ -181,9 +196,9 @@ Notes:
 |---|---|---|---|---|---|---|---|
 | `TeamArgument` | Bukkit `Team` / vanilla `PlayerTeam` | team name; `scoreboard(Supplier)` selects another scoreboard | `TeamArgument` | — | equivalent | equivalent | equivalent |
 | `ObjectiveArgument` (Bukkit) | `Objective` | objective name; `scoreboard(Supplier)` selects another scoreboard | `ObjectiveArgument` | — | equivalent | equivalent | missing |
-| `ScoreboardDisplaySlotArgument` (Bukkit) | `DisplaySlot` | vanilla names: `list`, `sidebar`, `below_name`, `sidebar.team.red` | `ScoreboardSlotArgument` | `scoreboardDisplaySlot()` | partial | equivalent | missing |
+| `ScoreboardDisplaySlotArgument` (Bukkit) | `DisplaySlot` | vanilla `scoreboard_slot`: `list`, `sidebar`, `below_name` (`belowName` before 1.20.2), `sidebar.team.red`; validated and suggested by the client | `ScoreboardSlotArgument` | `scoreboardDisplaySlot()` | partial | equivalent | missing |
 | `GameModeArgument` (Bukkit) | `GameMode` | `survival`, `creative`, `adventure`, `spectator` | — | `gameMode()` | equivalent | equivalent | missing |
-| `ChatColorArgument` (Bukkit) | Spigot: legacy `ChatColor`; Paper: `NamedTextColor` | vanilla color names such as `dark_red`, and `reset` on Spigot | `ChatColorArgument` | `namedColor()` | equivalent | equivalent | missing |
+| `ChatColorArgument` (Bukkit) | Spigot: legacy `ChatColor`; Paper: `NamedTextColor` | vanilla `color`: names such as `dark_red`, and `reset`; validated and suggested by the client | `ChatColorArgument` | `namedColor()` | equivalent | equivalent | missing |
 | objective criteria | — | — | `ObjectiveCriteriaArgument` | `objectiveCriteria()` | missing | missing | missing |
 | math operation | — | — | `MathOperationArgument` | — | missing | missing | missing |
 
@@ -192,11 +207,12 @@ Notes:
 - On Spigot without `scoreboard(...)`, `TeamArgument` uses vanilla's team argument (server scoreboard, vanilla
   suggestions and `Unknown team` error). Paper's and the custom-scoreboard variants are a word argument with
   CommandLib's suggestions and the "Incorrect argument for command" error.
-- On Paper, `ScoreboardDisplaySlotArgument` and `ChatColorArgument` use Paper's `scoreboardDisplaySlot()` and
-  `namedColor()`. On Spigot they are string arguments over a fixed list of vanilla names, so the client does not
-  validate them and an unknown name is "Incorrect argument for command".
-- Spigot's `ScoreboardDisplaySlotArgument` also accepts `belowName`, the name before 1.20.2, and offers the
-  `sidebar.team.<color>` slots only where Bukkit's `DisplaySlot` has them (not on 1.16.5–1.18.2), hence `partial`.
+- `ScoreboardDisplaySlotArgument` and `ChatColorArgument` use vanilla's `scoreboard_slot` and `color` argument types,
+  through NMS on Spigot and Paper's `scoreboardDisplaySlot()` and `namedColor()` on Paper. The client validates and
+  suggests them, and an unknown name is vanilla's `Unknown display slot` / `Invalid color` error while parsing.
+- The slot names are the server's: `belowName` before 1.20.2, `below_name` from then. Bukkit's `DisplaySlot` has no
+  team slots on Spigot 1.16.5–1.18.2, so there the client accepts `sidebar.team.<color>` but the command fails with
+  `<slot> is not a display slot of this server`, hence `partial`.
 - `ChatColorArgument` rejects formats such as `bold`, like vanilla's color argument. Spigot returns `ChatColor.RESET`
   for `reset`; `NamedTextColor` has no reset, and what Paper's `namedColor()` does with `reset` has not been checked.
 - On Forge / NeoForge, `EnumArgument<GameType>` works as a game mode argument.
@@ -269,8 +285,8 @@ Notes:
   `NameableObjectArgument` approach. An unknown name is "Incorrect argument for command".
 - Selectors (`@a`, `@p`), UUIDs, and offline players are not accepted. Use `ObjectArgument` with your own map for
   other proxy objects.
-- `UnparsedArgument` and the range arguments are missing: their argument types are CommandLib's or Minecraft's, not
-  Brigadier's, so a proxy cannot send them to the client.
+- `UnparsedArgument`, `TimeArgument` and the range arguments are missing: their argument types are CommandLib's or
+  Minecraft's, not Brigadier's, so a proxy cannot send them to the client.
 - `velocity-testing`'s `CommandTester` runs the real parsers. `PlayerArgument` and `ServerArgument` look up the
   players and servers added with `withFakePlayer` and `withFakeServer` on its Mockito `ProxyServer`.
 
@@ -288,16 +304,12 @@ These points are open, separate from the missing arguments below:
 
 The order weighs plugin demand, the CommandAPI / Paper parity gap, and how much of the work already exists.
 
-1. **Generic registry argument** (Paper `resource(RegistryKey)` / `resourceKey(RegistryKey)` equivalent) on both
-   Bukkit modules.
-2. **Forge / NeoForge parity**: dimension / world, sound, biome, attribute, entity type, objective, game mode, and the
-   other Bukkit-only registry arguments.
-3. **Rotation, angle, 2D location, axes.**
-4. **Score holder, objective criteria, math operation**, the remaining scoreboard set.
-5. **Function, command, list, map** arguments.
-6. `style`, `hexColor`, `heightMap`, `entityAnchor`, structure mirror / rotation.
-7. **Vanilla `time` in game ticks** (`TimeArgument`, `time()`), for commands that schedule ticks rather than real time;
-   `DurationArgument` covers real-time durations.
+1. **Forge / NeoForge parity**: dimension / world, sound, biome, attribute, entity type, objective, game mode, and the
+   other Bukkit-only registry arguments (`RegistryArgument` already reads their registries).
+2. **Rotation, angle, 2D location, axes.**
+3. **Score holder, objective criteria, math operation**, the remaining scoreboard set.
+4. **Function, command, list, map** arguments.
+5. `style`, `hexColor`, `heightMap`, `entityAnchor`, structure mirror / rotation.
 
 ## Testing each argument
 
@@ -315,7 +327,9 @@ depends on the artifact:
 | Argument | `spigot-testing` | `paper-testing` | `forge-testing` / `neoforge-testing` / `fabric-testing` |
 |---|---|---|---|
 | Boolean, numbers, `StringArgument`, `UnparsedArgument`, `LiteralArgument`, `EnumArgument`, `ObjectArgument`, `NameableObjectArgument` | real | real | real |
-| `GameModeArgument`, `ChatColorArgument`, `ScoreboardDisplaySlotArgument` | real | mock: vanilla names | — |
+| `TimeArgument` | mock: vanilla syntax, minimum and unit suggestions | mock: vanilla syntax, minimum and unit suggestions | real |
+| `GameModeArgument` | real | mock: vanilla names | — |
+| `ChatColorArgument`, `ScoreboardDisplaySlotArgument` | mock: vanilla names of a 1.20.2+ server, with suggestions | mock: vanilla names | — |
 | `PlayerArgument`, `PlayersArgument` | mock: names, `@s`, `@p`, `@r`, `@a` (`withFakePlayer`) | mock: names, `@a` for the list variant (`withFakePlayer`) | real selectors over the fake players (`withPlayer`) |
 | `EntityArgument`, `EntitiesArgument` | mock: names, `@s`, `@p`, `@r`, `@a`, `@e` (`withFakeEntity`) | mock: names, `@a` (`withFakeEntity`) | real selectors; only players exist |
 | `OfflinePlayerArgument`, `OfflinePlayersArgument`, `UUIDArgument`, `UUIDsArgument` | static | static | `UUIDArgument`, `UUIDsArgument`, `GameProfileArgument`: online fake players only |
@@ -331,6 +345,7 @@ depends on the artifact:
 | `NamespacedKeyArgument` / `ResourceLocationArgument` | real key parsing | real key parsing | real |
 | `SoundArgument`, `BiomeArgument`, `AttributeArgument`, `EntityTypeArgument` | static (`Registry`) | mock (`withFakeSound`, `withFakeBiome`, `withFakeAttribute`, `withFakeEntityType`) | — |
 | `AdvancementArgument`, `LootTableArgument`, `RecipeArgument` | static | static | — |
+| `RegistryArgument` | real over the Bukkit `Registry`; static when it needs a server | mock (`withFakeRegistryValue(registryKey, key, value)`) | real over the built-in registries (1.20.5+: also the data-driven ones) |
 | `TeamArgument` | mock vanilla type plus static scoreboard; real with `scoreboard(Supplier)` | static, or real with `scoreboard(Supplier)` | real with `scoreboard(Supplier)`; the server scoreboard is not available |
 | `ObjectiveArgument` | static, or real with `scoreboard(Supplier)` | static, or real with `scoreboard(Supplier)` | — |
 | `ComponentArgument` | mock: JSON read by Bungee | mock: JSON read by Adventure | real |

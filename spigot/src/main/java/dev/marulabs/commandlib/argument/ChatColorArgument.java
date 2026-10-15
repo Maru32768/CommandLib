@@ -1,32 +1,30 @@
 package dev.marulabs.commandlib.argument;
 
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import dev.marulabs.commandlib.Argument;
+import dev.marulabs.commandlib.CommandContext;
+import dev.marulabs.commandlib.util.nms.argument.NMSArgumentChatFormat;
 import org.bukkit.ChatColor;
 
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Locale;
-import java.util.Map;
-
 /**
- * A chat color by its vanilla name, such as {@code dark_red}, or {@code reset}. Formats such as {@code bold} are rejected,
- * as by vanilla's color argument.
+ * A chat color in the vanilla {@code color} syntax, which the client validates and suggests: a color name such as
+ * {@code dark_red}, or {@code reset}. Formats such as {@code bold} are rejected.
  */
-public class ChatColorArgument extends ObjectArgument<ChatColor> {
-    private static final Map<String, ChatColor> COLORS = colors();
-
+public class ChatColorArgument extends Argument<ChatColor, ChatColorArgument> {
     public ChatColorArgument(String name) {
-        super(name, COLORS);
+        super(name,
+              NMSArgumentChatFormat.create()
+                                   .argument());
     }
 
-    private static Map<String, ChatColor> colors() {
-        Map<String, ChatColor> colors = new LinkedHashMap<>();
-        for (ChatColor color : ChatColor.values()) {
-            if (color.isColor() || color == ChatColor.RESET) {
-                colors.put(color.name()
-                                .toLowerCase(Locale.ROOT),
-                           color);
-            }
-        }
-        return Collections.unmodifiableMap(colors);
+    @Override
+    public ChatColor cast(Object parsedArgument) {
+        return (ChatColor) parsedArgument;
+    }
+
+    @Override
+    protected ChatColor parseImpl(CommandContext ctx) throws CommandSyntaxException {
+        return NMSArgumentChatFormat.create()
+                                    .parse(ctx.getHandle(), name());
     }
 }

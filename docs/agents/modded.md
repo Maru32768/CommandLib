@@ -94,9 +94,9 @@ were working on, and run the `modded-testing` tests:
 `CommandTester`, `FakeSender`). It is a Stonecutter tree like `modded`, with the same nodes and conditional comment
 rules. It bootstraps Minecraft's registries and mocks the server, Forge's `NetworkHooks` during bootstrap (NeoForge:
 `FeatureFlagLoader`, which needs FML's mod list; Fabric bootstraps plain vanilla), and the permission lookup while a
-command executes. On 1.20.5+ the
-mocked server's `registryAccess()` holds the built-in registries plus copies of the data-driven ones built by
-`VanillaRegistries.createLookup()` (no tags are loaded), so data-driven registries such as
+command executes. The mocked server's `registryAccess()` holds the built-in registries (before 1.19.3,
+`RegistryAccess.builtin()`, whose static registries stay in `Registry.REGISTRY`). On 1.20.5+ it also holds copies of the
+data-driven ones built by `VanillaRegistries.createLookup()` (no tags are loaded), so data-driven registries such as
 enchantments resolve.
 
 When a change can affect the public API or published jars, also run

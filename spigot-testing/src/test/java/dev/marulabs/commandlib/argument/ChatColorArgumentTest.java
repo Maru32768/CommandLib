@@ -7,6 +7,7 @@ import dev.marulabs.commandlib.FakeSender;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class ChatColorArgumentTest {
     private static Command command() {
@@ -28,15 +29,14 @@ class ChatColorArgumentTest {
     }
 
     @Test
-    void formats_are_rejected() {
+    void formats_are_syntax_errors() {
         FakeSender sender = FakeSender.player("Alice");
 
         try (CommandTester tester = new CommandTester(ChatColorArgumentTest::command, "test.command")) {
-            tester.execute("color bold", sender);
+            assertThatThrownBy(() -> tester.execute("color bold", sender)).hasMessageContaining("Invalid color 'bold'");
         }
 
-        assertThat(sender.getSentMessageTexts()).containsExactly("Incorrect argument for command",
-                                                                 "color bold<--[HERE]");
+        assertThat(sender.getSentMessageTexts()).isEmpty();
     }
 
     @Test

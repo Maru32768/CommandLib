@@ -7,6 +7,7 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import dev.marulabs.commandlib.util.CurrentServer;
 import net.minecraft.SharedConstants;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -16,6 +17,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.mockito.Mockito;
 import org.mockito.MockedStatic;
+//? if >=1.19.3
+import net.minecraft.core.registries.BuiltInRegistries;
 
 //? if >=1.20.5 {
 /*import com.mojang.serialization.Lifecycle;
@@ -23,8 +26,6 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.RegistrationInfo;
 import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.registries.VanillaRegistries;
 import net.minecraft.resources.ResourceKey;
 *///?}
@@ -61,8 +62,9 @@ import net.minecraftforge.common.ForgeHooks;
  * Runs CommandLib Forge / NeoForge / Fabric commands without a Minecraft server.
  *
  * <p>Minecraft's registries are bootstrapped once per JVM, so vanilla argument types such as items, blocks, and
- * effects parse for real. On 1.20.5+ the server's {@code registryAccess()} also contains the data-driven registries
- * such as enchantments, built from vanilla's registry bootstrap code. Tags are not loaded. The server is a Mockito
+ * effects parse for real. The server's {@code registryAccess()} holds the built-in registries (before 1.19.3 its built-in
+ * data-driven ones, with the others in {@code Registry.REGISTRY}), and on 1.20.5+ also the data-driven registries such
+ * as enchantments, built from vanilla's registry bootstrap code. Tags are not loaded. The server is a Mockito
  * mock whose player list contains the fake players added with {@link #withPlayer(FakeSender)} and the player executing
  * each command, so player and entity arguments resolve those players by name. Permission nodes are answered by the executing {@link FakeSender}.</p>
  */
@@ -290,9 +292,12 @@ public final class CommandTester implements AutoCloseable {
         //?}
         //? if >=1.20.5 {
         /*RegistryAccess.Frozen registryAccess = MinecraftBootstrap.registryAccess();
+        *///?} elif >=1.19.3 {
+        RegistryAccess.Frozen registryAccess = RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY);
+        //?} else
+        /*RegistryAccess registryAccess = RegistryAccess.builtin();*/
         Mockito.when(server.registryAccess())
                .thenReturn(registryAccess);
-        *///?}
         return server;
     }
 

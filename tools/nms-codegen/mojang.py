@@ -233,6 +233,27 @@ arg("NMSArgumentChat", "commands.arguments.MessageArgument", "BaseComponent", "M
     "return ComponentSerializer.parse(CraftChatMessage.toJSON(MessageArgument.getMessage(CTX, name)))[0];", BUNGEE)
 arg("NMSArgumentNBTTag", "commands.arguments.CompoundTagArgument", "String", "CompoundTagArgument.compoundTag()",
     "return CompoundTagArgument.getCompoundTag(CTX, name).toString();", throws=False)
+# The slot is a number until 1.20.2, which made it the DisplaySlot enum. Both convert to the vanilla name.
+if V >= (1, 20, 2):
+    arg("NMSArgumentScoreboardSlot", "commands.arguments.ScoreboardSlotArgument", "String",
+        "ScoreboardSlotArgument.displaySlot()",
+        "return ScoreboardSlotArgument.getDisplaySlot(CTX, name).getSerializedName();", throws=False)
+else:
+    arg("NMSArgumentScoreboardSlot", "commands.arguments.ScoreboardSlotArgument", "String",
+        "ScoreboardSlotArgument.displaySlot()",
+        "return Scoreboard.getDisplaySlotName(ScoreboardSlotArgument.getDisplaySlot(CTX, name));",
+        ["net.minecraft.world.scores.Scoreboard"], throws=False)
+arg("NMSArgumentChatFormat", "commands.arguments.ColorArgument", "ChatColor", "ColorArgument.color()",
+    "return CraftChatMessage.getColor(ColorArgument.getColor(CTX, name));",
+    ["org.bukkit.ChatColor", f"{CB}.util.CraftChatMessage"], throws=False)
+# TimeArgument takes a minimum from 1.19.4; before, it only rejects negative values.
+arg("NMSArgumentTime", "commands.arguments.TimeArgument", "Integer", "TimeArgument.time()",
+    "return CTX.getArgument(name, Integer.class);", throws=False, extra=f'''
+    @Override
+    public ArgumentType<?> argument(int minimum) {{
+        return {"TimeArgument.time(minimum)" if V >= (1, 19, 4) else "TimeArgument.time()"};
+    }}
+''')
 
 w("NMSArgumentProfile", '''    public NMSArgumentProfile_SUFFIX() {
         super(null, GameProfileArgument.class);

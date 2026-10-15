@@ -7,6 +7,7 @@ import dev.marulabs.commandlib.FakeSender;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class ScoreboardDisplaySlotArgumentTest {
     private static Command command() {
@@ -24,10 +25,9 @@ class ScoreboardDisplaySlotArgumentTest {
             tester.execute("slot sidebar", sender);
             tester.execute("slot list", sender);
             tester.execute("slot below_name", sender);
-            tester.execute("slot belowName", sender);
         }
 
-        assertThat(sender.getSentMessageTexts()).containsExactly("SIDEBAR", "PLAYER_LIST", "BELOW_NAME", "BELOW_NAME");
+        assertThat(sender.getSentMessageTexts()).containsExactly("SIDEBAR", "PLAYER_LIST", "BELOW_NAME");
     }
 
     @Test
@@ -37,15 +37,27 @@ class ScoreboardDisplaySlotArgumentTest {
     }
 
     @Test
-    void bukkit_enum_name_is_rejected() {
+    void bukkit_enum_name_is_a_syntax_error() {
         FakeSender sender = FakeSender.player("Alice");
 
         try (CommandTester tester = new CommandTester(ScoreboardDisplaySlotArgumentTest::command, "test.command")) {
-            tester.execute("slot player_list", sender);
+            assertThatThrownBy(() -> tester.execute("slot player_list",
+                                                    sender)).hasMessageContaining("Unknown display slot 'player_list'");
         }
 
-        assertThat(sender.getSentMessageTexts()).containsExactly("Incorrect argument for command",
-                                                                 "slot player_list<--[HERE]");
+        assertThat(sender.getSentMessageTexts()).isEmpty();
+    }
+
+    @Test
+    void team_slot_fails_where_bukkit_has_no_team_slots() {
+        FakeSender sender = FakeSender.player("Alice");
+
+        // The Bukkit API of the tests, 1.16.5, has no team slots, while the mocked vanilla type accepts them.
+        try (CommandTester tester = new CommandTester(ScoreboardDisplaySlotArgumentTest::command, "test.command")) {
+            tester.execute("slot sidebar.team.red", sender);
+        }
+
+        assertThat(sender.getSentMessageTexts()).containsExactly("sidebar.team.red is not a display slot of this server");
     }
 
     @Test

@@ -6,6 +6,8 @@ import dev.marulabs.commandlib.CommonArgument;
 import dev.marulabs.commandlib.argument.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
+//? if >=1.19.3
+import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
@@ -159,12 +161,21 @@ public final class ArgumentTest extends TestBase {
                            "commandlib:example/path",
                            String::valueOf,
                            "commandlib:example/path"));
+        commands.add(check("registryArgument",
+                           //? if >=1.19.3 {
+                           new RegistryArgument<>("a", Registries.ITEM),
+                           //?} else
+                           /*new RegistryArgument<>("a", net.minecraft.core.Registry.ITEM_REGISTRY),*/
+                           "minecraft:diamond",
+                           x -> String.valueOf(x == Items.DIAMOND),
+                           "true"));
         commands.add(check("stringArgument", new StringArgument("a"), "abc", x -> x, "abc"));
         commands.add(check("teamArgument",
                            new TeamArgument("a"),
                            TestMain.TEST_TEAM_NAME,
                            x -> x.getName(),
                            TestMain.TEST_TEAM_NAME));
+        commands.add(check("timeArgument", new TimeArgument("a", 1), "0.5d", String::valueOf, "12000"));
         commands.add(check("unparsedArgument", new UnparsedArgument("a"), "a", x -> x, "a"));
         commands.add(check("uuidArgument", new UUIDArgument("a"), playerName, String::valueOf, playerUuid));
         commands.add(check("uuidsArgument",

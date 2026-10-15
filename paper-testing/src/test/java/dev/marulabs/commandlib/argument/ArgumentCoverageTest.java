@@ -3,6 +3,7 @@ package dev.marulabs.commandlib.argument;
 import dev.marulabs.commandlib.Command;
 import dev.marulabs.commandlib.CommandTester;
 import dev.marulabs.commandlib.CommonArgument;
+import io.papermc.paper.registry.RegistryKey;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.scoreboard.Scoreboard;
@@ -120,6 +121,9 @@ class ArgumentCoverageTest {
                                                                                                                                  () -> new PotionEffectArgument("value")),
                                                                                                                        Map.entry(RecipeArgument.class,
                                                                                                                                  () -> new RecipeArgument("value")),
+                                                                                                                       Map.entry(RegistryArgument.class,
+                                                                                                                                 () -> new RegistryArgument<>("value",
+                                                                                                                                                              RegistryKey.ENTITY_TYPE)),
                                                                                                                        Map.entry(ScoreboardDisplaySlotArgument.class,
                                                                                                                                  () -> new ScoreboardDisplaySlotArgument("value")),
                                                                                                                        Map.entry(SoundArgument.class,
@@ -128,6 +132,8 @@ class ArgumentCoverageTest {
                                                                                                                                  () -> new StringArgument("value")),
                                                                                                                        Map.entry(TeamArgument.class,
                                                                                                                                  () -> new TeamArgument("value")),
+                                                                                                                       Map.entry(TimeArgument.class,
+                                                                                                                                 () -> new TimeArgument("value")),
                                                                                                                        Map.entry(UnparsedArgument.class,
                                                                                                                                  () -> new UnparsedArgument("value")),
                                                                                                                        Map.entry(WorldArgument.class,

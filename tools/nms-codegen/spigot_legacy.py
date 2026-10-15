@@ -134,6 +134,22 @@ arg("NMSArgumentChat", "ArgumentChat", "ArgumentChat", "BaseComponent", "Argumen
     c("return ComponentSerializer.parse(CraftChatMessage.toJSON(ArgumentChat.a(CTX, name)))[0];"), BUNGEE)
 arg("NMSArgumentNBTTag", "ArgumentNBTTag", "ArgumentNBTTag", "String", "ArgumentNBTTag.a()",
     c("return ArgumentNBTTag.a(CTX, name).toString();"), throws=False)
+# ArgumentScoreboardSlot is Mojang's ScoreboardSlotArgument, which parses to the slot number, and getSlotName its
+# vanilla name. ArgumentChatFormat is ColorArgument.
+arg("NMSArgumentScoreboardSlot", "ArgumentScoreboardSlot", "ArgumentScoreboardSlot", "String",
+    "ArgumentScoreboardSlot.a()", c("return Scoreboard.getSlotName(ArgumentScoreboardSlot.a(CTX, name));"),
+    [f"{NMS}.Scoreboard"], throws=False)
+arg("NMSArgumentChatFormat", "ArgumentChatFormat", "ArgumentChatFormat", "ChatColor", "ArgumentChatFormat.a()",
+    c("return CraftChatMessage.getColor(ArgumentChatFormat.a(CTX, name));"),
+    ["org.bukkit.ChatColor", f"{CB}.util.CraftChatMessage"], throws=False)
+# ArgumentTime is Mojang's TimeArgument, which has no minimum before 1.19.4.
+arg("NMSArgumentTime", "ArgumentTime", "ArgumentTime", "Integer", "ArgumentTime.a()",
+    c("return CTX.getArgument(name, Integer.class);"), throws=False, extra='''
+    @Override
+    public ArgumentType<?> argument(int minimum) {
+        return ArgumentTime.a();
+    }
+''')
 
 w("NMSArgumentProfile", '''    public NMSArgumentProfile_SUFFIX() {
         super(null, ArgumentProfile.class);

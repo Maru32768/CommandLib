@@ -90,10 +90,11 @@ typed with `ctx.getArgument(a)` (see [Java builder](../java-builder.md#eight-or-
 | `BlockStateArgument` | `BlockDataArgument` (`BlockData`) |
 | `PotionEffectArgument` | `PotionEffectArgument` (returns a `PotionEffect`; use `getType()`) |
 | `ScoreboardSlotArgument` | `ScoreboardDisplaySlotArgument` |
+| Registry-backed arguments without a CommandLib class | `RegistryArgument<>(name, registry)` over a Bukkit `Registry` (Spigot) or a Paper `RegistryKey` (Paper) |
 | `CustomArgument` | `ObjectArgument`, `NameableObjectArgument`, `EnumArgument`, or a subclass of `Argument` |
 | `ListArgument` | `variadic()` on the element argument (see [optional arguments](#optional-arguments)) |
 | `IntegerRangeArgument` / `DoubleRangeArgument` | Same names; they return Guava `Range<Integer>` / `Range<Double>` instead of `IntegerRange` / `DoubleRange` |
-| `TimeArgument` | `DurationArgument` (a real-time `java.time.Duration` such as `1h30m`; `d` is 24 hours, not 24000 ticks) |
+| `TimeArgument` | Same name (`Integer` game ticks, `minimum` as the second constructor argument); `DurationArgument` reads real time (`java.time.Duration`, such as `1h30m`) instead |
 | `ChatComponentArgument` / `AdventureChatComponentArgument` | `ComponentArgument`: one Bungee `BaseComponent` on Spigot instead of a `BaseComponent[]`, an Adventure `Component` on Paper |
 | `ChatArgument` / `AdventureChatArgument` | `MessageArgument`: the same component types, selectors resolved, without the signature (see [the catalog](../arguments.md#text-nbt-and-other-advanced-arguments)) |
 | `NBTCompoundArgument` | `NBTCompoundArgument`: an SNBT `String` on Spigot and Paper, so NBT-API is not needed; pass it to `NBT.parseNBT(...)` for an NBT-API object |
