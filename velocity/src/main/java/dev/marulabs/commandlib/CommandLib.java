@@ -87,13 +87,24 @@ public final class CommandLib {
     public static CommandLib register(@NotNull Object plugin,
                                       @NotNull ProxyServer proxy,
                                       @NotNull Collection<? extends Command> commands) {
+        return register(plugin, proxy, CommandDefaults.of(CommandContext.class), commands);
+    }
+
+    /**
+     * Same as {@link #register(Object, ProxyServer, Collection)}, with the middlewares and context value providers of
+     * {@code defaults} applied to every command. See {@link CommandDefaults}.
+     */
+    public static CommandLib register(@NotNull Object plugin,
+                                      @NotNull ProxyServer proxy,
+                                      @NotNull CommandDefaults<CommandContext> defaults,
+                                      @NotNull Collection<? extends Command> commands) {
         Objects.requireNonNull(plugin);
         String pluginId = proxy.getPluginManager()
                                .fromInstance(plugin)
                                .orElseThrow(() -> new IllegalArgumentException(plugin + " is not a Velocity plugin"))
                                .getDescription()
                                .getId();
-        return register(plugin, proxy, pluginId.toLowerCase(Locale.ROOT) + ".command", commands);
+        return register(plugin, proxy, pluginId.toLowerCase(Locale.ROOT) + ".command", defaults, commands);
     }
 
     public static CommandLib register(@NotNull Object plugin,
@@ -108,6 +119,18 @@ public final class CommandLib {
                                       @NotNull ProxyServer proxy,
                                       @NotNull String permissionPrefix,
                                       @NotNull Collection<? extends Command> commands) {
+        return register(plugin, proxy, permissionPrefix, CommandDefaults.of(CommandContext.class), commands);
+    }
+
+    /**
+     * Same as {@link #register(Object, ProxyServer, String, Collection)}, with the middlewares and context value
+     * providers of {@code defaults} applied to every command. See {@link CommandDefaults}.
+     */
+    public static CommandLib register(@NotNull Object plugin,
+                                      @NotNull ProxyServer proxy,
+                                      @NotNull String permissionPrefix,
+                                      @NotNull CommandDefaults<CommandContext> defaults,
+                                      @NotNull Collection<? extends Command> commands) {
         Objects.requireNonNull(plugin);
         Objects.requireNonNull(proxy);
         Objects.requireNonNull(permissionPrefix);
@@ -117,6 +140,7 @@ public final class CommandLib {
         }
         commands.forEach(Objects::requireNonNull);
         List<Command> list = List.copyOf(commands);
+        defaults.applyTo(list);
         List<LiteralCommandNode<CommandSource>> nodes = new CommandNodeCreator<CommandSource, Component, CommandContext, Command>(list,
                                                                                                                                   permissionPrefix,
                                                                                                                                   new VelocityCommandScheduler(plugin,

@@ -67,10 +67,21 @@ public final class CommandLib implements Listener {
     }
 
     public static CommandLib register(@NotNull Plugin plugin, @NotNull Collection<Command> commands) {
-        return new CommandLib(plugin,
-                              commands,
-                              plugin.getName()
-                                    .toLowerCase(Locale.ROOT) + ".command");
+        return register(plugin, CommandDefaults.of(CommandContext.class), commands);
+    }
+
+    /**
+     * Same as {@link #register(Plugin, Collection)}, with the middlewares and context value providers of
+     * {@code defaults} applied to every command. See {@link CommandDefaults}.
+     */
+    public static CommandLib register(@NotNull Plugin plugin,
+                                      @NotNull CommandDefaults<CommandContext> defaults,
+                                      @NotNull Collection<? extends Command> commands) {
+        return register(plugin,
+                        plugin.getName()
+                              .toLowerCase(Locale.ROOT) + ".command",
+                        defaults,
+                        commands);
     }
 
     public static CommandLib register(@NotNull Plugin plugin,
@@ -86,6 +97,18 @@ public final class CommandLib implements Listener {
     public static CommandLib register(@NotNull Plugin plugin,
                                       @NotNull String permissionPrefix,
                                       @NotNull Collection<? extends Command> commands) {
+        return register(plugin, permissionPrefix, CommandDefaults.of(CommandContext.class), commands);
+    }
+
+    /**
+     * Same as {@link #register(Plugin, String, Collection)}, with the middlewares and context value providers of
+     * {@code defaults} applied to every command. See {@link CommandDefaults}.
+     */
+    public static CommandLib register(@NotNull Plugin plugin,
+                                      @NotNull String permissionPrefix,
+                                      @NotNull CommandDefaults<CommandContext> defaults,
+                                      @NotNull Collection<? extends Command> commands) {
+        defaults.applyTo(commands);
         return new CommandLib(plugin, commands, permissionPrefix);
     }
 

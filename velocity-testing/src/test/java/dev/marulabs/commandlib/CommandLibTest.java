@@ -88,6 +88,34 @@ class CommandLibTest {
     }
 
     @Test
+    void registration_defaults_apply_to_every_command() throws CommandSyntaxException {
+        List<String> log = new java.util.ArrayList<>();
+        CommandDefaults<CommandContext> defaults = CommandDefaults.of(CommandContext.class)
+                                                                  .addMiddleware((ctx, next) -> {
+                                                                      log.add("audit");
+                                                                      return next.proceed();
+                                                                  })
+                                                                  .provide(String.class, ctx -> "default");
+        CommandLib.register(plugin, proxy, defaults, List.of(new Command("hub") {{
+            permission(DefaultPermission.ALL);
+            execute(ctx -> log.add("hub " + ctx.get(String.class)));
+        }}));
+        Mockito.verify(commandManager)
+               .register(Mockito.any(CommandMeta.class), registered.capture());
+        CommandDispatcher<CommandSource> dispatcher = new CommandDispatcher<>();
+        dispatcher.getRoot()
+                  .addChild(registered.getValue()
+                                      .getNode());
+        Player player = Mockito.mock(Player.class);
+        Mockito.when(player.getPermissionValue(Mockito.anyString()))
+               .thenReturn(Tristate.UNDEFINED);
+
+        dispatcher.execute("hub", player);
+
+        assertThat(log).containsExactly("audit", "hub default");
+    }
+
+    @Test
     void permission_defaults_apply_when_the_permission_is_unset() throws CommandSyntaxException {
         CommandLib.register(plugin, proxy, new Command("hub") {{
             permission(DefaultPermission.ALL);

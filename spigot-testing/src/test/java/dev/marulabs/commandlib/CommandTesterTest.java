@@ -108,6 +108,35 @@ class CommandTesterTest {
     @Nested
     class Execute {
         @Test
+        void builder_defaults_wrap_every_command_and_provide_values() {
+            java.util.List<String> log = new java.util.ArrayList<>();
+            CommandTester tester = CommandTester.builder()
+                                                .command(new Command("a") {{
+                                                    execute(ctx -> log.add("a " + ctx.get(String.class)));
+                                                }})
+                                                .command(new Command("b") {{
+                                                    provide(String.class, ctx -> "b");
+                                                    execute(ctx -> log.add("b " + ctx.get(String.class)));
+                                                }})
+                                                .permissionPrefix("test.command")
+                                                .defaults(CommandDefaults.of(CommandContext.class)
+                                                                         .addMiddleware((ctx, next) -> {
+                                                                             log.add("audit " + ctx.getActor()
+                                                                                                   .getName());
+                                                                             return next.proceed();
+                                                                         })
+                                                                         .provide(String.class, ctx -> "default"))
+                                                .build();
+            FakeSender sender = FakeSender.player("Steve");
+
+            tester.execute("a", sender);
+            tester.execute("b", sender);
+            tester.close();
+
+            assertThat(log).containsExactly("audit Steve", "a default", "audit Steve", "b b");
+        }
+
+        @Test
         void message_is_captured() {
             try (CommandTester tester = new CommandTester(new Command("hello") {{
                 execute(ctx -> ctx.sendMessage("Hello!"));

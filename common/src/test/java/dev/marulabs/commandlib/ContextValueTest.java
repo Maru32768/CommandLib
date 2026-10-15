@@ -59,6 +59,45 @@ class ContextValueTest {
     }
 
     @Test
+    void registration_defaults_wrap_every_command_and_provide_values_it_does_not() throws Exception {
+        List<String> log = new ArrayList<>();
+        TestCommand command = new TestCommand("root") {{
+            provide(String.class, ctx -> "root");
+            confirm();
+            addMiddleware((ctx, next) -> {
+                log.add("command");
+                return next.proceed();
+            });
+            addChildren(new TestCommand("free") {{
+                disableParentMiddleware();
+                execute(ctx -> log.add("free " + ctx.get(String.class) + " " + ctx.get(Integer.class)));
+            }});
+            execute(ctx -> log.add(ctx.get(String.class) + " " + ctx.get(Integer.class)));
+        }};
+        CommandDefaults.of(TestCommandContext.class)
+                       .addMiddleware((ctx, next) -> {
+                           log.add("registration");
+                           return next.proceed();
+                       })
+                       .provide(String.class, ctx -> "registration")
+                       .provide(Integer.class, ctx -> 1)
+                       .applyTo(List.of(command));
+        TestCommandRunner runner = new TestCommandRunner(command);
+
+        // The registration's middleware runs before the confirmation, which fails the first execution.
+        runner.executeAndGetResult("root");
+        runner.dispatch("root");
+        runner.dispatch("root free");
+
+        assertThat(log).containsExactly("registration",
+                                        "registration",
+                                        "command",
+                                        "root 1",
+                                        "registration",
+                                        "free root 1");
+    }
+
+    @Test
     void children_inherit_providers_and_replace_them_for_the_same_key() throws Exception {
         List<String> log = new ArrayList<>();
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("root") {{

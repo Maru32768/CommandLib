@@ -72,6 +72,17 @@ public final class CommandLib {
 
     public static CommandLib register(@NotNull String permissionPrefix,
                                       @NotNull Collection<? extends Command> commands) {
+        return register(permissionPrefix, CommandDefaults.of(CommandContext.class), commands);
+    }
+
+    /**
+     * Same as {@link #register(String, Collection)}, with the middlewares and context value providers of
+     * {@code defaults} applied to every command. See {@link CommandDefaults}.
+     */
+    public static CommandLib register(@NotNull String permissionPrefix,
+                                      @NotNull CommandDefaults<CommandContext> defaults,
+                                      @NotNull Collection<? extends Command> commands) {
+        defaults.applyTo(commands);
         CommandLib registration = new CommandLib(commands, permissionPrefix);
         REGISTRATIONS.add(registration);
         return registration;

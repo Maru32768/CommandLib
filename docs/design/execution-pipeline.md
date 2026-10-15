@@ -68,9 +68,17 @@ back to the sync thread with `whenCompleteAsync(noop, sync)`, so every post-hook
 rather than `thenApplyAsync`, since the latter completes a failed stage on the completing thread without the executor.
 
 `addMiddleware` takes `CommandMiddleware<? super C>`, so a middleware written for `CommonCommandContext<?, ?>` works on
-every platform. A global registration on the platforms' `CommandLib` was left out: each `CommandLib.register` takes a
-list of top-level commands, and adding the middleware to each of them has the same effect without new API on three
-platforms.
+every platform.
+
+`CommandDefaults` holds the middlewares and providers of a registration. `CommandLib.register` and the testers'
+builders set it on each top-level command, and `CommonCommand#middlewares()` / `providers()` read it from the root of
+the tree, so the node creators need no new parameter. Its middlewares come before the cooldown and confirmation, and
+apply also below `disableParentMiddleware()`: they belong to the registration, so a child that opts out of its parent's
+chain still gets cross-cutting work such as auditing. Its providers come before the root's own, so any command of the
+tree replaces them for its subtree. The defaults are typed for the platform's context
+(`CommandDefaults.of(CommandContext.class)`), and accept middlewares and providers of a supertype, so one written for
+`CommonCommandContext` works on every platform. Adding the middleware to each top-level command had the same effect
+for most commands, but repeated the setup in the plugin and in each test.
 
 ## Completion and results
 
@@ -204,9 +212,8 @@ Alternatives considered:
 - **Values only from middlewares**: a middleware can already compute a value, but it runs for executors only, so
   prerequisites, optional-argument defaults, suggestions and help could not read the mapped sender, and the work would
   run even when nothing reads it. Providers are lazy; `put` covers values that depend on the middleware's own work.
-- **A registration-wide registry on `CommandLib.register`**: rejected for the same reason as a platform-wide
-  middleware registration. Providers on the top-level commands have the same scope without new API on four platforms
-  and the testers.
+- **A platform-wide registry**, shared by every registration of a plugin: `CommandDefaults` on each
+  `CommandLib.register` gives the same scope without global state, and the testers take the same object.
 
 `get` does not declare `CommandPrerequisiteException`, since the typed executors (`(team, ctx) -> ...`) cannot throw
 checked exceptions and the main use, a sender mapper, has to refuse some senders. The provider's exception is rethrown
@@ -232,8 +239,3 @@ Lamp and ACF, while constructor injection stays the recommended form and is how 
   a mocked proxy.
 - Each tester has an `AsyncCommandTest` with a queued async executor. `spigot-testing` passes the sender as the
   Brigadier source, so the mock NMS wrapper still finds it in a follow-up that runs after `execute` returned.
-
-## Not done
-
-- A platform-wide middleware registration, and providers registered on `CommandLib.register` instead of the
-  top-level commands.

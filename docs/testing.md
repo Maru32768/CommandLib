@@ -53,7 +53,7 @@ class HealCommandTest {
 |---|---|
 | `new CommandTester(Supplier<Command>, prefix)` | Builds the command inside the tester. **Prefer this form.** |
 | `new CommandTester(Command, prefix)`, `new CommandTester(Collection<Command>, prefix)` | For commands without platform argument types. |
-| `CommandTester.builder().command(...).commands(...).permissionPrefix(...).build()` | Several commands, or extra setup (`mockNmsClass` in `spigot-testing`). |
+| `CommandTester.builder().command(...).commands(...).permissionPrefix(...).build()` | Several commands, or extra setup (`mockNmsClass` in `spigot-testing`, `defaults(...)` for the registration's [middlewares and providers](execution.md#registration-wide-middlewares-and-providers)). |
 | `execute(input, sender)` | Runs the input as the sender and returns the result `/execute store result` would store (`0` for a failure). No leading `/`. |
 | `suggestions(input, sender)` | Returns Brigadier's `CompletableFuture<Suggestions>` for a partial input. |
 | `suggest(input, sender)` | Returns the suggestion texts for a partial input as a `List<String>`. Not in `modded-testing`. |

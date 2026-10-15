@@ -98,9 +98,20 @@ public final class CommandLib implements Listener {
     }
 
     public static CommandLib register(@NotNull Plugin plugin, @NotNull Collection<? extends Command> commands) {
+        return register(plugin, CommandDefaults.of(CommandContext.class), commands);
+    }
+
+    /**
+     * Same as {@link #register(Plugin, Collection)}, with the middlewares and context value providers of
+     * {@code defaults} applied to every command. See {@link CommandDefaults}.
+     */
+    public static CommandLib register(@NotNull Plugin plugin,
+                                      @NotNull CommandDefaults<CommandContext> defaults,
+                                      @NotNull Collection<? extends Command> commands) {
         return register(plugin,
                         plugin.getName()
                               .toLowerCase(Locale.ROOT) + ".command",
+                        defaults,
                         commands);
     }
 
@@ -117,7 +128,19 @@ public final class CommandLib implements Listener {
     public static CommandLib register(@NotNull Plugin plugin,
                                       @NotNull String permissionPrefix,
                                       @NotNull Collection<? extends Command> commands) {
+        return register(plugin, permissionPrefix, CommandDefaults.of(CommandContext.class), commands);
+    }
+
+    /**
+     * Same as {@link #register(Plugin, String, Collection)}, with the middlewares and context value providers of
+     * {@code defaults} applied to every command. See {@link CommandDefaults}.
+     */
+    public static CommandLib register(@NotNull Plugin plugin,
+                                      @NotNull String permissionPrefix,
+                                      @NotNull CommandDefaults<CommandContext> defaults,
+                                      @NotNull Collection<? extends Command> commands) {
         Objects.requireNonNull(plugin);
+        defaults.applyTo(commands);
         CommandSet commandSet = CommandSet.of(permissionPrefix,
                                               commands,
                                               FoliaCommandScheduler.forServer(() -> plugin));
@@ -182,7 +205,19 @@ public final class CommandLib implements Listener {
     public static void bootstrap(@NotNull BootstrapContext context,
                                  @NotNull String permissionPrefix,
                                  @NotNull Collection<? extends Command> commands) {
+        bootstrap(context, permissionPrefix, CommandDefaults.of(CommandContext.class), commands);
+    }
+
+    /**
+     * Same as {@link #bootstrap(BootstrapContext, String, Collection)}, with the middlewares and context value
+     * providers of {@code defaults} applied to every command. See {@link CommandDefaults}.
+     */
+    public static void bootstrap(@NotNull BootstrapContext context,
+                                 @NotNull String permissionPrefix,
+                                 @NotNull CommandDefaults<CommandContext> defaults,
+                                 @NotNull Collection<? extends Command> commands) {
         Objects.requireNonNull(context);
+        defaults.applyTo(commands);
         String pluginName = context.getPluginMeta()
                                    .getName();
         CommandSet commandSet = CommandSet.of(permissionPrefix,

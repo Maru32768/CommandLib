@@ -49,6 +49,8 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
     private @Nullable UsageFormatter usageFormatter = null;
     private @Nullable ErrorFormatter errorFormatter = null;
     private List<String> examples = List.of();
+    // Set by the registration on a top-level command; null until it is registered.
+    private @Nullable CommandDefaults<C> defaults = null;
     // Null until execute is called; the command then runs its help action.
     private @Nullable AsyncCommandExecutor<C> executor;
     private final List<UncaughtExceptionHandler<C>> uncaughtExceptionHandlers = new ArrayList<>();
@@ -538,7 +540,10 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
      */
     final Map<ContextKey<?>, Extractor<? super C, ?>> providers() {
         if (parent == null) {
-            return Map.copyOf(providers);
+            Map<ContextKey<?>, Extractor<? super C, ?>> result = new HashMap<>(defaults != null ? defaults.providers()
+                    : Map.of());
+            result.putAll(providers);
+            return Map.copyOf(result);
         }
         Map<ContextKey<?>, Extractor<? super C, ?>> result = new HashMap<>(parent.providers());
         result.putAll(providers);
@@ -721,11 +726,14 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
     }
 
     /**
-     * The middlewares an execution of this command runs, outermost first: the cooldown check, the confirmation, the
-     * inherited and own middlewares, and the start of the cooldown.
+     * The middlewares an execution of this command runs, outermost first: those of the registration's
+     * {@link CommandDefaults}, the cooldown check, the confirmation, the inherited and own middlewares, and the start of
+     * the cooldown.
      */
     final List<CommandMiddleware<? super C>> middlewares() {
-        List<CommandMiddleware<? super C>> result = new ArrayList<>();
+        CommandDefaults<C> defaults = root().defaults;
+        List<CommandMiddleware<? super C>> result = new ArrayList<>(defaults != null ? defaults.middlewares()
+                : List.of());
         Cooldown cooldown = effectiveCooldown();
         Confirmation confirmation = effectiveConfirmation();
         if (cooldown != null) {
@@ -742,6 +750,21 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
             });
         }
         return result;
+    }
+
+    /**
+     * Sets the defaults of the registration of this top-level command.
+     */
+    final void defaults(CommandDefaults<C> defaults) {
+        this.defaults = Objects.requireNonNull(defaults);
+    }
+
+    private CommonCommand<C, T> root() {
+        CommonCommand<C, T> root = this;
+        for (T x = parent; x != null; x = x.parent()) {
+            root = x;
+        }
+        return root;
     }
 
     final List<CommandMiddleware<? super C>> inheritedMiddlewares() {

@@ -312,6 +312,7 @@ public final class CommandTester implements AutoCloseable {
     public static final class Builder {
         private final List<Supplier<? extends Command>> commandSuppliers = new ArrayList<>();
         private CommandScheduler scheduler = CommandScheduler.of(Runnable::run, Runnable::run);
+        private CommandDefaults<CommandContext> defaults = CommandDefaults.of(CommandContext.class);
         @Nullable
         private String permissionPrefix;
 
@@ -350,6 +351,15 @@ public final class CommandTester implements AutoCloseable {
             return this;
         }
 
+        /**
+         * Applies {@code defaults}' middlewares and context value providers to every command, as
+         * {@code CommandLib.register(..., defaults, commands)} does. See {@link CommandDefaults}.
+         */
+        public Builder defaults(@NotNull CommandDefaults<CommandContext> defaults) {
+            this.defaults = Objects.requireNonNull(defaults, "defaults");
+            return this;
+        }
+
         public CommandTester build() {
             return new CommandTester(this);
         }
@@ -359,6 +369,7 @@ public final class CommandTester implements AutoCloseable {
             for (Supplier<? extends Command> supplier : commandSuppliers) {
                 commands.add(Objects.requireNonNull(supplier.get(), "command supplier returned null"));
             }
+            defaults.applyTo(commands);
             return commands;
         }
     }

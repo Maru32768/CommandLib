@@ -144,7 +144,7 @@ stand for your own code.
 | `ctx.sender()` | `ctx.getSender()` (`CommandSender`) |
 | `senderType(Player.class)` | `requirePlayer()` on the command, then `ctx.getPlayer()`; or `require(Command.playerRequirer())` for a typed player |
 | `senderType(ConsoleCommandSender.class)` | `requireConsole()`, then `ctx.getConsole()` |
-| `SenderMapper` / custom sender type for the whole manager | `provide(GamePlayer.class, ctx -> ...)` on each top-level command maps the sender once per execution for the whole tree; read it with `ctx.get(GamePlayer.class)`, or as a typed executor parameter with `require(ctx -> ctx.get(GamePlayer.class))`. See [context values](../context-values.md) |
+| `SenderMapper` / custom sender type for the whole manager | `CommandDefaults.of(CommandContext.class).provide(GamePlayer.class, ctx -> ...)` passed to `CommandLib.register` maps the sender once per execution for every command; read it with `ctx.get(GamePlayer.class)`, or as a typed executor parameter with `require(ctx -> ctx.get(GamePlayer.class))`. See [context values](../context-values.md) |
 | `PaperSimpleSenderMapper`, `CommandSourceStack` | The `paper` artifact reads the `CommandSourceStack` itself; use `ctx.getSender()`, or `ctx.getHandle().getSource()` for the stack |
 
 ```java
@@ -371,8 +371,7 @@ CommandLib's `spigot-testing` / `paper-testing` run commands without a server:
 
 ## Not available yet
 
-Tracked in the roadmap: a platform-wide middleware and provider
-registration (add them to each top-level command), permission predicates that hide commands, typed value options beyond primitives and strings, and the
+Tracked in the roadmap: permission predicates that hide commands, typed value options beyond primitives and strings, and the
 arguments listed as missing in the [catalog](../arguments.md).
 
 See also: the [comparison of seven use cases](../comparison.md), [Migrating from CommandAPI](from-commandapi.md), [Lamp](from-lamp.md), [ACF](from-acf.md).

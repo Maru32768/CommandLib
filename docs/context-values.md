@@ -176,14 +176,18 @@ to `CommandLib.register`.
 
 ## Scope
 
-Providers belong to a command and its subtree. For values shared by every command of a plugin, add them to each
-top-level command passed to `CommandLib.register`, as for middlewares:
+Providers belong to a command and its subtree. For values shared by every command of a plugin, give them to the
+registration with `CommandDefaults`, which also holds registration-wide middlewares
+([execution](execution.md#registration-wide-middlewares-and-providers)):
 
 ```java
-List<Command> commands = List.of(new TeamCommand(games), new ArenaCommand(arenas));
-commands.forEach(x -> x.provide(GamePlayer.class, ctx -> games.of(Command.playerRequirer().extract(ctx))));
-CommandLib.register(this, commands);
+CommandDefaults<CommandContext> defaults = CommandDefaults.of(CommandContext.class)
+        .provide(GamePlayer.class, ctx -> games.of(Command.playerRequirer().extract(ctx)));
+CommandLib.register(this, defaults, List.of(new TeamCommand(games), new ArenaCommand(arenas)));
 ```
+
+A command that provides the same key replaces the registration's provider for its subtree. Testers take the same
+defaults with `CommandTester.builder().defaults(defaults)`.
 
 ## Threads
 

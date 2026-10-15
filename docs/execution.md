@@ -10,8 +10,9 @@ A command input that reaches an executor goes through these steps (see [errors](
 
 1. The permission of the command node, the options, each argument branch's permission and arguments, and the
    prerequisites (`addPrerequisite`, `require(...)`, `requirePlayer()`). These also run before the generated help.
-2. The middlewares, outermost first: the cooldown check, the confirmation, the middlewares and preprocesses of the
-   command and its parents in the order they were added, and the start of the cooldown. The generated help skips them.
+2. The middlewares, outermost first: those of the registration (`CommandDefaults`), the cooldown check, the
+   confirmation, the middlewares and preprocesses of the command and its parents in the order they were added, and the
+   start of the cooldown. The generated help skips them.
 3. The executor, set with `execute(...)` or `executeAsync(...)`.
 
 ## Middleware
@@ -67,8 +68,39 @@ public final class AuditedCommand extends Command {
 
 A command's middlewares apply to its argument branches and its child commands, the parent's before the child's. A child
 that calls `disableParentMiddleware()` inherits none of them, nor the parent's confirmation and cooldown. A middleware
-typed for the common context, `CommandMiddleware<CommonCommandContext<?, ?>>`, works on every platform. To apply one to
-every command of a plugin, add it to each top-level command.
+typed for the common context, `CommandMiddleware<CommonCommandContext<?, ?>>`, works on every platform.
+
+### Registration-wide middlewares and providers
+
+`CommandDefaults` holds middlewares and [context value](context-values.md) providers for every command of a
+registration. Pass it to `CommandLib.register` (or `CommandLib.bootstrap` on Paper) before the commands, and to the
+testers' builder with `defaults(...)`, so the tests run the same chain:
+
+```java
+CommandDefaults<CommandContext> defaults = CommandDefaults.of(CommandContext.class)
+        .addMiddleware(new AuditMiddleware(getLogger()))
+        .provide(GamePlayer.class, ctx -> games.of(Command.playerRequirer().extract(ctx)));
+
+CommandLib.register(this, defaults, List.of(new TeamCommand(), new ArenaCommand()));
+
+// In a test
+CommandTester tester = CommandTester.builder()
+                                    .command(new TeamCommand())
+                                    .permissionPrefix("myplugin.command")
+                                    .defaults(defaults)
+                                    .build();
+```
+
+- Its middlewares run first, before each command's cooldown, confirmation and middlewares, in the order they were
+  added. They belong to the registration, not to a parent, so they also run for a child that calls
+  `disableParentMiddleware()`.
+- Its providers give a value only for keys that the command and its parents do not provide.
+- The same overloads exist on every platform: `register(plugin, defaults, commands)` and
+  `register(plugin, permissionPrefix, defaults, commands)` on Spigot and Paper, `register(plugin, proxy, defaults,
+  commands)` and `register(plugin, proxy, permissionPrefix, defaults, commands)` on Velocity, and
+  `register(permissionPrefix, defaults, commands)` on Forge, NeoForge and Fabric.
+- The registration keeps the defaults on its top-level commands, so registering the same command objects again
+  replaces them.
 
 `addPreprocess(...)`, `confirm(...)` and `cooldown(...)` are middlewares. A preprocess that returns false fails the
 command with the messages it sent; one that returns true sends them and continues.
