@@ -1,5 +1,10 @@
 package dev.marulabs.commandlib;
 
+import com.mojang.brigadier.LiteralMessage;
+import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import dev.marulabs.commandlib.argument.IntegerArgument;
 import dev.marulabs.commandlib.argument.StringArgument;
 import dev.marulabs.commandlib.exception.ArgumentValidationException;
@@ -54,5 +59,41 @@ class DocumentedErrorBehaviorTest {
         }
 
         assertThat(sender.getSentMessageTexts()).isEmpty();
+    }
+
+    @Test
+    void syntax_exception_while_resolving_sends_its_message_and_context() {
+        FakeSender sender = FakeSender.player("Alice");
+        try (CommandTester tester = new CommandTester(() -> new Command("check") {{
+            argument(new ResolvingArgument("value")).execute((value, ctx) -> ctx.sendMessage("unreachable"));
+        }}, "test.command")) {
+            tester.execute("check bad", sender);
+        }
+
+        assertThat(sender.getSentMessageTexts()).containsExactly("Bad value", "check bad<--[HERE]");
+    }
+
+    /**
+     * Throws a Brigadier exception carrying the input while resolving, as a custom argument type may.
+     */
+    static final class ResolvingArgument extends Argument<String, ResolvingArgument> {
+        ResolvingArgument(String name) {
+            super(name, StringArgumentType.word());
+        }
+
+        @Override
+        public String cast(Object parsedArgument) {
+            return (String) parsedArgument;
+        }
+
+        @Override
+        protected String parseImpl(CommandContext ctx) throws CommandSyntaxException {
+            StringReader reader = new StringReader(ctx.getHandle()
+                                                      .getInput());
+            reader.setCursor(reader.getString()
+                                   .indexOf(' ')
+                    + 1);
+            throw new SimpleCommandExceptionType(new LiteralMessage("Bad value")).createWithContext(reader);
+        }
     }
 }

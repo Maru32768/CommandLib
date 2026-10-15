@@ -2,8 +2,10 @@ package dev.marulabs.commandlib.exception;
 
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.context.ParsedCommandNode;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.ArgumentCommandNode;
 import dev.marulabs.commandlib.CommonCommandContext;
+import dev.marulabs.commandlib.PlatformAdapter;
 import dev.marulabs.commandlib.util.ChatColorUtil;
 import dev.marulabs.commandlib.util.text.RichText;
 
@@ -12,6 +14,7 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 public class ArgumentParseException extends Exception {
+    private static final int RED = Objects.requireNonNull(ChatColorUtil.RED.getRGB());
     private final Consumer<CommonCommandContext<?, ?>> sendMessages;
 
     protected static <C extends CommonCommandContext<?, ?>> Consumer<CommonCommandContext<?, ?>> buildIncorrectInputMessage(String argumentName,
@@ -23,15 +26,22 @@ public class ArgumentParseException extends Exception {
         CommandContext<?> handle = ctx.getHandle();
         return context -> {
             String prefix = inputBefore(handle, argumentName, incorrectInput);
-            int red = Objects.requireNonNull(ChatColorUtil.RED.getRGB());
             context.sendMessage(RichText.translatable("command.unknown.argument")
-                                        .color(red));
-            context.sendMessage(RichText.text(ChatColorUtil.GRAY + prefix + ChatColorUtil.RED + ChatColorUtil.UNDERLINE
-                    + incorrectInput + ChatColorUtil.RESET)
-                                        .append(RichText.translatable("command.context.here")
-                                                        .italic()
-                                                        .color(red)));
+                                        .color(RED));
+            context.sendMessage(contextLine(prefix, incorrectInput));
         };
+    }
+
+    /**
+     * The line vanilla shows under a command error: the input before the error, the rejected input, and
+     * {@code <--[HERE]}.
+     */
+    private static RichText contextLine(String before, String incorrectInput) {
+        return RichText.text(ChatColorUtil.GRAY + before + ChatColorUtil.RED + ChatColorUtil.UNDERLINE + incorrectInput
+                + ChatColorUtil.RESET)
+                       .append(RichText.translatable("command.context.here")
+                                       .italic()
+                                       .color(RED));
     }
 
     private static String inputBefore(CommandContext<?> handle, String argumentName, String incorrectInput) {
@@ -49,6 +59,10 @@ public class ArgumentParseException extends Exception {
                         // Without a matching node, cut the input before the incorrect token so that it is not shown twice.
                         .orElseGet(() -> incorrectTokenStart(handle, input, incorrectInput));
 
+        return abbreviateBefore(input, end);
+    }
+
+    private static String abbreviateBefore(String input, int end) {
         // Player input keeps the leading slash while console input does not; strip it only when present.
         int start = input.startsWith("/") ? 1 : 0;
         String str = input.substring(Math.min(start, end), end);
@@ -80,6 +94,29 @@ public class ArgumentParseException extends Exception {
                                                                                                  C ctx,
                                                                                                  String incorrectInput) {
         return new ArgumentParseException(buildIncorrectInputMessage(argumentName, ctx, incorrectInput));
+    }
+
+    /**
+     * Converts a {@link CommandSyntaxException} thrown while an argument is resolved into the messages vanilla sends
+     * for it: the platform's form of its message, which keeps a translatable message translatable, then the context
+     * line when the exception carries its input.
+     *
+     * @param e the exception thrown while resolving the argument
+     * @return the exception sending the converted messages
+     */
+    public static ArgumentParseException ofCommandSyntaxException(CommandSyntaxException e) {
+        ArgumentParseException message = PlatformAdapter.get()
+                                                        .convertCommandSyntaxException(e);
+        String input = e.getInput();
+        if (input == null || e.getCursor() < 0) {
+            return message;
+        }
+        int cursor = Math.min(input.length(), e.getCursor());
+        RichText context = contextLine(abbreviateBefore(input, cursor), input.substring(cursor));
+        return new ArgumentParseException(ctx -> {
+            message.sendMessage(ctx);
+            ctx.sendMessage(context);
+        });
     }
 
     public ArgumentParseException(String message, String... messages) {

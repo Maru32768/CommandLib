@@ -265,8 +265,7 @@ public abstract class CommonArgument<T, C extends CommonCommandContext<?, ?>, SE
         } catch (CommandSyntaxException e) {
             t = additionalParser.apply(ctx, ctx.getInput(name));
             if (t == null) {
-                throw PlatformAdapter.get()
-                                     .convertCommandSyntaxException(e);
+                throw ArgumentParseException.ofCommandSyntaxException(e);
             }
         } catch (ArgumentParseException e) {
             t = additionalParser.apply(ctx, ctx.getInput(name));

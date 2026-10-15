@@ -1,6 +1,11 @@
 package dev.marulabs.commandlib;
 
 import dev.marulabs.commandlib.exception.CommandPrerequisiteException;
+import com.mojang.brigadier.LiteralMessage;
+import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestion;
 import dev.marulabs.commandlib.argument.*;
 import dev.marulabs.commandlib.util.text.ClickAction;
@@ -31,6 +36,30 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class CommandTesterTest {
+    /**
+     * Throws a Brigadier exception carrying the input while resolving, as a custom argument type may.
+     */
+    static final class ResolvingArgument extends Argument<String, ResolvingArgument> {
+        ResolvingArgument(String name) {
+            super(name, StringArgumentType.word());
+        }
+
+        @Override
+        public String cast(Object parsedArgument) {
+            return (String) parsedArgument;
+        }
+
+        @Override
+        protected String parseImpl(CommandContext ctx) throws CommandSyntaxException {
+            StringReader reader = new StringReader(ctx.getHandle()
+                                                      .getInput());
+            reader.setCursor(reader.getString()
+                                   .indexOf(' ')
+                    + 1);
+            throw new SimpleCommandExceptionType(new LiteralMessage("Bad value")).createWithContext(reader);
+        }
+    }
+
     @Nested
     class Execute {
         @Test
@@ -356,6 +385,35 @@ class CommandTesterTest {
                              .get(0)
                              .getStyle()
                              .getColor()).isEqualTo(TextColor.fromLegacyFormat(ChatFormatting.RED));
+        }
+
+        @Test
+        void selector_matching_nothing_is_rejected_by_every_selector_argument() {
+            FakeSender sender = FakeSender.player("Steve")
+                                          .op(true);
+            try (CommandTester tester = new CommandTester(new Command("arg") {{
+                addChildren(new Command("players") {{
+                    argument(new PlayersArgument("p")).execute((p, ctx) -> ctx.sendMessage("unreachable"));
+                }}, new Command("entities") {{
+                    argument(new EntitiesArgument("e")).execute((e, ctx) -> ctx.sendMessage("unreachable"));
+                }});
+            }}, "test")) {
+                // A name selector parses, and vanilla's getPlayers / getEntities reject the empty result.
+                tester.execute("arg players Nobody", sender);
+                tester.execute("arg entities Nobody", sender);
+            }
+            assertThat(sender.getSentMessageTexts()).containsExactly("No player was found", "No entity was found");
+        }
+
+        @Test
+        void syntax_exception_with_input_sends_the_context_line() {
+            FakeSender sender = FakeSender.console();
+            try (CommandTester tester = new CommandTester(new Command("check") {{
+                argument(new ResolvingArgument("value")).execute((value, ctx) -> ctx.sendMessage("unreachable"));
+            }}, "test")) {
+                tester.execute("check bad", sender);
+            }
+            assertThat(sender.getSentMessageTexts()).containsExactly("Bad value", "§7check §c§nbad§r<--[HERE]");
         }
 
         @Test

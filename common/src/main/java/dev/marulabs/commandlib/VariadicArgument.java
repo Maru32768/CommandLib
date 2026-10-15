@@ -100,8 +100,7 @@ public final class VariadicArgument<T, C extends CommonCommandContext<?, ?>> ext
         try {
             value = type().parse(reader);
         } catch (CommandSyntaxException e) {
-            throw PlatformAdapter.get()
-                                 .convertCommandSyntaxException(e);
+            throw ArgumentParseException.ofCommandSyntaxException(e);
         }
         return new CommandContext<>(handle.getSource(),
                                     handle.getInput(),

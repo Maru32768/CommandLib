@@ -29,6 +29,7 @@ public final class PlatformAdapterImpl implements PlatformAdapter<TestCommandSou
 
     @Override
     public ArgumentParseException convertCommandSyntaxException(CommandSyntaxException e) {
-        return new ArgumentParseException(ctx -> ctx.sendFailure(e.getMessage()));
+        return new ArgumentParseException(ctx -> ctx.sendFailure(e.getRawMessage()
+                                                                  .getString()));
     }
 }
