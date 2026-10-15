@@ -27,8 +27,10 @@ class RangeArgumentTest {
             tester.execute("range 1..10 0.5..", sender);
             tester.execute("range ..5 0.1", sender);
             tester.execute("range 5 ..2.5", sender);
-            assertThatThrownBy(() -> tester.execute("range 10..1 0.1", sender)).hasMessageContaining("Min cannot be bigger than max");
-            assertThatThrownBy(() -> tester.execute("range 1 ..", sender)).hasMessageContaining("Expected value or range of values");
+            assertThatThrownBy(() -> tester.execute("range 10..1 0.1",
+                                                    sender)).hasMessageContaining("Min cannot be bigger than max");
+            assertThatThrownBy(() -> tester.execute("range 1 ..",
+                                                    sender)).hasMessageContaining("Expected value or range of values");
             messages = sender.getSentMessageTexts();
         }
 
