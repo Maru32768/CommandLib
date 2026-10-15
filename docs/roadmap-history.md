@@ -47,6 +47,8 @@
   反映する（spigot-1.16.5 / paper-26.3 の integration test、2026-10-15）。
 - `[x]` vanilla-style feedback を追加する。`ctx.sendSuccess(message, broadcastToOps)` が `sendCommandFeedback` /
   `logAdminCommands` gamerule を尊重する（2026-10-15）。
+- `[x]` `IntegerRangeArgument` / `DoubleRangeArgument`（vanilla `int_range` / `float_range`、Guava `Range`）と
+  `DurationArgument`（`1h30m`、`20t`、`java.time.Duration`）を Spigot / Paper / Forge / NeoForge に追加する（2026-10-15）。
 - `[x]` error taxonomy を公開仕様として整理する（`docs/errors.md`、2026-10-15）。
 - `[x]` CommandAPI migration guide を追加する（`docs/migration/from-commandapi.md`、2026-10-15）。
 
