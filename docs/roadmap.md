@@ -36,7 +36,7 @@
 | Brigadier / NMS hiding              | `[~]` | 利用者 API から Brigadier / NMS を隠している。                                                                                                      | capability detection、公式 API 優先、fallback policy。                            |
 | `/execute` integration              | `[~]` | README と Bukkit registration path で `/execute run` 連携を扱っている。spigot module と paper module の command は `/minecraft:reload` 後や runtime 登録後も data pack function から使える（`/minecraft:reload` 後は両 module に integration test あり）。paper module で plugin から登録した command は次 tick の function 再 compile 後に使える（bootstrap 登録は server の compile 時点から使える）。 | command block / tag での保証と tests。 |
 | Built-in arguments                  | `[~]` | 基本的な primitive、string、player、entity、location、item などがある。CommandAPI / Paper との挙動別 catalog は [`docs/arguments.md`](arguments.md)。 | catalog の missing 一覧（`resourceKey` 相当、angle / rotation、score holder 等）の補完。 |
-| Argument validation                 | `[x]` | `validator(...)` と `ArgumentValidator` がある。                                                                                             | reusable condition registry、error customization。                           |
+| Argument validation                 | `[x]` | `validator(...)` と `ArgumentValidator` がある。                                                                                             | — |
 | Argument transform                  | `[x]` | `transformer(...)` がある。                                                                                                                 | docs と examples。                                                           |
 | Custom parsing fallback             | `[x]` | `additionalParser(...)` がある。                                                                                                            | behavior spec と tests。                                                     |
 | Sync suggestions                    | `[x]` | `suggestionProvider(...)`、additional suggestions、`SuggestionBuilder#suggest` の String / Brigadier Message tooltip overload がある。                                                                                   | rich tooltip の platform 別保証、ranking、fuzzy suggestions。                                 |
@@ -48,8 +48,8 @@
 | Generated usage / help              | `[x]` | 生成 help / usage に `HelpFormatter` / `UsageFormatter` と `examples(...)` があり、command ごとに継承される（[`docs/help.md`](help.md)）。`serverHelp(...)` は Bukkit 系の `/help` index に載る。 | usage line の RichText 化（hover / click）、`CommandDocs` への examples の出力。 |
 | Error taxonomy                      | `[~]` | parse / validation / prerequisite / option 系の例外があり、各 error で sender に見える message を [`docs/errors.md`](errors.md) で公開仕様化した。 | unknown subcommand、missing argument の専用 error、cooldown / confirmation / preprocess message の error formatter 経由化。 |
 | Exception handling                  | `[x]` | uncaught exception handler と、middleware での exception mapping / result handling がある。 | global な exception handler。 |
-| Preprocess / prerequisite           | `[~]` | `addPreprocess(...)`（middleware 化済み）、`addPrerequisite(...)`、`requirePlayer()` 等がある。 | reusable condition registry、diagnostics。 |
-| Middleware / interceptor            | `[x]` | `addMiddleware(CommandMiddleware)` で pre / post hook、exception mapping、result handling を合成でき、child と argument branch に継承される。`confirm()` / `cooldown()` / preprocess も middleware 上にある。 | platform 単位の global middleware。 |
+| Preprocess / prerequisite           | `[~]` | `addPreprocess(...)`（middleware 化済み）、`addPrerequisite(...)`、`requirePlayer()` 等がある。 | diagnostics。 |
+| Middleware / interceptor            | `[x]` | `addMiddleware(CommandMiddleware)` で pre / post hook、exception mapping、result handling を合成でき、child と argument branch に継承される。`confirm()` / `cooldown()` / preprocess も middleware 上にある。 | — |
 | Sender abstraction                  | `[x]` | `provide(Type, ctx -> ...)` で sender を plugin の型に変換し、`ctx.get(Type)` で cast なしに読める。middleware は `ctx.put` で値を足せる（[`docs/context-values.md`](context-values.md)）。 | platform 単位の provider 登録。 |
 | Dependency injection                | `[x]` | context value の provider と、annotation API の `registerDependency` / `@Dependency` field がある。DI framework 非依存。 | platform 単位の provider 登録、`require(Class)` の短縮形。 |
 | Annotation API                      | `[~]` | `AnnotationParser` と `@Command` / `@Subcommand` / `@Permission` / `@Optional` / `@Default` / `@Range` / `@Suggest` / `@Flag` / `@Option` / `@Confirm` / `@Cooldown` 等、custom annotation の拡張点が Spigot / Paper / Velocity にある。fluent と同じ help / permission / 実行結果を snapshot で確認（[`docs/annotations.md`](annotations.md)）。 | Forge / NeoForge の `AnnotatedCommands`、middleware / prerequisite / option 依存の annotation。 |
@@ -80,9 +80,6 @@
   残りの Spigot / Paper target、mohist、forge / neoforge と、component / message / NBT の fixture は未実行。
 - `[?]` `/execute as` 後の actor を platform 間で揃えるか決める。Spigot / Paper では sender / actor は元の sender（console）のまま、
   Forge / NeoForge では実行 entity に従う（permission 判定も含む）。
-- `[ ]` selector で複数 target に適用した場合の集計 feedback message（vanilla の "Applied to 3 players" 相当）を扱う。
-- `[ ]` typed executor（`(a, ctx) -> ...`）から command を失敗させる手段を用意する。現在は `ctx ->` 形式でしか
-  `CommandPrerequisiteException` を投げられない。
 - `[ ]` `IntegerRangeArgument` / `DoubleRangeArgument` / `DurationArgument` を実サーバーで検証する（旧 target の
   MCProtocolLib bot が `int_range` / `float_range` を decode できるか、NMS range class の link）。
 - `[ ]` `BlockPositionArgument` / `ItemPredicateArgument` / `BlockPredicateArgument` を実サーバーで検証する（新しい NMS class の
@@ -95,20 +92,19 @@
   Paper 1.21.3〜26.x で動くことを integration test（`CommandSyntaxExceptionTest`）で確認する。
 - `[ ]` optional / variadic argument を実サーバー（Spigot / Paper / modded の integration test）で検証する。各 token を
   platform の `ArgumentType#parse` で読み直す実装のため、command tree の大きさ（`maxCount` × option の展開）も確認する。
-- `[ ]` platform 単位の global middleware と context value provider を追加する（現在は top-level command ごとに `addMiddleware` / `provide`）。
-- `[ ]` cooldown の reset / query API と永続化（現在は memory 上のみ）、argument branch 単位の confirm / cooldown。
+- `[ ]` cooldown の永続化（restart 後に復元する hook）、argument branch 単位の confirm / cooldown / `@Condition`。
 - `[ ]` permission 以外の state で command の表示を切り替える visibility predicate を追加する（現在は permission を付け外しして
   `CommandLib.refresh(player)` する方式を docs で案内）。
 - `[ ]` option の順列展開を抑える。short flag 6 個で unique node 5,490、player に送る packet では 491,607 node になる（4 個で 2,395）。
   option の状態ごとに argument node を複製している（`CommandNodeCreator#argumentNodeSupplier`）ため、共有すれば登録 node を約 2 割減らせる。
 - `[ ]` 比較で劣った点を埋める: positional argument の後の option、option 単位の permission、primitive / string 以外の value option、
-  annotation での argument-first tree、plugin 全体での context value 登録、CommandLib 組み込み message の他言語 bundle。
+  annotation での argument-first tree、CommandLib 組み込み message の他言語 bundle。
 - `[ ]` annotation API を Forge / NeoForge に広げ、middleware / prerequisite / option の `requires`・排他 / argument-first child 用の
   annotation を追加する。
 - `[ ]` Kotlin DSL を Forge / NeoForge に広げ、suspend middleware と Kotlin 関数の default 引数からの command 生成を追加する。
 - `[~]` options の継承と配置拡張（subcommand への継承、positional argument の後の option、固定 arity の multi-value）を実装する。
   repeatable / count / aliases / required / 排他は実装済み。
-- `[ ]` reusable condition registry、help / usage / error formatter、rich help / MiniMessage を追加する。
+- `[ ]` rich help（hover / click の usage line）と MiniMessage を追加する。
 - `[?]` 構文エラー時の usage 表示（`ErrorFormatter.SYNTAX_ADVICE`）を既定にするか決める。現在は opt-in で、既定にすると全 module の
   argument error の出力が変わる。
 
