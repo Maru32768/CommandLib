@@ -59,7 +59,7 @@ with ease.
 
 ## Why CommandLib
 
-- **One command model for Spigot, Paper, Forge, and NeoForge.** The same `Command` / `argument(...)` code compiles
+- **One command model for Spigot, Paper, Forge, NeoForge, and Fabric.** The same `Command` / `argument(...)` code compiles
   against each platform artifact, from Minecraft 1.16.5 to 26.x.
 - **Typed values in the executor.** `argument(new PlayerArgument("target"), new IntegerArgument("amount"))` hands a
   `Player` and an `Integer` to the lambda: no lookup by name, no casts.
@@ -549,7 +549,8 @@ registration and real server registry behavior are covered by integration tests.
 argument types such as items, blocks, effects, and enchantments parse for real. The server is a Mockito mock:
 fake players added with `CommandTester#withPlayer` (and the executing player)
 are online, so player, entity, game profile, and UUID arguments resolve them by
-name. Worlds, scoreboards, and other server state are not available.
+name. Levels added with `CommandTester#withLevel` are the server's worlds; stub other server state, such as the
+scoreboard or the advancements, with `CommandTester#withServer`.
 
 ## Velocity
 

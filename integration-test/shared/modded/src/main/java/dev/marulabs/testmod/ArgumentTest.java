@@ -4,11 +4,19 @@ import dev.marulabs.commandlib.Command;
 import dev.marulabs.commandlib.CommandContext;
 import dev.marulabs.commandlib.CommonArgument;
 import dev.marulabs.commandlib.argument.*;
+import dev.marulabs.commandlib.util.CurrentServer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 //? if >=1.19.3
 import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.storage.loot.LootTable;
+//? if <1.20.2
+import net.minecraft.world.scores.Scoreboard;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
@@ -41,6 +49,27 @@ public final class ArgumentTest extends TestBase {
     public List<String> build() {
         List<String> commands = new ArrayList<>();
 
+        commands.add(check("advancementArgument",
+                           new AdvancementArgument("a"),
+                           "minecraft:story/mine_stone",
+                           //? if >=1.20.2 {
+                           /*x -> String.valueOf(x.id()),
+                           *///?} else
+                           x -> String.valueOf(x.getId()),
+                           "minecraft:story/mine_stone"));
+        commands.add(check("attributeArgument",
+                           new AttributeArgument("a"),
+                           "minecraft:generic.max_health",
+                           //? if >=1.20.5 {
+                           /*x -> String.valueOf(x.value() == Attributes.MAX_HEALTH.value()),
+                           *///?} else
+                           x -> String.valueOf(x == Attributes.MAX_HEALTH),
+                           "true"));
+        commands.add(check("biomeArgument",
+                           new BiomeArgument("a"),
+                           "minecraft:plains",
+                           ArgumentTest::biomeKey,
+                           "minecraft:plains"));
         commands.add(check("blockPositionArgument",
                            new BlockPositionArgument("a"),
                            "1 2 3",
@@ -54,6 +83,7 @@ public final class ArgumentTest extends TestBase {
                                  .toString(),
                            "Block{minecraft:stone}"));
         commands.add(check("booleanArgument", new BooleanArgument("a"), "true", String::valueOf, "true"));
+        commands.add(check("chatColorArgument", new ChatColorArgument("a"), "dark_red", Enum::name, "DARK_RED"));
         // JSON, which the SNBT reader of 1.21.5 also accepts.
         commands.add(check("componentArgument",
                            new ComponentArgument("a"),
@@ -90,12 +120,19 @@ public final class ArgumentTest extends TestBase {
                            x -> x.getName()
                                  .getString(),
                            playerName));
+        commands.add(check("entityTypeArgument",
+                           new EntityTypeArgument("a"),
+                           "minecraft:zombie",
+                           x -> EntityType.getKey(x)
+                                          .toString(),
+                           "minecraft:zombie"));
         commands.add(check("enumArgument",
                            new EnumArgument<>("a", TestEnum.class),
                            "second",
                            String::valueOf,
                            "SECOND"));
         commands.add(check("floatArgument", new FloatArgument("a"), "1.5", String::valueOf, "1.5"));
+        commands.add(check("gameModeArgument", new GameModeArgument("a"), "creative", Enum::name, "CREATIVE"));
         commands.add(check("gameProfileArgument",
                            new GameProfileArgument("a"),
                            playerName,
@@ -132,6 +169,11 @@ public final class ArgumentTest extends TestBase {
         // case disconnects the integration bot before tests can run.
         //? if >=1.17
         commands.add(check("longArgument", new LongArgument("a"), "100", String::valueOf, "100"));
+        commands.add(check("lootTableArgument",
+                           new LootTableArgument("a"),
+                           "minecraft:chests/simple_dungeon",
+                           x -> String.valueOf(x != LootTable.EMPTY),
+                           "true"));
         commands.add(check("messageArgument",
                            new MessageArgument("a"),
                            "hello, world!",
@@ -144,6 +186,11 @@ public final class ArgumentTest extends TestBase {
                            x -> x.tabCompleteName(),
                            "nameable"));
         commands.add(check("objectArgument", new ObjectArgument<>("a", Map.of("one", 1)), "one", String::valueOf, "1"));
+        commands.add(check("objectiveArgument",
+                           new ObjectiveArgument("a"),
+                           TestMain.TEST_OBJECTIVE_NAME,
+                           x -> x.getName(),
+                           TestMain.TEST_OBJECTIVE_NAME));
         commands.add(check("particleArgument",
                            new ParticleArgument("a"),
                            "minecraft:flame",
@@ -156,6 +203,14 @@ public final class ArgumentTest extends TestBase {
                                  .getName(),
                            playerName));
         commands.add(check("playersArgument", new PlayersArgument("a"), "@a", ArgumentTest::entityNames, playerName));
+        commands.add(check("recipeArgument",
+                           new RecipeArgument("a"),
+                           "minecraft:oak_planks",
+                           //? if >=1.20.2 {
+                           /*x -> String.valueOf(x.id()),
+                           *///?} else
+                           x -> String.valueOf(x.getId()),
+                           "minecraft:oak_planks"));
         commands.add(check("resourceLocationArgument",
                            new ResourceLocationArgument("a"),
                            "commandlib:example/path",
@@ -168,6 +223,19 @@ public final class ArgumentTest extends TestBase {
                            /*new RegistryArgument<>("a", net.minecraft.core.Registry.ITEM_REGISTRY),*/
                            "minecraft:diamond",
                            x -> String.valueOf(x == Items.DIAMOND),
+                           "true"));
+        commands.add(check("scoreboardDisplaySlotArgument",
+                           new ScoreboardDisplaySlotArgument("a"),
+                           "sidebar",
+                           //? if >=1.20.2 {
+                           /*x -> x.getSerializedName(),
+                           *///?} else
+                           x -> Scoreboard.getDisplaySlotName(x),
+                           "sidebar"));
+        commands.add(check("soundArgument",
+                           new SoundArgument("a"),
+                           "minecraft:entity.pig.ambient",
+                           x -> String.valueOf(x == SoundEvents.PIG_AMBIENT),
                            "true"));
         commands.add(check("stringArgument", new StringArgument("a"), "abc", x -> x, "abc"));
         commands.add(check("teamArgument",
@@ -185,6 +253,13 @@ public final class ArgumentTest extends TestBase {
                                  .map(String::valueOf)
                                  .collect(Collectors.joining(",")),
                            playerUuid));
+        commands.add(check("worldArgument",
+                           new WorldArgument("a"),
+                           "minecraft:overworld",
+                           x -> x.dimension()
+                                 .location()
+                                 .toString(),
+                           "minecraft:overworld"));
 
         return commands;
     }
@@ -227,6 +302,20 @@ public final class ArgumentTest extends TestBase {
         }});
 
         return buildCommand(name + " minecraft:stone");
+    }
+
+    private static String biomeKey(Biome biome) {
+        //? if >=1.19.3 {
+        return String.valueOf(CurrentServer.get()
+                                           .registryAccess()
+                                           .registryOrThrow(Registries.BIOME)
+                                           .getKey(biome));
+        //?} else {
+        /*return String.valueOf(CurrentServer.get()
+                                           .registryAccess()
+                                           .registryOrThrow(net.minecraft.core.Registry.BIOME_REGISTRY)
+                                           .getKey(biome));
+        *///?}
     }
 
     private static String entityNames(List<? extends Entity> entities) {

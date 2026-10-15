@@ -111,7 +111,7 @@ Notes:
 |---|---|---|---|---|---|---|---|
 | `LocationArgument(name[, centerIntegers])` | Bukkit `Location` / CommandLib `util.Location` (Forge) | vanilla `vec3`: `x y z`, `~`, `^`; integer x and z are centered (`1 64 1` → `1.5 64 1.5`) unless `centerIntegers` is false; world is the sender's | `LocationArgument` (`PRECISE_POSITION`) | `finePosition(centerIntegers)` | equivalent | equivalent | equivalent |
 | `BlockPositionArgument` | Bukkit `Location` with integer coordinates in the sender's world / vanilla `BlockPos` | vanilla `block_pos`: integer `x y z`, `~`, `^`; neither the chunk nor the world height is checked | `LocationArgument` (`BLOCK_POSITION`) | `blockPosition()` | equivalent | equivalent | equivalent |
-| `WorldArgument` (Bukkit) | `World` | dimension key such as `minecraft:overworld`, suggested by the server | `WorldArgument` | `world()` | equivalent | equivalent | missing |
+| `WorldArgument` | Bukkit `World` / vanilla `ServerLevel` | dimension key such as `minecraft:overworld`, suggested by the server | `WorldArgument` | `world()` | equivalent | equivalent | equivalent |
 | 2D location | — | — | `Location2DArgument` | `columnBlockPosition()`, `columnFinePosition()` | missing | missing | missing |
 | rotation | — | — | `RotationArgument` | `rotation()` | missing | missing | missing |
 | angle | — | — | `AngleArgument` | `angle()` | missing | missing | missing |
@@ -124,7 +124,8 @@ Notes:
 - `BlockPositionArgument` resolves the position like Paper's `blockPosition()` resolver and vanilla's
   `Coordinates#getBlockPos`, not like `BlockPosArgument#getLoadedBlockPos`, so an unloaded or out-of-world position is
   not an error. Forge / NeoForge return the `BlockPos`; Bukkit returns the block's corner as a `Location`.
-- On Forge / NeoForge, read a dimension with `ResourceLocationArgument` and look it up in the server's levels.
+- `WorldArgument` is vanilla's `dimension` argument on every platform (through NMS on Spigot, `world()` on Paper). An
+  unknown key fails with vanilla's `Unknown dimension` error when the command runs.
 
 ## Blocks, items, and effects
 
@@ -160,13 +161,13 @@ Notes:
 |---|---|---|---|---|---|---|---|
 | `NamespacedKeyArgument` (Bukkit) | `NamespacedKey` | `namespace:path`; no namespace means `minecraft` | `NamespacedKeyArgument` | `namespacedKey()` | equivalent | equivalent | — |
 | `ResourceLocationArgument` (Forge / NeoForge) | `ResourceLocation` | `namespace:path` | — | — | — | — | equivalent |
-| `SoundArgument` (Bukkit) | `Sound` | sound key such as `minecraft:entity.pig.ambient`; suggests registry keys | `SoundArgument` | `resource(SOUND_EVENT)` | equivalent | equivalent | missing |
-| `BiomeArgument` (Bukkit) | `Biome` | biome key; suggests registry keys | `BiomeArgument` | `resource(BIOME)` | equivalent | equivalent | missing |
-| `AttributeArgument` (Bukkit) | `Attribute` | attribute key; suggests registry keys | — | `resource(ATTRIBUTE)` | equivalent | equivalent | missing |
-| `EntityTypeArgument` (Bukkit) | `EntityType` | entity type key such as `minecraft:zombie`; suggests registry keys | `EntityTypeArgument` | `resource(ENTITY_TYPE)` | equivalent | equivalent | missing |
-| `AdvancementArgument` (Bukkit) | `Advancement` | advancement key; suggests loaded advancements | `AdvancementArgument` | — | equivalent | equivalent | missing |
-| `LootTableArgument` (Bukkit) | `LootTable` | loot table key; suggests registered loot tables | `LootTableArgument` | — | equivalent | equivalent | missing |
-| `RecipeArgument` (Bukkit) | `Recipe` | recipe key; suggests keyed recipes | `RecipeArgument` (`ComplexRecipe`) | — | equivalent | equivalent | missing |
+| `SoundArgument` | Bukkit `Sound` / vanilla `SoundEvent` | sound key such as `minecraft:entity.pig.ambient`; suggests registry keys | `SoundArgument` | `resource(SOUND_EVENT)` | equivalent | equivalent | equivalent |
+| `BiomeArgument` | Bukkit `Biome` / vanilla `Biome` | biome key; suggests registry keys | `BiomeArgument` | `resource(BIOME)` | equivalent | equivalent | equivalent |
+| `AttributeArgument` | Bukkit `Attribute` / vanilla `Attribute` (`Holder<Attribute>` on 1.20.5+) | attribute key; suggests registry keys | — | `resource(ATTRIBUTE)` | equivalent | equivalent | equivalent |
+| `EntityTypeArgument` | Bukkit `EntityType` / vanilla `EntityType<?>` | entity type key such as `minecraft:zombie`; suggests registry keys | `EntityTypeArgument` | `resource(ENTITY_TYPE)` | equivalent | equivalent | equivalent |
+| `AdvancementArgument` | Bukkit `Advancement` / vanilla `Advancement` (`AdvancementHolder` on 1.20.2+) | advancement key; suggests loaded advancements | `AdvancementArgument` | — | equivalent | equivalent | equivalent |
+| `LootTableArgument` | Bukkit `LootTable` / vanilla `LootTable` | loot table key; suggests registered loot tables | `LootTableArgument` | — | equivalent | equivalent | equivalent |
+| `RecipeArgument` | Bukkit `Recipe` / vanilla `Recipe<?>` (`RecipeHolder<?>` on 1.20.2+) | recipe key; suggests keyed recipes | `RecipeArgument` (`ComplexRecipe`) | — | equivalent | equivalent | equivalent |
 | `RegistryArgument<T>(name, registry)` | `T` | a key of the registry: Bukkit `Registry<T extends Keyed>` (Spigot), Paper `RegistryKey<T>` (Paper), vanilla `ResourceKey<Registry<T>>` (Forge / NeoForge); no namespace means `minecraft`; suggests the registry's keys | per-type arguments | `resource(RegistryKey)` | equivalent | equivalent | equivalent |
 | registry key | — | — | — | `resourceKey(RegistryKey)` (`TypedKey<T>`) | missing | missing | missing |
 
@@ -179,6 +180,14 @@ Notes:
 - On Paper, `SoundArgument`, `BiomeArgument`, `AttributeArgument`, `EntityTypeArgument`, `EnchantmentArgument`,
   `PotionEffectArgument`, and `ParticleArgument` use Paper's `ArgumentTypes.resource(...)`, so Paper parses, suggests,
   and rejects unknown keys natively during Brigadier parsing.
+- On Forge / NeoForge, `SoundArgument`, `BiomeArgument` and `LootTableArgument` are a resource location looked up in
+  the server's registries (loot tables: its loaded loot tables) when the command runs, like `RegistryArgument`: an
+  unknown key is `<key> is not a known sound` / `biome` / `loot table`. `AttributeArgument` and `EntityTypeArgument`
+  are vanilla's `resource` argument from 1.19.3, so an unknown key is vanilla's `Can't find element` error (while
+  parsing on 1.19.3–1.20.4, when the command runs from 1.20.5), and a looked-up resource location before. `EntityTypeArgument` accepts every entity type, not only the summonable ones `/summon` takes.
+  `AdvancementArgument` and `RecipeArgument` are vanilla's lookups of `/advancement` and `/recipe`, with vanilla's
+  errors. The values are vanilla's: from 1.20.5 an attribute is its `Holder`, as `LivingEntity#getAttribute` takes
+  it, and from 1.20.2 an advancement and a recipe are their `AdvancementHolder` and `RecipeHolder`.
 - `RegistryArgument` covers any registry with one class: `new RegistryArgument<>("enchantment", Registry.ENCHANTMENT)`
   on Spigot, `RegistryKey.ENCHANTMENT` on Paper (Paper's `resource(...)`, so Paper rejects an unknown key while parsing),
   and `Registries.ENCHANTMENT` (`Registry.ENCHANTMENT_REGISTRY` before 1.19.3) on Forge / NeoForge. The constructor
@@ -194,10 +203,10 @@ Notes:
 | CommandLib | Result | Input | CommandAPI | Paper | Spigot | Paper | Forge / NeoForge |
 |---|---|---|---|---|---|---|---|
 | `TeamArgument` | Bukkit `Team` / vanilla `PlayerTeam` | team name; `scoreboard(Supplier)` selects another scoreboard | `TeamArgument` | — | equivalent | equivalent | equivalent |
-| `ObjectiveArgument` (Bukkit) | `Objective` | objective name; `scoreboard(Supplier)` selects another scoreboard | `ObjectiveArgument` | — | equivalent | equivalent | missing |
-| `ScoreboardDisplaySlotArgument` (Bukkit) | `DisplaySlot` | vanilla `scoreboard_slot`: `list`, `sidebar`, `below_name` (`belowName` before 1.20.2), `sidebar.team.red`; validated and suggested by the client | `ScoreboardSlotArgument` | `scoreboardDisplaySlot()` | partial | equivalent | missing |
-| `GameModeArgument` (Bukkit) | `GameMode` | `survival`, `creative`, `adventure`, `spectator` | — | `gameMode()` | equivalent | equivalent | missing |
-| `ChatColorArgument` (Bukkit) | Spigot: legacy `ChatColor`; Paper: `NamedTextColor` | vanilla `color`: names such as `dark_red`, and `reset`; validated and suggested by the client | `ChatColorArgument` | `namedColor()` | equivalent | equivalent | missing |
+| `ObjectiveArgument` | Bukkit `Objective` / vanilla `Objective` | objective name; `scoreboard(Supplier)` selects another scoreboard | `ObjectiveArgument` | — | equivalent | equivalent | equivalent |
+| `ScoreboardDisplaySlotArgument` | Bukkit `DisplaySlot` / vanilla `DisplaySlot` (the `int` slot before 1.20.2) | vanilla `scoreboard_slot`: `list`, `sidebar`, `below_name` (`belowName` before 1.20.2), `sidebar.team.red`; validated and suggested by the client | `ScoreboardSlotArgument` | `scoreboardDisplaySlot()` | partial | equivalent | equivalent |
+| `GameModeArgument` | Bukkit `GameMode` / vanilla `GameType` | `survival`, `creative`, `adventure`, `spectator` | — | `gameMode()` | equivalent | equivalent | equivalent |
+| `ChatColorArgument` | Spigot: legacy `ChatColor`; Paper: `NamedTextColor`; Forge / NeoForge: `ChatFormatting` | vanilla `color`: names such as `dark_red`, and `reset`; validated and suggested by the client | `ChatColorArgument` | `namedColor()` | equivalent | equivalent | equivalent |
 | objective criteria | — | — | `ObjectiveCriteriaArgument` | `objectiveCriteria()` | missing | missing | missing |
 | math operation | — | — | `MathOperationArgument` | — | missing | missing | missing |
 
@@ -214,7 +223,11 @@ Notes:
   `<slot> is not a display slot of this server`, hence `partial`.
 - `ChatColorArgument` rejects formats such as `bold`, like vanilla's color argument. Spigot returns `ChatColor.RESET`
   for `reset`; `NamedTextColor` has no reset, and what Paper's `namedColor()` does with `reset` has not been checked.
-- On Forge / NeoForge, `EnumArgument<GameType>` works as a game mode argument.
+- On Forge / NeoForge, `ObjectiveArgument` is vanilla's `objective` argument, like `TeamArgument`: without
+  `scoreboard(...)` it reads the server scoreboard with vanilla's suggestions and `Unknown scoreboard objective`
+  error. `ScoreboardDisplaySlotArgument` and `ChatColorArgument` are vanilla's `scoreboard_slot` and `color`, and
+  `GameModeArgument` is vanilla's `gamemode` from 1.19.4; before, it is a word with the names suggested, and an
+  unknown name fails with "Incorrect argument for command" when the command runs.
 
 ## Text, NBT, and other advanced arguments
 
@@ -303,12 +316,15 @@ These points are open, separate from the missing arguments below:
 
 The order weighs plugin demand, the CommandAPI / Paper parity gap, and how much of the work already exists.
 
-1. **Forge / NeoForge parity**: dimension / world, sound, biome, attribute, entity type, objective, game mode, and the
-   other Bukkit-only registry arguments (`RegistryArgument` already reads their registries).
-2. **Rotation, angle, 2D location, axes.**
-3. **Score holder, objective criteria, math operation**, the remaining scoreboard set.
-4. **Function, command, list, map** arguments.
-5. `style`, `hexColor`, `heightMap`, `entityAnchor`, structure mirror / rotation.
+1. **Rotation, angle, 2D location, axes.**
+2. **Score holder, objective criteria, math operation**, the remaining scoreboard set.
+3. **Function, command, list, map** arguments.
+4. `style`, `hexColor`, `heightMap`, `entityAnchor`, structure mirror / rotation.
+
+Every Bukkit argument with a vanilla argument type or registry exists on Forge / NeoForge / Fabric. The Bukkit-only
+ones left are `OfflinePlayerArgument` and `OfflinePlayersArgument` (use `GameProfileArgument`), `NamespacedKeyArgument`
+(`ResourceLocationArgument`), `PotionEffectArgument` (`EffectArgument`) and `BlockDataArgument`
+(`BlockStateArgument`).
 
 ## Testing each argument
 
@@ -327,26 +343,26 @@ depends on the artifact:
 |---|---|---|---|
 | Boolean, numbers, `StringArgument`, `UnparsedArgument`, `LiteralArgument`, `EnumArgument`, `ObjectArgument`, `NameableObjectArgument` | real | real | real |
 | `TimeArgument` | mock: vanilla syntax, minimum and unit suggestions | mock: vanilla syntax, minimum and unit suggestions | real |
-| `GameModeArgument` | real | mock: vanilla names | — |
-| `ChatColorArgument`, `ScoreboardDisplaySlotArgument` | mock: vanilla names of a 1.20.2+ server, with suggestions | mock: vanilla names | — |
+| `GameModeArgument` | real | mock: vanilla names | real |
+| `ChatColorArgument`, `ScoreboardDisplaySlotArgument` | mock: vanilla names of a 1.20.2+ server, with suggestions | mock: vanilla names | real |
 | `PlayerArgument`, `PlayersArgument` | mock: names, `@s`, `@p`, `@r`, `@a` (`withFakePlayer`) | mock: names, `@a` for the list variant (`withFakePlayer`) | real selectors over the fake players (`withPlayer`) |
 | `EntityArgument`, `EntitiesArgument` | mock: names, `@s`, `@p`, `@r`, `@a`, `@e` (`withFakeEntity`) | mock: names, `@a` (`withFakeEntity`) | real selectors; only players exist |
 | `OfflinePlayerArgument`, `OfflinePlayersArgument`, `UUIDArgument`, `UUIDsArgument` | static | static | `UUIDArgument`, `UUIDsArgument`, `GameProfileArgument`: online fake players only |
 | `LocationArgument` | mock: `x y z` numbers | mock: `x y z` numbers, world `null` | real |
 | `BlockPositionArgument` | mock: integer `x y z` | mock: integer `x y z`, world `null` | real |
 | `ItemPredicateArgument`, `BlockPredicateArgument` | mock: an item or block id, matched by material; suggests ids | mock: a material id, matched by material; suggests ids (the block predicate needs the Paper 1.21.8 API on the test classpath) | real; tags are not loaded |
-| `WorldArgument` | mock (`withFakeWorld("minecraft:overworld", world)`) | mock (`withFakeWorld(world)`, by key) | — |
+| `WorldArgument` | mock (`withFakeWorld("minecraft:overworld", world)`) | mock (`withFakeWorld(world)`, by key) | real over the levels added with `withLevel(level)` |
 | `BlockDataArgument` / `BlockStateArgument` | mock | mock (`withFakeBlockData`) | real |
 | `ItemStackArgument` | mock | mock (`withFakeItemStack`) | real |
 | `EnchantmentArgument` | mock | mock (`withFakeEnchantment`) | real (1.20.5+: from the bootstrapped registries) |
 | `PotionEffectArgument` / `EffectArgument` | mock | mock (`withFakePotionEffectType`) | real |
 | `ParticleArgument` | mock | mock (`withFakeParticle`) | real |
 | `NamespacedKeyArgument` / `ResourceLocationArgument` | real key parsing | real key parsing | real |
-| `SoundArgument`, `BiomeArgument`, `AttributeArgument`, `EntityTypeArgument` | static (`Registry`) | mock (`withFakeSound`, `withFakeBiome`, `withFakeAttribute`, `withFakeEntityType`) | — |
-| `AdvancementArgument`, `LootTableArgument`, `RecipeArgument` | static | static | — |
-| `RegistryArgument` | real over the Bukkit `Registry`; static when it needs a server | mock (`withFakeRegistryValue(registryKey, key, value)`) | real over the built-in registries (1.20.5+: also the data-driven ones) |
-| `TeamArgument` | mock vanilla type plus static scoreboard; real with `scoreboard(Supplier)` | static, or real with `scoreboard(Supplier)` | real with `scoreboard(Supplier)`; the server scoreboard is not available |
-| `ObjectiveArgument` | static, or real with `scoreboard(Supplier)` | static, or real with `scoreboard(Supplier)` | — |
+| `SoundArgument`, `BiomeArgument`, `AttributeArgument`, `EntityTypeArgument` | static (`Registry`) | mock (`withFakeSound`, `withFakeBiome`, `withFakeAttribute`, `withFakeEntityType`) | real (biomes from vanilla's registry bootstrap; no data pack) |
+| `AdvancementArgument`, `LootTableArgument`, `RecipeArgument` | static | static | server only, or stub the server's managers with `withServer(...)` |
+| `RegistryArgument` | real over the Bukkit `Registry`; static when it needs a server | mock (`withFakeRegistryValue(registryKey, key, value)`) | real over the built-in registries (1.19.3+: also the data-driven ones) |
+| `TeamArgument` | mock vanilla type plus static scoreboard; real with `scoreboard(Supplier)` | static, or real with `scoreboard(Supplier)` | real with `scoreboard(Supplier)`; the server has no scoreboard unless `withServer(...)` stubs `getScoreboard()` |
+| `ObjectiveArgument` | static, or real with `scoreboard(Supplier)` | static, or real with `scoreboard(Supplier)` | as `TeamArgument` |
 | `ComponentArgument` | mock: JSON read by Bungee | mock: JSON read by Adventure | real |
 | `MessageArgument` | mock: the text as written, selectors not resolved | mock: the text as written, selectors not resolved | real; selectors are resolved only with a level, which the fake sources lack |
 | `NBTCompoundArgument` | mock: the compound as written, not checked | mock: the compound as written, not checked | real |

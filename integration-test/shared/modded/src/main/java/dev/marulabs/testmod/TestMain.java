@@ -8,8 +8,10 @@ import dev.marulabs.integration.core.JUnitXmlReport;
 import dev.marulabs.integration.core.TestResult;
 import dev.marulabs.integration.core.TestStatus;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.scores.Scoreboard;
+import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -24,6 +26,7 @@ import java.util.stream.Collectors;
 public final class TestMain {
     static final String TEST_PLAYER_NAME = "Maru32768";
     static final String TEST_TEAM_NAME = "test";
+    static final String TEST_OBJECTIVE_NAME = "test";
     private static final Logger LOGGER = LogManager.getLogger(TestMain.class);
     private static final String REPORT_COMMAND = MainCommand.NAME + " reportTests";
 
@@ -93,6 +96,21 @@ public final class TestMain {
         Scoreboard scoreboard = server.getScoreboard();
         if (scoreboard.getPlayerTeam(TEST_TEAM_NAME) == null) {
             scoreboard.addPlayerTeam(TEST_TEAM_NAME);
+        }
+        if (scoreboard.getObjective(TEST_OBJECTIVE_NAME) == null) {
+            //? if >=1.20.3 {
+            /*scoreboard.addObjective(TEST_OBJECTIVE_NAME,
+                                    ObjectiveCriteria.DUMMY,
+                                    Component.nullToEmpty(TEST_OBJECTIVE_NAME),
+                                    ObjectiveCriteria.RenderType.INTEGER,
+                                    false,
+                                    null);
+            *///?} else {
+            scoreboard.addObjective(TEST_OBJECTIVE_NAME,
+                                    ObjectiveCriteria.DUMMY,
+                                    Component.nullToEmpty(TEST_OBJECTIVE_NAME),
+                                    ObjectiveCriteria.RenderType.INTEGER);
+            //?}
         }
 
         LOGGER.info("Executing CommandLib test cases.");
