@@ -54,7 +54,7 @@ with ease.
 | Flags and options (`-f`, `--limit 10`) | built in | — | — |
 | Generated usage / help | built in | `/help` entries | `/help` entries |
 | Server-free test utilities | `spigot-testing`, `paper-testing`, `forge-` / `neoforge-testing` | test toolkit (MockBukkit) | — |
-| Optional arguments, result values, chat / NBT / range arguments | not yet | yes | yes |
+| Chat / NBT arguments | not yet | yes | yes |
 
 See the [argument catalog](docs/arguments.md) for an argument-by-argument comparison and
 [compatibility](docs/compatibility.md) for the tested server versions.
@@ -68,6 +68,9 @@ See the [argument catalog](docs/arguments.md) for an argument-by-argument compar
 - [Testing](docs/testing.md): `CommandTester` and `FakeSender` for plugin and mod tests.
 - [Troubleshooting](docs/troubleshooting.md).
 - [Migrating from CommandAPI](docs/migration/from-commandapi.md).
+- [Migrating from Cloud](docs/migration/from-cloud.md).
+- [Migrating from Lamp](docs/migration/from-lamp.md).
+- [Migrating from ACF](docs/migration/from-acf.md).
 - [Compatibility](docs/compatibility.md): tested platforms and versions.
 
 ## Installation

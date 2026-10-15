@@ -131,7 +131,7 @@ becomes `variadic()` on the element argument, such as `new PlayerArgument("targe
 | `executesPlayer((player, args) -> ...)` | `requirePlayer()` on the command, then `ctx.getPlayer()`; or `require(Command.playerRequirer())` for a typed player |
 | `executesConsole(...)` | `requireConsole()`, then `ctx.getConsole()` |
 | `executesCommandBlock`, `executesProxy`, `executesNative`, `executesEntity` | **Not available** as separate executors; check `ctx.getSender()` (`BlockCommandSender`, ...) yourself |
-| Resulting executors (`return 1`), `/execute store` | **Not available** yet; the command returns `1` when the executor runs |
+| Resulting executors (`return n`), `/execute store` | `ctx.setResult(n)` in the executor; `1` unless set, `0` for a failure. See [errors](../errors.md#results-and-failures) |
 | `throw CommandAPI.failWithString("...")` | `throw new CommandPrerequisiteException("...")` from `execute(ctx -> ...)`, or `ctx.sendFailure("..."); return;` |
 | Message helpers | `ctx.sendMessage`, `sendSuccess` (green), `sendWarn` (yellow), `sendFailure` (red), with `String`, a native component, or `RichText` |
 
@@ -304,6 +304,7 @@ See [testing](../testing.md).
 
 ## Not available yet
 
-Tracked in the roadmap: resulting executors and `/execute store`, vanilla success
-feedback, requirement-based visibility, per-sender executor variants, annotation and Kotlin DSL APIs, and the
-arguments listed as missing in the [catalog](../arguments.md).
+Tracked in the roadmap: requirement-based visibility, per-sender executor variants, annotation and Kotlin DSL APIs,
+and the arguments listed as missing in the [catalog](../arguments.md).
+
+See also: [Migrating from Cloud](from-cloud.md), [Lamp](from-lamp.md), [ACF](from-acf.md).
