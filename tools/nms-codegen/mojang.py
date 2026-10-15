@@ -147,6 +147,9 @@ else:
         "return NMSMobEffectList.create(MobEffectArgument.getEffect(CTX, name));", throws=False)
 # 1.21.11 renamed ResourceLocation to Identifier.
 ID_ARGUMENT = "IdentifierArgument" if V >= (1, 21, 11) else "ResourceLocationArgument"
+ID_CLASS = "Identifier" if V >= (1, 21, 11) else "ResourceLocation"
+# 1.21 made the constructor of ResourceLocation private.
+LOAD_TAG_ID = f'{ID_CLASS}.withDefaultNamespace("load")' if V >= (1, 21) else 'new ResourceLocation("minecraft", "load")'
 arg("NMSArgumentNamespacedKey", f"commands.arguments.{ID_ARGUMENT}", "String",
     f"{ID_ARGUMENT}.id()", f"return {ID_ARGUMENT}.getId(CTX, name).toString();", throws=False)
 arg("NMSArgumentParticle", "commands.arguments.ParticleArgument", "NMSParticleParam",
@@ -504,13 +507,20 @@ w("NMSDedicatedServer", f'''    public NMSDedicatedServer_SUFFIX(Object handle) 
     }}
 
     @Override
-    public void recompileFunctions(NMSCommandDispatcher dispatcher) {{
+    public void recompileFunctions(NMSCommandDispatcher dispatcher, boolean reloaded) {{
         DedicatedServer server = (DedicatedServer) requireHandle();
         ServerFunctionLibrary library = server.{"resources.managers()" if HAS_RELOADABLE_RESOURCES else "resources"}.getFunctionLibrary();
+        boolean loadMissing = reloaded && loadTagEmpty(library);
         setFunctionDispatcher(library, ServerFunctionLibrary.class, dispatcher);
         library.reload({RELOAD_ARGUMENTS})
                .join();
-        keepPendingLoad(server.getFunctions(), () -> server.getFunctions().replaceLibrary(library));
+        keepPendingLoad(server.getFunctions(),
+                        () -> server.getFunctions().replaceLibrary(library),
+                        loadMissing && !loadTagEmpty(library));
+    }}
+
+    private static boolean loadTagEmpty(ServerFunctionLibrary library) {{
+        return library.getTag({LOAD_TAG_ID}){".getValues()" if V < (1, 19) else ""}.isEmpty();
     }}
 
     @Override
@@ -520,6 +530,7 @@ w("NMSDedicatedServer", f'''    public NMSDedicatedServer_SUFFIX(Object handle) 
 ''', ["net.minecraft.server.dedicated.DedicatedServer",
       *(["net.minecraft.server.MinecraftServer"] if PAPER else []),
       "net.minecraft.server.ServerFunctionLibrary",
+      f"net.minecraft.resources.{ID_CLASS}",
       "net.minecraft.server.packs.resources.PreparableReloadListener",
       *([] if RELOAD_DROPPED_PROFILERS else ["net.minecraft.util.profiling.InactiveProfiler"]),
       "java.util.concurrent.CompletableFuture"])

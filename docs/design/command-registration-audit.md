@@ -116,6 +116,13 @@ dev bundles. Line numbers refer to the commit that adds this document.
   `isInFunction` on 1.16.5) keep their values across the call
   (`NMSDedicatedServer#keepPendingLoad`); otherwise every registration or
   unregister after startup ran the `#load` functions of every data pack again.
+  A data reload run by a plugin task is applied after that tick's check and
+  before the server ticks functions, so the server runs `#load` with its own
+  compilation, which dropped the tag. When the resources changed since the
+  last compilation (`FunctionCompilationMarker#reloaded`) and the server's
+  library lacks the `#minecraft:load` tag that CommandLib's compilation has,
+  the run that `replaceLibrary` schedules stays, so the tag runs once, a tick
+  late.
   A compiled function holds the nodes it uses, so a plugin disable removes every
   instance of the plugin and compiles the functions at once, while the server
   runs, since the plugin's tasks are cancelled then; otherwise the functions ran

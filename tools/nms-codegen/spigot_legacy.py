@@ -331,9 +331,10 @@ w("NMSDedicatedServer", '''    public NMSDedicatedServer_SUFFIX(Object handle) {
     }
 
     @Override
-    public void recompileFunctions(NMSCommandDispatcher dispatcher) {
+    public void recompileFunctions(NMSCommandDispatcher dispatcher, boolean reloaded) {
         DedicatedServer server = (DedicatedServer) requireHandle();
         CustomFunctionManager library = server.dataPackResources.a();
+        boolean loadMissing = reloaded && loadTagEmpty(library);
         setFunctionDispatcher(library, CustomFunctionManager.class, dispatcher);
         // Mohist remaps IReloadListener but not its inner barrier interface, so a class implementing it fails to link
         // there; the barrier is a proxy of the reload method's parameter type instead.
@@ -373,7 +374,13 @@ w("NMSDedicatedServer", '''    public NMSDedicatedServer_SUFFIX(Object handle) {
         } catch (ReflectiveOperationException e) {
             throw new IllegalStateException(e);
         }
-        keepPendingLoad(server.getFunctionData(), () -> server.getFunctionData().a(library));
+        keepPendingLoad(server.getFunctionData(),
+                        () -> server.getFunctionData().a(library),
+                        loadMissing && !loadTagEmpty(library));
+    }
+
+    private static boolean loadTagEmpty(CustomFunctionManager library) {
+        return library.b().b(new MinecraftKey("minecraft", "load")).getTagged().isEmpty();
     }
 
     @Override
@@ -383,6 +390,7 @@ w("NMSDedicatedServer", '''    public NMSDedicatedServer_SUFFIX(Object handle) {
 ''', [f"{NMS}.DedicatedServer",
       f"{NMS}.CustomFunctionManager",
       f"{NMS}.GameProfilerDisabled",
+      f"{NMS}.MinecraftKey",
       "java.lang.reflect.Method",
       "java.lang.reflect.Proxy",
       "java.util.concurrent.CompletableFuture",

@@ -31,6 +31,15 @@ final class FunctionCompilationMarker {
         return state(resources).equals(System.getProperty(COMPILED));
     }
 
+    /**
+     * Whether a copy compiled the functions for other data pack resources last, so the server loaded the data packs
+     * again since. False before the first compilation.
+     */
+    static boolean reloaded(Object resources) {
+        String compiled = System.getProperty(COMPILED);
+        return compiled != null && !compiled.startsWith(System.identityHashCode(resources) + ":");
+    }
+
     static void markCompiled(Object resources) {
         System.setProperty(COMPILED, state(resources));
     }

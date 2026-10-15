@@ -573,7 +573,8 @@ public final class CommandLib implements Listener {
      * event. A function with an unknown command is dropped. So a task checks every tick whether the data pack
      * resources were replaced or the commands changed, and then compiles the functions again with the dispatcher
      * that holds the commands. Bukkit tasks run before the server ticks functions, so the #load functions run once,
-     * with the commands.
+     * with the commands. A reload run by a later task of the same tick has had its #load functions run by the server
+     * without them, which the compilation makes up for ({@link NMSDedicatedServer#recompileFunctions}).
      */
     private void compileFunctionsWithCommands() {
         FunctionCompilationMarker.changed();
@@ -613,7 +614,7 @@ public final class CommandLib implements Listener {
                 return;
             }
             server.recompileFunctions(usesPaperCommandDispatcher() ? server.getCommandDispatcher()
-                    : server.getVanillaCommandDispatcher());
+                    : server.getVanillaCommandDispatcher(), FunctionCompilationMarker.reloaded(resources));
             FunctionCompilationMarker.markCompiled(resources);
         } catch (RuntimeException | LinkageError ex) {
             Objects.requireNonNull(functionCompiler)

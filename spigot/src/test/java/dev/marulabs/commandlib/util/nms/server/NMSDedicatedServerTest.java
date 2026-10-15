@@ -9,7 +9,7 @@ class NMSDedicatedServerTest {
     void keepPendingLoadUndoesTheLoadRunReplaceLibrarySchedules() {
         FunctionManager manager = new FunctionManager();
 
-        NMSDedicatedServer.keepPendingLoad(manager, manager::replaceLibrary);
+        NMSDedicatedServer.keepPendingLoad(manager, manager::replaceLibrary, false);
 
         assertThat(manager.replacements).isEqualTo(1);
         assertThat(manager.postReload).isFalse();
@@ -21,9 +21,19 @@ class NMSDedicatedServerTest {
         FunctionManager manager = new FunctionManager();
         manager.postReload = true;
 
-        NMSDedicatedServer.keepPendingLoad(manager, manager::replaceLibrary);
+        NMSDedicatedServer.keepPendingLoad(manager, manager::replaceLibrary, false);
 
         assertThat(manager.postReload).isTrue();
+    }
+
+    @Test
+    void keepPendingLoadKeepsTheLoadRunOfAReloadWhoseLoadTagTheServerMissed() {
+        FunctionManager manager = new FunctionManager();
+
+        NMSDedicatedServer.keepPendingLoad(manager, manager::replaceLibrary, true);
+
+        assertThat(manager.postReload).isTrue();
+        assertThat(manager.isInFunction).isFalse();
     }
 
     /**

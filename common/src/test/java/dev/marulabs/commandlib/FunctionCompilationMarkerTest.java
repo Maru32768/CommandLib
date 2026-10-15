@@ -35,6 +35,17 @@ class FunctionCompilationMarkerTest {
     }
 
     @Test
+    void reloadedComparesWithTheResourcesOfTheLastCompilation() {
+        Object resources = new Object();
+        assertThat(FunctionCompilationMarker.reloaded(resources)).isFalse();
+
+        FunctionCompilationMarker.markCompiled(resources);
+        FunctionCompilationMarker.changed();
+        assertThat(FunctionCompilationMarker.reloaded(resources)).isFalse();
+        assertThat(FunctionCompilationMarker.reloaded(new Object())).isTrue();
+    }
+
+    @Test
     void unreadableMarkerNeverSkips() {
         Object resources = new Object();
         System.setProperty(FunctionCompilationMarker.CHANGES, "not a number");

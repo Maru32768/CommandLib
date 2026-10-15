@@ -44,8 +44,12 @@ public abstract class NMSDedicatedServer extends NMSClass {
     /**
      * Compiles the functions of the current data packs again with the given dispatcher, so their commands may use
      * what was added to it after the data packs were loaded, and hands them to the server's function manager.
+     *
+     * @param reloaded whether the data packs were loaded again since the last compilation, so the function library
+     *                 holds the server's own compilation, whose #minecraft:load tag lacks the functions that use
+     *                 commands it did not have yet
      */
-    public abstract void recompileFunctions(NMSCommandDispatcher dispatcher);
+    public abstract void recompileFunctions(NMSCommandDispatcher dispatcher, boolean reloaded);
 
     /**
      * Whether the server is running, which is false once it begins to stop, before it disables the plugins.
@@ -58,8 +62,19 @@ public abstract class NMSDedicatedServer extends NMSClass {
      * still pending from a data reload stays. The flag, postReload, is the manager's only boolean field from 1.17, and
      * 1.16.5 also has isInFunction, which the call leaves alone, so every boolean field keeps its value; its name is
      * obfuscated on Spigot.
+     *
+     * <p>A data reload that a plugin task runs, such as {@code Bukkit.dispatchCommand(console, "minecraft:reload")},
+     * is applied after this tick's compilation check and before the server ticks functions, so the server runs the
+     * #load functions of the reload with its own compilation. That compilation drops a tag listing a function it could
+     * not compile, so none of the tag's functions ran. When {@code loadMissed}, the tag was missing from the server's
+     * compilation of a data reload and is present in CommandLib's, so the run that replaceLibrary schedules stays, and
+     * the #load functions run once, with the commands.
      */
-    protected static void keepPendingLoad(Object functionManager, Runnable replaceLibrary) {
+    protected static void keepPendingLoad(Object functionManager, Runnable replaceLibrary, boolean loadMissed) {
+        if (loadMissed) {
+            replaceLibrary.run();
+            return;
+        }
         List<Field> flags = new ArrayList<>();
         for (Class<?> c = functionManager.getClass(); c != Object.class; c = c.getSuperclass()) {
             for (Field field : c.getDeclaredFields()) {

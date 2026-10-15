@@ -83,7 +83,10 @@ logged, so a function that is really broken is reported once.
 
 Function tags, such as `function #mypack:setup`, run the commands like functions do, since the recompilation rebuilds
 the tags. `#minecraft:load` runs once after a reload, with the commands: the server runs it on the tick after the
-reload, after the Bukkit tasks of that tick, which compile the functions first. A later recompilation, such as the one
+reload, after the Bukkit tasks of that tick, which compile the functions first. A reload that a plugin task runs, such
+as `Bukkit.dispatchCommand(console, "minecraft:reload")`, is applied after that tick's compilation, and the server runs
+`#minecraft:load` in the same tick with its own compilation, which dropped the tag. On Spigot the next tick's
+compilation then runs the tag once, when the server's compilation lacked it. A later recompilation, such as the one
 after a plugin registers a command at runtime, does not run `#minecraft:load` again. `#minecraft:tick` uses the
 recompiled functions from the same tick on.
 
