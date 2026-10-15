@@ -44,6 +44,9 @@ with ease.
 9. **Kotlin DSL**  
    Build the same commands with `command("heal") { ... }` blocks, typed argument references, options as delegated
    properties, and `suspend` executors and suggestion providers ([docs](docs/kotlin.md)).
+10. **Annotated Commands**  
+    Write a command as a class with `@Command`, `@Subcommand`, `@Flag` and `@Option` methods; it builds the same
+    command as the fluent API, with the same help, permissions and tests ([docs](docs/annotations.md)).
 
 ## Why CommandLib
 
@@ -78,6 +81,7 @@ See the [argument catalog](docs/arguments.md) for an argument-by-argument compar
 - [Errors](docs/errors.md): what the sender sees when a command fails.
 - [Vanilla integration](docs/vanilla-integration.md): `/execute`, command blocks, functions, and tags.
 - [Execution](docs/execution.md): middlewares, async executors, threads, and `/execute store` for async commands.
+- [Annotated commands](docs/annotations.md): commands as annotated classes, and how they map to the fluent API.
 - [Testing](docs/testing.md): `CommandTester` and `FakeSender` for plugin and mod tests.
 - [Kotlin DSL](docs/kotlin.md): `command { }` blocks, delegated options, and coroutines.
 - [Documentation exports and diagnostics](docs/diagnostics.md): Markdown / JSON of the commands and permission nodes,
@@ -949,6 +953,37 @@ Exceptions of the work reach the `UncaughtExceptionHandler`s as an executor's do
 once, an async command still running gives `/execute store` the result set so far (1 unless set). See
 [execution](docs/execution.md) for the order of middlewares, exception mapping, threads on each platform, timeouts,
 cancellation and testing.
+
+## Annotated Commands
+
+A command can also be a class whose methods are annotated. `AnnotatedCommands.parse` builds an ordinary `Command`
+from it through the fluent API, so help, permission nodes, options and `CommandTester` tests are the same:
+
+```java
+@Command("ban")
+@Description("Ban a player")
+public final class BanCommand {
+    @Execute
+    public void ban(CommandContext ctx,
+                    @Flag(value = "silent", shortName = 's') boolean silent,
+                    Player target,
+                    @Greedy @Default("Banned by an operator") String reason) {
+        target.kickPlayer(reason);
+    }
+
+    @Subcommand("list")
+    public void list(CommandContext ctx, @Option("limit") @Range(min = 1, max = 100) @Default("10") int limit) {
+    }
+}
+
+CommandLib.register(this, AnnotatedCommands.parse(new BanCommand()));
+```
+
+Parameters map by type to the built-in arguments (`Player` to `PlayerArgument`, `int` to `IntegerArgument`, ...), a
+last `List<T>` parameter is variadic, `@Optional` / `@Default` make arguments optional, and a method returning a
+`CompletionStage` runs as `executeAsync`. Argument names come from the parameter names, so compile with `-parameters`
+or use `@Name`. See [annotated commands](docs/annotations.md) for every annotation, custom types and annotations, and
+the fluent equivalent.
 
 ## Server Help
 

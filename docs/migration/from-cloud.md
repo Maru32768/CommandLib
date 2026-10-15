@@ -326,7 +326,8 @@ argument(new IntegerArgument("amount").validator((amount, ctx) -> {
 
 ## Annotations
 
-**Not available.** CommandLib has no annotation parser; each `cloud-annotations` method becomes a `Command` subclass.
+CommandLib's [annotation API](../annotations.md) reads annotated methods instead of a syntax string
+(`@Subcommand("game start")` and one parameter per argument). The fluent equivalents:
 
 | `cloud-annotations` | CommandLib |
 |---|---|
@@ -356,7 +357,7 @@ CommandLib's `spigot-testing` / `paper-testing` run commands without a server:
 
 ## Not available yet
 
-Tracked in the roadmap: an annotation API, a global sender mapper, a platform-wide middleware
+Tracked in the roadmap: a global sender mapper, a platform-wide middleware
 registration, injection, customizable and translatable built-in
 messages, permission predicates that hide commands, typed value options beyond primitives and strings, and the
 arguments listed as missing in the [catalog](../arguments.md).

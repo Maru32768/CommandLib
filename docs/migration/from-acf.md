@@ -5,8 +5,9 @@ This guide maps [Aikar's Annotation Command Framework](https://github.com/aikar/
 `acf-paper` names on the left and CommandLib's `spigot` / `paper` artifacts on the right.
 
 The main difference in style: ACF reads annotated methods of a `BaseCommand` and resolves each parameter through a
-context registered by type. CommandLib has no annotations and no registry; a command is a `Command` subclass whose
-arguments are objects, and the executor gets their values as typed lambda parameters. CommandLib commands are always
+context registered by type. CommandLib's core is fluent: a command is a `Command` subclass whose arguments are
+objects, and the executor gets their values as typed lambda parameters. Its [annotation API](../annotations.md), with a
+type registry, builds the same fluent commands from annotated methods; this guide maps to the fluent API. CommandLib commands are always
 Brigadier nodes, so the client validates and colors the input while the player types.
 
 Features CommandLib does not have yet are marked **Not available**.
@@ -311,7 +312,7 @@ parameters: `CommandLib.register(this, new JoinCommand(arenaManager))`.
 
 ## Not available yet
 
-Tracked in the roadmap: an annotation API, dependency injection, reusable named conditions, a locale and message key
+Tracked in the roadmap: dependency injection, reusable named conditions, a locale and message key
 system for CommandLib's own messages and help, message formats, catch-unknown handlers, hidden commands, root aliases
 for subcommands, and global contexts and completions by type. Asynchronous execution is `executeAsync(...)`, see
 [execution](../execution.md#async-executors).

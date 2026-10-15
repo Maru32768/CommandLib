@@ -4,9 +4,10 @@ This guide maps [Lamp](https://github.com/Revxrsal/Lamp) 4.x ([docs](https://fox
 to CommandLib for Spigot and Paper plugins. The examples use `lamp.bukkit` names on the left and CommandLib's `spigot` /
 `paper` artifacts on the right.
 
-The main difference in style: Lamp reads annotated methods and turns each parameter into an argument. CommandLib has no
-annotations; a command is a `Command` subclass whose arguments are objects, and the executor gets their values as typed
-lambda parameters. The command tree is real Brigadier on Spigot as well as Paper, from 1.16.5 to 26.x.
+The main difference in style: Lamp reads annotated methods and turns each parameter into an argument. CommandLib's core
+is fluent: a command is a `Command` subclass whose arguments are objects, and the executor gets their values as typed
+lambda parameters. Its [annotation API](../annotations.md) (`@Command`, `@Subcommand`, `@Flag`, `@Optional`, ...) is
+close to Lamp's and builds the same fluent commands; this guide maps to the fluent API. The command tree is real Brigadier on Spigot as well as Paper, from 1.16.5 to 26.x.
 
 Features CommandLib does not have yet are marked **Not available**.
 
@@ -361,7 +362,7 @@ providers are `addSuggestionProviderSuspend { sb -> }`. Functions with default p
 
 ## Not available yet
 
-Tracked in the roadmap: an annotation API (with custom annotations), dependency
+Tracked in the roadmap: dependency
 injection, middleware and hooks, response handlers, global parameter types and suggestion
 providers, customizable and translatable built-in messages, and options with non-primitive values.
 
