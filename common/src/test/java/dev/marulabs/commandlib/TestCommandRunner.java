@@ -11,22 +11,31 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 final class TestCommandRunner {
+    static final CommandScheduler INLINE = CommandScheduler.of(Runnable::run, Runnable::run);
     private final CommandDispatcher<TestCommandSource> dispatcher = new CommandDispatcher<>();
     private final TestCommandSource source;
 
     TestCommandRunner(TestCommand command) {
+        this(command, INLINE);
+    }
+
+    TestCommandRunner(TestCommand command, CommandScheduler scheduler) {
         this(command, new TestCommandSource() {
             @Override
             public boolean hasPermission(String permission) {
                 return true;
             }
-        });
+        }, scheduler);
     }
 
     TestCommandRunner(TestCommand command, TestCommandSource source) {
+        this(command, source, INLINE);
+    }
+
+    TestCommandRunner(TestCommand command, TestCommandSource source, CommandScheduler scheduler) {
         this.source = source;
-        new CommandNodeCreator<>(List.of(command), "test.command").build()
-                                                                  .forEach(dispatcher.getRoot()::addChild);
+        new CommandNodeCreator<>(List.of(command), "test.command", scheduler).build()
+                                                                             .forEach(dispatcher.getRoot()::addChild);
     }
 
     TestCommandContext execute(String input) throws CommandSyntaxException {

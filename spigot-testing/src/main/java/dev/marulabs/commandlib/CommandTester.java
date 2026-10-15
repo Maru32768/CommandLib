@@ -25,6 +25,7 @@ import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
@@ -137,8 +138,8 @@ public class CommandTester implements AutoCloseable {
 
         try {
             commands.addAll(builder.createCommands());
-            new CommandNodeCreator<>(commands, permissionPrefix).build()
-                                                                .forEach(dispatcher.getRoot()::addChild);
+            new CommandNodeCreator<>(commands, permissionPrefix, builder.scheduler).build()
+                                                                                   .forEach(dispatcher.getRoot()::addChild);
         } catch (Exception e) {
             close();
             throw new RuntimeException("Unexpected exception", e);
@@ -181,7 +182,8 @@ public class CommandTester implements AutoCloseable {
         current.set(this);
         currentCommandSender.set(sender);
         try {
-            return dispatcher.execute(input, new Object());
+            // The sender is the source, so a follow-up of an async command still finds it after execute returns.
+            return dispatcher.execute(input, sender);
         } catch (CommandFailure e) {
             e.sendMessages();
             return 0;
@@ -296,6 +298,7 @@ public class CommandTester implements AutoCloseable {
 
     public static class Builder {
         private final List<Supplier<? extends Command>> commandSuppliers = new ArrayList<>();
+        private CommandScheduler scheduler = CommandScheduler.of(Runnable::run, Runnable::run);
         private final Map<Class<? extends NMSClass>, Class<? extends NMSClass>> nmsMocks = defaultNmsMocks();
         private @Nullable String permissionPrefix;
 
@@ -317,6 +320,16 @@ public class CommandTester implements AutoCloseable {
 
         public Builder permissionPrefix(String permissionPrefix) {
             this.permissionPrefix = Objects.requireNonNull(permissionPrefix, "permissionPrefix");
+            return this;
+        }
+
+        /**
+         * Sets the threads of {@code executeAsync} commands. By default both executors run tasks at once, so an async
+         * command completes before {@code execute} returns; pass executors that queue tasks to test what happens in
+         * between.
+         */
+        public Builder scheduler(@NotNull CommandScheduler scheduler) {
+            this.scheduler = Objects.requireNonNull(scheduler, "scheduler");
             return this;
         }
 

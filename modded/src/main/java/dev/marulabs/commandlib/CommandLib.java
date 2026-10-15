@@ -225,8 +225,8 @@ public final class CommandLib {
     }
 
     private void register(RootCommandNode<CommandSourceStack> root) {
-        new CommandNodeCreator<>(commands, permissionPrefix).build()
-                                                            .forEach(root::addChild);
+        new CommandNodeCreator<>(commands, permissionPrefix, ServerCommandScheduler.INSTANCE).build()
+                                                                                             .forEach(root::addChild);
     }
 
     static boolean hasPermission(CommandSourceStack source, ServerPlayer player, String node) {
@@ -265,7 +265,7 @@ public final class CommandLib {
                                                                        .getDispatcher()
                                                                        .getRoot();
 
-        new CommandNodeCreator<>(commands, permissionPrefix).build()
+        new CommandNodeCreator<>(commands, permissionPrefix, ServerCommandScheduler.INSTANCE).build()
                                                             .forEach(root::addChild);
 
         commands.stream()

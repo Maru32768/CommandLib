@@ -315,7 +315,9 @@ public final class CommandLib implements Listener {
     @SuppressWarnings({"unchecked", "rawtypes"})
     private void enable() {
         // Build first, so invalid commands are rejected before any permission is added to the server.
-        List<CommandNode<?>> nodes = new ArrayList<>(new CommandNodeCreator<>(commands, permissionPrefix).build());
+        List<CommandNode<?>> nodes = new ArrayList<>(new CommandNodeCreator<>(commands,
+                                                                              permissionPrefix,
+                                                                              new BukkitCommandScheduler(plugin)).build());
         registerPermissions();
 
         registeredCommands.addAll(nodes);

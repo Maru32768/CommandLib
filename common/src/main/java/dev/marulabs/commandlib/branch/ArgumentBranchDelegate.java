@@ -3,7 +3,7 @@ package dev.marulabs.commandlib.branch;
 import dev.marulabs.commandlib.CommonCommand;
 import dev.marulabs.commandlib.CommonCommandContext;
 import dev.marulabs.commandlib.DefaultPermission;
-import dev.marulabs.commandlib.command.CommandExecutor;
+import dev.marulabs.commandlib.command.AsyncCommandExecutor;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -14,7 +14,7 @@ public interface ArgumentBranchDelegate<C extends CommonCommandContext<?, ?>, T 
 
     void description(@NotNull Function<C, String> description);
 
-    void execute(@NotNull CommandExecutor<C> action);
+    void execute(@NotNull AsyncCommandExecutor<C> action);
 
     void addChildren(@NotNull Collection<? extends T> children);
 

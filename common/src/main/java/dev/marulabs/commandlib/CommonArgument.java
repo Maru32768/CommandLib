@@ -3,6 +3,7 @@ package dev.marulabs.commandlib;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.marulabs.commandlib.argument.ArgumentValidator;
+import dev.marulabs.commandlib.command.AsyncCommandExecutor;
 import dev.marulabs.commandlib.command.CommandExecutor;
 import dev.marulabs.commandlib.command.Extractor;
 import dev.marulabs.commandlib.exception.ArgumentParseException;
@@ -26,7 +27,7 @@ public abstract class CommonArgument<T, C extends CommonCommandContext<?, ?>, SE
     // Returns null when it cannot parse the input either.
     private BiFunction<C, String, T> additionalParser = (ctx, input) -> null;
     // Null until execute is called.
-    private @Nullable CommandExecutor<C> executor;
+    private @Nullable AsyncCommandExecutor<C> executor;
     private final ArgumentType<?> type;
     private ArgumentValidator<? super T, C> validator = (x, ctx) -> {
     };
@@ -177,7 +178,7 @@ public abstract class CommonArgument<T, C extends CommonCommandContext<?, ?>, SE
     }
 
     @Nullable
-    protected final CommandExecutor<C> executor() {
+    protected final AsyncCommandExecutor<C> executor() {
         return executor;
     }
 
@@ -185,8 +186,15 @@ public abstract class CommonArgument<T, C extends CommonCommandContext<?, ?>, SE
         return List.copyOf(uncaughtExceptionHandlers);
     }
 
-    @SuppressWarnings("unchecked")
     public final SELF execute(@NotNull CommandExecutor<C> executor) {
+        return executeAsync(AsyncCommandExecutor.of(executor));
+    }
+
+    /**
+     * Sets an executor whose work finishes later, like {@link CommonCommand#executeAsync(AsyncCommandExecutor)}.
+     */
+    @SuppressWarnings("unchecked")
+    public final SELF executeAsync(@NotNull AsyncCommandExecutor<C> executor) {
         this.executor = Objects.requireNonNull(executor);
         return (SELF) this;
     }

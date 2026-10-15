@@ -5,12 +5,15 @@ import dev.marulabs.commandlib.CommonArgument;
 import dev.marulabs.commandlib.CommonCommand;
 import dev.marulabs.commandlib.CommonCommandContext;
 import dev.marulabs.commandlib.DefaultPermission;
+import dev.marulabs.commandlib.command.AsyncCommandExecutor;
 import dev.marulabs.commandlib.command.CommandExecutor;
 import dev.marulabs.commandlib.command.Extractor;
 import dev.marulabs.commandlib.util.function.HexaConsumer;
+import dev.marulabs.commandlib.util.function.HexaFunction;
 import dev.marulabs.commandlib.util.function.QuintFunction;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
 
 public final class QuintArgumentBranch<T1, T2, T3, T4, T5, C extends CommonCommandContext<?, ?>, T extends CommonCommand<C, T>> extends ArgumentBranch<C, T> {
@@ -44,9 +47,25 @@ public final class QuintArgumentBranch<T1, T2, T3, T4, T5, C extends CommonComma
         return this;
     }
 
+    public QuintArgumentBranch<T1, T2, T3, T4, T5, C, T> executeAsync(@NotNull HexaFunction<T1, T2, T3, T4, T5, C, CompletionStage<?>> action) {
+        super.executeAsync(ctx -> action.apply(ctx.getArgument(argument1),
+                                               ctx.getArgument(argument2),
+                                               ctx.getArgument(argument3),
+                                               ctx.getArgument(argument4),
+                                               ctx.getArgument(argument5),
+                                               ctx));
+        return this;
+    }
+
     @Override
     public QuintArgumentBranch<T1, T2, T3, T4, T5, C, T> execute(@NotNull CommandExecutor<C> action) {
         super.execute(action);
+        return this;
+    }
+
+    @Override
+    public QuintArgumentBranch<T1, T2, T3, T4, T5, C, T> executeAsync(@NotNull AsyncCommandExecutor<C> action) {
+        super.executeAsync(action);
         return this;
     }
 
@@ -114,7 +133,7 @@ public final class QuintArgumentBranch<T1, T2, T3, T4, T5, C extends CommonComma
     @Override
     public <S> RequiredQuintArgumentBranch<S, T1, T2, T3, T4, T5, C, T> require(@NotNull Extractor<C, S> extractor) {
         return new RequiredQuintArgumentBranch<>(extractor,
-                                                 this::execute,
+                                                 this::executeAsync,
                                                  children -> delegate.addChildren(children),
                                                  argument1,
                                                  argument2,

@@ -14,10 +14,12 @@ final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U ext
     private final PlatformAdapter<S, T, C, U> platformAdapter = PlatformAdapter.get();
     private final Collection<? extends U> commands;
     private final String permissionPrefix;
+    private final CommandScheduler scheduler;
 
-    public CommandNodeCreator(Collection<? extends U> commands, String permissionPrefix) {
+    public CommandNodeCreator(Collection<? extends U> commands, String permissionPrefix, CommandScheduler scheduler) {
         this.commands = commands;
         this.permissionPrefix = permissionPrefix;
+        this.scheduler = scheduler;
     }
 
     public List<LiteralCommandNode<S>> build() {
@@ -95,13 +97,14 @@ final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U ext
 
         if (argumentsList.isEmpty()) {
             CommandRunner<S, C> runner = new CommandRunner<>(platformAdapter,
+                                                             scheduler,
                                                              command,
                                                              permissionPrefix,
                                                              inheritedArguments,
                                                              command.options(),
                                                              command.prerequisite(),
                                                              helpAction,
-                                                             command.preprocess(),
+                                                             command.middlewares(),
                                                              command.executor(),
                                                              command.uncaughtExceptionHandlers());
             builder.executes(runner);
@@ -124,21 +127,23 @@ final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U ext
         // it runs with its defaults then.
         CommandRunner<S, C> bareRunner = allOptional.isEmpty()
                 ? new CommandRunner<>(platformAdapter,
+                                      scheduler,
                                       command,
                                       permissionPrefix,
                                       inheritedArguments,
                                       command.options(),
                                       command.prerequisite(),
                                       helpAction,
-                                      command.preprocess(),
+                                      command.middlewares(),
                                       command.executor(),
                                       command.uncaughtExceptionHandlers())
                 : new ArgumentCommandNodeCreator<>(allOptional.get(0),
                                                    appendArgument(inheritedArguments, allOptional.get(0)),
-                                                   permissionPrefix).runner(allOptional.get(0)
-                                                                                       .first(),
-                                                                            helpAction,
-                                                                            command);
+                                                   permissionPrefix,
+                                                   scheduler).runner(allOptional.get(0)
+                                                                                .first(),
+                                                                     helpAction,
+                                                                     command);
         builder.executes(bareRunner);
 
         argumentsList.stream()
@@ -157,9 +162,10 @@ final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U ext
                                                                            .collect(Collectors.toList());
                          Supplier<ArgumentCommandNode<S, ?>> argumentNodeSupplier = () -> new ArgumentCommandNodeCreator<>(arguments,
                                                                                                                            executorArguments,
-                                                                                                                           permissionPrefix).build(helpAction,
-                                                                                                                                                   command,
-                                                                                                                                                   childNodes);
+                                                                                                                           permissionPrefix,
+                                                                                                                           scheduler).build(helpAction,
+                                                                                                                                            command,
+                                                                                                                                            childNodes);
                          builder.then(argumentNodeSupplier.get());
                          createOptionCommands(command, argumentNodeSupplier, bareRunner).forEach(builder::then);
                      });

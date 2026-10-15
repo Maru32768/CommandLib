@@ -5,12 +5,15 @@ import dev.marulabs.commandlib.CommonArgument;
 import dev.marulabs.commandlib.CommonCommand;
 import dev.marulabs.commandlib.CommonCommandContext;
 import dev.marulabs.commandlib.DefaultPermission;
+import dev.marulabs.commandlib.command.AsyncCommandExecutor;
 import dev.marulabs.commandlib.command.CommandExecutor;
 import dev.marulabs.commandlib.command.Extractor;
 import dev.marulabs.commandlib.util.function.QuintConsumer;
+import dev.marulabs.commandlib.util.function.QuintFunction;
 import dev.marulabs.commandlib.util.function.TetraFunction;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
 
 public final class TetraArgumentBranch<T1, T2, T3, T4, C extends CommonCommandContext<?, ?>, T extends CommonCommand<C, T>> extends ArgumentBranch<C, T> {
@@ -40,9 +43,24 @@ public final class TetraArgumentBranch<T1, T2, T3, T4, C extends CommonCommandCo
         return this;
     }
 
+    public TetraArgumentBranch<T1, T2, T3, T4, C, T> executeAsync(@NotNull QuintFunction<T1, T2, T3, T4, C, CompletionStage<?>> action) {
+        super.executeAsync(ctx -> action.apply(ctx.getArgument(argument1),
+                                               ctx.getArgument(argument2),
+                                               ctx.getArgument(argument3),
+                                               ctx.getArgument(argument4),
+                                               ctx));
+        return this;
+    }
+
     @Override
     public TetraArgumentBranch<T1, T2, T3, T4, C, T> execute(@NotNull CommandExecutor<C> action) {
         super.execute(action);
+        return this;
+    }
+
+    @Override
+    public TetraArgumentBranch<T1, T2, T3, T4, C, T> executeAsync(@NotNull AsyncCommandExecutor<C> action) {
+        super.executeAsync(action);
         return this;
     }
 
@@ -106,7 +124,7 @@ public final class TetraArgumentBranch<T1, T2, T3, T4, C extends CommonCommandCo
     @Override
     public <S> RequiredTetraArgumentBranch<S, T1, T2, T3, T4, C, T> require(@NotNull Extractor<C, S> extractor) {
         return new RequiredTetraArgumentBranch<>(extractor,
-                                                 this::execute,
+                                                 this::executeAsync,
                                                  children -> delegate.addChildren(children),
                                                  argument1,
                                                  argument2,

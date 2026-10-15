@@ -4,12 +4,14 @@ import dev.marulabs.commandlib.ArgRef;
 import dev.marulabs.commandlib.CommonArgument;
 import dev.marulabs.commandlib.CommonCommand;
 import dev.marulabs.commandlib.CommonCommandContext;
-import dev.marulabs.commandlib.command.CommandExecutor;
+import dev.marulabs.commandlib.command.AsyncCommandExecutor;
 import dev.marulabs.commandlib.command.Extractor;
 import dev.marulabs.commandlib.util.function.TriConsumer;
+import dev.marulabs.commandlib.util.function.TriFunction;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
+import java.util.concurrent.CompletionStage;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -17,7 +19,7 @@ public final class RequiredUnaryArgumentBranch<S, T1, C extends CommonCommandCon
     private final CommonArgument<T1, C, ?> argument1;
 
     public RequiredUnaryArgumentBranch(@NotNull Extractor<C, S> extractor,
-                                       @NotNull Consumer<CommandExecutor<C>> executeRegistrar,
+                                       @NotNull Consumer<AsyncCommandExecutor<C>> executeRegistrar,
                                        @NotNull Consumer<Collection<? extends T>> childrenAdder,
                                        @NotNull CommonArgument<T1, C, ?> argument1) {
         super(extractor, executeRegistrar, childrenAdder);
@@ -26,6 +28,11 @@ public final class RequiredUnaryArgumentBranch<S, T1, C extends CommonCommandCon
 
     public RequiredUnaryArgumentBranch<S, T1, C, T> execute(@NotNull TriConsumer<T1, S, C> action) {
         super.execute((s, ctx) -> action.accept(ctx.getArgument(argument1), s, ctx));
+        return this;
+    }
+
+    public RequiredUnaryArgumentBranch<S, T1, C, T> executeAsync(@NotNull TriFunction<T1, S, C, CompletionStage<?>> action) {
+        super.executeAsync((s, ctx) -> action.apply(ctx.getArgument(argument1), s, ctx));
         return this;
     }
 

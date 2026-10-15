@@ -179,7 +179,7 @@ class CommonCommandConfirmCooldownTest {
             }}, new TestCommand("tools") {{
                 execute(ctx -> ctx.sendMessage("tools"));
             }}, new TestCommand("free") {{
-                disableParentPreprocess();
+                disableParentMiddleware();
                 execute(ctx -> ctx.sendMessage("free"));
             }});
         }};

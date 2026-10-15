@@ -1,7 +1,9 @@
 package dev.marulabs.commandlib;
 
 import dev.marulabs.commandlib.branch.*;
+import dev.marulabs.commandlib.command.AsyncCommandExecutor;
 import dev.marulabs.commandlib.command.CommandExecutor;
+import dev.marulabs.commandlib.command.CommandMiddleware;
 import dev.marulabs.commandlib.command.Extractor;
 import dev.marulabs.commandlib.command.Prerequisite;
 import dev.marulabs.commandlib.util.UncaughtExceptionHandler;
@@ -10,6 +12,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -29,7 +32,7 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
     // The parent's argument branch this command follows, or null when it follows the parent's literal.
     private @Nullable Arguments<C> parentArguments = null;
     private boolean inheritParentPrerequisite = true;
-    private boolean inheritParentPreprocess = true;
+    private boolean inheritParentMiddleware = true;
     private final List<T> children = new ArrayList<>();
     private final List<String> aliases = new ArrayList<>();
     private final List<Arguments<C>> argumentsList = new ArrayList<>();
@@ -37,11 +40,11 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
     private final List<Set<CommandOption<?, ?>>> exclusiveOptionGroups = new ArrayList<>();
     private Prerequisite<C> prerequisite = ctx -> {
     };
-    private Predicate<C> preprocess = ctx -> true;
+    private final List<CommandMiddleware<? super C>> middlewares = new ArrayList<>();
     private @Nullable Confirmation confirmation = null;
     private @Nullable Cooldown cooldown = null;
     // Null until execute is called; the command then runs its help action.
-    private @Nullable CommandExecutor<C> executor;
+    private @Nullable AsyncCommandExecutor<C> executor;
     private final List<UncaughtExceptionHandler<C>> uncaughtExceptionHandlers = new ArrayList<>();
 
     protected CommonCommand(@NotNull String name) {
@@ -243,8 +246,13 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
         this.inheritParentPrerequisite = false;
     }
 
-    public final void disableParentPreprocess() {
-        this.inheritParentPreprocess = false;
+    /**
+     * Keeps this command from inheriting the middlewares of its parent: those added with
+     * {@link #addMiddleware(CommandMiddleware)} and {@link #addPreprocess(Predicate)}, the confirmation and the
+     * cooldown.
+     */
+    public final void disableParentMiddleware() {
+        this.inheritParentMiddleware = false;
     }
 
     public final ArgumentBranch<C, T> argument(@NotNull Consumer<ArgumentBuilder<C>> buildArguments) {
@@ -255,7 +263,7 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
             throw new IllegalArgumentException("ArgumentBuilder must add at least one argument.");
         }
         Arguments<C> arguments = addArguments(builtArguments, List.of());
-        CommandExecutor<C> executor = builder.executor();
+        AsyncCommandExecutor<C> executor = builder.executor();
         if (executor != null && builtArguments.get(builtArguments.size() - 1)
                                               .executor() == null) {
             arguments.executor(executor);
@@ -356,7 +364,7 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
             }
 
             @Override
-            public void execute(@NotNull CommandExecutor<C> action) {
+            public void execute(@NotNull AsyncCommandExecutor<C> action) {
                 arguments.executor(action);
             }
 
@@ -448,7 +456,7 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
     }
 
     public final <S> RequiredArgumentBranch<S, C, T> require(@NotNull Extractor<C, S> extractor) {
-        return new RequiredArgumentBranch<>(Objects.requireNonNull(extractor), this::execute, this::addChildren);
+        return new RequiredArgumentBranch<>(Objects.requireNonNull(extractor), this::executeAsync, this::addChildren);
     }
 
     public final void addPrerequisite(@NotNull Prerequisite<C> prerequisite) {
@@ -465,12 +473,39 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
     }
 
     /**
-     * Adds a check that runs before this command executes.
+     * Adds a check that runs before this command executes, as a middleware. Returning false fails the command with the
+     * messages the check sent, or silently when it sent none; returning true sends them and continues.
      *
      * @param preprocess return false if cancel executing command.
      */
     public final void addPreprocess(@NotNull Predicate<C> preprocess) {
-        this.preprocess = this.preprocess.and(Objects.requireNonNull(preprocess));
+        Objects.requireNonNull(preprocess);
+        addMiddleware(preprocessMiddleware(preprocess));
+    }
+
+    /**
+     * Adds a middleware that wraps the execution of this command, its argument branches and, unless they call
+     * {@link #disableParentMiddleware()}, its child commands. Middlewares run in the order they are added, the
+     * parent's before the child's. See {@link CommandMiddleware}.
+     */
+    public final void addMiddleware(@NotNull CommandMiddleware<? super C> middleware) {
+        this.middlewares.add(Objects.requireNonNull(middleware));
+    }
+
+    /**
+     * A middleware that collects the messages {@code check} sends until it tells whether the command fails, and then
+     * fails with them or sends them.
+     */
+    private static <C extends CommonCommandContext<?, ?>> CommandMiddleware<C> preprocessMiddleware(Predicate<? super C> check) {
+        return (ctx, next) -> {
+            boolean[] passed = new boolean[1];
+            CommandFailure failure = ctx.captureFailure(() -> passed[0] = check.test(ctx));
+            if (!passed[0]) {
+                return CompletableFuture.failedFuture(failure);
+            }
+            failure.sendMessages();
+            return next.proceed();
+        };
     }
 
     /**
@@ -481,8 +516,8 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
     }
 
     /**
-     * Asks the sender to confirm before the command executes, as {@code confirmation} describes. Like a preprocess,
-     * it applies to the argument branches and, unless they call {@link #disableParentPreprocess()}, to the child
+     * Asks the sender to confirm before the command executes, as {@code confirmation} describes. Like a middleware,
+     * it applies to the argument branches and, unless they call {@link #disableParentMiddleware()}, to the child
      * commands that set none of their own. It replaces the confirmation set before.
      */
     public final void confirm(@NotNull Confirmation confirmation) {
@@ -497,17 +532,27 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
     }
 
     /**
-     * Keeps a sender from executing the command again until {@code cooldown} ends. Like a preprocess, it applies to the
-     * argument branches and, unless they call {@link #disableParentPreprocess()}, to the child commands that set none
+     * Keeps a sender from executing the command again until {@code cooldown} ends. Like a middleware, it applies to the
+     * argument branches and, unless they call {@link #disableParentMiddleware()}, to the child commands that set none
      * of their own, which then share it. It replaces the cooldown set before.
      * <p>
-     * The cooldown is checked before the confirmation and the preprocess, and starts only when they all pass.
+     * The cooldown is checked before the confirmation and the other middlewares, and starts only when they all pass,
+     * right before the executor runs.
      */
     public final void cooldown(@NotNull Cooldown cooldown) {
         this.cooldown = Objects.requireNonNull(cooldown);
     }
 
     public final void execute(@NotNull CommandExecutor<C> executor) {
+        executeAsync(AsyncCommandExecutor.of(executor));
+    }
+
+    /**
+     * Sets an executor whose work finishes later. It runs on the sync thread and returns the stage that completes when
+     * the command is done, such as one made with {@link CommonCommandContext#supplyAsync}. See
+     * {@link AsyncCommandExecutor}.
+     */
+    public final void executeAsync(@NotNull AsyncCommandExecutor<C> executor) {
         this.executor = Objects.requireNonNull(executor);
     }
 
@@ -547,39 +592,42 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
                      .and(prerequisite);
     }
 
-    final Predicate<C> preprocess() {
-        Predicate<C> preprocess = inheritedPreprocess();
+    /**
+     * The middlewares an execution of this command runs, outermost first: the cooldown check, the confirmation, the
+     * inherited and own middlewares, and the start of the cooldown.
+     */
+    final List<CommandMiddleware<? super C>> middlewares() {
+        List<CommandMiddleware<? super C>> result = new ArrayList<>();
         Cooldown cooldown = effectiveCooldown();
         Confirmation confirmation = effectiveConfirmation();
-        return ctx -> {
-            if (cooldown != null && !cooldown.check(ctx)) {
-                return false;
-            }
-            if (confirmation != null && !confirmation.confirm(ctx)) {
-                return false;
-            }
-            if (!preprocess.test(ctx)) {
-                return false;
-            }
-            if (cooldown != null) {
+        if (cooldown != null) {
+            result.add(preprocessMiddleware(cooldown::check));
+        }
+        if (confirmation != null) {
+            result.add(preprocessMiddleware(confirmation::confirm));
+        }
+        result.addAll(inheritedMiddlewares());
+        if (cooldown != null) {
+            result.add((ctx, next) -> {
                 cooldown.start(ctx);
-            }
-            return true;
-        };
+                return next.proceed();
+            });
+        }
+        return result;
     }
 
-    final Predicate<C> inheritedPreprocess() {
-        if (!inheritParentPreprocess || parent == null) {
-            return preprocess;
+    final List<CommandMiddleware<? super C>> inheritedMiddlewares() {
+        if (!inheritParentMiddleware || parent == null) {
+            return middlewares;
         }
-
-        return parent.inheritedPreprocess()
-                     .and(preprocess);
+        List<CommandMiddleware<? super C>> result = new ArrayList<>(parent.inheritedMiddlewares());
+        result.addAll(middlewares);
+        return result;
     }
 
     @Nullable
     final Cooldown effectiveCooldown() {
-        if (cooldown != null || !inheritParentPreprocess || parent == null) {
+        if (cooldown != null || !inheritParentMiddleware || parent == null) {
             return cooldown;
         }
         return parent.effectiveCooldown();
@@ -587,7 +635,7 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
 
     @Nullable
     final Confirmation effectiveConfirmation() {
-        if (confirmation != null || !inheritParentPreprocess || parent == null) {
+        if (confirmation != null || !inheritParentMiddleware || parent == null) {
             return confirmation;
         }
         return parent.effectiveConfirmation();
@@ -614,7 +662,7 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
     }
 
     @Nullable
-    final CommandExecutor<C> executor() {
+    final AsyncCommandExecutor<C> executor() {
         return executor;
     }
 

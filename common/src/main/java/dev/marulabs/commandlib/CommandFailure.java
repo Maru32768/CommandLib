@@ -43,6 +43,15 @@ final class CommandFailure extends CommandSyntaxException {
         return getRawMessage().getString();
     }
 
+    /**
+     * Does not create the platform's message: a middleware stage wraps the failure in a CompletionException, whose
+     * message is this text, and the testers have no server to create the message with.
+     */
+    @Override
+    public String toString() {
+        return getClass().getName();
+    }
+
     boolean hasMessages() {
         return !sends.isEmpty();
     }

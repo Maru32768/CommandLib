@@ -12,10 +12,12 @@ import java.util.stream.Collectors;
 /**
  * The commands of one registration and the prefix of their permissions.
  *
- * @param byLabel the command of each name and alias
+ * @param byLabel   the command of each name and alias
+ * @param scheduler the threads of the async commands
  */
-record CommandSet(List<Command> commands, String permissionPrefix, Map<String, Command> byLabel) {
-    static CommandSet of(String permissionPrefix, Collection<? extends Command> commands) {
+record CommandSet(List<Command> commands, String permissionPrefix, Map<String, Command> byLabel,
+        CommandScheduler scheduler) {
+    static CommandSet of(String permissionPrefix, Collection<? extends Command> commands, CommandScheduler scheduler) {
         Objects.requireNonNull(permissionPrefix);
         Objects.requireNonNull(commands);
         if (permissionPrefix.isEmpty()) {
@@ -30,12 +32,13 @@ record CommandSet(List<Command> commands, String permissionPrefix, Map<String, C
             command.aliases()
                    .forEach(alias -> byLabel.put(alias, command));
         }
-        return new CommandSet(List.copyOf(commands), permissionPrefix, Map.copyOf(byLabel));
+        return new CommandSet(List.copyOf(commands), permissionPrefix, Map.copyOf(byLabel), scheduler);
     }
 
     List<LiteralCommandNode<CommandSourceStack>> buildNodes() {
         return new CommandNodeCreator<CommandSourceStack, Component, CommandContext, Command>(commands,
-                                                                                              permissionPrefix).build();
+                                                                                              permissionPrefix,
+                                                                                              scheduler).build();
     }
 
     /**

@@ -118,7 +118,7 @@ public final class CommandLib implements Listener {
                                       @NotNull String permissionPrefix,
                                       @NotNull Collection<? extends Command> commands) {
         Objects.requireNonNull(plugin);
-        CommandSet commandSet = CommandSet.of(permissionPrefix, commands);
+        CommandSet commandSet = CommandSet.of(permissionPrefix, commands, new BukkitCommandScheduler(() -> plugin));
 
         CommandLib instance = new CommandLib(plugin,
                                              REGISTRATION_STATES.computeIfAbsent(plugin,
@@ -181,11 +181,14 @@ public final class CommandLib implements Listener {
                                  @NotNull String permissionPrefix,
                                  @NotNull Collection<? extends Command> commands) {
         Objects.requireNonNull(context);
-        CommandSet commandSet = CommandSet.of(permissionPrefix, commands);
-
-        CommandPermissions.addBootstrapDefaults(commandSet);
         String pluginName = context.getPluginMeta()
                                    .getName();
+        CommandSet commandSet = CommandSet.of(permissionPrefix,
+                                              commands,
+                                              new BukkitCommandScheduler(() -> Bukkit.getPluginManager()
+                                                                                     .getPlugin(pluginName)));
+
+        CommandPermissions.addBootstrapDefaults(commandSet);
         BootstrapRegistration registration = new BootstrapRegistration(pluginName, commandSet);
         BOOTSTRAP_REGISTRATIONS.add(registration);
         context.getLifecycleManager()

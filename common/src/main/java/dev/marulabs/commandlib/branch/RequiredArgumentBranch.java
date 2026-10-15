@@ -2,13 +2,16 @@ package dev.marulabs.commandlib.branch;
 
 import dev.marulabs.commandlib.CommonCommand;
 import dev.marulabs.commandlib.CommonCommandContext;
+import dev.marulabs.commandlib.command.AsyncCommandExecutor;
 import dev.marulabs.commandlib.command.CommandExecutor;
 import dev.marulabs.commandlib.command.Extractor;
 import dev.marulabs.commandlib.command.Prerequisite;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.concurrent.CompletionStage;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
 public class RequiredArgumentBranch<S, C extends CommonCommandContext<?, ?>, T extends CommonCommand<C, T>> {
@@ -16,11 +19,11 @@ public class RequiredArgumentBranch<S, C extends CommonCommandContext<?, ?>, T e
     // Holding a CommonCommand directly would cause stamp coupling and would not work uniformly:
     // command.require() registers children on CommonCommand, while argument().require() registers them
     // on the Arguments object via ArgumentBranchDelegate. Consumers abstract over both cases.
-    private final Consumer<CommandExecutor<C>> executeRegistrar;
+    private final Consumer<AsyncCommandExecutor<C>> executeRegistrar;
     private final Consumer<Collection<? extends T>> childrenAdder;
 
     public RequiredArgumentBranch(@NotNull Extractor<C, S> extractor,
-                                  @NotNull Consumer<CommandExecutor<C>> executeRegistrar,
+                                  @NotNull Consumer<AsyncCommandExecutor<C>> executeRegistrar,
                                   @NotNull Consumer<Collection<? extends T>> childrenAdder) {
         this.extractor = Objects.requireNonNull(extractor);
         this.executeRegistrar = Objects.requireNonNull(executeRegistrar);
@@ -29,10 +32,17 @@ public class RequiredArgumentBranch<S, C extends CommonCommandContext<?, ?>, T e
 
     public RequiredArgumentBranch<S, C, T> execute(@NotNull BiConsumer<S, C> action) {
         Objects.requireNonNull(action);
-        executeRegistrar.accept(ctx -> {
-            S s = extractor.extract(ctx);
-            action.accept(s, ctx);
-        });
+        CommandExecutor<C> executor = ctx -> action.accept(extractor.extract(ctx), ctx);
+        executeRegistrar.accept(AsyncCommandExecutor.of(executor));
+        return this;
+    }
+
+    /**
+     * Sets an executor whose work finishes later, like {@link CommonCommand#executeAsync(AsyncCommandExecutor)}.
+     */
+    public RequiredArgumentBranch<S, C, T> executeAsync(@NotNull BiFunction<S, C, CompletionStage<?>> action) {
+        Objects.requireNonNull(action);
+        executeRegistrar.accept(ctx -> action.apply(extractor.extract(ctx), ctx));
         return this;
     }
 

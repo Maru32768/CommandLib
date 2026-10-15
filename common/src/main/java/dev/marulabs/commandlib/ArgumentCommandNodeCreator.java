@@ -22,8 +22,13 @@ final class ArgumentCommandNodeCreator<S, T, C extends CommonCommandContext<S, T
     private final Arguments<C> arguments;
     private final List<Arguments<C>> executorArguments;
     private final String permissionPrefix;
+    private final CommandScheduler scheduler;
 
-    ArgumentCommandNodeCreator(Arguments<C> arguments, List<Arguments<C>> executorArguments, String permissionPrefix) {
+    ArgumentCommandNodeCreator(Arguments<C> arguments,
+                               List<Arguments<C>> executorArguments,
+                               String permissionPrefix,
+                               CommandScheduler scheduler) {
+        this.scheduler = scheduler;
         this.arguments = arguments;
         this.executorArguments = List.copyOf(executorArguments);
         this.permissionPrefix = permissionPrefix;
@@ -105,13 +110,14 @@ final class ArgumentCommandNodeCreator<S, T, C extends CommonCommandContext<S, T
                                CommandExecutor<C> helpAction,
                                CommonCommand<C, ?> parent) {
         return new CommandRunner<>(platformAdapter,
+                                   scheduler,
                                    parent,
                                    permissionPrefix,
                                    executorArguments,
                                    parent.options(),
                                    parent.prerequisite(),
                                    helpAction,
-                                   parent.preprocess(),
+                                   parent.middlewares(),
                                    arguments.executorFor(argument),
                                    uncaughtExceptionHandlers(parent, argument));
     }

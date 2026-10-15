@@ -21,7 +21,7 @@ public class PreprocessCommand extends Command {
         });
 
         addChildren(new Command("sub") {{
-            disableParentPreprocess();
+            disableParentMiddleware();
             execute(ctx -> ctx.sendSuccess("always success"));
         }});
     }

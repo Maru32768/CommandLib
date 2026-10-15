@@ -5,12 +5,15 @@ import dev.marulabs.commandlib.CommonArgument;
 import dev.marulabs.commandlib.CommonCommand;
 import dev.marulabs.commandlib.CommonCommandContext;
 import dev.marulabs.commandlib.DefaultPermission;
+import dev.marulabs.commandlib.command.AsyncCommandExecutor;
 import dev.marulabs.commandlib.command.CommandExecutor;
 import dev.marulabs.commandlib.command.Extractor;
 import dev.marulabs.commandlib.util.function.TetraConsumer;
+import dev.marulabs.commandlib.util.function.TetraFunction;
 import dev.marulabs.commandlib.util.function.TriFunction;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
 
 public final class TriArgumentBranch<T1, T2, T3, C extends CommonCommandContext<?, ?>, T extends CommonCommand<C, T>> extends ArgumentBranch<C, T> {
@@ -36,9 +39,23 @@ public final class TriArgumentBranch<T1, T2, T3, C extends CommonCommandContext<
         return this;
     }
 
+    public TriArgumentBranch<T1, T2, T3, C, T> executeAsync(@NotNull TetraFunction<T1, T2, T3, C, CompletionStage<?>> action) {
+        super.executeAsync(ctx -> action.apply(ctx.getArgument(argument1),
+                                               ctx.getArgument(argument2),
+                                               ctx.getArgument(argument3),
+                                               ctx));
+        return this;
+    }
+
     @Override
     public TriArgumentBranch<T1, T2, T3, C, T> execute(@NotNull CommandExecutor<C> action) {
         super.execute(action);
+        return this;
+    }
+
+    @Override
+    public TriArgumentBranch<T1, T2, T3, C, T> executeAsync(@NotNull AsyncCommandExecutor<C> action) {
+        super.executeAsync(action);
         return this;
     }
 
@@ -102,7 +119,7 @@ public final class TriArgumentBranch<T1, T2, T3, C extends CommonCommandContext<
     @Override
     public <S> RequiredTriArgumentBranch<S, T1, T2, T3, C, T> require(@NotNull Extractor<C, S> extractor) {
         return new RequiredTriArgumentBranch<>(extractor,
-                                               this::execute,
+                                               this::executeAsync,
                                                children -> delegate.addChildren(children),
                                                argument1,
                                                argument2,

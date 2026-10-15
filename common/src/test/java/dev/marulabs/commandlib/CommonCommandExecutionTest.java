@@ -236,7 +236,7 @@ class CommonCommandExecutionTest {
                 return true;
             });
             addChildren(new TestCommand("child") {{
-                disableParentPreprocess();
+                disableParentMiddleware();
                 execute(ctx -> ctx.sendMessage("executed"));
             }});
         }});

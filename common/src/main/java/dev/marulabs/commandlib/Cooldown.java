@@ -16,7 +16,7 @@ import java.util.function.BiConsumer;
 /**
  * A per-sender cooldown for {@link CommonCommand#cooldown(Cooldown)}.
  * <p>
- * The cooldown starts when the command passes its preprocess and is about to execute, and keeps the same sender from
+ * The cooldown starts when the command passes its middlewares and is about to execute, and keeps the same sender from
  * executing it again until it ends. Senders are told apart by their unique id, so only senders that have one, such as
  * players and entities, are throttled; the console, remote consoles and command blocks are never on cooldown. Commands
  * given the same instance share one cooldown.

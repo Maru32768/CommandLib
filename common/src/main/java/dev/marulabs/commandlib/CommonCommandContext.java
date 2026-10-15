@@ -9,7 +9,17 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.function.Supplier;
 
+/**
+ * The context of one command execution.
+ * <p>
+ * Thread safety: the parsed arguments, options and inputs do not change once the executor runs, so any thread may read
+ * them. Everything else, sending messages, the result, the sender and the platform objects, belongs to the sync
+ * thread; from async work, return to it with {@link #supplyAsync(Supplier)} or {@link #syncExecutor()}.
+ */
 public abstract class CommonCommandContext<S, C> {
     // Replaced only while a variadic argument parses one of its values.
     protected com.mojang.brigadier.context.CommandContext<S> handle;
@@ -21,6 +31,8 @@ public abstract class CommonCommandContext<S, C> {
     // Non-null while CommandRunner collects the messages of a failure.
     private @Nullable List<C> failureMessages;
     private @Nullable List<Runnable> failureSends;
+    // Set by CommandRunner before the command runs; null in suggestion contexts.
+    private @Nullable CommandScheduler scheduler;
 
     protected CommonCommandContext(@NotNull com.mojang.brigadier.context.CommandContext<S> ctx) {
         this.handle = Objects.requireNonNull(ctx);
@@ -256,9 +268,71 @@ public abstract class CommonCommandContext<S, C> {
      * {@link dev.marulabs.commandlib.exception.CommandPrerequisiteException}, whose preprocess returns false, or whose
      * permission, argument or prerequisite check fails. Its failure messages then reach the sender the way a vanilla
      * command's error does, so a silent source or each target of {@code /execute as @a} does not get them.
+     * <p>
+     * An {@code executeAsync} command whose stage has not completed when the dispatch returns gives the result set by
+     * then, so setting it later has no effect.
      */
     public final void setResult(int result) {
         this.result = result;
+    }
+
+    /**
+     * Runs {@code work} on the {@link #asyncExecutor()} and returns a future that completes on the
+     * {@link #syncExecutor()}, so that the stages chained on it with the non-async methods, such as
+     * {@code thenAccept}, run on the sync thread and may send messages and use the platform API.
+     *
+     * @throws IllegalStateException outside a command execution, such as in a suggestion provider
+     */
+    @NotNull
+    public final <T> CompletableFuture<T> supplyAsync(@NotNull Supplier<T> work) {
+        return CompletableFuture.supplyAsync(Objects.requireNonNull(work), asyncExecutor())
+                                .whenCompleteAsync((x, e) -> {
+                                }, syncExecutor());
+    }
+
+    /**
+     * Same as {@link #supplyAsync(Supplier)} for work without a value.
+     */
+    @NotNull
+    public final CompletableFuture<Void> runAsync(@NotNull Runnable work) {
+        Objects.requireNonNull(work);
+        return supplyAsync(() -> {
+            work.run();
+            return null;
+        });
+    }
+
+    /**
+     * The executor for the thread that owns the sender, the server thread. It runs a task at once when called on that
+     * thread.
+     *
+     * @throws IllegalStateException outside a command execution, such as in a suggestion provider
+     */
+    @NotNull
+    public final Executor syncExecutor() {
+        return requireScheduler().sync(this);
+    }
+
+    /**
+     * The executor for work off the sync thread.
+     *
+     * @throws IllegalStateException outside a command execution, such as in a suggestion provider
+     */
+    @NotNull
+    public final Executor asyncExecutor() {
+        return requireScheduler().async(this);
+    }
+
+    private CommandScheduler requireScheduler() {
+        CommandScheduler scheduler = this.scheduler;
+        if (scheduler == null) {
+            throw new IllegalStateException("The executors are available only while a command executes.");
+        }
+        return scheduler;
+    }
+
+    final void scheduler(CommandScheduler scheduler) {
+        this.scheduler = Objects.requireNonNull(scheduler);
     }
 
     /**

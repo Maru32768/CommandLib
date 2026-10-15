@@ -114,8 +114,8 @@ public final class CommandTester implements AutoCloseable {
 
         try (MockedStatic<ArgumentTypes> ignored = mockArgumentTypes()) {
             commands.addAll(builder.createCommands());
-            new CommandNodeCreator<>(commands, permissionPrefix).build()
-                                                                .forEach(dispatcher.getRoot()::addChild);
+            new CommandNodeCreator<>(commands, permissionPrefix, builder.scheduler).build()
+                                                                                   .forEach(dispatcher.getRoot()::addChild);
         }
     }
 
@@ -561,6 +561,7 @@ public final class CommandTester implements AutoCloseable {
 
     public static final class Builder {
         private final List<Supplier<? extends Command>> commandSuppliers = new ArrayList<>();
+        private CommandScheduler scheduler = CommandScheduler.of(Runnable::run, Runnable::run);
         private @Nullable String permissionPrefix;
 
         public Builder command(@NotNull Command command) {
@@ -581,6 +582,16 @@ public final class CommandTester implements AutoCloseable {
 
         public Builder permissionPrefix(@NotNull String permissionPrefix) {
             this.permissionPrefix = Objects.requireNonNull(permissionPrefix, "permissionPrefix");
+            return this;
+        }
+
+        /**
+         * Sets the threads of {@code executeAsync} commands. By default both executors run tasks at once, so an async
+         * command completes before {@code execute} returns; pass executors that queue tasks to test what happens in
+         * between.
+         */
+        public Builder scheduler(@NotNull CommandScheduler scheduler) {
+            this.scheduler = Objects.requireNonNull(scheduler, "scheduler");
             return this;
         }
 

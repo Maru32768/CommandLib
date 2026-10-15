@@ -1,6 +1,6 @@
 package dev.marulabs.commandlib;
 
-import dev.marulabs.commandlib.command.CommandExecutor;
+import dev.marulabs.commandlib.command.AsyncCommandExecutor;
 import dev.marulabs.commandlib.exception.ArgumentParseException;
 import dev.marulabs.commandlib.exception.CommandPrerequisiteException;
 import dev.marulabs.commandlib.util.ChatColorUtil;
@@ -26,7 +26,7 @@ final class Arguments<C extends CommonCommandContext<?, ?>> {
     private @Nullable DefaultPermission defaultPermissionOverride = null;
     private String permissionDescription = "";
     // Null until the branch sets one; the last argument's own executor applies then.
-    private @Nullable CommandExecutor<C> executor = null;
+    private @Nullable AsyncCommandExecutor<C> executor = null;
 
     Arguments(CommonCommand<C, ?> owner,
               List<? extends CommonArgument<?, C, ?>> arguments,
@@ -129,14 +129,14 @@ final class Arguments<C extends CommonCommandContext<?, ?>> {
                      .clear();
     }
 
-    void executor(CommandExecutor<C> executor) {
+    void executor(AsyncCommandExecutor<C> executor) {
         // Keep the executor on the branch instead of the argument instance, so one argument instance can be reused
         // as the last argument of several branches without them overwriting each other's executor.
         this.executor = Objects.requireNonNull(executor);
     }
 
     @Nullable
-    CommandExecutor<C> executorFor(CommonArgument<?, C, ?> argument) {
+    AsyncCommandExecutor<C> executorFor(CommonArgument<?, C, ?> argument) {
         // The branch can end at an argument when every argument after it is optional.
         int index = arguments.indexOf(argument);
         boolean endsBranch = index >= 0 && arguments.subList(index + 1, arguments.size())

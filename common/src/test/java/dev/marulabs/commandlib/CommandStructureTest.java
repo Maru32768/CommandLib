@@ -217,8 +217,9 @@ class CommandStructureTest {
         }});
 
         assertThatThrownBy(() -> new CommandNodeCreator<>(commands,
-                                                          "test.command").build()).isInstanceOf(IllegalArgumentException.class)
-                                                                                  .hasMessageContaining("foo");
+                                                          "test.command",
+                                                          TestCommandRunner.INLINE).build()).isInstanceOf(IllegalArgumentException.class)
+                                                                                            .hasMessageContaining("foo");
     }
 
     @Test

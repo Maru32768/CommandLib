@@ -5,11 +5,14 @@ import dev.marulabs.commandlib.CommonArgument;
 import dev.marulabs.commandlib.CommonCommand;
 import dev.marulabs.commandlib.CommonCommandContext;
 import dev.marulabs.commandlib.DefaultPermission;
+import dev.marulabs.commandlib.command.AsyncCommandExecutor;
 import dev.marulabs.commandlib.command.CommandExecutor;
 import dev.marulabs.commandlib.command.Extractor;
 import dev.marulabs.commandlib.util.function.TriConsumer;
+import dev.marulabs.commandlib.util.function.TriFunction;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.concurrent.CompletionStage;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -30,9 +33,20 @@ public final class BiArgumentBranch<T1, T2, C extends CommonCommandContext<?, ?>
         return this;
     }
 
+    public BiArgumentBranch<T1, T2, C, T> executeAsync(@NotNull TriFunction<T1, T2, C, CompletionStage<?>> action) {
+        super.executeAsync(ctx -> action.apply(ctx.getArgument(argument1), ctx.getArgument(argument2), ctx));
+        return this;
+    }
+
     @Override
     public BiArgumentBranch<T1, T2, C, T> execute(@NotNull CommandExecutor<C> action) {
         super.execute(action);
+        return this;
+    }
+
+    @Override
+    public BiArgumentBranch<T1, T2, C, T> executeAsync(@NotNull AsyncCommandExecutor<C> action) {
+        super.executeAsync(action);
         return this;
     }
 
@@ -96,7 +110,7 @@ public final class BiArgumentBranch<T1, T2, C extends CommonCommandContext<?, ?>
     @Override
     public <S> RequiredBiArgumentBranch<S, T1, T2, C, T> require(@NotNull Extractor<C, S> extractor) {
         return new RequiredBiArgumentBranch<>(extractor,
-                                              this::execute,
+                                              this::executeAsync,
                                               children -> delegate.addChildren(children),
                                               argument1,
                                               argument2);

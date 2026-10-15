@@ -2,7 +2,9 @@ package dev.marulabs.commandlib;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.context.CommandContext;
+import dev.marulabs.commandlib.command.AsyncCommandExecutor;
 import dev.marulabs.commandlib.command.CommandExecutor;
+import dev.marulabs.commandlib.command.CommandMiddleware;
 import dev.marulabs.commandlib.command.Prerequisite;
 import dev.marulabs.commandlib.exception.ArgumentParseException;
 import dev.marulabs.commandlib.exception.CommandPrerequisiteException;
@@ -15,39 +17,49 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Predicate;
+import java.util.Objects;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
+import java.util.function.Function;
 
 final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Command<S> {
     private final PlatformAdapter<S, ?, C, ?> platformAdapter;
+    private final CommandScheduler scheduler;
     private final CommonCommand<C, ?> command;
     private final String permissionPrefix;
     private final List<Arguments<C>> argumentsList;
     private final List<CommandOption<?, C>> options;
     private final Prerequisite<C> prerequisite;
     private final CommandExecutor<C> helpAction;
-    private final Predicate<C> preprocess;
-    // Null when the command or branch has no executor; the help action runs instead, without the preprocess.
-    private final @Nullable CommandExecutor<C> executor;
+    private final List<CommandMiddleware<? super C>> middlewares;
+    // Null when the command or branch has no executor; the help action runs instead, without the middlewares.
+    private final @Nullable AsyncCommandExecutor<C> executor;
     private final List<UncaughtExceptionHandler<C>> uncaughtExceptionHandlers;
 
     CommandRunner(PlatformAdapter<S, ?, C, ?> platformAdapter,
+                  CommandScheduler scheduler,
                   CommonCommand<C, ?> command,
                   String permissionPrefix,
                   List<Arguments<C>> argumentsList,
                   List<CommandOption<?, C>> options,
                   Prerequisite<C> prerequisite,
                   CommandExecutor<C> helpAction,
-                  Predicate<C> preprocess,
-                  @Nullable CommandExecutor<C> executor,
+                  List<CommandMiddleware<? super C>> middlewares,
+                  @Nullable AsyncCommandExecutor<C> executor,
                   List<UncaughtExceptionHandler<C>> uncaughtExceptionHandlers) {
         this.platformAdapter = platformAdapter;
+        this.scheduler = scheduler;
         this.command = command;
         this.permissionPrefix = permissionPrefix;
         this.argumentsList = List.copyOf(argumentsList);
         this.options = options;
         this.prerequisite = prerequisite;
         this.helpAction = helpAction;
-        this.preprocess = preprocess;
+        this.middlewares = List.copyOf(middlewares);
         this.executor = executor;
         this.uncaughtExceptionHandlers = uncaughtExceptionHandlers;
     }
@@ -56,6 +68,7 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
     public int run(CommandContext<S> context) throws CommandFailure {
         try {
             C ctx = platformAdapter.createCommandContext(context);
+            ctx.scheduler(scheduler);
             return CurrentCommandContext.call(ctx, () -> runInContext(ctx));
         } catch (CommandFailure e) {
             throw e;
@@ -99,45 +112,140 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
             }
 
             if (executor == null) {
-                return executeWithStackTrace(ctx, helpAction);
+                try {
+                    helpAction.accept(ctx);
+                    return ctx.getResult();
+                } catch (Exception e) {
+                    return fail(toFailure(ctx, e));
+                }
             }
 
-            // The preprocess sends its messages before returning, so they are collected until it tells whether the
-            // command fails.
-            boolean[] passed = new boolean[1];
-            CommandFailure preprocessFailure = ctx.captureFailure(() -> passed[0] = preprocess.test(ctx));
-            if (!passed[0]) {
-                return fail(preprocessFailure);
+            CompletableFuture<Void> completion = proceed(ctx, 0, executor);
+            if (completion.isDone()) {
+                Throwable failure = failureOf(completion);
+                return failure == null ? ctx.getResult() : fail(toFailure(ctx, failure));
             }
-            preprocessFailure.sendMessages();
-
-            return executeWithStackTrace(ctx, executor);
+            // Brigadier needs the result now, so an execution still running returns the result set so far, 1 unless
+            // set, and reports its failure to the sender when it completes.
+            int result = ctx.getResult();
+            whenComplete(completion, ctx);
+            return result;
         } catch (CommandFailure e) {
             throw e;
         } catch (Throwable e) {
-            // Exceptions escaping parsing, prerequisites or preprocess are not reported to the sender, so the handlers
-            // get them before Brigadier propagates them to the platform.
+            // Exceptions escaping parsing or prerequisites are not reported to the sender, so the handlers get them
+            // before Brigadier propagates them to the platform.
             e.printStackTrace();
             notifyUncaughtExceptionHandlers(e, ctx);
             throw e;
         }
     }
 
-    private int executeWithStackTrace(C ctx, CommandExecutor<C> executor) throws CommandFailure {
+    /**
+     * Runs the middleware at {@code index}, or the executor after the last one, on the sync thread, inline when the
+     * caller is on it.
+     */
+    // The nested future is flattened by thenCompose, not ignored.
+    @SuppressWarnings("FutureReturnValueIgnored")
+    private CompletableFuture<Void> proceed(C ctx, int index, AsyncCommandExecutor<C> executor) {
+        return CompletableFuture.supplyAsync(() -> CurrentCommandContext.call(ctx, () -> step(ctx, index, executor)),
+                                             scheduler.sync(ctx))
+                                .thenCompose(Function.identity());
+    }
+
+    private CompletableFuture<Void> step(C ctx, int index, AsyncCommandExecutor<C> executor) {
+        CompletableFuture<?> stage;
         try {
-            executor.accept(ctx);
-            return ctx.getResult();
-        } catch (CommandPrerequisiteException e) {
-            return fail(ctx, () -> e.sendMessage(ctx));
+            CompletionStage<?> result;
+            if (index < middlewares.size()) {
+                result = middlewares.get(index)
+                                    .handle(ctx, () -> proceed(ctx, index + 1, executor));
+            } else {
+                result = executor.apply(ctx);
+            }
+            stage = Objects.requireNonNull(result, "A middleware or async executor returned null")
+                           .toCompletableFuture();
         } catch (Exception e) {
-            e.printStackTrace();
-            CommandFailure failure = ctx.captureFailure(() -> {
-                ctx.sendFailure("An unexpected error occurred trying to execute that command.");
-                ctx.sendFailure("Check the console for details.");
-            });
-            notifyUncaughtExceptionHandlers(e, ctx);
-            return fail(failure);
+            return CompletableFuture.failedFuture(e);
         }
+        if (stage.isDone()) {
+            return stage.thenApply(x -> null);
+        }
+        // Brings the completion back to the sync thread, so the outer middlewares' hooks run there.
+        return stage.whenCompleteAsync((x, e) -> {
+        }, scheduler.sync(ctx))
+                    .thenApply(x -> null);
+    }
+
+    // The completion runs the reporting; its own future has nothing more to report.
+    @SuppressWarnings("FutureReturnValueIgnored")
+    private void whenComplete(CompletableFuture<Void> completion, C ctx) {
+        completion.whenCompleteAsync((ignored, e) -> {
+            if (e != null) {
+                reportLateFailure(ctx, unwrap(e));
+            }
+        }, scheduler.sync(ctx));
+    }
+
+    // common has no logger, so a stack trace on the console is how it reports, as in run.
+    @SuppressWarnings("CatchAndPrintStackTrace")
+    private void reportLateFailure(C ctx, Throwable e) {
+        try {
+            // The dispatch has returned, so the messages go to the sender directly.
+            CurrentCommandContext.run(ctx, () -> toFailure(ctx, e).sendMessages());
+        } catch (RuntimeException t) {
+            t.printStackTrace();
+        }
+    }
+
+    @Nullable
+    private static Throwable failureOf(CompletableFuture<?> completion) {
+        try {
+            completion.join();
+            return null;
+        } catch (CancellationException e) {
+            return e;
+        } catch (CompletionException e) {
+            return unwrap(e);
+        }
+    }
+
+    private static Throwable unwrap(Throwable e) {
+        Throwable t = e;
+        while ((t instanceof CompletionException || t instanceof ExecutionException) && t.getCause() != null) {
+            t = t.getCause();
+        }
+        return t;
+    }
+
+    /**
+     * The failure that reports {@code e} from a middleware, the executor or the help action, with its messages
+     * collected. An unexpected exception is printed and passed to the uncaught exception handlers.
+     */
+    private CommandFailure toFailure(C ctx, Throwable e) {
+        if (e instanceof CommandFailure) {
+            return (CommandFailure) e;
+        }
+        if (e instanceof CommandPrerequisiteException) {
+            return ctx.captureFailure(() -> ((CommandPrerequisiteException) e).sendMessage(ctx));
+        }
+        if (e instanceof CancellationException) {
+            // Someone cancelled the work on purpose, so there is nothing to report.
+            return ctx.captureFailure(() -> {
+            });
+        }
+        if (e instanceof TimeoutException) {
+            CommandFailure failure = ctx.captureFailure(() -> ctx.sendFailure("The command timed out."));
+            notifyUncaughtExceptionHandlers(e, ctx);
+            return failure;
+        }
+        e.printStackTrace();
+        CommandFailure failure = ctx.captureFailure(() -> {
+            ctx.sendFailure("An unexpected error occurred trying to execute that command.");
+            ctx.sendFailure("Check the console for details.");
+        });
+        notifyUncaughtExceptionHandlers(e, ctx);
+        return failure;
     }
 
     private static int fail(CommonCommandContext<?, ?> ctx, Runnable sendMessages) throws CommandFailure {
@@ -152,7 +260,7 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
         throw failure;
     }
 
-    // common has no logger, so a stack trace on the console is how it reports, as in run and executeWithStackTrace.
+    // common has no logger, so a stack trace on the console is how it reports, as in run.
     @SuppressWarnings("CatchAndPrintStackTrace")
     private void notifyUncaughtExceptionHandlers(Throwable e, C ctx) {
         // A failing handler must neither keep the remaining handlers from running nor escape to the outer catch,

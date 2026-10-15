@@ -4,13 +4,15 @@ import dev.marulabs.commandlib.ArgRef;
 import dev.marulabs.commandlib.CommonArgument;
 import dev.marulabs.commandlib.CommonCommand;
 import dev.marulabs.commandlib.CommonCommandContext;
-import dev.marulabs.commandlib.command.CommandExecutor;
+import dev.marulabs.commandlib.command.AsyncCommandExecutor;
 import dev.marulabs.commandlib.command.Extractor;
 import dev.marulabs.commandlib.util.function.HexaConsumer;
+import dev.marulabs.commandlib.util.function.HexaFunction;
 import dev.marulabs.commandlib.util.function.TetraFunction;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
+import java.util.concurrent.CompletionStage;
 import java.util.function.Consumer;
 
 public final class RequiredTetraArgumentBranch<S, T1, T2, T3, T4, C extends CommonCommandContext<?, ?>, T extends CommonCommand<C, T>> extends RequiredArgumentBranch<S, C, T> {
@@ -20,7 +22,7 @@ public final class RequiredTetraArgumentBranch<S, T1, T2, T3, T4, C extends Comm
     private final CommonArgument<T4, C, ?> argument4;
 
     public RequiredTetraArgumentBranch(@NotNull Extractor<C, S> extractor,
-                                       @NotNull Consumer<CommandExecutor<C>> executeRegistrar,
+                                       @NotNull Consumer<AsyncCommandExecutor<C>> executeRegistrar,
                                        @NotNull Consumer<Collection<? extends T>> childrenAdder,
                                        @NotNull CommonArgument<T1, C, ?> argument1,
                                        @NotNull CommonArgument<T2, C, ?> argument2,
@@ -40,6 +42,16 @@ public final class RequiredTetraArgumentBranch<S, T1, T2, T3, T4, C extends Comm
                                                 ctx.getArgument(argument4),
                                                 s,
                                                 ctx));
+        return this;
+    }
+
+    public RequiredTetraArgumentBranch<S, T1, T2, T3, T4, C, T> executeAsync(@NotNull HexaFunction<T1, T2, T3, T4, S, C, CompletionStage<?>> action) {
+        super.executeAsync((s, ctx) -> action.apply(ctx.getArgument(argument1),
+                                                    ctx.getArgument(argument2),
+                                                    ctx.getArgument(argument3),
+                                                    ctx.getArgument(argument4),
+                                                    s,
+                                                    ctx));
         return this;
     }
 

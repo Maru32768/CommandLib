@@ -18,22 +18,26 @@ public class MockNMSCommandListenerWrapper extends NMSCommandListenerWrapper {
         super(handle, Object.class);
     }
 
+    /**
+     * The sender CommandTester executes the command as, which it passes as the source.
+     */
     @Override
     public CommandSender getBukkitSender() {
-        return CommandTester.getCurrentCommandSender();
+        Object handle = getHandle();
+        return handle instanceof CommandSender ? (CommandSender) handle : CommandTester.getCurrentCommandSender();
     }
 
     @Override
     @Nullable
     public Entity getBukkitEntity() {
-        CommandSender sender = CommandTester.getCurrentCommandSender();
+        CommandSender sender = getBukkitSender();
         return sender instanceof Entity ? (Entity) sender : null;
     }
 
     @Override
     @Nullable
     public World getBukkitWorld() {
-        CommandSender sender = CommandTester.getCurrentCommandSender();
+        CommandSender sender = getBukkitSender();
         return sender instanceof Entity ? ((Entity) sender).getWorld() : null;
     }
 
@@ -65,7 +69,7 @@ public class MockNMSCommandListenerWrapper extends NMSCommandListenerWrapper {
     @Override
     @Nullable
     public Location getBukkitLocation() {
-        CommandSender sender = CommandTester.getCurrentCommandSender();
+        CommandSender sender = getBukkitSender();
         return sender instanceof Entity ? ((Entity) sender).getLocation() : null;
     }
 }

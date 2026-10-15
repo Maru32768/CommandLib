@@ -4,13 +4,15 @@ import dev.marulabs.commandlib.ArgRef;
 import dev.marulabs.commandlib.CommonArgument;
 import dev.marulabs.commandlib.CommonCommand;
 import dev.marulabs.commandlib.CommonCommandContext;
-import dev.marulabs.commandlib.command.CommandExecutor;
+import dev.marulabs.commandlib.command.AsyncCommandExecutor;
 import dev.marulabs.commandlib.command.Extractor;
 import dev.marulabs.commandlib.util.function.HeptConsumer;
+import dev.marulabs.commandlib.util.function.HeptFunction;
 import dev.marulabs.commandlib.util.function.QuintFunction;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
+import java.util.concurrent.CompletionStage;
 import java.util.function.Consumer;
 
 public final class RequiredQuintArgumentBranch<S, T1, T2, T3, T4, T5, C extends CommonCommandContext<?, ?>, T extends CommonCommand<C, T>> extends RequiredArgumentBranch<S, C, T> {
@@ -21,7 +23,7 @@ public final class RequiredQuintArgumentBranch<S, T1, T2, T3, T4, T5, C extends 
     private final CommonArgument<T5, C, ?> argument5;
 
     public RequiredQuintArgumentBranch(@NotNull Extractor<C, S> extractor,
-                                       @NotNull Consumer<CommandExecutor<C>> executeRegistrar,
+                                       @NotNull Consumer<AsyncCommandExecutor<C>> executeRegistrar,
                                        @NotNull Consumer<Collection<? extends T>> childrenAdder,
                                        @NotNull CommonArgument<T1, C, ?> argument1,
                                        @NotNull CommonArgument<T2, C, ?> argument2,
@@ -44,6 +46,17 @@ public final class RequiredQuintArgumentBranch<S, T1, T2, T3, T4, T5, C extends 
                                                 ctx.getArgument(argument5),
                                                 s,
                                                 ctx));
+        return this;
+    }
+
+    public RequiredQuintArgumentBranch<S, T1, T2, T3, T4, T5, C, T> executeAsync(@NotNull HeptFunction<T1, T2, T3, T4, T5, S, C, CompletionStage<?>> action) {
+        super.executeAsync((s, ctx) -> action.apply(ctx.getArgument(argument1),
+                                                    ctx.getArgument(argument2),
+                                                    ctx.getArgument(argument3),
+                                                    ctx.getArgument(argument4),
+                                                    ctx.getArgument(argument5),
+                                                    s,
+                                                    ctx));
         return this;
     }
 

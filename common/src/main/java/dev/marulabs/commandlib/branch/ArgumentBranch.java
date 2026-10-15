@@ -3,6 +3,7 @@ package dev.marulabs.commandlib.branch;
 import dev.marulabs.commandlib.CommonCommand;
 import dev.marulabs.commandlib.CommonCommandContext;
 import dev.marulabs.commandlib.DefaultPermission;
+import dev.marulabs.commandlib.command.AsyncCommandExecutor;
 import dev.marulabs.commandlib.command.CommandExecutor;
 import dev.marulabs.commandlib.command.Extractor;
 import org.jetbrains.annotations.NotNull;
@@ -31,6 +32,13 @@ public class ArgumentBranch<C extends CommonCommandContext<?, ?>, T extends Comm
     }
 
     public ArgumentBranch<C, T> execute(@NotNull CommandExecutor<C> action) {
+        return executeAsync(AsyncCommandExecutor.of(action));
+    }
+
+    /**
+     * Sets an executor whose work finishes later, like {@link CommonCommand#executeAsync(AsyncCommandExecutor)}.
+     */
+    public ArgumentBranch<C, T> executeAsync(@NotNull AsyncCommandExecutor<C> action) {
         delegate.execute(Objects.requireNonNull(action));
         return this;
     }
@@ -80,7 +88,7 @@ public class ArgumentBranch<C extends CommonCommandContext<?, ?>, T extends Comm
 
     public <S> RequiredArgumentBranch<S, C, T> require(@NotNull Extractor<C, S> extractor) {
         return new RequiredArgumentBranch<>(Objects.requireNonNull(extractor),
-                                            this::execute,
+                                            this::executeAsync,
                                             children -> delegate.addChildren(children));
     }
 }

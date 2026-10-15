@@ -1,5 +1,6 @@
 package dev.marulabs.commandlib;
 
+import dev.marulabs.commandlib.command.AsyncCommandExecutor;
 import dev.marulabs.commandlib.command.CommandExecutor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -11,7 +12,7 @@ import java.util.Objects;
 public final class ArgumentBuilder<C extends CommonCommandContext<?, ?>> {
     private final List<CommonArgument<?, C, ?>> arguments = new ArrayList<>();
     // Null until execute is called.
-    private @Nullable CommandExecutor<C> executor = null;
+    private @Nullable AsyncCommandExecutor<C> executor = null;
 
     public ArgumentBuilder<C> argument(@NotNull CommonArgument<?, C, ?> argument) {
         Objects.requireNonNull(argument);
@@ -26,11 +27,18 @@ public final class ArgumentBuilder<C extends CommonCommandContext<?, ?>> {
     }
 
     public void execute(@NotNull CommandExecutor<C> executor) {
+        executeAsync(AsyncCommandExecutor.of(executor));
+    }
+
+    /**
+     * Sets an executor whose work finishes later, like {@link CommonCommand#executeAsync(AsyncCommandExecutor)}.
+     */
+    public void executeAsync(@NotNull AsyncCommandExecutor<C> executor) {
         this.executor = Objects.requireNonNull(executor);
     }
 
     @Nullable
-    CommandExecutor<C> executor() {
+    AsyncCommandExecutor<C> executor() {
         return executor;
     }
 

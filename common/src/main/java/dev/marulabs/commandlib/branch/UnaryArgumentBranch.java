@@ -5,11 +5,14 @@ import dev.marulabs.commandlib.CommonArgument;
 import dev.marulabs.commandlib.CommonCommand;
 import dev.marulabs.commandlib.CommonCommandContext;
 import dev.marulabs.commandlib.DefaultPermission;
+import dev.marulabs.commandlib.command.AsyncCommandExecutor;
 import dev.marulabs.commandlib.command.CommandExecutor;
 import dev.marulabs.commandlib.command.Extractor;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.concurrent.CompletionStage;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public final class UnaryArgumentBranch<T1, C extends CommonCommandContext<?, ?>, T extends CommonCommand<C, T>> extends ArgumentBranch<C, T> {
@@ -25,9 +28,20 @@ public final class UnaryArgumentBranch<T1, C extends CommonCommandContext<?, ?>,
         return this;
     }
 
+    public UnaryArgumentBranch<T1, C, T> executeAsync(@NotNull BiFunction<T1, C, CompletionStage<?>> action) {
+        super.executeAsync(ctx -> action.apply(ctx.getArgument(argument1), ctx));
+        return this;
+    }
+
     @Override
     public UnaryArgumentBranch<T1, C, T> execute(@NotNull CommandExecutor<C> action) {
         super.execute(action);
+        return this;
+    }
+
+    @Override
+    public UnaryArgumentBranch<T1, C, T> executeAsync(@NotNull AsyncCommandExecutor<C> action) {
+        super.executeAsync(action);
         return this;
     }
 
@@ -91,7 +105,7 @@ public final class UnaryArgumentBranch<T1, C extends CommonCommandContext<?, ?>,
     @Override
     public <S> RequiredUnaryArgumentBranch<S, T1, C, T> require(@NotNull Extractor<C, S> extractor) {
         return new RequiredUnaryArgumentBranch<>(extractor,
-                                                 this::execute,
+                                                 this::executeAsync,
                                                  children -> delegate.addChildren(children),
                                                  argument1);
     }

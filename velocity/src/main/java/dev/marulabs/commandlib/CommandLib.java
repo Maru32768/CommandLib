@@ -118,7 +118,9 @@ public final class CommandLib {
         commands.forEach(Objects::requireNonNull);
         List<Command> list = List.copyOf(commands);
         List<LiteralCommandNode<CommandSource>> nodes = new CommandNodeCreator<CommandSource, Component, CommandContext, Command>(list,
-                                                                                                                                  permissionPrefix).build();
+                                                                                                                                  permissionPrefix,
+                                                                                                                                  new VelocityCommandScheduler(plugin,
+                                                                                                                                                               proxy)).build();
         CommandContext.proxy = proxy;
         list.forEach(c -> VelocityPermissions.addDefaults(c.permissionConfigs(permissionPrefix)));
 
