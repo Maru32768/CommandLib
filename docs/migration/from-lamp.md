@@ -278,7 +278,7 @@ argument(new WorldArgument("world").setSuggestionProvider(sb -> Bukkit.getWorlds
 | Parameter validators | `validator(...)` on the argument; throw `ArgumentValidationException("...")` for your own message |
 | `CommandCondition` + a custom annotation | A `Prerequisite<CommandContext>` added with `addPrerequisite(...)` |
 | `throw new CommandErrorException("...")` | `throw new CommandPrerequisiteException("...")` from `execute(ctx -> ...)` or a prerequisite |
-| `@Cooldown(value = 3, unit = TimeUnit.SECONDS)` | **Not available** |
+| `@Cooldown(value = 3, unit = TimeUnit.SECONDS)` | `cooldown(Duration.ofSeconds(3))` on the command; see [confirmation and cooldown](../../README.md#confirmation-and-cooldown) |
 | Hooks | **Not available** globally; `addPreprocess(ctx -> ...)` on a command also covers its children |
 
 ```java
@@ -362,7 +362,7 @@ Coroutine (`suspend`) handlers are **not available**.
 ## Not available yet
 
 Tracked in the roadmap: an annotation API (with custom annotations), a Kotlin DSL with default arguments, dependency
-injection, cooldowns and confirmation, middleware and hooks, response handlers, global parameter types and suggestion
+injection, middleware and hooks, response handlers, global parameter types and suggestion
 providers, customizable and translatable built-in messages, and options with non-primitive values.
 
 See also: [Migrating from CommandAPI](from-commandapi.md), [Cloud](from-cloud.md), [ACF](from-acf.md).

@@ -262,6 +262,9 @@ class ScanCommand extends Command {
 
 `/scan -f Steve`, `/scan --force Steve`. See [options](../options.md).
 
+Also not in ACF: `confirm()` asks the sender to run the command again before it executes, and `cooldown(Duration)`
+keeps a player from running it again too soon. See [confirmation and cooldown](../../README.md#confirmation-and-cooldown).
+
 ## Help
 
 | ACF | CommandLib |

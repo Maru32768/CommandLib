@@ -295,9 +295,11 @@ The command has returned by the time the task runs, so `/execute store` sees `1`
 |---|---|
 | `registerCommandPreProcessor(...)` (every command) | **Not available** globally. `addPreprocess(ctx -> ...)` on a command also covers its children (opt out with `disableParentPreprocess()`) |
 | `registerCommandPostProcessor(...)` | **Not available** globally. `addPrerequisite(...)` (also inherited, `disableParentPrerequisite()`) runs before the executor |
-| `cloud-processors-confirmation` | **Not available** |
-| `cloud-processors-cooldown` | **Not available** |
+| `cloud-processors-confirmation` | `confirm()`, or `confirm(Confirmation.within(timeout))`: the sender runs the same input again (or clicks `[Confirm]`) |
+| `cloud-processors-cooldown` | `cooldown(Duration)`, or `cooldown(Cooldown.of(duration).bypassPermission(...))`; kept in memory per unique id |
 | `ParameterInjectorRegistry`, `ctx.inject(...)`, Guice injection service | **Not available**; pass dependencies to the command's constructor |
+
+See [confirmation and cooldown](../../README.md#confirmation-and-cooldown) in the README for the messages and the order of the checks.
 
 ## Errors and captions
 
@@ -340,7 +342,8 @@ argument(new IntegerArgument("amount").validator((amount, ctx) -> {
 | `@Permission("...")` | `permission("...")` |
 | `@CommandDescription("...")` | `description("...")` |
 | `@Suggestions("name")`, `@Parser` | A suggestion provider or argument instance on the branch |
-| `@ProxiedBy` (a root alias of a subcommand), `@Confirmation` | **Not available**; `addAliases(...)` adds aliases on the same level only |
+| `@Confirmation` | `confirm()` |
+| `@ProxiedBy` (a root alias of a subcommand) | **Not available**; `addAliases(...)` adds aliases on the same level only |
 
 ## Kotlin
 
@@ -356,7 +359,7 @@ CommandLib's `spigot-testing` / `paper-testing` run commands without a server:
 ## Not available yet
 
 Tracked in the roadmap: an annotation API and a Kotlin DSL, a global sender mapper, asynchronous execution, global
-pre- and postprocessors (middleware), confirmation and cooldowns, injection, customizable and translatable built-in
+pre- and postprocessors (middleware), injection, customizable and translatable built-in
 messages, permission predicates that hide commands, typed value options beyond primitives and strings, and the
 arguments listed as missing in the [catalog](../arguments.md).
 
