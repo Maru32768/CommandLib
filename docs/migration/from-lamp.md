@@ -153,7 +153,7 @@ factory method that returns a configured argument. To refine a built-in type, us
 | `Player sender` as the first parameter (player only) | `requirePlayer()` on the command, then `ctx.getPlayer()`; or `require(Command.playerRequirer())` for a typed player |
 | `ConsoleCommandSender sender` | `requireConsole()`, then `ctx.getConsole()` |
 | `actor.requirePlayer()` | `Command.playerRequirer()` |
-| A custom actor type or `ContextParameter` | `require(ctx -> ...)` maps the sender to your type per branch |
+| A custom actor type or `ContextParameter` | `provide(GameActor.class, ctx -> ...)` on the command maps the sender once per execution for its subtree; `ctx.get(GameActor.class)` reads it, and annotated methods take it as a parameter after `registerContextValue(GameActor.class, ctx -> ...)`. See [context values](../context-values.md) |
 
 ```java
 // CommandLib: a typed player value
@@ -308,7 +308,29 @@ A prerequisite on a command also applies to its children unless a child calls `d
 
 ## Dependency injection
 
-**Not available** as a container. `@Dependency` fields and `builder.dependency(...)` become constructor parameters:
+`builder.dependency(Type.class, instance)` and `@Dependency` fields map to the annotation parser:
+
+```java
+@Command("arena")
+public final class ArenaCommand {
+    @Dependency
+    private ArenaManager arenas;
+
+    @Subcommand("ready")
+    public void ready(CommandContext ctx) {
+        ctx.sendMessage(arenas.isReady() ? "ready" : "not ready");
+    }
+}
+
+// onEnable
+CommandLib.register(this, AnnotatedCommands.parser()
+                                           .registerDependency(ArenaManager.class, arenaManager)
+                                           .parse(new ArenaCommand()));
+```
+
+A registered dependency is also a parameter type of the methods and a value fluent code of the command reads with
+`ctx.get(ArenaManager.class)` ([context values](../context-values.md#dependencies)). Constructor parameters do the same
+without reflection, and are how fluent commands get their services:
 
 ```java
 class ArenaCommand extends Command {
@@ -363,8 +385,8 @@ providers are `addSuggestionProviderSuspend { sb -> }`. Functions with default p
 
 ## Not available yet
 
-Tracked in the roadmap: dependency
-injection, middleware and hooks, response handlers, global parameter types and suggestion
+Tracked in the roadmap: registration
+hooks, response handlers, global parameter types and suggestion
 providers, customizable and translatable built-in messages, and options with non-primitive values.
 
 See also: [Migrating from CommandAPI](from-commandapi.md), [Cloud](from-cloud.md), [ACF](from-acf.md).

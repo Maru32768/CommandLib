@@ -51,6 +51,9 @@ with ease.
 11. **Localized Messages**  
     CommandLib's own messages are captions sent in each sender's locale, in English and Japanese out of the box, and a
     plugin can replace them per key and locale or load its own properties files ([docs](docs/localization.md)).
+12. **Sender Mapping and Context Values**  
+    Map the sender to your own type once, attach values from middlewares, and give commands their services; executors,
+    annotated methods and the Kotlin DSL read them by type without casts ([docs](docs/context-values.md)).
 
 ## Why CommandLib
 
@@ -87,6 +90,7 @@ See the [argument catalog](docs/arguments.md) for an argument-by-argument compar
 - [Vanilla integration](docs/vanilla-integration.md): `/execute`, command blocks, functions, and tags.
 - [Execution](docs/execution.md): middlewares, async executors, threads, and `/execute store` for async commands.
 - [Annotated commands](docs/annotations.md): commands as annotated classes, and how they map to the fluent API.
+- [Context values](docs/context-values.md): sender mapping, values from middlewares, and dependencies.
 - [Testing](docs/testing.md): `CommandTester` and `FakeSender` for plugin and mod tests.
 - [Kotlin DSL](docs/kotlin.md): `command { }` blocks, delegated options, and coroutines.
 - [Java builder](docs/java-builder.md): `Command.builder(name)` chains, and branches of eight or more arguments.
@@ -1079,6 +1083,30 @@ Exceptions of the work reach the `UncaughtExceptionHandler`s as an executor's do
 once, an async command still running gives `/execute store` the result set so far (1 unless set). See
 [execution](docs/execution.md) for the order of middlewares, exception mapping, threads on each platform, timeouts,
 cancellation and testing.
+
+## Sender Mapping and Context Values
+
+A command provides typed values to its executions, such as the sender as the plugin's own type; middlewares can put
+more, and every executor, prerequisite and suggestion provider of the subtree reads them by type:
+
+```java
+public final class TeamCommand extends Command {
+    public TeamCommand(Games games, Accounts accounts) {
+        super("team");
+
+        provide(GamePlayer.class, ctx -> games.of(playerRequirer().extract(ctx)));    // once per execution
+        addMiddleware((ctx, next) -> {
+            ctx.put(Account.class, accounts.load(ctx.getSender()));
+            return next.proceed();
+        });
+        argument(new StringArgument("team")).execute((team, ctx) -> ctx.get(GamePlayer.class).join(team));
+    }
+}
+```
+
+The console gets "This command can only be executed by a player." from the provider. Annotated methods take the same
+values as parameters (`void join(GamePlayer player, String team)`) through `registerContextValue` and
+`registerDependency`, with `@Dependency` fields. See [context values](docs/context-values.md).
 
 ## Annotated Commands
 

@@ -92,8 +92,11 @@ return a `CompletionStage` that returns null fails with a clear message.
   `List`), with `Enum.class` as the fallback for enums. A later registration replaces an earlier one, so a plugin can
   override a built-in mapping. The factory receives an `AnnotatedParameter` (name, value type, annotations), so it can
   read annotations of its own.
-- `registerContextValue(Class, Extractor)`: values resolved from the context, for senders and for services such as an
-  economy, which is the first step of dependency injection.
+- `registerContextValue(Class, Extractor)`: values resolved from the context with `ctx.get(type)`, for mapped senders
+  and services. The parsed root provides them (`provide(type, extractor)`), so they are the same values fluent code
+  and middlewares of the command read ([context values](execution-pipeline.md#context-values)).
+  `registerContextValue(Class)` declares a type a middleware or a parent command gives, and
+  `registerDependency(Class, instance)` a constant that also sets `@Dependency` fields.
 - `registerAnnotation(Class<A>, Class<V>, ArgumentAnnotationHandler)`: custom parameter annotations. A handler gets the
   annotation and the argument typed as `CommonArgument<V, C, ?>`, so `argument.validator(Player::isOnline)` needs no
   cast, and returns the argument to use. Handlers apply after the factory and `@Suggest` and before `variadic()` and

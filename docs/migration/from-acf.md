@@ -146,7 +146,7 @@ configured argument.
 | ACF context kind | CommandLib |
 |---|---|
 | `registerContext` (consumes input) | An argument: `ObjectArgument`, `NameableObjectArgument`, `EnumArgument`, or a subclass of `Argument` |
-| `registerIssuerOnlyContext` (from the sender only) | `require(ctx -> ...)`, which hands the value to the executor |
+| `registerIssuerOnlyContext` (from the sender only) | `provide(Type.class, ctx -> ...)` on the command, read with `ctx.get(Type.class)` or as an annotated parameter after `registerContextValue`; or `require(ctx -> ...)`, which hands the value to one executor ([context values](../context-values.md#sender-mapping)) |
 | `registerIssuerAwareContext` (input, or the sender when omitted) | An argument with `optional(ctx -> ...)` |
 | `InvalidCommandArgument("...")` | `ArgumentValidationException("...")` from `validator(...)`, or `CommandPrerequisiteException("...")` from an `Extractor` |
 
@@ -307,8 +307,12 @@ class HelloCommand extends Command {
 
 ## Dependency injection
 
-**Not available** as a container. `manager.registerDependency(...)` and `@Dependency` fields become constructor
-parameters: `CommandLib.register(this, new JoinCommand(arenaManager))`.
+`manager.registerDependency(Type.class, instance)` and `@Dependency` fields map to the annotation parser:
+`AnnotatedCommands.parser().registerDependency(ArenaManager.class, arenaManager).parse(new JoinCommand())` sets the
+fields of `JoinCommand` annotated `@Dependency` (from `dev.marulabs.commandlib.annotation`) and lets its methods take an
+`ArenaManager` parameter. Fluent commands get their services through the constructor,
+`CommandLib.register(this, new JoinCommand(arenaManager))`, or read a value a parent command provides with
+`ctx.get(ArenaManager.class)` ([context values](../context-values.md#dependencies)).
 
 ## Testing
 
@@ -318,7 +322,7 @@ parameters: `CommandLib.register(this, new JoinCommand(arenaManager))`.
 
 ## Not available yet
 
-Tracked in the roadmap: dependency injection, reusable named conditions, a locale and message key
+Tracked in the roadmap: reusable named conditions, a locale and message key
 system for CommandLib's own messages and help, message formats, catch-unknown handlers, hidden commands, root aliases
 for subcommands, and global contexts and completions by type. Asynchronous execution is `executeAsync(...)`, see
 [execution](../execution.md#async-executors).

@@ -43,6 +43,8 @@ public final class AuditedCommand extends Command {
   its message, as a prerequisite does. Return a stage without calling `proceed()`, such as
   `CompletableFuture.completedFuture(null)`, to skip the executor without failing.
 - **Post-execution hooks** chain on the stage `proceed()` returns: `whenComplete`, `thenRun`, `handle`.
+- **Context values**: `ctx.put(Account.class, account)` before `proceed()` hands a value to the later middlewares and
+  the executor, which read it with `ctx.get(Account.class)`. See [context values](context-values.md).
 - **Results**: `ctx.setResult(int)` before or after `proceed()` sets the value `/execute store result` stores, as long
   as the execution completes before the dispatch returns.
 - **Exception mapping**: `proceed()` never throws. An exception of the executor or of an inner middleware completes its

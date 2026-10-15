@@ -150,6 +150,10 @@ Each parameter is, in this order:
    argument, is a variadic argument of `T` (`new XArgument(name).variadic()`).
 5. **A value from the context** for its type when no argument has the type, such as `CommandSender`.
 
+A value from the context is read with `ctx.get(type)`: the value the parsed command provides with the registered
+extractor, run once per execution, or the value a middleware put. A sender mapped to a type of your own, a service and
+a middleware's value are all parameters this way; see [context values](context-values.md#annotated-commands).
+
 | Parameter type | Argument |
 |---|---|
 | `String` | `StringArgument` (`@Greedy` for `StringArgument.Type.PHRASE`) |
@@ -211,8 +215,12 @@ command with its message; other exceptions are reported as an executor's are.
 Command command = AnnotatedCommands.parser()
         // A type of your own, or a replacement for a built-in one.
         .registerArgument(Arena.class, p -> new ObjectArgument<>(p.name(), arenas.byName()))
-        // A value the method gets from the context, such as a service.
-        .registerContextValue(Economy.class, ctx -> economy)
+        // A value the method gets from the context, such as the sender as your own type.
+        .registerContextValue(GamePlayer.class, ctx -> games.of(Command.playerRequirer().extract(ctx)))
+        // A value a middleware puts, or a command the parsed one is added to provides.
+        .registerContextValue(Account.class)
+        // A service: a parameter of the type, and the fields annotated @Dependency.
+        .registerDependency(Economy.class, economy)
         // A custom annotation that configures the argument of a parameter.
         .registerAnnotation(Online.class, Player.class, (online, argument) -> argument.validator(Player::isOnline))
         .parse(new ShopCommand());
@@ -224,6 +232,8 @@ Command command = AnnotatedCommands.parser()
 - `registerAnnotation(annotation, valueType, handler)` applies after the factory and `@Suggest`, in registration order,
   and before the argument is made variadic or optional, so on a `List` parameter it configures each value. It returns
   the argument to use, which keeps the parameter's name.
+- `registerContextValue` and `registerDependency` are described in [context values](context-values.md#annotated-commands):
+  the parsed command provides the registered values, so fluent code added to it reads them with `ctx.get(type)`.
 - The parsed command is an ordinary `Command`: add middlewares, prerequisites or children with the fluent API before
   registering it.
 

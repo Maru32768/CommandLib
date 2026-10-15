@@ -169,6 +169,20 @@ Reading `force` outside a callback, for example in the command block itself, thr
 `ctx[option]` reads an option from a context. Everything else about options (kinds, `repeatable`, `required`,
 `mutuallyExclusive`, `requires`) is the Java API, described in [options](options.md).
 
+## Context values
+
+`provide { ctx -> ... }` provides a value keyed by the lambda's return type, `ctx.put(value)` sets one keyed by the
+value's type, and `ctx.get<T>()` / `ctx.getOrNull<T>()` read them, so a sender mapped to your own type needs no cast:
+
+```kotlin
+command("team") {
+    provide { ctx -> games.of(ctx.player) }    // GamePlayer
+    subcommand("show") { execute { ctx -> ctx.sendMessage(ctx.get<GamePlayer>().team) } }
+}
+```
+
+See [context values](context-values.md) for the order in which values are read, inheritance and named keys.
+
 ## Coroutines
 
 `executeSuspend { ctx -> }` on a command or an argument branch sets a suspending executor. It is an `executeAsync`
@@ -227,6 +241,7 @@ between, give the builder a scheduler that queues the async tasks, as in [execut
 | `argument(a) { ra -> subcommand("get") { ... } }` | `argument(a).child(ra -> new Command("get") {{ ... }})` |
 | `val force by flag("force", 'f')` and `force` | `option(Options.flag("force", 'f'))` and `ctx.getOption(force)` |
 | `executeSuspend { ctx -> ... }` | `executeAsync(ctx -> ctx.supplyAsync(...).thenAccept(...))` |
+| `provide { ctx -> games.of(ctx.player) }`, `ctx.get<GamePlayer>()` | `provide(GamePlayer.class, ctx -> ...)`, `ctx.get(GamePlayer.class)` |
 | `arg.addSuggestionProviderSuspend { sb -> ... }` | `arg.addSuggestionProvider(sb -> sb.await(...))` |
 
 The repository tests build a command with subcommands, options, optional and variadic arguments and an

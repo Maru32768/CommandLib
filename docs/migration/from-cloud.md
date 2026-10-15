@@ -144,7 +144,7 @@ stand for your own code.
 | `ctx.sender()` | `ctx.getSender()` (`CommandSender`) |
 | `senderType(Player.class)` | `requirePlayer()` on the command, then `ctx.getPlayer()`; or `require(Command.playerRequirer())` for a typed player |
 | `senderType(ConsoleCommandSender.class)` | `requireConsole()`, then `ctx.getConsole()` |
-| `SenderMapper` / custom sender type for the whole manager | **Not available** globally. `require(ctx -> ...)` maps the sender per branch |
+| `SenderMapper` / custom sender type for the whole manager | `provide(GamePlayer.class, ctx -> ...)` on each top-level command maps the sender once per execution for the whole tree; read it with `ctx.get(GamePlayer.class)`, or as a typed executor parameter with `require(ctx -> ctx.get(GamePlayer.class))`. See [context values](../context-values.md) |
 | `PaperSimpleSenderMapper`, `CommandSourceStack` | The `paper` artifact reads the `CommandSourceStack` itself; use `ctx.getSender()`, or `ctx.getHandle().getSource()` for the stack |
 
 ```java
@@ -153,13 +153,19 @@ class CoinsCommand extends Command {
     CoinsCommand(Profiles profiles) {
         super("coins");
 
-        argument(new IntegerArgument("amount", 1, 1000)).require(ctx -> profiles.of(ctx.getSender()))
-                                                         .execute((amount, profile, ctx) -> profile.addCoins(amount));
+        provide(Profile.class, ctx -> profiles.of(ctx.getSender()));
+        argument(new IntegerArgument("amount", 1, 1000)).execute((amount, ctx) -> ctx.get(Profile.class)
+                                                                                    .addCoins(amount));
+        addChildren(new Command("show") {{
+            require(ctx -> ctx.get(Profile.class)).execute((profile, ctx) -> ctx.sendMessage(profile.coins()));
+        }});
     }
 }
 ```
 
-`Profiles.of` stands for your own code; it may throw `CommandPrerequisiteException("...")` to refuse the sender.
+`Profiles.of` stands for your own code; it may throw `CommandPrerequisiteException("...")` to refuse the sender, which
+fails the command with that message wherever the value is read. Unlike Cloud, the command's type stays the platform's:
+the mapped sender is a value of the execution, not a type parameter of the command.
 Forge / NeoForge have no `requirePlayer()` or `playerRequirer()`.
 
 ## Subcommands
@@ -295,7 +301,9 @@ returning the stage), not a value the work computes.
 | `registerCommandPostProcessor(...)` | A middleware's code before `next.proceed()` runs right before the executor, and a stage chained on it runs after; `addPrerequisite(...)` (inherited, `disableParentPrerequisite()`) runs before the help too |
 | `cloud-processors-confirmation` | `confirm()`, or `confirm(Confirmation.within(timeout))`: the sender runs the same input again (or clicks `[Confirm]`) |
 | `cloud-processors-cooldown` | `cooldown(Duration)`, or `cooldown(Cooldown.of(duration).bypassPermission(...))`; kept in memory per unique id |
-| `ParameterInjectorRegistry`, `ctx.inject(...)`, Guice injection service | **Not available**; pass dependencies to the command's constructor |
+| `ctx.store(CloudKey, value)` in a preprocessor, `ctx.get(key)` | `ctx.put(ContextKey, value)` in a middleware, `ctx.get(key)`; see [context values](../context-values.md) |
+| `ParameterInjectorRegistry`, `ctx.inject(Type.class)` | `provide(Type.class, ctx -> ...)` on the command and `ctx.get(Type.class)`; annotated methods take the type as a parameter after `registerContextValue` or `registerDependency` |
+| Guice injection service | Let Guice create the command through its constructor, or `provide(Type.class, ctx -> injector.getInstance(Type.class))`; CommandLib depends on no container |
 
 See [confirmation and cooldown](../../README.md#confirmation-and-cooldown) in the README for the messages and the order of the checks.
 
@@ -363,8 +371,8 @@ CommandLib's `spigot-testing` / `paper-testing` run commands without a server:
 
 ## Not available yet
 
-Tracked in the roadmap: a global sender mapper, a platform-wide middleware
-registration, injection, customizable and translatable built-in
+Tracked in the roadmap: a platform-wide middleware and provider
+registration (add them to each top-level command), customizable and translatable built-in
 messages, permission predicates that hide commands, typed value options beyond primitives and strings, and the
 arguments listed as missing in the [catalog](../arguments.md).
 

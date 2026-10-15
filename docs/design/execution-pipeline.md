@@ -175,6 +175,52 @@ thread-local that is set only while the runner runs on the sync thread. Sending 
 automatically: doing so would hide the threading from authors in one place while every platform API they call next
 still requires the sync thread.
 
+## Context values
+
+User documentation: [`docs/context-values.md`](../context-values.md).
+
+Sender mappers, context enrichment and dependency injection are one mechanism: typed values of an execution, keyed by
+`ContextKey<T>` (a name and a boxed type; `ContextKey.of(type)` is the key of the type, which the `Class` overloads
+use).
+
+- `CommonCommand#provide(key, Extractor<? super C, ? extends V>)` registers a provider. `providers()` merges the
+  parent's map with the command's own, the nearer one winning, and is independent of `disableParentMiddleware()`:
+  opting out of the parent's checks must not make a value the subtree reads disappear.
+- The node creators set the merged map on every context they create (`CommonCommandContext#providers`): the runner's,
+  the generated help's and the suggestions'. The runner computes it once, when the node is built, so an execution
+  does no map merging.
+- `ctx.get(key)` reads a value put with `ctx.put(key, value)`, or else runs the provider and stores its value, so a
+  provider runs at most once per execution and the middleware and the executor see the same object. A provider that
+  reads its own key fails with `IllegalStateException` instead of overflowing the stack.
+
+Alternatives considered:
+
+- **A sender type parameter on commands** (Cloud's `Command<C>` with a `SenderMapper`): every executor would get the
+  mapped type directly, but `CommonCommand<C, T>` and its platform subclasses would gain a third type parameter, every
+  branch class with them, and commands of different sender types could not share a tree. The executor reads
+  `ctx.get(GamePlayer.class)` instead, or takes it as a typed parameter through the existing `require(ctx -> ...)`.
+- **A typed sub-context per platform** (`GameContext extends CommandContext`): the platforms create their context in
+  `PlatformAdapter`, so a plugin could not substitute its own class without a factory on every platform.
+- **Values only from middlewares**: a middleware can already compute a value, but it runs for executors only, so
+  prerequisites, optional-argument defaults, suggestions and help could not read the mapped sender, and the work would
+  run even when nothing reads it. Providers are lazy; `put` covers values that depend on the middleware's own work.
+- **A registration-wide registry on `CommandLib.register`**: rejected for the same reason as a platform-wide
+  middleware registration. Providers on the top-level commands have the same scope without new API on four platforms
+  and the testers.
+
+`get` does not declare `CommandPrerequisiteException`, since the typed executors (`(team, ctx) -> ...`) cannot throw
+checked exceptions and the main use, a sender mapper, has to refuse some senders. The provider's exception is rethrown
+unchecked and reaches the runner as if the executor, prerequisite or parser had thrown it, so its message is reported
+as usual. `find` is empty only when nothing gives the key; a failing provider still fails, rather than hiding the
+reason from the sender.
+
+The annotation parser resolves every context-value parameter with `ctx.get(type)` and installs the extractors it was
+given as providers of the parsed root, so a parameter, a fluent child and a middleware see the same per-execution
+value. `registerContextValue(type)` declares a type something else gives (a middleware's `put`, a parent's provider),
+which keeps the parse-time error for a parameter type the parser knows nothing about. `registerDependency(type,
+instance)` is a constant context value that also sets `@Dependency` fields; field injection exists for code moving from
+Lamp and ACF, while constructor injection stays the recommended form and is how Guice or Dagger interoperate.
+
 ## Testing
 
 - `common` tests use `FakeScheduler`, which queues sync tasks only when they come from an async task or another
@@ -189,6 +235,5 @@ still requires the sync thread.
 
 ## Not done
 
-- A platform-wide middleware registration.
-- Dependency injection hooks, sender mappers and context enrichment beyond what a middleware can do with the existing
-  context.
+- A platform-wide middleware registration, and providers registered on `CommandLib.register` instead of the
+  top-level commands.
