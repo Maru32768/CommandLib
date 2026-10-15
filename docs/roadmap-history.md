@@ -55,6 +55,8 @@
   Spigot / Paper / Forge / NeoForge に追加する（Paper の `BlockPredicateArgument` は 1.21.8+、2026-10-15）。
 - `[x]` `ComponentArgument` / `MessageArgument` / `NBTCompoundArgument` を Spigot / Paper / Forge / NeoForge / Fabric に追加する
   （2026-10-16）。
+- `[x]` 汎用の `RegistryArgument`、vanilla `time` の `TimeArgument` を追加し、Spigot の `ScoreboardDisplaySlotArgument` /
+  `ChatColorArgument` を vanilla の argument type で送る（2026-10-16）。
 - `[x]` error taxonomy を公開仕様として整理する（`docs/errors.md`、2026-10-15）。
 - `[x]` CommandAPI migration guide を追加する（`docs/migration/from-commandapi.md`、2026-10-15）。
 - `[x]` Cloud、Lamp、ACF からの migration guide を追加する（`docs/migration/from-cloud.md` / `from-lamp.md` /
