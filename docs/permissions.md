@@ -134,8 +134,29 @@ On 1.16.5 the nodes are registered with `PermissionAPI.registerNode(node, level,
 
 See [errors](errors.md#permission-denied) for what the sender sees.
 
-CommandLib does not resend the command tree when a sender's permissions change. Bukkit sends it on join and when a
-plugin calls `Player#updateCommands()`.
+## Refreshing the command tree
+
+The client hides what the command tree it last received leaves out. The server sends the tree on join and when the
+player's operator status changes, not when a permission changes, so a newly granted command stays hidden, and a revoked
+one stays visible, until the tree is sent again. Send it again after the change:
+
+```java
+// Spigot / Paper: on the main thread, or it throws IllegalStateException
+player.addAttachment(plugin, "myplugin.command.game.start", true);
+CommandLib.refresh(player);
+CommandLib.refreshAll(); // every online player
+
+// Forge / NeoForge: from any thread; the tree is sent on the server thread
+CommandLib.refresh(serverPlayer);
+CommandLib.refreshAll(); // every player on the running server
+```
+
+The tree lists every command on the server, not only CommandLib's, so one call covers every registration.
+
+Only permissions decide what the tree shows. Prerequisites (`addPrerequisite`, `require`, `playerRequirer`) run when the
+command runs and do not hide it. To show a command only in some plugin state, such as `/game start` only before a game
+starts, give the command its own node, grant or revoke that node when the state changes (a `PermissionAttachment`, or
+your permission plugin), and refresh the players it affects.
 
 ## LuckPerms
 
@@ -161,6 +182,7 @@ grant `myplugin.command.config` itself, which the route also needs.
 
 LuckPerms on Bukkit refreshes players' command trees when their permissions change (its `update-client-command-list`
 option), so newly granted commands appear without a rejoin. This has not been tested with CommandLib on every version.
+Elsewhere, call [`CommandLib.refresh`](#refreshing-the-command-tree) after the change.
 
 ## Testing permissions
 

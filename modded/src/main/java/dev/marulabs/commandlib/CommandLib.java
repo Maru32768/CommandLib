@@ -3,6 +3,7 @@ package dev.marulabs.commandlib;
 import com.mojang.brigadier.tree.RootCommandNode;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
 //? if neoforge {
 /*import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.common.NeoForge;
@@ -18,7 +19,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 //? if >=1.18 {
-import net.minecraft.server.level.ServerPlayer;
 //? if neoforge {
 /*import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
@@ -59,6 +59,33 @@ public final class CommandLib {
 
     public static void register(@NotNull String permissionPrefix, @NotNull Collection<? extends Command> commands) {
         new CommandLib(commands, permissionPrefix);
+    }
+
+    /**
+     * Sends the command tree to the player again, so the commands and branches they see follow a change of their
+     * permissions without a rejoin. The server sends the tree on join and when the player's operator status changes,
+     * but not when a permission handler changes a permission. Called from another thread, it sends the tree on the
+     * server thread later.
+     */
+    public static void refresh(@NotNull ServerPlayer player) {
+        MinecraftServer server = player.server;
+        // execute runs at once on the server thread and queues the task from other threads.
+        server.execute(() -> server.getCommands()
+                                   .sendCommands(player));
+    }
+
+    /**
+     * Same as {@link #refresh(ServerPlayer)} for every player on the running server. Does nothing when no server runs.
+     */
+    public static void refreshAll() {
+        MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+        if (server == null) {
+            return;
+        }
+        server.execute(() -> server.getPlayerList()
+                                   .getPlayers()
+                                   .forEach(player -> server.getCommands()
+                                                            .sendCommands(player)));
     }
 
     //? if >=1.18 {

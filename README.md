@@ -912,6 +912,12 @@ LuckPerms can provide those platform permissions. Configure the same generated o
 CommandLib does not need additional LuckPerms-specific integration. On Forge 1.18+ and NeoForge the nodes are in the
 `commandlib` namespace, so grant `commandlib.<node>` there. See [permissions](docs/permissions.md).
 
+### Refreshing Command Trees
+
+Players see only the commands and branches they have permission for, but the server does not resend the command tree
+when a permission changes. Call `CommandLib.refresh(player)` (or `CommandLib.refreshAll()`) after granting or revoking
+one, so the change shows without a rejoin. See [refreshing the command tree](docs/permissions.md#refreshing-the-command-tree).
+
 ## Claude Code Skill
 
 A Claude Code skill is available as the `commandlib` plugin in this repository's plugin marketplace

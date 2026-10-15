@@ -633,6 +633,39 @@ public final class CommandLib implements Listener {
         }
     }
 
+    /**
+     * Sends the command tree to the player again, so the commands and branches they see follow a change of their
+     * permissions without a rejoin. The server sends the tree on join and when the player's operator status changes,
+     * but not when a permission changes, such as through a {@code PermissionAttachment}. Must be called on the main
+     * server thread.
+     *
+     * @throws IllegalStateException if called from another thread
+     */
+    public static void refresh(@NotNull Player player) {
+        Objects.requireNonNull(player);
+        requirePrimaryThread();
+        player.updateCommands();
+    }
+
+    /**
+     * Same as {@link #refresh(Player)} for every online player. Must be called on the main server thread.
+     *
+     * @throws IllegalStateException if called from another thread
+     */
+    public static void refreshAll() {
+        requirePrimaryThread();
+        Bukkit.getOnlinePlayers()
+              .forEach(Player::updateCommands);
+    }
+
+    private static void requirePrimaryThread() {
+        // Sending the tree reads the dispatcher, which only the main thread may touch; permission plugins often fire
+        // their change events asynchronously.
+        if (!Bukkit.isPrimaryThread()) {
+            throw new IllegalStateException("Command trees must be refreshed on the main server thread");
+        }
+    }
+
     public void unregister() {
         unregister(true);
     }
