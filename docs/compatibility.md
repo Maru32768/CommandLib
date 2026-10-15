@@ -57,7 +57,7 @@ CommandLib は `1.16.5` から最新安定版までのサポートを目標に�
 | `1.21` / `1.21.1` | Spigot fixture、Paper `1.21` fixture（paper module）、Paper `1.21.1` fixture（spigot module）、typed NMS module。 | Tested。 |
 | `1.21.2` / `1.21.3` | Spigot fixture、Paper `1.21.3` fixture（paper module）、typed NMS module（`spigot-1.21.3`）。Paper 1.21.2 は存在しない。1.21.2 で attribute id の `generic.` prefix がなくなった。 | Tested。 |
 | `1.21.4`〜`1.21.11` | Spigot / Paper fixture（Paper は paper module）、typed NMS module（`1.21.6` と `1.21.7`〜`1.21.8`、`1.21.9`〜`1.21.10` はそれぞれ 1 module）。1.21.11 で `ResourceLocation` が `Identifier` になり、CraftBukkit の function compile 用 source が `NullCommandSender` を返すようになった。 | Tested。 |
-| `26.1`〜`26.3` | Spigot fixture（`26.1`、`26.1.1`、`26.1.2`、`26.2`、`26.3`）、Paper fixture（`26.1.1`〜`26.3`、paper module）、typed NMS module（`spigot-26.1.2` が全 26.x を扱う）。Spigot も Mojang 名で動き、CraftBukkit の package に version が付かない。Java 25 が必要。 | Tested。 |
+| `26.1`〜`26.3` | Spigot fixture（`26.1`、`26.1.1`、`26.1.2`、`26.2`、`26.3`）、Paper fixture（`26.1.1`〜`26.3`、paper module）、typed NMS module（`spigot-26.1.2` が全 26.x を扱う）。Spigot も Mojang 名で動き、CraftBukkit の package に version が付かない。Java 25 が必要。26.2 で `MinMaxBounds` が `advancements.predicates` に移った。 | Tested。 |
 | spigot module on Paper `1.21.2+` | 未対応。typed NMS module は Spigot 用のみ。Paper では paper module を使う。 | 対応予定なし。 |
 | spigot module の `1.16.3` 以前 | 未対応。typed NMS module がない。 | 対応予定なし。 |
 | latest stable | `26.3`（2026-10 時点）。 | 各 release 時点の最新安定版を追従対象にする。 |
@@ -121,9 +121,10 @@ CommandLib は `1.16.5` から最新安定版までのサポートを目標に�
   [vanilla-integration.md](vanilla-integration.md) に記載。Bukkit 系 fixture の `VanillaExecutionTest`（`execute as` /
   `positioned` / `rotated`、`@s` と `distance` selector、command block の sender と `SuccessCount`）と
   `DataPackFunctionTest`（function、function tag、`#minecraft:load` が reload 後に 1 回だけ実行されること）、
-  Forge / NeoForge fixture の `ActorTest`（`execute as` と `positioned ... rotated`）を追加済み。2026-10-15 時点では
-  Docker が使えず実サーバーでは未実行のため、各 target で通るまで Tested としない。Forge / NeoForge の command block と
-  function は未確認。
+  Forge / NeoForge fixture の `ActorTest`（`execute as` と `positioned ... rotated`）を追加済み。2026-10-16 に
+  `spigot-1.16.5`、`spigot-26.3`、`paper-1.20.4`（spigot module）、`paper-26.3`（paper module）で全 case が通った
+  （range / duration / block position / predicate、`/execute store`、command block、function tag、`#minecraft:load` を含む）。
+  他の target は未実行のため Tested としない。Forge / NeoForge の command block と function は未確認。
 - Mohist の Forge/Bukkit 混在時の command registration を確認する。
 
 ### P2
