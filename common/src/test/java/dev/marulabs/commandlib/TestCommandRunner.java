@@ -39,6 +39,10 @@ final class TestCommandRunner {
                                                                              .forEach(dispatcher.getRoot()::addChild);
     }
 
+    com.mojang.brigadier.tree.RootCommandNode<TestCommandSource> root() {
+        return dispatcher.getRoot();
+    }
+
     /**
      * Adds a literal that redirects to the root, as vanilla's "execute run" does.
      */

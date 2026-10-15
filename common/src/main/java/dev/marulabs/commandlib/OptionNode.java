@@ -3,6 +3,7 @@ package dev.marulabs.commandlib;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 
 /**
@@ -14,13 +15,16 @@ final class OptionNode<S> implements Predicate<S> {
     private final OptionGraph<S, ?> graph;
     private final List<? extends CommandOption<?, ?>> flags;
     private final @Nullable CommandOption<?, ?> value;
+    private final @Nullable Map<? extends CommandOption<?, ?>, Integer> state;
 
     OptionNode(OptionGraph<S, ?> graph,
                List<? extends CommandOption<?, ?>> flags,
-               @Nullable CommandOption<?, ?> value) {
+               @Nullable CommandOption<?, ?> value,
+               @Nullable Map<? extends CommandOption<?, ?>, Integer> state) {
         this.graph = graph;
         this.flags = List.copyOf(flags);
         this.value = value;
+        this.state = state;
     }
 
     @Override
@@ -45,5 +49,13 @@ final class OptionNode<S> implements Predicate<S> {
     @Nullable
     CommandOption<?, ?> value() {
         return value;
+    }
+
+    /**
+     * The option counts after the node, or null for the literal of a value option, which its value follows.
+     */
+    @Nullable
+    Map<? extends CommandOption<?, ?>, Integer> state() {
+        return state;
     }
 }

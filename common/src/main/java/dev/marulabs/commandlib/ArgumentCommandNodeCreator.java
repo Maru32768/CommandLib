@@ -43,14 +43,13 @@ final class ArgumentCommandNodeCreator<S, T, C extends CommonCommandContext<S, T
                                                         CommandExecutor<C> helpAction,
                                                         CommonCommand<C, ?> parent) {
         RequiredArgumentBuilder<S, ?> builder = RequiredArgumentBuilder.argument(argument.name(), argument.type());
-        builder.requires(source -> platformAdapter.hasPermission(source,
-                                                                 arguments.permissionName(parent, permissionPrefix)));
+        String permission = arguments.permissionName(parent, permissionPrefix);
+        builder.requires(source -> platformAdapter.hasPermission(source, permission));
 
         Map<ContextKey<?>, ? extends Extractor<?, ?>> providers = parent.providers();
         builder.suggests((context, sb) -> {
             try {
-                if (!platformAdapter.hasPermission(context.getSource(),
-                                                   arguments.permissionName(parent, permissionPrefix))) {
+                if (!platformAdapter.hasPermission(context.getSource(), permission)) {
                     return Suggestions.empty();
                 }
                 // Brigadier suggests with the first context of the input, which has the nodes before the first

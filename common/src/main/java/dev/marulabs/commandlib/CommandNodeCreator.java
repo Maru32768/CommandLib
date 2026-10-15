@@ -1,14 +1,10 @@
 package dev.marulabs.commandlib;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.brigadier.builder.RequiredArgumentBuilder;
-import com.mojang.brigadier.tree.ArgumentCommandNode;
-import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import dev.marulabs.commandlib.command.Extractor;
 
 import java.util.*;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U extends CommonCommand<C, U>> {
@@ -74,8 +70,9 @@ final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U ext
 
     private LiteralCommandNode<S> createHelpNode(U command, HelpMessageAction<S, T, C, U> helpAction) {
         Map<ContextKey<?>, ? extends Extractor<?, ?>> providers = command.providers();
+        String permission = command.permissionName(permissionPrefix);
         return LiteralArgumentBuilder.<S>literal("help")
-                                     .requires(x -> platformAdapter.hasPermission(command, x, permissionPrefix))
+                                     .requires(x -> platformAdapter.hasPermission(x, permission))
                                      .executes(context -> {
                                          try {
                                              C ctx = platformAdapter.createCommandContext(context);
@@ -94,10 +91,11 @@ final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U ext
                                                 List<Arguments<C>> inheritedArguments,
                                                 HelpMessageAction<S, T, C, U> helpAction) {
         LiteralArgumentBuilder<S> builder = LiteralArgumentBuilder.literal(command.name());
-        builder.requires(x -> platformAdapter.hasPermission(command, x, permissionPrefix));
+        String permission = command.permissionName(permissionPrefix);
+        builder.requires(x -> platformAdapter.hasPermission(x, permission));
 
         List<Arguments<C>> argumentsList = command.argumentsList();
-        OptionGraph<S, C> optionGraph = new OptionGraph<>(command.options());
+        OptionGraph<S, C> optionGraph = OptionGraph.of(command, inheritedArguments);
 
         if (argumentsList.isEmpty()) {
             CommandRunner<S, C> runner = new CommandRunner<>(platformAdapter,
@@ -112,8 +110,10 @@ final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U ext
                                                              command.executor(),
                                                              command.uncaughtExceptionHandlers());
             builder.executes(runner);
-            createOptionCommands(command, optionGraph, () -> null, runner).forEach(builder::then);
-            return builder.build();
+            LiteralCommandNode<S> node = builder.build();
+            optionGraph.build(List.of(), runner)
+                       .forEach(node::addChild);
+            return node;
         }
 
         argumentsList.forEach(x -> x.validateTrailingArguments(command));
@@ -150,36 +150,37 @@ final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U ext
                                                                      helpAction,
                                                                      command);
         builder.executes(bareRunner);
+        LiteralCommandNode<S> node = builder.build();
 
+        // The argument nodes of every branch are built once and follow the command literal and every option state.
+        // They are merged as the command literal would merge them, so branches whose first arguments share a name
+        // become one node before the option states take them.
+        LiteralCommandNode<S> argumentNodes = LiteralArgumentBuilder.<S>literal(command.name())
+                                                                    .build();
         argumentsList.stream()
                      .sorted((x, y) -> Integer.compare(y.size(), x.size())) // Sort in descending order to handle variable-length arguments
                      .forEach(arguments -> {
                          List<Arguments<C>> executorArguments = appendArgument(inheritedArguments, arguments);
                          // Brigadier can attach literal nodes under an argument node. The executor still needs the
-                         // parent arguments, so child commands inherit the complete argument chain here. The child
-                         // nodes are built once and shared by every argument node the supplier creates for options,
-                         // as alias nodes share the children of their target.
+                         // parent arguments, so child commands inherit the complete argument chain here.
                          List<LiteralCommandNode<S>> childNodes = arguments.children()
                                                                            .stream()
                                                                            .map(x -> toCommandNodes(castCommand(x),
                                                                                                     executorArguments))
                                                                            .flatMap(Collection::stream)
                                                                            .collect(Collectors.toList());
-                         Supplier<ArgumentCommandNode<S, ?>> argumentNodeSupplier = () -> new ArgumentCommandNodeCreator<>(arguments,
-                                                                                                                           executorArguments,
-                                                                                                                           optionGraph,
-                                                                                                                           permissionPrefix,
-                                                                                                                           scheduler).build(helpAction,
-                                                                                                                                            command,
-                                                                                                                                            childNodes);
-                         builder.then(argumentNodeSupplier.get());
-                         createOptionCommands(command,
-                                              optionGraph,
-                                              argumentNodeSupplier,
-                                              bareRunner).forEach(builder::then);
+                         argumentNodes.addChild(new ArgumentCommandNodeCreator<>(arguments,
+                                                                                 executorArguments,
+                                                                                 optionGraph,
+                                                                                 permissionPrefix,
+                                                                                 scheduler).build(helpAction,
+                                                                                                  command,
+                                                                                                  childNodes));
                      });
 
-        return builder.build();
+        optionGraph.build(new ArrayList<>(argumentNodes.getChildren()), bareRunner)
+                   .forEach(node::addChild);
+        return node;
     }
 
     private List<Arguments<C>> appendArgument(List<Arguments<C>> inheritedArguments, Arguments<C> arguments) {
@@ -193,190 +194,14 @@ final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U ext
         return (U) command;
     }
 
-    private List<CommandNode<S>> createOptionCommands(U command,
-                                                      OptionGraph<S, C> optionGraph,
-                                                      Supplier<ArgumentCommandNode<S, ?>> argumentNodeSupplier,
-                                                      CommandRunner<S, C> executor) {
-        if (command.options()
-                   .isEmpty()) {
-            return List.of();
-        }
-
-        return createOptionCommands(command, optionGraph, Map.of(), argumentNodeSupplier, executor, new HashMap<>());
-    }
-
-    // usedOptions counts the occurrences of each option on the path to the nodes being created. The nodes after a
-    // path depend only on those counts, so every path with the same counts shares them through childrenByUsedOptions.
-    // Otherwise the tree would grow with every order the options can be given in.
-    private List<CommandNode<S>> createOptionCommands(U command,
-                                                      OptionGraph<S, C> optionGraph,
-                                                      Map<CommandOption<?, C>, Integer> usedOptions,
-                                                      Supplier<ArgumentCommandNode<S, ?>> argumentNodeSupplier,
-                                                      CommandRunner<S, C> executor,
-                                                      Map<Map<CommandOption<?, C>, Integer>, List<CommandNode<S>>> childrenByUsedOptions) {
-        List<CommandNode<S>> nodes = new ArrayList<>();
-
-        for (OptionToken<C> optionToken : createOptionTokens(command, usedOptions)) {
-            List<CommandOption<?, C>> tokenOptions = optionToken.options();
-            Map<CommandOption<?, C>, Integer> nextUsedOptions = new HashMap<>(usedOptions);
-            tokenOptions.forEach(x -> nextUsedOptions.merge(x, 1, Integer::sum));
-            List<CommandNode<S>> children = createOptionChildren(command,
-                                                                 optionGraph,
-                                                                 nextUsedOptions,
-                                                                 argumentNodeSupplier,
-                                                                 executor,
-                                                                 childrenByUsedOptions);
-
-            LiteralArgumentBuilder<S> builder = LiteralArgumentBuilder.literal(optionToken.token());
-            if (isValueOptionToken(tokenOptions)) {
-                CommandOption<?, C> option = tokenOptions.get(0);
-                builder.requires(optionGraph.literal(List.of()));
-                // Each occurrence needs its own argument name, since Brigadier keeps one value per name.
-                RequiredArgumentBuilder<S, ?> valueBuilder = RequiredArgumentBuilder.argument(option.internalName(usedOptions.getOrDefault(option,
-                                                                                                                                           0)),
-                                                                                              option.type());
-                valueBuilder.requires(optionGraph.value(option));
-                valueBuilder.executes(executor);
-                children.forEach(valueBuilder::then);
-                builder.then(valueBuilder);
-            } else {
-                builder.requires(optionGraph.literal(tokenOptions));
-                builder.executes(executor);
-                children.forEach(builder::then);
-            }
-
-            nodes.add(builder.build());
-        }
-
-        return nodes;
-    }
-
-    // The nodes that may follow the options counted by usedOptions: the argument node and the remaining options.
-    private List<CommandNode<S>> createOptionChildren(U command,
-                                                      OptionGraph<S, C> optionGraph,
-                                                      Map<CommandOption<?, C>, Integer> usedOptions,
-                                                      Supplier<ArgumentCommandNode<S, ?>> argumentNodeSupplier,
-                                                      CommandRunner<S, C> executor,
-                                                      Map<Map<CommandOption<?, C>, Integer>, List<CommandNode<S>>> childrenByUsedOptions) {
-        List<CommandNode<S>> cached = childrenByUsedOptions.get(usedOptions);
-        if (cached != null) {
-            return cached;
-        }
-
-        List<CommandNode<S>> children = new ArrayList<>();
-        ArgumentCommandNode<S, ?> argumentNode = argumentNodeSupplier.get();
-        if (argumentNode != null) {
-            children.add(argumentNode);
-        }
-        children.addAll(createOptionCommands(command,
-                                             optionGraph,
-                                             usedOptions,
-                                             argumentNodeSupplier,
-                                             executor,
-                                             childrenByUsedOptions));
-        childrenByUsedOptions.put(usedOptions, children);
-        return children;
-    }
-
-    private boolean isValueOptionToken(List<CommandOption<?, C>> tokenOptions) {
-        return tokenOptions.size() == 1 && tokenOptions.get(0)
-                                                       .hasValue();
-    }
-
-    private List<OptionToken<C>> createOptionTokens(U command, Map<CommandOption<?, C>, Integer> usedOptions) {
-        List<OptionToken<C>> optionTokens = new ArrayList<>();
-        List<CommandOption<?, C>> remainingOptions = command.options()
-                                                            .stream()
-                                                            .filter(x -> usedOptions.getOrDefault(x,
-                                                                                                  0) < x.maxOccurrences())
-                                                            .filter(x -> usedOptions.keySet()
-                                                                                    .stream()
-                                                                                    .noneMatch(y -> command.excludes(x,
-                                                                                                                     y)))
-                                                            .collect(Collectors.toList());
-
-        for (CommandOption<?, C> option : remainingOptions) {
-            for (String name : option.names()) {
-                optionTokens.add(new OptionToken<>("--" + name, List.of(option)));
-            }
-            Character shortName = option.shortName();
-            if (shortName == null) {
-                continue;
-            }
-            optionTokens.add(new OptionToken<>("-" + shortName, List.of(option)));
-            if (option.hasValue()) {
-                continue;
-            }
-            // A counted flag can repeat its short name in one token, such as -vvv.
-            int remaining = option.maxOccurrences() - usedOptions.getOrDefault(option, 0);
-            for (int count = 2; count <= remaining; count++) {
-                optionTokens.add(new OptionToken<>("-" + String.valueOf(shortName)
-                                                               .repeat(count),
-                                                   Collections.nCopies(count, option)));
-            }
-        }
-
-        List<CommandOption<?, C>> shortOptions = remainingOptions.stream()
-                                                                 .filter(x -> x.shortName() != null && !x.hasValue())
-                                                                 .collect(Collectors.toList());
-        for (int size = 2; size <= shortOptions.size(); size++) {
-            collectShortOptionPermutations(command, shortOptions, size, new ArrayList<>(), optionTokens);
-        }
-
-        return optionTokens;
-    }
-
-    private void collectShortOptionPermutations(U command,
-                                                List<CommandOption<?, C>> options,
-                                                int size,
-                                                List<CommandOption<?, C>> current,
-                                                List<OptionToken<C>> dest) {
-        if (current.size() == size) {
-            dest.add(new OptionToken<>("-" + current.stream()
-                                                    .map(CommandOption::shortName)
-                                                    .map(String::valueOf)
-                                                    .collect(Collectors.joining()),
-                                       List.copyOf(current)));
-            return;
-        }
-
-        for (CommandOption<?, C> option : options) {
-            if (current.contains(option) || current.stream()
-                                                   .anyMatch(x -> command.excludes(x, option))) {
-                continue;
-            }
-            current.add(option);
-            collectShortOptionPermutations(command, options, size, current, dest);
-            current.remove(current.size() - 1);
-        }
-    }
-
-    private static class OptionToken<C extends CommonCommandContext<?, ?>> {
-        private final String token;
-        private final List<CommandOption<?, C>> options;
-
-        private OptionToken(String token, List<CommandOption<?, C>> options) {
-            this.token = token;
-            this.options = options;
-        }
-
-        private String token() {
-            return token;
-        }
-
-        private List<CommandOption<?, C>> options() {
-            return options;
-        }
-    }
-
     private List<LiteralCommandNode<S>> createAliasCommands(U source, LiteralCommandNode<S> redirectTarget) {
+        String permission = source.permissionName(permissionPrefix);
         return source.aliases()
                      .stream()
                      .map(s -> {
                          LiteralCommandNode<S> node = LiteralArgumentBuilder.<S>literal(s)
-                                                                            .requires(x -> platformAdapter.hasPermission(source,
-                                                                                                                         x,
-                                                                                                                         permissionPrefix))
+                                                                            .requires(x -> platformAdapter.hasPermission(x,
+                                                                                                                         permission))
                                                                             .executes(x -> redirectTarget.getCommand()
                                                                                                          .run(x))
                                                                             .build();

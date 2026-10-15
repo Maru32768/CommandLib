@@ -68,7 +68,8 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
     @Override
     public int run(CommandContext<S> context) throws CommandFailure {
         try {
-            C ctx = platformAdapter.createCommandContext(context);
+            // After options, Brigadier executes a context without them; the graph adds them back.
+            C ctx = platformAdapter.createCommandContext(optionGraph.recover(context));
             ctx.scheduler(scheduler);
             ctx.captions(command.captions());
             ctx.providers(providers);
