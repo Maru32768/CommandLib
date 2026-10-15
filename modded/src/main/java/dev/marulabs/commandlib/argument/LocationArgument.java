@@ -9,9 +9,25 @@ import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 
+/**
+ * A position in the vanilla {@code vec3} syntax: {@code x y z}, relative ({@code ~}) or local ({@code ^}) coordinates.
+ * The value is a location in the sender's level, with the sender's rotation.
+ */
 public class LocationArgument extends Argument<Location, LocationArgument> {
+    /**
+     * Creates the argument, which moves an integer x or z coordinate to the center of its block, as vanilla commands
+     * do: {@code 1 64 1} is {@code 1.5 64 1.5}.
+     */
     public LocationArgument(String name) {
-        super(name, Vec3Argument.vec3());
+        this(name, true);
+    }
+
+    /**
+     * Creates the argument, which moves an integer x or z coordinate to the center of its block when
+     * {@code centerIntegers} is true and keeps it otherwise: {@code 1 64 1} is {@code 1.5 64 1.5} or {@code 1 64 1}.
+     */
+    public LocationArgument(String name, boolean centerIntegers) {
+        super(name, Vec3Argument.vec3(centerIntegers));
     }
 
     @Override

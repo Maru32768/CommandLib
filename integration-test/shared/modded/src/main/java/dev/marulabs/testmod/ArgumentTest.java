@@ -34,8 +34,8 @@ public final class ArgumentTest extends TestBase {
     public List<String> build() {
         List<String> commands = new ArrayList<>();
 
-        commands.add(check("blockPosArgument",
-                           new BlockPosArgument("a"),
+        commands.add(check("blockPositionArgument",
+                           new BlockPositionArgument("a"),
                            "1 2 3",
                            x -> x.getX() + "," + x.getY() + "," + x.getZ(),
                            "1,2,3"));

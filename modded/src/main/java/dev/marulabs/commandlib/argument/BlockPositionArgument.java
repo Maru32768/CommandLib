@@ -6,8 +6,14 @@ import dev.marulabs.commandlib.exception.ArgumentParseException;
 import net.minecraft.commands.arguments.coordinates.Coordinates;
 import net.minecraft.core.BlockPos;
 
-public class BlockPosArgument extends Argument<BlockPos, BlockPosArgument> {
-    public BlockPosArgument(String name) {
+/**
+ * A block position in the vanilla {@code block_pos} syntax: {@code x y z} integers, relative ({@code ~}) or local
+ * ({@code ^}) coordinates. The client completes it with the block it looks at.
+ *
+ * <p>Neither the chunk nor the world height is checked.
+ */
+public class BlockPositionArgument extends Argument<BlockPos, BlockPositionArgument> {
+    public BlockPositionArgument(String name) {
         super(name, net.minecraft.commands.arguments.coordinates.BlockPosArgument.blockPos());
     }
 

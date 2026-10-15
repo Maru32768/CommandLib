@@ -353,7 +353,7 @@ class CommandTesterTest {
 
         @Test
         void block_pos() {
-            assertThat(parse(new BlockPosArgument("a"), "1 2 3", FakeSender.console()).getY()).isEqualTo(2);
+            assertThat(parse(new BlockPositionArgument("a"), "1 2 3", FakeSender.console()).getY()).isEqualTo(2);
         }
 
         @Test
