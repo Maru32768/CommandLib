@@ -406,8 +406,8 @@ In Kotlin, `provide { ctx -> economy.account(ctx.sender) }` keys the value by th
 `ctx.get<Economy.Account>()` reads it. A provider that throws `CommandPrerequisiteException` refuses the sender with its
 message, also from a typed executor ("You have no account." in the
 [snapshot](../examples/src/test/resources/snapshots/balance.snap)). Middlewares can `put` values for the executor too
-([context values](context-values.md)). A provider belongs to a command tree: values for every command of a plugin are
-provided on each top-level command.
+([context values](context-values.md)). A provider belongs to a command tree; values for every command of a plugin go
+in a `CommandDefaults` passed to `CommandLib.register`.
 
 ```java
 // Cloud: about 3 lines
@@ -525,9 +525,10 @@ public int score(CommandContext ctx, String player) throws CommandPrerequisiteEx
 
 The other styles call `ctx.setResult(score)`. `CommandTester#execute` returns the stored value: 42, 7 and 0 in the
 [snapshot](../examples/src/test/resources/snapshots/score.snap). The fluent and builder variants use the untyped
-executor `execute(ctx -> ...)` with `ctx.getArgument(argument)`, because the typed executors cannot throw the checked
-`CommandPrerequisiteException` ([errors](errors.md#prerequisite-failed-commandprerequisiteexception)); Kotlin has no
-checked exceptions, so its typed block throws it.
+executor `execute(ctx -> ...)` with `ctx.getArgument(argument)` and throw the checked `CommandPrerequisiteException`;
+a typed executor, which cannot throw it, fails the same way with `throw ctx.fail(...)`
+([errors](errors.md#prerequisite-failed-commandprerequisiteexception)). Kotlin has no checked exceptions, so its typed
+block throws it.
 
 ```java
 // CommandAPI: about 4 lines
@@ -621,12 +622,10 @@ less code in a large plugin.
 
 - Options must come before the positional arguments; value options take primitives and strings only; options have no
   permission of their own.
-- The typed Java executors cannot throw `CommandPrerequisiteException`, so a failing Java executor uses
-  `execute(ctx -> ...)` and `ctx.getArgument(argument)` (use case 7, the `go` branch of use case 6).
 - Annotations do not cover argument-first children, captions, localized descriptions or middlewares; the parsed
   command takes them through the fluent API.
-- Context values are provided per command tree or per annotation parser, not once for a whole plugin, and the
-  sender type stays the platform's.
+- Context values are provided per command tree, per annotation parser or per registration (`CommandDefaults`), and
+  the sender type stays the platform's.
 - Help is a child of commands only: `/team red help` is rejected, while `/team red` shows the help of `/team`.
 - Parsing always runs on the server thread; there is no coordinator to move it.
 - CommandLib's own messages are translated into English and Japanese only.

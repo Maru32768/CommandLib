@@ -21,7 +21,7 @@ public final class FluentHomeCommand extends Command {
 
         addChildren(new Command("go") {{
             StringArgument name = new StringArgument("name");
-            // The untyped executor, since a typed one cannot throw the checked CommandPrerequisiteException.
+            // The untyped executor throws the checked CommandPrerequisiteException; a typed one uses ctx.fail.
             argument(name).execute(ctx -> {
                 if (!homes.contains(ctx.getArgument(name))) {
                     throw new CommandPrerequisiteException(HomeCaptions.UNKNOWN,
