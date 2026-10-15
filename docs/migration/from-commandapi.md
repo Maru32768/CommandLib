@@ -82,10 +82,10 @@ Typed executors take up to seven arguments. Beyond that, use `argument(builder -
 | `EntitySelectorArgument.OneEntity` / `ManyEntities` | `EntityArgument` / `EntitiesArgument` (`List<Entity>`) |
 | `PlayerProfileArgument` | `OfflinePlayersArgument`, `UUIDsArgument` |
 | `LocationArgument` (precise) | `LocationArgument` |
-| `WorldArgument`, `ItemStackArgument`, `EnchantmentArgument`, `ParticleArgument`, `SoundArgument`, `BiomeArgument`, `LootTableArgument`, `RecipeArgument`, `AdvancementArgument`, `NamespacedKeyArgument`, `TeamArgument`, `ObjectiveArgument`, `UUIDArgument`, `EntityTypeArgument`, `ChatColorArgument` | Same names; see the [argument catalog](../arguments.md) for result type differences |
+| `WorldArgument`, `ItemStackArgument`, `EnchantmentArgument`, `ParticleArgument`, `SoundArgument`, `BiomeArgument`, `LootTableArgument`, `RecipeArgument`, `AdvancementArgument`, `NamespacedKeyArgument`, `TeamArgument`, `ObjectiveArgument`, `UUIDArgument`, `EntityTypeArgument`, `ChatColorArgument` (`NamedTextColor` on Paper) | Same names; see the [argument catalog](../arguments.md) for result type differences |
 | `BlockStateArgument` | `BlockDataArgument` (`BlockData`) |
 | `PotionEffectArgument` | `PotionEffectArgument` (returns a `PotionEffect`; use `getType()`) |
-| `ScoreboardSlotArgument` | `ScoreboardDisplaySlotArgument` (Bukkit `DisplaySlot` names) |
+| `ScoreboardSlotArgument` | `ScoreboardDisplaySlotArgument` |
 | `CustomArgument` | `ObjectArgument`, `NameableObjectArgument`, `EnumArgument`, or a subclass of `Argument` |
 | `ListArgument` | `variadic()` on the element argument (see [optional arguments](#optional-arguments)) |
 | `IntegerRangeArgument`, `DoubleRangeArgument`, `TimeArgument`, `RotationArgument`, `AngleArgument`, `AxisArgument`, `Location2DArgument`, `ChatComponentArgument`, `ChatArgument`, `NBTCompoundArgument`, `BlockPredicateArgument`, `ItemStackPredicateArgument`, `FunctionArgument`, `CommandArgument`, `MapArgument`, `MathOperationArgument`, `ObjectiveCriteriaArgument`, `ScoreHolderArgument` | **Not available.** See [missing arguments](../arguments.md#missing-arguments-by-priority) |

@@ -145,6 +145,19 @@ class LightweightArgumentExecutionTest {
     }
 
     @Test
+    void displaySlotAndColorArgumentsReadVanillaNames() {
+        CommandTester tester = new CommandTester(() -> new Command("args") {{
+            argument(new ScoreboardDisplaySlotArgument("slot"),
+                     new ChatColorArgument("color")).execute((slot, color, ctx) -> ctx.sendMessage(slot.name() + ":" + color));
+        }}, "test.command");
+        FakeSender sender = FakeSender.player("Steve");
+
+        tester.execute("args sidebar.team.red dark_red", sender);
+
+        assertThat(sender.getSentMessageTexts()).containsExactly("SIDEBAR_TEAM_RED:dark_red");
+    }
+
+    @Test
     void paperLocationArgumentExecutes() {
         CommandTester tester = new CommandTester(() -> new Command("args") {{
             argument(new LocationArgument("location")).execute((location, ctx) -> {

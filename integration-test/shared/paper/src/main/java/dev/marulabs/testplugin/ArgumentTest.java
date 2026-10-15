@@ -180,7 +180,7 @@ public final class ArgumentTest extends TestBase {
             argument(new ChatColorArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
             })).execute((a, ctx) -> {
-                putResult(key, a.name(), "DARK_RED");
+                putResult(key, a.toString(), "dark_red");
             });
         }});
 

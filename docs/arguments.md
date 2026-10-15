@@ -135,7 +135,7 @@ Notes:
 | `SoundArgument` (Bukkit) | `Sound` | sound key such as `minecraft:entity.pig.ambient`; suggests registry keys | `SoundArgument` | `resource(SOUND_EVENT)` | equivalent | equivalent | missing |
 | `BiomeArgument` (Bukkit) | `Biome` | biome key; suggests registry keys | `BiomeArgument` | `resource(BIOME)` | equivalent | equivalent | missing |
 | `AttributeArgument` (Bukkit) | `Attribute` | attribute key; suggests registry keys | — | `resource(ATTRIBUTE)` | equivalent | equivalent | missing |
-| `EntityTypeArgument` (Bukkit) | `EntityType` | Spigot: enum name such as `zombie`; Paper: registry key such as `minecraft:zombie` | `EntityTypeArgument` | `resource(ENTITY_TYPE)` | partial | equivalent | missing |
+| `EntityTypeArgument` (Bukkit) | `EntityType` | entity type key such as `minecraft:zombie`; suggests registry keys | `EntityTypeArgument` | `resource(ENTITY_TYPE)` | equivalent | equivalent | missing |
 | `AdvancementArgument` (Bukkit) | `Advancement` | advancement key; suggests loaded advancements | `AdvancementArgument` | — | equivalent | equivalent | missing |
 | `LootTableArgument` (Bukkit) | `LootTable` | loot table key; suggests registered loot tables | `LootTableArgument` | — | equivalent | equivalent | missing |
 | `RecipeArgument` (Bukkit) | `Recipe` | recipe key; suggests keyed recipes | `RecipeArgument` (`ComplexRecipe`) | — | equivalent | equivalent | missing |
@@ -150,8 +150,6 @@ Notes:
 - On Paper, `SoundArgument`, `BiomeArgument`, `AttributeArgument`, `EntityTypeArgument`, `EnchantmentArgument`,
   `PotionEffectArgument`, and `ParticleArgument` use Paper's `ArgumentTypes.resource(...)`, so Paper parses, suggests,
   and rejects unknown keys natively during Brigadier parsing.
-- Spigot's `EntityTypeArgument` is still an enum argument: it accepts `zombie` but not `minecraft:zombie`, and it
-  suggests every constant, including `unknown`. Converging it on the registry key form is tracked in the roadmap.
 - Forge / NeoForge have only `ResourceLocationArgument`; look the value up in the registry yourself.
 
 ## Scoreboard and game systems
@@ -160,9 +158,9 @@ Notes:
 |---|---|---|---|---|---|---|---|
 | `TeamArgument` | Bukkit `Team` / vanilla `PlayerTeam` | team name; `scoreboard(Supplier)` selects another scoreboard | `TeamArgument` | — | equivalent | equivalent | equivalent |
 | `ObjectiveArgument` (Bukkit) | `Objective` | objective name; `scoreboard(Supplier)` selects another scoreboard | `ObjectiveArgument` | — | equivalent | equivalent | missing |
-| `ScoreboardDisplaySlotArgument` (Bukkit) | `DisplaySlot` | Bukkit enum names such as `sidebar`, `player_list`, `below_name`, `sidebar_team_red` | `ScoreboardSlotArgument` | `scoreboardDisplaySlot()` | partial | partial | missing |
+| `ScoreboardDisplaySlotArgument` (Bukkit) | `DisplaySlot` | vanilla names: `list`, `sidebar`, `below_name`, `sidebar.team.red` | `ScoreboardSlotArgument` | `scoreboardDisplaySlot()` | partial | equivalent | missing |
 | `GameModeArgument` (Bukkit) | `GameMode` | `survival`, `creative`, `adventure`, `spectator` | — | `gameMode()` | equivalent | equivalent | missing |
-| `ChatColorArgument` (Bukkit) | legacy `ChatColor` | any `ChatColor` constant name, including formats such as `bold` | `ChatColorArgument` | `namedColor()` | partial | partial | missing |
+| `ChatColorArgument` (Bukkit) | Spigot: legacy `ChatColor`; Paper: `NamedTextColor` | vanilla color names such as `dark_red`, and `reset` on Spigot | `ChatColorArgument` | `namedColor()` | equivalent | equivalent | missing |
 | objective criteria | — | — | `ObjectiveCriteriaArgument` | `objectiveCriteria()` | missing | missing | missing |
 | math operation | — | — | `MathOperationArgument` | — | missing | missing | missing |
 
@@ -171,9 +169,13 @@ Notes:
 - On Spigot without `scoreboard(...)`, `TeamArgument` uses vanilla's team argument (server scoreboard, vanilla
   suggestions and `Unknown team` error). Paper's and the custom-scoreboard variants are a word argument with
   CommandLib's suggestions and the "Incorrect argument for command" error.
-- `ScoreboardDisplaySlotArgument` uses Bukkit's enum names, not vanilla's `list`, `belowName`, `sidebar.team.red`.
-- `ChatColorArgument` accepts formatting codes as well as colors, while vanilla's color argument accepts only colors
-  and `reset`. On Paper it returns the legacy `ChatColor`, not Adventure's `NamedTextColor`.
+- On Paper, `ScoreboardDisplaySlotArgument` and `ChatColorArgument` use Paper's `scoreboardDisplaySlot()` and
+  `namedColor()`. On Spigot they are string arguments over a fixed list of vanilla names, so the client does not
+  validate them and an unknown name is "Incorrect argument for command".
+- Spigot's `ScoreboardDisplaySlotArgument` also accepts `belowName`, the name before 1.20.2, and offers the
+  `sidebar.team.<color>` slots only where Bukkit's `DisplaySlot` has them (not on 1.16.5–1.18.2), hence `partial`.
+- `ChatColorArgument` rejects formats such as `bold`, like vanilla's color argument. Spigot returns `ChatColor.RESET`
+  for `reset`; `NamedTextColor` has no reset, and what Paper's `namedColor()` does with `reset` has not been checked.
 - On Forge / NeoForge, `EnumArgument<GameType>` works as a game mode argument.
 
 ## Text, NBT, and other advanced arguments
@@ -231,15 +233,14 @@ The order weighs plugin demand, the CommandAPI / Paper parity gap, and how much 
 4. **Item predicate and block predicate.** The Spigot NMS bridge for item predicates (`NMSArgumentPredicateItemStack`)
    and its mock already exist.
 5. **NBT / SNBT compound.**
-6. **Registry semantics on Spigot**: `EntityTypeArgument` by `minecraft:` key, and a generic registry argument
-   (Paper `resource(RegistryKey)` / `resourceKey(RegistryKey)` equivalent) on both Bukkit modules.
+6. **Generic registry argument** (Paper `resource(RegistryKey)` / `resourceKey(RegistryKey)` equivalent) on both
+   Bukkit modules.
 7. **Forge / NeoForge parity**: dimension / world, sound, biome, attribute, entity type, objective, game mode, and the
    other Bukkit-only registry arguments.
 8. **Rotation, angle, 2D location, axes.**
 9. **Score holder, objective criteria, math operation**, the remaining scoreboard set.
 10. **Function, command, list, map** arguments.
-11. **Vanilla display slot names, `NamedTextColor` on Paper**, `style`, `hexColor`, `heightMap`, `entityAnchor`,
-    structure mirror / rotation.
+11. `style`, `hexColor`, `heightMap`, `entityAnchor`, structure mirror / rotation.
 
 ## Testing each argument
 
@@ -257,7 +258,7 @@ depends on the artifact:
 | Argument | `spigot-testing` | `paper-testing` | `forge-testing` / `neoforge-testing` |
 |---|---|---|---|
 | Boolean, numbers, `StringArgument`, `UnparsedArgument`, `LiteralArgument`, `EnumArgument`, `ObjectArgument`, `NameableObjectArgument` | real | real | real |
-| `GameModeArgument`, `EntityTypeArgument`, `ChatColorArgument`, `ScoreboardDisplaySlotArgument` | real (enum) | `GameMode` mock; `EntityType` mock (`withFakeEntityType`); others real (enum) | — |
+| `GameModeArgument`, `ChatColorArgument`, `ScoreboardDisplaySlotArgument` | real | mock: vanilla names | — |
 | `PlayerArgument`, `PlayersArgument` | mock: names, `@s`, `@p`, `@r`, `@a` (`withFakePlayer`) | mock: names, `@a` for the list variant (`withFakePlayer`) | real selectors over the fake players (`withPlayer`) |
 | `EntityArgument`, `EntitiesArgument` | mock: names, `@s`, `@p`, `@r`, `@a`, `@e` (`withFakeEntity`) | mock: names, `@a` (`withFakeEntity`) | real selectors; only players exist |
 | `OfflinePlayerArgument`, `OfflinePlayersArgument`, `UUIDArgument`, `UUIDsArgument` | static | static | `UUIDArgument`, `UUIDsArgument`, `GameProfileArgument`: online fake players only |
@@ -270,7 +271,7 @@ depends on the artifact:
 | `PotionEffectArgument` / `EffectArgument` | mock | mock (`withFakePotionEffectType`) | real |
 | `ParticleArgument` | mock | mock (`withFakeParticle`) | real |
 | `NamespacedKeyArgument` / `ResourceLocationArgument` | real key parsing | real key parsing | real |
-| `SoundArgument`, `BiomeArgument`, `AttributeArgument` | static (`Registry`) | mock (`withFakeSound`, `withFakeBiome`, `withFakeAttribute`) | — |
+| `SoundArgument`, `BiomeArgument`, `AttributeArgument`, `EntityTypeArgument` | static (`Registry`) | mock (`withFakeSound`, `withFakeBiome`, `withFakeAttribute`, `withFakeEntityType`) | — |
 | `AdvancementArgument`, `LootTableArgument`, `RecipeArgument` | static | static | — |
 | `TeamArgument` | mock vanilla type plus static scoreboard; real with `scoreboard(Supplier)` | static, or real with `scoreboard(Supplier)` | real with `scoreboard(Supplier)`; the server scoreboard is not available |
 | `ObjectiveArgument` | static, or real with `scoreboard(Supplier)` | static, or real with `scoreboard(Supplier)` | — |

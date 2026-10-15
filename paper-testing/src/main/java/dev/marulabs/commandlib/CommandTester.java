@@ -15,6 +15,7 @@ import io.papermc.paper.command.brigadier.argument.resolvers.selector.EntitySele
 import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver;
 import io.papermc.paper.math.Position;
 import io.papermc.paper.registry.RegistryKey;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
@@ -32,6 +33,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scoreboard.DisplaySlot;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.mockito.MockedStatic;
@@ -236,6 +238,10 @@ public final class CommandTester implements AutoCloseable {
         MockedStatic<ArgumentTypes> argumentTypes = Mockito.mockStatic(ArgumentTypes.class);
         argumentTypes.when(ArgumentTypes::gameMode)
                      .thenReturn(word(token -> GameMode.valueOf(token.toUpperCase(Locale.ROOT))));
+        argumentTypes.when(ArgumentTypes::scoreboardDisplaySlot)
+                     .thenReturn(word(DisplaySlot.NAMES::value));
+        argumentTypes.when(ArgumentTypes::namedColor)
+                     .thenReturn(word(NamedTextColor.NAMES::value));
         argumentTypes.when(ArgumentTypes::namespacedKey)
                      .thenReturn(word(NamespacedKey::fromString));
         argumentTypes.when(ArgumentTypes::world)
