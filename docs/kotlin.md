@@ -110,9 +110,18 @@ with the branch (`ArgumentBranch`) as its receiver. Each lambda parameter is an 
 so `PlayerArgument` gives `ArgRef<Player>` and `PlayerArgument(...).variadic()` gives `ArgRef<List<Player>>`; no
 casts and no lookups by name.
 
-For eight or more arguments, call `argument(arg1, ..., argN)` without a block, which returns the branch, and read each
-value typed with `ctx.getArgument(arg)`: `argument(x1, y1, z1, x2, y2, z2, world, name).execute { ctx ->
-ctx.getArgument(world) }`.
+For eight or more arguments, use `arguments(arg1, ..., argN) { }`: it takes any number of arguments and runs the block
+with the branch as its receiver, without references. Keep the arguments in variables and read each value typed from
+its argument with `ctx[arg]`, also in a `subcommand` of the branch:
+
+```kotlin
+val world = WorldArgument("world")
+val name = StringArgument("name")
+arguments(x1, y1, z1, x2, y2, z2, world, name) {
+    execute { ctx -> ctx.sendMessage("${ctx[name]}: ${ctx[x2] - ctx[x1]} wide") }
+    subcommand("preview") { execute { ctx -> ctx.sendMessage("${ctx[name]} in ${ctx[world].name}") } }
+}
+```
 
 Read a value in any callback of the command (executor, suggestion provider, prerequisite, help) with `ref.get()`.
 `ctx[ref]` reads it from a context, which also works where no callback is running on the thread, such as in work given
@@ -238,6 +247,7 @@ between, give the builder a scheduler that queues the async tasks, as in [execut
 | `command("heal") { ... }` | `new Command("heal") {{ ... }}` |
 | `subcommand("all") { ... }` | `addChildren(new Command("all") {{ ... }})` |
 | `argument(a, b) { ra, rb -> execute { ctx -> ra.get() } }` | `argument(a, b).execute((va, vb, ctx) -> ...)` |
+| `arguments(a, ..., h) { execute { ctx -> ctx[a] } }` | `argument(a, ..., h).execute(ctx -> ctx.getArgument(a))` |
 | `argument(a) { ra -> subcommand("get") { ... } }` | `argument(a).child(ra -> new Command("get") {{ ... }})` |
 | `val force by flag("force", 'f')` and `force` | `option(Options.flag("force", 'f'))` and `ctx.getOption(force)` |
 | `executeSuspend { ctx -> ... }` | `executeAsync(ctx -> ctx.supplyAsync(...).thenAccept(...))` |

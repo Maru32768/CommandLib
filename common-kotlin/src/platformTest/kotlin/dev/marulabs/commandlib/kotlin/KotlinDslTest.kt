@@ -133,14 +133,20 @@ class KotlinDslTest {
         val label = StringArgument("label")
         val sum =
             command("sum") {
-                argument(numbers[0], numbers[1], numbers[2], numbers[3], numbers[4], numbers[5], numbers[6], label)
-                    .execute { ctx -> ctx.sendMessage(ctx.getArgument(label) + ":" + numbers.sumOf { ctx.getArgument(it) }) }
+                arguments(numbers[0], numbers[1], numbers[2], numbers[3], numbers[4], numbers[5], numbers[6], label) {
+                    description("Sum seven numbers")
+                    execute { ctx -> ctx.sendMessage(ctx[label] + ":" + numbers.sumOf { ctx[it] }) }
+                    subcommand("first") { execute { ctx -> ctx.sendMessage("${ctx[label]}:${ctx[numbers[0]]}") } }
+                }
             }
         val sender = FakeSender.player("Steve")
 
-        CommandTester(sum, "test.command").use { it.execute("sum 1 2 3 4 5 6 7 total", sender) }
+        CommandTester(sum, "test.command").use { tester ->
+            tester.execute("sum 1 2 3 4 5 6 7 total", sender)
+            tester.execute("sum 1 2 3 4 5 6 7 total first", sender)
+        }
 
-        assertThat(sender.sentMessageTexts).containsExactly("total:28")
+        assertThat(sender.sentMessageTexts).containsExactly("total:28", "total:1")
     }
 
     @Test

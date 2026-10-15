@@ -160,6 +160,24 @@ fun <C : CommonCommandContext<*, *>, T : CommonCommand<C, T>, A1, A2, A3, A4, A5
         )
     }
 
+/**
+ * Adds an argument branch of any number of arguments, such as eight or more, and configures it in [block]. Keep the
+ * arguments in variables and read each value typed from its argument with `ctx[argument]`:
+ *
+ * ```kotlin
+ * val world = WorldArgument("world")
+ * arguments(x1, y1, z1, x2, y2, z2, world, name) {
+ *     execute { ctx -> ctx.sendMessage("${ctx[name]} in ${ctx[world].name}") }
+ * }
+ * ```
+ *
+ * It is named apart from [argument] so that `argument(a) { ... }` stays the typed form.
+ */
+fun <C : CommonCommandContext<*, *>, T : CommonCommand<C, T>> T.arguments(
+    vararg arguments: CommonArgument<*, C, *>,
+    block: (@CommandLibDsl ArgumentBranch<C, T>).() -> Unit,
+): ArgumentBranch<C, T> = branch(*arguments).apply(block)
+
 // The varargs form adds the same branch as the typed argument(...) overloads of the fluent API.
 private fun <C : CommonCommandContext<*, *>, T : CommonCommand<C, T>> T.branch(
     vararg arguments: CommonArgument<*, C, *>,
@@ -169,6 +187,11 @@ private fun <C : CommonCommandContext<*, *>, T : CommonCommand<C, T>> T.branch(
  * The value of [ref] in this context.
  */
 operator fun <V> CommonCommandContext<*, *>.get(ref: ArgRef<V>): V = ref.get(this)
+
+/**
+ * The value of [argument] in this context, also of an argument of a parent branch.
+ */
+operator fun <V> CommonCommandContext<*, *>.get(argument: CommonArgument<V, *, *>): V = getArgument(argument)
 
 /**
  * The value of [option] in this context, its default when it was not given.
