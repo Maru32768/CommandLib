@@ -322,8 +322,7 @@ fields of `JoinCommand` annotated `@Dependency` (from `dev.marulabs.commandlib.a
 
 ## Not available yet
 
-Tracked in the roadmap: reusable named conditions, a locale and message key
-system for CommandLib's own messages and help, message formats, catch-unknown handlers, hidden commands, root aliases
+Tracked in the roadmap: reusable named conditions, message formats, catch-unknown handlers, hidden commands, root aliases
 for subcommands, and global contexts and completions by type. Asynchronous execution is `executeAsync(...)`, see
 [execution](../execution.md#async-executors).
 

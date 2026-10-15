@@ -50,8 +50,8 @@
 | Exception handling                  | `[x]` | uncaught exception handler と、middleware での exception mapping / result handling がある。 | global な exception handler。 |
 | Preprocess / prerequisite           | `[~]` | `addPreprocess(...)`（middleware 化済み）、`addPrerequisite(...)`、`requirePlayer()` 等がある。 | reusable condition registry、diagnostics。 |
 | Middleware / interceptor            | `[x]` | `addMiddleware(CommandMiddleware)` で pre / post hook、exception mapping、result handling を合成でき、child と argument branch に継承される。`confirm()` / `cooldown()` / preprocess も middleware 上にある。 | platform 単位の global middleware。 |
-| Sender abstraction                  | `[ ]` | platform context に依存。                                                                                                                   | sender mapper、custom sender、context enrichment。                            |
-| Dependency injection                | `[ ]` | なし。                                                                                                                                     | constructor / method parameter injection、extension point。                  |
+| Sender abstraction                  | `[x]` | `provide(Type, ctx -> ...)` で sender を plugin の型に変換し、`ctx.get(Type)` で cast なしに読める。middleware は `ctx.put` で値を足せる（[`docs/context-values.md`](context-values.md)）。 | platform 単位の provider 登録。 |
+| Dependency injection                | `[x]` | context value の provider と、annotation API の `registerDependency` / `@Dependency` field がある。DI framework 非依存。 | platform 単位の provider 登録、`require(Class)` の短縮形。 |
 | Annotation API                      | `[~]` | `AnnotationParser` と `@Command` / `@Subcommand` / `@Permission` / `@Optional` / `@Default` / `@Range` / `@Suggest` / `@Flag` / `@Option` / `@Confirm` / `@Cooldown` 等、custom annotation の拡張点が Spigot / Paper / Velocity にある。fluent と同じ help / permission / 実行結果を snapshot で確認（[`docs/annotations.md`](annotations.md)）。 | Forge / NeoForge の `AnnotatedCommands`、middleware / prerequisite / option 依存の annotation。 |
 | Kotlin DSL                          | `[~]` | `common-kotlin` + `spigot-kotlin` / `paper-kotlin` / `velocity-kotlin` に型推論の効く builder、delegated option、`executeSuspend`、suspend suggestions がある（[`docs/kotlin.md`](kotlin.md)）。 | Forge / NeoForge 版、Kotlin 関数の default 引数から command を作る形、suspend middleware。`common-kotlin` は package-private の `CurrentCommandContext` を同じ package から読むため `common` と同じ class loader が必要。 |
 | Java builder API                    | `[x]` | `Command.builder(name)`（common の `CommandBuilder`）が全 platform にあり、fluent と同じ command tree / permission / 結果を snapshot で確認（[`docs/java-builder.md`](java-builder.md)）。 | modded-testing の builder test。 |
@@ -95,7 +95,7 @@
   Paper 1.21.3〜26.x で動くことを integration test（`CommandSyntaxExceptionTest`）で確認する。
 - `[ ]` optional / variadic argument を実サーバー（Spigot / Paper / modded の integration test）で検証する。各 token を
   platform の `ArgumentType#parse` で読み直す実装のため、command tree の大きさ（`maxCount` × option の展開）も確認する。
-- `[ ]` platform 単位の global middleware を追加する（現在は top-level command ごとに `addMiddleware`）。
+- `[ ]` platform 単位の global middleware と context value provider を追加する（現在は top-level command ごとに `addMiddleware` / `provide`）。
 - `[ ]` cooldown の reset / query API と永続化（現在は memory 上のみ）、argument branch 単位の confirm / cooldown。
 - `[ ]` permission 以外の state で command の表示を切り替える visibility predicate を追加する（現在は permission を付け外しして
   `CommandLib.refresh(player)` する方式を docs で案内）。
@@ -107,8 +107,6 @@
 - `[~]` options の継承と配置拡張（subcommand への継承、positional argument の後の option、固定 arity の multi-value）を実装する。
   repeatable / count / aliases / required / 排他は実装済み。
 - `[ ]` reusable condition registry、help / usage / error formatter、rich help / MiniMessage を追加する。
-- `[ ]` dependency injection hooks を追加する。
-- `[ ]` sender mapper / context enrichment を追加する。
 - `[ ]` help / usage / error formatter API を追加する（現在は help の見出しだけ caption）。
 
 ### P5: Platform expansion

@@ -72,6 +72,8 @@
   （`assertCommandTreeMatchesSnapshot`）を追加する（common / spigot / paper、2026-10-15）。
 - `[x]` confirmation / cooldown を標準機能として追加する（`confirm()`、`cooldown(Duration)`、bypass permission、
   差し替え可能な message と clock、2026-10-15）。
+- `[x]` sender mapper / context enrichment / dependency injection hooks を追加する。`ContextKey` による typed context value、
+  `provide` / `ctx.put` / `ctx.get`、annotation の `registerDependency` と `@Dependency`（`docs/context-values.md`、2026-10-16）。
 - `[x]` middleware / interceptor API（`addMiddleware`）と async execution（`executeAsync`、`CommandScheduler` による sync thread
   への復帰）を追加し、preprocess / confirm / cooldown を middleware 上に載せる（`docs/execution.md`、
   `docs/design/execution-pipeline.md`、2026-10-15）。

@@ -387,6 +387,6 @@ providers are `addSuggestionProviderSuspend { sb -> }`. Functions with default p
 
 Tracked in the roadmap: registration
 hooks, response handlers, global parameter types and suggestion
-providers, customizable and translatable built-in messages, and options with non-primitive values.
+providers, and options with non-primitive values.
 
 See also: [Migrating from CommandAPI](from-commandapi.md), [Cloud](from-cloud.md), [ACF](from-acf.md).

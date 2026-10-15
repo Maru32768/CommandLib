@@ -372,8 +372,7 @@ CommandLib's `spigot-testing` / `paper-testing` run commands without a server:
 ## Not available yet
 
 Tracked in the roadmap: a platform-wide middleware and provider
-registration (add them to each top-level command), customizable and translatable built-in
-messages, permission predicates that hide commands, typed value options beyond primitives and strings, and the
+registration (add them to each top-level command), permission predicates that hide commands, typed value options beyond primitives and strings, and the
 arguments listed as missing in the [catalog](../arguments.md).
 
 See also: [Migrating from CommandAPI](from-commandapi.md), [Lamp](from-lamp.md), [ACF](from-acf.md).
