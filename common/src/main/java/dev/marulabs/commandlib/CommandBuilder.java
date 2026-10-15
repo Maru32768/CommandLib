@@ -319,6 +319,14 @@ public final class CommandBuilder<C extends CommonCommandContext<?, ?>, T extend
         return this;
     }
 
+    /**
+     * See {@link CommonCommand#captions(Captions)}.
+     */
+    public CommandBuilder<C, T> captions(@NotNull Captions captions) {
+        command.captions(captions);
+        return this;
+    }
+
     public CommandBuilder<C, T> execute(@NotNull CommandExecutor<C> executor) {
         command.execute(executor);
         return this;
