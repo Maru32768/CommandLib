@@ -1,14 +1,16 @@
 package dev.marulabs.commandlib;
 
 import dev.marulabs.commandlib.CommonCommand;
+import dev.marulabs.commandlib.command.Extractor;
+import dev.marulabs.commandlib.exception.CommandPrerequisiteException;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.stream.Collectors;
 //? if >=1.18 && !fabric
 import net.minecraft.network.chat.Component;
-//? if >=1.18
-import net.minecraft.server.level.ServerPlayer;
 //? if neoforge {
 /*import net.neoforged.neoforge.server.permission.nodes.PermissionNode;
 import net.neoforged.neoforge.server.permission.nodes.PermissionTypes;
@@ -33,6 +35,41 @@ public class Command extends CommonCommand<CommandContext, Command> {
     @NotNull
     public static CommandBuilder<CommandContext, Command> builder(@NotNull String name) {
         return CommandBuilder.of(new Command(name));
+    }
+
+    /**
+     * Returns the player executing the command, and fails the command with {@link Caption#REQUIRE_PLAYER} for any
+     * other source.
+     */
+    public static Extractor<CommandContext, ServerPlayer> playerRequirer() {
+        return ctx -> {
+            if (!(ctx.getEntity() instanceof ServerPlayer)) {
+                throw new CommandPrerequisiteException(Caption.REQUIRE_PLAYER);
+            }
+            return (ServerPlayer) ctx.getEntity();
+        };
+    }
+
+    /**
+     * Returns the source of a command the console or a remote console executes, and fails the command with
+     * {@link Caption#REQUIRE_CONSOLE} for any other source.
+     */
+    public static Extractor<CommandContext, CommandSourceStack> consoleRequirer() {
+        return ctx -> {
+            if (!ctx.getActor()
+                    .isConsole()) {
+                throw new CommandPrerequisiteException(Caption.REQUIRE_CONSOLE);
+            }
+            return ctx.getSender();
+        };
+    }
+
+    public final void requirePlayer() {
+        addPrerequisite(playerRequirer()::extract);
+    }
+
+    public final void requireConsole() {
+        addPrerequisite(consoleRequirer()::extract);
     }
 
     //? if >=1.18 {

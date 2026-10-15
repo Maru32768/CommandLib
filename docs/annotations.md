@@ -4,8 +4,8 @@ The annotation API writes a command as a class with annotated methods. It builds
 fluent API, so the help, the permission nodes, the options, the suggestions and the tests are the same as for the same
 command written fluently. The design is in [design/annotation-api.md](design/annotation-api.md).
 
-It is available for Spigot, Paper and Velocity through `AnnotatedCommands`; on Forge and NeoForge, create an
-`AnnotationParser` yourself (see [Other platforms](#other-platforms)).
+It is available for Spigot, Paper, Velocity, Forge, NeoForge and Fabric through `AnnotatedCommands`; for a context of
+your own, create an `AnnotationParser` yourself (see [Other contexts](#other-contexts)).
 
 ## Example
 
@@ -99,8 +99,8 @@ public final class ArenaCommand extends Command {
 }
 ```
 
-`spigot-testing` and `paper-testing` check that the two give the same tree, permissions, suggestions, help and
-execution results (`AnnotationStyleTest`).
+`spigot-testing`, `paper-testing` and `modded-testing` check that the two give the same tree, permissions, suggestions,
+help and execution results (`AnnotationStyleTest`).
 
 ## Parameter names
 
@@ -164,9 +164,11 @@ a middleware's value are all parameters this way; see [context values](context-v
 | `Duration`, `UUID` | `DurationArgument`, `UUIDArgument` |
 | `Player`, `OfflinePlayer`, `Entity`, `World`, `Location`, `GameMode`, `EntityType`, `Biome`, `Sound`, `Attribute`, `Enchantment`, `Particle`, `PotionEffect`, `ItemStack`, `BlockData`, `NamespacedKey`, `Advancement`, `LootTable`, `Recipe`, `Team`, `Objective`, `DisplaySlot`, `ChatColor` (Paper: `NamedTextColor`) | the argument of the same name (Spigot, Paper) |
 | `Player`, `RegisteredServer` | `PlayerArgument`, `ServerArgument` (Velocity) |
+| `ServerPlayer`, `GameProfile`, `Entity`, `ServerLevel`, `Location` (CommandLib's), `BlockPos`, `GameType`, `EntityType`, `Biome`, `SoundEvent`, `ParticleOptions`, `ItemStack`, `BlockInput`, `CompoundTag`, `ResourceLocation`, `LootTable`, `PlayerTeam`, `Objective`, `ChatFormatting` | `PlayerArgument`, `GameProfileArgument`, `EntityArgument`, `WorldArgument`, `LocationArgument`, `BlockPositionArgument`, `GameModeArgument`, `EntityTypeArgument`, `BiomeArgument`, `SoundArgument`, `ParticleArgument`, `ItemStackArgument`, `BlockStateArgument`, `NBTCompoundArgument`, `ResourceLocationArgument`, `LootTableArgument`, `TeamArgument`, `ObjectiveArgument`, `ChatColorArgument` (Forge, NeoForge, Fabric) |
+| `Enchantment`, `MobEffect`, `Attribute` (`Holder<Enchantment>`, `Holder<MobEffect>`, `Holder<Attribute>` on 1.20.5+), `Advancement`, `Recipe` (`AdvancementHolder`, `RecipeHolder`, `DisplaySlot` on 1.20.2+) | `EnchantmentArgument`, `EffectArgument`, `AttributeArgument`, `AdvancementArgument`, `RecipeArgument`, `ScoreboardDisplaySlotArgument` (Forge, NeoForge, Fabric) |
 
 Context values: `CommandSender`, `ConsoleCommandSender` and `Player` on Spigot and Paper; `CommandSource`,
-`ConsoleCommandSource` and `Player` on Velocity.
+`ConsoleCommandSource` and `Player` on Velocity; `CommandSourceStack` and `ServerPlayer` on Forge, NeoForge and Fabric.
 
 ### Argument annotations
 
@@ -253,9 +255,9 @@ ArenaCommand#show(Thread): parameter thread has no argument type for java.lang.T
 ArenaCommand#run() has @Description but neither @Execute nor @Subcommand
 ```
 
-## Other platforms
+## Other contexts
 
-On Forge and NeoForge, or for a context of your own, create the parser and register the types:
+For a context of your own, create the parser and register the types:
 
 ```java
 AnnotationParser<CommandContext, Command> parser = new AnnotationParser<>(CommandContext.class, Command::new)

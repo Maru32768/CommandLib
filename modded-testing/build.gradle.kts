@@ -21,10 +21,17 @@ repositories {
 dependencies {
     api(project(path = ":modded:${sc.current.project}", configuration = "namedElements"))
     api("org.mockito:mockito-core:5.11.0")
+    // CommandLibExtension; tests that use it already have JUnit.
+    compileOnly("org.junit.jupiter:junit-jupiter-api:5.8.1")
 
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("org.assertj:assertj-core:3.25.3")
+}
+
+// The annotated example commands take their argument names from their parameters.
+tasks.compileTestJava {
+    options.compilerArgs.add("-parameters")
 }
 
 tasks.test {

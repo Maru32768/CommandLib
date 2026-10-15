@@ -21,8 +21,10 @@ The parser uses the list form `argument(List<CommonArgument<?, C, ?>>)`, which t
 the method. The typed `Unary`…`Hept` branches are not needed, so methods are not limited to seven arguments.
 
 `T` is the platform command and `C` its context; the parser is created with the context class and a command factory
-(`Command::new`). Each platform has an `AnnotatedCommands` class (Spigot, Paper, Velocity) that returns a parser with the
-platform's argument types and sender types registered. The annotations themselves are platform independent.
+(`Command::new`). Each platform has an `AnnotatedCommands` class (Spigot, Paper, Velocity, and the Forge / NeoForge /
+Fabric nodes) that returns a parser with the platform's argument types and sender types registered. The annotations
+themselves are platform independent. The parser matches a parameter by its raw type, so on 1.20.5+ the modded parser
+registers `Holder` once and picks the enchantment, mob effect or attribute argument from the holder's type argument.
 
 ## Reflection, not an annotation processor
 
@@ -105,7 +107,6 @@ return a `CompletionStage` that returns null fails with a clear message.
 
 ## Not done
 
-- Forge and NeoForge have no `AnnotatedCommands`; a mod creates the parser with its own registrations.
 - `@Subcommand` on nested classes, inherited methods, and an explicit method order (`@Order`).
 - Annotations for middlewares (`addMiddleware`), prerequisites, option dependencies (`requires`, `mutuallyExclusive`)
   and argument-first children (`child(...)`). The parsed command is an ordinary `Command`, so these can be added
