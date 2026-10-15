@@ -6,7 +6,7 @@
 *.iml
 *.ipr
 *.iws
-t
+
 # IntelliJ
 out/
 # mpeltonen/sbt-idea plugin
@@ -106,6 +106,8 @@ $RECYCLE.BIN/
 
 .gradle
 .gradle-user-home*
+# Kotlin 2 compiler data
+.kotlin/
 build/
 
 # Ignore Gradle GUI config
