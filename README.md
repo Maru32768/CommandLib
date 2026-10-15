@@ -737,7 +737,8 @@ public final class CountCommand extends Command {
 ```
 
 `/execute store result score @s count run count @a` then stores the number of players. `CommandTester#execute`
-returns the result, and 0 for a failure, whose messages it sends to the `FakeSender`.
+returns the result, and 0 for a failure, whose messages it sends to the `FakeSender`. See
+[errors](docs/errors.md#results-and-failures) for each failure.
 
 ## Server Help
 

@@ -45,7 +45,7 @@ class HealCommandTest {
 | `new CommandTester(Supplier<Command>, prefix)` | Builds the command inside the tester. **Prefer this form.** |
 | `new CommandTester(Command, prefix)`, `new CommandTester(Collection<Command>, prefix)` | For commands without platform argument types. |
 | `CommandTester.builder().command(...).commands(...).permissionPrefix(...).build()` | Several commands, or extra setup (`mockNmsClass` in `spigot-testing`). |
-| `execute(input, sender)` | Runs the input as the sender. No leading `/`. |
+| `execute(input, sender)` | Runs the input as the sender and returns the result `/execute store result` would store (`0` for a failure). No leading `/`. |
 | `suggestions(input, sender)` | Returns Brigadier's `CompletableFuture<Suggestions>` for a partial input. |
 | `close()` | Ends the tester. Use try-with-resources. |
 
@@ -205,6 +205,7 @@ void suggests_modes() {
 - `DefaultPermission` defaults, permission plugin behavior, client command trees.
 - Real registries and tags (Spigot, Paper), worlds, scoreboards (except through `scoreboard(Supplier)`), selector
   filters such as `@e[type=zombie]` (Spigot, Paper).
-- `/execute`, command blocks, functions, and result values.
+- `/execute`, command blocks, and functions. `execute` returns the result, but gamerules, silent sources, and the
+  operator broadcast of `sendSuccess(message, true)` are not modeled.
 
 CommandLib's own coverage of these lives in the repository's `integration-test` module, which runs real servers.

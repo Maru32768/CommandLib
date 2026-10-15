@@ -13,7 +13,8 @@ A command input goes through two stages, and each stage reports its own errors.
    `CommandSyntaxException` into its usual red error message with the `...<--[HERE]` context line.
 2. **CommandLib execution.** When Brigadier finds a node that can run, CommandLib's runner takes over. It checks
    permissions again, reads options, converts each argument to its Java value, runs validators, prerequisites,
-   preprocesses, and finally the executor. Errors at this stage are sent by CommandLib through `ctx.sendFailure(...)`.
+   preprocesses, and finally the executor. CommandLib collects the messages of an error at this stage and throws them
+   to the platform as a `CommandSyntaxException`, see [Results and failures](#results-and-failures).
 
 The runner works in this order and stops at the first failure:
 
@@ -24,10 +25,23 @@ The runner works in this order and stops at the first failure:
 | 3 | For each argument branch on the path: branch permission, then each argument's parse → `validator` → `transformer`, or the default of an omitted optional argument | The permission message, the argument's `ArgumentParseException`, or the `CommandPrerequisiteException` of an `optional(extractor)` default |
 | 4 | Prerequisites (`addPrerequisite`, `require(...)`, `requirePlayer()`, `requireConsole()`) | The `CommandPrerequisiteException` message |
 | 5 | No executor on this node: the generated help is sent instead | (help text, not an error) |
-| 6 | Preprocesses (`addPreprocess`) | Nothing; a preprocess that returns `false` stops silently |
+| 6 | Preprocesses (`addPreprocess`) | The messages the preprocess sent before returning `false` |
 | 7 | The executor | A `CommandPrerequisiteException` message, or the generic unexpected-error message |
 
-The runner currently returns `1` to Brigadier when the executor (or the help) runs and `0` for every handled failure.
+## Results and failures
+
+The runner returns the value the executor set with `ctx.setResult(int)` to Brigadier, `1` unless set, and `1` for the
+generated help. `/execute store result` stores it.
+
+A failure at any step above throws a `CommandSyntaxException` whose message joins the failure messages, one per line.
+The platform reports it as it reports a vanilla command's error: the sender gets it in red, except a silent source such
+as a function and each target of a forked `/execute as @a ... run`. `/execute store result` and `/execute store success`
+both store `0`. A failure that sent no message, such as a preprocess returning `false` silently, only returns `0`,
+since the platform would send an empty line for it; `store success` then stores `1`.
+
+Messages the executor sent before throwing still reach the sender directly. `ctx.sendSuccess(...)` is vanilla command
+feedback (see the README): a player does not get it while the `sendCommandFeedback` gamerule is off, and
+`sendSuccess(message, true)` also goes to the other operators and, with `logAdminCommands`, the server log.
 
 ## Error catalog
 
@@ -167,7 +181,7 @@ Non-player sources:
 ### Prerequisite failed (`CommandPrerequisiteException`)
 
 Thrown by a `Prerequisite` (`addPrerequisite`), an `Extractor` (`require(...)`), or by an executor written as
-`execute(ctx -> ...)`. The message is sent in red and the command returns `0`.
+`execute(ctx -> ...)`. The message is sent in red and the command [fails](#results-and-failures).
 
 | Source | Message |
 |---|---|
@@ -180,13 +194,15 @@ Thrown by a `Prerequisite` (`addPrerequisite`), an `Extractor` (`require(...)`),
 Prerequisites of a parent command apply to its children unless the child calls `disableParentPrerequisite()`.
 
 The typed executors (`execute((a, b, ctx) -> ...)`) take `java.util.function` style consumers that cannot throw
-checked exceptions. To stop such an executor with a failure message, call `ctx.sendFailure(...)` and return, or use the
-`execute(ctx -> ...)` form and read the values with `ctx.getArgument(argument)`.
+checked exceptions. Calling `ctx.sendFailure(...)` and returning sends the message but does not fail the command
+(`store success` stores `1`). To fail it, use the `execute(ctx -> ...)` form and read the values with
+`ctx.getArgument(argument)`.
 
 ### Preprocess cancelled
 
-`addPreprocess(Predicate)` returning `false` stops the command without any message. Send the message yourself before
-returning `false`. Preprocesses run only when the node has an executor; the generated help skips them.
+`addPreprocess(Predicate)` returning `false` makes the command fail with the messages the preprocess sent before
+returning, and stops it without a message when it sent none. A preprocess that returns `true` has its messages sent
+when it returns. Preprocesses run only when the node has an executor; the generated help skips them.
 
 ### Option errors
 
@@ -210,7 +226,7 @@ An exception thrown by the executor, other than `CommandPrerequisiteException`:
   in red;
 - every `UncaughtExceptionHandler` added with `addUncaughtExceptionHandler` on the command (and, for an argument node,
   on the argument) is called with the exception and the context;
-- the command returns `0`.
+- the command [fails](#results-and-failures) with those two lines.
 
 An unchecked exception thrown outside the executor (in a parser, validator, transformer, prerequisite, or preprocess)
 is printed, passed to the uncaught exception handlers, and rethrown to Brigadier. The platform then reports it with its
@@ -231,5 +247,6 @@ is not implemented yet.
 `CommandTester#execute` in every testing artifact throws a `RuntimeException` whose cause is the
 `CommandSyntaxException` when Brigadier rejects the input (unknown command, unknown subcommand, invalid syntax,
 permission hidden node). Everything CommandLib reports itself is captured by `FakeSender#getSentMessages()` /
-`getSentMessageTexts()`. Translatable parts read as English text in `spigot-testing` and `modded-testing` and as
+`getSentMessageTexts()`: a failure's messages are sent to the sender one by one, as they were sent, and `execute`
+returns `0`. Otherwise `execute` returns the command's result. Translatable parts read as English text in `spigot-testing` and `modded-testing` and as
 translation keys (`command.unknown.argument`, `command.context.here`) in `paper-testing`. See [testing](testing.md).
