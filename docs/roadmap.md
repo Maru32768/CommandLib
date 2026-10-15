@@ -78,7 +78,12 @@
 - `[ ]` 汎用の registry argument（Paper の `ArgumentTypes.resource(RegistryKey...)` 相当）を Spigot / Paper に追加する。
 - `[ ]` Spigot の `ScoreboardDisplaySlotArgument` / `ChatColorArgument` を vanilla の argument type で送る（現在は string
   argument のため client 側で検証されない）。
-- `[ ]` `/execute`、command blocks、functions、tags の挙動を検証して docs / tests に落とす。
+- `[~]` `/execute`、command blocks、functions、tags の挙動を検証して docs / tests に落とす。integration test
+  （`VanillaExecutionTest`、`DataPackFunctionTest`、modded `ActorTest`）と [`docs/vanilla-integration.md`](vanilla-integration.md)
+  は追加済みだが、実サーバーでは未実行（spigot-1.16.5、spigot-26.3、paper-26.3、paper-1.20.4、forge-1.20.1 から実行する）。
+  range / duration の fixture と Paper の `CommandSyntaxExceptionTest` も同時に確認する。
+- `[?]` `/execute as` 後の actor を platform 間で揃えるか決める。Spigot / Paper では sender / actor は元の sender（console）のまま、
+  Forge / NeoForge では実行 entity に従う（permission 判定も含む）。
 - `[ ]` selector で複数 target に適用した場合の集計 feedback message（vanilla の "Applied to 3 players" 相当）を扱う。
 - `[ ]` typed executor（`(a, ctx) -> ...`）から command を失敗させる手段を用意する。現在は `ctx ->` 形式でしか
   `CommandPrerequisiteException` を投げられない。
