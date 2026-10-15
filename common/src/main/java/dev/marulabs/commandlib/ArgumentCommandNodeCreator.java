@@ -23,16 +23,19 @@ final class ArgumentCommandNodeCreator<S, T, C extends CommonCommandContext<S, T
     private final PlatformAdapter<S, T, C, ?> platformAdapter = PlatformAdapter.get();
     private final Arguments<C> arguments;
     private final List<Arguments<C>> executorArguments;
+    private final OptionGraph<S, C> optionGraph;
     private final String permissionPrefix;
     private final CommandScheduler scheduler;
 
     ArgumentCommandNodeCreator(Arguments<C> arguments,
                                List<Arguments<C>> executorArguments,
+                               OptionGraph<S, C> optionGraph,
                                String permissionPrefix,
                                CommandScheduler scheduler) {
         this.scheduler = scheduler;
         this.arguments = arguments;
         this.executorArguments = List.copyOf(executorArguments);
+        this.optionGraph = optionGraph;
         this.permissionPrefix = permissionPrefix;
     }
 
@@ -118,7 +121,7 @@ final class ArgumentCommandNodeCreator<S, T, C extends CommonCommandContext<S, T
                                    parent,
                                    permissionPrefix,
                                    executorArguments,
-                                   parent.options(),
+                                   optionGraph,
                                    parent.prerequisite(),
                                    helpAction,
                                    parent.middlewares(),

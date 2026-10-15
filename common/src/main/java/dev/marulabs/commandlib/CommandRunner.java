@@ -14,9 +14,6 @@ import dev.marulabs.commandlib.exception.OptionParseException;
 import dev.marulabs.commandlib.util.UncaughtExceptionHandler;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -34,7 +31,7 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
     private final CommonCommand<C, ?> command;
     private final String permissionPrefix;
     private final List<Arguments<C>> argumentsList;
-    private final List<CommandOption<?, C>> options;
+    private final OptionGraph<S, C> optionGraph;
     private final Prerequisite<C> prerequisite;
     private final CommandExecutor<C> helpAction;
     private final List<CommandMiddleware<? super C>> middlewares;
@@ -48,7 +45,7 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
                   CommonCommand<C, ?> command,
                   String permissionPrefix,
                   List<Arguments<C>> argumentsList,
-                  List<CommandOption<?, C>> options,
+                  OptionGraph<S, C> optionGraph,
                   Prerequisite<C> prerequisite,
                   CommandExecutor<C> helpAction,
                   List<CommandMiddleware<? super C>> middlewares,
@@ -59,7 +56,7 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
         this.command = command;
         this.permissionPrefix = permissionPrefix;
         this.argumentsList = List.copyOf(argumentsList);
-        this.options = options;
+        this.optionGraph = optionGraph;
         this.prerequisite = prerequisite;
         this.helpAction = helpAction;
         this.middlewares = List.copyOf(middlewares);
@@ -319,67 +316,13 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
     }
 
     private void parseOptions(C ctx) {
-        Map<String, CommandOption<?, C>> flagByLongToken = new HashMap<>();
-        Map<Character, CommandOption<?, C>> flagByShortName = new HashMap<>();
-        Map<String, CommandOption<?, C>> valueOptionByInternalName = new HashMap<>();
-
-        for (CommandOption<?, C> option : options) {
-            if (option.hasValue()) {
-                for (int i = 0; i < option.maxOccurrences(); i++) {
-                    valueOptionByInternalName.put(option.internalName(i), option);
-                }
-                continue;
-            }
-            option.names()
-                  .forEach(x -> flagByLongToken.put("--" + x, option));
-            if (option.shortName() != null) {
-                flagByShortName.put(option.shortName(), option);
-            }
-        }
-
-        // The node names of each option's occurrences in input order. A flag has its token once per occurrence.
-        Map<CommandOption<?, C>, List<String>> occurrences = new LinkedHashMap<>();
-        ctx.getHandle()
-           .getNodes()
-           .stream()
-           .map(x -> x.getNode()
-                      .getName())
-           .forEach(token -> {
-               CommandOption<?, C> valueOption = valueOptionByInternalName.get(token);
-               if (valueOption != null) {
-                   occurrences.computeIfAbsent(valueOption, x -> new ArrayList<>())
-                              .add(token);
-                   return;
-               }
-               if (!token.startsWith("-")) {
-                   return;
-               }
-
-               CommandOption<?, C> longFlag = flagByLongToken.get(token);
-               if (longFlag != null) {
-                   occurrences.computeIfAbsent(longFlag, x -> new ArrayList<>())
-                              .add(token);
-                   return;
-               }
-               if (token.startsWith("--")) {
-                   return;
-               }
-
-               for (int i = 1; i < token.length(); i++) {
-                   CommandOption<?, C> flag = flagByShortName.get(token.charAt(i));
-                   if (flag != null) {
-                       occurrences.computeIfAbsent(flag, x -> new ArrayList<>())
-                                  .add(token);
-                   }
-               }
-           });
-
-        occurrences.forEach((option, names) -> ctx.setOptionValue(option, option.read(ctx, names)));
+        optionGraph.occurrences(ctx.getHandle())
+                   .forEach((option, names) -> ctx.setOptionValue(option, option.read(ctx, names)));
     }
 
     private void validateOptions(C ctx) throws OptionParseException {
         // Help runs where there is no executor, and must not ask for the options the executor requires.
-        for (CommandOption<?, C> option : options) {
+        for (CommandOption<?, C> option : optionGraph.options()) {
             option.validate(ctx, executor != null);
         }
     }

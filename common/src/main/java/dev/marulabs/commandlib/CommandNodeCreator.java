@@ -97,6 +97,7 @@ final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U ext
         builder.requires(x -> platformAdapter.hasPermission(command, x, permissionPrefix));
 
         List<Arguments<C>> argumentsList = command.argumentsList();
+        OptionGraph<S, C> optionGraph = new OptionGraph<>(command.options());
 
         if (argumentsList.isEmpty()) {
             CommandRunner<S, C> runner = new CommandRunner<>(platformAdapter,
@@ -104,14 +105,14 @@ final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U ext
                                                              command,
                                                              permissionPrefix,
                                                              inheritedArguments,
-                                                             command.options(),
+                                                             optionGraph,
                                                              command.prerequisite(),
                                                              helpAction,
                                                              command.middlewares(),
                                                              command.executor(),
                                                              command.uncaughtExceptionHandlers());
             builder.executes(runner);
-            createOptionCommands(command, () -> null, runner).forEach(builder::then);
+            createOptionCommands(command, optionGraph, () -> null, runner).forEach(builder::then);
             return builder.build();
         }
 
@@ -134,7 +135,7 @@ final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U ext
                                       command,
                                       permissionPrefix,
                                       inheritedArguments,
-                                      command.options(),
+                                      optionGraph,
                                       command.prerequisite(),
                                       helpAction,
                                       command.middlewares(),
@@ -142,6 +143,7 @@ final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U ext
                                       command.uncaughtExceptionHandlers())
                 : new ArgumentCommandNodeCreator<>(allOptional.get(0),
                                                    appendArgument(inheritedArguments, allOptional.get(0)),
+                                                   optionGraph,
                                                    permissionPrefix,
                                                    scheduler).runner(allOptional.get(0)
                                                                                 .first(),
@@ -165,12 +167,16 @@ final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U ext
                                                                            .collect(Collectors.toList());
                          Supplier<ArgumentCommandNode<S, ?>> argumentNodeSupplier = () -> new ArgumentCommandNodeCreator<>(arguments,
                                                                                                                            executorArguments,
+                                                                                                                           optionGraph,
                                                                                                                            permissionPrefix,
                                                                                                                            scheduler).build(helpAction,
                                                                                                                                             command,
                                                                                                                                             childNodes);
                          builder.then(argumentNodeSupplier.get());
-                         createOptionCommands(command, argumentNodeSupplier, bareRunner).forEach(builder::then);
+                         createOptionCommands(command,
+                                              optionGraph,
+                                              argumentNodeSupplier,
+                                              bareRunner).forEach(builder::then);
                      });
 
         return builder.build();
@@ -188,6 +194,7 @@ final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U ext
     }
 
     private List<CommandNode<S>> createOptionCommands(U command,
+                                                      OptionGraph<S, C> optionGraph,
                                                       Supplier<ArgumentCommandNode<S, ?>> argumentNodeSupplier,
                                                       CommandRunner<S, C> executor) {
         if (command.options()
@@ -195,13 +202,14 @@ final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U ext
             return List.of();
         }
 
-        return createOptionCommands(command, Map.of(), argumentNodeSupplier, executor, new HashMap<>());
+        return createOptionCommands(command, optionGraph, Map.of(), argumentNodeSupplier, executor, new HashMap<>());
     }
 
     // usedOptions counts the occurrences of each option on the path to the nodes being created. The nodes after a
     // path depend only on those counts, so every path with the same counts shares them through childrenByUsedOptions.
     // Otherwise the tree would grow with every order the options can be given in.
     private List<CommandNode<S>> createOptionCommands(U command,
+                                                      OptionGraph<S, C> optionGraph,
                                                       Map<CommandOption<?, C>, Integer> usedOptions,
                                                       Supplier<ArgumentCommandNode<S, ?>> argumentNodeSupplier,
                                                       CommandRunner<S, C> executor,
@@ -213,6 +221,7 @@ final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U ext
             Map<CommandOption<?, C>, Integer> nextUsedOptions = new HashMap<>(usedOptions);
             tokenOptions.forEach(x -> nextUsedOptions.merge(x, 1, Integer::sum));
             List<CommandNode<S>> children = createOptionChildren(command,
+                                                                 optionGraph,
                                                                  nextUsedOptions,
                                                                  argumentNodeSupplier,
                                                                  executor,
@@ -221,14 +230,17 @@ final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U ext
             LiteralArgumentBuilder<S> builder = LiteralArgumentBuilder.literal(optionToken.token());
             if (isValueOptionToken(tokenOptions)) {
                 CommandOption<?, C> option = tokenOptions.get(0);
+                builder.requires(optionGraph.literal(List.of()));
                 // Each occurrence needs its own argument name, since Brigadier keeps one value per name.
                 RequiredArgumentBuilder<S, ?> valueBuilder = RequiredArgumentBuilder.argument(option.internalName(usedOptions.getOrDefault(option,
                                                                                                                                            0)),
                                                                                               option.type());
+                valueBuilder.requires(optionGraph.value(option));
                 valueBuilder.executes(executor);
                 children.forEach(valueBuilder::then);
                 builder.then(valueBuilder);
             } else {
+                builder.requires(optionGraph.literal(tokenOptions));
                 builder.executes(executor);
                 children.forEach(builder::then);
             }
@@ -241,6 +253,7 @@ final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U ext
 
     // The nodes that may follow the options counted by usedOptions: the argument node and the remaining options.
     private List<CommandNode<S>> createOptionChildren(U command,
+                                                      OptionGraph<S, C> optionGraph,
                                                       Map<CommandOption<?, C>, Integer> usedOptions,
                                                       Supplier<ArgumentCommandNode<S, ?>> argumentNodeSupplier,
                                                       CommandRunner<S, C> executor,
@@ -256,6 +269,7 @@ final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U ext
             children.add(argumentNode);
         }
         children.addAll(createOptionCommands(command,
+                                             optionGraph,
                                              usedOptions,
                                              argumentNodeSupplier,
                                              executor,

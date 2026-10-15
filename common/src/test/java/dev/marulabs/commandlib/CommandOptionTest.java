@@ -393,6 +393,22 @@ class CommandOptionTest {
     }
 
     @Test
+    void argument_child_does_not_count_the_options_of_its_parent() throws Exception {
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("config") {{
+            option(Options.flag("force", 'f'));
+            argument(new CommonStringArgument<>("key")).child(new TestCommand("set") {{
+                CommandOption<Boolean, TestCommandContext> force = option(Options.flag("force", 'f'));
+                execute(ctx -> ctx.sendMessage("force=" + ctx.getOption(force)));
+            }});
+        }});
+
+        assertThat(runner.execute("config -f difficulty set")
+                         .messages()).containsExactly("force=false");
+        assertThat(runner.execute("config difficulty set -f")
+                         .messages()).containsExactly("force=true");
+    }
+
+    @Test
     void option_tokens_are_excluded_from_context_inputs() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("scan") {{
             option(Options.flag("force", 'f'));
