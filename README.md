@@ -16,6 +16,7 @@ with ease.
 | **Forge**  | `forge-<minecraft-version>` | `1.16.5`, `1.20.1`                             | Use the artifact that matches the target Minecraft version.   |
 | **NeoForge** | `neoforge-<minecraft-version>` | `1.21.1`                                   | Use the artifact that matches the target Minecraft version. Requires Java 21+. |
 | **Mohist** | `spigot` | `1.16.5`, `1.20.1`                                         | Works on Mohist since it's compatible with Spigot.            |
+| **Velocity** | `velocity` | — (unit tests only)                                    | Built against Velocity API `3.4.0`. Requires Java 17+. Proxy arguments only; see [Velocity](#velocity). |
 
 ## Features
 
@@ -51,12 +52,12 @@ with ease.
 
 | | CommandLib | CommandAPI | Paper command API |
 |---|---|---|---|
-| Platforms | Spigot, Paper, Forge, NeoForge | Spigot, Paper (others: see its docs) | Paper |
+| Platforms | Spigot, Paper, Forge, NeoForge, Velocity | Spigot, Paper (others: see its docs) | Paper |
 | Executor arguments | typed parameters | `args.get("name")` + cast | `ctx.getArgument("name", Type.class)` |
 | Generated permission nodes | every command and branch | manual | manual |
 | Flags and options (`-f`, `--limit 10`) | built in | — | — |
 | Generated usage / help | built in | `/help` entries | `/help` entries |
-| Server-free test utilities | `spigot-testing`, `paper-testing`, `forge-` / `neoforge-testing` | test toolkit (MockBukkit) | — |
+| Server-free test utilities | `spigot-testing`, `paper-testing`, `velocity-testing`, `forge-` / `neoforge-testing` | test toolkit (MockBukkit) | — |
 | Chat / NBT arguments | not yet | yes | yes |
 
 See the [argument catalog](docs/arguments.md) for an argument-by-argument comparison and
@@ -305,6 +306,39 @@ tasks.named<ShadowJar>("shadowJar") {
 
 </details>
 
+<details>
+<summary>Velocity (Kotlin DSL)</summary>
+
+```kotlin
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
+plugins {
+    id("com.gradleup.shadow") version "8.3.5"
+}
+
+repositories {
+    maven { url = uri("https://repo.papermc.io/repository/maven-public/") }
+    maven { url = uri("https://jitpack.io") }
+}
+
+dependencies {
+    compileOnly("com.velocitypowered:velocity-api:3.4.0")
+    annotationProcessor("com.velocitypowered:velocity-api:3.4.0")
+    implementation("com.github.Maru32768.CommandLib:velocity:latest.release")
+}
+
+val projectGroup = project.group.toString()
+val projectNameLower = project.name.lowercase()
+tasks.named<ShadowJar>("shadowJar") {
+    archiveFileName.set("${rootProject.name}-${project.version}.jar")
+    // Avoid package conflicts
+    relocate("dev.marulabs.commandlib", "$projectGroup.$projectNameLower.commandlib")
+}
+tasks.named("build") { dependsOn(tasks.named("shadowJar")) }
+```
+
+</details>
+
 ## Testing Commands
 
 CommandLib provides command-level test utilities for downstream plugins.
@@ -314,6 +348,7 @@ dependencies {
     testImplementation("com.github.Maru32768.CommandLib:common-testing:latest.release")
     testImplementation("com.github.Maru32768.CommandLib:spigot-testing:latest.release")
     testImplementation("com.github.Maru32768.CommandLib:paper-testing:latest.release")
+    testImplementation("com.github.Maru32768.CommandLib:velocity-testing:latest.release")
     testImplementation("com.github.Maru32768.CommandLib:forge-testing-1.20.1:latest.release")
     testImplementation("com.github.Maru32768.CommandLib:neoforge-testing-1.21.1:latest.release")
 }
@@ -321,7 +356,8 @@ dependencies {
 
 Use `common-testing` for commands built against the platform-neutral `common`
 API, `spigot-testing` for commands built against the `spigot` artifact,
-`paper-testing` for commands built against the `paper` artifact, and
+`paper-testing` for commands built against the `paper` artifact,
+`velocity-testing` for commands built against the `velocity` artifact, and
 `forge-testing-<minecraft-version>` / `neoforge-testing-<minecraft-version>` for
 commands built against the matching `forge-<minecraft-version>` /
 `neoforge-<minecraft-version>` artifact. They provide
@@ -354,6 +390,44 @@ argument types such as items, blocks, effects, and enchantments parse for real. 
 fake players added with `CommandTester#withPlayer` (and the executing player)
 are online, so player, entity, game profile, and UUID arguments resolve them by
 name. Worlds, scoreboards, and other server state are not available.
+
+## Velocity
+
+The `velocity` artifact registers the same `Command` model on a Velocity proxy as `BrigadierCommand`s. Register from
+the proxy initialize event with the plugin instance and the `ProxyServer`:
+
+```java
+@Plugin(id = "myproxy", name = "MyProxy", version = "1.0.0")
+public final class MyProxyPlugin {
+    private final ProxyServer proxy;
+
+    @Inject
+    public MyProxyPlugin(ProxyServer proxy) {
+        this.proxy = proxy;
+    }
+
+    @Subscribe
+    public void onProxyInitialize(ProxyInitializeEvent event) {
+        Command send = new Command("send");
+        send.argument(new PlayerArgument("player"), new ServerArgument("server")).execute((player, server, ctx) -> {
+            // 'player' is a com.velocitypowered.api.proxy.Player, 'server' a RegisteredServer
+            player.createConnectionRequest(server)
+                  .fireAndForget();
+            ctx.sendSuccess("Sending " + player.getUsername() + " to " + server.getServerInfo()
+                                                                              .getName());
+        });
+        // Permission nodes are myproxy.command.send and myproxy.command.send.player.server
+        CommandLib.register(this, proxy, send);
+    }
+}
+```
+
+The client only knows Brigadier's own argument types through a proxy, so the Velocity artifact has the primitive,
+string, duration, enum, literal, and object arguments, plus `PlayerArgument` (an online player by name) and
+`ServerArgument` (a registered server by name), both suggested by the proxy. There are no world, entity, or location
+arguments. The proxy has no operators, so a node whose default is not `DefaultPermission.ALL` needs a permission plugin
+such as LuckPerms to grant it to players; the console has every permission. Players who are online see new commands
+the next time their backend server sends the command tree, such as on a server switch.
 
 ## Code Examples
 

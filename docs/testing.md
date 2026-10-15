@@ -13,6 +13,7 @@ Pick the artifact for the CommandLib artifact your code uses, one per test sourc
 | `common` (platform-neutral) | `common-testing` | Commands are `TestCommand`; arguments are the `Common...Argument` classes. |
 | `spigot` | `spigot-testing` | NMS argument types are replaced by mocks. Uses Mockito. |
 | `paper` | `paper-testing` | Paper's `ArgumentTypes` and resolvers are stubbed. Uses Mockito. |
+| `velocity` | `velocity-testing` | Senders and the `ProxyServer` are Mockito mocks; every argument parses for real. No `CommandLibExtension`. |
 | `forge-<version>` | `forge-testing-<version>` | Minecraft's registries are bootstrapped; vanilla arguments parse for real. |
 | `neoforge-<version>` | `neoforge-testing-<version>` | Same as Forge. |
 
@@ -70,6 +71,7 @@ CommandLib reports itself (validation, prerequisites, unexpected errors) is sent
 | `spigot-testing` | `withFakePlayer(Player)`, `withFakeEntity(name, Entity)`, `withFakeWorld(key, World)` | Values for player / entity selectors (names, `@s`, `@p`, `@r`, `@a`, `@e`) and `WorldArgument` |
 | `paper-testing` | `withFakePlayer`, `withFakeEntity`, `withFakeWorld`, `withFakeBlockData`, `withFakeItemStack`, `withFakeEnchantment`, `withFakeParticle`, `withFakePotionEffectType`, `withFakeBiome`, `withFakeAttribute`, `withFakeEntityType`, `withFakeSound` | The value each stubbed Paper argument returns |
 | `forge-testing` / `neoforge-testing` | `withPlayer(FakeSender)` | Online players for selectors, `GameProfileArgument`, `UUIDArgument` |
+| `velocity-testing` | `withFakePlayer(FakeSender)`, `withFakeServer(name)`, `proxy()` | Players and servers of the fake `ProxyServer` for `PlayerArgument` and `ServerArgument` |
 
 The [argument catalog](arguments.md#testing-each-argument) lists, argument by argument, what runs for real, what is
 mocked, and what needs Bukkit static mocks.
@@ -188,7 +190,10 @@ Translatable messages, such as CommandLib's "Incorrect argument for command", re
 and `modded-testing` and as their translation keys (`command.unknown.argument`) in `paper-testing`. Check colors on
 the components, for example `getSentMessages().get(0).getColor()` in `spigot-testing`.
 
-Other helpers: `asSender()` returns the Mockito `CommandSender` mock (`spigot-testing`, `paper-testing`), and
+`velocity-testing` reads messages like `paper-testing` (Adventure `Component`s, plain texts).
+
+Other helpers: `asSender()` returns the Mockito `CommandSender` mock (`spigot-testing`, `paper-testing`) or
+`CommandSource` mock (`velocity-testing`), and
 `asPlayer()` returns the `ServerPlayer` mock (`modded-testing`).
 
 ## Examples

@@ -5,9 +5,11 @@ files:
   - common/src/main/java
   - spigot/src/main/java
   - paper/src/main/java
+  - velocity/src/main/java
   - common-testing/src/main/java
   - spigot-testing/src/main/java
   - paper-testing/src/main/java
+  - velocity-testing/src/main/java
 # The mock NMS classes of spigot-testing stub what tests never reach, by design, with a no-op or an
 # UnsupportedOperationException that contradicts the name of the method they override.
 exclude:

@@ -13,6 +13,8 @@ A node is the registration **prefix**, a dot, and the **path** of the route.
 | `CommandLib.register(plugin, "myplugin.cmd", commands...)` (Spigot, Paper) | `myplugin.cmd` |
 | `CommandLib.bootstrap(context, commands...)` (Paper) | `<plugin name in lower case>.command` |
 | `CommandLib.register("mymod.command", commands...)` (Forge / NeoForge) | `mymod.command` (required) |
+| `CommandLib.register(plugin, proxy, commands...)` (Velocity) | `<plugin id>.command` |
+| `CommandLib.register(plugin, proxy, "myproxy.cmd", commands...)` (Velocity) | `myproxy.cmd` |
 
 The path is built from names, not from aliases:
 
@@ -87,16 +89,18 @@ The description is registered with the permission where the platform supports on
 
 ### Per platform
 
-| `DefaultPermission` | Spigot / Paper (Bukkit `PermissionDefault`) | Forge / NeoForge 1.18+ (default resolver) | Forge 1.16.5 (`DefaultPermissionLevel`) |
-|---|---|---|---|
-| `ALL` | `TRUE` | `true` | `ALL` |
-| `OP` | `OP` | the player has permission level 4 | `OP`, decided by Forge's permission handler |
-| `NONE` | `FALSE` | `false` | `NONE` |
+| `DefaultPermission` | Spigot / Paper (Bukkit `PermissionDefault`) | Forge / NeoForge 1.18+ (default resolver) | Forge 1.16.5 (`DefaultPermissionLevel`) | Velocity (unset node) |
+|---|---|---|---|---|
+| `ALL` | `TRUE` | `true` | `ALL` | `true` |
+| `OP` | `OP` | the player has permission level 4 | `OP`, decided by Forge's permission handler | `false` |
+| `NONE` | `FALSE` | `false` | `NONE` | `false` |
 
 Platform overloads exist as well: `permission(PermissionDefault)` on Spigot and Paper (only `TRUE`, `FALSE`, and `OP`;
 `NOT_OP` throws `IllegalArgumentException`) and `permission(DefaultPermissionLevel)` on Forge 1.16.5.
 
-Non-player senders on Forge / NeoForge (console, command blocks, functions) always pass the checks. On Spigot and Paper
+Velocity has no operators, so `OP` behaves like `NONE` there: players need the node from a permission plugin. The
+proxy console has every permission. Non-player senders on Forge / NeoForge (console, command blocks, functions) always
+pass the checks. On Spigot and Paper
 the Bukkit sender is asked, except while the server compiles data pack functions, when the check passes and the
 function permission level applies.
 
@@ -124,6 +128,12 @@ permission handlers see is **`commandlib.<node>`**, for example `commandlib.mymo
 
 On 1.16.5 the nodes are registered with `PermissionAPI.registerNode(node, level, "")` under their own name, without the
 `commandlib.` part, when the server has started.
+
+### Velocity
+
+Velocity has no registry of permissions, so nothing is registered. `CommandLib.register(plugin, proxy, ...)` keeps the
+defaults of its nodes and applies them when `PermissionSubject#getPermissionValue(node)` is `UNDEFINED`, that is when
+no permission plugin sets the node. A `TRUE` or `FALSE` value always wins.
 
 ## Where permissions are checked
 
@@ -155,6 +165,9 @@ CommandLib.refreshAll(); // every player on the running server
 
 The tree lists every command on the server, not only CommandLib's, so one call covers every registration.
 
+Velocity has no API to send the tree again and no `CommandLib.refresh`. It adds the proxy's commands to the tree the
+backend server sends, so a player sees a permission change when the backend next sends it, such as on a server switch.
+
 Only permissions decide what the tree shows. Prerequisites (`addPrerequisite`, `require`, `playerRequirer`) run when the
 command runs and do not hide it. To show a command only in some plugin state, such as `/game start` only before a game
 starts, give the command its own node, grant or revoke that node when the state changes (a `PermissionAttachment`, or
@@ -167,6 +180,7 @@ CommandLib asks the platform, and LuckPerms answers through it:
 - Spigot / Paper: `CommandSender#hasPermission(node)`.
 - Forge / NeoForge 1.18+: `PermissionAPI.getPermission(player, node)`.
 - Forge 1.16.5: `PermissionAPI.hasPermission(player, node)`.
+- Velocity: `CommandSource#getPermissionValue(node)`, with the default above when it is `UNDEFINED`.
 
 No LuckPerms-specific setup is needed. Grant the node names from the tables above:
 

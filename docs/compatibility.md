@@ -35,7 +35,7 @@ CommandLib の長期目標は、Minecraft `1.16.5` から各リリース時点�
 | Paper | `Tested` | `paper` module と `paper-testing`。Paper 公式 command API と Adventure component を使う。paper module の integration target は `1.21`、`1.21.3`〜`1.21.11`、`26.1.1`〜`26.3`（Paper `1.21.2` と `26.1` の build はない）。 | Paper `1.20.6` 以前は spigot module を使い、`1.16.5`〜`1.21.1` の Paper integration target で確認している。それより新しい Paper で spigot module を使うと paper artifact を案内する `NMSClassNotFoundException` になり、`paper-26.3-spigot-jar` で確認している。 |
 | Folia | `Planned` | なし。 | scheduler、threading、command registration の安全性確認が必要。 |
 | Mohist | `Best effort` | integration fixture: `1.16.5`, `1.20.1`。README に tested version として記載あり。 | Bukkit compatibility 上で動かす方針。Forge side との干渉確認が必要。 |
-| Velocity | `Planned` | なし。 | proxy command model と Minecraft server command model の差分設計が必要。 |
+| Velocity | `Best effort` | `velocity` module と `velocity-testing`。Velocity API `3.4.0`（Java 17）に対して compile し、command を `BrigadierCommand` で登録する。unit test は Velocity の Brigadier fork 上で実行。 | 実 proxy の integration target はない。Velocity `3.5` 以降と `4.x`（Adventure 5、Java 21 / 25）は API の差分を javap で確認しただけで未実行。argument は Brigadier の基本型、`DurationArgument`、`LiteralArgument` / `EnumArgument` / `ObjectArgument` / `NameableObjectArgument` と proxy 用の `PlayerArgument`（online player）、`ServerArgument`（`RegisteredServer`）に限る。world / entity / location 系 argument は提供しない。Velocity には operator も permission の default 登録もないため、`DefaultPermission.ALL` 以外は permission plugin が付与しない限り player に許可されない（console は常に許可）。command tree を再送する API がないため `CommandLib.refresh` はない。 |
 | Forge | `Best effort` | `modded` の Stonecutter tree の `forge-1.16.5` / `forge-1.20.1` node（artifact: `forge-1.16.5` / `forge-1.20.1`）。`forge-testing-<version>` と integration target あり。 | 上記以外の Forge version は未対応。 |
 | NeoForge | `Best effort` | `modded` の Stonecutter tree の `neoforge-1.21.1` node（artifact: `neoforge-1.21.1`）。`neoforge-testing-1.21.1` と integration target `neoforge-1.21.1` あり。 | Forge と同じソースを `//? if neoforge` で分岐。NeoForge 1.21.1 以外の version は未対応。 |
 | Fabric | `Planned` | なし。 | Fabric command registration と Brigadier integration の設計が必要。 |
@@ -86,10 +86,11 @@ CommandLib は `1.16.5` から最新安定版までのサポートを目標に�
 | `spigot` | Bukkit/Spigot API を基準にした実装。typed NMS module（`nms/*`）を同梱する。Paper-specific API は使わない。 |
 | `paper` | Paper 公式 command API、Adventure component、lifecycle API を使う実装。 |
 | `modded` | Forge / NeoForge 実装。Stonecutter node は `forge-1.16.5` / `forge-1.20.1` / `neoforge-1.21.1`。 |
-| `common-testing` / `spigot-testing` / `paper-testing` / `modded-testing` | 各 platform 向けの公開 testing artifact。 |
+| `velocity` | Velocity の `BrigadierCommand`、permission API、Adventure component を使う proxy 用実装。 |
+| `common-testing` / `spigot-testing` / `paper-testing` / `velocity-testing` / `modded-testing` | 各 platform 向けの公開 testing artifact。 |
 | `integration-test` | 非公開の実サーバー integration test aggregator。 |
 
-未実装の module（`folia` / `velocity` / `fabric`）は Planned。Mohist は専用 module を持たず、`spigot` 互換と integration target で扱う。
+未実装の module（`folia` / `fabric`）は Planned。Mohist は専用 module を持たず、`spigot` 互換と integration target で扱う。
 
 方針:
 
@@ -127,12 +128,11 @@ CommandLib は `1.16.5` から最新安定版までのサポートを目標に�
 ### P2
 
 - Folia 対応方針を決める。
-- Velocity module の必要性と API shape を決める。
+- Velocity の実 proxy integration target を追加する。
 - NeoForge / Fabric module の分割方針を決める。
 
 ## Open questions
 
-- Velocity を server-side command library と同じ API で扱うか、proxy command 用の別 API として扱うか。
 - Fabric / NeoForge を `common` の同じ command model に完全に載せるか、platform-specific limitations を許容するか。
 - Java baseline を Java 11 のまま維持するか、platform ごとに Java baseline を分けるか。
 - `latest stable` を release ごとに固定する仕組みを README / docs / CI のどこに置くか。

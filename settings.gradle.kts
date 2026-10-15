@@ -13,7 +13,7 @@ plugins {
 }
 
 rootProject.name = "CommandLib"
-include("spigot", "paper")
+include("spigot", "paper", "velocity")
 // Typed NMS modules bundled into :spigot, one per directory under nms/. They need BuildTools or a paperweight dev
 // bundle, so -Pcommandlib.typedNms=false leaves them out for work that does not need the spigot jar, which then has
 // no NMS implementations, and -Pcommandlib.typedNms=spigot-1.20.4,paper-1.20.6 includes only the listed modules.
@@ -43,7 +43,7 @@ val includedTypedNmsModules = when (typedNmsSelection) {
 }
 includedTypedNmsModules.forEach { include("nms:$it") }
 include("common")
-include("common-testing", "spigot-testing", "paper-testing")
+include("common-testing", "spigot-testing", "paper-testing", "velocity-testing")
 // Forge and NeoForge share one source tree. Nodes are named <loader>-<minecraft version>.
 include("modded")
 include("modded-testing")

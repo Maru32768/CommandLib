@@ -229,7 +229,9 @@ Notes:
 - The network format changes of text components after 1.20.3 (NBT, snake_case in 1.21.5) are handled by the server and
   do not affect the API. Only modded's Java API changes in 1.21.5+ (table above); handle it with Stonecutter conditions
   when such a node is added. All current targets are below 1.21.5.
-- A Velocity module can reuse the Paper converter (adventure-api is shared).
+- `velocity` has a copy of paper's `RichTexts.toAdventure`; the modules share no source. Both build click events
+  with the `ClickEvent` factory methods, which link against Adventure 4 and Adventure 5 (Paper 26.x, Velocity 4.x),
+  where `ClickEvent.clickEvent(Action, String)` no longer exists.
 
 ## Removed APIs
 

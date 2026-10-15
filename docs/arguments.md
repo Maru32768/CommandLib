@@ -11,6 +11,8 @@ an argument exists, so code written against the `spigot` artifact usually compil
 
 For how arguments fail, see [errors](errors.md). For custom suggestions, see [suggestions](suggestions.md).
 
+The tables below compare the server platforms. Velocity, a proxy, has its own smaller set; see [Velocity](#velocity).
+
 ## Status legend
 
 | Status | Meaning |
@@ -217,6 +219,29 @@ Notes:
   otherwise. Help shows `[count]` and `<targets...>`. Each value of a variadic argument is a separate token parsed by the
   element's own type, with its own suggestions, so it is `partial` against CommandAPI's `ListArgument`, which reads one
   greedy string split by a delimiter. See [the design note](design/optional-variadic-arguments.md).
+
+## Velocity
+
+A proxy has no worlds, entities, blocks, or registries, and the client knows only Brigadier's own argument types
+through it, so the `velocity` artifact has a smaller set. The Spigot / Paper parity rule does not apply to it.
+
+| CommandLib | Result | Input and suggestions | Status |
+|---|---|---|---|
+| `BooleanArgument`, `IntegerArgument`, `LongArgument`, `FloatArgument`, `DoubleArgument`, `StringArgument` | as on the servers | Brigadier types, validated by the client | equivalent to the server platforms |
+| `DurationArgument`, `LiteralArgument`, `EnumArgument`, `ObjectArgument`, `NameableObjectArgument` | as on the servers | string arguments with CommandLib's suggestions | equivalent to the server platforms |
+| `PlayerArgument` | Velocity `Player` | the name of a player online on the proxy, ignoring case (a word); suggests online players containing the input | — (no selectors) |
+| `ServerArgument` | `RegisteredServer` | the name of a registered server, ignoring case (a word or a `"quoted name"`); suggests registered servers | — |
+
+Notes:
+
+- `PlayerArgument` and `ServerArgument` are string arguments that the proxy parses and suggests (`ask_server`), the
+  `NameableObjectArgument` approach. An unknown name is "Incorrect argument for command".
+- Selectors (`@a`, `@p`), UUIDs, and offline players are not accepted. Use `ObjectArgument` with your own map for
+  other proxy objects.
+- `UnparsedArgument` and the range arguments are missing: their argument types are CommandLib's or Minecraft's, not
+  Brigadier's, so a proxy cannot send them to the client.
+- `velocity-testing`'s `CommandTester` runs the real parsers. `PlayerArgument` and `ServerArgument` look up the
+  players and servers added with `withFakePlayer` and `withFakeServer` on its Mockito `ProxyServer`.
 
 ## Not checked yet
 

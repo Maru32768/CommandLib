@@ -70,6 +70,8 @@ val publishedProjectPaths = setOf(
     ":spigot-testing",
     ":paper",
     ":paper-testing",
+    ":velocity",
+    ":velocity-testing",
     ":modded:forge-1.16.5",
     ":modded:forge-1.20.1",
     ":modded:neoforge-1.21.1",

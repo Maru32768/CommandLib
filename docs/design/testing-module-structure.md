@@ -30,6 +30,7 @@ This document defines how the test modules and the integration-test module are o
 | `common-testing` | Yes | Test helpers for commands built against the platform-neutral `common` API. |
 | `spigot-testing` | Yes | Command testing utilities for Spigot/Bukkit plugins. Includes NMS mocks and a fake sender. |
 | `paper-testing` | Yes | Testing utilities for the Paper command API, Adventure components, Paper suggestions, and Paper registry arguments. |
+| `velocity-testing` | Yes | Velocity command testing utilities: Mockito `Player` / `ConsoleCommandSource` senders and a Mockito `ProxyServer` that knows fake players and servers. Proxy registration is not reproduced. |
 | `modded-testing` | Yes | Forge / NeoForge command testing utilities, published as `forge-testing-<version>` and `neoforge-testing-<version>` (one artifact per node, like `modded`). |
 
 ### Repository-only integration modules
@@ -182,7 +183,7 @@ Split later when:
 ## Remaining Work
 
 - Decide whether the platform metadata should become a typed model instead of the current per-script `platform` property.
-- Add Fabric / Folia / Velocity testing targets when those platforms are added.
+- Add Fabric / Folia testing targets when those platforms are added, and a real Velocity proxy target.
 - Split `paper-integration-test` or `modded-integration-test` out of the aggregator when the "Split later when" conditions above hold.
 
 ## Roadmap Checklist
