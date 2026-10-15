@@ -145,11 +145,9 @@ annotation API / Kotlin DSL の `@Optional` や default args は optional / vari
   使う場合は、verdict cache（`.jev-lint/baseline.json`）を commit して key なしで lint する運用に切り替える。
 - `[ ]` 0.18.0 を release する。`AbstractCommandContext` の削除や `net.kunmc.lab` から `dev.marulabs` への package 移動など、
   0.17.x と binary 互換でない変更を含む。
-- `[ ]` JitPack から Maven Central に移行する。Maven Central は javadoc jar を要求するが、javadoc jar と doclint は Bukkit 側の
-  module（`common`、`spigot`、`paper` と各 `-testing`）にしか設定していないため、modded の node にも追加する。
-- `[ ]` Error Prone / NullAway を typed NMS module と modded の node にも広げる。現在は Bukkit 側の module だけが対象で、
-  typed NMS module は toolchain 16 / 17 で compile し、modded は Architectury Loom 経由で build するため、それぞれ
-  Error Prone を JDK 21 で動かす設定が別途必要になる。
+- `[ ]` JitPack から Maven Central に移行する。javadoc jar と doclint は Bukkit 側の module と modded / modded-testing の
+  node に設定済み。
+- `[ ]` integration test 用 mod（`integration-test/shared/modded`）にも Error Prone / NullAway を広げる。
 - `[?]` （優先度低・候補）config-driven customization。server admin が YAML 等で command 名、alias、無効化、message を
   再コンパイルなしで上書きできるようにする。需要を見て採否を決める。
 

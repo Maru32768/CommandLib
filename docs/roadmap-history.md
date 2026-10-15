@@ -68,6 +68,8 @@
 - `[x]` Spigot 1.21.2 以降に対応する。spigot module の `AttributeArgument` / `BiomeArgument` / `SoundArgument` を Bukkit
   `Registry` を使う実装に作り直し（入力は Paper 版と同じ NamespacedKey）、1.21.3〜26.3 の typed NMS module と、Spigot
   1.16.5〜26.3 の全 release、Paper 1.21.3〜26.3（paper module）の integration target を追加した。
+- `[x]` Error Prone / NullAway を typed NMS module（27 module、generator 側で修正）と modded / modded-testing の node に
+  広げ、modded node に javadoc jar と doclint を追加する（2026-10-15）。
 
 ## 完了済み Release Phases
 
