@@ -13,7 +13,7 @@ A command input goes through two stages, and each stage reports its own errors.
    `CommandSyntaxException` into its usual red error message with the `...<--[HERE]` context line.
 2. **CommandLib execution.** When Brigadier finds a node that can run, CommandLib's runner takes over. It checks
    permissions again, reads options, converts each argument to its Java value, runs validators, prerequisites,
-   preprocesses, and finally the executor. CommandLib collects the messages of an error at this stage and throws them
+   the middlewares, and finally the executor. CommandLib collects the messages of an error at this stage and throws them
    to the platform as a `CommandSyntaxException`, see [Results and failures](#results-and-failures).
 
 The runner works in this order and stops at the first failure:
@@ -25,13 +25,19 @@ The runner works in this order and stops at the first failure:
 | 3 | For each argument branch on the path: branch permission, then each argument's parse → `validator` → `transformer`, or the default of an omitted optional argument | The permission message, the argument's `ArgumentParseException`, or the `CommandPrerequisiteException` of an `optional(extractor)` default |
 | 4 | Prerequisites (`addPrerequisite`, `require(...)`, `requirePlayer()`, `requireConsole()`) | The `CommandPrerequisiteException` message |
 | 5 | No executor on this node: the generated help is sent instead | (help text, not an error) |
-| 6 | `cooldown(...)`, then `confirm(...)`, then the preprocesses (`addPreprocess`) | The cooldown message, the confirmation request, or the messages the preprocess sent before returning `false` |
-| 7 | The executor | A `CommandPrerequisiteException` message, or the generic unexpected-error message |
+| 6 | The middlewares: `cooldown(...)`, then `confirm(...)`, then the middlewares and preprocesses (`addMiddleware`, `addPreprocess`) in the order they were added | The cooldown message, the confirmation request, the messages a preprocess sent before returning `false`, a middleware's `CommandPrerequisiteException` message, or the generic unexpected-error message |
+| 7 | The executor (`execute` or `executeAsync`) | A `CommandPrerequisiteException` message, `The command timed out.` for a `TimeoutException`, or the generic unexpected-error message |
+
+A middleware can map the failure of the steps after it, see [execution](execution.md#middleware).
 
 ## Results and failures
 
 The runner returns the value the executor set with `ctx.setResult(int)` to Brigadier, `1` unless set, and `1` for the
 generated help. `/execute store result` stores it.
+
+An `executeAsync` command whose stage is still running when the dispatch returns gives the result set by then, 1
+unless set, so `store success` stores 1; a later failure sends its messages to the sender directly and cannot change
+what was stored. See [execution](execution.md#the-result-for-execute-store).
 
 A failure at any step above throws a `CommandSyntaxException` whose message joins the failure messages, one per line.
 The platform reports it as it reports a vanilla command's error: the sender gets it in red, except a silent source such
@@ -208,8 +214,7 @@ when it returns. Preprocesses run only when the node has an executor; the genera
 
 ### Cooldown and confirmation
 
-`cooldown(...)` and `confirm(...)` run as the first part of the preprocess step, so they too run only when the node has
-an executor. A sender on cooldown gets `You must wait 1m 30s before using this command again.`, and a first execution
+`cooldown(...)` and `confirm(...)` are the first middlewares, so they too run only when the node has an executor. A sender on cooldown gets `You must wait 1m 30s before using this command again.`, and a first execution
 of a command with a confirmation gets `Run the command again within 10s to confirm. [Confirm]` in yellow, where
 `[Confirm]` runs the command again when clicked. Both make the command [fail](#results-and-failures), so a function or
 each target of a forked `/execute as @a ... run` does not get them. `Cooldown#message` and `Confirmation#message`
@@ -230,17 +235,20 @@ See [options](options.md) for the option syntax.
 
 ### Unexpected exception
 
-An exception thrown by the executor, other than `CommandPrerequisiteException`:
+An exception thrown by the executor or a middleware, or a failed stage of an async executor, other than
+`CommandPrerequisiteException`, `CancellationException` (reports nothing) and `TimeoutException` (sends
+`The command timed out.` and calls the handlers):
 
 - its stack trace is printed to the server console;
 - the sender gets `An unexpected error occurred trying to execute that command.` and `Check the console for details.`
   in red;
 - every `UncaughtExceptionHandler` added with `addUncaughtExceptionHandler` on the command (and, for an argument node,
   on the argument) is called with the exception and the context;
-- the command [fails](#results-and-failures) with those two lines.
+- the command [fails](#results-and-failures) with those two lines, or, for an async command that has already
+  returned, sends them to the sender directly; the handlers then run on the sync thread.
 
-An unchecked exception thrown outside the executor (in a parser, validator, transformer, prerequisite, or preprocess)
-is printed, passed to the uncaught exception handlers, and rethrown to Brigadier. The platform then reports it with its
+An unchecked exception thrown before the middlewares (in a parser, validator, transformer, or prerequisite) is
+printed, passed to the uncaught exception handlers, and rethrown to Brigadier. The platform then reports it with its
 own generic error (vanilla: `An unexpected error occurred trying to execute that command`, with the exception message
 on hover for operators).
 

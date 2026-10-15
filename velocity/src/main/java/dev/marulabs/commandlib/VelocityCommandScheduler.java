@@ -6,8 +6,7 @@ import java.util.concurrent.Executor;
 
 /**
  * Runs async commands on Velocity. The proxy has no main thread and its API may be used from any thread, so sync tasks
- * run at once on the calling thread. Async work goes to the proxy's scheduler under the plugin, which cancels the
- * plugin's tasks when the plugin is unloaded.
+ * run at once on the calling thread. Async work goes to the proxy's scheduler under the plugin.
  */
 final class VelocityCommandScheduler implements CommandScheduler {
     private final Executor async;

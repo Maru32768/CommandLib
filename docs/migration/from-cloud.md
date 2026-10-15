@@ -264,37 +264,33 @@ See [options](../options.md).
 
 | Cloud | CommandLib |
 |---|---|
-| `ExecutionCoordinator.simpleCoordinator()` | The only mode: parsing and the executor run on the thread where the platform dispatches the command (the server thread for players) |
-| `ExecutionCoordinator.asyncCoordinator()`, `coordinatorFor(executor)` | **Not available**. Start asynchronous work from the executor yourself |
-| `futureHandler(...)` | **Not available** |
+| `ExecutionCoordinator.simpleCoordinator()` | Parsing, middlewares and the executor run on the thread where the platform dispatches the command (the server thread for players) |
+| `ExecutionCoordinator.asyncCoordinator()`, `coordinatorFor(executor)` | `executeAsync(...)` per command or branch: parsing stays on the server thread, the work runs on `ctx.supplyAsync(...)` and comes back to it. See [execution](../execution.md#async-executors) |
+| `futureHandler(...)` | The stage `executeAsync` returns: its exceptions go to the `UncaughtExceptionHandler`s; a middleware can map them |
 | Suggestions executor | Providers run on the platform's thread; use `sb.await(...)` for slow lookups |
 
 ```java
 // CommandLib: load off the main thread, reply on it
 class StatsCommand extends Command {
-    StatsCommand(Plugin plugin, Stats stats) {
+    StatsCommand(Stats stats) {
         super("stats");
 
-        argument(new StringArgument("name", StringArgument.Type.WORD)).execute((name, ctx) -> {
-            Bukkit.getScheduler()
-                  .runTaskAsynchronously(plugin, () -> {
-                      String text = stats.load(name);
-                      Bukkit.getScheduler()
-                            .runTask(plugin, () -> ctx.sendMessage(text));
-                  });
-        });
+        argument(new StringArgument("name", StringArgument.Type.WORD)).executeAsync((name, ctx) ->
+                ctx.supplyAsync(() -> stats.load(name))
+                   .thenAccept(ctx::sendMessage));
     }
 }
 ```
 
-The command has returned by the time the task runs, so `/execute store` sees `1`, not a value the task computes.
+The command has returned by the time the work completes, so `/execute store` sees `1` (or what the executor set before
+returning the stage), not a value the work computes.
 
 ## Pre- and postprocessors
 
 | Cloud | CommandLib |
 |---|---|
-| `registerCommandPreProcessor(...)` (every command) | **Not available** globally. `addPreprocess(ctx -> ...)` on a command also covers its children (opt out with `disableParentPreprocess()`) |
-| `registerCommandPostProcessor(...)` | **Not available** globally. `addPrerequisite(...)` (also inherited, `disableParentPrerequisite()`) runs before the executor |
+| `registerCommandPreProcessor(...)` (every command) | `addMiddleware((ctx, next) -> ...)` or `addPreprocess(ctx -> ...)` on a top-level command also covers its children (opt out with `disableParentMiddleware()`); no registration for every command at once. See [execution](../execution.md#middleware) |
+| `registerCommandPostProcessor(...)` | A middleware's code before `next.proceed()` runs right before the executor, and a stage chained on it runs after; `addPrerequisite(...)` (inherited, `disableParentPrerequisite()`) runs before the help too |
 | `cloud-processors-confirmation` | `confirm()`, or `confirm(Confirmation.within(timeout))`: the sender runs the same input again (or clicks `[Confirm]`) |
 | `cloud-processors-cooldown` | `cooldown(Duration)`, or `cooldown(Cooldown.of(duration).bypassPermission(...))`; kept in memory per unique id |
 | `ParameterInjectorRegistry`, `ctx.inject(...)`, Guice injection service | **Not available**; pass dependencies to the command's constructor |
@@ -358,8 +354,8 @@ CommandLib's `spigot-testing` / `paper-testing` run commands without a server:
 
 ## Not available yet
 
-Tracked in the roadmap: an annotation API and a Kotlin DSL, a global sender mapper, asynchronous execution, global
-pre- and postprocessors (middleware), injection, customizable and translatable built-in
+Tracked in the roadmap: an annotation API and a Kotlin DSL, a global sender mapper, a platform-wide middleware
+registration, injection, customizable and translatable built-in
 messages, permission predicates that hide commands, typed value options beyond primitives and strings, and the
 arguments listed as missing in the [catalog](../arguments.md).
 

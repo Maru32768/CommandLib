@@ -37,6 +37,9 @@ with ease.
 7. **Documentation Exports and Diagnostics**  
    Export the commands and every generated permission node as Markdown or JSON, and inspect the registrations and
    the platform at runtime ([docs](docs/diagnostics.md)).
+8. **Middleware and Async Execution**  
+   Wrap executions with typed middlewares, and run heavy work off the server thread with `executeAsync`, coming back
+   to it for messages and the platform API.
 
 ## Why CommandLib
 
@@ -70,6 +73,7 @@ See the [argument catalog](docs/arguments.md) for an argument-by-argument compar
 - [Permissions](docs/permissions.md): node names, defaults per platform, registration, and LuckPerms.
 - [Errors](docs/errors.md): what the sender sees when a command fails.
 - [Vanilla integration](docs/vanilla-integration.md): `/execute`, command blocks, functions, and tags.
+- [Execution](docs/execution.md): middlewares, async executors, threads, and `/execute store` for async commands.
 - [Testing](docs/testing.md): `CommandTester` and `FakeSender` for plugin and mod tests.
 - [Documentation exports and diagnostics](docs/diagnostics.md): Markdown / JSON of the commands and permission nodes,
   and a runtime report of the platform and the registrations.
@@ -844,8 +848,8 @@ public final class ResetCommand extends Command {
 The first execution sends "Run the command again within 10s to confirm. [Confirm]", where `[Confirm]` runs the same
 command when clicked. Each sender has one pending confirmation: another input, or the same one after the timeout, asks
 again. A sender on cooldown gets "You must wait 4m 59s before using this command again." Both are checked after the
-permissions, the arguments and the prerequisites, in this order: the cooldown, the confirmation, the preprocess. The
-cooldown starts only when all of them pass, so a sender on cooldown is not asked to confirm and an unconfirmed
+permissions, the arguments and the prerequisites, in this order: the cooldown, the confirmation, the other middlewares
+and preprocesses. The cooldown starts only when all of them pass, so a sender on cooldown is not asked to confirm and an unconfirmed
 execution does not start the cooldown. Both messages make the command fail like an error, see
 [errors](docs/errors.md#cooldown-and-confirmation).
 
@@ -862,11 +866,48 @@ cooldown(Cooldown.of(Duration.ofSeconds(30))
 - The cooldown is kept per unique id, so it applies to players and entities. The console, remote consoles and command
   blocks have no unique id and are never on cooldown. Confirmations are kept per unique id too, and per sender type and
   name for senders without one, so the console has to confirm as well.
-- Like a preprocess, both apply to the command's argument branches and to child commands that set none of their own,
-  unless the child calls `disableParentPreprocess()`. Children that inherit a cooldown share it, as do commands given
+- Like a middleware, both apply to the command's argument branches and to child commands that set none of their own,
+  unless the child calls `disableParentMiddleware()`. Children that inherit a cooldown share it, as do commands given
   the same `Cooldown` instance.
 - The state lives in memory and is lost when the server restarts.
 - In tests, pass a `Clock` with `clock(...)` instead of waiting for the time to pass.
+
+## Middleware and Async Execution
+
+A middleware wraps the execution of a command, its argument branches and its child commands. It runs after the
+permission, argument and prerequisite checks, and returns the stage `next.proceed()` gives, which completes when the
+executor is done:
+
+```java
+public final class AdminCommand extends Command {
+    public AdminCommand(Database database) {
+        super("admin");
+
+        addMiddleware((ctx, next) -> {
+            if (Maintenance.isActive()) {
+                throw new CommandPrerequisiteException("The server is in maintenance.");
+            }
+            return next.proceed()
+                       .whenComplete((ignored, e) -> Bukkit.getLogger().info(ctx.getSender().getName() + " ran /admin"));
+        });
+        addChildren(new ReloadCommand(), new StatsCommand(database));
+    }
+}
+```
+
+`executeAsync` takes an executor that returns a `CompletionStage`. `ctx.supplyAsync(...)` runs the work off the server
+thread and completes back on it, so the follow-up may send messages and use the platform API:
+
+```java
+argument(new OfflinePlayerArgument("player")).executeAsync((player, ctx) ->
+        ctx.supplyAsync(() -> database.loadStats(player.getUniqueId()))
+           .thenAccept(stats -> ctx.sendSuccess(player.getName() + " has " + stats.kills() + " kills")));
+```
+
+Exceptions of the work reach the `UncaughtExceptionHandler`s as an executor's do. Since vanilla needs the result at
+once, an async command still running gives `/execute store` the result set so far (1 unless set). See
+[execution](docs/execution.md) for the order of middlewares, exception mapping, threads on each platform, timeouts,
+cancellation and testing.
 
 ## Server Help
 

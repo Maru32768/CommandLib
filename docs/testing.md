@@ -27,6 +27,12 @@ dependencies {
 The artifacts do not bring a test framework; the examples use JUnit 5 and AssertJ. `CommandLibExtension` needs JUnit
 5 (`junit-jupiter-api` 5.8 or later) on the test classpath; the rest of the artifacts work with any framework.
 
+## Async commands
+
+The testers run `executeAsync` work at once by default, so the command has finished when `execute` returns. Give the
+builder a scheduler with `scheduler(CommandScheduler.of(Runnable::run, queue::add))` to run the async work yourself and
+check the state in between; see [execution](execution.md#testing).
+
 ## `CommandTester`
 
 ```java

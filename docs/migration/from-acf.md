@@ -313,6 +313,7 @@ parameters: `CommandLib.register(this, new JoinCommand(arenaManager))`.
 
 Tracked in the roadmap: an annotation API, dependency injection, reusable named conditions, a locale and message key
 system for CommandLib's own messages and help, message formats, catch-unknown handlers, hidden commands, root aliases
-for subcommands, global contexts and completions by type, and asynchronous execution.
+for subcommands, and global contexts and completions by type. Asynchronous execution is `executeAsync(...)`, see
+[execution](../execution.md#async-executors).
 
 See also: [Migrating from CommandAPI](from-commandapi.md), [Cloud](from-cloud.md), [Lamp](from-lamp.md).
