@@ -22,7 +22,7 @@
 | Variadic / optional arguments       | `[x]` | 末尾の `optional(default)` / `optional(Extractor)` と `variadic([max])`（`List<T>`）がある。配置違反は登録時に `IllegalStateException`（[`docs/design/optional-variadic-arguments.md`](design/optional-variadic-arguments.md)）。 | 上限なしの variadic、`Optional<T>` 形式、実サーバーでの検証。 |
 | Execution result                    | `[ ]` | `CommandExecutor` は `void` を返す。                                                                                                          | int result / success を返し `/execute store result / success` に反映する。                |
 | Async execution                     | `[ ]` | async suggestions のみ。実行は同期。                                                                                                            | `CompletableFuture` ベースの非同期実行と main / region thread への復帰。                      |
-| Dynamic command tree refresh        | `[ ]` | なし。                                                                                                                                     | permission / state 変化時に対象 player へ command tree を再送する API。                       |
+| Dynamic command tree refresh        | `[x]` | `CommandLib.refresh(player)` / `refreshAll()` が Spigot / Paper / Forge / NeoForge にある（[`docs/permissions.md`](permissions.md)）。 | permission 以外の state による表示切替 predicate、実 client での検証。 |
 | Vanilla-style feedback              | `[ ]` | なし。                                                                                                                                     | `sendCommandFeedback` / `logAdminCommands` gamerule を尊重する success feedback と op broadcast。 |
 | Bukkit / Spigot / Paper support     | `[~]` | `spigot` module（Spigot 1.16.5〜26.3 を Tested）と `paper` module（Paper 1.21〜26.3 を Tested）がある。 | Folia 対応。 |
 | Paper 1.20.6+ registration          | `[x]` | `LifecycleEvents.COMMANDS` + `Commands registrar` + `CommandSourceStack` を使った公式 API 登録が実装済み。Adventure component を標準 message path として利用。 | bootstrap 登録の互換性保証・docs / tests の拡充（`CommandLib.bootstrap(BootstrapContext, ...)` は実装済み）。                                                   |
@@ -97,8 +97,8 @@ annotation API / Kotlin DSL の `@Optional` や default args は optional / vari
   main thread（Folia では entity / region thread）で返す。例外は既存の `UncaughtExceptionHandler` に流す。
   Folia support の thread 抽象と設計を共有する。
 - `[ ]` confirmation / cooldown を middleware を待たずに標準機能として追加する（`confirm()`、`cooldown(Duration)`）。
-- `[ ]` dynamic command tree refresh を追加する。permission や plugin state の変化時に対象 player の command tree を
-  再送し、権限・状態に応じた command 表示を動的に切り替えられるようにする。
+- `[ ]` permission 以外の state で command の表示を切り替える visibility predicate を追加する（現在は permission を付け外しして
+  `CommandLib.refresh(player)` する方式を docs で案内）。
 - `[ ]` annotation API を設計・実装する。
 - `[ ]` Kotlin DSL を設計・実装する。
 - `[ ]` middleware / interceptor API を追加する。
