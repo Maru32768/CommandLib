@@ -41,6 +41,9 @@ with ease.
 8. **Middleware and Async Execution**  
    Wrap executions with typed middlewares, and run heavy work off the server thread with `executeAsync`, coming back
    to it for messages and the platform API.
+9. **Kotlin DSL**  
+   Build the same commands with `command("heal") { ... }` blocks, typed argument references, options as delegated
+   properties, and `suspend` executors and suggestion providers ([docs](docs/kotlin.md)).
 
 ## Why CommandLib
 
@@ -76,6 +79,7 @@ See the [argument catalog](docs/arguments.md) for an argument-by-argument compar
 - [Vanilla integration](docs/vanilla-integration.md): `/execute`, command blocks, functions, and tags.
 - [Execution](docs/execution.md): middlewares, async executors, threads, and `/execute store` for async commands.
 - [Testing](docs/testing.md): `CommandTester` and `FakeSender` for plugin and mod tests.
+- [Kotlin DSL](docs/kotlin.md): `command { }` blocks, delegated options, and coroutines.
 - [Documentation exports and diagnostics](docs/diagnostics.md): Markdown / JSON of the commands and permission nodes,
   and a runtime report of the platform and the registrations.
 - [Troubleshooting](docs/troubleshooting.md).
@@ -343,6 +347,42 @@ tasks.named("build") { dependsOn(tasks.named("shadowJar")) }
 ```
 
 </details>
+
+## Kotlin DSL
+
+`spigot-kotlin`, `paper-kotlin`, and `velocity-kotlin` add a Kotlin DSL on top of the same command model. Use one of
+them in place of the platform artifact, which they bring along:
+
+```kotlin
+dependencies {
+    implementation("com.github.Maru32768.CommandLib:spigot-kotlin:latest.release")
+    // Only for executeSuspend and the other coroutine functions.
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
+}
+```
+
+```kotlin
+val heal = command("heal") {
+    description("Heal players")
+    val silent by flag("silent", 's')
+    argument(IntegerArgument("amount"), PlayerArgument("targets").variadic()) { amount, targets ->
+        execute { ctx ->
+            targets.get().forEach { it.health = minOf(it.health + amount.get(), 20.0) }
+            if (!silent) ctx.sendSuccess("Healed ${targets.get().size} players")
+        }
+    }
+    subcommand("stats") {
+        executeSuspend { ctx ->
+            val count = withContext(ctx.asyncDispatcher) { database.countHeals() }
+            ctx.sendSuccess("$count heals so far")
+        }
+    }
+}
+CommandLib.register(this, heal)
+```
+
+The block's receiver is the `Command`, so every fluent method (`permission`, `requirePlayer()`, `cooldown`, ...) works
+in it, and the tree, permissions, and help are the same as the fluent API's. See [Kotlin DSL](docs/kotlin.md).
 
 ## Testing Commands
 

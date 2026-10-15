@@ -88,6 +88,7 @@ CommandLib は `1.16.5` から最新安定版までのサポートを目標に�
 | `modded` | Forge / NeoForge 実装。Stonecutter node は `forge-1.16.5` / `forge-1.20.1` / `neoforge-1.21.1`。 |
 | `velocity` | Velocity の `BrigadierCommand`、permission API、Adventure component を使う proxy 用実装。 |
 | `common-testing` / `spigot-testing` / `paper-testing` / `velocity-testing` / `modded-testing` | 各 platform 向けの公開 testing artifact。 |
+| `common-kotlin` / `spigot-kotlin` / `paper-kotlin` / `velocity-kotlin` | Kotlin DSL。Forge / NeoForge 向けはまだない。 |
 | `integration-test` | 非公開の実サーバー integration test aggregator。 |
 
 未実装の module（`fabric`）は Planned。Mohist は専用 module を持たず、`spigot` 互換と integration target で扱う。Folia も専用 module を持たず、`paper` module で扱う。

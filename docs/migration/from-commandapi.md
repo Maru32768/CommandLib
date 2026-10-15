@@ -307,7 +307,7 @@ See [testing](../testing.md).
 
 ## Not available yet
 
-Tracked in the roadmap: requirement-based visibility, per-sender executor variants, annotation and Kotlin DSL APIs,
+Tracked in the roadmap: requirement-based visibility, per-sender executor variants, an annotation API,
 and the arguments listed as missing in the [catalog](../arguments.md).
 
 See also: [Migrating from Cloud](from-cloud.md), [Lamp](from-lamp.md), [ACF](from-acf.md).

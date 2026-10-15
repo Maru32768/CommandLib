@@ -26,6 +26,8 @@ This document describes CommandLib's module / artifact layout and the rules that
 | `paper-testing` | Yes | Testing utilities for the Paper command API, Adventure components, and Paper registry arguments. |
 | `velocity-testing` | Yes | `CommandTester` / `FakeSender` with a Mockito `ProxyServer` for downstream Velocity plugins. |
 | `modded-testing` | Yes | Serverless testing utilities for downstream Forge / NeoForge mods, built per node. |
+| `common-kotlin` | Yes | The platform-neutral Kotlin DSL: argument blocks, delegated options, coroutine executors and suggestions. |
+| `spigot-kotlin` / `paper-kotlin` / `velocity-kotlin` | Yes | The DSL's `command` / `subcommand` factories, compiled against each platform's `Command`. |
 | `integration-test` | No | Multi-platform real-server integration aggregator (Spigot, Paper, Mohist, Forge, NeoForge targets). |
 | `samples` | No | Sample plugins / mods for Spigot, Paper, and Forge. |
 
@@ -64,6 +66,10 @@ What does not go into `common`:
 | `:modded-testing:forge-1.16.5` | `forge-testing-1.16.5` |
 | `:modded-testing:forge-1.20.1` | `forge-testing-1.20.1` |
 | `:modded-testing:neoforge-1.21.1` | `neoforge-testing-1.21.1` |
+| `:common-kotlin` | `common-kotlin` |
+| `:spigot-kotlin` | `spigot-kotlin` |
+| `:paper-kotlin` | `paper-kotlin` |
+| `:velocity-kotlin` | `velocity-kotlin` |
 
 No `bukkit` artifact exists. `integration-test` is not published.
 
@@ -83,6 +89,10 @@ spigot-testing   -> spigot
 paper-testing    -> paper
 velocity-testing -> velocity
 modded-testing   -> modded
+common-kotlin    -> common
+spigot-kotlin    -> spigot, common-kotlin
+paper-kotlin     -> paper, common-kotlin
+velocity-kotlin  -> velocity, common-kotlin
 integration-test -> platform modules
 ```
 
@@ -132,6 +142,21 @@ Responsibilities:
 
 The module compiles against Velocity API 3.4.0 (Java 17). The API it uses is unchanged up to 4.2.0, and the jar was
 run on Velocity 3.4.0 and 4.2.0 proxies.
+
+### Kotlin DSL
+
+The DSL is extension functions over the fluent model (`CommonCommand`, `ArgumentBranch`, `CommandOption`), so it
+adds no command semantics of its own. Platform types stay out of `common-kotlin`; the only platform-specific code is
+`command` / `subcommand`, which must create the platform's `Command`. Every platform names that class
+`dev.marulabs.commandlib.Command`, so the platform modules compile one shared source directory
+(`common-kotlin/src/platform`) and one shared test directory (`common-kotlin/src/platformTest`) instead of each having
+its own copy. Forge / NeoForge have no Kotlin module yet, since a Loom build per node would be needed for three
+functions.
+
+`common-kotlin` reads the current command context through the package-private `CurrentCommandContext`, from a file
+in the same package. That keeps the core API unchanged but requires `common` and `common-kotlin` to share a class
+loader, which shading gives. kotlinx-coroutines is `compileOnly`, and the coroutine functions are in their own file
+class, so the rest of the DSL loads without it.
 
 ### Forge / NeoForge
 

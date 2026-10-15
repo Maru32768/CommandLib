@@ -338,20 +338,20 @@ class ArenaCommand extends Command {
 
 ## Kotlin
 
-Lamp reads Kotlin default arguments as optional parameters. CommandLib has no Kotlin DSL; its Java API can be used
-from Kotlin, with `init` blocks in place of Java's double brace initialization:
+Lamp reads Kotlin default arguments as optional parameters. A Kotlin lambda cannot declare default values, so
+CommandLib's [Kotlin DSL](../kotlin.md) keeps the default on the argument with `optional(...)`, and the block
+receives typed references:
 
 ```kotlin
-class GreetCommand : Command("greet") {
-    init {
-        argument(PlayerArgument("target").optional(Command.playerRequirer())).execute { target, ctx ->
-            target.sendMessage("Welcome, ${target.name}!")
-        }
+val greet = command("greet") {
+    argument(PlayerArgument("target").optional { ctx -> ctx.player }) { target ->
+        execute { ctx -> target.get().sendMessage("Welcome, ${target.get().name}!") }
     }
 }
 ```
 
-Coroutine (`suspend`) handlers are **not available**.
+Suspending handlers are `executeSuspend { ctx -> }`, which resumes on the server thread, and suspending suggestion
+providers are `addSuggestionProviderSuspend { sb -> }`. Functions with default parameters are not read as commands.
 
 ## Testing
 
@@ -361,7 +361,7 @@ Coroutine (`suspend`) handlers are **not available**.
 
 ## Not available yet
 
-Tracked in the roadmap: an annotation API (with custom annotations), a Kotlin DSL with default arguments, dependency
+Tracked in the roadmap: an annotation API (with custom annotations), dependency
 injection, middleware and hooks, response handlers, global parameter types and suggestion
 providers, customizable and translatable built-in messages, and options with non-primitive values.
 

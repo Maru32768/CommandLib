@@ -343,8 +343,10 @@ argument(new IntegerArgument("amount").validator((amount, ctx) -> {
 
 ## Kotlin
 
-Cloud's `cloud-kotlin-extensions` (builder DSL) and `cloud-kotlin-coroutines` (suspending handlers) have no
-counterpart. CommandLib is a Java API that Kotlin can call directly; a Kotlin DSL is not available yet.
+Cloud's `cloud-kotlin-extensions` (builder DSL) and `cloud-kotlin-coroutines` (suspending handlers) correspond to
+CommandLib's [Kotlin DSL](../kotlin.md): `command("name") { ... }` blocks with typed argument references and options as
+delegated properties, `executeSuspend { ctx -> }` for suspending handlers, which resume on the server thread through
+the platform's scheduler, and `addSuggestionProviderSuspend { sb -> }` for suspending suggestions.
 
 ## Testing
 
@@ -354,7 +356,7 @@ CommandLib's `spigot-testing` / `paper-testing` run commands without a server:
 
 ## Not available yet
 
-Tracked in the roadmap: an annotation API and a Kotlin DSL, a global sender mapper, a platform-wide middleware
+Tracked in the roadmap: an annotation API, a global sender mapper, a platform-wide middleware
 registration, injection, customizable and translatable built-in
 messages, permission predicates that hide commands, typed value options beyond primitives and strings, and the
 arguments listed as missing in the [catalog](../arguments.md).
