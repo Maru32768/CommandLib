@@ -195,6 +195,23 @@ class CommonArgumentTest {
     }
 
     @Test
+    void argument_child_suggestions_read_parent_arguments_after_a_redirect() {
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("config") {{
+            argument(new StrArg("key")).child(new TestCommand("set") {{
+                argument(new StrArg("value").addSuggestionProvider(sb -> sb.suggest(sb.getContext()
+                                                                                      .getArgument("key")
+                        + "-default"))).execute((value, ctx) -> {
+                        });
+            }});
+        }});
+        // Like "execute run", which starts a new Brigadier context before the command.
+        runner.redirectToRoot("run");
+
+        assertThat(runner.suggest("config difficulty set ")).contains("difficulty-default");
+        assertThat(runner.suggest("run config difficulty set ")).contains("difficulty-default");
+    }
+
+    @Test
     void default_suggestions_can_be_cleared_and_restored() {
         TestCommandRunner addedRunner = new TestCommandRunner(new TestCommand("pick") {{
             argument(new DefaultSuggestingArg("value").addSuggestionProvider(sb -> sb.suggest("custom"))).execute((value,

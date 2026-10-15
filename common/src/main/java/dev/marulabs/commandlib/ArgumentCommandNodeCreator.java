@@ -53,7 +53,10 @@ final class ArgumentCommandNodeCreator<S, T, C extends CommonCommandContext<S, T
                                                    arguments.permissionName(parent, permissionPrefix))) {
                     return Suggestions.empty();
                 }
-                C ctx = platformAdapter.createCommandContext(context);
+                // Brigadier suggests with the first context of the input, which has the nodes before the first
+                // redirect only, such as those of "execute run" or of a Paper label that redirects to
+                // <plugin>:<label>.
+                C ctx = platformAdapter.createCommandContext(ChainedCommandContext.flatten(context));
                 ctx.providers(providers);
                 SuggestionBuilder<C> suggestionBuilder = new SuggestionBuilder<>(ctx, sb.getRemaining());
                 List<CompletableFuture<Suggestions>> defaultFutures = new ArrayList<>();

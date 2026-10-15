@@ -2,6 +2,7 @@ package dev.marulabs.commandlib;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 
@@ -36,6 +37,14 @@ final class TestCommandRunner {
         this.source = source;
         new CommandNodeCreator<>(List.of(command), "test.command", scheduler).build()
                                                                              .forEach(dispatcher.getRoot()::addChild);
+    }
+
+    /**
+     * Adds a literal that redirects to the root, as vanilla's "execute run" does.
+     */
+    void redirectToRoot(String literal) {
+        dispatcher.register(LiteralArgumentBuilder.<TestCommandSource>literal(literal)
+                                                  .redirect(dispatcher.getRoot()));
     }
 
     TestCommandContext execute(String input) throws CommandSyntaxException {
