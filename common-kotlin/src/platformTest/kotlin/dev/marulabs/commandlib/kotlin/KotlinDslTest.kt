@@ -199,4 +199,36 @@ class KotlinDslTest {
 
         assertThat(suggestions).containsExactlyInAnyOrder("spawn", "shop")
     }
+
+    class GamePlayer(
+        val name: String,
+    )
+
+    class Started(
+        val tick: Long,
+    )
+
+    @Test
+    fun `providers and middlewares give typed values to the executors`() {
+        val sender = FakeSender.player("Steve")
+        val team =
+            command("team") {
+                provide { ctx -> GamePlayer(ctx.actor.name) }
+                addMiddleware { ctx, next ->
+                    ctx.put(Started(20))
+                    next.proceed()
+                }
+                argument(StringArgument("name")) { name ->
+                    execute { ctx ->
+                        val started = ctx.get<Started>().tick
+                        ctx.sendMessage("${ctx.get<GamePlayer>().name} joins ${name.get()} at $started")
+                        ctx.sendMessage("missing: ${ctx.getOrNull<String>()}")
+                    }
+                }
+            }
+
+        CommandTester(team, "test.command").use { it.execute("team red", sender) }
+
+        assertThat(sender.sentMessageTexts).containsExactly("Steve joins red at 20", "missing: null")
+    }
 }
