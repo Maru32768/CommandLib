@@ -1,6 +1,7 @@
 package dev.marulabs.samplemod;
 
 import dev.marulabs.commandlib.CommandLib;
+import dev.marulabs.commandlib.CommandLibDiagnosticsCommand;
 import net.minecraftforge.fml.common.Mod;
 
 @Mod("samplemod")
@@ -15,6 +16,9 @@ public class SampleMod {
                             new OptionCommand(),
                             new PreprocessCommand(),
                             new IncrementCommand(),
-                            new MathCommand());
+                            new MathCommand(),
+                            new ResetCommand(),
+                            // Reports the platform and this mod's registrations. The name is up to the mod.
+                            new CommandLibDiagnosticsCommand("samplemod-diagnostics"));
     }
 }
