@@ -32,7 +32,7 @@ Corrections and newer versions are welcome; this page is only as good as the evi
 | 2. Optional and variadic arguments | `optional(v)`, `variadic()` (space-separated values) | `withOptionalArguments`, `ListArgument` | `optional(..., DefaultValue)`; no generic variadic | `@Default`, greedy `List<T>` | `@Default`, comma-separated arrays | A branch per optional argument |
 | 3. Argument-first tree | `argument(...).child(...)` (not in annotations) | `CommandTree` | Literal after an argument | `@Command("team <name> add")` | Not supported | Native |
 | 4. Async I/O, back to the main thread | `executeAsync` + `ctx.supplyAsync`, `executeSuspend` | Manual scheduler | Coordinators; main thread is manual | `CompletionStage` return; main thread is manual | Manual scheduler | Manual scheduler |
-| 5. Dependency injection | Constructor; `require(...)` maps the sender; annotations: `registerContextValue` | Constructor | Parameter injectors, Guice, `SenderMapper` | `@Dependency`, context parameters, sender resolvers | `registerDependency`, issuer-aware contexts | Constructor |
+| 5. Dependency injection | `provide(Type.class, ...)` per command tree, `ctx.get(Type.class)`; annotations: `registerDependency`, `@Dependency`, `registerContextValue` | Constructor | Parameter injectors, Guice, `SenderMapper` | `@Dependency`, context parameters, sender resolvers | `registerDependency`, issuer-aware contexts | Constructor |
 | 6. Per-locale messages | Captions, bundles, the sender's locale, localized help headings | None | Captions, translations, locale extractor | None in v4 | Locales, message keys, per-issuer locale | None in the command API |
 | 7. Result for `/execute store` | `ctx.setResult`, `int` return | `int` return | Always 1 | Always 1 | Always true / 1 | `int` return |
 | Executor reads values | Typed parameters | `args.get("name")` + cast, or `getByArgument` | `ctx.get("name")` (builder), parameters (annotations) | Parameters | Parameters | `getArgument("name", Type.class)` |
@@ -48,7 +48,7 @@ The sections below give the detail and the sources.
 | 2. [`kit`](../examples/src/main/java/dev/marulabs/commandlib/examples/kit) | 20 | 24 | 16 | 16 | none |
 | 3. [`team`](../examples/src/main/java/dev/marulabs/commandlib/examples/team) | 27 | 33 | 35 (annotations + fluent) | 25 | none |
 | 4. [`stats`](../examples/src/main/java/dev/marulabs/commandlib/examples/stats) | 9 | 14 | 13 | 10 | none |
-| 5. [`balance`](../examples/src/main/java/dev/marulabs/commandlib/examples/balance) | 20 | 23 | 22 | 15 | none |
+| 5. [`balance`](../examples/src/main/java/dev/marulabs/commandlib/examples/balance) | 20 | 23 | 25 | 16 | none; the account is read by type, `ctx.get(Economy.Account.class)` |
 | 6. [`home`](../examples/src/main/java/dev/marulabs/commandlib/examples/home) | 23 | 27 | 22 | 22 | none |
 | 7. [`score`](../examples/src/main/java/dev/marulabs/commandlib/examples/score) | 16 | 18 | 13 | 11 | none (the untyped executor reads `ctx.getArgument(argument)`) |
 
@@ -375,11 +375,13 @@ an account is refused.
 // CommandLib, fluent (examples/.../balance/FluentBalanceCommand.java)
 public FluentBalanceCommand(Economy economy) {
     super("balance");
-    require(ctx -> economy.account(ctx.getSender())).execute((account, ctx) -> ctx.sendMessage("You have " + account.balance() + " coins"));
+    // The sender's account, mapped once per execution for this command and its children.
+    provide(Economy.Account.class, ctx -> economy.account(ctx.getSender()));
+    execute(ctx -> ctx.sendMessage("You have " + ctx.get(Economy.Account.class).balance() + " coins"));
     addChildren(new Command("pay") {{
-        argument(new PlayerArgument("target"), new IntegerArgument("amount", 1, 1000))
-                .require(ctx -> economy.account(ctx.getSender()))
-                .execute((target, amount, account, ctx) -> account.pay(target.getName(), amount));
+        argument(new PlayerArgument("target"), new IntegerArgument("amount", 1, 1000)).execute((target, amount, ctx) -> {
+            economy.pay(ctx.get(Economy.Account.class), target.getName(), amount);
+        });
     }});
 }
 ```
@@ -387,17 +389,25 @@ public FluentBalanceCommand(Economy economy) {
 ```java
 // CommandLib, annotations (examples/.../balance/AnnotatedBalanceCommand.java)
 AnnotatedCommands.parser()
+                 .registerDependency(Economy.class, economy)    // sets @Dependency fields
                  .registerContextValue(Economy.Account.class, ctx -> economy.account(ctx.getSender()))
                  .parse(new AnnotatedBalanceCommand());
 
+@Dependency
+private Economy economy;
+
 @Subcommand("pay")
-public void pay(CommandContext ctx, Economy.Account account, Player target, @Range(min = 1, max = 1000) int amount) { }
+public void pay(CommandContext ctx, Economy.Account account, Player target, @Range(min = 1, max = 1000) int amount) {
+    economy.pay(account, target.getName(), amount);
+}
 ```
 
-The service comes through the constructor or the factory's parameter, and `require(...)` maps the sender to a typed
-value per branch. The annotated form registers the mapping once per parser. **CommandLib has no injector or sender
-mapper for a whole plugin yet** (tracked in the [roadmap](roadmap.md)), so the mapping is repeated per branch in the
-code styles; the example uses what exists today.
+In Kotlin, `provide { ctx -> economy.account(ctx.sender) }` keys the value by the lambda's type and
+`ctx.get<Economy.Account>()` reads it. A provider that throws `CommandPrerequisiteException` refuses the sender with its
+message, also from a typed executor ("You have no account." in the
+[snapshot](../examples/src/test/resources/snapshots/balance.snap)). Middlewares can `put` values for the executor too
+([context values](context-values.md)). A provider belongs to a command tree: values for every command of a plugin are
+provided on each top-level command.
 
 ```java
 // Cloud: about 3 lines
@@ -438,9 +448,11 @@ Partly verified: `registerDependency`, `@Dependency` and the issuer-only context
 - **CommandAPI** and **Paper** have no injection: pass the service to the class that builds the command
   (verified by absence).
 
-**Compared.** Lamp, Cloud and ACF are better here: one registration makes a service or a sender type available to
-every command, and Cloud's `SenderMapper` changes the sender type of the whole manager. CommandLib's `require(...)` is
-typed and fails the command with its own message, but it is per branch.
+**Compared.** Lamp, Cloud and ACF register a service or a sender type once for every command of the manager, and
+Cloud's `SenderMapper` changes the sender type itself, so handlers take `Payer` instead of `CommandSender`. CommandLib's
+values are typed, mapped once per execution, readable from middlewares, prerequisites and suggestions as well, and
+scoped to a command tree, which is one call per top-level command in a plugin with many; the sender type stays the
+platform's.
 
 ## 6. Per-locale messages
 
@@ -613,7 +625,8 @@ less code in a large plugin.
   `execute(ctx -> ...)` and `ctx.getArgument(argument)` (use case 7, the `go` branch of use case 6).
 - Annotations do not cover argument-first children, captions, localized descriptions or middlewares; the parsed
   command takes them through the fluent API.
-- No plugin-wide sender mapper or injector yet; `require(...)` and `registerContextValue` are per branch or per parser.
+- Context values are provided per command tree or per annotation parser, not once for a whole plugin, and the
+  sender type stays the platform's.
 - Help is a child of commands only: `/team red help` is rejected, while `/team red` shows the help of `/team`.
 - Parsing always runs on the server thread; there is no coordinator to move it.
 - CommandLib's own messages are translated into English and Japanese only.
