@@ -45,8 +45,8 @@
 | Permission registration             | `[~]` | Bukkit / Forge の permission registration がある。                                                                                           | reload safety の integration tests、LuckPerms guide。                         |
 | Permission-aware help / suggestions | `[~]` | argument branch permission を help / tab completion に反映する設計がある。                                                                          | 網羅 tests と docs。                                                           |
 | Typed command options               | `[~]` | flag / value / count option、default、dependency、repeatable（`List<T>`）、alias、required、`mutuallyExclusive(...)`、`OptionParseException`、help の option section がある（[`docs/options.md`](options.md)）。 | subcommand への継承、positional argument の後の option、固定 arity の multi-value、排他 group の専用 error message。 |
-| Generated usage / help              | `[~]` | README と snapshot tests に usage / help がある。server の `/help` 用の text は `serverHelp(...)` で指定でき、Bukkit 系では plugin の index に載る。 | formatter API、theme、locale、MiniMessage / Adventure。                        |
-| Error taxonomy                      | `[~]` | parse / validation / prerequisite / option 系の例外があり、各 error で sender に見える message を [`docs/errors.md`](errors.md) で公開仕様化した。 | unknown subcommand、missing argument の専用 error、error formatter API。 |
+| Generated usage / help              | `[x]` | 生成 help / usage に `HelpFormatter` / `UsageFormatter` と `examples(...)` があり、command ごとに継承される（[`docs/help.md`](help.md)）。`serverHelp(...)` は Bukkit 系の `/help` index に載る。 | usage line の RichText 化（hover / click）、`CommandDocs` への examples の出力。 |
+| Error taxonomy                      | `[~]` | parse / validation / prerequisite / option 系の例外があり、各 error で sender に見える message を [`docs/errors.md`](errors.md) で公開仕様化した。 | unknown subcommand、missing argument の専用 error、cooldown / confirmation / preprocess message の error formatter 経由化。 |
 | Exception handling                  | `[x]` | uncaught exception handler と、middleware での exception mapping / result handling がある。 | global な exception handler。 |
 | Preprocess / prerequisite           | `[~]` | `addPreprocess(...)`（middleware 化済み）、`addPrerequisite(...)`、`requirePlayer()` 等がある。 | reusable condition registry、diagnostics。 |
 | Middleware / interceptor            | `[x]` | `addMiddleware(CommandMiddleware)` で pre / post hook、exception mapping、result handling を合成でき、child と argument branch に継承される。`confirm()` / `cooldown()` / preprocess も middleware 上にある。 | platform 単位の global middleware。 |
@@ -107,7 +107,8 @@
 - `[~]` options の継承と配置拡張（subcommand への継承、positional argument の後の option、固定 arity の multi-value）を実装する。
   repeatable / count / aliases / required / 排他は実装済み。
 - `[ ]` reusable condition registry、help / usage / error formatter、rich help / MiniMessage を追加する。
-- `[ ]` help / usage / error formatter API を追加する（現在は help の見出しだけ caption）。
+- `[?]` 構文エラー時の usage 表示（`ErrorFormatter.SYNTAX_ADVICE`）を既定にするか決める。現在は opt-in で、既定にすると全 module の
+  argument error の出力が変わる。
 
 ### P5: Platform expansion
 
