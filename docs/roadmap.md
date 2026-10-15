@@ -55,7 +55,7 @@
 | Annotation API                      | `[~]` | `AnnotationParser` と `@Command` / `@Subcommand` / `@Permission` / `@Optional` / `@Default` / `@Range` / `@Suggest` / `@Flag` / `@Option` / `@Confirm` / `@Cooldown` 等、custom annotation の拡張点が Spigot / Paper / Velocity にある。fluent と同じ help / permission / 実行結果を snapshot で確認（[`docs/annotations.md`](annotations.md)）。 | Forge / NeoForge の `AnnotatedCommands`、middleware / prerequisite / option 依存の annotation。 |
 | Kotlin DSL                          | `[~]` | `common-kotlin` + `spigot-kotlin` / `paper-kotlin` / `velocity-kotlin` に型推論の効く builder、delegated option、`executeSuspend`、suspend suggestions がある（[`docs/kotlin.md`](kotlin.md)）。 | Forge / NeoForge 版、Kotlin 関数の default 引数から command を作る形、suspend middleware。`common-kotlin` は package-private の `CurrentCommandContext` を同じ package から読むため `common` と同じ class loader が必要。 |
 | Java builder API                    | `[x]` | `Command.builder(name)`（common の `CommandBuilder`）が全 platform にあり、fluent と同じ command tree / permission / 結果を snapshot で確認（[`docs/java-builder.md`](java-builder.md)）。 | modded-testing の builder test。 |
-| Localization / captions             | `[ ]` | なし。                                                                                                                                     | locale-aware help / errors / suggestions。                                  |
+| Localization / captions             | `[~]` | `Caption` / `Captions` で組み込み message を key 化し、sender の locale で解決する（en / ja 同梱、override、ResourceBundle、`CaptionSender`。[`docs/localization.md`](localization.md)）。 | help / usage formatter API、diagnostics / `CommandDocs` の文言、Fabric node での locale 取得の確認。 |
 | Public testing framework            | `[~]` | `common-testing` / `spigot-testing` / `paper-testing` / loader 別 `modded-testing` がある。`CommandTester`（`suggest()`、int を返す `execute`、`assertCommandTreeMatchesSnapshot`）、`FakeSender`、NMS mock、JUnit 5 の `CommandLibExtension` + `@Sender`（modded 以外）と downstream guide（[`docs/testing.md`](testing.md)）がある。 | modded-testing の JUnit extension、testing artifact 間の共通化、gamerule / silent source の模擬。 |
 | Adventure / MiniMessage             | `[~]` | platform 非依存の rich text 値型 `RichText`（色、装飾、hover text、click、translatable 引数）を全 platform で送れる（Phase 1 完了）。Paper / modded は native component の `sendSuccess/Warn/Failure` もある。 | rich help、rich suggestion tooltip の統一、MiniMessage。設計: [`docs/design/rich-text-messages.md`](design/rich-text-messages.md)。 |
 | Multi-version integration tests     | `[~]` | `integration-test` aggregator と Spigot（1.16.5〜26.3 の全 release）/ Paper / Mohist / Forge / NeoForge fixtures がある。                                                             | CI matrix、`IntegrationTarget` への platform フィールド追加、result docs、test kit 化。  |
@@ -110,7 +110,7 @@
 - `[ ]` reusable condition registry、help / usage / error formatter、rich help / MiniMessage を追加する。
 - `[ ]` dependency injection hooks を追加する。
 - `[ ]` sender mapper / context enrichment を追加する。
-- `[ ]` localization / caption system を追加する。
+- `[ ]` help / usage / error formatter API を追加する（現在は help の見出しだけ caption）。
 
 ### P5: Platform expansion
 
