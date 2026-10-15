@@ -10,8 +10,8 @@ import java.util.function.Supplier;
 /**
  * Runs async commands with the Bukkit scheduler of the plugin that registered them: sync tasks on the main thread, at
  * once when already there, and async work on the scheduler's async pool. The scheduler refuses tasks of a disabled
- * plugin, so the follow-up of a command still running when its plugin is disabled is dropped. Folia has no such
- * scheduler.
+ * plugin, so the follow-up of a command still running when its plugin is disabled is dropped. Folia refuses this
+ * scheduler and gets {@link FoliaCommandScheduler}.
  */
 final class BukkitCommandScheduler implements CommandScheduler {
     private final Executor sync;

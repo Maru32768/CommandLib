@@ -19,8 +19,9 @@ import java.util.logging.Logger;
  * 1.20.5.
  */
 final class ServerFunctions {
-    // Main thread only: set after a failure, which would repeat on every attempt.
-    private static boolean unavailable;
+    // Main thread only: set after a failure, which would repeat on every attempt. Folia never runs functions (it ticks
+    // none and has no function or reload command), so they are not compiled again there.
+    private static boolean unavailable = FoliaCommandScheduler.ON_FOLIA;
 
     private ServerFunctions() {
     }

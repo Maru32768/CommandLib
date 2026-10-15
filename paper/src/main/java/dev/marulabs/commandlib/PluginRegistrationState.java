@@ -18,7 +18,7 @@ final class PluginRegistrationState {
     Mode mode = new Mode.Unhandled();
     // The instances not unregistered yet, which the plugin's COMMANDS handler adds on every data reload.
     final List<CommandLib> instances = new ArrayList<>();
-    // Main thread only: the changes of one tick share one update of the players' command trees and one compilation.
+    // Main thread (Folia: global region thread) only: the changes of one tick share one update of the players' command trees and one compilation.
     private boolean commandTreeUpdateScheduled;
     private boolean functionRecompileScheduled;
 

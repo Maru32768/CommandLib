@@ -118,7 +118,9 @@ public final class CommandLib implements Listener {
                                       @NotNull String permissionPrefix,
                                       @NotNull Collection<? extends Command> commands) {
         Objects.requireNonNull(plugin);
-        CommandSet commandSet = CommandSet.of(permissionPrefix, commands, new BukkitCommandScheduler(() -> plugin));
+        CommandSet commandSet = CommandSet.of(permissionPrefix,
+                                              commands,
+                                              FoliaCommandScheduler.forServer(() -> plugin));
 
         CommandLib instance = new CommandLib(plugin,
                                              REGISTRATION_STATES.computeIfAbsent(plugin,
@@ -185,8 +187,8 @@ public final class CommandLib implements Listener {
                                    .getName();
         CommandSet commandSet = CommandSet.of(permissionPrefix,
                                               commands,
-                                              new BukkitCommandScheduler(() -> Bukkit.getPluginManager()
-                                                                                     .getPlugin(pluginName)));
+                                              FoliaCommandScheduler.forServer(() -> Bukkit.getPluginManager()
+                                                                                          .getPlugin(pluginName)));
 
         CommandPermissions.addBootstrapDefaults(commandSet);
         BootstrapRegistration registration = new BootstrapRegistration(pluginName, commandSet);
@@ -326,7 +328,7 @@ public final class CommandLib implements Listener {
      * Sends the command tree to the player again, so the commands and branches they see follow a change of their
      * permissions without a rejoin. The server sends the tree on join and when the player's operator status changes,
      * but not when a permission changes, such as through a {@code PermissionAttachment}. Must be called on the main
-     * server thread.
+     * server thread, or on Folia on any region or global region thread; Folia sends the tree on the player's own thread.
      *
      * @throws IllegalStateException if called from another thread
      */
@@ -337,7 +339,7 @@ public final class CommandLib implements Listener {
     }
 
     /**
-     * Same as {@link #refresh(Player)} for every online player. Must be called on the main server thread.
+     * Same as {@link #refresh(Player)} for every online player, on the same threads.
      *
      * @throws IllegalStateException if called from another thread
      */
@@ -349,15 +351,16 @@ public final class CommandLib implements Listener {
 
     private static void requirePrimaryThread() {
         // Sending the tree reads the dispatcher, which only the main thread may touch; permission plugins often fire
-        // their change events asynchronously.
+        // their change events asynchronously. On Folia every region thread is a primary thread and reads it as well.
         if (!Bukkit.isPrimaryThread()) {
-            throw new IllegalStateException("Command trees must be refreshed on the main server thread");
+            throw new IllegalStateException("Command trees must be refreshed on the main server thread (on Folia, a "
+                    + "region or global region thread)");
         }
     }
 
     /**
      * Removes all commands and permissions registered by this instance.
-     * Must be called on the main server thread.
+     * Must be called on the main server thread, on Folia the global region thread.
      */
     public void unregister() {
         unregister(true);
@@ -469,6 +472,13 @@ public final class CommandLib implements Listener {
                 }
                 return;
             }
+        }
+        if (FoliaCommandScheduler.ON_FOLIA) {
+            // Folia has no data reload, so the commands come with the next server start.
+            plugin.getLogger()
+                  .warning("The commands of " + plugin.getName()
+                          + " missed Paper's COMMANDS event and cannot be added on Folia until the server restarts");
+            return;
         }
         // Without Paper's dispatcher, take the /minecraft:reload path: it fires the COMMANDS handlers, rebuilds the help
         // topics, and sends the command tree to players.
