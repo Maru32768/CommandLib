@@ -9,11 +9,26 @@ import io.papermc.paper.command.brigadier.argument.resolvers.FinePositionResolve
 import io.papermc.paper.math.FinePosition;
 import org.bukkit.Location;
 
+/**
+ * A position in the vanilla {@code vec3} syntax: {@code x y z}, relative ({@code ~}) or local ({@code ^}) coordinates.
+ * The value is a location in the sender's world.
+ */
 @SuppressWarnings("UnstableApiUsage")
 public class LocationArgument extends Argument<Location, LocationArgument> {
+    /**
+     * Creates the argument, which moves an integer x or z coordinate to the center of its block, as vanilla commands
+     * do: {@code 1 64 1} is {@code 1.5 64 1.5}.
+     */
     public LocationArgument(String name) {
-        // Center integer x/z coordinates like vanilla commands and the Spigot implementation do (1 64 1 -> 1.5 64 1.5).
-        super(name, ArgumentTypes.finePosition(true));
+        this(name, true);
+    }
+
+    /**
+     * Creates the argument, which moves an integer x or z coordinate to the center of its block when
+     * {@code centerIntegers} is true and keeps it otherwise: {@code 1 64 1} is {@code 1.5 64 1.5} or {@code 1 64 1}.
+     */
+    public LocationArgument(String name, boolean centerIntegers) {
+        super(name, ArgumentTypes.finePosition(centerIntegers));
     }
 
     @Override

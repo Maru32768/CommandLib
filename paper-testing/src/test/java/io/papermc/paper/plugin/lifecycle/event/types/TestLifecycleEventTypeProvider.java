@@ -21,4 +21,9 @@ public final class TestLifecycleEventTypeProvider implements LifecycleEventTypeP
                                                                                                                         Class<? extends O> ownerType) {
         return Mockito.mock(LifecycleEventType.Prioritizable.class);
     }
+
+    @Override
+    public TagEventTypeProvider tagProvider() {
+        return Mockito.mock(TagEventTypeProvider.class);
+    }
 }

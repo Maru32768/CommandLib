@@ -18,7 +18,8 @@ dependencies {
     compileOnly("org.junit.jupiter:junit-jupiter-api:5.10.2")
     api("org.mockito:mockito-core:5.11.0")
 
-    testImplementation("io.papermc.paper:paper-api:1.21-R0.1-SNAPSHOT")
+    // 1.21.8 added ArgumentTypes.blockInWorldPredicate(), which CommandTester stubs when the API has it.
+    testImplementation("io.papermc.paper:paper-api:1.21.8-R0.1-SNAPSHOT")
     testImplementation("com.mojang:brigadier:1.0.18")
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")

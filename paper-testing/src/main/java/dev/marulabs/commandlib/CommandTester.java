@@ -10,10 +10,13 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.Suggestions;
+import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
+import io.papermc.paper.command.brigadier.argument.predicate.ItemStackPredicate;
 import io.papermc.paper.command.brigadier.argument.range.DoubleRangeProvider;
 import io.papermc.paper.command.brigadier.argument.range.IntegerRangeProvider;
+import io.papermc.paper.command.brigadier.argument.resolvers.BlockPositionResolver;
 import io.papermc.paper.command.brigadier.argument.resolvers.FinePositionResolver;
 import io.papermc.paper.command.brigadier.argument.resolvers.selector.EntitySelectorArgumentResolver;
 import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver;
@@ -22,12 +25,14 @@ import io.papermc.paper.registry.RegistryKey;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Biome;
+import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.command.CommandSender;
@@ -43,6 +48,7 @@ import org.jetbrains.annotations.Nullable;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -317,6 +323,13 @@ public final class CommandTester implements AutoCloseable {
                      .thenReturn(finePosition());
         argumentTypes.when(ArgumentTypes::itemStack)
                      .thenReturn(word(token -> requireCurrent().fakeItemStack));
+        argumentTypes.when(ArgumentTypes::blockPosition)
+                     .thenReturn(blockPosition());
+        argumentTypes.when(ArgumentTypes::itemPredicate)
+                     .thenReturn(material("item",
+                                          material -> (ItemStackPredicate) item -> item != null
+                                                  && item.getType() == material));
+        stubBlockInWorldPredicate(argumentTypes);
         argumentTypes.when(ArgumentTypes::integerRange)
                      .thenReturn(range(Integer::valueOf, range -> (IntegerRangeProvider) () -> range));
         argumentTypes.when(ArgumentTypes::doubleRange)
@@ -447,6 +460,88 @@ public final class CommandTester implements AutoCloseable {
         }
         return reader.getString()
                      .substring(start, reader.getCursor());
+    }
+
+    /**
+     * Stubs {@code ArgumentTypes.blockInWorldPredicate()}, which Paper added in 1.21.8, when the Paper API on the
+     * classpath has it. The predicate matches blocks of the material of the id.
+     */
+    private static void stubBlockInWorldPredicate(MockedStatic<ArgumentTypes> argumentTypes) {
+        Method method;
+        Class<?> predicateClass;
+        try {
+            method = ArgumentTypes.class.getMethod("blockInWorldPredicate");
+            predicateClass = Class.forName("io.papermc.paper.command.brigadier.argument.predicate.BlockInWorldPredicate");
+        } catch (NoSuchMethodException | ClassNotFoundException e) {
+            return;
+        }
+        argumentTypes.when(() -> method.invoke(null))
+                     .thenReturn(material("block", material -> Mockito.mock(predicateClass, invocation -> {
+                         if (!invocation.getMethod()
+                                        .getName()
+                                        .equals("testBlock")) {
+                             return Mockito.RETURNS_DEFAULTS.answer(invocation);
+                         }
+                         Block block = invocation.getArgument(0);
+                         return resultOf(invocation.getMethod()
+                                                   .getReturnType(),
+                                         block.getType() == material);
+                     })));
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private static Object resultOf(Class<?> resultClass, boolean matches) {
+        return Enum.valueOf((Class) resultClass, matches ? "TRUE" : "FALSE");
+    }
+
+    /**
+     * Reads a material id such as {@code stone} or {@code minecraft:stone}, rejects an unknown one while parsing like a
+     * server, and suggests the ids that start with the input. It does not tell items from blocks, since
+     * {@link Material#isItem()} and {@link Material#isBlock()} need a server from Paper 1.21.3.
+     */
+    private static <T> ArgumentType<T> material(String kind, Function<Material, T> value) {
+        return new ArgumentType<T>() {
+            @Override
+            public T parse(StringReader reader) throws CommandSyntaxException {
+                int start = reader.getCursor();
+                String token = readUntilWhitespace(reader);
+                Material material = Material.matchMaterial(token);
+                if (material == null) {
+                    reader.setCursor(start);
+                    throw new SimpleCommandExceptionType(new LiteralMessage("Unknown " + kind + " '" + token
+                            + "'")).createWithContext(reader);
+                }
+                return value.apply(material);
+            }
+
+            @Override
+            public <S> CompletableFuture<Suggestions> listSuggestions(com.mojang.brigadier.context.CommandContext<S> context,
+                                                                      SuggestionsBuilder builder) {
+                String input = builder.getRemaining();
+                for (Material material : Material.values()) {
+                    if (material.isLegacy()) {
+                        continue;
+                    }
+                    String key = material.getKey()
+                                         .toString();
+                    if (key.startsWith(input) || key.startsWith("minecraft:" + input)) {
+                        builder.suggest(key);
+                    }
+                }
+                return builder.buildFuture();
+            }
+        };
+    }
+
+    private static ArgumentType<BlockPositionResolver> blockPosition() {
+        return reader -> {
+            int x = reader.readInt();
+            reader.skipWhitespace();
+            int y = reader.readInt();
+            reader.skipWhitespace();
+            int z = reader.readInt();
+            return source -> Position.block(x, y, z);
+        };
     }
 
     private static ArgumentType<FinePositionResolver> finePosition() {
