@@ -76,6 +76,8 @@
   `provide` / `ctx.put` / `ctx.get`、annotation の `registerDependency` と `@Dependency`（`docs/context-values.md`、2026-10-16）。
 - `[x]` help / usage / error formatter API と command の `examples(...)`、opt-in の syntax advice を追加する（`docs/help.md`、
   2026-10-16）。
+- `[x]` option の順列展開を redirect で抑える。player ごとの tree は short flag 6 個で 491,607 → 5,490 node、argument node を共有
+  （`docs/design/command-options.md`、2026-10-16、実サーバー未検証）。
 - `[x]` registration 全体の middleware / provider（`CommandDefaults`）、cooldown の `remaining` / `reset`、typed executor からの
   `ctx.fail(...)`、annotation の `@Condition` による名前付き prerequisite、selector 向けの `ctx.sendSuccessFor(...)` を追加する（2026-10-16）。
 - `[x]` middleware / interceptor API（`addMiddleware`）と async execution（`executeAsync`、`CommandScheduler` による sync thread

@@ -95,8 +95,8 @@
 - `[ ]` cooldown の永続化（restart 後に復元する hook）、argument branch 単位の confirm / cooldown / `@Condition`。
 - `[ ]` permission 以外の state で command の表示を切り替える visibility predicate を追加する（現在は permission を付け外しして
   `CommandLib.refresh(player)` する方式を docs で案内）。
-- `[ ]` option の順列展開を抑える。short flag 6 個で unique node 5,490、player に送る packet では 491,607 node になる（4 個で 2,395）。
-  option の状態ごとに argument node を複製している（`CommandNodeCreator#argumentNodeSupplier`）ため、共有すれば登録 node を約 2 割減らせる。
+- `[ ]` option の redirect 化（`OptionGraph`）を実サーバーで検証する（Spigot 1.16.5〜26.x、Paper の `ApiMirrorRootNode`、Velocity、modded）。
+  argument child と primitive 以外の value option を持つ command は従来の tree のままで、順列で増える。
 - `[ ]` 比較で劣った点を埋める: positional argument の後の option、option 単位の permission、primitive / string 以外の value option、
   annotation での argument-first tree、CommandLib 組み込み message の他言語 bundle。
 - `[ ]` annotation API を Forge / NeoForge に広げ、middleware / prerequisite / option の `requires`・排他 / argument-first child 用の
