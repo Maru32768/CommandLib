@@ -63,6 +63,10 @@ When adding or fixing command behavior, prefer narrow tests around parsing,
 execution, options, permissions, and suggestions. Use `spigot-testing` utilities
 for command-level Bukkit tests when a full server is not needed.
 
+For a change that may affect registration, parsing or suggestion speed, run the JMH benchmarks and compare them with
+the recorded baseline (`./gradlew :benchmark:jmh :benchmark:jmhCompare`, see `docs/benchmarks.md`). They take
+minutes, so they are not part of `check`.
+
 ## Static Analysis
 
 Error Prone runs inside `compileJava` / `compileTestJava` of the published modules (`common`, `spigot`, `paper`,
