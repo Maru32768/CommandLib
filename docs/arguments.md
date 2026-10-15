@@ -203,12 +203,15 @@ Notes:
 
 ## Text, NBT, and other advanced arguments
 
+| CommandLib | Result | Input | CommandAPI | Paper | Spigot | Paper | Forge / NeoForge |
+|---|---|---|---|---|---|---|---|
+| `ComponentArgument` | Bungee `BaseComponent` / Adventure `Component` / vanilla `Component` | vanilla text component: JSON such as `{"text":"hi","color":"red"}`, SNBT from 1.21.5 | `ChatComponentArgument` (`BaseComponent[]`), `AdventureChatComponentArgument` | `component()` | equivalent | equivalent | equivalent |
+| `MessageArgument` | same types as `ComponentArgument`, selectors resolved | the rest of the input, like `/say` | `ChatArgument`, `AdventureChatArgument` | `signedMessage()` (`SignedMessageResolver`) | equivalent | partial | equivalent |
+| `NBTCompoundArgument` | SNBT `String` (Bukkit) / vanilla `CompoundTag` | vanilla SNBT compound: `{CustomName:"Bob",Health:20.0f}` | `NBTCompoundArgument` (an NBT-API object) | — | partial | partial | equivalent |
+
 | Capability | CommandAPI | Paper | Spigot | Paper | Forge / NeoForge |
 |---|---|---|---|---|---|
-| text component / JSON text | `ChatComponentArgument` | `component()` | missing | missing | missing |
-| signed chat message | `ChatArgument` | `signedMessage()` | missing | missing | missing |
 | style, hex color | — | `style()`, `hexColor()` | missing | missing | missing |
-| NBT / SNBT compound | `NBTCompoundArgument` | — | missing | missing | missing |
 | function / function tag | `FunctionArgument` | — | missing | missing | missing |
 | command | `CommandArgument` | — | missing | missing | missing |
 | list | `ListArgument` | — | partial | partial | partial |
@@ -219,6 +222,23 @@ Notes:
 
 Notes:
 
+- `ComponentArgument` returns the component as written: selector, score, and NBT components are not resolved for a
+  viewer. On Spigot it is one Bungee `BaseComponent` (CommandAPI gives a `BaseComponent[]`), which `ctx.sendMessage`
+  and `player.spigot().sendMessage` take. Up to 1.20.2 vanilla's JSON reader also consumes the character after the
+  component, so an argument after it fails to parse there; put it last, as `/tellraw` does.
+- `MessageArgument` reads the rest of the input, so it must be the last argument of its branch. Selectors such as `@p`
+  are replaced by the selected names when the sender may use selectors (permission level 2), as in `/say`. From 1.19
+  clients sign the argument; the value drops the signature, so sending it sends a system message, not a signed chat
+  message. Paper's `signedMessage()` resolves the signed message only asynchronously, after chat decoration; read it
+  from the Brigadier context when you need it signed:
+  `ctx.getHandle().getArgument(name, SignedMessageResolver.class).resolveSignedMessage(name, ctx.getHandle())`. That,
+  and selectors being resolved through Paper's internal message, make the Paper class `partial`. On Forge / NeoForge
+  use vanilla's `MessageArgument.resolveChatMessage` (1.19.3+) for the signed message.
+- `NBTCompoundArgument` returns SNBT on Spigot and Paper because Bukkit has no NBT type; the server parses the input
+  and rewrites it in its own form (`{a:true}` becomes `{a:1b}`). Pass it to an NBT library, for example NBT-API's
+  `NBT.parseNBT(snbt)`, or to a command. Paper has no NBT argument type, so the Paper class uses the vanilla
+  `nbt_compound_tag` type, which Paper's command API accepts, created by its Mojang name. Forge / NeoForge return the
+  vanilla `CompoundTag`.
 - Custom arguments: extend the platform's `Argument<T, SELF>` with an existing Brigadier or vanilla `ArgumentType` and
   implement `cast` and `parseImpl`, or adapt an existing argument with `validator`, `transformer`, and
   `additionalParser`. A new `ArgumentType` class must be known to the client, which CommandLib does not register for
@@ -268,18 +288,15 @@ These points are open, separate from the missing arguments below:
 
 The order weighs plugin demand, the CommandAPI / Paper parity gap, and how much of the work already exists.
 
-1. **Text component and signed message** for Paper (`component()`, `signedMessage()`), and a portable component
-   argument for Spigot and Forge / NeoForge.
-2. **NBT / SNBT compound.**
-3. **Generic registry argument** (Paper `resource(RegistryKey)` / `resourceKey(RegistryKey)` equivalent) on both
+1. **Generic registry argument** (Paper `resource(RegistryKey)` / `resourceKey(RegistryKey)` equivalent) on both
    Bukkit modules.
-4. **Forge / NeoForge parity**: dimension / world, sound, biome, attribute, entity type, objective, game mode, and the
+2. **Forge / NeoForge parity**: dimension / world, sound, biome, attribute, entity type, objective, game mode, and the
    other Bukkit-only registry arguments.
-5. **Rotation, angle, 2D location, axes.**
-6. **Score holder, objective criteria, math operation**, the remaining scoreboard set.
-7. **Function, command, list, map** arguments.
-8. `style`, `hexColor`, `heightMap`, `entityAnchor`, structure mirror / rotation.
-9. **Vanilla `time` in game ticks** (`TimeArgument`, `time()`), for commands that schedule ticks rather than real time;
+3. **Rotation, angle, 2D location, axes.**
+4. **Score holder, objective criteria, math operation**, the remaining scoreboard set.
+5. **Function, command, list, map** arguments.
+6. `style`, `hexColor`, `heightMap`, `entityAnchor`, structure mirror / rotation.
+7. **Vanilla `time` in game ticks** (`TimeArgument`, `time()`), for commands that schedule ticks rather than real time;
    `DurationArgument` covers real-time durations.
 
 ## Testing each argument
@@ -316,6 +333,9 @@ depends on the artifact:
 | `AdvancementArgument`, `LootTableArgument`, `RecipeArgument` | static | static | — |
 | `TeamArgument` | mock vanilla type plus static scoreboard; real with `scoreboard(Supplier)` | static, or real with `scoreboard(Supplier)` | real with `scoreboard(Supplier)`; the server scoreboard is not available |
 | `ObjectiveArgument` | static, or real with `scoreboard(Supplier)` | static, or real with `scoreboard(Supplier)` | — |
+| `ComponentArgument` | mock: JSON read by Bungee | mock: JSON read by Adventure | real |
+| `MessageArgument` | mock: the text as written, selectors not resolved | mock: the text as written, selectors not resolved | real; selectors are resolved only with a level, which the fake sources lack |
+| `NBTCompoundArgument` | mock: the compound as written, not checked | mock: the compound as written, not checked | real |
 
 `paper-testing`'s registry mocks return the single fake value for any token, so they do not check that a key exists.
 Tests that depend on unknown-key errors, real registries, tags, or worlds belong in integration tests.

@@ -69,7 +69,7 @@ with ease.
 | Flags and options (`-f`, `--limit 10`) | built in | — | — |
 | Generated usage / help | built in | `/help` entries | `/help` entries |
 | Server-free test utilities | `spigot-testing`, `paper-testing`, `velocity-testing`, `forge-` / `neoforge-` / `fabric-testing` | test toolkit (MockBukkit) | — |
-| Chat / NBT arguments | not yet | yes | yes |
+| Chat / NBT arguments | text component, message, NBT compound (SNBT string on Bukkit) | yes | component, signed message; no NBT |
 
 See the [argument catalog](docs/arguments.md) for an argument-by-argument comparison and
 [compatibility](docs/compatibility.md) for the tested server versions.
