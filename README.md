@@ -33,6 +33,9 @@ with ease.
    Generate usage and help messages from the command tree, including arguments, subcommands, options, and descriptions.
 6. **Seamless Integration with the `/execute` command**   
    Allow your commands to be executed seamlessly from the `/execute` command, just like built-in commands.
+7. **Documentation Exports and Diagnostics**  
+   Export the commands and every generated permission node as Markdown or JSON, and inspect the registrations and
+   the platform at runtime ([docs](docs/diagnostics.md)).
 
 ## Why CommandLib
 
@@ -67,6 +70,8 @@ See the [argument catalog](docs/arguments.md) for an argument-by-argument compar
 - [Errors](docs/errors.md): what the sender sees when a command fails.
 - [Vanilla integration](docs/vanilla-integration.md): `/execute`, command blocks, functions, and tags.
 - [Testing](docs/testing.md): `CommandTester` and `FakeSender` for plugin and mod tests.
+- [Documentation exports and diagnostics](docs/diagnostics.md): Markdown / JSON of the commands and permission nodes,
+  and a runtime report of the platform and the registrations.
 - [Troubleshooting](docs/troubleshooting.md).
 - [Migrating from CommandAPI](docs/migration/from-commandapi.md).
 - [Migrating from Cloud](docs/migration/from-cloud.md).

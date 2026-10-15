@@ -29,6 +29,8 @@ Running a route needs the node of every step on it. `/config <key> get` needs `m
 the command it points to.
 
 `command.permissionName(prefix)` returns the node of a command, which helps when writing permission docs or tests.
+`CommandDocs.of(prefix, commands).permissionsMarkdown()` (or `permissionsJson()`) lists every node of the commands with
+its default; see [permission export](diagnostics.md#permission-export).
 
 ### Overriding the node
 

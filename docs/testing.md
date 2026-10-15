@@ -245,8 +245,10 @@ void suggests_modes() {
 ### Command tree snapshots
 
 `commandTree()` renders the registered commands: each command with its aliases, permission node and
-`DefaultPermission`, then its options, argument branches (argument names and classes, and the branch's permission)
-and child commands, indented by depth. The generated `help` children are left out.
+`DefaultPermission`, then its options (long names and aliases, short name, value name, and whether it is required or
+repeatable), argument branches (argument names and classes, `[optional]` and `<variadic...>` markers, and the branch's
+permission) and child commands, indented by depth. The generated `help` children are left out. It is the same text as
+[`CommandDocs#tree()`](diagnostics.md#command-documentation).
 
 ```text
 heal (aliases: h) [myplugin.command.heal, OP]

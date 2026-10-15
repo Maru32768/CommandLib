@@ -170,6 +170,13 @@ class ConfigCommand extends Command {
 }
 ```
 
+To document the commands or list every generated node, use `CommandDocs`
+(`registration.docs()`, or `CommandDocs.of(prefix, commands)` without
+registering): `markdown()`, `json()`, `permissionsMarkdown()`,
+`permissionsJson()`. For runtime inspection, `CommandLib.diagnostics()` returns
+a report, and `new CommandLibDiagnosticsCommand("myplugin-diagnostics")` is an
+opt-in command that sends it; CommandLib never registers it by itself.
+
 ## Subcommands And Prerequisites
 
 Prerequisites are inherited by children by default. Define shared checks on the
