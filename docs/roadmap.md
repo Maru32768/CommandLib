@@ -18,8 +18,8 @@
 | 領域                                  |    状況 | 現状                                                                                                                                      | 足りないもの                                                                     |
 |-------------------------------------|------:|-----------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------|
 | Fluent / tree API                   | `[x]` | `Command`、`argument(...)`、`addChildren(...)` による command tree 定義がある。                                                                    | API stability policy と migration guide。                                    |
-| 型安全な argument callback              | `[x]` | `Unary` から `Hept` までの typed branch callback がある。                                                                                        | 8 個以上の引数、optional/default/list 系の表現整理。                                     |
-| Variadic / optional arguments       | `[ ]` | なし。省略形ごとに branch を並べる必要がある。                                                                                                            | 末尾 variadic argument（`List<T>`）、末尾 optional argument（default 値付き）。              |
+| 型安全な argument callback              | `[x]` | `Unary` から `Hept` までの typed branch callback がある。                                                                                        | 8 個以上の引数。                                     |
+| Variadic / optional arguments       | `[x]` | 末尾の `optional(default)` / `optional(Extractor)` と `variadic([max])`（`List<T>`）がある。配置違反は登録時に `IllegalStateException`（[`docs/design/optional-variadic-arguments.md`](design/optional-variadic-arguments.md)）。 | 上限なしの variadic、`Optional<T>` 形式、実サーバーでの検証。 |
 | Execution result                    | `[ ]` | `CommandExecutor` は `void` を返す。                                                                                                          | int result / success を返し `/execute store result / success` に反映する。                |
 | Async execution                     | `[ ]` | async suggestions のみ。実行は同期。                                                                                                            | `CompletableFuture` ベースの非同期実行と main / region thread への復帰。                      |
 | Dynamic command tree refresh        | `[ ]` | なし。                                                                                                                                     | permission / state 変化時に対象 player へ command tree を再送する API。                       |
@@ -35,7 +35,7 @@
 | Fabric support                      | `[ ]` | なし。                                                                                                                                     | Fabric command registration / Brigadier integration 設計、Stonecutter matrix への追加（方針案: Pillar 11）。                    |
 | Brigadier / NMS hiding              | `[~]` | 利用者 API から Brigadier / NMS を隠している。                                                                                                      | capability detection、公式 API 優先、fallback policy。                            |
 | `/execute` integration              | `[~]` | README と Bukkit registration path で `/execute run` 連携を扱っている。spigot module と paper module の command は `/minecraft:reload` 後や runtime 登録後も data pack function から使える（`/minecraft:reload` 後は両 module に integration test あり）。paper module で plugin から登録した command は次 tick の function 再 compile 後に使える（bootstrap 登録は server の compile 時点から使える）。 | command block / tag での保証と tests。 |
-| Built-in arguments                  | `[~]` | 基本的な primitive、string、player、entity、location、item などがある。CommandAPI / Paper との挙動別 catalog は [`docs/arguments.md`](arguments.md)。 | catalog の missing 一覧（optional / variadic、range、duration、component、block position、predicate、NBT、registry 等）の補完。 |
+| Built-in arguments                  | `[~]` | 基本的な primitive、string、player、entity、location、item などがある。CommandAPI / Paper との挙動別 catalog は [`docs/arguments.md`](arguments.md)。 | catalog の missing 一覧（range、duration、component、block position、predicate、NBT、registry 等）の補完。 |
 | Argument validation                 | `[x]` | `validator(...)` と `ArgumentValidator` がある。                                                                                             | reusable condition registry、error customization。                           |
 | Argument transform                  | `[x]` | `transformer(...)` がある。                                                                                                                 | docs と examples。                                                           |
 | Custom parsing fallback             | `[x]` | `additionalParser(...)` がある。                                                                                                            | behavior spec と tests。                                                     |
@@ -89,12 +89,10 @@
 
 ### P4: Cloud / Lamp / ACF を上回る developer experience
 
-annotation API / Kotlin DSL の `@Optional` や default args はこの土台の上に載せるため、先頭 3 項目を優先する。
+annotation API / Kotlin DSL の `@Optional` や default args は optional / variadic argument（実装済み）の上に載せる。
 
-- `[ ]` variadic argument を追加する。`new PlayerArgument("targets").variadic()` のように末尾 argument を
-  `List<T>` として受け取れるようにする。
-- `[ ]` optional argument を追加する（要設計）。`.optional(defaultValue)` の形を候補とし、optional / variadic は
-  argument 列の末尾にのみ置ける制約とする。末尾以外に置いた場合は command 登録時の assertion で runtime error にする。
+- `[ ]` optional / variadic argument を実サーバー（Spigot / Paper / modded の integration test）で検証する。各 token を
+  platform の `ArgumentType#parse` で読み直す実装のため、command tree の大きさ（`maxCount` × option の展開）も確認する。
 - `[ ]` async execution を追加する。`executeAsync(ctx -> CompletableFuture<...>)` で重い処理を非同期化し、結果を
   main thread（Folia では entity / region thread）で返す。例外は既存の `UncaughtExceptionHandler` に流す。
   Folia support の thread 抽象と設計を共有する。
