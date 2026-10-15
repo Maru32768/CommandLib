@@ -17,7 +17,8 @@ public class LookupCommand extends Command {
         addMiddleware((ctx, next) -> {
             long start = System.nanoTime();
             return next.proceed()
-                       .whenComplete((ignored, e) -> logger.info("/lookup took " + (System.nanoTime() - start) / 1_000_000 + " ms"));
+                       .whenComplete((ignored, e) -> logger.info("/lookup took "
+                               + (System.nanoTime() - start) / 1_000_000 + " ms"));
         });
 
         // supplyAsync runs the work off the server thread and completes back on it, so thenAccept may send messages.
