@@ -36,6 +36,8 @@ configure<JavaPluginExtension> {
 
 tasks.withType<JavaCompile>().configureEach {
     options.encoding = "UTF-8"
+    // The annotation style (ArenaCommand) names arguments after the parameters.
+    options.compilerArgs.add("-parameters")
 }
 
 tasks.named<ProcessResources>("processResources") {

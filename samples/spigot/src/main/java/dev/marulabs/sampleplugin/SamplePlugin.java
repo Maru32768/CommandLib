@@ -1,6 +1,8 @@
 package dev.marulabs.sampleplugin;
 
 import dev.marulabs.commandlib.CommandLib;
+import dev.marulabs.commandlib.CommandLibDiagnosticsCommand;
+import dev.marulabs.commandlib.annotation.AnnotatedCommands;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class SamplePlugin extends JavaPlugin {
@@ -15,6 +17,12 @@ public final class SamplePlugin extends JavaPlugin {
                             new OptionCommand(),
                             new PreprocessCommand(),
                             new IncrementCommand(),
-                            new MathCommand());
+                            new MathCommand(),
+                            new ResetCommand(),
+                            new LookupCommand(getLogger()),
+                            AnnotatedCommands.parse(new ArenaCommand()),
+                            FeedCommand.create(),
+                            // Reports the platform and this plugin's registrations. The name is up to the plugin.
+                            new CommandLibDiagnosticsCommand("sample-diagnostics"));
     }
 }

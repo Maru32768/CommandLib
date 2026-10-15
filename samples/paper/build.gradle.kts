@@ -24,6 +24,17 @@ repositories {
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21-R0.1-SNAPSHOT")
     implementation("com.github.Maru32768.CommandLib:paper:latest.release")
+
+    // Runs the commands without a server (src/test). Never shade the testing artifacts.
+    testImplementation("com.github.Maru32768.CommandLib:paper-testing:latest.release")
+    testImplementation("io.papermc.paper:paper-api:1.21-R0.1-SNAPSHOT")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation("org.assertj:assertj-core:3.25.3")
+}
+
+tasks.test {
+    useJUnitPlatform()
 }
 
 configure<JavaPluginExtension> {
@@ -32,6 +43,8 @@ configure<JavaPluginExtension> {
 
 tasks.withType<JavaCompile>().configureEach {
     options.encoding = "UTF-8"
+    // The annotation style (ArenaCommand) names arguments after the parameters.
+    options.compilerArgs.add("-parameters")
 }
 
 tasks.named<ProcessResources>("processResources") {

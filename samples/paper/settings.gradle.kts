@@ -6,6 +6,8 @@ if (commandLibRoot.resolve("settings.gradle.kts").isFile) {
         dependencySubstitution {
             substitute(module("com.github.Maru32768.CommandLib:paper"))
                 .using(project(":paper"))
+            substitute(module("com.github.Maru32768.CommandLib:paper-testing"))
+                .using(project(":paper-testing"))
         }
     }
 }
