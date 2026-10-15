@@ -8,6 +8,8 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+//? if fabric && <1.20.2
+/*@org.junit.jupiter.api.Disabled("Fabric 1.20.1 does not read the player's language")*/
 class CaptionLocaleTest {
     private static final Caption GREETING = Caption.of("test.greeting", "Hello, {name}!");
 

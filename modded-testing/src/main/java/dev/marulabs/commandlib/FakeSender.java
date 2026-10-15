@@ -232,8 +232,17 @@ public final class FakeSender {
                .thenReturn(uniqueId);
         Mockito.when(player.getStringUUID())
                .thenReturn(uniqueId.toString());
+        //? if fabric && >=1.20.2 {
+        /*net.minecraft.server.level.ClientInformation information =
+                Mockito.mock(net.minecraft.server.level.ClientInformation.class);
+        Mockito.when(information.language())
+               .thenReturn(locale);
+        Mockito.when(player.clientInformation())
+               .thenReturn(information);
+        *///?} elif !fabric {
         Mockito.when(player.getLanguage())
                .thenReturn(locale);
+        //?}
         Mockito.when(player.isAlive())
                .thenReturn(true);
         Mockito.when(player.hasPermissions(Mockito.anyInt()))

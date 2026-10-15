@@ -58,6 +58,15 @@ public final class CommandContext extends CommonCommandContext<CommandSourceStac
     @NotNull
     public String getLanguage() {
         // Forge and NeoForge add getLanguage to ServerPlayer; a mock or a player that sent no settings returns null.
+        //? if fabric && >=1.20.2 {
+        /*net.minecraft.server.level.ClientInformation information =
+                getEntity() instanceof ServerPlayer ? ((ServerPlayer) getEntity()).clientInformation() : null;
+        String language = information != null ? information.language() : null;
+        *///?} elif fabric {
+        /*// shortcut: vanilla 1.20.1 keeps the language in a private field with an intermediary name, so Fabric 1.20.1
+        // uses the default language; read it through an accessor mixin if a mod needs it.
+        String language = null;
+        *///?} else
         String language = getEntity() instanceof ServerPlayer ? ((ServerPlayer) getEntity()).getLanguage() : null;
         if (language == null || language.isEmpty()) {
             return super.getLanguage();
