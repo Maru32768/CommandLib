@@ -11,6 +11,7 @@ import org.apache.logging.log4j.core.filter.AbstractFilter;
 import org.apache.logging.log4j.message.Message;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.function.BooleanSupplier;
 
 /**
@@ -19,7 +20,9 @@ import java.util.function.BooleanSupplier;
  * functions on a data reload before a plugin can add commands to the new dispatcher (Spigot has no hook, and Paper fires
  * the COMMANDS event of plugins afterwards), so every function using a CommandLib command was reported as broken on
  * each reload although it works a tick later. The errors of CommandLib's own compilation, whose stack has a
- * {@value #RECOMPILE_METHOD} method, pass, so a function that is really broken is still reported, once.
+ * {@value #RECOMPILE_METHOD} method, pass, so a function that is really broken is still reported, once. A function tag,
+ * such as {@code #minecraft:load}, that lists such a function was reported as missing it as well, so the error of a
+ * function tag is dropped the same way.
  *
  * <p>It is a context-wide Log4j filter, which the logger checks in the logging thread before the event is made, even
  * with asynchronous loggers, so only its variants for a logger call are needed. Servers log through Log4j, which plugins see from the server's class loader; without it
@@ -30,6 +33,19 @@ final class FunctionLoadErrorFilter extends AbstractFilter {
      * The format of the error the function library logs for a function it could not compile, the same from 1.16.5.
      */
     static final String MESSAGE = "Failed to load function {}";
+    /**
+     * The formats of the error the tag loader logs for a tag that lists a missing element: with the tag type on 1.16.5,
+     * without it on later versions such as 1.21.11 and 26.3. The function library builds its tags with the functions it compiled.
+     */
+    static final List<String> TAG_MESSAGES = List.of("Couldn't load {} tag {} as it is missing following references: {}",
+                                                     "Couldn't load tag {} as it is missing following references: {}");
+    /**
+     * The function library, whose stack frames tell a function tag from the tags of other registries: its Spigot,
+     * Mojang and MCP (Mohist 1.16.5) names.
+     */
+    private static final List<String> FUNCTION_LIBRARIES = List.of("CustomFunctionManager",
+                                                                   "ServerFunctionLibrary",
+                                                                   "FunctionReloader");
     /**
      * The name of the methods that compile the functions again: NMSDedicatedServer#recompileFunctions in the spigot
      * module and ServerFunctions#recompileFunctions in the paper module. Methods are matched by name, so the filter of
@@ -70,8 +86,10 @@ final class FunctionLoadErrorFilter extends AbstractFilter {
         filter.filter(null, null, null, (String) null, (Object[]) null);
         filter.filter(null, null, null, (Message) null, null);
         filter.decide(MESSAGE);
+        filter.decide(TAG_MESSAGES.get(0));
         // decide checks the stack only while CommandLib is going to compile the functions again.
         fromRecompilation();
+        fromFunctionLibrary();
         // A composite filter stops at the first filter that accepts or denies, and Forge's configuration, which Mohist
         // uses, has filters that accept errors, so this one goes first.
         Filter existing = configuration.getFilter();
@@ -110,15 +128,24 @@ final class FunctionLoadErrorFilter extends AbstractFilter {
     }
 
     Result decide(@Nullable String format) {
-        if (!MESSAGE.equals(format) || DECIDING.get()) {
+        // List.of rejects a null element even in contains.
+        boolean tag = format != null && TAG_MESSAGES.contains(format);
+        if (!(tag || MESSAGE.equals(format)) || DECIDING.get()) {
             return Result.NEUTRAL;
         }
         DECIDING.set(true);
         try {
-            return recompiling.getAsBoolean() && !fromRecompilation() ? Result.DENY : Result.NEUTRAL;
+            return recompiling.getAsBoolean() && !fromRecompilation() && (!tag || fromFunctionLibrary()) ? Result.DENY
+                    : Result.NEUTRAL;
         } finally {
             DECIDING.set(false);
         }
+    }
+
+    private static boolean fromFunctionLibrary() {
+        return StackWalker.getInstance()
+                          .walk(frames -> frames.anyMatch(frame -> FUNCTION_LIBRARIES.stream()
+                                                                                     .anyMatch(frame.getClassName()::endsWith)));
     }
 
     private static boolean fromRecompilation() {

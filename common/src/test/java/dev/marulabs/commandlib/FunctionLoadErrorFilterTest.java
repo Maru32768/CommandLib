@@ -108,6 +108,32 @@ class FunctionLoadErrorFilterTest {
         assertThat(filter.decide("Failed to load something else {}")).isEqualTo(Filter.Result.NEUTRAL);
     }
 
+    @Test
+    void drops_the_error_of_a_function_tag_listing_a_function_the_server_dropped() {
+        ServerFunctionLibrary.buildTags(logger, FunctionLoadErrorFilter.TAG_MESSAGES.get(1));
+        ServerFunctionLibrary.buildTags(logger, FunctionLoadErrorFilter.TAG_MESSAGES.get(0));
+
+        assertThat(logged).isEmpty();
+    }
+
+    @Test
+    void keeps_the_error_of_a_tag_of_another_registry() {
+        logger.error(FunctionLoadErrorFilter.TAG_MESSAGES.get(1), "minecraft:logs", "test:missing");
+
+        assertThat(logged).containsExactly("Couldn't load tag minecraft:logs as it is missing following references: test:missing");
+    }
+
+    // Stands for the server's function library, which builds the function tags.
+    private static final class ServerFunctionLibrary {
+        static void buildTags(Logger logger, String format) {
+            if (format.startsWith("Couldn't load {}")) {
+                logger.error(format, "function", "minecraft:load", "test:probe");
+            } else {
+                logger.error(format, "minecraft:load", "test:probe");
+            }
+        }
+    }
+
     // Named as FunctionLoadErrorFilter.RECOMPILE_METHOD.
     private void recompileFunctions() {
         logger.error(FunctionLoadErrorFilter.MESSAGE, "test:probe", new IllegalArgumentException("Unknown command"));
