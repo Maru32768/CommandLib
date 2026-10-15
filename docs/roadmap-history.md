@@ -71,6 +71,7 @@
 - `[x]` middleware / interceptor API（`addMiddleware`）と async execution（`executeAsync`、`CommandScheduler` による sync thread
   への復帰）を追加し、preprocess / confirm / cooldown を middleware 上に載せる（`docs/execution.md`、
   `docs/design/execution-pipeline.md`、2026-10-15）。
+- `[x]` Kotlin DSL を設計・実装する（Spigot / Paper / Velocity、coroutine の `executeSuspend`、`docs/kotlin.md`、2026-10-16）。
 - `[x]` dynamic command tree refresh を追加する。`CommandLib.refresh(player)` / `refreshAll()`（Spigot / Paper / Forge /
   NeoForge、2026-10-15）。
 
