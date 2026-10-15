@@ -13,6 +13,8 @@ import net.minecraft.network.chat.MutableComponent;
 /*import net.minecraft.network.chat.TextComponent;*/
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.phys.Vec2;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -37,10 +39,16 @@ public final class CommandContext extends CommonCommandContext<CommandSourceStac
                      .getLevel();
     }
 
+    /**
+     * The location the command runs at, with the source's rotation as the yaw and pitch, such as the direction a player
+     * executing it faces or what {@code /execute rotated} sets.
+     */
     public Location getLocation() {
-        return new Location(getWorld(),
-                            handle.getSource()
-                                  .getPosition());
+        Vec3 position = handle.getSource()
+                              .getPosition();
+        Vec2 rotation = handle.getSource()
+                              .getRotation();
+        return new Location(getWorld(), position.x, position.y, position.z, rotation.y, rotation.x);
     }
 
     public @NotNull CommandSourceStack getSender() {
