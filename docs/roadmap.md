@@ -30,7 +30,7 @@
 | Forge support                       | `[~]` | Forge 1.16.5 / 1.20.1 を Architectury Loom + Stonecutter による `modded` の単一ソースから build。                                                                                                                | 1.16.5+ の対象 version 拡充、loader 非依存層の分離、Bukkit との差分整理。                                     |
 | Mohist support                      | `[~]` | README 上で tested version が記載されている。                                                                                                      | integration test の明文化、非対応ケースの整理。                                           |
 | Folia support                       | `[ ]` | なし。                                                                                                                                     | scheduler / threading model を踏まえた Paper 互換性確認。                             |
-| Velocity support                    | `[ ]` | なし。                                                                                                                                     | proxy command model 向け module / API 設計（方針案: Pillar 11）。                                    |
+| Velocity support                    | `[~]` | `velocity` / `velocity-testing` module（Velocity 3.4.0+、`PlayerArgument` / `ServerArgument`）がある。Velocity 3.4.0 / 4.2.0 の proxy で手動 smoke test 済み。 | 実 proxy + backend + client の integration target、Velocity sample。 |
 | NeoForge support                    | `[~]` | NeoForge 1.21.1 を Forge と共有の `modded` Stonecutter tree から build（`neoforge-1.21.1`、`neoforge-testing-1.21.1`、integration target あり）。 | 1.21.1 以外の NeoForge version。 |
 | Fabric support                      | `[ ]` | なし。                                                                                                                                     | Fabric command registration / Brigadier integration 設計、Stonecutter matrix への追加（方針案: Pillar 11）。                    |
 | Brigadier / NMS hiding              | `[~]` | 利用者 API から Brigadier / NMS を隠している。                                                                                                      | capability detection、公式 API 優先、fallback policy。                            |
@@ -117,7 +117,7 @@
 - `[x]` Forge testing strategy を決め、`forge-testing` を追加する。実サーバーの integration targets（`forge-1.16.5`、`forge-1.20.1`）と、サーバーなしの `forge-testing-<version>`（`CommandTester` / `FakeSender`）を追加済み。
 - `[~]` NeoForge / Fabric / Forge の module 方針を決める。方針案は
   [11. Platform Architecture](#11-platform-architecture) を参照。
-- `[~]` Velocity support 方針を決める。方針案は [11. Platform Architecture](#11-platform-architecture) を参照。
+- `[ ]` Velocity の integration target（proxy + backend + bot）と sample を追加する。`ServerArgument` の補完で quote が必要な名前を quote する。
 - `[x]` Architectury Loom + Stonecutter の PoC として、`forge:1.16.5` と `forge:1.20.1` を単一ソースから build する。
 - `[ ]` mod loader 系 module を `minecraft`（MC version 依存・loader 非依存）と `loader/*`（loader 依存）に分割する。
 - `[~]` sender / message abstraction（Adventure と vanilla `Component` の差分吸収）を Velocity 着手前に設計する。

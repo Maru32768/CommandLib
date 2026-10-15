@@ -69,6 +69,11 @@
 - `[x]` dynamic command tree refresh を追加する。`CommandLib.refresh(player)` / `refreshAll()`（Spigot / Paper / Forge /
   NeoForge、2026-10-15）。
 
+### P5: Platform expansion（完了分）
+
+- `[x]` Velocity support を追加する。`velocity` / `velocity-testing` module（`BrigadierCommand` 登録、Adventure message、
+  `PlayerArgument` / `ServerArgument`、diagnostics）。Velocity 3.4.0 / 4.2.0 で手動確認（2026-10-15）。
+
 ### P6: Ecosystem と tooling（完了分）
 
 - `[x]` Spigot 1.21.2 以降に対応する。spigot module の `AttributeArgument` / `BiomeArgument` / `SoundArgument` を Bukkit
