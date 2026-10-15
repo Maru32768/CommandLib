@@ -111,10 +111,14 @@ CommandLib uses two message shapes:
   gray (at most the last 10 characters, prefixed with `...`), the rejected token underlined in red, and the
   translatable `command.context.here` ("<--[HERE]") in red italics. Used by the enum, literal, object, nameable object,
   team, offline player, and Paper world arguments.
-- A plain red message, such as `minecraft:foo is not a known advancement`, `foo is not a known objective`,
-  `foo is not valid namespaced key`, `Steve is not found or not valid UUID`, `no player found`, `@x is invalid selector`.
+- A red message. Where vanilla has a message of the same meaning, it is vanilla's translatable one:
+  `Unknown advancement: minecraft:foo`, `Unknown recipe: foo`, `Unknown scoreboard objective 'foo'`,
+  `No player was found` (an `@a` or `@r` without players). The others are [captions](localization.md):
+  `foo is not a valid namespaced key`, `foo is not a known loot table`, `foo is not a known sound`,
+  `Steve is neither a known player nor a valid UUID`, `@x is not a valid selector`.
 
-The message is the same on every platform. The translatable parts are translated by the client.
+The message is the same on every platform. The translatable parts are translated by the client, the captions are sent
+in the sender's locale.
 
 If the argument has an `additionalParser(...)`, it gets the raw input first; the error is reported only when it returns
 `null`.
@@ -149,6 +153,7 @@ return an empty list, so CommandLib's `PlayersArgument` / `EntitiesArgument` rej
   command" message with the context line (the `ofIncorrectInput` shape above).
 - `validator(ArgumentValidator)` lets you throw your own `ArgumentValidationException`:
   - `new ArgumentValidationException()` sends `Invalid value.` in red.
+  - `new ArgumentValidationException(caption, placeholders)` sends a [caption](localization.md) in red.
   - `new ArgumentValidationException("message", "more lines"...)` sends each string in red.
   - `new ArgumentValidationException(ctx -> ...)` sends whatever the consumer sends.
   - `ArgumentValidationException.ofIncorrectInput(name, ctx, input)` sends the vanilla-style message.
@@ -195,6 +200,7 @@ Thrown by a `Prerequisite` (`addPrerequisite`), an `Extractor` (`require(...)`),
 |---|---|
 | `new CommandPrerequisiteException()` | `You do not have permission to execute this command.` |
 | `new CommandPrerequisiteException("message", "more lines"...)` | each string, in red |
+| `new CommandPrerequisiteException(caption[, placeholders])` | the [caption](localization.md) in the sender's locale, in red |
 | `new CommandPrerequisiteException(ctx -> ...)` | whatever the consumer sends |
 | `requirePlayer()`, `Command.playerRequirer()` (Spigot, Paper) | `This command can only be executed by a player.` |
 | `requireConsole()`, `Command.consoleRequirer()` (Spigot, Paper) | `This command can only be executed from the console.` |
@@ -240,8 +246,8 @@ An exception thrown by the executor or a middleware, or a failed stage of an asy
 `The command timed out.` and calls the handlers):
 
 - its stack trace is printed to the server console;
-- the sender gets `An unexpected error occurred trying to execute that command.` and `Check the console for details.`
-  in red;
+- the sender gets `An unexpected error occurred trying to execute that command` (vanilla's translatable
+  `command.failed`, unless `Caption.UNEXPECTED_ERROR` is given a text) and `Check the console for details.` in red;
 - every `UncaughtExceptionHandler` added with `addUncaughtExceptionHandler` on the command (and, for an argument node,
   on the argument) is called with the exception and the context;
 - the command [fails](#results-and-failures) with those two lines, or, for an async command that has already
@@ -254,12 +260,15 @@ on hover for operators).
 
 An exception thrown by a suggestion provider is printed and rethrown; the client gets no suggestions for that request.
 
-## Messages are English
+## Languages
 
-The CommandLib-generated texts above (permission, prerequisite, unexpected error, option dependency, and the plain
-argument messages) are fixed English strings. Only the vanilla-style "Incorrect argument for command" / "<--[HERE]"
-parts and the vanilla messages passed through are translated by the client. Localization of CommandLib's own messages
-is not implemented yet.
+The texts CommandLib sends itself (permission, prerequisite, timeout, option errors, cooldown, confirmation, the plain
+argument messages, and the headings of the generated help) are [captions](localization.md): they are sent in the
+sender's locale, CommandLib ships English and Japanese, and a plugin can replace each per locale with `Captions`. The
+English texts in this page are their defaults. The vanilla-style "Incorrect argument for command" / "<--[HERE]" parts,
+the vanilla messages CommandLib uses where they mean the same thing (`No player was found`, `Unknown advancement`,
+`Unknown recipe`, `Unknown scoreboard objective`, `command.failed`), and the vanilla messages passed through are
+translatable and translated by the client. Brigadier's own errors are the platform's.
 
 ## In tests
 

@@ -87,6 +87,32 @@ or component passed in. `RichTexts.toBungee` (spigot), `RichTexts.toAdventure` (
 (Forge / NeoForge) convert a `RichText` to the native component. For Paper-only plugins, Adventure and MiniMessage can
 be used directly: `ctx.sendMessage(MiniMessage.miniMessage().deserialize("<red>Hello"))`.
 
+### Translated Messages
+
+CommandLib's own messages are captions sent in the sender's locale (English and Japanese built in). Translate them and
+your own messages with `Caption` and `Captions`, given to each top-level command:
+
+```java
+static final Caption HOME_SET = Caption.of("myplugin.home.set", "Home {name} set.");
+
+Captions captions = Captions.create()
+                            .set(Locale.JAPANESE, Caption.PERMISSION_DENIED, "それはできません。")
+                            // lang/messages.properties, lang/messages_ja.properties, ... read as UTF-8.
+                            .bundle("lang/messages", plugin.getClass().getClassLoader());
+
+class HomeCommand extends Command {
+    HomeCommand(Captions captions) {
+        super("home");
+        captions(captions);
+        argument(new StringArgument("name")).execute((name, ctx) -> ctx.sendSuccess(HOME_SET, Map.of("name", name)));
+    }
+}
+```
+
+`ctx.caption(caption[, placeholders])` returns the text, `new CommandPrerequisiteException(caption)` fails with it, and
+`Captions#sender(...)` formats every caption (a prefix, MiniMessage on Paper). Tests set a player's locale with
+`FakeSender#locale("ja_jp")`.
+
 ### Feedback And Results
 
 `sendSuccess` is vanilla command feedback: hidden while the `sendCommandFeedback` gamerule is off and for silent

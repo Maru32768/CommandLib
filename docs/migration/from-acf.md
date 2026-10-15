@@ -279,25 +279,31 @@ keeps a player from running it again too soon. See [confirmation and cooldown](.
 
 | ACF | CommandLib |
 |---|---|
-| `MessageKeys`, `getLocales().addMessageBundle(...)`, `loadYamlLanguageFile(...)` | **Not available**. CommandLib's own messages are fixed English text |
-| `usePerIssuerLocale(true)` | `ctx.getLocale()` / `ctx.getLanguage()` return the sender's client locale for your own messages |
+| `MessageKeys` | `Caption` constants, such as `Caption.PERMISSION_DENIED`; your own keys with `Caption.of(key, englishDefault)`. See [localization](../localization.md) |
+| `getLocales().addMessage(locale, key, text)` | `Captions.create().set(locale, caption, text)`, given to the command with `captions(...)` |
+| `getLocales().addMessageBundle(...)` | `Captions#bundle("lang/messages", classLoader)` for properties files, `Captions#load(locale, resourceBundle)` for a `ResourceBundle` |
+| `loadYamlLanguageFile(...)` | **Not available**; read the YAML yourself and `set(...)` each text, or use a properties file |
+| `{name}` replacements in `sendMessage(MessageKey, "{name}", value)` | `ctx.sendFailure(caption, Map.of("name", value))` |
+| `usePerIssuerLocale(true)` | Always on: captions follow `ctx.getLocale()`, the sender's client locale, and the JVM's default locale for the console |
 | `{@@key}` in `@Description` | `description(ctx -> messages.get(ctx.getLocale(), "key"))` |
-| `setFormat(MessageType.ERROR, ...)` | **Not available**; failures are red, `sendSuccess` green, `sendWarn` yellow |
+| `setFormat(MessageType.ERROR, ...)` | `Captions#sender((ctx, caption, message, send) -> ...)` formats every caption; otherwise failures are red, `sendSuccess` green, `sendWarn` yellow |
 | `setDefaultExceptionHandler(...)` | **Not available** globally; `addUncaughtExceptionHandler((e, ctx) -> ...)` on a command or argument |
 
 ```java
 class HelloCommand extends Command {
-    HelloCommand(Messages messages) {
+    static final Caption DESCRIPTION = Caption.of("hello.description", "Says hello.");
+    static final Caption REPLY = Caption.of("hello.reply", "Hello, {name}!");
+
+    HelloCommand(Captions captions) {
         super("hello");
 
-        description(ctx -> messages.get(ctx.getLocale(), "hello.description"));
-        execute(ctx -> ctx.sendMessage(messages.get(ctx.getLocale(), "hello.reply")));
-        addUncaughtExceptionHandler((e, ctx) -> ctx.sendFailure(messages.get(ctx.getLocale(), "error")));
+        captions(captions);
+        description(ctx -> ctx.caption(DESCRIPTION));
+        execute(ctx -> ctx.sendMessage(REPLY, Map.of("name", ctx.getActor()
+                                                                 .getName())));
     }
 }
 ```
-
-`Messages` stands for your own translation lookup.
 
 ## Dependency injection
 

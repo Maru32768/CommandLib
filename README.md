@@ -48,6 +48,9 @@ with ease.
 10. **Annotated Commands**  
     Write a command as a class with `@Command`, `@Subcommand`, `@Flag` and `@Option` methods; it builds the same
     command as the fluent API, with the same help, permissions and tests ([docs](docs/annotations.md)).
+11. **Localized Messages**  
+    CommandLib's own messages are captions sent in each sender's locale, in English and Japanese out of the box, and a
+    plugin can replace them per key and locale or load its own properties files ([docs](docs/localization.md)).
 
 ## Why CommandLib
 
@@ -80,6 +83,7 @@ See the [argument catalog](docs/arguments.md) for an argument-by-argument compar
 - [Suggestions](docs/suggestions.md): default, custom, asynchronous, and tooltip suggestions.
 - [Permissions](docs/permissions.md): node names, defaults per platform, registration, and LuckPerms.
 - [Errors](docs/errors.md): what the sender sees when a command fails.
+- [Localization](docs/localization.md): captions, the sender's locale, translations, and caption formatting.
 - [Vanilla integration](docs/vanilla-integration.md): `/execute`, command blocks, functions, and tags.
 - [Execution](docs/execution.md): middlewares, async executors, threads, and `/execute store` for async commands.
 - [Annotated commands](docs/annotations.md): commands as annotated classes, and how they map to the fluent API.
@@ -904,6 +908,31 @@ or component passed in. `RichTexts.toBungee` (spigot), `RichTexts.toAdventure` (
 (Forge / NeoForge) convert a `RichText` to the native component. For Paper-only plugins, Adventure and MiniMessage can
 be used directly: `ctx.sendMessage(MiniMessage.miniMessage().deserialize("<red>Hello"))`.
 
+### Translated Messages
+
+CommandLib's own messages, such as "You do not have permission to execute this command." or the help headings, are
+captions sent in the sender's locale, with English and Japanese built in. Replace them, and translate your own, with
+`Captions`:
+
+```java
+public static final Caption HOME_SET = Caption.of("myplugin.home.set", "Home {name} set.");
+
+Captions captions = Captions.create()
+                            .set(Locale.JAPANESE, Caption.PERMISSION_DENIED, "それはできません。")
+                            // lang/messages_ja.properties etc. in the plugin jar, read as UTF-8.
+                            .bundle("lang/messages", getClass().getClassLoader());
+
+public final class HomeCommand extends Command {
+    public HomeCommand(Captions captions) {
+        super("home");
+        captions(captions);
+        argument(new StringArgument("name")).execute((name, ctx) -> ctx.sendSuccess(HOME_SET, Map.of("name", name)));
+    }
+}
+```
+
+See [localization](docs/localization.md) for the lookup order, the keys, and `Captions#sender` to format every caption.
+
 ### Feedback And Results
 
 `sendSuccess` sends command feedback the way vanilla commands do: a player does not get it while the
@@ -954,7 +983,8 @@ public final class ResetCommand extends Command {
 }
 ```
 
-The first execution sends "Run the command again within 10s to confirm. [Confirm]", where `[Confirm]` runs the same
+The first execution sends "Run the command again within 10s to confirm. [Confirm]" (a
+[caption](docs/localization.md), in the sender's language), where `[Confirm]` runs the same
 command when clicked. Each sender has one pending confirmation: another input, or the same one after the timeout, asks
 again. A sender on cooldown gets "You must wait 4m 59s before using this command again." Both are checked after the
 permissions, the arguments and the prerequisites, in this order: the cooldown, the confirmation, the other middlewares

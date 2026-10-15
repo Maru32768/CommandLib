@@ -303,11 +303,15 @@ See [confirmation and cooldown](../../README.md#confirmation-and-cooldown) in th
 
 | Cloud | CommandLib |
 |---|---|
-| `exceptionController().registerHandler(...)` for `NoPermissionException`, `InvalidSyntaxException`, `InvalidCommandSenderException`, ... | **Not available**. CommandLib sends fixed English messages; Brigadier syntax errors are the platform's vanilla messages. See [errors](../errors.md) |
+| `exceptionController().registerHandler(...)` for `NoPermissionException`, `InvalidSyntaxException`, `InvalidCommandSenderException`, ... | **Not available**. CommandLib sends its messages as captions that you can replace (see below); Brigadier syntax errors are the platform's vanilla messages. See [errors](../errors.md) |
 | An exception thrown by the handler | `addUncaughtExceptionHandler((e, ctx) -> ...)` on the command or argument |
 | `ArgumentParseResult.failure(...)` from a parser | `throw new ArgumentValidationException("...")` from `validator(...)` |
 | Failing from the handler | `throw new CommandPrerequisiteException("...")` from `execute(ctx -> ...)`, or `ctx.sendFailure("..."); return;` |
-| `captionRegistry().registerProvider(...)`, `cloud-translations` bundles, `LocaleExtractor` | **Not available** for CommandLib's own messages. `ctx.getLocale()` gives the sender's locale for your messages, and `description(ctx -> ...)` makes help text per sender |
+| `Caption.of(key)`, `StandardCaptionKeys` | `Caption.of(key, englishDefault)`, CommandLib's own keys as `Caption` constants. See [localization](../localization.md) |
+| `captionRegistry().registerProvider(...)` | `Captions.create().set(locale, caption, text)`, `bundle(baseName, classLoader)` or `load(locale, resourceBundle)`, given to the command with `captions(...)` |
+| `cloud-translations` bundles | CommandLib ships English and Japanese |
+| `captionFormatter(...)`, `<name>` placeholders | `Captions#sender(...)` formats every caption; placeholders are `{name}`, replaced from `Map.of("name", value)` |
+| `LocaleExtractor` | Built in: `ctx.getLocale()`, the sender's client locale, or the JVM's default for the console |
 | `MinecraftExceptionHandler` (minecraft-extras) | Not needed: failures are sent in red like vanilla errors |
 
 ```java

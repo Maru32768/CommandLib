@@ -168,8 +168,9 @@ entity arguments resolve it by name. Build senders that need more, such as a UUI
 | `FakeSender.unknown()` (`common-testing` only) | A sender of unknown type without permissions |
 
 Adjust a sender with `op(boolean)`, `permissions(nodes...)` (only these nodes), `denyPermissions(nodes...)` (all but
-these), `uniqueId(uuid)`, `locale(tag)` (not in `modded-testing`), and `name(name)` (not in `common-testing`). The
-builders have the same methods.
+these), `uniqueId(uuid)`, `locale(tag)` (a `Locale` in `velocity-testing`), and `name(name)` (not in
+`common-testing`). The builders have the same methods. A player's locale decides the language of CommandLib's messages
+and of your [captions](localization.md); the console uses the JVM's default locale.
 
 Keep the returned sender: in `common-testing` these methods return a new `FakeSender`, in the other artifacts they
 change the sender and return it.
