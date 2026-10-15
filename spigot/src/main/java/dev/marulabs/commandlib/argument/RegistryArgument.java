@@ -2,6 +2,7 @@ package dev.marulabs.commandlib.argument;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.marulabs.commandlib.Argument;
+import dev.marulabs.commandlib.Caption;
 import dev.marulabs.commandlib.CommandContext;
 import dev.marulabs.commandlib.exception.ArgumentParseException;
 import dev.marulabs.commandlib.util.nms.argument.NMSArgumentNamespacedKey;
@@ -32,6 +33,6 @@ public class RegistryArgument<T extends Keyed> extends Argument<T, RegistryArgum
 
     @Override
     protected T parseImpl(CommandContext ctx) throws ArgumentParseException, CommandSyntaxException {
-        return NamespacedKeyArgumentSupport.parseRegistryValue(ctx, name(), registry, "registry entry");
+        return NamespacedKeyArgumentSupport.parseRegistryValue(ctx, name(), registry, Caption.UNKNOWN_REGISTRY_ENTRY);
     }
 }

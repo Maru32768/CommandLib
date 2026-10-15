@@ -1,8 +1,11 @@
 package dev.marulabs.commandlib.argument;
 
 import dev.marulabs.commandlib.Argument;
+import dev.marulabs.commandlib.Caption;
 import dev.marulabs.commandlib.CommandContext;
 import dev.marulabs.commandlib.exception.ArgumentParseException;
+
+import java.util.Map;
 
 /**
  * A number of game ticks in the vanilla {@code time} syntax: a number, decimals allowed, with one optional unit,
@@ -40,8 +43,7 @@ public class TimeArgument extends Argument<Integer, TimeArgument> {
                        .getArgument(name(), Integer.class);
         // The vanilla type has no minimum before 1.19.4.
         if (ticks < minimum) {
-            throw new ArgumentParseException(x -> x.sendFailure("Tick count must not be less than " + minimum
-                    + ", found " + ticks));
+            throw new ArgumentParseException(Caption.TICK_COUNT_TOO_LOW, Map.of("minimum", minimum, "ticks", ticks));
         }
         return ticks;
     }

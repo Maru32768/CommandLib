@@ -51,6 +51,12 @@ public final class Caption {
     public static final Caption UNKNOWN_ENTITY_TYPE = builtIn("commandlib.argument.unknown_entity_type");
     /** {@code {value} is not a known sound} */
     public static final Caption UNKNOWN_SOUND = builtIn("commandlib.argument.unknown_sound");
+    /** {@code {value} is not a known registry entry} */
+    public static final Caption UNKNOWN_REGISTRY_ENTRY = builtIn("commandlib.argument.unknown_registry_entry");
+    /** {@code {value} is not a display slot of this server} */
+    public static final Caption UNKNOWN_DISPLAY_SLOT = builtIn("commandlib.argument.unknown_display_slot");
+    /** {@code Tick count must not be less than {minimum}, found {ticks}} */
+    public static final Caption TICK_COUNT_TOO_LOW = builtIn("commandlib.argument.tick_count_too_low");
     /** {@code Missing required option {option}.} */
     public static final Caption OPTION_MISSING = builtIn("commandlib.option.missing");
     /** {@code {option} requires {required}.} */

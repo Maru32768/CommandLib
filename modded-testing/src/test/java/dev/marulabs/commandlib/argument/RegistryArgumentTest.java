@@ -53,7 +53,7 @@ class RegistryArgumentTest {
             messages = sender.getSentMessageTexts();
         }
 
-        assertThat(messages).containsExactly("Can't find element 'commandlib:missing' of type 'minecraft:item'");
+        assertThat(messages).containsExactly("commandlib:missing is not a known registry entry");
     }
 
     @Test

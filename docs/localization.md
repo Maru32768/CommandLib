@@ -156,6 +156,9 @@ message is not translatable either) and the option errors, so they are captions.
 | `UNKNOWN_BIOME` | `commandlib.argument.unknown_biome` | {value} is not a known biome |
 | `UNKNOWN_ENTITY_TYPE` | `commandlib.argument.unknown_entity_type` | {value} is not a known entity type |
 | `UNKNOWN_SOUND` | `commandlib.argument.unknown_sound` | {value} is not a known sound |
+| `UNKNOWN_REGISTRY_ENTRY` | `commandlib.argument.unknown_registry_entry` | {value} is not a known registry entry |
+| `UNKNOWN_DISPLAY_SLOT` | `commandlib.argument.unknown_display_slot` | {value} is not a display slot of this server |
+| `TICK_COUNT_TOO_LOW` | `commandlib.argument.tick_count_too_low` | Tick count must not be less than {minimum}, found {ticks} |
 | `OPTION_MISSING` | `commandlib.option.missing` | Missing required option {option}. |
 | `OPTION_REQUIRES` | `commandlib.option.requires` | {option} requires {required}. |
 | `OPTION_REQUIRES_VALUE` | `commandlib.option.requires_value` | {option} requires {required} to be {value}. |

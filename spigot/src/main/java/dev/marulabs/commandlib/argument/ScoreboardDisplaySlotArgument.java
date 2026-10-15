@@ -2,6 +2,7 @@ package dev.marulabs.commandlib.argument;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.marulabs.commandlib.Argument;
+import dev.marulabs.commandlib.Caption;
 import dev.marulabs.commandlib.CommandContext;
 import dev.marulabs.commandlib.exception.ArgumentParseException;
 import dev.marulabs.commandlib.util.nms.argument.NMSArgumentScoreboardSlot;
@@ -37,7 +38,7 @@ public class ScoreboardDisplaySlotArgument extends Argument<DisplaySlot, Scorebo
                                                    .parse(ctx.getHandle(), name());
         DisplaySlot slot = SLOTS.get(slotName);
         if (slot == null) {
-            throw new ArgumentParseException(x -> x.sendFailure(slotName + " is not a display slot of this server"));
+            throw new ArgumentParseException(Caption.UNKNOWN_DISPLAY_SLOT, Map.of("value", slotName));
         }
         return slot;
     }

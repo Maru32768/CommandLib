@@ -2,9 +2,12 @@ package dev.marulabs.commandlib.argument;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.marulabs.commandlib.Argument;
+import dev.marulabs.commandlib.Caption;
 import dev.marulabs.commandlib.CommandContext;
 import dev.marulabs.commandlib.exception.ArgumentParseException;
 import dev.marulabs.commandlib.util.nms.argument.NMSArgumentTime;
+
+import java.util.Map;
 
 /**
  * A number of game ticks in the vanilla {@code time} syntax: a number, decimals allowed, with one optional unit,
@@ -41,8 +44,7 @@ public class TimeArgument extends Argument<Integer, TimeArgument> {
                                    .parse(ctx.getHandle(), name());
         // The type of servers before 1.19.4 has no minimum.
         if (ticks < minimum) {
-            throw new ArgumentParseException(x -> x.sendFailure("Tick count must not be less than " + minimum
-                    + ", found " + ticks));
+            throw new ArgumentParseException(Caption.TICK_COUNT_TOO_LOW, Map.of("minimum", minimum, "ticks", ticks));
         }
         return ticks;
     }

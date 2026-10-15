@@ -1,6 +1,7 @@
 package dev.marulabs.commandlib.argument;
 
 import dev.marulabs.commandlib.Argument;
+import dev.marulabs.commandlib.Caption;
 import dev.marulabs.commandlib.CommandContext;
 import dev.marulabs.commandlib.exception.ArgumentParseException;
 import dev.marulabs.commandlib.util.StringUtil;
@@ -8,6 +9,8 @@ import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
+
+import java.util.Map;
 
 /**
  * A value of a registry of the server by its key, such as {@code minecraft:diamond} for
@@ -47,8 +50,8 @@ public class RegistryArgument<T> extends Argument<T, RegistryArgument<T>> {
         return registry(ctx.getHandle()
                            .getSource()
                            .getServer()).getOptional(key)
-                                        .orElseThrow(() -> new ArgumentParseException(x -> x.sendFailure("Can't find element '"
-                                                + key + "' of type '" + registryKey.location() + "'")));
+                                        .orElseThrow(() -> new ArgumentParseException(Caption.UNKNOWN_REGISTRY_ENTRY,
+                                                                                      Map.of("value", key)));
     }
 
     @SuppressWarnings("unchecked")

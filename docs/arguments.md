@@ -183,8 +183,7 @@ Notes:
   on Spigot, `RegistryKey.ENCHANTMENT` on Paper (Paper's `resource(...)`, so Paper rejects an unknown key while parsing),
   and `Registries.ENCHANTMENT` (`Registry.ENCHANTMENT_REGISTRY` before 1.19.3) on Forge / NeoForge. The constructor
   takes the platform's registry type, so the code differs between platforms. On Spigot and Forge / NeoForge it is a
-  resource location looked up when the command runs: an unknown key is `<key> is not a known registry entry` (Spigot)
-  or `Can't find element '<key>' of type '<registry>'` (Forge / NeoForge). Forge / NeoForge look the registry up in the
+  resource location looked up when the command runs: an unknown key is `<key> is not a known registry entry`. Forge / NeoForge look the registry up in the
   server's registries, so data-driven registries such as biomes work there. The value is the registry entry, not a
   `Holder`.
 - For a registry key without its value (Paper's `resourceKey(...)`), use `NamespacedKeyArgument` or
