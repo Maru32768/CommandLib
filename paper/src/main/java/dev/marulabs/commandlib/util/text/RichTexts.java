@@ -47,16 +47,30 @@ public final class RichTexts {
         if (text.hover() != null) {
             component = component.hoverEvent(HoverEvent.showText(toAdventure(text.hover())));
         }
-        if (text.click() != null) {
-            component = component.clickEvent(ClickEvent.clickEvent(ClickEvent.Action.valueOf(text.click()
-                                                                                                 .type()
-                                                                                                 .name()),
-                                                                   text.click()
-                                                                       .value()));
+        ClickAction click = text.click();
+        if (click != null) {
+            component = component.clickEvent(clickEvent(click));
         }
         return component.children(text.children()
                                       .stream()
                                       .map(RichTexts::toAdventure)
                                       .collect(Collectors.toList()));
+    }
+
+    // Adventure 5 (Paper 26.x) has no ClickEvent.clickEvent(Action, String) and no enum Action, while the factory
+    // methods link against both Adventure 4 and 5.
+    private static ClickEvent clickEvent(ClickAction click) {
+        switch (click.type()) {
+            case RUN_COMMAND:
+                return ClickEvent.runCommand(click.value());
+            case SUGGEST_COMMAND:
+                return ClickEvent.suggestCommand(click.value());
+            case COPY_TO_CLIPBOARD:
+                return ClickEvent.copyToClipboard(click.value());
+            case OPEN_URL:
+                return ClickEvent.openUrl(click.value());
+            default:
+                throw new IllegalArgumentException("Unknown click action: " + click.type());
+        }
     }
 }
