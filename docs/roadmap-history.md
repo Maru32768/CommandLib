@@ -78,6 +78,8 @@
   2026-10-16）。
 - `[x]` option の順列展開を redirect で抑える。player ごとの tree は short flag 6 個で 491,607 → 5,490 node、argument node を共有
   （`docs/design/command-options.md`、2026-10-16、実サーバー未検証）。
+- `[x]` modded に Bukkit 側の argument（World / Sound / Biome / Attribute / EntityType / Advancement / Recipe / LootTable / Objective /
+  ScoreboardDisplaySlot / GameMode / ChatColor）、`AnnotatedCommands`、modded-testing の `CommandLibExtension` を追加する（2026-10-16）。
 - `[x]` registration 全体の middleware / provider（`CommandDefaults`）、cooldown の `remaining` / `reset`、typed executor からの
   `ctx.fail(...)`、annotation の `@Condition` による名前付き prerequisite、selector 向けの `ctx.sendSuccessFor(...)` を追加する（2026-10-16）。
 - `[x]` middleware / interceptor API（`addMiddleware`）と async execution（`executeAsync`、`CommandScheduler` による sync thread
