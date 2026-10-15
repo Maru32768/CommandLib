@@ -101,6 +101,8 @@
   `CommandLib.refresh(player)` する方式を docs で案内）。
 - `[ ]` option の順列展開を抑える。short flag 6 個で unique node 5,490、player に送る packet では 491,607 node になる（4 個で 2,395）。
   option の状態ごとに argument node を複製している（`CommandNodeCreator#argumentNodeSupplier`）ため、共有すれば登録 node を約 2 割減らせる。
+- `[ ]` 比較で劣った点を埋める: positional argument の後の option、option 単位の permission、primitive / string 以外の value option、
+  annotation での argument-first tree、plugin 全体での context value 登録、CommandLib 組み込み message の他言語 bundle。
 - `[ ]` annotation API を Forge / NeoForge に広げ、middleware / prerequisite / option の `requires`・排他 / argument-first child 用の
   annotation を追加する。
 - `[ ]` Kotlin DSL を Forge / NeoForge に広げ、suspend middleware と Kotlin 関数の default 引数からの command 生成を追加する。
@@ -197,8 +199,10 @@ backlog は作業項目、Product Pillars は仕様の詳細、Release Phases �
 機能の完了には public API、使用例、仕様、focused tests が必要。platform の対応完了には実サーバーの証拠が必要。
 fixture の存在、設計方針の決定、compile 成功だけでは全挙動の保証完了としない。
 
-- [ ] 競合比較用の共通 example suite を作る（admin options、optional / variadic、argument-first tree、async I/O、DI、locale、vanilla result）。
-- [ ] 各 example の定義量、取得キー / cast、設定手順、拡張のしやすさ、テスト可能範囲を比較し、差分と制約を公開する。
+- [x] 競合比較用の共通 example suite を作る（`examples/` module。7 use case を fluent / builder / annotation / Kotlin で書き、
+  同一の transcript を snapshot で確認）。
+- [x] 各 example の定義量、取得キー / cast、設定手順、拡張のしやすさ、テスト可能範囲を比較し、差分と制約を公開する
+  （[`docs/comparison.md`](comparison.md)。競合側の snippet は未 compile、一部未検証）。
 - [~] parse / suggestion の p50 / p95 latency、throughput、allocation と起動 / 登録コストを同条件で計測する。JMH の `benchmark` module、
   事前に決めた回帰許容値と `:benchmark:jmhCompare` がある（[`docs/benchmarks.md`](benchmarks.md)）。初回 baseline は高負荷下で取ったため、
   時間指標で gate する前に idle な環境で取り直す。platform tester / async / 競合比較の計測は未実施。
