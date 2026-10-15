@@ -9,6 +9,10 @@ suggestions, its errors, and how it looks values up in a registry.
 All argument classes live in `dev.marulabs.commandlib.argument`. The class names are the same on every platform where
 an argument exists, so code written against the `spigot` artifact usually compiles against `paper` unchanged.
 
+Fabric (`fabric-<minecraft-version>`) is built from the same source tree as Forge / NeoForge and has the same arguments
+with the same behavior, so every "Forge / NeoForge" column and note below applies to Fabric of the same Minecraft
+version.
+
 For how arguments fail, see [errors](errors.md). For custom suggestions, see [suggestions](suggestions.md).
 
 The tables below compare the server platforms. Velocity, a proxy, has its own smaller set; see [Velocity](#velocity).
@@ -26,7 +30,8 @@ The tables below compare the server platforms. Velocity, a proxy, has its own sm
 The status was checked by reading CommandLib's source and tests, CommandAPI's documentation, and the Paper Javadoc.
 Every built-in Spigot, Paper, Forge, and NeoForge argument also runs on a real server in the integration tests
 (`integration-test/shared/*/ArgumentTest.java`), which check that a valid input parses; they do not compare error texts
-or suggestions with the references.
+or suggestions with the references. Fabric has no integration target yet, so its arguments are checked only by
+`fabric-testing`.
 
 ## Primitive and string arguments
 
@@ -290,7 +295,7 @@ depends on the artifact:
   the same try-with-resources, or use MockBukkit.
 - **server only**: needs state the tester cannot provide; cover it with an integration test.
 
-| Argument | `spigot-testing` | `paper-testing` | `forge-testing` / `neoforge-testing` |
+| Argument | `spigot-testing` | `paper-testing` | `forge-testing` / `neoforge-testing` / `fabric-testing` |
 |---|---|---|---|
 | Boolean, numbers, `StringArgument`, `UnparsedArgument`, `LiteralArgument`, `EnumArgument`, `ObjectArgument`, `NameableObjectArgument` | real | real | real |
 | `GameModeArgument`, `ChatColorArgument`, `ScoreboardDisplaySlotArgument` | real | mock: vanilla names | — |

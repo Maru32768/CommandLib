@@ -38,7 +38,7 @@ CommandLib の長期目標は、Minecraft `1.16.5` から各リリース時点�
 | Velocity | `Best effort` | `velocity` module と `velocity-testing`。Velocity API `3.4.0`（Java 17）に対して compile し、command を `BrigadierCommand` で登録する。unit test は Velocity の Brigadier fork 上で実行。 | repository に実 proxy の integration target はない。2026-10-15 に Velocity `3.4.0`（Java 17）と `4.2.0`（Adventure 5、Java 25）の実 proxy で、plugin から登録・実行・失敗 message・permission default・RichText の click・補完・登録解除を client なしの command source で手動確認した。player client からの command tree 送信は未確認。argument は Brigadier の基本型、`DurationArgument`、`LiteralArgument` / `EnumArgument` / `ObjectArgument` / `NameableObjectArgument` と proxy 用の `PlayerArgument`（online player）、`ServerArgument`（`RegisteredServer`）に限る。world / entity / location 系 argument は提供しない。Velocity には operator も permission の default 登録もないため、`DefaultPermission.ALL` 以外は permission plugin が付与しない限り player に許可されない（console は常に許可）。command tree を再送する API がないため `CommandLib.refresh` はない。 |
 | Forge | `Best effort` | `modded` の Stonecutter tree の `forge-1.16.5` / `forge-1.20.1` node（artifact: `forge-1.16.5` / `forge-1.20.1`）。`forge-testing-<version>` と integration target あり。 | 上記以外の Forge version は未対応。 |
 | NeoForge | `Best effort` | `modded` の Stonecutter tree の `neoforge-1.21.1` node（artifact: `neoforge-1.21.1`）。`neoforge-testing-1.21.1` と integration target `neoforge-1.21.1` あり。 | Forge と同じソースを `//? if neoforge` で分岐。NeoForge 1.21.1 以外の version は未対応。 |
-| Fabric | `Planned` | なし。 | Fabric command registration と Brigadier integration の設計が必要。 |
+| Fabric | `Best effort` | `modded` の Stonecutter tree の `fabric-1.20.1` / `fabric-1.21.1` node（artifact: `fabric-1.20.1` / `fabric-1.21.1`）。`fabric-testing-<version>` あり。integration target はない。 | Forge / NeoForge と同じソースを `//? if fabric` で分岐し、同じ argument 群を持つ。Fabric API の `CommandRegistrationCallback`（v2）で登録する。permission は fabric-permissions-api があればそれに、なければ `DefaultPermission` と vanilla の permission level で判定する。実サーバーでは未確認。上記以外の version は未対応。 |
 
 ## Version coverage
 
@@ -71,7 +71,7 @@ CommandLib は `1.16.5` から最新安定版までのサポートを目標に�
 - Paper module は Paper 公式 API を基準にし、Paper の command API、Adventure component、lifecycle API を優先する。
 - Folia は専用 module を持たず `paper` module で扱う。Paper の command / lifecycle API はそのまま使い、thread が分かれる部分（async command の scheduler、function の再 compile、data reload）だけ実行時に切り替える。`spigot` module は Folia を拒否する。
 - Mohist は Bukkit compatibility を前提にしつつ、Forge 連携部分の干渉を別途確認する。
-- Forge と NeoForge は `modded` module（Stonecutter node）で扱う。Fabric は platform-specific module または loader の追加で扱う。
+- Forge、NeoForge、Fabric は `modded` module（Stonecutter node）で扱う。
 - unsupported version / platform でも偶然動く可能性はあるが、test と docs で確認するまでは supported としない。
 
 ## Module layout
@@ -85,10 +85,10 @@ CommandLib は `1.16.5` から最新安定版までのサポートを目標に�
 | `common` | platform 非依存の command model、arguments、options、permissions、help。 |
 | `spigot` | Bukkit/Spigot API を基準にした実装。typed NMS module（`nms/*`）を同梱する。Paper-specific API は使わない。 |
 | `paper` | Paper 公式 command API、Adventure component、lifecycle API を使う実装。 |
-| `modded` | Forge / NeoForge 実装。Stonecutter node は `forge-1.16.5` / `forge-1.20.1` / `neoforge-1.21.1`。 |
+| `modded` | Forge / NeoForge / Fabric 実装。Stonecutter node は `forge-1.16.5` / `forge-1.20.1` / `neoforge-1.21.1` / `fabric-1.20.1` / `fabric-1.21.1`。 |
 | `velocity` | Velocity の `BrigadierCommand`、permission API、Adventure component を使う proxy 用実装。 |
 | `common-testing` / `spigot-testing` / `paper-testing` / `velocity-testing` / `modded-testing` | 各 platform 向けの公開 testing artifact。 |
-| `common-kotlin` / `spigot-kotlin` / `paper-kotlin` / `velocity-kotlin` | Kotlin DSL。Forge / NeoForge 向けはまだない。 |
+| `common-kotlin` / `spigot-kotlin` / `paper-kotlin` / `velocity-kotlin` | Kotlin DSL。Forge / NeoForge / Fabric 向けはまだない。 |
 | `integration-test` | 非公開の実サーバー integration test aggregator。 |
 
 未実装の module（`fabric`）は Planned。Mohist は専用 module を持たず、`spigot` 互換と integration target で扱う。Folia も専用 module を持たず、`paper` module で扱う。
@@ -130,7 +130,7 @@ CommandLib は `1.16.5` から最新安定版までのサポートを目標に�
 
 - Folia の実サーバー integration target を追加する（Folia の scheduler を使う fixture が必要）。
 - Velocity の実 proxy integration target を追加する。
-- NeoForge / Fabric module の分割方針を決める。
+- `modded` を MC version 依存層と loader 依存層に分割するかを決める。
 
 ## Open questions
 

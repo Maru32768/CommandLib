@@ -13,7 +13,10 @@ removed from their command tree and parsed as if they did not exist. Check the n
 On Forge 1.18+ and NeoForge, CommandLib's nodes live in the `commandlib` namespace. Grant
 `commandlib.<prefix>.<path>`, for example `commandlib.mymod.command.spawn`, not `mymod.command.spawn`.
 
-## Operators cannot use an `OP` command on Forge / NeoForge
+On Fabric the node has no namespace (`mymod.command.spawn`), and LuckPerms answers only when a mod ships
+fabric-permissions-api. Without it, the node's default decides.
+
+## Operators cannot use an `OP` command on Forge / NeoForge / Fabric
 
 `DefaultPermission.OP` resolves to permission level 4 there. An operator with a lower `op-permission-level` does not get
 it by default. Grant the node, or use `DefaultPermission.ALL` with your own check.

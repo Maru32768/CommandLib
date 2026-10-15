@@ -31,7 +31,7 @@ This document defines how the test modules and the integration-test module are o
 | `spigot-testing` | Yes | Command testing utilities for Spigot/Bukkit plugins. Includes NMS mocks and a fake sender. |
 | `paper-testing` | Yes | Testing utilities for the Paper command API, Adventure components, Paper suggestions, and Paper registry arguments. |
 | `velocity-testing` | Yes | Velocity command testing utilities: Mockito `Player` / `ConsoleCommandSource` senders and a Mockito `ProxyServer` that knows fake players and servers. Proxy registration is not reproduced. |
-| `modded-testing` | Yes | Forge / NeoForge command testing utilities, published as `forge-testing-<version>` and `neoforge-testing-<version>` (one artifact per node, like `modded`). |
+| `modded-testing` | Yes | Forge / NeoForge / Fabric command testing utilities, published as `forge-testing-<version>`, `neoforge-testing-<version>` and `fabric-testing-<version>` (one artifact per node, like `modded`). |
 
 ### Repository-only integration modules
 
@@ -92,7 +92,7 @@ Open questions:
 
 ## `modded-testing`
 
-`modded-testing` uses the same Stonecutter setup as `modded` and publishes `forge-testing-<version>` / `neoforge-testing-<version>` per node.
+`modded-testing` uses the same Stonecutter setup as `modded` and publishes `forge-testing-<version>` / `neoforge-testing-<version>` / `fabric-testing-<version>` per node.
 
 Responsibilities:
 

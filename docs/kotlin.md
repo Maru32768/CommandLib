@@ -75,7 +75,7 @@ dependencies {
 - Shade `common-kotlin` together with `common` (the platform artifact): the DSL reads CommandLib's current command
   context through a package-private class, so both must be loaded by the same class loader. Relocating
   `dev.marulabs.commandlib` relocates both.
-- Forge and NeoForge have no Kotlin artifact yet. `common-kotlin` is platform-neutral; the platform part is the three
+- Forge, NeoForge and Fabric have no Kotlin artifact yet. `common-kotlin` is platform-neutral; the platform part is the three
   functions in `common-kotlin/src/platform/kotlin/dev/marulabs/commandlib/kotlin/Commands.kt`, written against
   `dev.marulabs.commandlib.Command`, the class name every platform uses, so a mod can copy them.
 

@@ -16,6 +16,7 @@ Pick the artifact for the CommandLib artifact your code uses, one per test sourc
 | `velocity` | `velocity-testing` | Senders and the `ProxyServer` are Mockito mocks; every argument parses for real. No `CommandLibExtension`. |
 | `forge-<version>` | `forge-testing-<version>` | Minecraft's registries are bootstrapped; vanilla arguments parse for real. |
 | `neoforge-<version>` | `neoforge-testing-<version>` | Same as Forge. |
+| `fabric-<version>` | `fabric-testing-<version>` | Same as Forge. |
 
 ```kotlin
 dependencies {
@@ -61,7 +62,7 @@ class HealCommandTest {
 
 Build commands through the `Supplier` form (`HealCommand::new`, `() -> new Command("x") {{ ... }}`). Argument
 constructors call platform code: NMS lookups on Spigot, `ArgumentTypes` on Paper, vanilla argument types that need
-bootstrapped registries on Forge / NeoForge. The tester makes those available only while it builds the commands.
+bootstrapped registries on Forge / NeoForge / Fabric. The tester makes those available only while it builds the commands.
 
 `execute` throws a `RuntimeException` caused by Brigadier's `CommandSyntaxException` when the platform would reject
 the input: unknown command or subcommand, invalid argument syntax, or a node hidden by a missing permission. Everything
@@ -76,7 +77,7 @@ CommandLib reports itself (validation, prerequisites, unexpected errors) is sent
 |---|---|---|
 | `spigot-testing` | `withFakePlayer(Player)`, `withFakeEntity(name, Entity)`, `withFakeWorld(key, World)` | Values for player / entity selectors (names, `@s`, `@p`, `@r`, `@a`, `@e`) and `WorldArgument` |
 | `paper-testing` | `withFakePlayer`, `withFakeEntity`, `withFakeWorld`, `withFakeBlockData`, `withFakeItemStack`, `withFakeEnchantment`, `withFakeParticle`, `withFakePotionEffectType`, `withFakeBiome`, `withFakeAttribute`, `withFakeEntityType`, `withFakeSound` | The value each stubbed Paper argument returns |
-| `forge-testing` / `neoforge-testing` | `withPlayer(FakeSender)` | Online players for selectors, `GameProfileArgument`, `UUIDArgument` |
+| `forge-testing` / `neoforge-testing` / `fabric-testing` | `withPlayer(FakeSender)` | Online players for selectors, `GameProfileArgument`, `UUIDArgument` |
 | `velocity-testing` | `withFakePlayer(FakeSender)`, `withFakeServer(name)`, `proxy()` | Players and servers of the fake `ProxyServer` for `PlayerArgument` and `ServerArgument` |
 
 The [argument catalog](arguments.md#testing-each-argument) lists, argument by argument, what runs for real, what is

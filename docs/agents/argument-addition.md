@@ -4,7 +4,7 @@ Use this checklist whenever adding a public `*Argument` class.
 
 ## 1. Decide Platform Scope
 
-- Confirm the target modules: `common`, `spigot`, `paper`, `modded` (Forge / NeoForge), or a subset.
+- Confirm the target modules: `common`, `spigot`, `paper`, `modded` (Forge / NeoForge / Fabric), or a subset.
 - Prefer a shared public concept only when the return type and accepted syntax are stable across platforms.
 - Keep Spigot-only NMS or Bukkit internals in `spigot`.
 - Use Paper official `ArgumentTypes` in `paper` when available.
@@ -88,7 +88,7 @@ Run focused checks for touched modules. Typical commands:
 ```bash
 ./gradlew :spigot:compileJava :spigot-testing:test
 ./gradlew :paper:compileJava :paper-testing:test
-./gradlew :modded:forge-1.16.5:compileJava :modded:forge-1.20.1:compileJava :modded:neoforge-1.21.1:compileJava
+./gradlew :modded:forge-1.16.5:compileJava :modded:forge-1.20.1:compileJava :modded:neoforge-1.21.1:compileJava :modded:fabric-1.20.1:compileJava :modded:fabric-1.21.1:compileJava
 ```
 
 For integration fixture source changes, compile representative fixtures:

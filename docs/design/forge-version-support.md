@@ -5,8 +5,9 @@ module beyond Minecraft 1.16.5.
 
 ## Current State
 
-Forge 1.16.5 and 1.20.1, and NeoForge 1.21.1, are built from one shared source
-tree with [Stonecutter](https://stonecutter.kikugie.dev/) and Architectury Loom:
+Forge 1.16.5 and 1.20.1, NeoForge 1.21.1, and Fabric 1.20.1 and 1.21.1 are
+built from one shared source tree with
+[Stonecutter](https://stonecutter.kikugie.dev/) and Architectury Loom:
 
 - The tree lives in `modded/` because it serves both loaders. Its nodes are
   named `<loader>-<minecraft-version>`: `forge-1.16.5`, `forge-1.20.1`, and
@@ -36,6 +37,19 @@ tree with [Stonecutter](https://stonecutter.kikugie.dev/) and Architectury Loom:
   server's `registryAccess()`. On 1.20.5+ `EnchantmentArgument` and
   `EffectArgument` return the registry `Holder`, which the Minecraft APIs that
   apply enchantments and effects take there.
+- Fabric is a loader of the same tree (`fabric-1.20.1`, `fabric-1.21.1`,
+  artifacts of the same names) under the `fabric` constant. Commands are added
+  through Fabric API's `CommandRegistrationCallback` (v2), which fires on every
+  server start and `/reload`. The running server comes from Fabric API's
+  `ServerLifecycleEvents`, behind `util.CurrentServer`, which Forge and
+  NeoForge back with `ServerLifecycleHooks`. Permissions go through
+  fabric-permissions-api (`Permissions.check(player, node, default)`) when a
+  mod ships it, and otherwise resolve the node's `DefaultPermission` against
+  the vanilla permission level. The node names have no `commandlib.` prefix.
+  The jar carries a `fabric.mod.json` (mod id `commandlib`) whose `main`
+  entrypoint starts the server tracking, so it works with Loom's `include()`.
+  The argument set is the same as on Forge / NeoForge of the same Minecraft
+  version. Loom remaps the jars to intermediary.
 - Public API still exposes each Minecraft version's native types. The 1.16.5
   artifact keeps its `DefaultPermissionLevel` overloads and
   `FMLServerStartedEvent` registration; 1.20.1 uses `RegisterCommandsEvent` and
@@ -262,6 +276,8 @@ Use compile checks as the first gate:
 ./gradlew :modded:forge-1.16.5:compileJava
 ./gradlew :modded:forge-1.20.1:compileJava
 ./gradlew :modded:neoforge-1.21.1:compileJava
+./gradlew :modded:fabric-1.20.1:compileJava
+./gradlew :modded:fabric-1.21.1:compileJava
 ```
 
 Then add fixture-level checks:

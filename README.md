@@ -15,6 +15,7 @@ with ease.
 | **Paper**  | `paper`  | `1.21`, `1.21.3`–`1.21.11`, `26.1.1`–`26.3` | Uses Paper official command/lifecycle API. Requires Java 21+. Use `spigot` on Paper `1.20.6` and earlier. |
 | **Forge**  | `forge-<minecraft-version>` | `1.16.5`, `1.20.1`                             | Use the artifact that matches the target Minecraft version.   |
 | **NeoForge** | `neoforge-<minecraft-version>` | `1.21.1`                                   | Use the artifact that matches the target Minecraft version. Requires Java 21+. |
+| **Fabric** | `fabric-<minecraft-version>` | `1.20.1`, `1.21.1` (built and unit-tested; not yet run on a real server) | Use the artifact that matches the target Minecraft version. Requires Fabric API. |
 | **Mohist** | `spigot` | `1.16.5`, `1.20.1`                                         | Works on Mohist since it's compatible with Spigot.            |
 | **Folia**  | `paper`  | Not tested on a real server yet | Detected at runtime; async commands return to the entity, region or global region thread. Declare `folia-supported: true`. See [Folia](docs/execution.md#folia). |
 | **Velocity** | `velocity` | `3.4.0`, `4.2.0` (manual proxy runs, no client)        | Built against Velocity API `3.4.0`. Requires Java 17+. Proxy arguments only; see [Velocity](#velocity). |
@@ -62,12 +63,12 @@ with ease.
 
 | | CommandLib | CommandAPI | Paper command API |
 |---|---|---|---|
-| Platforms | Spigot, Paper, Forge, NeoForge, Velocity | Spigot, Paper (others: see its docs) | Paper |
+| Platforms | Spigot, Paper, Forge, NeoForge, Fabric, Velocity | Spigot, Paper (others: see its docs) | Paper |
 | Executor arguments | typed parameters | `args.get("name")` + cast | `ctx.getArgument("name", Type.class)` |
 | Generated permission nodes | every command and branch | manual | manual |
 | Flags and options (`-f`, `--limit 10`) | built in | — | — |
 | Generated usage / help | built in | `/help` entries | `/help` entries |
-| Server-free test utilities | `spigot-testing`, `paper-testing`, `velocity-testing`, `forge-` / `neoforge-testing` | test toolkit (MockBukkit) | — |
+| Server-free test utilities | `spigot-testing`, `paper-testing`, `velocity-testing`, `forge-` / `neoforge-` / `fabric-testing` | test toolkit (MockBukkit) | — |
 | Chat / NBT arguments | not yet | yes | yes |
 
 See the [argument catalog](docs/arguments.md) for an argument-by-argument comparison and
@@ -320,6 +321,39 @@ tasks.named<ShadowJar>("shadowJar") {
 </details>
 
 <details>
+<summary>Fabric (Kotlin DSL)</summary>
+
+```kotlin
+repositories {
+    maven { url = uri("https://jitpack.io") }
+}
+
+dependencies {
+    // Fabric API is required.
+    modImplementation("com.github.Maru32768.CommandLib:fabric-1.21.1:latest.release")
+    include("com.github.Maru32768.CommandLib:fabric-1.21.1:latest.release")
+    include("com.github.Maru32768.CommandLib:common:latest.release")
+    // Optional: lets permission mods such as LuckPerms answer CommandLib's permission checks.
+    modImplementation("me.lucko:fabric-permissions-api:0.3.3")
+    include("me.lucko:fabric-permissions-api:0.3.3")
+}
+```
+
+```java
+public final class MyMod implements ModInitializer {
+    @Override
+    public void onInitialize() {
+        CommandLib.register("mymod.command", new SpawnCommand());
+    }
+}
+```
+
+> **Note:** The jar is a Fabric mod (`commandlib`), so `include` nests it in your mod jar. Without
+> fabric-permissions-api, permission checks use each node's default and the vanilla permission level.
+
+</details>
+
+<details>
 <summary>Velocity (Kotlin DSL)</summary>
 
 ```kotlin
@@ -400,6 +434,7 @@ dependencies {
     testImplementation("com.github.Maru32768.CommandLib:velocity-testing:latest.release")
     testImplementation("com.github.Maru32768.CommandLib:forge-testing-1.20.1:latest.release")
     testImplementation("com.github.Maru32768.CommandLib:neoforge-testing-1.21.1:latest.release")
+    testImplementation("com.github.Maru32768.CommandLib:fabric-testing-1.21.1:latest.release")
 }
 ```
 
@@ -407,9 +442,10 @@ Use `common-testing` for commands built against the platform-neutral `common`
 API, `spigot-testing` for commands built against the `spigot` artifact,
 `paper-testing` for commands built against the `paper` artifact,
 `velocity-testing` for commands built against the `velocity` artifact, and
-`forge-testing-<minecraft-version>` / `neoforge-testing-<minecraft-version>` for
-commands built against the matching `forge-<minecraft-version>` /
-`neoforge-<minecraft-version>` artifact. They provide
+`forge-testing-<minecraft-version>` / `neoforge-testing-<minecraft-version>` /
+`fabric-testing-<minecraft-version>` for commands built against the matching
+`forge-<minecraft-version>` / `neoforge-<minecraft-version>` /
+`fabric-<minecraft-version>` artifact. They provide
 `CommandTester` and `FakeSender` so commands can be executed without a running
 Minecraft server. Use one testing artifact per test module; these artifacts
 share package-level helper names.
@@ -434,7 +470,7 @@ mocks.
 registry-backed argument paths for command-level tests. Paper lifecycle
 registration and real server registry behavior are covered by integration tests.
 
-`forge-testing` and `neoforge-testing` bootstrap Minecraft's registries, so vanilla
+`forge-testing`, `neoforge-testing`, and `fabric-testing` bootstrap Minecraft's registries, so vanilla
 argument types such as items, blocks, effects, and enchantments parse for real. The server is a Mockito mock:
 fake players added with `CommandTester#withPlayer` (and the executing player)
 are online, so player, entity, game profile, and UUID arguments resolve them by
@@ -1008,7 +1044,8 @@ server help, ignore it.
 ## Permissions
 
 CommandLib automatically generates and registers permission nodes for each command, subcommand, and argument branch.
-Bukkit uses Bukkit permissions. Forge and NeoForge use their permission node APIs.
+Bukkit uses Bukkit permissions. Forge and NeoForge use their permission node APIs. Fabric uses fabric-permissions-api
+when a mod ships it.
 
 ### Permission Prefix
 
@@ -1184,6 +1221,7 @@ CommandLib delegates permission checks to the platform permission system:
 - Bukkit: `CommandSender#hasPermission(permissionNode)`
 - Forge / NeoForge: `PermissionAPI.getPermission(player, permissionNode)` (Forge 1.16.5:
   `PermissionAPI.hasPermission(player, permissionNode)`)
+- Fabric: `Permissions.check(player, permissionNode, default)` of fabric-permissions-api
 
 LuckPerms can provide those platform permissions. Configure the same generated or custom permission nodes in LuckPerms;
 CommandLib does not need additional LuckPerms-specific integration. On Forge 1.18+ and NeoForge the nodes are in the

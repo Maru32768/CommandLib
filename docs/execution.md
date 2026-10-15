@@ -109,7 +109,7 @@ public final class StatsCommand extends Command {
 |---|---|---|
 | Spigot, Paper | The main thread, through the Bukkit scheduler of the registering plugin; a task given on the main thread runs at once | The Bukkit scheduler's async pool |
 | Folia (`paper` artifact) | The thread that owns the source: the entity scheduler of the entity the command runs as, the region of a command block, or the global region for the console; a task given on that thread runs at once | Folia's async scheduler |
-| Forge, NeoForge | The server of the command's source (`MinecraftServer#execute`), which runs a task at once on the server thread | A pool of daemon threads owned by CommandLib, growing with the work |
+| Forge, NeoForge, Fabric | The server of the command's source (`MinecraftServer#execute`), which runs a task at once on the server thread | A pool of daemon threads owned by CommandLib, growing with the work |
 | Velocity | The calling thread: the proxy has no main thread and its API may be used from any thread | The proxy's scheduler, under the registering plugin |
 | Testers | `Runnable::run` unless the builder's `scheduler(...)` sets another | `Runnable::run` unless set |
 

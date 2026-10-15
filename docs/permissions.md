@@ -12,7 +12,7 @@ A node is the registration **prefix**, a dot, and the **path** of the route.
 | `CommandLib.register(plugin, commands...)` (Spigot, Paper) | `<plugin name in lower case>.command` |
 | `CommandLib.register(plugin, "myplugin.cmd", commands...)` (Spigot, Paper) | `myplugin.cmd` |
 | `CommandLib.bootstrap(context, commands...)` (Paper) | `<plugin name in lower case>.command` |
-| `CommandLib.register("mymod.command", commands...)` (Forge / NeoForge) | `mymod.command` (required) |
+| `CommandLib.register("mymod.command", commands...)` (Forge / NeoForge / Fabric) | `mymod.command` (required) |
 | `CommandLib.register(plugin, proxy, commands...)` (Velocity) | `<plugin id>.command` |
 | `CommandLib.register(plugin, proxy, "myproxy.cmd", commands...)` (Velocity) | `myproxy.cmd` |
 
@@ -89,7 +89,7 @@ The description is registered with the permission where the platform supports on
 
 ### Per platform
 
-| `DefaultPermission` | Spigot / Paper (Bukkit `PermissionDefault`) | Forge / NeoForge 1.18+ (default resolver) | Forge 1.16.5 (`DefaultPermissionLevel`) | Velocity (unset node) |
+| `DefaultPermission` | Spigot / Paper (Bukkit `PermissionDefault`) | Forge / NeoForge 1.18+ (default resolver), Fabric | Forge 1.16.5 (`DefaultPermissionLevel`) | Velocity (unset node) |
 |---|---|---|---|---|
 | `ALL` | `TRUE` | `true` | `ALL` | `true` |
 | `OP` | `OP` | the player has permission level 4 | `OP`, decided by Forge's permission handler | `false` |
@@ -99,7 +99,7 @@ Platform overloads exist as well: `permission(PermissionDefault)` on Spigot and 
 `NOT_OP` throws `IllegalArgumentException`) and `permission(DefaultPermissionLevel)` on Forge 1.16.5.
 
 Velocity has no operators, so `OP` behaves like `NONE` there: players need the node from a permission plugin. The
-proxy console has every permission. Non-player senders on Forge / NeoForge (console, command blocks, functions) always
+proxy console has every permission. Non-player senders on Forge / NeoForge / Fabric (console, command blocks, functions) always
 pass the checks. On Spigot and Paper
 the Bukkit sender is asked, except while the server compiles data pack functions, when the check passes and the
 function permission level applies.
@@ -128,6 +128,14 @@ permission handlers see is **`commandlib.<node>`**, for example `commandlib.mymo
 
 On 1.16.5 the nodes are registered with `PermissionAPI.registerNode(node, level, "")` under their own name, without the
 `commandlib.` part, when the server has started.
+
+### Fabric
+
+Fabric has no permission registry, so nothing is registered. A player's check asks
+[fabric-permissions-api](https://github.com/lucko/fabric-permissions-api) with the node's own name, without a
+`commandlib.` part, and the default from the table above as its fallback: `Permissions.check(player, node, default)`.
+CommandLib does not ship fabric-permissions-api. Include it in your mod (`include`) for permission mods such as
+LuckPerms to answer; without it the default decides.
 
 ### Velocity
 
@@ -158,7 +166,7 @@ player.addAttachment(plugin, "myplugin.command.game.start", true);
 CommandLib.refresh(player);
 CommandLib.refreshAll(); // every online player
 
-// Forge / NeoForge: from any thread; the tree is sent on the server thread
+// Forge / NeoForge / Fabric: from any thread; the tree is sent on the server thread
 CommandLib.refresh(serverPlayer);
 CommandLib.refreshAll(); // every player on the running server
 ```
@@ -180,6 +188,7 @@ CommandLib asks the platform, and LuckPerms answers through it:
 - Spigot / Paper: `CommandSender#hasPermission(node)`.
 - Forge / NeoForge 1.18+: `PermissionAPI.getPermission(player, node)`.
 - Forge 1.16.5: `PermissionAPI.hasPermission(player, node)`.
+- Fabric: `Permissions.check(player, node, default)` of fabric-permissions-api, when a mod ships it.
 - Velocity: `CommandSource#getPermissionValue(node)`, with the default above when it is `UNDEFINED`.
 
 No LuckPerms-specific setup is needed. Grant the node names from the tables above:
@@ -191,6 +200,9 @@ No LuckPerms-specific setup is needed. Grant the node names from the tables abov
 
 # Forge / NeoForge 1.18+: the commandlib. namespace is part of the node
 /lp group default permission set commandlib.mymod.command.spawn true
+
+# Fabric
+/lp group default permission set mymod.command.spawn true
 ```
 
 Wildcards such as `myplugin.command.config.*` are LuckPerms' own feature. Granting `myplugin.command.config.*` does not

@@ -29,13 +29,13 @@ Pass `-Pcommandlib.typedNms=false` to leave them out when the change does not
 need the spigot jar, such as `:spigot:test` or `spigot-testing`. The jar then
 has no NMS implementations, so it does not work on a server.
 
-Forge / NeoForge changes must compile every node, because code for nodes
-other than the active one is only type-checked when that node compiles (see
-`docs/agents/modded.md`):
+Forge / NeoForge / Fabric changes must compile every node, because code for
+nodes other than the active one is only type-checked when that node compiles
+(see `docs/agents/modded.md`):
 
 ```bash
-./gradlew :modded:forge-1.16.5:compileJava :modded:forge-1.20.1:compileJava :modded:neoforge-1.21.1:compileJava
-./gradlew :modded-testing:forge-1.16.5:test :modded-testing:forge-1.20.1:test :modded-testing:neoforge-1.21.1:test
+./gradlew :modded:forge-1.16.5:compileJava :modded:forge-1.20.1:compileJava :modded:neoforge-1.21.1:compileJava :modded:fabric-1.20.1:compileJava :modded:fabric-1.21.1:compileJava
+./gradlew :modded-testing:forge-1.16.5:test :modded-testing:forge-1.20.1:test :modded-testing:neoforge-1.21.1:test :modded-testing:fabric-1.20.1:test :modded-testing:fabric-1.21.1:test
 ```
 
 The samples under `samples/` are separate builds, so the root build does not
@@ -82,7 +82,8 @@ annotation of a method on the line above it, as the existing code does.
 The published modules, including the modded nodes, publish a javadoc jar, and their `javadoc` task runs doclint
 without the `missing` group: broken Javadoc (malformed HTML, a bad `@param` name, an unknown `{@link}`) fails it, an
 undocumented member does not. Check with `./gradlew :common:javadoc :spigot:javadoc :paper:javadoc` and, for the modded
-nodes, `./gradlew :modded:forge-1.16.5:javadoc :modded:forge-1.20.1:javadoc :modded:neoforge-1.21.1:javadoc`.
+nodes, `./gradlew :modded:forge-1.16.5:javadoc :modded:forge-1.20.1:javadoc :modded:neoforge-1.21.1:javadoc
+:modded:fabric-1.20.1:javadoc :modded:fabric-1.21.1:javadoc`.
 
 `./gradlew :common:japicmp :spigot:japicmp` compares the public API with the JitPack release named in `apiBaselines`
 in the root `build.gradle.kts` and writes `build/reports/japicmp/`. It lists binary-incompatible changes, and fails on

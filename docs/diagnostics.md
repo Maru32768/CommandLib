@@ -143,7 +143,7 @@ The platform lines are:
 |---|---|
 | Spigot (`spigot` artifact) | Artifact, CommandLib package (shows a relocation), server and Minecraft version, Java, the command dispatcher (the vanilla dispatcher through NMS, or Paper's dispatcher when the spigot jar runs on Paper 1.20.6+), each typed NMS module for the server's version with its status (`in use`, `available`, or why it cannot be used), and every NMS wrapper without an implementation. |
 | Paper (`paper` artifact) | Artifact, CommandLib package, server and Minecraft version, Java, the registration API, and whether a `COMMANDS` event has been seen. |
-| Forge / NeoForge | Artifact, CommandLib package, loader version, Minecraft version, Java, how commands and permission nodes are registered, and whether a server runs. |
+| Forge / NeoForge / Fabric | Artifact, CommandLib package, loader version, Minecraft version, Java, how commands and permission nodes are registered, and whether a server runs. |
 | Velocity | Artifact, CommandLib package, proxy name and version, Java, and the registration API. |
 
 A registration's path tells how its commands reach the dispatcher:
@@ -152,7 +152,7 @@ A registration's path tells how its commands reach the dispatcher:
 |---|---|
 | Spigot | `vanilla dispatcher and Bukkit command map`; on Paper 1.20.6+ `Paper dispatcher, added again by a COMMANDS lifecycle handler on data reloads`, or `... on ServerResourcesReloadedEvent` when registered after the plugin enabled. |
 | Paper | `COMMANDS lifecycle handler` (`, waiting for the event` before it fires), `added to the live dispatcher ...` when registered after the plugin's initialization, or `bootstrap COMMANDS lifecycle handler`. |
-| Forge / NeoForge | `server dispatcher` while a server runs, `waiting for the server` before. The owner is the permission prefix, since registration takes no mod id. |
+| Forge / NeoForge / Fabric | `server dispatcher` while a server runs, `waiting for the server` before. The owner is the permission prefix, since registration takes no mod id. |
 | Velocity | `BrigadierCommand`. The owner is the plugin id. |
 
 A plugin or mod that shades and relocates CommandLib has its own copy, which reports only its own registrations. A
@@ -167,7 +167,7 @@ other commands, under a name of your choice:
 // Spigot / Paper
 CommandLib.register(this, new SpawnCommand(), new CommandLibDiagnosticsCommand("myplugin-diagnostics"));
 
-// Forge / NeoForge
+// Forge / NeoForge / Fabric
 CommandLib.register("mymod.command", new SpawnCommand(), new CommandLibDiagnosticsCommand("mymod-diagnostics"));
 
 // Velocity

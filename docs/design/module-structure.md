@@ -19,13 +19,13 @@ This document describes CommandLib's module / artifact layout and the rules that
 | `spigot` | Yes | Bukkit/Spigot implementation. Includes the typed NMS bridge (bundles the `nms:*` modules), the Bungee `BaseComponent` message path, and the legacy command registration path. |
 | `paper` | Yes | Paper implementation on the official Paper command API and Adventure components. |
 | `velocity` | Yes | Velocity proxy implementation on `BrigadierCommand`, Velocity's permission API, and Adventure components. |
-| `modded` | Yes | Forge and NeoForge implementation. One shared source tree built as Stonecutter nodes `forge-1.16.5`, `forge-1.20.1`, and `neoforge-1.21.1` (Gradle paths `:modded:<node>`). |
+| `modded` | Yes | Forge, NeoForge and Fabric implementation. One shared source tree built as Stonecutter nodes `forge-1.16.5`, `forge-1.20.1`, `neoforge-1.21.1`, `fabric-1.20.1`, and `fabric-1.21.1` (Gradle paths `:modded:<node>`). |
 | `nms:*` | No | Typed NMS modules bundled into `spigot`, one per directory under `nms/`. |
 | `common-testing` | Yes | Test helpers for commands built against `common`. |
 | `spigot-testing` | Yes | `CommandTester` / `FakeSender` and NMS mocks for downstream Spigot plugins. |
 | `paper-testing` | Yes | Testing utilities for the Paper command API, Adventure components, and Paper registry arguments. |
 | `velocity-testing` | Yes | `CommandTester` / `FakeSender` with a Mockito `ProxyServer` for downstream Velocity plugins. |
-| `modded-testing` | Yes | Serverless testing utilities for downstream Forge / NeoForge mods, built per node. |
+| `modded-testing` | Yes | Serverless testing utilities for downstream Forge / NeoForge / Fabric mods, built per node. |
 | `common-kotlin` | Yes | The platform-neutral Kotlin DSL: argument blocks, delegated options, coroutine executors and suggestions. |
 | `spigot-kotlin` / `paper-kotlin` / `velocity-kotlin` | Yes | The DSL's `command` / `subcommand` factories, compiled against each platform's `Command`. |
 | `integration-test` | No | Multi-platform real-server integration aggregator (Spigot, Paper, Mohist, Forge, NeoForge targets). |
@@ -59,6 +59,8 @@ What does not go into `common`:
 | `:modded:forge-1.16.5` | `forge-1.16.5` |
 | `:modded:forge-1.20.1` | `forge-1.20.1` |
 | `:modded:neoforge-1.21.1` | `neoforge-1.21.1` |
+| `:modded:fabric-1.20.1` | `fabric-1.20.1` |
+| `:modded:fabric-1.21.1` | `fabric-1.21.1` |
 | `:common-testing` | `common-testing` |
 | `:spigot-testing` | `spigot-testing` |
 | `:paper-testing` | `paper-testing` |
@@ -66,6 +68,8 @@ What does not go into `common`:
 | `:modded-testing:forge-1.16.5` | `forge-testing-1.16.5` |
 | `:modded-testing:forge-1.20.1` | `forge-testing-1.20.1` |
 | `:modded-testing:neoforge-1.21.1` | `neoforge-testing-1.21.1` |
+| `:modded-testing:fabric-1.20.1` | `fabric-testing-1.20.1` |
+| `:modded-testing:fabric-1.21.1` | `fabric-testing-1.21.1` |
 | `:common-kotlin` | `common-kotlin` |
 | `:spigot-kotlin` | `spigot-kotlin` |
 | `:paper-kotlin` | `paper-kotlin` |
@@ -82,7 +86,7 @@ common
   +-- spigot
   +-- paper
   +-- velocity
-  +-- modded (forge-* / neoforge-* nodes)
+  +-- modded (forge-* / neoforge-* / fabric-* nodes)
 
 common-testing   -> common
 spigot-testing   -> spigot
@@ -150,7 +154,7 @@ adds no command semantics of its own. Platform types stay out of `common-kotlin`
 `command` / `subcommand`, which must create the platform's `Command`. Every platform names that class
 `dev.marulabs.commandlib.Command`, so the platform modules compile one shared source directory
 (`common-kotlin/src/platform`) and one shared test directory (`common-kotlin/src/platformTest`) instead of each having
-its own copy. Forge / NeoForge have no Kotlin module yet, since a Loom build per node would be needed for three
+its own copy. Forge / NeoForge / Fabric have no Kotlin module yet, since a Loom build per node would be needed for three
 functions.
 
 `common-kotlin` reads the current command context through the package-private `CurrentCommandContext`, from a file
@@ -158,7 +162,7 @@ in the same package. That keeps the core API unchanged but requires `common` and
 loader, which shading gives. kotlinx-coroutines is `compileOnly`, and the coroutine functions are in their own file
 class, so the rest of the DSL loads without it.
 
-### Forge / NeoForge
+### Forge / NeoForge / Fabric
 
 `modded` exposes the same command model where practical, using platform-native registration, permission, message, and registry APIs. Public API exposes each Minecraft version's native types. See `forge-version-support.md`.
 
@@ -168,7 +172,6 @@ These platforms have no module. Adding one should follow the rules above (platfo
 
 | Platform | Notes |
 |---|---|
-| Fabric | Command registration / Brigadier integration; may become another `modded` loader or a separate module. |
 
 Mohist has no module of its own. It is handled through `spigot` compatibility and the Mohist integration targets.
 
@@ -182,4 +185,6 @@ main thread.
 - Should `paper` share any source with `spigot`, or should duplication be accepted until a true neutral abstraction appears?
 - Should `mohist` stay tested under `spigot`, or become its own artifact if its differences grow?
 - Should message APIs expose CommandLib's own abstraction, Adventure, or platform-native components?
-- Should `modded` be split into a Minecraft-version module and loader modules once Fabric is added (see `docs/roadmap.md`)?
+- Should `modded` be split into a Minecraft-version module and loader modules (see `docs/roadmap.md`)? Fabric was added as
+  a loader of the same tree without the split: the loader-specific code is command registration, permissions, the
+  running server lookup (`util.CurrentServer`) and the `fabric.mod.json` metadata.
