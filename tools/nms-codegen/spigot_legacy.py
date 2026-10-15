@@ -178,11 +178,27 @@ w("NMSCommandListenerWrapper", '''    public NMSCommandListenerWrapper_SUFFIX(Ob
         return rotation != null ? NMSVec2D.create(rotation) : null;
     }
 
+    @Override
+    public void sendSuccess(BaseComponent component, boolean broadcastToOps) {
+        wrapper().sendMessage(component(component), broadcastToOps);
+    }
+
+    @Override
+    public Message toMessage(BaseComponent component) {
+        return component(component);
+    }
+
+    private static IChatBaseComponent component(BaseComponent component) {
+        return CraftChatMessage.fromJSON(ComponentSerializer.toString(component));
+    }
+
     private CommandListenerWrapper wrapper() {
         return (CommandListenerWrapper) getHandle();
     }
 ''', [f"{NMS}.CommandListenerWrapper", f"{NMS}.Entity", f"{NMS}.Vec2F", f"{NMS}.Vec3D", f"{NMS}.WorldServer",
-      "org.bukkit.World", "org.bukkit.command.CommandSender"])
+      "org.bukkit.World", "org.bukkit.command.CommandSender", f"{NMS}.IChatBaseComponent", f"{CB}.util.CraftChatMessage",
+      "net.md_5.bungee.api.chat.BaseComponent", "net.md_5.bungee.chat.ComponentSerializer",
+      "com.mojang.brigadier.Message"])
 
 w("NMSVanillaCommandWrapper", '''    public NMSVanillaCommandWrapper_SUFFIX() {
         super(null, VanillaCommandWrapper.class);

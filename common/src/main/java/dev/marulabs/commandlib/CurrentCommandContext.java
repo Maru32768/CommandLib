@@ -5,7 +5,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
-import java.util.function.Supplier;
 
 /**
  * Tracks the command context being processed on the current thread so that {@link ArgRef#get()} can resolve
@@ -20,7 +19,8 @@ final class CurrentCommandContext {
     /**
      * Runs {@code action} with {@code ctx} as the current context and returns its result.
      */
-    static <R> R call(@NotNull CommonCommandContext<?, ?> ctx, @NotNull Supplier<R> action) {
+    static <R, E extends Exception> R call(@NotNull CommonCommandContext<?, ?> ctx,
+                                           @NotNull Action<R, E> action) throws E {
         push(ctx);
         try {
             return action.get();
@@ -33,10 +33,17 @@ final class CurrentCommandContext {
      * Runs {@code action} with {@code ctx} as the current context.
      */
     static void run(@NotNull CommonCommandContext<?, ?> ctx, @NotNull Runnable action) {
-        call(ctx, () -> {
+        push(ctx);
+        try {
             action.run();
-            return null;
-        });
+        } finally {
+            pop();
+        }
+    }
+
+    @FunctionalInterface
+    interface Action<R, E extends Exception> {
+        R get() throws E;
     }
 
     @Nullable

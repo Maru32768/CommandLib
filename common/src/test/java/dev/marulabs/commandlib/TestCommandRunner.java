@@ -30,8 +30,7 @@ final class TestCommandRunner {
     }
 
     TestCommandContext execute(String input) throws CommandSyntaxException {
-        TestCommandContext.clearLatest();
-        dispatcher.execute(input, source);
+        executeAndGetResult(input);
         return TestCommandContext.latest();
     }
 
@@ -43,11 +42,30 @@ final class TestCommandRunner {
         TestCommandContext.clearLatest();
         StringReader reader = new StringReader(input);
         reader.skip();
-        dispatcher.execute(reader, source);
+        try {
+            dispatcher.execute(reader, source);
+        } catch (CommandFailure e) {
+            e.sendMessages();
+        }
         return TestCommandContext.latest();
     }
 
+    /**
+     * Executes input like the testers: a failure sends its messages to the context and returns 0.
+     */
     int executeAndGetResult(String input) throws CommandSyntaxException {
+        try {
+            return dispatch(input);
+        } catch (CommandFailure e) {
+            e.sendMessages();
+            return 0;
+        }
+    }
+
+    /**
+     * Executes input like a server, which gets the failure of a command as the exception.
+     */
+    int dispatch(String input) throws CommandSyntaxException {
         TestCommandContext.clearLatest();
         return dispatcher.execute(input, source);
     }

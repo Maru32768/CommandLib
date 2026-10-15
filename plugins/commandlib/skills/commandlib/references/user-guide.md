@@ -87,6 +87,25 @@ or component passed in. `RichTexts.toBungee` (spigot), `RichTexts.toAdventure` (
 (Forge / NeoForge) convert a `RichText` to the native component. For Paper-only plugins, Adventure and MiniMessage can
 be used directly: `ctx.sendMessage(MiniMessage.miniMessage().deserialize("<red>Hello"))`.
 
+### Feedback And Results
+
+`sendSuccess` is vanilla command feedback: hidden while the `sendCommandFeedback` gamerule is off and for silent
+sources such as functions. `sendSuccess(message, true)` also broadcasts to operators and, with `logAdminCommands`, the
+server log. `ctx.setResult(int)` sets what `/execute store result` stores (1 unless set). A command fails, storing 0
+for `store result` and `store success`, when its executor throws `CommandPrerequisiteException`, its preprocess returns
+false, or a permission, argument, or prerequisite check fails. `CommandTester#execute` returns the result, 0 for a
+failure.
+
+```java
+argument(new PlayersArgument("targets")).execute((targets, ctx) -> {
+    if (targets.isEmpty()) {
+        throw new CommandPrerequisiteException("No player was found");
+    }
+    ctx.sendSuccess("Counted " + targets.size() + " players", true);
+    ctx.setResult(targets.size());
+});
+```
+
 ## Server Help
 
 `serverHelp(shortText)` sets the text the server's `/help` lists a top-level Bukkit command with, and

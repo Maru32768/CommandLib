@@ -708,6 +708,37 @@ or component passed in. `RichTexts.toBungee` (spigot), `RichTexts.toAdventure` (
 (Forge / NeoForge) convert a `RichText` to the native component. For Paper-only plugins, Adventure and MiniMessage can
 be used directly: `ctx.sendMessage(MiniMessage.miniMessage().deserialize("<red>Hello"))`.
 
+### Feedback And Results
+
+`sendSuccess` sends command feedback the way vanilla commands do: a player does not get it while the
+`sendCommandFeedback` gamerule is off, and a silent source such as a function gets nothing. `sendSuccess(message, true)`
+also broadcasts it to the other operators in gray italics and to the server log when `logAdminCommands` is on, like
+`/gamemode`. `sendMessage`, `sendWarn`, and `sendFailure` always reach the sender.
+
+`ctx.setResult(int)` sets the value that `/execute store result` stores (1 unless set). A command fails, storing 0 for
+both `store result` and `store success`, when its executor throws `CommandPrerequisiteException`, its preprocess returns
+false, or a permission, argument, or prerequisite check fails. Its failure messages then reach the sender the way a
+vanilla command's error does, so a function or each target of `/execute as @a` does not get them.
+
+```java
+public final class CountCommand extends Command {
+    public CountCommand() {
+        super("count");
+
+        argument(new PlayersArgument("targets")).execute((targets, ctx) -> {
+            if (targets.isEmpty()) {
+                throw new CommandPrerequisiteException("No player was found");
+            }
+            ctx.sendSuccess("Counted " + targets.size() + " players", true);
+            ctx.setResult(targets.size());
+        });
+    }
+}
+```
+
+`/execute store result score @s count run count @a` then stores the number of players. `CommandTester#execute`
+returns the result, and 0 for a failure, whose messages it sends to the `FakeSender`.
+
 ## Server Help
 
 The server's `/help` lists each Bukkit command with a short text under the plugin's index, and `/help <command>` shows

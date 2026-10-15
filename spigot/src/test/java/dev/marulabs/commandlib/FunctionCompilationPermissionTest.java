@@ -72,6 +72,16 @@ class FunctionCompilationPermissionTest {
         protected dev.marulabs.commandlib.util.nms.world.NMSVec2D getRotation() {
             return null;
         }
+
+        @Override
+        public void sendSuccess(net.md_5.bungee.api.chat.BaseComponent component, boolean broadcastToOps) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public com.mojang.brigadier.Message toMessage(net.md_5.bungee.api.chat.BaseComponent component) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
     }
 
     public static final class DeniedSource extends SenderlessSource {

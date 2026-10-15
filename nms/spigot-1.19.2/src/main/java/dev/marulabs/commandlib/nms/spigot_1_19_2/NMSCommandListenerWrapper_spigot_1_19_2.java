@@ -1,15 +1,20 @@
 package dev.marulabs.commandlib.nms.spigot_1_19_2;
 
+import com.mojang.brigadier.Message;
 import dev.marulabs.commandlib.util.nms.command.NMSCommandListenerWrapper;
 import dev.marulabs.commandlib.util.nms.world.NMSVec2D;
 import dev.marulabs.commandlib.util.nms.world.NMSVec3D;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.chat.ComponentSerializer;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
+import org.bukkit.craftbukkit.v1_19_R1.util.CraftChatMessage;
 
 public class NMSCommandListenerWrapper_spigot_1_19_2 extends NMSCommandListenerWrapper {
     public NMSCommandListenerWrapper_spigot_1_19_2(Object handle) {
@@ -43,6 +48,21 @@ public class NMSCommandListenerWrapper_spigot_1_19_2 extends NMSCommandListenerW
     protected NMSVec2D getRotation() {
         Vec2 rotation = source().getRotation();
         return rotation != null ? NMSVec2D.create(rotation) : null;
+    }
+
+    @Override
+    public void sendSuccess(BaseComponent component, boolean broadcastToOps) {
+        Component message = component(component);
+        source().sendSuccess(message, broadcastToOps);
+    }
+
+    @Override
+    public Message toMessage(BaseComponent component) {
+        return component(component);
+    }
+
+    private static Component component(BaseComponent component) {
+        return CraftChatMessage.fromJSON(ComponentSerializer.toString(component));
     }
 
     private CommandSourceStack source() {

@@ -1,5 +1,7 @@
 package dev.marulabs.commandlib;
 
+import com.mojang.brigadier.LiteralMessage;
+import com.mojang.brigadier.Message;
 import dev.marulabs.commandlib.util.ChatColorUtil;
 import dev.marulabs.commandlib.util.text.RichText;
 import dev.marulabs.commandlib.util.text.TextRichText;
@@ -49,8 +51,16 @@ public final class TestCommandContext extends CommonCommandContext<FakeSender, S
     }
 
     @Override
-    public void sendSuccess(@Nullable String message) {
-        sendSuccess(RichText.text(String.valueOf(message)));
+    public void sendSuccess(@Nullable String message, boolean broadcastToOps) {
+        sendSuccess(RichText.text(String.valueOf(message)), broadcastToOps);
+    }
+
+    /**
+     * Sends {@code text} in green unless it has its own color. This test platform has no operators to broadcast to.
+     */
+    @Override
+    public void sendSuccess(@NotNull RichText text, boolean broadcastToOps) {
+        sendMessage(text.color() != null ? text : text.color(Objects.requireNonNull(ChatColorUtil.GREEN.getRGB())));
     }
 
     @Override
@@ -69,13 +79,16 @@ public final class TestCommandContext extends CommonCommandContext<FakeSender, S
      */
     @Override
     public void sendMessage(@NotNull RichText text) {
-        richMessages.add(text);
         // An empty uncolored message stays empty, as sendMessage("") always did.
         boolean blank = text.plainText()
                             .isEmpty()
                 && text.color() == null;
         // White, the default chat color.
-        send(blank ? "" : legacyText(text, 0xFFFFFF, new boolean[5]));
+        String legacy = blank ? "" : legacyText(text, 0xFFFFFF, new boolean[5]);
+        deliver(legacy, () -> {
+            richMessages.add(text);
+            send(legacy);
+        });
     }
 
     /**
@@ -83,8 +96,15 @@ public final class TestCommandContext extends CommonCommandContext<FakeSender, S
      */
     @Override
     public void sendComponent(String component) {
-        richMessages.add(RichText.text(String.valueOf(component)));
-        send(component);
+        deliver(component, () -> {
+            richMessages.add(RichText.text(String.valueOf(component)));
+            send(component);
+        });
+    }
+
+    @Override
+    Message toFailureMessage(List<String> messages) {
+        return new LiteralMessage(String.join("\n", messages));
     }
 
     @Override

@@ -1,5 +1,6 @@
 package dev.marulabs.commandlib;
 
+import com.mojang.brigadier.Message;
 import com.mojang.brigadier.context.ParsedCommandNode;
 import dev.marulabs.commandlib.util.ChatColorUtil;
 import dev.marulabs.commandlib.util.text.RichText;
@@ -15,6 +16,10 @@ public abstract class CommonCommandContext<S, C> {
     private final LinkedHashMap<String, Object> parsedArgMap = new LinkedHashMap<>();
     private final Map<CommandOption<?, ?>, Object> optionValues = new LinkedHashMap<>();
     private final Set<CommandOption<?, ?>> presentOptions = new LinkedHashSet<>();
+    private int result = 1;
+    // Non-null while CommandRunner collects the messages of a failure.
+    private @Nullable List<C> failureMessages;
+    private @Nullable List<Runnable> failureSends;
 
     protected CommonCommandContext(@NotNull com.mojang.brigadier.context.CommandContext<S> ctx) {
         this.handle = Objects.requireNonNull(ctx);
@@ -149,7 +154,22 @@ public abstract class CommonCommandContext<S, C> {
         sendSuccess(Objects.toString(obj));
     }
 
-    public abstract void sendSuccess(@Nullable String message);
+    /**
+     * Sends {@code message} in green as command feedback, like {@link #sendSuccess(String, boolean)} without
+     * broadcasting it.
+     */
+    public final void sendSuccess(@Nullable String message) {
+        sendSuccess(message, false);
+    }
+
+    /**
+     * Sends {@code message} in green as command feedback, the way vanilla commands report success: the sender gets it
+     * unless the {@code sendCommandFeedback} gamerule is off for a player or the source is silent, such as a function.
+     * With {@code broadcastToOps}, the other operators also get it in gray italics, and the server log gets it when
+     * the {@code logAdminCommands} gamerule is on, as for {@code /gamemode}. A platform or source without vanilla
+     * feedback, such as a test sender, gets it as a plain message.
+     */
+    public abstract void sendSuccess(@Nullable String message, boolean broadcastToOps);
 
     public final void sendWarn(@Nullable Object obj) {
         sendWarn(Objects.toString(obj));
@@ -169,11 +189,18 @@ public abstract class CommonCommandContext<S, C> {
     public abstract void sendMessage(@NotNull RichText text);
 
     /**
-     * Sends {@code text} in green unless it has its own color.
+     * Sends {@code text} in green unless it has its own color, as command feedback like
+     * {@link #sendSuccess(String, boolean)} without broadcasting it.
      */
-    public void sendSuccess(@NotNull RichText text) {
-        sendMessage(withDefaultColor(text, ChatColorUtil.GREEN));
+    public final void sendSuccess(@NotNull RichText text) {
+        sendSuccess(text, false);
     }
+
+    /**
+     * Sends {@code text} in green unless it has its own color, as command feedback like
+     * {@link #sendSuccess(String, boolean)}.
+     */
+    public abstract void sendSuccess(@NotNull RichText text, boolean broadcastToOps);
 
     /**
      * Sends {@code text} in yellow unless it has its own color.
@@ -219,6 +246,61 @@ public abstract class CommonCommandContext<S, C> {
     public Locale getLocale() {
         return Locale.forLanguageTag(getLanguage().replace('_', '-'));
     }
+
+    /**
+     * Sets the result of the command, which {@code /execute store result} stores and which a function or command block
+     * gets. It is 1 unless set. A command that fails stores 0 as its result and success: one that throws
+     * {@link dev.marulabs.commandlib.exception.CommandPrerequisiteException}, whose preprocess returns false, or whose
+     * permission, argument or prerequisite check fails. Its failure messages then reach the sender the way a vanilla
+     * command's error does, so a silent source or each target of {@code /execute as @a} does not get them.
+     */
+    public final void setResult(int result) {
+        this.result = result;
+    }
+
+    /**
+     * Returns the result set by {@link #setResult(int)}, 1 unless set.
+     */
+    public final int getResult() {
+        return result;
+    }
+
+    /**
+     * Runs {@code send}, which sends {@code message}, unless CommandRunner is collecting the messages of a failure; it
+     * then keeps both for the failure. Each platform sends every message through this.
+     */
+    final void deliver(C message, Runnable send) {
+        List<C> messages = failureMessages;
+        List<Runnable> sends = failureSends;
+        if (messages == null || sends == null) {
+            send.run();
+            return;
+        }
+        messages.add(message);
+        sends.add(send);
+    }
+
+    /**
+     * Collects the messages {@code sendMessages} sends into a failure instead of sending them.
+     */
+    final CommandFailure captureFailure(Runnable sendMessages) {
+        List<C> messages = new ArrayList<>();
+        List<Runnable> sends = new ArrayList<>();
+        failureMessages = messages;
+        failureSends = sends;
+        try {
+            sendMessages.run();
+        } finally {
+            failureMessages = null;
+            failureSends = null;
+        }
+        return new CommandFailure(() -> toFailureMessage(messages), sends);
+    }
+
+    /**
+     * Joins the messages of a failure, one per line, into the platform's component, which the platform sends in red.
+     */
+    abstract Message toFailureMessage(List<C> messages);
 
     final void setParsedArgument(String name, Object parsedArgument) {
         parsedArgMap.put(name, parsedArgument);

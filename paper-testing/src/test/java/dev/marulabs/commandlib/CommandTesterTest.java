@@ -3,6 +3,7 @@ package dev.marulabs.commandlib;
 import com.mojang.brigadier.LiteralMessage;
 import dev.marulabs.commandlib.argument.PlayerArgument;
 import dev.marulabs.commandlib.argument.StringArgument;
+import dev.marulabs.commandlib.exception.CommandPrerequisiteException;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
@@ -107,6 +108,41 @@ class CommandTesterTest {
         void send_success_has_green_color() {
             CommandTester tester = new CommandTester(new Command("hello") {{
                 execute(ctx -> ctx.sendSuccess("done"));
+            }}, "test.command");
+            FakeSender sender = FakeSender.player("Steve");
+
+            tester.execute("hello", sender);
+
+            assertThat(sender.getSentMessages()).extracting(net.kyori.adventure.text.Component::color)
+                                                .containsExactly(NamedTextColor.GREEN);
+        }
+
+        @Test
+        void execute_returns_the_result() {
+            CommandTester tester = new CommandTester(new Command("count") {{
+                execute(ctx -> ctx.setResult(7));
+            }}, "test.command");
+
+            assertThat(tester.execute("count", FakeSender.player("Steve"))).isEqualTo(7);
+        }
+
+        @Test
+        void failure_returns_zero_and_sends_its_messages() {
+            CommandTester tester = new CommandTester(new Command("count") {{
+                execute(ctx -> {
+                    throw new CommandPrerequisiteException("no", "really");
+                });
+            }}, "test.command");
+            FakeSender sender = FakeSender.player("Steve");
+
+            assertThat(tester.execute("count", sender)).isZero();
+            assertThat(sender.getSentMessageTexts()).containsExactly("no", "really");
+        }
+
+        @Test
+        void broadcast_success_is_sent_to_the_sender() {
+            CommandTester tester = new CommandTester(new Command("hello") {{
+                execute(ctx -> ctx.sendSuccess("done", true));
             }}, "test.command");
             FakeSender sender = FakeSender.player("Steve");
 

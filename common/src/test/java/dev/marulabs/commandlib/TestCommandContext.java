@@ -1,5 +1,7 @@
 package dev.marulabs.commandlib;
 
+import com.mojang.brigadier.LiteralMessage;
+import com.mojang.brigadier.Message;
 import dev.marulabs.commandlib.util.text.RichText;
 
 import java.util.ArrayList;
@@ -24,32 +26,46 @@ final class TestCommandContext extends CommonCommandContext<TestCommandSource, S
 
     @Override
     public void sendMessage(String message) {
-        messages.add(String.valueOf(message));
+        add(String.valueOf(message));
     }
 
     @Override
-    public void sendSuccess(String message) {
-        messages.add(String.valueOf(message));
+    public void sendSuccess(String message, boolean broadcastToOps) {
+        add(String.valueOf(message));
     }
 
     @Override
     public void sendWarn(String message) {
-        messages.add(String.valueOf(message));
+        add(String.valueOf(message));
     }
 
     @Override
     public void sendFailure(String message) {
-        messages.add(String.valueOf(message));
+        add(String.valueOf(message));
     }
 
     @Override
     public void sendMessage(RichText text) {
-        messages.add(text.plainText());
+        add(text.plainText());
+    }
+
+    @Override
+    public void sendSuccess(RichText text, boolean broadcastToOps) {
+        add(text.plainText());
     }
 
     @Override
     public void sendComponent(String component) {
-        messages.add(component);
+        add(component);
+    }
+
+    @Override
+    Message toFailureMessage(List<String> messages) {
+        return new LiteralMessage(String.join("\n", messages));
+    }
+
+    private void add(String message) {
+        deliver(message, () -> messages.add(message));
     }
 
     @Override

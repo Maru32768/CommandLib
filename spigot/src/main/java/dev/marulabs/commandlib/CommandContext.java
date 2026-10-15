@@ -1,5 +1,6 @@
 package dev.marulabs.commandlib;
 
+import com.mojang.brigadier.Message;
 import dev.marulabs.commandlib.util.nms.command.NMSCommandListenerWrapper;
 import dev.marulabs.commandlib.util.text.RichText;
 import dev.marulabs.commandlib.util.text.RichTexts;
@@ -15,6 +16,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -94,17 +96,39 @@ public final class CommandContext extends CommonCommandContext<Object, BaseCompo
     }
 
     public void sendMessage(@NotNull BaseComponent component) {
-        getSender().spigot()
-                   .sendMessage(Objects.requireNonNull(component));
+        Objects.requireNonNull(component);
+        deliver(component,
+                () -> getSender().spigot()
+                                 .sendMessage(component));
     }
 
     @Override
-    public void sendSuccess(@Nullable String message) {
-        sendSuccess(new TextComponent(String.valueOf(message)));
+    public void sendSuccess(@Nullable String message, boolean broadcastToOps) {
+        sendSuccess(new TextComponent(String.valueOf(message)), broadcastToOps);
     }
 
+    /**
+     * Sends {@code component} in green unless it has its own color, as command feedback like
+     * {@link #sendSuccess(String, boolean)} without broadcasting it.
+     */
     public void sendSuccess(@NotNull BaseComponent component) {
-        sendMessage(withDefaultColor(component, ChatColor.GREEN));
+        sendSuccess(component, false);
+    }
+
+    /**
+     * Sends {@code component} in green unless it has its own color, as command feedback like
+     * {@link #sendSuccess(String, boolean)}.
+     */
+    public void sendSuccess(@NotNull BaseComponent component, boolean broadcastToOps) {
+        BaseComponent colored = withDefaultColor(component, ChatColor.GREEN);
+        deliver(colored,
+                () -> NMSCommandListenerWrapper.create(handle.getSource())
+                                               .sendSuccess(colored, broadcastToOps));
+    }
+
+    @Override
+    public void sendSuccess(@NotNull RichText text, boolean broadcastToOps) {
+        sendSuccess(RichTexts.toBungee(text), broadcastToOps);
     }
 
     @Override
@@ -133,6 +157,19 @@ public final class CommandContext extends CommonCommandContext<Object, BaseCompo
     @Override
     public void sendComponent(BaseComponent component) {
         sendMessage(component);
+    }
+
+    @Override
+    Message toFailureMessage(List<BaseComponent> messages) {
+        TextComponent joined = new TextComponent();
+        for (int i = 0; i < messages.size(); i++) {
+            if (i > 0) {
+                joined.addExtra("\n");
+            }
+            joined.addExtra(messages.get(i));
+        }
+        return NMSCommandListenerWrapper.create(handle.getSource())
+                                        .toMessage(joined);
     }
 
     private static BaseComponent withDefaultColor(BaseComponent component, ChatColor color) {

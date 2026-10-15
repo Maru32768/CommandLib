@@ -53,64 +53,67 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
     }
 
     @Override
-    public int run(CommandContext<S> context) {
+    public int run(CommandContext<S> context) throws CommandFailure {
         try {
             C ctx = platformAdapter.createCommandContext(context);
             return CurrentCommandContext.call(ctx, () -> runInContext(ctx));
+        } catch (CommandFailure e) {
+            throw e;
         } catch (Throwable e) {
             e.printStackTrace();
             throw e;
         }
     }
 
-    private int runInContext(C ctx) {
+    private int runInContext(C ctx) throws CommandFailure {
         try {
             if (!platformAdapter.hasPermission(ctx, command.permissionName(permissionPrefix))) {
-                ctx.sendFailure("You do not have permission to execute this command.");
-                return 0;
+                return fail(ctx, () -> ctx.sendFailure("You do not have permission to execute this command."));
             }
 
             try {
                 parseOptions(ctx);
                 validateOptions(ctx);
             } catch (OptionParseException e) {
-                e.sendMessage(ctx);
-                return 0;
+                return fail(ctx, () -> e.sendMessage(ctx));
             }
 
             for (Arguments<C> arguments : argumentsList) {
                 if (!platformAdapter.hasPermission(ctx, arguments.permissionName(permissionPrefix))) {
-                    ctx.sendFailure("You do not have permission to execute this command.");
-                    return 0;
+                    return fail(ctx, () -> ctx.sendFailure("You do not have permission to execute this command."));
                 }
 
                 try {
                     arguments.parse(ctx);
                 } catch (ArgumentParseException e) {
-                    e.sendMessage(ctx);
-                    return 0;
+                    return fail(ctx, () -> e.sendMessage(ctx));
                 } catch (CommandPrerequisiteException e) {
                     // The default value of an omitted optional argument can need a prerequisite.
-                    e.sendMessage(ctx);
-                    return 0;
+                    return fail(ctx, () -> e.sendMessage(ctx));
                 }
             }
             try {
                 prerequisite.check(ctx);
             } catch (CommandPrerequisiteException e) {
-                e.sendMessage(ctx);
-                return 0;
+                return fail(ctx, () -> e.sendMessage(ctx));
             }
 
             if (executor == null) {
                 return executeWithStackTrace(ctx, helpAction);
             }
 
-            if (!preprocess.test(ctx)) {
-                return 0;
+            // The preprocess sends its messages before returning, so they are collected until it tells whether the
+            // command fails.
+            boolean[] passed = new boolean[1];
+            CommandFailure preprocessFailure = ctx.captureFailure(() -> passed[0] = preprocess.test(ctx));
+            if (!passed[0]) {
+                return fail(preprocessFailure);
             }
+            preprocessFailure.sendMessages();
 
             return executeWithStackTrace(ctx, executor);
+        } catch (CommandFailure e) {
+            throw e;
         } catch (Throwable e) {
             // Exceptions escaping parsing, prerequisites or preprocess are not reported to the sender, so the handlers
             // get them before Brigadier propagates them to the platform.
@@ -120,20 +123,33 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
         }
     }
 
-    private int executeWithStackTrace(C ctx, CommandExecutor<C> executor) {
+    private int executeWithStackTrace(C ctx, CommandExecutor<C> executor) throws CommandFailure {
         try {
             executor.accept(ctx);
-            return 1;
+            return ctx.getResult();
         } catch (CommandPrerequisiteException e) {
-            e.sendMessage(ctx);
-            return 0;
+            return fail(ctx, () -> e.sendMessage(ctx));
         } catch (Exception e) {
             e.printStackTrace();
-            ctx.sendFailure("An unexpected error occurred trying to execute that command.");
-            ctx.sendFailure("Check the console for details.");
+            CommandFailure failure = ctx.captureFailure(() -> {
+                ctx.sendFailure("An unexpected error occurred trying to execute that command.");
+                ctx.sendFailure("Check the console for details.");
+            });
             notifyUncaughtExceptionHandlers(e, ctx);
+            return fail(failure);
+        }
+    }
+
+    private static int fail(CommonCommandContext<?, ?> ctx, Runnable sendMessages) throws CommandFailure {
+        return fail(ctx.captureFailure(sendMessages));
+    }
+
+    private static int fail(CommandFailure failure) throws CommandFailure {
+        // The platform would send an empty line for a failure without a message, so such a failure only returns 0.
+        if (!failure.hasMessages()) {
             return 0;
         }
+        throw failure;
     }
 
     // common has no logger, so a stack trace on the console is how it reports, as in run and executeWithStackTrace.

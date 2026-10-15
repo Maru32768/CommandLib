@@ -3,6 +3,7 @@ package dev.marulabs.commandlib;
 import com.mojang.brigadier.LiteralMessage;
 import dev.marulabs.commandlib.argument.PlayerArgument;
 import dev.marulabs.commandlib.argument.StringArgument;
+import dev.marulabs.commandlib.exception.CommandPrerequisiteException;
 import dev.marulabs.commandlib.util.nms.NMSClass;
 import dev.marulabs.commandlib.util.nms.NMSClassRegistry;
 import net.md_5.bungee.api.ChatColor;
@@ -117,6 +118,40 @@ class CommandTesterTest {
         void send_success_has_green_color() {
             try (CommandTester tester = new CommandTester(new Command("hello") {{
                 execute(ctx -> ctx.sendSuccess("done"));
+            }}, "test.command")) {
+                FakeSender sender = FakeSender.player("Steve");
+                tester.execute("hello", sender);
+                assertThat(sender.getSentMessages()).extracting(BaseComponent::getColor)
+                                                    .containsExactly(ChatColor.GREEN);
+            }
+        }
+
+        @Test
+        void execute_returns_the_result() {
+            try (CommandTester tester = new CommandTester(new Command("count") {{
+                execute(ctx -> ctx.setResult(7));
+            }}, "test.command")) {
+                assertThat(tester.execute("count", FakeSender.player("Steve"))).isEqualTo(7);
+            }
+        }
+
+        @Test
+        void failure_returns_zero_and_sends_its_messages() {
+            try (CommandTester tester = new CommandTester(new Command("count") {{
+                execute(ctx -> {
+                    throw new CommandPrerequisiteException("no", "really");
+                });
+            }}, "test.command")) {
+                FakeSender sender = FakeSender.player("Steve");
+                assertThat(tester.execute("count", sender)).isZero();
+                assertThat(sender.getSentMessageTexts()).containsExactly("no", "really");
+            }
+        }
+
+        @Test
+        void broadcast_success_is_sent_to_the_sender() {
+            try (CommandTester tester = new CommandTester(new Command("hello") {{
+                execute(ctx -> ctx.sendSuccess("done", true));
             }}, "test.command")) {
                 FakeSender sender = FakeSender.player("Steve");
                 tester.execute("hello", sender);

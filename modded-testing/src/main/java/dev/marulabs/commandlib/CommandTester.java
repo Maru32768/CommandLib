@@ -96,13 +96,21 @@ public final class CommandTester implements AutoCloseable {
     }
 
     /**
-     * Executes the given command input as the specified fake sender.
+     * Executes the given command input as the specified fake sender and returns the command's result, which
+     * {@code /execute store result} would store. A command that fails sends its failure messages to the sender, as the
+     * server does, and returns 0.
      *
      * @throws RuntimeException if the input does not match any registered command
      */
-    public void execute(@NotNull String input, @NotNull FakeSender sender) {
+    public int execute(@NotNull String input, @NotNull FakeSender sender) {
         try (Scope scope = new Scope(sender)) {
-            dispatcher.execute(input, sender.createSource(scope.server));
+            try {
+                return dispatcher.execute(input, sender.createSource(scope.server));
+            } catch (CommandFailure e) {
+                // Sent inside the scope, which the source's messages may need.
+                e.sendMessages();
+                return 0;
+            }
         } catch (CommandSyntaxException e) {
             throw new RuntimeException("Command syntax error: " + e.getMessage(), e);
         }

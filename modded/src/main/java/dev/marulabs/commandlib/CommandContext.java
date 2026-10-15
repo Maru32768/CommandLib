@@ -1,5 +1,6 @@
 package dev.marulabs.commandlib;
 
+import com.mojang.brigadier.Message;
 import dev.marulabs.commandlib.CommonCommandContext;
 import dev.marulabs.commandlib.util.Location;
 import dev.marulabs.commandlib.util.text.RichText;
@@ -17,6 +18,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -107,31 +109,42 @@ public final class CommandContext extends CommonCommandContext<CommandSourceStac
         sendMessage(component, false);
     }
 
+    /**
+     * Sends {@code component} through {@link CommandSourceStack#sendSuccess}, which respects the
+     * {@code sendCommandFeedback} gamerule and, with {@code allowLogging}, broadcasts it to operators.
+     */
     public void sendMessage(@NotNull Component component, boolean allowLogging) {
+        Objects.requireNonNull(component);
         //? if >=1.20 {
-        getSender().sendSuccess(() -> Objects.requireNonNull(component), allowLogging);
+        deliver(component, () -> getSender().sendSuccess(() -> component, allowLogging));
         //?} else
-        /*getSender().sendSuccess(Objects.requireNonNull(component), allowLogging);*/
+        /*deliver(component, () -> getSender().sendSuccess(component, allowLogging));*/
     }
 
     @Override
-    public void sendSuccess(@Nullable String message) {
-        sendSuccess(message, false);
-    }
-
-    public void sendSuccess(@Nullable String message, boolean allowLogging) {
-        sendSuccess(literal(message), allowLogging);
+    public void sendSuccess(@Nullable String message, boolean broadcastToOps) {
+        sendSuccess(literal(message), broadcastToOps);
     }
 
     /**
-     * Sends {@code component} in green unless it has its own color.
+     * Sends {@code component} in green unless it has its own color, as command feedback like
+     * {@link #sendSuccess(String, boolean)} without broadcasting it.
      */
     public void sendSuccess(@NotNull Component component) {
         sendSuccess(component, false);
     }
 
-    public void sendSuccess(@NotNull Component component, boolean allowLogging) {
-        sendMessage(withDefaultColor(component, ChatFormatting.GREEN), allowLogging);
+    /**
+     * Sends {@code component} in green unless it has its own color, as command feedback like
+     * {@link #sendSuccess(String, boolean)}.
+     */
+    public void sendSuccess(@NotNull Component component, boolean broadcastToOps) {
+        sendMessage(withDefaultColor(component, ChatFormatting.GREEN), broadcastToOps);
+    }
+
+    @Override
+    public void sendSuccess(@NotNull RichText text, boolean broadcastToOps) {
+        sendSuccess(RichTexts.toVanilla(text), broadcastToOps);
     }
 
     @Override
@@ -176,7 +189,7 @@ public final class CommandContext extends CommonCommandContext<CommandSourceStac
             // CommandSourceStack#sendFailure never broadcasts to ops, so route through sendSuccess.
             sendMessage(colored, true);
         } else {
-            getSender().sendFailure(colored);
+            deliver(colored, () -> getSender().sendFailure(colored));
         }
     }
 
@@ -193,6 +206,18 @@ public final class CommandContext extends CommonCommandContext<CommandSourceStac
     @Override
     public void sendComponent(Component component) {
         sendMessage(component);
+    }
+
+    @Override
+    Message toFailureMessage(List<Component> messages) {
+        MutableComponent joined = literal("");
+        for (int i = 0; i < messages.size(); i++) {
+            if (i > 0) {
+                joined.append("\n");
+            }
+            joined.append(messages.get(i));
+        }
+        return joined;
     }
 
     private static MutableComponent literal(@Nullable String message) {

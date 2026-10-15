@@ -165,16 +165,21 @@ public class CommandTester implements AutoCloseable {
     }
 
     /**
-     * Executes the given command input as the specified sender.
+     * Executes the given command input as the specified sender and returns the command's result, which
+     * {@code /execute store result} would store. A command that fails sends its failure messages to the sender, as the
+     * server does, and returns 0.
      *
      * @throws RuntimeException if the input does not match any registered command
      */
-    public void execute(String input, CommandSender sender) {
+    public int execute(String input, CommandSender sender) {
         CommandTester previous = current.get();
         current.set(this);
         currentCommandSender.set(sender);
         try {
-            dispatcher.execute(input, new Object());
+            return dispatcher.execute(input, new Object());
+        } catch (CommandFailure e) {
+            e.sendMessages();
+            return 0;
         } catch (CommandSyntaxException e) {
             throw new RuntimeException("Command syntax error: " + e.getMessage(), e);
         } finally {
@@ -189,8 +194,8 @@ public class CommandTester implements AutoCloseable {
      *
      * @throws RuntimeException if the input does not match any registered command
      */
-    public void execute(String input, FakeSender sender) {
-        execute(input, sender.getCommandSender());
+    public int execute(String input, FakeSender sender) {
+        return execute(input, sender.getCommandSender());
     }
 
     /**

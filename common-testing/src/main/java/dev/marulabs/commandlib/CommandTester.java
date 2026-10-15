@@ -50,10 +50,19 @@ public final class CommandTester implements AutoCloseable {
                                                                                     .forEach(dispatcher.getRoot()::addChild);
     }
 
-    public void execute(@NotNull String input, @NotNull FakeSender sender) {
+    /**
+     * Executes the input as the sender and returns the command's result, which {@code /execute store result} would
+     * store. A command that fails sends its failure messages to the sender, as the server does, and returns 0.
+     *
+     * @throws RuntimeException if the input does not match any registered command
+     */
+    public int execute(@NotNull String input, @NotNull FakeSender sender) {
         TestCommandContext.clearLatest();
         try {
-            dispatcher.execute(input, sender);
+            return dispatcher.execute(input, sender);
+        } catch (CommandFailure e) {
+            e.sendMessages();
+            return 0;
         } catch (CommandSyntaxException e) {
             throw new RuntimeException("Command syntax error: " + e.getMessage(), e);
         }

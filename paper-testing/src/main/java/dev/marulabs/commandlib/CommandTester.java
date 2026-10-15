@@ -107,24 +107,29 @@ public final class CommandTester implements AutoCloseable {
     }
 
     /**
-     * Executes the given command input as the specified fake sender.
+     * Executes the given command input as the specified fake sender and returns the command's result, which
+     * {@code /execute store result} would store. A command that fails sends its failure messages to the sender, as the
+     * server does, and returns 0.
      *
      * @throws RuntimeException if the input does not match any registered command
      */
-    public void execute(@NotNull String input, @NotNull FakeSender sender) {
-        execute(input, sender.asSender());
+    public int execute(@NotNull String input, @NotNull FakeSender sender) {
+        return execute(input, sender.asSender());
     }
 
     /**
-     * Executes the given command input as the specified Bukkit/Paper sender.
+     * Executes the given command input as the specified Bukkit/Paper sender, like {@link #execute(String, FakeSender)}.
      *
      * @throws RuntimeException if the input does not match any registered command
      */
-    public void execute(@NotNull String input, @NotNull CommandSender sender) {
+    public int execute(@NotNull String input, @NotNull CommandSender sender) {
         CommandTester previous = current.get();
         current.set(this);
         try {
-            dispatcher.execute(input, commandSource(sender));
+            return dispatcher.execute(input, commandSource(sender));
+        } catch (CommandFailure e) {
+            e.sendMessages();
+            return 0;
         } catch (CommandSyntaxException e) {
             throw new RuntimeException("Command syntax error: " + e.getMessage(), e);
         } finally {

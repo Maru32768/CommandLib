@@ -1,5 +1,6 @@
 package dev.marulabs.commandlib;
 
+import dev.marulabs.commandlib.exception.CommandPrerequisiteException;
 import com.mojang.brigadier.suggestion.Suggestion;
 import dev.marulabs.commandlib.argument.*;
 import dev.marulabs.commandlib.util.text.ClickAction;
@@ -47,6 +48,39 @@ class CommandTesterTest {
         void message_is_captured_for_console() {
             try (CommandTester tester = new CommandTester(new Command("hello") {{
                 execute(ctx -> ctx.sendSuccess("done"));
+            }}, "test")) {
+                FakeSender sender = FakeSender.console();
+                tester.execute("hello", sender);
+                assertThat(sender.getSentMessageTexts()).containsExactly("done");
+            }
+        }
+
+        @Test
+        void execute_returns_the_result() {
+            try (CommandTester tester = new CommandTester(new Command("count") {{
+                execute(ctx -> ctx.setResult(7));
+            }}, "test")) {
+                assertThat(tester.execute("count", FakeSender.player("Steve"))).isEqualTo(7);
+            }
+        }
+
+        @Test
+        void failure_returns_zero_and_sends_its_messages() {
+            try (CommandTester tester = new CommandTester(new Command("count") {{
+                execute(ctx -> {
+                    throw new CommandPrerequisiteException("no", "really");
+                });
+            }}, "test")) {
+                FakeSender sender = FakeSender.player("Steve");
+                assertThat(tester.execute("count", sender)).isZero();
+                assertThat(sender.getSentMessageTexts()).containsExactly("no", "really");
+            }
+        }
+
+        @Test
+        void rich_success_is_sent_as_feedback() {
+            try (CommandTester tester = new CommandTester(new Command("hello") {{
+                execute(ctx -> ctx.sendSuccess(RichText.text("done"), true));
             }}, "test")) {
                 FakeSender sender = FakeSender.console();
                 tester.execute("hello", sender);

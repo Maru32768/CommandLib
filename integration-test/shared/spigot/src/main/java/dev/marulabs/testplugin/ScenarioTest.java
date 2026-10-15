@@ -3,11 +3,13 @@ package dev.marulabs.testplugin;
 import dev.marulabs.commandlib.Command;
 import dev.marulabs.commandlib.CommandLib;
 import dev.marulabs.commandlib.argument.StringArgument;
+import dev.marulabs.commandlib.exception.CommandPrerequisiteException;
 import dev.marulabs.integration.core.TestResult;
 import dev.marulabs.integration.core.TestStatus;
 import org.bukkit.Bukkit;
 import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.scoreboard.Objective;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -50,6 +52,7 @@ public final class ScenarioTest extends TestBase {
 
         commands.addAll(executeRunAsPlayer());
         commands.addAll(executeRunWithArgument());
+        commands.addAll(executeStoreReadsResultAndFailure());
         commands.addAll(runtimeRegisteredCommandIsExecutableUntilUnregistered());
         commands.addAll(lateRegisteredCommandSurvivesReload());
         deniedProbe();
@@ -91,6 +94,47 @@ public final class ScenarioTest extends TestBase {
         }});
 
         return List.of("execute as " + playerName + " run " + buildCommand(command, name + " hello"));
+    }
+
+    /**
+     * {@code /execute store} stores the result a command sets, and 0 as the success of a command that fails.
+     */
+    public List<String> executeStoreReadsResultAndFailure() {
+        String name = getMethodName();
+        String key = getKey();
+        String objective = "commandlibstore";
+
+        putCommandNotExecutedResult(key);
+        command.addChildren(new Command(name + "Result") {{
+            execute(ctx -> {
+                // Feedback goes through the server's source; a failure there would fail the command and store 0.
+                ctx.sendSuccess("stored", true);
+                ctx.setResult(42);
+            });
+        }}, new Command(name + "Failure") {{
+            execute(ctx -> {
+                throw new CommandPrerequisiteException("failure probe");
+            });
+        }}, new Command(name) {{
+            execute(ctx -> {
+                Objective scores = Bukkit.getScoreboardManager()
+                                         .getMainScoreboard()
+                                         .getObjective(objective);
+                String actual = scores == null ? "no objective" : scores.getScore("#result")
+                                                                        .getScore()
+                        + "," + scores.getScore("#success")
+                                      .getScore();
+                putResult(key, actual, "42,0");
+            });
+        }});
+
+        return List.of("scoreboard objectives add " + objective + " dummy",
+                       "scoreboard players set #success " + objective + " 7",
+                       "execute store result score #result " + objective + " run "
+                               + buildCommand(command, name + "Result"),
+                       "execute store success score #success " + objective + " run "
+                               + buildCommand(command, name + "Failure"),
+                       buildCommand(command, name));
     }
 
     /**

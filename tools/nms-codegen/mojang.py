@@ -38,6 +38,8 @@ BUILDS_CONTEXT_FROM_PUBLIC_API = V >= (1, 20, 5)
 # from 1.21.9.
 RELOAD_DROPPED_PROFILERS = V >= (1, 21, 2)
 RELOAD_HAS_SHARED_STATE = V >= (1, 21, 9)
+# CommandSourceStack#sendSuccess takes a Supplier of the message from 1.20.
+SEND_SUCCESS_TAKES_SUPPLIER = V >= (1, 20)
 
 RESOURCE_MANAGER = "server.resources.resourceManager()" if HAS_RELOADABLE_RESOURCES \
     else "server.resources.getResourceManager()"
@@ -320,11 +322,30 @@ w("NMSCommandListenerWrapper", '''    public NMSCommandListenerWrapper_SUFFIX(Ob
         return rotation != null ? NMSVec2D.create(rotation) : null;
     }
 
+    @Override
+    public void sendSuccess(BaseComponent component, boolean broadcastToOps) {
+        Component message = component(component);
+        SEND_SUCCESS
+    }
+
+    @Override
+    public Message toMessage(BaseComponent component) {
+        return component(component);
+    }
+
+    private static Component component(BaseComponent component) {
+        return CraftChatMessage.fromJSON(ComponentSerializer.toString(component));
+    }
+
     private CommandSourceStack source() {
         return (CommandSourceStack) getHandle();
     }
-''', [CSS, "net.minecraft.server.level.ServerLevel", "net.minecraft.world.entity.Entity", "net.minecraft.world.phys.Vec2",
-      "net.minecraft.world.phys.Vec3", "org.bukkit.World", "org.bukkit.command.CommandSender"])
+'''.replace("SEND_SUCCESS", "source().sendSuccess(() -> message, broadcastToOps);" if SEND_SUCCESS_TAKES_SUPPLIER
+            else "source().sendSuccess(message, broadcastToOps);"),
+  [CSS, "net.minecraft.server.level.ServerLevel", "net.minecraft.world.entity.Entity", "net.minecraft.world.phys.Vec2",
+   "net.minecraft.world.phys.Vec3", "org.bukkit.World", "org.bukkit.command.CommandSender",
+   "net.minecraft.network.chat.Component", f"{CB}.util.CraftChatMessage", "net.md_5.bungee.api.chat.BaseComponent",
+   "net.md_5.bungee.chat.ComponentSerializer", "com.mojang.brigadier.Message"])
 
 w("NMSVanillaCommandWrapper", '''    public NMSVanillaCommandWrapper_SUFFIX() {
         super(null, VanillaCommandWrapper.class);
