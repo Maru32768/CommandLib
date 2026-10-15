@@ -2,6 +2,7 @@ package dev.marulabs.commandlib;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.marulabs.commandlib.command.AsyncCommandExecutor;
 import dev.marulabs.commandlib.command.CommandExecutor;
 import dev.marulabs.commandlib.command.CommandMiddleware;
@@ -66,7 +67,7 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
     }
 
     @Override
-    public int run(CommandContext<S> context) throws CommandFailure {
+    public int run(CommandContext<S> context) throws CommandSyntaxException {
         try {
             // After options, Brigadier executes a context without them; the graph adds them back.
             C ctx = platformAdapter.createCommandContext(optionGraph.recover(context));
@@ -74,7 +75,7 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
             ctx.captions(command.captions());
             ctx.providers(providers);
             return CurrentCommandContext.call(ctx, () -> runInContext(ctx));
-        } catch (CommandFailure e) {
+        } catch (CommandSyntaxException e) {
             throw e;
         } catch (Throwable e) {
             e.printStackTrace();

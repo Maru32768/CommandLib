@@ -280,7 +280,7 @@ final class OptionGraph<S, C extends CommonCommandContext<S, ?>> {
      * them before that context, and the literals of the command's path before them are added as they were typed.
      */
     @SuppressWarnings("unchecked")
-    CommandContext<S> recover(CommandContext<S> context) {
+    CommandContext<S> recover(CommandContext<S> context) throws CommandSyntaxException {
         if (!redirects) {
             return context;
         }
@@ -298,6 +298,14 @@ final class OptionGraph<S, C extends CommonCommandContext<S, ?>> {
         int end = context.getRange()
                          .getStart()
                 - 1;
+        if (end + 1 >= input.length()) {
+            // Brigadier follows a redirect once any character follows the token, here a trailing space, and a word
+            // argument then parses the empty rest. Without the redirect it rejected the space, as it still does.
+            StringReader reader = new StringReader(input);
+            reader.setCursor(Math.max(end, 0));
+            throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument()
+                                                            .createWithContext(reader);
+        }
         Region<S> region = end > 0 && input.charAt(end) == ' ' ? findRegion(input, end, state) : null;
         if (region == null) {
             throw new IllegalStateException("Cannot read the options before position " + (end + 1) + " of '" + input

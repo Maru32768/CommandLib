@@ -75,6 +75,21 @@ class OptionRedirectTest {
     }
 
     @Test
+    void a_space_after_the_last_option_is_rejected_as_before() {
+        TestCommandRunner runner = new TestCommandRunner(scan());
+
+        // Brigadier leaves the space unread after --force, which holds the nodes after {force}.
+        assertThatThrownBy(() -> runner.execute("scan --force ")).isInstanceOf(CommandSyntaxException.class)
+                                                                 .hasMessageContaining("Incorrect argument");
+        // -f redirects to --force; Brigadier follows the redirect and the word argument parses the empty rest.
+        assertThatThrownBy(() -> runner.execute("scan -f ")).isInstanceOf(CommandSyntaxException.class)
+                                                            .hasMessageContaining("Incorrect argument")
+                                                            .hasMessageContaining("scan -f<--[HERE]");
+        assertThatThrownBy(() -> runner.execute("scan -n 5 ")).isInstanceOf(CommandSyntaxException.class)
+                                                              .hasMessageContaining("Incorrect argument");
+    }
+
+    @Test
     void an_option_value_may_look_like_an_option() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(scan());
 
