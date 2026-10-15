@@ -3,24 +3,16 @@ package dev.marulabs.commandlib;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.marulabs.commandlib.exception.ArgumentParseException;
 
-import java.lang.reflect.InvocationTargetException;
-
 public interface PlatformAdapter<S, T, C extends CommonCommandContext<S, T>, U extends CommonCommand<C, U>> {
+    /**
+     * The platform's adapter. Its class is looked up once.
+     */
     @SuppressWarnings("unchecked")
     static <S, T, C extends CommonCommandContext<S, T>, U extends CommonCommand<C, U>> PlatformAdapter<S, T, C, U> get() {
-        try {
-            Class<PlatformAdapter<S, T, C, U>> platformAdapterImplClass = (Class<PlatformAdapter<S, T, C, U>>) Class.forName("dev.marulabs.commandlib.PlatformAdapterImpl");
-            return platformAdapterImplClass.getConstructor()
-                                           .newInstance();
-        } catch (ClassNotFoundException | InvocationTargetException | InstantiationException | IllegalAccessException |
-                 NoSuchMethodException e) {
-            throw new IllegalStateException("Could not find PlatformAdapter", e);
-        }
+        return (PlatformAdapter<S, T, C, U>) PlatformAdapterHolder.get();
     }
 
     C createCommandContext(com.mojang.brigadier.context.CommandContext<S> ctx);
-
-    boolean hasPermission(U command, S commandSource, String permissionPrefix);
 
     boolean hasPermission(U command, C ctx, String permissionPrefix);
 

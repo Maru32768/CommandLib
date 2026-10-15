@@ -23,11 +23,6 @@ public final class PlatformAdapterImpl implements PlatformAdapter<Object, BaseCo
     }
 
     @Override
-    public boolean hasPermission(Command command, Object commandSource, String permissionPrefix) {
-        return hasPermission(commandSource, command.permissionName(permissionPrefix));
-    }
-
-    @Override
     public boolean hasPermission(Command command, CommandContext ctx, String permissionPrefix) {
         return ctx.getSender()
                   .hasPermission(command.permissionName(permissionPrefix));
