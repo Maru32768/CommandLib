@@ -1,0 +1,36 @@
+# Tree
+home [example.command.home, OP]
+  go [example.command.home.go, OP]
+    <name: StringArgument> [example.command.home.go.name, OP]
+  set [example.command.home.set, OP]
+    <name: StringArgument> [example.command.home.set.name, OP]
+
+# Inputs
+## en_us
+/home help -> 1
+    --------------------------------------------------
+    Manage your homes
+    Usage:
+      /home go
+      /home set
+    --------------------------------------------------
+/home set base -> 1
+    Home base set.
+/home go base -> 1
+    Teleported to base.
+/home go mine -> 0
+    You have no home named mine.
+## ja_jp
+/home help -> 1
+    --------------------------------------------------
+    ホームを管理します
+    使い方:
+      /home go
+      /home set
+    --------------------------------------------------
+/home set base -> 1
+    ホーム base を設定しました。
+/home go base -> 1
+    base に移動しました。
+/home go mine -> 0
+    mine という名前のホームはありません。

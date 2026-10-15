@@ -1,0 +1,17 @@
+# Tree
+score [example.command.score, OP]
+  <player: StringArgument> [example.command.score.player, OP]
+
+# Inputs
+/score help -> 1
+    --------------------------------------------------
+    Look up a player's score
+    Usage:
+      /score <player>
+    --------------------------------------------------
+/score Steve -> 42
+    Steve has 42 points
+/score Alex -> 7
+    Alex has 7 points
+/score Herobrine -> 0
+    No score for Herobrine

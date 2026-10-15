@@ -1,0 +1,30 @@
+# Tree
+kit [example.command.kit, OP]
+  give [example.command.kit.give, OP]
+    <name: StringArgument> [count: IntegerArgument] [example.command.kit.give.name.count, OP]
+  send [example.command.kit.send, OP]
+    <players...: PlayerArgument> [example.command.kit.send.players, OP]
+
+# Inputs
+/kit help -> 1
+    --------------------------------------------------
+    Hand out kits
+    Usage:
+      /kit give: Give yourself a kit
+      /kit send: Send the starter kit to players
+    --------------------------------------------------
+/kit give apple -> 1
+    Gave 1 x apple
+/kit give apple 5 -> 1
+    Gave 5 x apple
+/kit give apple 99 -> rejected: Command syntax error: Integer must not be more than 64, found 99 at position 15: ...ive apple <--[HERE]
+/kit send Steve -> 1
+    Sent the starter kit to Steve
+/kit send Steve Alex -> 1
+    Sent the starter kit to Steve, Alex
+/kit send -> 1
+    --------------------------------------------------
+    Send the starter kit to players
+    Usage:
+      /kit send <players...>
+    --------------------------------------------------

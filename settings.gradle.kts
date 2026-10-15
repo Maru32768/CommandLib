@@ -48,6 +48,8 @@ include("common-testing", "spigot-testing", "paper-testing", "velocity-testing")
 include("benchmark")
 // The Kotlin DSL: the platform-independent part, and the command factories of each platform.
 include("common-kotlin", "spigot-kotlin", "paper-kotlin", "velocity-kotlin")
+// The use cases of docs/comparison.md in every definition style, with tests that compare the styles.
+include("examples")
 // Forge, NeoForge and Fabric share one source tree. Nodes are named <loader>-<minecraft version>.
 include("modded")
 include("modded-testing")

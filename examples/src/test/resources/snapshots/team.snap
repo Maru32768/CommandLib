@@ -1,0 +1,37 @@
+# Tree
+team [example.command.team, OP]
+  <team: ObjectArgument> [example.command.team.team, OP]
+    add [example.command.team.add, OP]
+      <player: PlayerArgument> [example.command.team.add.player, OP]
+    remove [example.command.team.remove, OP]
+      <player: PlayerArgument> [example.command.team.remove.player, OP]
+
+# Inputs
+suggest /team  -> [blue, help, red]
+suggest /team red  -> [add, remove]
+/team -> 1
+    Teams: blue, red
+/team help -> 1
+    --------------------------------------------------
+    Manage team members
+    Usage:
+      /team <team> add <player>
+      /team <team> remove <player>
+    --------------------------------------------------
+/team red add Steve -> 1
+    Members: [Steve]
+/team red add Alex -> 1
+    Members: [Alex, Steve]
+/team red remove Steve -> 1
+    Members: [Alex]
+/team red -> 1
+    --------------------------------------------------
+    Manage team members
+    Usage:
+      /team <team> add <player>
+      /team <team> remove <player>
+    --------------------------------------------------
+/team red help -> rejected: Command syntax error: Incorrect argument for command at position 9: team red <--[HERE]
+/team green add Steve -> 0
+    Incorrect argument for command
+    team green<--[HERE]

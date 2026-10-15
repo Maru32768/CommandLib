@@ -1,0 +1,13 @@
+# Tree
+stats [example.command.stats, OP]
+  <player: StringArgument> [example.command.stats.player, OP]
+
+# Inputs
+/stats help -> 1
+    --------------------------------------------------
+    Show a player's kills
+    Usage:
+      /stats <player>
+    --------------------------------------------------
+/stats Steve -> 1
+    Steve has 5 kills

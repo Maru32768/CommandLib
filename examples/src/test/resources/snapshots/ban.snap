@@ -1,0 +1,25 @@
+# Tree
+ban [example.command.ban, OP]
+  --silent, -s
+  --reason, -r <reason>
+  <target: PlayerArgument> [example.command.ban.target, OP]
+
+# Inputs
+/ban help -> 1
+    --------------------------------------------------
+    Ban a player
+    Usage:
+      /ban [options] <target>
+    
+    Options:
+      -s, --silent: Do not announce the ban
+      -r <reason>, --reason <reason>: Why the player is banned
+    --------------------------------------------------
+/ban Steve -> 1
+    Banned Steve: No reason
+/ban -s -r griefing Steve -> 1
+    Banned Steve: griefing (silent)
+/ban --silent --reason "being rude" Alex -> 1
+    Banned Alex: being rude (silent)
+/ban Steve -s -> rejected: Command syntax error: Incorrect argument for command at position 10: ban Steve <--[HERE]
+/ban Steve -> rejected: Command syntax error: Unknown command at position 0: <--[HERE]

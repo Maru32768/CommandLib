@@ -54,7 +54,7 @@ spotless {
         formatJava()
     }
     kotlin {
-        target(javaSources("*-kotlin/src/**/*.kt"))
+        target(javaSources("*-kotlin/src/**/*.kt", "examples/src/**/*.kt"))
         ktlint()
     }
 }

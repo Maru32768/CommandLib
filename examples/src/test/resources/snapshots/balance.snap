@@ -1,0 +1,22 @@
+# Tree
+balance [example.command.balance, OP]
+  pay [example.command.balance.pay, OP]
+    <target: PlayerArgument> <amount: IntegerArgument> [example.command.balance.pay.target.amount, OP]
+
+# Inputs
+/balance help -> 1
+    --------------------------------------------------
+    Show and spend your coins
+    Usage:
+      /balance pay: Pay a player
+    --------------------------------------------------
+/balance -> 1
+    You have 100 coins
+/balance pay Steve 30 -> 1
+    Paid 30 to Steve, 70 left
+/balance -> 1
+    You have 70 coins
+/balance -> 0
+    You have no account.
+/balance pay Steve 1 -> 0
+    You have no account.
