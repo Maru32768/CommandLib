@@ -288,7 +288,7 @@ public final class ArgumentTest extends TestBase {
             });
         }});
 
-        return List.of(buildCommand(command, name + " zombie"));
+        return List.of(buildCommand(command, name + " minecraft:zombie"));
     }
 
     public List<String> enumArgument() {

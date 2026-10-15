@@ -41,11 +41,6 @@ subcommand: `/game start -f arena`. See [options](options.md).
 `UnparsedArgument` is advertised to the client as a greedy string so that the client accepts any characters, which
 makes the client stop completing after it. The server still parses the following arguments. Put it last.
 
-## `minecraft:zombie` is rejected by `EntityTypeArgument` on Spigot
-
-The Spigot `EntityTypeArgument` reads the Bukkit enum name (`zombie`). Paper's reads registry keys. See the
-[argument catalog](arguments.md#registry-backed-values).
-
 ## A `Location` from `LocationArgument` is off by 0.5
 
 Integer x and z coordinates are centered, like vanilla commands (`10 64 10` → `10.5 64 10.5`). Use `getBlockX()` /
