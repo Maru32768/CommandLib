@@ -27,6 +27,14 @@ public class Command extends CommonCommand<CommandContext, Command> {
         super(name);
     }
 
+    /**
+     * A builder of a command named {@code name}, which configures it in one chain. See {@link CommandBuilder}.
+     */
+    @NotNull
+    public static CommandBuilder<CommandContext, Command> builder(@NotNull String name) {
+        return CommandBuilder.of(new Command(name));
+    }
+
     //? if >=1.18 {
     //? if !fabric {
     final List<PermissionNode<Boolean>> permissionEntries(@NotNull String prefix) {

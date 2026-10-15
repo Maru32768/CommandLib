@@ -7,8 +7,8 @@ message path differ.
 
 ## Argument Style
 
-Prefer typed argument instances with `argument(...).execute(...)` over the
-builder style for normal command implementations.
+Prefer typed argument instances with `argument(...).execute(...)` for normal
+command implementations.
 
 ```java
 class MyCommand extends Command {
@@ -22,8 +22,19 @@ class MyCommand extends Command {
 }
 ```
 
-Use the builder style only when the typed shorthand cannot express the required
-shape.
+The typed callbacks take one to seven arguments. For eight or more, pass them
+all to `argument(...)` and read each value typed from its argument instance:
+
+```java
+argument(x1, y1, z1, x2, y2, z2, world, name).execute(ctx -> {
+    double width = ctx.getArgument(x2) - ctx.getArgument(x1);
+});
+```
+
+When the user asks for a chained builder instead of a subclass, use
+`Command.builder(name)...build()`. It has the same methods, and `argument(...)`
+takes a callback for the branch:
+`.argument(new PlayerArgument("target"), b -> b.execute((target, ctx) -> ...))`.
 
 Options such as validation and suggestions are set via fluent methods on the
 argument instance:

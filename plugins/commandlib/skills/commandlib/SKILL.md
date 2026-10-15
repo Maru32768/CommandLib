@@ -50,7 +50,7 @@ Read the files relevant to the user's request. Common public API files include:
 - `common/src/main/java/dev/marulabs/commandlib/CommandOption.java`
 - `common/src/main/java/dev/marulabs/commandlib/Options.java`
 - `common/src/main/java/dev/marulabs/commandlib/branch/ArgumentBranch.java`
-- `common/src/main/java/dev/marulabs/commandlib/ArgumentBuilder.java`
+- `common/src/main/java/dev/marulabs/commandlib/CommandBuilder.java`
 - `common/src/main/java/dev/marulabs/commandlib/CommonArgument.java`
 - `spigot/src/main/java/dev/marulabs/commandlib/argument/`
 

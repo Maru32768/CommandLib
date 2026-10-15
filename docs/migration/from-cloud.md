@@ -5,7 +5,8 @@ The examples use `cloud-paper` / `cloud-bukkit` names on the left and CommandLib
 right. Both end up as Brigadier commands on modern servers, so command syntax and vanilla argument behavior carry over.
 
 The main difference in style: Cloud builds commands with a builder on a `CommandManager` and reads values back by key
-(`ctx.get("name")`). CommandLib declares a `Command` subclass and passes typed values to the executor.
+(`ctx.get("name")`). CommandLib declares a `Command` subclass, or chains `Command.builder(name)` (see
+[Java builder](../java-builder.md)), and passes typed values to the executor.
 
 Features CommandLib does not have yet are marked **Not available**.
 
@@ -67,7 +68,8 @@ class GiveCommand extends Command {
 }
 ```
 
-Typed executors take up to seven arguments. Beyond that, use `argument(builder -> ...)` with `ctx.getArgument(...)`.
+Typed executors take up to seven arguments. Beyond that, `argument(a, b, ..., h).execute(ctx -> ...)` reads each value
+typed with `ctx.getArgument(a)` (see [Java builder](../java-builder.md#eight-or-more-arguments)).
 
 | Cloud | CommandLib |
 |---|---|
@@ -75,7 +77,7 @@ Typed executors take up to seven arguments. Beyond that, use `argument(builder -
 | `optional(name, parser, DefaultValue.constant(v))` | `.optional(v)` on the argument |
 | `optional(name, parser, DefaultValue.dynamic(ctx -> ...))` | `.optional(ctx -> ...)` (an `Extractor`), such as `optional(Command.playerRequirer())` |
 | `optional(name, parser)` + `ctx.optional(name)` | **Not available** as an empty value; give a default, or declare a second branch without the argument |
-| `ctx.get(name)`, `ctx.getOrDefault(name, v)` | Typed executor parameters; `ctx.getArgument(name, Type.class)` in the builder style |
+| `ctx.get(name)`, `ctx.getOrDefault(name, v)` | Typed executor parameters; `ctx.getArgument(argument)` for a branch of eight or more arguments |
 | `literal("start", "s")` | A child command: `addChildren(new Command("start") {{ addAliases("s"); ... }})` |
 | `commandBuilder("game", "g")` (aliases) | `addAliases("g")` |
 | `Command.Builder#meta(key, value)` | **Not available** |

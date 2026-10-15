@@ -85,6 +85,7 @@ See the [argument catalog](docs/arguments.md) for an argument-by-argument compar
 - [Annotated commands](docs/annotations.md): commands as annotated classes, and how they map to the fluent API.
 - [Testing](docs/testing.md): `CommandTester` and `FakeSender` for plugin and mod tests.
 - [Kotlin DSL](docs/kotlin.md): `command { }` blocks, delegated options, and coroutines.
+- [Java builder](docs/java-builder.md): `Command.builder(name)` chains, and branches of eight or more arguments.
 - [Documentation exports and diagnostics](docs/diagnostics.md): Markdown / JSON of the commands and permission nodes,
   and a runtime report of the platform and the registrations.
 - [Troubleshooting](docs/troubleshooting.md).
@@ -421,6 +422,33 @@ CommandLib.register(this, heal)
 
 The block's receiver is the `Command`, so every fluent method (`permission`, `requirePlayer()`, `cooldown`, ...) works
 in it, and the tree, permissions, and help are the same as the fluent API's. See [Kotlin DSL](docs/kotlin.md).
+
+## Java Builder
+
+`Command.builder(name)` configures a command in one chain, without a subclass or an initializer block. `build()`
+returns the same `Command` as the fluent API, with the same tree, help, and permissions:
+
+```java
+Command heal = Command.builder("heal")
+                      .description("Heal a player")
+                      .permission(DefaultPermission.OP)
+                      .addAliases("h")
+                      .configure(Command::requirePlayer)
+                      .argument(new PlayerArgument("target"), new IntegerArgument("amount"),
+                                branch -> branch.execute((target, amount, ctx) -> {
+                                    target.setHealth(Math.min(20, target.getHealth() + amount));
+                                }))
+                      .addChild(Command.builder("all")
+                                       .execute(ctx -> Bukkit.getOnlinePlayers().forEach(p -> p.setHealth(20))))
+                      .build();
+CommandLib.register(this, heal);
+```
+
+The builder has the `Command` methods under the same names; `argument(...)` and `require(...)` take a callback that
+configures the branch, and `configure(...)` reaches platform methods such as `requirePlayer()`. A branch of eight or
+more arguments, which the typed callbacks do not cover, reads each value with `ctx.getArgument(argument)`:
+`argument(x1, y1, z1, x2, y2, z2, world, name).execute(ctx -> ctx.getArgument(world)...)`. See
+[Java builder](docs/java-builder.md).
 
 ## Testing Commands
 

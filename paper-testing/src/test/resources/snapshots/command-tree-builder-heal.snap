@@ -1,0 +1,4 @@
+heal (aliases: h) [myplugin.command.heal, OP]
+  --silent, -s
+  <target: PlayerArgument> <amount: IntegerArgument> [myplugin.command.heal.target.amount, OP]
+  all [myplugin.command.heal.all, ALL]

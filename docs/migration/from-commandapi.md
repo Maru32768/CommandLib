@@ -66,7 +66,8 @@ class MessageCommand extends Command {
 }
 ```
 
-Typed executors take up to seven arguments. Beyond that, use `argument(builder -> ...)` with `ctx.getArgument(...)`.
+Typed executors take up to seven arguments. Beyond that, `argument(a, b, ..., h).execute(ctx -> ...)` reads each value
+typed with `ctx.getArgument(a)` (see [Java builder](../java-builder.md#eight-or-more-arguments)).
 
 ### Argument names
 
