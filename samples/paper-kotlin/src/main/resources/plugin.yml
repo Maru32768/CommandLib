@@ -1,0 +1,4 @@
+name: SamplePaperKotlinPlugin
+version: '${version}'
+main: dev.marulabs.samplekotlin.SamplePlugin
+api-version: 1.21
