@@ -62,8 +62,8 @@
 | NMS Reflection test strategy        | `[~]` | `CommandTester` が `Mockito.mockStatic` で `NMSClassRegistry` をスタブし、軽量な Mock 実装クラス方式で NMS なしテストを実現している。                 | Builder / mock 差し込みの保証拡充、新引数の Mock + Test ルールの継続適用。              |
 | Documentation                       | `[~]` | README（Why CommandLib、比較表）、`docs/compatibility.md`、`arguments` / `errors` / `options` / `suggestions` / `permissions` / `testing` / `troubleshooting` と design docs がある。 | compatibility の結果公開・更新、documentation site。 |
 | Migration guides                    | `[x]` | CommandAPI、Cloud、Lamp、ACF からの移行 guide が `docs/migration/` にある。 | 未実装機能（annotation、Kotlin、DI、locale 等）の実装に合わせた更新。 |
-| Runtime diagnostics                 | `[ ]` | なし。                                                                                                                                     | command tree、permissions、platform capability report。                       |
-| Generated docs / exports            | `[ ]` | なし。                                                                                                                                     | command docs、permission tree Markdown / JSON。                              |
+| Runtime diagnostics                 | `[x]` | `CommandLib.diagnostics()` と opt-in の `CommandLibDiagnosticsCommand` が Spigot / Paper / Forge / NeoForge にある（[`docs/diagnostics.md`](diagnostics.md)）。 | 実サーバーでの検証、plugin 別 filter。 |
+| Generated docs / exports            | `[x]` | `CommandDocs` が command docs と permission tree を Markdown / JSON で出力する。 | 排他 option group と option の `requires` の出力、sender 依存の description。 |
 
 ## 優先度別バックログ
 
@@ -128,13 +128,9 @@
   package のままなので、0.18.0 の release 後に基準を移し、paper と `*-testing` を加え、CI で実行する。
 - `[ ]` downstream mod 向けに JarJar / `include()` と shade + relocate の推奨方針を決めて docs に書く。
 - `[ ]` capability-based registration に移行する。
-- `[ ]` runtime platform capability diagnostics を追加する。
 
 ### P6: Ecosystem と tooling
 
-- `[ ]` command tree documentation generator を追加する。
-- `[ ]` permission tree exporter を追加する。
-- `[ ]` runtime diagnostics command を追加する。
 - `[ ]` example plugin collection を整備する。
 - `[ ]` documentation site を作る。
 - `[ ]` CI を整備する。typed NMS module（`nms/*`）は初回 build で BuildTools を version ごとに実行し（1 version あたり
