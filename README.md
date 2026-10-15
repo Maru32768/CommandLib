@@ -16,7 +16,7 @@ with ease.
 | **Forge**  | `forge-<minecraft-version>` | `1.16.5`, `1.20.1`                             | Use the artifact that matches the target Minecraft version.   |
 | **NeoForge** | `neoforge-<minecraft-version>` | `1.21.1`                                   | Use the artifact that matches the target Minecraft version. Requires Java 21+. |
 | **Mohist** | `spigot` | `1.16.5`, `1.20.1`                                         | Works on Mohist since it's compatible with Spigot.            |
-| **Velocity** | `velocity` | — (unit tests only)                                    | Built against Velocity API `3.4.0`. Requires Java 17+. Proxy arguments only; see [Velocity](#velocity). |
+| **Velocity** | `velocity` | `3.4.0`, `4.2.0` (manual proxy runs, no client)        | Built against Velocity API `3.4.0`. Requires Java 17+. Proxy arguments only; see [Velocity](#velocity). |
 
 ## Features
 

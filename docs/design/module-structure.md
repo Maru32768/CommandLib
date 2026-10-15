@@ -130,7 +130,8 @@ Responsibilities:
   since the client knows only Brigadier's own argument types through a proxy. Spigot / Paper argument parity does not
   apply.
 
-The module compiles against Velocity API 3.4.0 (Java 17). The API used is unchanged up to 4.2.0.
+The module compiles against Velocity API 3.4.0 (Java 17). The API it uses is unchanged up to 4.2.0, and the jar was
+run on Velocity 3.4.0 and 4.2.0 proxies.
 
 ### Forge / NeoForge
 
