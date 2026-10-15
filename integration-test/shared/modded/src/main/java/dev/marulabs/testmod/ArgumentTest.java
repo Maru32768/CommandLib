@@ -4,7 +4,12 @@ import dev.marulabs.commandlib.Command;
 import dev.marulabs.commandlib.CommandContext;
 import dev.marulabs.commandlib.CommonArgument;
 import dev.marulabs.commandlib.argument.*;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
@@ -39,6 +44,7 @@ public final class ArgumentTest extends TestBase {
                            "1 2 3",
                            x -> x.getX() + "," + x.getY() + "," + x.getZ(),
                            "1,2,3"));
+        commands.add(blockPredicateArgument());
         commands.add(check("blockStateArgument",
                            new BlockStateArgument("a"),
                            "minecraft:stone",
@@ -87,6 +93,11 @@ public final class ArgumentTest extends TestBase {
                            playerName + "," + playerUuid));
         commands.add(check("integerArgument", new IntegerArgument("a"), "10", String::valueOf, "10"));
         commands.add(check("integerRangeArgument", new IntegerRangeArgument("a"), "1..10", String::valueOf, "[1..10]"));
+        commands.add(check("itemPredicateArgument",
+                           new ItemPredicateArgument("a"),
+                           "minecraft:diamond",
+                           x -> x.test(new ItemStack(Items.DIAMOND)) + "," + x.test(new ItemStack(Items.DIRT)),
+                           "true,false"));
         commands.add(check("itemStackArgument",
                            new ItemStackArgument("a"),
                            "minecraft:diamond",
@@ -102,6 +113,11 @@ public final class ArgumentTest extends TestBase {
                            "1.25 2.5 3.75",
                            x -> x.getX() + "," + x.getY() + "," + x.getZ(),
                            "1.25,2.5,3.75"));
+        commands.add(check("uncenteredLocationArgument",
+                           new LocationArgument("a", false),
+                           "1 2 3",
+                           x -> x.getX() + "," + x.getY() + "," + x.getZ(),
+                           "1.0,2.0,3.0"));
         // MCProtocolLib 1.16.5 cannot decode brigadier:long in the command tree packet, and registering this
         // case disconnects the integration bot before tests can run.
         //? if >=1.17
@@ -164,6 +180,28 @@ public final class ArgumentTest extends TestBase {
         }});
 
         return buildCommand(name + " " + input);
+    }
+
+    // The predicate tests a block that the command places in the source's level.
+    private String blockPredicateArgument() {
+        String name = "blockPredicateArgument";
+        String key = getKey(name);
+        BlockPredicateArgument arg = new BlockPredicateArgument("a");
+
+        putCommandNotExecutedResult(key);
+        arg.addUncaughtExceptionHandler((e, ctx) -> putException(key, e));
+        command.addChildren(new Command(name) {{
+            argument(arg).execute((a, ctx) -> {
+                ServerLevel level = ctx.getWorld();
+                BlockPos pos = new BlockPos(0, 200, 0);
+                level.setBlockAndUpdate(pos, Blocks.STONE.defaultBlockState());
+                boolean stone = a.test(new BlockInWorld(level, pos, true));
+                level.setBlockAndUpdate(pos, Blocks.DIRT.defaultBlockState());
+                putResult(key, stone + "," + a.test(new BlockInWorld(level, pos, true)), "true,false");
+            });
+        }});
+
+        return buildCommand(name + " minecraft:stone");
     }
 
     private static String entityNames(List<? extends Entity> entities) {
