@@ -47,6 +47,12 @@ public final class ArgumentTest extends TestBase {
                            "Block{minecraft:stone}"));
         commands.add(check("booleanArgument", new BooleanArgument("a"), "true", String::valueOf, "true"));
         commands.add(check("doubleArgument", new DoubleArgument("a"), "1.5", String::valueOf, "1.5"));
+        commands.add(check("doubleRangeArgument",
+                           new DoubleRangeArgument("a"),
+                           "0.5..10",
+                           String::valueOf,
+                           "[0.5..10.0]"));
+        commands.add(check("durationArgument", new DurationArgument("a"), "1h30m", String::valueOf, "PT1H30M"));
         commands.add(check("effectArgument",
                            new EffectArgument("a"),
                            "minecraft:speed",
@@ -80,6 +86,7 @@ public final class ArgumentTest extends TestBase {
                            x -> x.getName() + "," + x.getId(),
                            playerName + "," + playerUuid));
         commands.add(check("integerArgument", new IntegerArgument("a"), "10", String::valueOf, "10"));
+        commands.add(check("integerRangeArgument", new IntegerRangeArgument("a"), "1..10", String::valueOf, "[1..10]"));
         commands.add(check("itemStackArgument",
                            new ItemStackArgument("a"),
                            "minecraft:diamond",

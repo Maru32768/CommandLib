@@ -309,6 +309,8 @@ public class CommandTester implements AutoCloseable {
         mocks.put(NMSArgumentScoreboardTeam.class, MockNMSArgumentScoreboardTeam.class);
         mocks.put(NMSArgumentDimension.class, MockNMSArgumentDimension.class);
         mocks.put(NMSArgumentVec3D.class, MockNMSArgumentVec3D.class);
+        mocks.put(NMSArgumentIntRange.class, MockNMSArgumentIntRange.class);
+        mocks.put(NMSArgumentFloatRange.class, MockNMSArgumentFloatRange.class);
         mocks.put(NMSArgumentEnchantment.class, MockNMSArgumentEnchantment.class);
         mocks.put(NMSArgumentNamespacedKey.class, MockNMSArgumentNamespacedKey.class);
         mocks.put(NMSCraftEnchantment.class, MockNMSCraftEnchantment.class);

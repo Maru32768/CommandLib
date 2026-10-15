@@ -36,6 +36,8 @@ public final class ArgumentTest extends TestBase {
         commands.addAll(booleanArgument());
         commands.addAll(chatColorArgument());
         commands.addAll(doubleArgument());
+        commands.addAll(doubleRangeArgument());
+        commands.addAll(durationArgument());
         commands.addAll(enchantmentArgument());
         commands.addAll(entitiesArgument());
         commands.addAll(entityArgument());
@@ -44,6 +46,7 @@ public final class ArgumentTest extends TestBase {
         commands.addAll(floatArgument());
         commands.addAll(gameModeArgument());
         commands.addAll(integerArgument());
+        commands.addAll(integerRangeArgument());
         commands.addAll(itemStackArgument());
         commands.addAll(literalArgument());
         commands.addAll(locationArgument());
@@ -200,6 +203,54 @@ public final class ArgumentTest extends TestBase {
         }});
 
         return List.of(buildCommand(command, name + " 1.0"));
+    }
+
+    public List<String> doubleRangeArgument() {
+        String name = getMethodName();
+        String key = getKey();
+
+        putCommandNotExecutedResult(key);
+        command.addChildren(new Command(name) {{
+            argument(new DoubleRangeArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
+                putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
+            })).execute((a, ctx) -> {
+                putResult(key, a.toString(), "[0.5..10.0]");
+            });
+        }});
+
+        return List.of(buildCommand(command, name + " 0.5..10"));
+    }
+
+    public List<String> durationArgument() {
+        String name = getMethodName();
+        String key = getKey();
+
+        putCommandNotExecutedResult(key);
+        command.addChildren(new Command(name) {{
+            argument(new DurationArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
+                putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
+            })).execute((a, ctx) -> {
+                putResult(key, a.toString(), "PT1H30M");
+            });
+        }});
+
+        return List.of(buildCommand(command, name + " 1h30m"));
+    }
+
+    public List<String> integerRangeArgument() {
+        String name = getMethodName();
+        String key = getKey();
+
+        putCommandNotExecutedResult(key);
+        command.addChildren(new Command(name) {{
+            argument(new IntegerRangeArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
+                putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
+            })).execute((a, ctx) -> {
+                putResult(key, a.toString(), "[1..10]");
+            });
+        }});
+
+        return List.of(buildCommand(command, name + " 1..10"));
     }
 
     public List<String> enchantmentArgument() {

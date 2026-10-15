@@ -15,6 +15,8 @@ public final class TypedNmsClasses {
                        NMSArgumentEnchantment_paper_1_21_1.class,
                        NMSArgumentEntities_paper_1_21_1.class,
                        NMSArgumentEntity_paper_1_21_1.class,
+                       NMSArgumentFloatRange_paper_1_21_1.class,
+                       NMSArgumentIntRange_paper_1_21_1.class,
                        NMSArgumentItemStack_paper_1_21_1.class,
                        NMSArgumentMobEffect_paper_1_21_1.class,
                        NMSArgumentNamespacedKey_paper_1_21_1.class,

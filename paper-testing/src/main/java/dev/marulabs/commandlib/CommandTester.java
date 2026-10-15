@@ -1,5 +1,6 @@
 package dev.marulabs.commandlib;
 
+import com.google.common.collect.Range;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.LiteralMessage;
 import com.mojang.brigadier.ParseResults;
@@ -10,6 +11,8 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
+import io.papermc.paper.command.brigadier.argument.range.DoubleRangeProvider;
+import io.papermc.paper.command.brigadier.argument.range.IntegerRangeProvider;
 import io.papermc.paper.command.brigadier.argument.resolvers.FinePositionResolver;
 import io.papermc.paper.command.brigadier.argument.resolvers.selector.EntitySelectorArgumentResolver;
 import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver;
@@ -272,6 +275,10 @@ public final class CommandTester implements AutoCloseable {
                      .thenReturn(finePosition());
         argumentTypes.when(ArgumentTypes::itemStack)
                      .thenReturn(word(token -> requireCurrent().fakeItemStack));
+        argumentTypes.when(ArgumentTypes::integerRange)
+                     .thenReturn(range(Integer::valueOf, range -> (IntegerRangeProvider) () -> range));
+        argumentTypes.when(ArgumentTypes::doubleRange)
+                     .thenReturn(range(Double::valueOf, range -> (DoubleRangeProvider) () -> range));
         argumentTypes.when(() -> ArgumentTypes.resource(Mockito.any(RegistryKey.class)))
                      .thenAnswer(invocation -> word(token -> resourceValue(invocation.getArgument(0))));
         return argumentTypes;
@@ -355,6 +362,39 @@ public final class CommandTester implements AutoCloseable {
                         + "'")).createWithContext(reader);
             }
             return value;
+        };
+    }
+
+    /**
+     * Reads a vanilla range such as {@code 1..10}, {@code ..5}, {@code 3..} or {@code 5}, and rejects {@code ..}, a
+     * bound that is not a number, and a minimum above the maximum while parsing like a server.
+     */
+    private static <T extends Comparable<T>, P> ArgumentType<P> range(Function<String, T> parseNumber,
+                                                                      Function<Range<T>, P> provider) {
+        return reader -> {
+            int start = reader.getCursor();
+            String token = readUntilWhitespace(reader);
+            int separator = token.indexOf("..");
+            String min = separator < 0 ? token : token.substring(0, separator);
+            String max = separator < 0 ? token : token.substring(separator + 2);
+            String error;
+            try {
+                T lower = min.isEmpty() ? null : parseNumber.apply(min);
+                T upper = max.isEmpty() ? null : parseNumber.apply(max);
+                if (lower == null && upper == null) {
+                    error = "Expected value or range of values";
+                } else if (lower != null && upper != null && lower.compareTo(upper) > 0) {
+                    error = "Min cannot be bigger than max";
+                } else if (lower == null) {
+                    return provider.apply(Range.atMost(Objects.requireNonNull(upper)));
+                } else {
+                    return provider.apply(upper == null ? Range.atLeast(lower) : Range.closed(lower, upper));
+                }
+            } catch (NumberFormatException e) {
+                error = "Invalid number '" + token + "'";
+            }
+            reader.setCursor(start);
+            throw new SimpleCommandExceptionType(new LiteralMessage(error)).createWithContext(reader);
         };
     }
 

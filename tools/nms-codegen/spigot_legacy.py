@@ -80,6 +80,18 @@ arg("NMSArgumentTile", "ArgumentTile", "ArgumentTile", "NMSArgumentTileLocation"
     c("return NMSArgumentTileLocation.create(ArgumentTile.a(CTX, name));"), throws=False)
 arg("NMSArgumentVec3D", "ArgumentVec3", "ArgumentVec3", "NMSVec3D", "ArgumentVec3.a()",
     c("return NMSVec3D.create(ArgumentVec3.a(CTX, name));"))
+# ArgumentCriterionValue is Mojang's RangeArgument and CriterionConditionValue its MinMaxBounds, whose a() and b() are
+# getMin() and getMax(). The float range has no static getter.
+arg("NMSArgumentIntRange", "ArgumentCriterionValue", "ArgumentCriterionValue", "Range<Integer>",
+    "ArgumentCriterionValue.a()",
+    c("CriterionConditionValue.IntegerRange bounds = ArgumentCriterionValue.b.a(CTX, name);\n"
+      "        return range(bounds.a(), bounds.b());"),
+    ["com.google.common.collect.Range", f"{NMS}.CriterionConditionValue"], throws=False)
+arg("NMSArgumentFloatRange", "ArgumentCriterionValue", "ArgumentCriterionValue", "Range<Double>",
+    "ArgumentCriterionValue.b()",
+    c("CriterionConditionValue.FloatRange bounds = CTX.getArgument(name, CriterionConditionValue.FloatRange.class);\n"
+      "        return doubleRange(bounds.a(), bounds.b());"),
+    ["com.google.common.collect.Range", f"{NMS}.CriterionConditionValue"], throws=False)
 
 w("NMSArgumentProfile", '''    public NMSArgumentProfile_SUFFIX() {
         super(null, ArgumentProfile.class);

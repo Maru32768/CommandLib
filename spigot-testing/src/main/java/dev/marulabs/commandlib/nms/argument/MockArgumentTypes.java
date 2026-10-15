@@ -8,6 +8,7 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import dev.marulabs.commandlib.util.nms.exception.UncheckedCommandSyntaxException;
 
 import java.util.Locale;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
@@ -50,6 +51,37 @@ public final class MockArgumentTypes {
                 throw syntaxError("Unknown " + kind + " '" + key + "'", reader);
             }
             return key;
+        };
+    }
+
+    /**
+     * Reads a vanilla range such as {@code 1..10}, {@code ..5}, {@code 3..} or {@code 5} into its minimum and maximum,
+     * null on an open side, and rejects it while parsing like a server: when it is {@code ..}, a bound is not a
+     * number, or the minimum is above the maximum.
+     */
+    public static <T extends Comparable<T>> ArgumentType<Object[]> bounds(Function<String, T> parseNumber) {
+        return reader -> {
+            int start = reader.getCursor();
+            String token = readToken(reader);
+            int separator = token.indexOf("..");
+            String min = separator < 0 ? token : token.substring(0, separator);
+            String max = separator < 0 ? token : token.substring(separator + 2);
+            try {
+                T lower = min.isEmpty() ? null : parseNumber.apply(min);
+                T upper = max.isEmpty() ? null : parseNumber.apply(max);
+                if (lower == null && upper == null) {
+                    reader.setCursor(start);
+                    throw syntaxError("Expected value or range of values", reader);
+                }
+                if (lower != null && upper != null && lower.compareTo(upper) > 0) {
+                    reader.setCursor(start);
+                    throw syntaxError("Min cannot be bigger than max", reader);
+                }
+                return new Object[]{lower, upper};
+            } catch (NumberFormatException e) {
+                reader.setCursor(start);
+                throw syntaxError("Invalid number '" + token + "'", reader);
+            }
         };
     }
 

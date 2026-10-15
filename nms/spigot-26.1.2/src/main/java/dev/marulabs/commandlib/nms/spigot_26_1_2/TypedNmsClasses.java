@@ -15,6 +15,8 @@ public final class TypedNmsClasses {
                        NMSArgumentEnchantment_spigot_26_1_2.class,
                        NMSArgumentEntities_spigot_26_1_2.class,
                        NMSArgumentEntity_spigot_26_1_2.class,
+                       NMSArgumentFloatRange_spigot_26_1_2.class,
+                       NMSArgumentIntRange_spigot_26_1_2.class,
                        NMSArgumentItemStack_spigot_26_1_2.class,
                        NMSArgumentMobEffect_spigot_26_1_2.class,
                        NMSArgumentNamespacedKey_spigot_26_1_2.class,
