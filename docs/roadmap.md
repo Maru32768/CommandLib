@@ -61,7 +61,7 @@
 | Multi-version integration tests     | `[~]` | `integration-test` aggregator と Spigot（1.16.5〜26.3 の全 release）/ Paper / Mohist / Forge / NeoForge fixtures がある。                                                             | CI matrix、`IntegrationTarget` への platform フィールド追加、result docs、test kit 化。  |
 | NMS Reflection test strategy        | `[~]` | `CommandTester` が `Mockito.mockStatic` で `NMSClassRegistry` をスタブし、軽量な Mock 実装クラス方式で NMS なしテストを実現している。                 | Builder / mock 差し込みの保証拡充、新引数の Mock + Test ルールの継続適用。              |
 | Documentation                       | `[~]` | README（Why CommandLib、比較表）、`docs/compatibility.md`、`arguments` / `errors` / `options` / `suggestions` / `permissions` / `testing` / `troubleshooting` と design docs がある。 | compatibility の結果公開・更新、documentation site。 |
-| Migration guides                    | `[~]` | CommandAPI からの移行 guide（[`docs/migration/from-commandapi.md`](migration/from-commandapi.md)）がある。 | Cloud、Lamp、ACF からの移行 guide。 |
+| Migration guides                    | `[x]` | CommandAPI、Cloud、Lamp、ACF からの移行 guide が `docs/migration/` にある。 | 未実装機能（annotation、Kotlin、DI、locale 等）の実装に合わせた更新。 |
 | Runtime diagnostics                 | `[ ]` | なし。                                                                                                                                     | command tree、permissions、platform capability report。                       |
 | Generated docs / exports            | `[ ]` | なし。                                                                                                                                     | command docs、permission tree Markdown / JSON。                              |
 
