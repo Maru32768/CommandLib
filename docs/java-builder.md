@@ -54,9 +54,10 @@ Command heal = new Command("heal") {{
 
 The builder has the configuration methods of `Command` under the same names, each returning the builder:
 `description`, `serverHelp`, `permission`, `permissionDescription`, `addAliases`, `option`, `mutuallyExclusive`,
-`addPrerequisite`, `addPreprocess`, `addMiddleware`, `confirm`, `cooldown`, `execute`, `executeAsync`,
+`addPrerequisite`, `addPreprocess`, `addMiddleware`, `provide`, `confirm`, `cooldown`, `execute`, `executeAsync`,
 `addUncaughtExceptionHandler`, `addChildren`, `disableParentPrerequisite` and `disableParentMiddleware`. They behave as
-described for the fluent API ([permissions](permissions.md), [options](options.md), [execution](execution.md)).
+described for the fluent API ([permissions](permissions.md), [options](options.md), [execution](execution.md),
+[context values](context-values.md)).
 
 The methods that return a branch on `Command` take a callback for it instead:
 

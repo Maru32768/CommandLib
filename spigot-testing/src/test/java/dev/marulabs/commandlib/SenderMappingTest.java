@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -63,6 +64,25 @@ class SenderMappingTest {
         }};
     }
 
+    private static Command builder(Games games) {
+        return Command.builder("team")
+                      .provide(GamePlayer.class,
+                               ctx -> games.of(Command.playerRequirer()
+                                                      .extract(ctx)))
+                      .addChild(Command.builder("show")
+                                       .execute(ctx -> ctx.sendMessage(ctx.get(GamePlayer.class)
+                                                                          .describe())))
+                      .addChild(Command.builder("join")
+                                       .argument(new StringArgument("team"), branch -> branch.execute((team, ctx) -> {
+                                           GamePlayer player = ctx.get(GamePlayer.class);
+                                           games.teams.put(ctx.getPlayer()
+                                                              .getName(),
+                                                           team);
+                                           ctx.sendMessage(player.describe() + " joins " + team);
+                                       })))
+                      .build();
+    }
+
     @dev.marulabs.commandlib.annotation.Command("team")
     static final class AnnotatedTeamCommand {
         @Dependency
@@ -92,20 +112,20 @@ class SenderMappingTest {
     }
 
     @Test
-    void fluent_and_annotated_commands_get_the_mapped_sender() {
-        assertThat(run(true)).isEqualTo(run(false))
-                             .containsExactly("Steve of red",
-                                              "Steve of red joins blue",
-                                              "Steve of blue",
-                                              "This command can only be executed by a player.");
+    void fluent_builder_and_annotated_commands_get_the_mapped_sender() {
+        assertThat(run(SenderMappingTest::annotated)).isEqualTo(run(SenderMappingTest::fluent))
+                                                     .isEqualTo(run(SenderMappingTest::builder))
+                                                     .containsExactly("Steve of red",
+                                                                      "Steve of red joins blue",
+                                                                      "Steve of blue",
+                                                                      "This command can only be executed by a player.");
     }
 
-    private static List<String> run(boolean annotated) {
+    private static List<String> run(Function<Games, Command> command) {
         Games games = games();
         FakeSender steve = FakeSender.player("Steve");
         FakeSender console = FakeSender.console();
-        try (CommandTester tester = new CommandTester(() -> annotated ? annotated(games) : fluent(games),
-                                                      "test.command")) {
+        try (CommandTester tester = new CommandTester(() -> command.apply(games), "test.command")) {
             tester.execute("team show", steve);
             tester.execute("team join blue", steve);
             tester.execute("team show", steve);

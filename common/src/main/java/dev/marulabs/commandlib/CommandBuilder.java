@@ -288,6 +288,24 @@ public final class CommandBuilder<C extends CommonCommandContext<?, ?>, T extend
     }
 
     /**
+     * See {@link CommonCommand#provide(ContextKey, Extractor)}.
+     */
+    public <V> CommandBuilder<C, T> provide(@NotNull ContextKey<V> key,
+                                            @NotNull Extractor<? super C, ? extends V> provider) {
+        command.provide(key, provider);
+        return this;
+    }
+
+    /**
+     * See {@link CommonCommand#provide(Class, Extractor)}.
+     */
+    public <V> CommandBuilder<C, T> provide(@NotNull Class<V> type,
+                                            @NotNull Extractor<? super C, ? extends V> provider) {
+        command.provide(type, provider);
+        return this;
+    }
+
+    /**
      * See {@link CommonCommand#confirm()}.
      */
     public CommandBuilder<C, T> confirm() {
