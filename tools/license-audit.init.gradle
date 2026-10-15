@@ -1,0 +1,57 @@
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
+import org.gradle.api.artifacts.component.ModuleComponentIdentifier
+import org.gradle.api.artifacts.result.UnresolvedDependencyResult
+
+// Usage: ./gradlew -I tools/license-audit.init.gradle licenseDependencyReport
+// Each project resolves its own configurations under Gradle's project lock.
+gradle.projectsEvaluated {
+    def root = gradle.rootProject
+    def reportTasks = []
+    def reportFiles = []
+    def publishedVersion = root.version.toString()
+    root.allprojects.findAll { it.plugins.hasPlugin('maven-publish') }.sort { it.path }.each { target ->
+        def projectPath = target.path
+        def configurations = ['compileClasspath', 'runtimeClasspath'].collect { target.configurations.findByName(it) }
+            .findAll { it != null && it.canBeResolved }
+        def output = target.layout.buildDirectory.file('reports/licenses/project-dependencies.json').get().asFile
+        reportFiles.add(output)
+        reportTasks.add(target.tasks.register('licenseDependencyReport') {
+            group = 'verification'
+            description = 'Records selected compile/runtime modules for license review.'
+            notCompatibleWithConfigurationCache('Resolves configurations at execution time.')
+            doLast {
+                def rows = configurations.collect { config ->
+                    def result = config.incoming.resolutionResult
+                    def unresolved = result.allDependencies.findAll { it instanceof UnresolvedDependencyResult }
+                        .collect { [requested: it.requested.displayName, reason: it.failure.message] }
+                    def modules = result.allComponents.findAll { it.id instanceof ModuleComponentIdentifier }
+                        .collect { [group: it.id.group, name: it.id.module, version: it.id.version] }
+                        .sort { a, b -> "${a.group}:${a.name}:${a.version}" <=> "${b.group}:${b.name}:${b.version}" }
+                    [project: projectPath, configuration: config.name, modules: modules, unresolved: unresolved]
+                }
+                output.parentFile.mkdirs()
+                output.setText(JsonOutput.prettyPrint(JsonOutput.toJson(rows)) + '\n', 'UTF-8')
+            }
+        })
+    }
+    def destination = root.layout.buildDirectory.file('reports/licenses/dependencies.json').get().asFile
+    root.tasks.register('licenseDependencyReport') {
+        group = 'verification'
+        description = 'Collects dependency inventories of all Maven-published modules.'
+        dependsOn(reportTasks)
+        doLast {
+            def rows = reportFiles.collectMany { new JsonSlurper().parse(it, 'UTF-8') }
+            destination.parentFile.mkdirs()
+            destination.setText(JsonOutput.prettyPrint(JsonOutput.toJson([
+                projectVersion: publishedVersion,
+                scope: 'Selected external compile/runtime modules of Maven-published projects; not a license certification or a complete toolchain/server SBOM.',
+                configurations: rows
+            ])) + '\n', 'UTF-8')
+            logger.lifecycle("Dependency inventory: ${destination}")
+            if (rows.any { !it.unresolved.isEmpty() }) {
+                throw new GradleException('Unresolved dependencies remain; see dependencies.json. Do not treat this inventory as complete.')
+            }
+        }
+    }
+}

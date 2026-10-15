@@ -977,3 +977,7 @@ CommandLib is licensed under the MIT License. See [LICENSE](./LICENSE).
 
 Spigot, Paper, Bukkit, Minecraft, Brigadier, Forge, and other platform APIs or runtimes are separate projects and may
 be governed by their own license terms. They are not bundled with CommandLib unless explicitly stated otherwise.
+
+See [third-party dependencies and distribution policy](./THIRD_PARTY_NOTICES.md) for dependency licenses,
+GPL platform integration, shading obligations, and Minecraft/mapping distribution restrictions.
+The MIT license for CommandLib's original code does not override upstream terms for a combined distribution.

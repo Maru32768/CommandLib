@@ -124,13 +124,13 @@ subprojects {
         }
     }
 
-    tasks.named<Jar>("jar") {
-        doFirst {
-            copy {
-                from(project.rootDir.toPath().toAbsolutePath())
-                into(layout.buildDirectory.dir("resources/main"))
-                include("LICENSE*")
-            }
+    // Legal documents are inputs of every archive, including sources, javadoc and remapped jars.
+    tasks.withType<Jar>().configureEach {
+        from(rootProject.file("LICENSE"))
+        from(rootProject.file("THIRD_PARTY_NOTICES.md"))
+        // Older builds copied LICENSE into resources/main; avoid duplicate entries on incremental builds.
+        filesMatching(listOf("LICENSE", "THIRD_PARTY_NOTICES.md")) {
+            duplicatesStrategy = DuplicatesStrategy.EXCLUDE
         }
     }
 
