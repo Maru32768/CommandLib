@@ -3,11 +3,13 @@ package dev.marulabs.testmod;
 import dev.marulabs.commandlib.Command;
 import dev.marulabs.commandlib.CommandActor;
 import dev.marulabs.commandlib.CommandActorType;
+import dev.marulabs.commandlib.util.Location;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.entity.Entity;
 
 import java.util.List;
 
-// Commands are dispatched from the server console source.
+// Commands are dispatched from the server console source, some through /execute.
 public final class ActorTest extends TestBase {
     public ActorTest(Command command) {
         super(command);
@@ -15,7 +17,52 @@ public final class ActorTest extends TestBase {
 
     @Override
     public List<String> build() {
-        return List.of(consoleActorType(), consoleActorUnwrapsServer());
+        return List.of(consoleActorType(),
+                       consoleActorUnwrapsServer(),
+                       executeAsPlayerChangesActor(),
+                       executePositionedSetsLocation());
+    }
+
+    // Unlike Bukkit, whose sender stays the console, the actor follows the entity of execute as.
+    private String executeAsPlayerChangesActor() {
+        String name = getMethodName();
+        String key = getKey(name);
+
+        putCommandNotExecutedResult(key);
+        command.addChildren(new Command(name) {{
+            execute(ctx -> {
+                Entity entity = ctx.getEntity();
+                putResult(key,
+                          ctx.getActor()
+                             .getType() + ","
+                                  + ctx.getActor()
+                                       .getName()
+                                  + "," + (entity == null ? "none" : entity.getName()
+                                                                           .getString()),
+                          CommandActorType.PLAYER + "," + TestMain.TEST_PLAYER_NAME + ","
+                                  + TestMain.TEST_PLAYER_NAME);
+            });
+        }});
+
+        return "execute as " + TestMain.TEST_PLAYER_NAME + " run " + buildCommand(name);
+    }
+
+    private String executePositionedSetsLocation() {
+        String name = getMethodName();
+        String key = getKey(name);
+
+        putCommandNotExecutedResult(key);
+        command.addChildren(new Command(name) {{
+            execute(ctx -> {
+                Location location = ctx.getLocation();
+                putResult(key,
+                          location.getX() + "," + location.getY() + "," + location.getZ() + "," + location.getYaw()
+                                  + "," + location.getPitch(),
+                          "10.25,70.5,-20.75,90.0,45.0");
+            });
+        }});
+
+        return "execute positioned 10.25 70.5 -20.75 rotated 90 45 run " + buildCommand(name);
     }
 
     private String consoleActorType() {

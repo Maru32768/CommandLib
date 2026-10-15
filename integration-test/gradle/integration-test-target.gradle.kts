@@ -297,7 +297,7 @@ fun writeServerProperties(serverDir: File, port: Int) {
         generate-structures=false
         allow-nether=false
         allow-flight=true
-        enable-command-block=false
+        enable-command-block=true
         enable-jmx-monitoring=false
         enable-query=false
         enable-rcon=false

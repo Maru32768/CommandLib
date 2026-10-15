@@ -160,6 +160,9 @@ class IntegrationTest {
                     String afterReload = logs.substring(logs.indexOf(reloadMarker));
                     assertThat(afterReload).as("server log after the reload")
                                            .doesNotContain("Failed to load function commandlibtest:probe")
+                                           .doesNotContain("Failed to load function commandlibtest:load")
+                                           .doesNotContain("Failed to load function commandlibtest:tagged")
+                                           .doesNotContain("missing following references: commandlibtest:")
                                            .contains("Failed to load function commandlibtest:broken");
                 }
 

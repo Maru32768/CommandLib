@@ -168,6 +168,16 @@ Notes:
 - MCProtocolLib 1.16.5 cannot decode `brigadier:long`, so the `LongArgument` case is not registered on 1.16.5, the
   same as the Spigot fixture.
 
+## Vanilla Command Integration
+
+The Bukkit-family fixtures (`VanillaExecutionTest`, `DataPackFunctionTest`) run commands the way vanilla content
+does: through `/execute as|at|positioned|rotated ... run`, from two command blocks placed over the world spawn and
+powered by redstone blocks (`server.properties` enables command blocks), from a data pack function, from a function tag
+and from `#minecraft:load`. Command blocks and `#minecraft:load` run on a later tick, so their checks are dispatched after
+`/minecraft:reload`, through `TestBase#afterReload`, a few ticks after the reload is applied. The Forge and NeoForge
+fixture checks `/execute as` and `/execute positioned ... rotated` in `ActorTest`. The verified behavior is described in
+[`docs/vanilla-integration.md`](../docs/vanilla-integration.md).
+
 ## Typed NMS Jars
 
 Targets that run the `spigot` module bundle the typed NMS jars that `:spigot:collectTypedNms` writes to

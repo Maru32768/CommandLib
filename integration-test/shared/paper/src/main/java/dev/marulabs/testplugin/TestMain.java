@@ -18,6 +18,7 @@ import org.bukkit.scoreboard.Scoreboard;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
@@ -29,6 +30,7 @@ public class TestMain {
     private static final String TEST_PLAYER_NAME = "Maru32768";
     private static final long RELOAD_POLL_TICKS = 5L;
     private static final long RELOAD_TIMEOUT_TICKS = 20L * 120;
+    private static final long AFTER_RELOAD_DELAY_TICKS = 5L;
     private final Plugin plugin;
     private final Logger logger;
     private boolean errorOccurredOnRegister = false;
@@ -78,6 +80,7 @@ public class TestMain {
             RuntimePermissionTest runtimePermissionTest = new RuntimePermissionTest(mainCommand, plugin);
             SuggestionTest suggestionTest = new SuggestionTest(mainCommand);
             ScenarioTest scenarioTest = new ScenarioTest(mainCommand, plugin, TEST_PLAYER_NAME);
+            VanillaExecutionTest vanillaExecutionTest = new VanillaExecutionTest(mainCommand, TEST_PLAYER_NAME);
             HelpTopicTest helpTopicTest = new HelpTopicTest(mainCommand, plugin);
             DataPackFunctionTest dataPackFunctionTest = new DataPackFunctionTest(mainCommand);
             new HelpMessageTest(mainCommand); // registers helpMessageRoot for bot-side help message verification
@@ -87,6 +90,7 @@ public class TestMain {
                                            runtimePermissionTest,
                                            suggestionTest,
                                            scenarioTest,
+                                           vanillaExecutionTest,
                                            helpTopicTest,
                                            dataPackFunctionTest);
             List<String> commands = tests.stream()
@@ -171,29 +175,25 @@ public class TestMain {
                                                       return;
                                                   }
                                                   poll[0].cancel();
-                                                  try {
-                                                      if (reloaded) {
-                                                          String probe = MainCommand.NAME + " "
-                                                                  + ScenarioTest.RELOAD_PROBE;
-                                                          CommandDispatchResult dispatchResult = dispatchProbe.dispatch(Bukkit.getConsoleSender(),
-                                                                                                                        probe);
-                                                          tests.forEach(test -> test.hookCommandDispatchError(probe,
-                                                                                                              dispatchResult));
-                                                          List<String> afterReload = List.of(MainCommand.NAME + " "
-                                                                  + HelpTopicTest.AFTER_RELOAD,
-                                                                                             "function "
-                                                                                                     + DataPackFunctionTest.FUNCTION);
-                                                          for (String afterReloadCommand : afterReload) {
-                                                              dispatchProbe.dispatch(Bukkit.getConsoleSender(),
-                                                                                     afterReloadCommand);
-                                                          }
-                                                      } else {
+                                                  if (!reloaded) {
+                                                      try {
                                                           scenarioTest.failReloadProbe("/minecraft:reload did not finish within "
                                                                   + RELOAD_TIMEOUT_TICKS + " ticks.");
+                                                      } finally {
+                                                          finish.run();
                                                       }
-                                                  } finally {
-                                                      finish.run();
+                                                      return;
                                                   }
+                                                  // The server runs #minecraft:load in the tick after the reload,
+                                                  // after the Bukkit tasks such as this one, so the checks wait.
+                                                  Bukkit.getScheduler()
+                                                        .runTaskLater(plugin, () -> {
+                                                            try {
+                                                                dispatchAfterReload(tests, dispatchProbe);
+                                                            } finally {
+                                                                finish.run();
+                                                            }
+                                                        }, AFTER_RELOAD_DELAY_TICKS);
                                               }, RELOAD_POLL_TICKS, RELOAD_POLL_TICKS);
                           } finally {
                               if (!waitingForReload) {
@@ -214,6 +214,19 @@ public class TestMain {
             errorOccurredOnRegister = true;
             logger.log(Level.SEVERE, "COMMANDLIB_TEST_PLUGIN_ENABLE_FAILED", e);
             throw e;
+        }
+    }
+
+    private static void dispatchAfterReload(List<TestBase> tests, CommandDispatchProbe dispatchProbe) {
+        String probe = MainCommand.NAME + " " + ScenarioTest.RELOAD_PROBE;
+        CommandDispatchResult dispatchResult = dispatchProbe.dispatch(Bukkit.getConsoleSender(), probe);
+        tests.forEach(test -> test.hookCommandDispatchError(probe, dispatchResult));
+        List<String> afterReload = new ArrayList<>(List.of(MainCommand.NAME + " " + HelpTopicTest.AFTER_RELOAD,
+                                                           "function " + DataPackFunctionTest.FUNCTION));
+        tests.forEach(test -> afterReload.addAll(test.afterReload()));
+        for (String command : afterReload) {
+            CommandDispatchResult result = dispatchProbe.dispatch(Bukkit.getConsoleSender(), command);
+            tests.forEach(test -> test.hookCommandDispatchError(command, result));
         }
     }
 

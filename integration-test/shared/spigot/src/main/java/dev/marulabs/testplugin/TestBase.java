@@ -22,6 +22,14 @@ public abstract class TestBase {
 
     public abstract List<String> build();
 
+    /**
+     * Commands dispatched after {@code /minecraft:reload} has finished and the server has run the functions of
+     * {@code #minecraft:load}, such as checks of what ran on a later tick.
+     */
+    public List<String> afterReload() {
+        return Collections.emptyList();
+    }
+
     protected final void putResult(TestResult result) {
         resultMap.put(result.key(), result);
     }
