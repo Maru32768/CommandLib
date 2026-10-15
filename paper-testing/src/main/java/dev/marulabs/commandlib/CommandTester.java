@@ -8,6 +8,7 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.Suggestions;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
@@ -52,6 +53,7 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * Executes Paper commands in tests without a running Minecraft server.
@@ -77,6 +79,7 @@ public final class CommandTester implements AutoCloseable {
     private EntityType fakeEntityType = EntityType.ZOMBIE;
     private @Nullable Sound fakeSound;
     private final String permissionPrefix;
+    private final List<Command> commands = new ArrayList<>();
 
     public static Builder builder() {
         return new Builder();
@@ -104,8 +107,9 @@ public final class CommandTester implements AutoCloseable {
         }
 
         try (MockedStatic<ArgumentTypes> ignored = mockArgumentTypes()) {
-            new CommandNodeCreator<>(builder.createCommands(), permissionPrefix).build()
-                                                                                .forEach(dispatcher.getRoot()::addChild);
+            commands.addAll(builder.createCommands());
+            new CommandNodeCreator<>(commands, permissionPrefix).build()
+                                                                .forEach(dispatcher.getRoot()::addChild);
         }
     }
 
@@ -159,6 +163,42 @@ public final class CommandTester implements AutoCloseable {
         } finally {
             restoreCurrent(previous);
         }
+    }
+
+    /**
+     * Returns the texts of the suggestions for the given partial input, waiting for them to complete.
+     */
+    public List<String> suggest(@NotNull String input, @NotNull FakeSender sender) {
+        return suggest(input, sender.asSender());
+    }
+
+    /**
+     * Returns the texts of the suggestions for the given partial input, waiting for them to complete.
+     */
+    public List<String> suggest(@NotNull String input, @NotNull CommandSender sender) {
+        return suggestions(input, sender).join()
+                                         .getList()
+                                         .stream()
+                                         .map(Suggestion::getText)
+                                         .collect(Collectors.toList());
+    }
+
+    /**
+     * Renders the registered commands as indented text: each command with its aliases and permission node, then its
+     * options, argument branches and child commands.
+     */
+    public String commandTree() {
+        return CommandTreeRenderer.render(commands, permissionPrefix);
+    }
+
+    /**
+     * Compares {@link #commandTree()} with {@code src/test/resources/snapshots/<snapshotName>}. A missing snapshot
+     * is written and fails the test; the environment variable {@code COMMANDLIB_UPDATE_SNAPSHOTS=true} rewrites it.
+     *
+     * @throws AssertionError if the tree differs from the snapshot
+     */
+    public void assertCommandTreeMatchesSnapshot(@NotNull String snapshotName) {
+        Snapshots.assertMatches(snapshotName, commandTree());
     }
 
     public String permissionPrefix() {

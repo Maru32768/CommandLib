@@ -10,7 +10,7 @@ class CommonCommandHelpSnapshotTest {
 
         TestCommandContext ctx = runner.execute("a");
 
-        SnapshotAssertions.assertMatchesSnapshot("command-help-root.snap", ctx.messages());
+        Snapshots.assertMatches("command-help-root.snap", String.join("\n", ctx.messages()));
     }
 
     @Test
@@ -19,7 +19,7 @@ class CommonCommandHelpSnapshotTest {
 
         TestCommandContext ctx = runner.execute("a 123 Maru32768");
 
-        SnapshotAssertions.assertMatchesSnapshot("command-help-parent-argument.snap", ctx.messages());
+        Snapshots.assertMatches("command-help-parent-argument.snap", String.join("\n", ctx.messages()));
     }
 
     @Test
@@ -28,7 +28,7 @@ class CommonCommandHelpSnapshotTest {
 
         TestCommandContext ctx = runner.execute("a 123 Maru32768 sub");
 
-        SnapshotAssertions.assertMatchesSnapshot("command-help-argument-child-command.snap", ctx.messages());
+        Snapshots.assertMatches("command-help-argument-child-command.snap", String.join("\n", ctx.messages()));
     }
 
     @Test
@@ -37,7 +37,7 @@ class CommonCommandHelpSnapshotTest {
 
         TestCommandContext ctx = runner.execute("a 123 Maru32768 sub false");
 
-        SnapshotAssertions.assertMatchesSnapshot("command-help-argument-child-argument.snap", ctx.messages());
+        Snapshots.assertMatches("command-help-argument-child-argument.snap", String.join("\n", ctx.messages()));
     }
 
     @Test
@@ -46,7 +46,7 @@ class CommonCommandHelpSnapshotTest {
 
         TestCommandContext ctx = runner.execute("a 123 Maru32768 sub2");
 
-        SnapshotAssertions.assertMatchesSnapshot("command-help-argument-child-description.snap", ctx.messages());
+        Snapshots.assertMatches("command-help-argument-child-description.snap", String.join("\n", ctx.messages()));
     }
 
     @Test
@@ -55,7 +55,7 @@ class CommonCommandHelpSnapshotTest {
 
         TestCommandContext ctx = runner.execute("a hoge");
 
-        SnapshotAssertions.assertMatchesSnapshot("command-help-child-description.snap", ctx.messages());
+        Snapshots.assertMatches("command-help-child-description.snap", String.join("\n", ctx.messages()));
     }
 
     @Test
@@ -71,7 +71,7 @@ class CommonCommandHelpSnapshotTest {
 
         TestCommandContext ctx = runner.execute("scan");
 
-        SnapshotAssertions.assertMatchesSnapshot("command-help-options-only.snap", ctx.messages());
+        Snapshots.assertMatches("command-help-options-only.snap", String.join("\n", ctx.messages()));
     }
 
     @Test
@@ -87,7 +87,7 @@ class CommonCommandHelpSnapshotTest {
 
         TestCommandContext ctx = runner.execute("scan");
 
-        SnapshotAssertions.assertMatchesSnapshot("command-help-options-and-argument.snap", ctx.messages());
+        Snapshots.assertMatches("command-help-options-and-argument.snap", String.join("\n", ctx.messages()));
     }
 
     @Test
@@ -109,7 +109,7 @@ class CommonCommandHelpSnapshotTest {
 
         TestCommandContext ctx = runner.execute("tag");
 
-        SnapshotAssertions.assertMatchesSnapshot("command-help-option-kinds.snap", ctx.messages());
+        Snapshots.assertMatches("command-help-option-kinds.snap", String.join("\n", ctx.messages()));
     }
 
     @Test
@@ -118,7 +118,7 @@ class CommonCommandHelpSnapshotTest {
 
         TestCommandContext ctx = runner.execute("manage");
 
-        SnapshotAssertions.assertMatchesSnapshot("command-help-parent-options-with-child.snap", ctx.messages());
+        Snapshots.assertMatches("command-help-parent-options-with-child.snap", String.join("\n", ctx.messages()));
     }
 
     @Test
@@ -127,7 +127,7 @@ class CommonCommandHelpSnapshotTest {
 
         TestCommandContext ctx = runner.execute("manage start");
 
-        SnapshotAssertions.assertMatchesSnapshot("command-help-child-options.snap", ctx.messages());
+        Snapshots.assertMatches("command-help-child-options.snap", String.join("\n", ctx.messages()));
     }
 
     private TestCommand createParentAndChildOptionsHelpCommand() {

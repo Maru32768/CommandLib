@@ -3,6 +3,7 @@ package dev.marulabs.commandlib;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.Suggestions;
 import dev.marulabs.commandlib.nms.argument.*;
 import dev.marulabs.commandlib.nms.command.MockNMSCommandListenerWrapper;
@@ -36,6 +37,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * Executes commands in tests without a running Minecraft server.
@@ -86,6 +88,8 @@ public class CommandTester implements AutoCloseable {
     }
 
     private final MockedStatic<NMSClassRegistry> nmsRegistryMock;
+    private final List<Command> commands = new ArrayList<>();
+    private final String permissionPrefix;
 
     public static Builder builder() {
         return new Builder();
@@ -118,7 +122,7 @@ public class CommandTester implements AutoCloseable {
     }
 
     private CommandTester(Builder builder) {
-        Objects.requireNonNull(builder.permissionPrefix, "permissionPrefix");
+        permissionPrefix = Objects.requireNonNull(builder.permissionPrefix, "permissionPrefix");
         if (builder.commandSuppliers.isEmpty()) {
             throw new IllegalStateException("At least one command must be registered.");
         }
@@ -132,8 +136,9 @@ public class CommandTester implements AutoCloseable {
         builder.nmsMocks.forEach((lookUpClass, mockClass) -> registerNmsMock(nmsRegistryMock, lookUpClass, mockClass));
 
         try {
-            new CommandNodeCreator<>(builder.createCommands(), builder.permissionPrefix).build()
-                                                                                        .forEach(dispatcher.getRoot()::addChild);
+            commands.addAll(builder.createCommands());
+            new CommandNodeCreator<>(commands, permissionPrefix).build()
+                                                                .forEach(dispatcher.getRoot()::addChild);
         } catch (Exception e) {
             close();
             throw new RuntimeException("Unexpected exception", e);
@@ -219,6 +224,42 @@ public class CommandTester implements AutoCloseable {
             currentCommandSender.remove();
             restoreCurrent(previous);
         }
+    }
+
+    /**
+     * Returns the texts of the suggestions for the given partial input, waiting for them to complete.
+     */
+    public List<String> suggest(String input, FakeSender sender) {
+        return suggest(input, sender.getCommandSender());
+    }
+
+    /**
+     * Returns the texts of the suggestions for the given partial input, waiting for them to complete.
+     */
+    public List<String> suggest(String input, CommandSender sender) {
+        return suggestions(input, sender).join()
+                                         .getList()
+                                         .stream()
+                                         .map(Suggestion::getText)
+                                         .collect(Collectors.toList());
+    }
+
+    /**
+     * Renders the registered commands as indented text: each command with its aliases and permission node, then its
+     * options, argument branches and child commands.
+     */
+    public String commandTree() {
+        return CommandTreeRenderer.render(commands, permissionPrefix);
+    }
+
+    /**
+     * Compares {@link #commandTree()} with {@code src/test/resources/snapshots/<snapshotName>}. A missing snapshot
+     * is written and fails the test; the environment variable {@code COMMANDLIB_UPDATE_SNAPSHOTS=true} rewrites it.
+     *
+     * @throws AssertionError if the tree differs from the snapshot
+     */
+    public void assertCommandTreeMatchesSnapshot(String snapshotName) {
+        Snapshots.assertMatches(snapshotName, commandTree());
     }
 
     @Override

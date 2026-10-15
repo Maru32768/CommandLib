@@ -28,12 +28,7 @@ class BiomeArgumentTest {
             argument(new BiomeArgument("biome")).execute((biome, ctx) -> {
             });
         }}, "test.command")) {
-            var suggestions = tester.suggestions("biome plai", FakeSender.player("Alice"))
-                                    .get()
-                                    .getList();
-
-            assertThat(suggestions).extracting(com.mojang.brigadier.suggestion.Suggestion::getText)
-                                   .contains("minecraft:plains");
+            assertThat(tester.suggest("biome plai", FakeSender.player("Alice"))).contains("minecraft:plains");
         }
     }
 }

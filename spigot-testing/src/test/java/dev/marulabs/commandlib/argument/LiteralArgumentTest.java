@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -43,8 +42,10 @@ class LiteralArgumentTest {
     void suggestions_list_literals_matching_input() {
         try (CommandTester tester = new CommandTester(modeCommand(List.of("on", "off", "auto")), "test.command")) {
             // Literal suggestions match by substring, so "o" also matches "auto".
-            assertThat(suggest(tester, "mode of")).containsExactly("off");
-            assertThat(suggest(tester, "mode o")).containsExactlyInAnyOrder("on", "off", "auto");
+            assertThat(tester.suggest("mode of", FakeSender.player("Alice"))).containsExactly("off");
+            assertThat(tester.suggest("mode o", FakeSender.player("Alice"))).containsExactlyInAnyOrder("on",
+                                                                                                       "off",
+                                                                                                       "auto");
         }
     }
 
@@ -69,14 +70,5 @@ class LiteralArgumentTest {
             argument(new LiteralArgument("value", literals)).execute((value,
                                                                       ctx) -> ctx.sendMessage("mode=" + value));
         }};
-    }
-
-    private static List<String> suggest(CommandTester tester, String input) {
-        return tester.suggestions(input, FakeSender.player("Alice"))
-                     .join()
-                     .getList()
-                     .stream()
-                     .map(com.mojang.brigadier.suggestion.Suggestion::getText)
-                     .collect(Collectors.toList());
     }
 }

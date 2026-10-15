@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -36,14 +35,7 @@ class CommandTesterTest {
             addChildren(new TestCommand("child"));
         }});
 
-        List<String> suggestions = tester.suggestions("root ", FakeSender.console())
-                                         .join()
-                                         .getList()
-                                         .stream()
-                                         .map(com.mojang.brigadier.suggestion.Suggestion::getText)
-                                         .collect(Collectors.toList());
-
-        assertThat(suggestions).contains("child");
+        assertThat(tester.suggest("root ", FakeSender.console())).contains("child");
     }
 
     @Test
@@ -213,14 +205,7 @@ class CommandTesterTest {
             });
         }});
 
-        List<String> suggestions = tester.suggestions("pick a", FakeSender.console())
-                                         .join()
-                                         .getList()
-                                         .stream()
-                                         .map(com.mojang.brigadier.suggestion.Suggestion::getText)
-                                         .collect(Collectors.toList());
-
-        assertThat(suggestions).containsExactlyInAnyOrder("alpha", "beta");
+        assertThat(tester.suggest("pick a", FakeSender.console())).containsExactlyInAnyOrder("alpha", "beta");
     }
 
     @Test

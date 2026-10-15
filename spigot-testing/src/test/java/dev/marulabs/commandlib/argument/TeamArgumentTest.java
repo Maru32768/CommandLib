@@ -1,6 +1,5 @@
 package dev.marulabs.commandlib.argument;
 
-import com.mojang.brigadier.suggestion.Suggestion;
 import dev.marulabs.commandlib.Command;
 import dev.marulabs.commandlib.CommandTester;
 import dev.marulabs.commandlib.FakeSender;
@@ -88,16 +87,11 @@ class TeamArgumentTest {
             });
         }}, "test.command")) {
             tester.execute("team arena_red", sender);
-            assertThat(tester.suggestions("team arena", sender)
-                             .get()
-                             .getList()).extracting(Suggestion::getText)
-                                        .containsExactly("arena_red");
+            assertThat(tester.suggest("team arena", sender)).containsExactly("arena_red");
 
             current.set(second);
             tester.execute("team arena_red", sender);
-            assertThat(tester.suggestions("team arena", sender)
-                             .get()
-                             .getList()).isEmpty();
+            assertThat(tester.suggest("team arena", sender)).isEmpty();
 
             current.set(null);
             tester.execute("team arena_red", sender);

@@ -3,6 +3,7 @@ package dev.marulabs.commandlib;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.Suggestions;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -13,9 +14,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public final class CommandTester implements AutoCloseable {
     private final CommandDispatcher<FakeSender> dispatcher = new CommandDispatcher<>();
+    private final Collection<? extends TestCommand> commands;
+    private final String permissionPrefix;
 
     public static Builder builder() {
         return new Builder();
@@ -41,13 +45,14 @@ public final class CommandTester implements AutoCloseable {
     }
 
     private CommandTester(Builder builder) {
-        Objects.requireNonNull(builder.permissionPrefix, "permissionPrefix");
+        this.permissionPrefix = Objects.requireNonNull(builder.permissionPrefix, "permissionPrefix");
         if (builder.commandSuppliers.isEmpty()) {
             throw new IllegalStateException("At least one command must be registered.");
         }
 
-        new CommandNodeCreator<>(builder.createCommands(), builder.permissionPrefix).build()
-                                                                                    .forEach(dispatcher.getRoot()::addChild);
+        commands = builder.createCommands();
+        new CommandNodeCreator<>(commands, permissionPrefix).build()
+                                                            .forEach(dispatcher.getRoot()::addChild);
     }
 
     /**
@@ -82,6 +87,37 @@ public final class CommandTester implements AutoCloseable {
     public CompletableFuture<Suggestions> suggestions(@NotNull String input, @NotNull FakeSender sender) {
         ParseResults<FakeSender> parseResults = dispatcher.parse(input, sender);
         return dispatcher.getCompletionSuggestions(parseResults);
+    }
+
+    /**
+     * Returns the texts of the suggestions for the given partial input, waiting for them to complete.
+     */
+    @NotNull
+    public List<String> suggest(@NotNull String input, @NotNull FakeSender sender) {
+        return suggestions(input, sender).join()
+                                         .getList()
+                                         .stream()
+                                         .map(Suggestion::getText)
+                                         .collect(Collectors.toList());
+    }
+
+    /**
+     * Renders the registered commands as indented text: each command with its aliases and permission node, then its
+     * options, argument branches and child commands.
+     */
+    @NotNull
+    public String commandTree() {
+        return CommandTreeRenderer.render(commands, permissionPrefix);
+    }
+
+    /**
+     * Compares {@link #commandTree()} with {@code src/test/resources/snapshots/<snapshotName>}. A missing snapshot
+     * is written and fails the test; the environment variable {@code COMMANDLIB_UPDATE_SNAPSHOTS=true} rewrites it.
+     *
+     * @throws AssertionError if the tree differs from the snapshot
+     */
+    public void assertCommandTreeMatchesSnapshot(@NotNull String snapshotName) {
+        Snapshots.assertMatches(snapshotName, commandTree());
     }
 
     @Override

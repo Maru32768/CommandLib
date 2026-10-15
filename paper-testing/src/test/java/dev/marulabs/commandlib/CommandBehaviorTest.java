@@ -8,7 +8,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class CommandBehaviorTest {
     @Test
-    void argumentBranchPermissionFiltersSuggestions() throws Exception {
+    void argumentBranchPermissionFiltersSuggestions() {
         CommandTester tester = new CommandTester(new Command("config") {{
             argument(new StringArgument("key").addSuggestionProvider(sb -> sb.suggest("difficulty"))).permission("custom.config.key")
                                                                                                      .execute((key,
@@ -19,10 +19,7 @@ class CommandBehaviorTest {
                            .hasPermission("custom.config.key"))
                .thenReturn(false);
 
-        assertThat(tester.suggestions("config ", sender)
-                         .get()
-                         .getList()).extracting(com.mojang.brigadier.suggestion.Suggestion::getText)
-                                    .containsExactly("help");
+        assertThat(tester.suggest("config ", sender)).containsExactly("help");
     }
 
     @Test
