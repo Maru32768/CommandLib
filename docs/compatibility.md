@@ -115,7 +115,13 @@ CommandLib は `1.16.5` から最新安定版までのサポートを目標に�
 ### P1
 
 - Paper 1.20.6+ の official Paper command API path の挙動を version ごとに確認する。
-- `/execute`、command block、function、datapack、tag 経由での挙動を version ごとに確認する。
+- `/execute`、command block、function、datapack、tag 経由での挙動を version ごとに確認する。挙動は
+  [vanilla-integration.md](vanilla-integration.md) に記載。Bukkit 系 fixture の `VanillaExecutionTest`（`execute as` /
+  `positioned` / `rotated`、`@s` と `distance` selector、command block の sender と `SuccessCount`）と
+  `DataPackFunctionTest`（function、function tag、`#minecraft:load` が reload 後に 1 回だけ実行されること）、
+  Forge / NeoForge fixture の `ActorTest`（`execute as` と `positioned ... rotated`）を追加済み。2026-10-15 時点では
+  Docker が使えず実サーバーでは未実行のため、各 target で通るまで Tested としない。Forge / NeoForge の command block と
+  function は未確認。
 - Mohist の Forge/Bukkit 混在時の command registration を確認する。
 
 ### P2

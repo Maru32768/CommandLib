@@ -65,6 +65,7 @@ See the [argument catalog](docs/arguments.md) for an argument-by-argument compar
 - [Suggestions](docs/suggestions.md): default, custom, asynchronous, and tooltip suggestions.
 - [Permissions](docs/permissions.md): node names, defaults per platform, registration, and LuckPerms.
 - [Errors](docs/errors.md): what the sender sees when a command fails.
+- [Vanilla integration](docs/vanilla-integration.md): `/execute`, command blocks, functions, and tags.
 - [Testing](docs/testing.md): `CommandTester` and `FakeSender` for plugin and mod tests.
 - [Troubleshooting](docs/troubleshooting.md).
 - [Migrating from CommandAPI](docs/migration/from-commandapi.md).
