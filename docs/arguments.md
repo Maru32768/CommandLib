@@ -99,8 +99,8 @@ Notes:
 
 | CommandLib | Result | Input | CommandAPI | Paper | Spigot | Paper | Forge / NeoForge |
 |---|---|---|---|---|---|---|---|
-| `LocationArgument` | Bukkit `Location` / CommandLib `util.Location` (Forge) | vanilla `vec3`: `x y z`, `~`, `^`; integer x and z are centered (`1 64 1` → `1.5 64 1.5`); world is the sender's | `LocationArgument` (`PRECISE_POSITION`) | `finePosition(true)` | equivalent | equivalent | equivalent |
-| `BlockPosArgument` (Forge / NeoForge) | `BlockPos` | vanilla block position | `LocationArgument` (`BLOCK_POSITION`) | `blockPosition()` | missing | missing | equivalent |
+| `LocationArgument(name[, centerIntegers])` | Bukkit `Location` / CommandLib `util.Location` (Forge) | vanilla `vec3`: `x y z`, `~`, `^`; integer x and z are centered (`1 64 1` → `1.5 64 1.5`) unless `centerIntegers` is false; world is the sender's | `LocationArgument` (`PRECISE_POSITION`) | `finePosition(centerIntegers)` | equivalent | equivalent | equivalent |
+| `BlockPositionArgument` | Bukkit `Location` with integer coordinates in the sender's world / vanilla `BlockPos` | vanilla `block_pos`: integer `x y z`, `~`, `^`; neither the chunk nor the world height is checked | `LocationArgument` (`BLOCK_POSITION`) | `blockPosition()` | equivalent | equivalent | equivalent |
 | `WorldArgument` (Bukkit) | `World` | dimension key such as `minecraft:overworld`, suggested by the server | `WorldArgument` | `world()` | equivalent | equivalent | missing |
 | 2D location | — | — | `Location2DArgument` | `columnBlockPosition()`, `columnFinePosition()` | missing | missing | missing |
 | rotation | — | — | `RotationArgument` | `rotation()` | missing | missing | missing |
@@ -111,9 +111,9 @@ Notes:
 
 Notes:
 
-- `LocationArgument` has no option for uncentered integers or block positions on Bukkit. Use `BlockPosArgument` on
-  Forge / NeoForge. The Spigot module already has an NMS bridge for block positions (`NMSArgumentTileLocation`) that no
-  public argument uses yet.
+- `BlockPositionArgument` resolves the position like Paper's `blockPosition()` resolver and vanilla's
+  `Coordinates#getBlockPos`, not like `BlockPosArgument#getLoadedBlockPos`, so an unloaded or out-of-world position is
+  not an error. Forge / NeoForge return the `BlockPos`; Bukkit returns the block's corner as a `Location`.
 - On Forge / NeoForge, read a dimension with `ResourceLocationArgument` and look it up in the server's levels.
 
 ## Blocks, items, and effects
@@ -127,12 +127,18 @@ Notes:
 | `PotionEffectArgument` (Bukkit) | `PotionEffect` (duration 1, amplifier 0) | effect key such as `minecraft:speed` | `PotionEffectArgument` (`PotionEffectType`) | `resource(MOB_EFFECT)` | partial | partial | — |
 | `EffectArgument` (Forge / NeoForge) | `MobEffect` (`Holder<MobEffect>` on 1.20.5+) | effect key | — | — | — | — | equivalent |
 | `ParticleArgument` | Bukkit `Particle` / vanilla `ParticleOptions` | Spigot, Forge / NeoForge: vanilla particle syntax with options; Paper: particle key only | `ParticleArgument` (`ParticleData`) | `resource(PARTICLE_TYPE)` | partial | partial | equivalent |
-| block predicate | — | — | `BlockPredicateArgument` | `blockInWorldPredicate()` | missing | missing | missing |
-| item predicate | — | — | `ItemStackPredicateArgument` | `itemPredicate()` | missing | missing | missing |
+| `BlockPredicateArgument` | Bukkit: `Predicate<Block>`; Forge / NeoForge: `Predicate<BlockInWorld>` | vanilla `block_predicate`: `stone`, `#minecraft:logs`, `oak_stairs[facing=east]`, NBT | `BlockPredicateArgument` | `blockInWorldPredicate()` | equivalent | partial | equivalent |
+| `ItemPredicateArgument` | `Predicate<ItemStack>` (Bukkit / vanilla) | vanilla `item_predicate`: `stone`, `#minecraft:logs`; NBT before 1.20.5, `*[damage>0]` component tests from then | `ItemStackPredicateArgument` | `itemPredicate()` | equivalent | equivalent | equivalent |
 
 Notes:
 
 - `BlockDataArgument` drops the block entity NBT the input may carry, since `BlockData` cannot hold it.
+- The Bukkit `BlockPredicateArgument` tests a block in its world with its chunk loaded, as `/execute if block` does.
+  On Forge / NeoForge, test `new BlockInWorld(level, pos, true)`. Paper added `blockInWorldPredicate()` in 1.21.8, so
+  on Paper the argument needs 1.21.8 or later; its constructor throws `UnsupportedOperationException` on an older
+  server, hence `partial`.
+- The Bukkit `ItemPredicateArgument` tests a Bukkit item through a server copy of it. An unknown item or block fails
+  while parsing; an unknown tag fails while parsing from 1.19 and, on Spigot and Forge before, when the command runs.
 - `PotionEffectArgument` really selects an effect type. Use `effect.getType()`; the duration and amplifier are
   placeholders.
 - Spigot's `ParticleArgument` accepts the full vanilla syntax (for example dust colors) but returns only the
@@ -259,21 +265,17 @@ The order weighs plugin demand, the CommandAPI / Paper parity gap, and how much 
 
 1. **Text component and signed message** for Paper (`component()`, `signedMessage()`), and a portable component
    argument for Spigot and Forge / NeoForge.
-2. **Block position on Bukkit** and an uncentered location option. The Spigot NMS bridge (`NMSArgumentTileLocation`)
-   and its test mock already exist.
-3. **Item predicate and block predicate.** The Spigot NMS bridge for item predicates (`NMSArgumentPredicateItemStack`)
-   and its mock already exist.
-4. **NBT / SNBT compound.**
-5. **Generic registry argument** (Paper `resource(RegistryKey)` / `resourceKey(RegistryKey)` equivalent) on both
+2. **NBT / SNBT compound.**
+3. **Generic registry argument** (Paper `resource(RegistryKey)` / `resourceKey(RegistryKey)` equivalent) on both
    Bukkit modules.
-6. **Forge / NeoForge parity**: dimension / world, sound, biome, attribute, entity type, objective, game mode, and the
+4. **Forge / NeoForge parity**: dimension / world, sound, biome, attribute, entity type, objective, game mode, and the
    other Bukkit-only registry arguments.
-7. **Rotation, angle, 2D location, axes.**
-8. **Score holder, objective criteria, math operation**, the remaining scoreboard set.
-9. **Function, command, list, map** arguments.
-10. `style`, `hexColor`, `heightMap`, `entityAnchor`, structure mirror / rotation.
-11. **Vanilla `time` in game ticks** (`TimeArgument`, `time()`), for commands that schedule ticks rather than real time;
-    `DurationArgument` covers real-time durations.
+5. **Rotation, angle, 2D location, axes.**
+6. **Score holder, objective criteria, math operation**, the remaining scoreboard set.
+7. **Function, command, list, map** arguments.
+8. `style`, `hexColor`, `heightMap`, `entityAnchor`, structure mirror / rotation.
+9. **Vanilla `time` in game ticks** (`TimeArgument`, `time()`), for commands that schedule ticks rather than real time;
+   `DurationArgument` covers real-time durations.
 
 ## Testing each argument
 
@@ -296,7 +298,8 @@ depends on the artifact:
 | `EntityArgument`, `EntitiesArgument` | mock: names, `@s`, `@p`, `@r`, `@a`, `@e` (`withFakeEntity`) | mock: names, `@a` (`withFakeEntity`) | real selectors; only players exist |
 | `OfflinePlayerArgument`, `OfflinePlayersArgument`, `UUIDArgument`, `UUIDsArgument` | static | static | `UUIDArgument`, `UUIDsArgument`, `GameProfileArgument`: online fake players only |
 | `LocationArgument` | mock: `x y z` numbers | mock: `x y z` numbers, world `null` | real |
-| `BlockPosArgument` | — | — | real |
+| `BlockPositionArgument` | mock: integer `x y z` | mock: integer `x y z`, world `null` | real |
+| `ItemPredicateArgument`, `BlockPredicateArgument` | mock: an item or block id, matched by material; suggests ids | mock: a material id, matched by material; suggests ids (the block predicate needs the Paper 1.21.8 API on the test classpath) | real; tags are not loaded |
 | `WorldArgument` | mock (`withFakeWorld("minecraft:overworld", world)`) | mock (`withFakeWorld(world)`, by key) | — |
 | `BlockDataArgument` / `BlockStateArgument` | mock | mock (`withFakeBlockData`) | real |
 | `ItemStackArgument` | mock | mock (`withFakeItemStack`) | real |

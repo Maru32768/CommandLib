@@ -44,7 +44,8 @@ makes the client stop completing after it. The server still parses the following
 ## A `Location` from `LocationArgument` is off by 0.5
 
 Integer x and z coordinates are centered, like vanilla commands (`10 64 10` → `10.5 64 10.5`). Use `getBlockX()` /
-`getBlockZ()` for block coordinates, or `BlockPosArgument` on Forge / NeoForge.
+`getBlockZ()` for block coordinates, `new LocationArgument(name, false)` to keep integers, or
+`BlockPositionArgument` for a block position.
 
 ## The executor of `PlayersArgument` gets an empty list on Paper
 

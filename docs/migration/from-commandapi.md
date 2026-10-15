@@ -81,7 +81,10 @@ Typed executors take up to seven arguments. Beyond that, use `argument(builder -
 | `EntitySelectorArgument.OnePlayer` / `ManyPlayers` | `PlayerArgument` / `PlayersArgument` (`List<Player>`) |
 | `EntitySelectorArgument.OneEntity` / `ManyEntities` | `EntityArgument` / `EntitiesArgument` (`List<Entity>`) |
 | `PlayerProfileArgument` | `OfflinePlayersArgument`, `UUIDsArgument` |
-| `LocationArgument` (precise) | `LocationArgument` |
+| `LocationArgument` (precise) | `LocationArgument`; `new LocationArgument(name, false)` keeps integer coordinates uncentered |
+| `LocationArgument` (block position) | `BlockPositionArgument` (a `Location` with integer coordinates) |
+| `BlockPredicateArgument` | Same name (`Predicate<Block>`; Paper 1.21.8 or later on Paper) |
+| `ItemStackPredicateArgument` | `ItemPredicateArgument` (`Predicate<ItemStack>`) |
 | `WorldArgument`, `ItemStackArgument`, `EnchantmentArgument`, `ParticleArgument`, `SoundArgument`, `BiomeArgument`, `LootTableArgument`, `RecipeArgument`, `AdvancementArgument`, `NamespacedKeyArgument`, `TeamArgument`, `ObjectiveArgument`, `UUIDArgument`, `EntityTypeArgument`, `ChatColorArgument` (`NamedTextColor` on Paper) | Same names; see the [argument catalog](../arguments.md) for result type differences |
 | `BlockStateArgument` | `BlockDataArgument` (`BlockData`) |
 | `PotionEffectArgument` | `PotionEffectArgument` (returns a `PotionEffect`; use `getType()`) |
@@ -90,7 +93,7 @@ Typed executors take up to seven arguments. Beyond that, use `argument(builder -
 | `ListArgument` | `variadic()` on the element argument (see [optional arguments](#optional-arguments)) |
 | `IntegerRangeArgument` / `DoubleRangeArgument` | Same names; they return Guava `Range<Integer>` / `Range<Double>` instead of `IntegerRange` / `DoubleRange` |
 | `TimeArgument` | `DurationArgument` (a real-time `java.time.Duration` such as `1h30m`; `d` is 24 hours, not 24000 ticks) |
-| `RotationArgument`, `AngleArgument`, `AxisArgument`, `Location2DArgument`, `ChatComponentArgument`, `ChatArgument`, `NBTCompoundArgument`, `BlockPredicateArgument`, `ItemStackPredicateArgument`, `FunctionArgument`, `CommandArgument`, `MapArgument`, `MathOperationArgument`, `ObjectiveCriteriaArgument`, `ScoreHolderArgument` | **Not available.** See [missing arguments](../arguments.md#missing-arguments-by-priority) |
+| `RotationArgument`, `AngleArgument`, `AxisArgument`, `Location2DArgument`, `ChatComponentArgument`, `ChatArgument`, `NBTCompoundArgument`, `FunctionArgument`, `CommandArgument`, `MapArgument`, `MathOperationArgument`, `ObjectiveCriteriaArgument`, `ScoreHolderArgument` | **Not available.** See [missing arguments](../arguments.md#missing-arguments-by-priority) |
 
 ### Optional arguments
 
