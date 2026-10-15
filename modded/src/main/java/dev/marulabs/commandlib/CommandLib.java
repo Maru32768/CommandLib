@@ -1,16 +1,19 @@
 package dev.marulabs.commandlib;
 
 import com.mojang.brigadier.tree.RootCommandNode;
+import net.minecraft.SharedConstants;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 //? if neoforge {
 /*import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.server.permission.PermissionAPI;
 *///?} else {
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.server.permission.PermissionAPI;
 //?}
 import org.jetbrains.annotations.NotNull;
@@ -18,6 +21,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 //? if >=1.18 {
 //? if neoforge {
 /*import net.neoforged.neoforge.event.RegisterCommandsEvent;
@@ -31,7 +36,6 @@ import net.minecraftforge.server.permission.events.PermissionGatherEvent;
 import net.minecraftforge.server.permission.nodes.PermissionNode;
 //?}
 
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -45,20 +49,97 @@ public final class CommandLib {
     //? if >=1.18
     private static final Map<String, PermissionNode<Boolean>> PERMISSIONS = new ConcurrentHashMap<>();
 
+    // The registrations of this copy of CommandLib, which last for the game's lifetime.
+    private static final List<CommandLib> REGISTRATIONS = new CopyOnWriteArrayList<>();
+
     private final Collection<? extends Command> commands;
     private final String permissionPrefix;
 
-    public static void register(@NotNull String permissionPrefix,
-                                @NotNull Command command,
-                                @NotNull Command... commands) {
+    public static CommandLib register(@NotNull String permissionPrefix,
+                                      @NotNull Command command,
+                                      @NotNull Command... commands) {
         ArrayList<Command> list = new ArrayList<>();
         list.add(command);
         Collections.addAll(list, commands);
-        register(permissionPrefix, list);
+        return register(permissionPrefix, list);
     }
 
-    public static void register(@NotNull String permissionPrefix, @NotNull Collection<? extends Command> commands) {
-        new CommandLib(commands, permissionPrefix);
+    public static CommandLib register(@NotNull String permissionPrefix,
+                                      @NotNull Collection<? extends Command> commands) {
+        CommandLib registration = new CommandLib(commands, permissionPrefix);
+        REGISTRATIONS.add(registration);
+        return registration;
+    }
+
+    /**
+     * Returns the documentation of this registration's commands with its permission prefix: Markdown and JSON of the
+     * commands and of the permission nodes registered for them. On 1.18+ the nodes that permission handlers see have
+     * a {@code commandlib.} namespace in front.
+     */
+    public CommandDocs docs() {
+        return CommandDocs.of(permissionPrefix, commands);
+    }
+
+    /**
+     * Reports the platform and the registrations of this copy of CommandLib: the loader and Minecraft version, how the
+     * commands reach the dispatcher, and each registration's commands and permissions. The owner of a registration is
+     * its permission prefix. {@link CommandLibDiagnosticsCommand} sends it to a source.
+     */
+    public static CommandLibDiagnostics diagnostics() {
+        boolean running = ServerLifecycleHooks.getCurrentServer() != null;
+        List<String> platform = new ArrayList<>();
+        //? if neoforge {
+        /*String loader = "neoforge";
+        *///?} else
+        String loader = "forge";
+        platform.add("Artifact: " + loader);
+        platform.add("CommandLib package: " + CommandLib.class.getPackage()
+                                                              .getName());
+        platform.add("Loader: " + loader + " " + loaderVersion(loader));
+        platform.add("Minecraft: " + minecraftVersion());
+        platform.add("Java: " + System.getProperty("java.version"));
+        //? if >=1.18 {
+        platform.add("Command registration: RegisterCommandsEvent on every data reload, or the running server's "
+                + "dispatcher when registered later");
+        platform.add("Permission nodes: PermissionGatherEvent.Nodes, named commandlib.<node>");
+        //?} else {
+        /*platform.add("Command registration: the server's dispatcher when the server has started");
+        platform.add("Permission nodes: PermissionAPI.registerNode when the server has started");
+        *///?}
+        platform.add("Server: " + (running ? "running" : "not running"));
+
+        List<CommandLibDiagnostics.Registration> registrations = new ArrayList<>();
+        for (CommandLib registration : REGISTRATIONS) {
+            CommandDocs docs = registration.docs();
+            registrations.add(new CommandLibDiagnostics.Registration(registration.permissionPrefix,
+                                                                     running ? "server dispatcher"
+                                                                             : "waiting for the server",
+                                                                     running ? docs.labels() : List.of(),
+                                                                     docs));
+        }
+        return new CommandLibDiagnostics(platform, registrations);
+    }
+
+    private static String loaderVersion(String modId) {
+        ModList mods = ModList.get();
+        if (mods == null) {
+            return "(mods not loaded)";
+        }
+        return mods.getModContainerById(modId)
+                   .map(x -> x.getModInfo()
+                              .getVersion()
+                              .toString())
+                   .orElse("(unknown)");
+    }
+
+    private static String minecraftVersion() {
+        try {
+            return SharedConstants.getCurrentVersion()
+                                  .getName();
+        } catch (RuntimeException e) {
+            // The version is detected when the game bootstraps, which tests may skip.
+            return "(unknown)";
+        }
     }
 
     /**

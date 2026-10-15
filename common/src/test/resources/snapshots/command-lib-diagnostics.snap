@@ -1,0 +1,21 @@
+CommandLib diagnostics
+Platform:
+  Artifact: test
+  Minecraft: 1.21.4
+Registrations: 2
+  MyPlugin: prefix myplugin.command, vanilla dispatcher
+    labels: spawn, sp, myplugin:spawn
+    permissions: 2
+  Other: prefix other.command, lifecycle handler
+    labels: (none yet)
+    permissions: 0
+Commands of MyPlugin:
+  spawn (aliases: sp) [myplugin.command.spawn, OP]
+    <target: CommonStringArgument> [myplugin.command.spawn.target, OP]
+Commands of Other:
+  (none)
+Permissions of MyPlugin:
+  myplugin.command.spawn [OP] /spawn
+  myplugin.command.spawn.target [OP] /spawn <target>
+Permissions of Other:
+  (none)

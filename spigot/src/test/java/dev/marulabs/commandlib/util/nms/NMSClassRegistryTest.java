@@ -133,6 +133,19 @@ public class NMSClassRegistryTest {
         assertThat(registry.unavailable("1.16.3")).containsExactly("No typed NMS module matches Minecraft 1.16.3");
     }
 
+    @Test
+    void module_status_tells_which_module_is_in_use_and_why_others_are_not() {
+        NMSClassRegistry registry = new NMSClassRegistry(FIXTURE_MODULES);
+
+        assertThat(registry.moduleStatus("1.20.6")).containsExactly("registry_mismatched: its mappings do not match the plugin",
+                                                                    "registry_typed: available");
+        registry.find(TypedLookUp.class, "1.20.6");
+        assertThat(registry.moduleStatus("1.20.6")).containsExactly("registry_mismatched: its mappings do not match the plugin",
+                                                                    "registry_typed: in use");
+        assertThat(registry.moduleStatus("1.16.5")).containsExactly("registry_missing: the module is not in this jar");
+        assertThat(registry.moduleStatus("1.16.3")).isEmpty();
+    }
+
     private static NMSClassRegistry.TypedModule module(String packageName, String version) {
         return new NMSClassRegistry.TypedModule(packageName, version, version);
     }

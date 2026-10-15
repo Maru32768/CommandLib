@@ -108,6 +108,24 @@ class CommandLibBootstrapTest {
         assertThat(canUse(fireCommandsEvent(), "bootearly", player(true))).isTrue();
     }
 
+    @Test
+    void diagnostics_report_bootstrap_registrations_with_their_labels() {
+        CommandLib.bootstrap(context, namedCommand("bootdiagnosed"));
+        fireCommandsEvent();
+
+        CommandLibDiagnostics.Registration registration = CommandLib.diagnostics()
+                                                                    .registrations()
+                                                                    .stream()
+                                                                    .filter(x -> x.labels()
+                                                                                  .contains("bootdiagnosed"))
+                                                                    .findFirst()
+                                                                    .orElseThrow();
+        assertThat(registration.owner()).isEqualTo("BootPlugin");
+        assertThat(registration.path()).isEqualTo("bootstrap COMMANDS lifecycle handler");
+        assertThat(registration.docs()
+                               .tree()).isEqualTo("bootdiagnosed [bootplugin.command.bootdiagnosed, OP]\n");
+    }
+
     private static boolean canUse(CommandDispatcher<CommandSourceStack> dispatcher, String name, Player sender) {
         CommandSourceStack source = mock(CommandSourceStack.class);
         when(source.getSender()).thenReturn(sender);
@@ -128,9 +146,10 @@ class CommandLibBootstrapTest {
         CommandDispatcher<CommandSourceStack> dispatcher = new CommandDispatcher<>();
         Commands registrar = mock(Commands.class);
         when(registrar.register(any(LiteralCommandNode.class), anyString())).thenAnswer(invocation -> {
+            LiteralCommandNode<CommandSourceStack> node = invocation.getArgument(0);
             dispatcher.getRoot()
-                      .addChild(invocation.getArgument(0));
-            return Set.of();
+                      .addChild(node);
+            return Set.of(node.getLiteral());
         });
         ReloadableRegistrarEvent<Commands> event = mock(ReloadableRegistrarEvent.class);
         when(event.registrar()).thenReturn(registrar);

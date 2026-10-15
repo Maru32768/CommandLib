@@ -75,6 +75,42 @@ public final class NMSClassRegistry {
         return DEFAULT.unavailable(BukkitUtil.getMinecraftVersion());
     }
 
+    /**
+     * Returns each typed NMS module for the running server's version, in the order they are tried, as
+     * {@code <module>: <status>}: {@code in use} when it provided an implementation so far, {@code available}, or why
+     * it cannot be used. Empty when no module supports the version. Runtime diagnostics report it.
+     */
+    public static List<String> moduleStatus() {
+        return DEFAULT.moduleStatus(BukkitUtil.getMinecraftVersion());
+    }
+
+    List<String> moduleStatus(String version) {
+        Set<String> inUse = new HashSet<>();
+        for (Resolution resolution : resolved.values()) {
+            String name = resolution.clazz.getName();
+            if (resolution.version.equals(version) && name.startsWith(TYPED_PACKAGE_PREFIX)) {
+                String rest = name.substring(TYPED_PACKAGE_PREFIX.length());
+                inUse.add(rest.substring(0, Math.max(rest.indexOf('.'), 0)));
+            }
+        }
+        List<String> status = new ArrayList<>();
+        for (TypedModule module : modulesFor(new MinecraftVersion(version))) {
+            String state;
+            String failure = matchesMappings(module) ? classes(module).failure : null;
+            if (!matchesMappings(module)) {
+                state = "its mappings do not match the plugin";
+            } else if (failure != null) {
+                state = failure;
+            } else if (inUse.contains(module.packageName)) {
+                state = "in use";
+            } else {
+                state = "available";
+            }
+            status.add(module.packageName + ": " + state);
+        }
+        return status;
+    }
+
     @SuppressWarnings("unchecked")
     <T extends Class<? extends NMSClass>> T find(T lookUpClass, String version) {
         return (T) resolution(lookUpClass, version);

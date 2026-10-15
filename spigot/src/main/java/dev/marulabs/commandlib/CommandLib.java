@@ -5,6 +5,7 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
 import dev.marulabs.commandlib.util.bukkit.BukkitUtil;
 import dev.marulabs.commandlib.util.bukkit.MinecraftVersion;
+import dev.marulabs.commandlib.util.nms.NMSClassRegistry;
 import dev.marulabs.commandlib.util.nms.command.NMSCommandDispatcher;
 import dev.marulabs.commandlib.util.nms.command.NMSVanillaCommandWrapper;
 import dev.marulabs.commandlib.util.nms.server.NMSCraftServer;
@@ -50,6 +51,8 @@ public final class CommandLib implements Listener {
     private final List<CommandNode<?>> registeredCommands = new ArrayList<>();
     private final List<Permission> registeredPermissions = new ArrayList<>();
     private final List<HelpTopic> registeredHelpTopics = new ArrayList<>();
+    // Whether a COMMANDS lifecycle handler adds the commands again to Paper's dispatcher after a reload.
+    private boolean commandsHandler;
     // Main thread only: the instances not unregistered yet, so a plugin disable removes them at once.
     private static final Set<CommandLib> INSTANCES = new LinkedHashSet<>();
     // Shared by the instances of this copy of CommandLib, which a plugin shades.
@@ -137,10 +140,11 @@ public final class CommandLib implements Listener {
             // usesPaperCommandDispatcher() means Paper 1.20.6+, which always has this event.
             throw new IllegalStateException("Paper's ServerResourcesReloadedEvent is missing", e);
         }
-        boolean commandsHandler = registerCommandsHandler();
+        commandsHandler = registerCommandsHandler();
         EventExecutor executor = (listener, event) -> {
             if (eventClass.isInstance(event)) {
-                ((CommandLib) listener).afterResourcesReload(!commandsHandler);
+                CommandLib instance = (CommandLib) listener;
+                instance.afterResourcesReload(!instance.commandsHandler);
             }
         };
         Bukkit.getPluginManager()
@@ -668,6 +672,67 @@ public final class CommandLib implements Listener {
 
     public void unregister() {
         unregister(true);
+    }
+
+    /**
+     * Returns the documentation of this registration's commands with its permission prefix: Markdown and JSON of the
+     * commands and of the permission nodes registered for them.
+     */
+    public CommandDocs docs() {
+        return CommandDocs.of(permissionPrefix, commands);
+    }
+
+    /**
+     * Reports the platform and the registrations of this copy of CommandLib that are not unregistered: the server and
+     * Minecraft version, how the commands reach the dispatcher, the typed NMS modules for the server, and each
+     * registration's commands and permissions. A plugin that shades and relocates CommandLib reports only its own
+     * registrations. Must be called on the main server thread. {@link CommandLibDiagnosticsCommand} sends it to a
+     * sender.
+     */
+    public static CommandLibDiagnostics diagnostics() {
+        String minecraftVersion = BukkitUtil.getMinecraftVersion();
+        List<String> platform = new ArrayList<>();
+        platform.add("Artifact: spigot");
+        platform.add("CommandLib package: " + CommandLib.class.getPackage()
+                                                              .getName());
+        platform.add("Server: " + Bukkit.getName() + " " + Bukkit.getVersion());
+        platform.add("Minecraft: " + minecraftVersion);
+        platform.add("Java: " + System.getProperty("java.version"));
+        platform.add("Command dispatcher: " + (usesPaperCommandDispatcher()
+                ? "Paper's Brigadier dispatcher (Paper 1.20.6+)" : "vanilla Brigadier dispatcher through NMS"));
+        List<String> modules = NMSClassRegistry.moduleStatus();
+        if (modules.isEmpty()) {
+            platform.add("Typed NMS module: none supports Minecraft " + minecraftVersion);
+        }
+        modules.forEach(x -> platform.add("Typed NMS module " + x));
+        NMSClassRegistry.unavailableClasses()
+                        .forEach(x -> platform.add("NMS problem: " + x));
+
+        List<CommandLibDiagnostics.Registration> registrations = new ArrayList<>();
+        for (CommandLib instance : INSTANCES) {
+            registrations.add(new CommandLibDiagnostics.Registration(instance.plugin.getName(),
+                                                                     instance.registrationPath(),
+                                                                     instance.labels(),
+                                                                     instance.docs()));
+        }
+        return new CommandLibDiagnostics(platform, registrations);
+    }
+
+    private String registrationPath() {
+        if (!usesPaperCommandDispatcher()) {
+            return "vanilla dispatcher and Bukkit command map";
+        }
+        return commandsHandler ? "Paper dispatcher, added again by a COMMANDS lifecycle handler on data reloads"
+                : "Paper dispatcher, added again on ServerResourcesReloadedEvent (registered after enabling)";
+    }
+
+    private List<String> labels() {
+        List<String> labels = new ArrayList<>();
+        for (CommandNode<?> node : registeredCommands) {
+            labels.add(node.getName());
+            labels.add(namespace(plugin) + ":" + node.getName());
+        }
+        return labels;
     }
 
     // PluginDisableEvent is fired while the server/plugin manager is already tearing down the plugin.

@@ -23,6 +23,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
 
 /**
@@ -51,6 +52,8 @@ public final class CommandLib implements Listener {
     private static volatile @Nullable CommandDispatcher<CommandSourceStack> serverDispatcher;
     private static final Map<Plugin, PluginRegistrationState> REGISTRATION_STATES = Collections.synchronizedMap(new WeakHashMap<>());
     private static @Nullable FunctionLoadErrorFilter functionLoadErrorFilter;
+    // The bootstrap registrations, which last for the server's lifetime.
+    private static final List<BootstrapRegistration> BOOTSTRAP_REGISTRATIONS = new CopyOnWriteArrayList<>();
 
     private final Plugin plugin;
     private final PluginRegistrationState registrationState;
@@ -183,13 +186,95 @@ public final class CommandLib implements Listener {
         CommandPermissions.addBootstrapDefaults(commandSet);
         String pluginName = context.getPluginMeta()
                                    .getName();
+        BootstrapRegistration registration = new BootstrapRegistration(pluginName, commandSet);
+        BOOTSTRAP_REGISTRATIONS.add(registration);
         context.getLifecycleManager()
                .registerEventHandler(LifecycleEvents.COMMANDS, event -> {
+                   List<String> labels = new ArrayList<>();
                    for (LiteralCommandNode<CommandSourceStack> node : commandSet.buildNodes()) {
-                       event.registrar()
-                            .register(node, commandSet.description(node, pluginName));
+                       labels.addAll(event.registrar()
+                                          .register(node, commandSet.description(node, pluginName)));
                    }
+                   registration.labels = List.copyOf(labels);
                });
+    }
+
+    /**
+     * Returns the documentation of this registration's commands with its permission prefix: Markdown and JSON of the
+     * commands and of the permission nodes registered for them.
+     */
+    public CommandDocs docs() {
+        return CommandDocs.of(commands.permissionPrefix(), commands.commands());
+    }
+
+    /**
+     * Reports the platform and the registrations of this copy of CommandLib, including bootstrap ones, that are not
+     * unregistered: the server and Minecraft version, how each registration reaches Paper's dispatcher, its labels,
+     * and its commands and permissions. A plugin that shades and relocates CommandLib reports only its own
+     * registrations. {@link CommandLibDiagnosticsCommand} sends it to a sender.
+     */
+    public static CommandLibDiagnostics diagnostics() {
+        List<String> platform = new ArrayList<>();
+        platform.add("Artifact: paper");
+        platform.add("CommandLib package: " + CommandLib.class.getPackageName());
+        platform.add("Server: " + Bukkit.getName() + " " + Bukkit.getVersion());
+        platform.add("Minecraft: " + Bukkit.getMinecraftVersion());
+        platform.add("Java: " + System.getProperty("java.version"));
+        platform.add("Command registration: Paper's Commands API (LifecycleEvents.COMMANDS)");
+        platform.add("Live dispatcher: "
+                + (serverDispatcher == null ? "not seen yet (no COMMANDS event so far)" : "seen in a COMMANDS event"));
+
+        List<CommandLibDiagnostics.Registration> registrations = new ArrayList<>();
+        for (BootstrapRegistration registration : BOOTSTRAP_REGISTRATIONS) {
+            registrations.add(new CommandLibDiagnostics.Registration(registration.pluginName,
+                                                                     "bootstrap COMMANDS lifecycle handler",
+                                                                     registration.labels,
+                                                                     CommandDocs.of(registration.commands.permissionPrefix(),
+                                                                                    registration.commands.commands())));
+        }
+        List<Map.Entry<Plugin, PluginRegistrationState>> entries;
+        synchronized (REGISTRATION_STATES) {
+            entries = new ArrayList<>(REGISTRATION_STATES.entrySet());
+        }
+        for (Map.Entry<Plugin, PluginRegistrationState> entry : entries) {
+            synchronized (entry.getValue()) {
+                String path = registrationPath(entry.getValue().mode);
+                for (CommandLib instance : entry.getValue().instances) {
+                    registrations.add(new CommandLibDiagnostics.Registration(entry.getKey()
+                                                                                  .getName(),
+                                                                             path,
+                                                                             instance.liveLabels(),
+                                                                             instance.docs()));
+                }
+            }
+        }
+        return new CommandLibDiagnostics(platform, registrations);
+    }
+
+    private static String registrationPath(Mode mode) {
+        return switch (mode) {
+            case Mode.Unhandled ignored -> "no COMMANDS lifecycle handler";
+            case Mode.Handled handled when handled.dispatcher() == null ->
+                "COMMANDS lifecycle handler, waiting for the event";
+            case Mode.Handled ignored -> "COMMANDS lifecycle handler";
+            case Mode.Direct ignored ->
+                "added to the live dispatcher (registered after the plugin's initialization), added again when "
+                        + "another plugin's COMMANDS handler runs";
+        };
+    }
+
+    /**
+     * A registration from {@link #bootstrap}: the commands, and the labels Paper gave them in the last COMMANDS event.
+     */
+    private static final class BootstrapRegistration {
+        private final String pluginName;
+        private final CommandSet commands;
+        private volatile List<String> labels = List.of();
+
+        private BootstrapRegistration(String pluginName, CommandSet commands) {
+            this.pluginName = pluginName;
+            this.commands = commands;
+        }
     }
 
     private void doRegister() {
