@@ -73,6 +73,8 @@
 - `[x]` middleware / interceptor API（`addMiddleware`）と async execution（`executeAsync`、`CommandScheduler` による sync thread
   への復帰）を追加し、preprocess / confirm / cooldown を middleware 上に載せる（`docs/execution.md`、
   `docs/design/execution-pipeline.md`、2026-10-15）。
+- `[x]` 8 引数以上を raw types / casts なしで扱える表現（varargs / List の `argument(...)` と `ctx.getArgument(arg)`）と explicit Java
+  builder API（`Command.builder(name)`）を追加する。`ArgumentBuilder` は削除（`docs/java-builder.md`、2026-10-16）。
 - `[x]` annotation API を設計・実装する（reflection で fluent model に変換、Spigot / Paper / Velocity、`docs/annotations.md`、
   2026-10-16）。
 - `[x]` Kotlin DSL を設計・実装する（Spigot / Paper / Velocity、coroutine の `executeSuspend`、`docs/kotlin.md`、2026-10-16）。
