@@ -102,6 +102,8 @@
 - `[ ]` cooldown の reset / query API と永続化（現在は memory 上のみ）、argument branch 単位の confirm / cooldown。
 - `[ ]` permission 以外の state で command の表示を切り替える visibility predicate を追加する（現在は permission を付け外しして
   `CommandLib.refresh(player)` する方式を docs で案内）。
+- `[ ]` option の順列展開を抑える。short flag 6 個で unique node 5,490、player に送る packet では 491,607 node になる（4 個で 2,395）。
+  option の状態ごとに argument node を複製している（`CommandNodeCreator#argumentNodeSupplier`）ため、共有すれば登録 node を約 2 割減らせる。
 - `[ ]` annotation API を Forge / NeoForge に広げ、middleware / prerequisite / option の `requires`・排他 / argument-first child 用の
   annotation を追加する。
 - `[ ]` Kotlin DSL を Forge / NeoForge に広げ、suspend middleware と Kotlin 関数の default 引数からの command 生成を追加する。
@@ -203,8 +205,9 @@ fixture の存在、設計方針の決定、compile 成功だけでは全挙動�
 
 - [ ] 競合比較用の共通 example suite を作る（admin options、optional / variadic、argument-first tree、async I/O、DI、locale、vanilla result）。
 - [ ] 各 example の定義量、取得キー / cast、設定手順、拡張のしやすさ、テスト可能範囲を比較し、差分と制約を公開する。
-- [ ] parse / suggestion の p50 / p95 latency、throughput、allocation と起動 / 登録コストを同条件で計測する。
-  JDK、MC / platform、ライブラリ version、tree 規模、権限、async / cache 条件を記録し、結果を見る前に回帰許容値を決める。
+- [~] parse / suggestion の p50 / p95 latency、throughput、allocation と起動 / 登録コストを同条件で計測する。JMH の `benchmark` module、
+  事前に決めた回帰許容値と `:benchmark:jmhCompare` がある（[`docs/benchmarks.md`](benchmarks.md)）。初回 baseline は高負荷下で取ったため、
+  時間指標で gate する前に idle な環境で取り直す。platform tester / async / 競合比較の計測は未実施。
 - [ ] 競合の各主要領域で同等性を確認し、少なくとも一つの具体的な優位性を example / test / measurement で示す。
   未対応カテゴリの deferred reason は中間 release の判断材料であり、最終的な勝利条件の代わりにはしない。
 - [ ] platform 固有の制約と対象外用途を公開する。CLI / JDA 等への拡張は Minecraft 領域の完成後に別 phase として判断する。
