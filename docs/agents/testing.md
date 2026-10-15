@@ -43,14 +43,22 @@ compile them. Build them after a public API change, one at a time, since
 parallel Loom builds share a cache:
 
 ```bash
-# Spigot and Paper include the repository as a composite build. The Spigot
-# sample builds the typed NMS modules it bundles.
+# Spigot, Paper, Paper Kotlin and Velocity include the repository as a
+# composite build. The Spigot sample builds the typed NMS modules it bundles.
 (cd samples/spigot && ./gradlew build)
 (cd samples/paper && ./gradlew build)
-# ForgeGradle 6 does not run on Gradle 9, so the Forge sample reads mavenLocal.
-./gradlew -Pcommandlib.typedNms=false :common:publishToMavenLocal :modded:forge-1.16.5:publishToMavenLocal
+(cd samples/paper-kotlin && ./gradlew build)
+(cd samples/velocity && ./gradlew build)
+# ForgeGradle 6 does not run on Gradle 9, and Loom remaps mod dependencies from
+# a Maven artifact, so the Forge and Fabric samples read mavenLocal.
+./gradlew -Pcommandlib.typedNms=false :common:publishToMavenLocal :modded:forge-1.16.5:publishToMavenLocal :modded:fabric-1.21.1:publishToMavenLocal
 (cd samples/forge && ./gradlew build -PcommandlibLocal=true)
+(cd samples/fabric && ./gradlew build -PcommandlibLocal=true)
 ```
+
+Every sample shades and relocates CommandLib; check the jar in `build/libs`
+(Fabric: the `remapJar` output without a classifier) has no
+`dev/marulabs/commandlib` entries after a packaging change.
 
 Integration tests may require Docker or a local Minecraft server environment.
 Run them only when the touched behavior requires it or the user asks for it:

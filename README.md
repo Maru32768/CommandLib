@@ -98,18 +98,24 @@ See the [argument catalog](docs/arguments.md) for an argument-by-argument compar
 - [Migrating from Lamp](docs/migration/from-lamp.md).
 - [Migrating from ACF](docs/migration/from-acf.md).
 - [Compatibility](docs/compatibility.md): tested platforms and versions.
+- [Packaging](docs/packaging.md): shading and relocating CommandLib per platform, Jar-in-Jar, and the artifacts.
+- [Sample projects](samples): buildable plugins and mods for each platform.
 
 ## Installation
 
-To ensure stability, we recommend replacing `latest.release` with a specific version such as `0.16.0`.  
+To ensure stability, we recommend replacing `latest.release` with a specific version such as `0.17.2`.  
 You can find the latest version on the [releases page](https://github.com/Maru32768/CommandLib/releases).
+
+Shade CommandLib into your plugin or mod and relocate `dev.marulabs.commandlib` on every platform, as below. See
+[packaging](docs/packaging.md) for the reasons, Maven Shade, Kotlin, and why Jar-in-Jar and Fabric's `include()` are
+not recommended while CommandLib is 0.x. The [sample projects](samples) build this way.
 
 <details>
 <summary>Spigot (Groovy DSL)</summary>
 
 ```groovy
 plugins {
-    id "com.gradleup.shadow" version "8.3.5"
+    id "com.gradleup.shadow" version "9.4.1"
 }
 
 repositories {
@@ -137,7 +143,7 @@ tasks.build.dependsOn tasks.shadowJar
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 plugins {
-    id("com.gradleup.shadow") version "8.3.5"
+    id("com.gradleup.shadow") version "9.4.1"
 }
 
 repositories {
@@ -165,7 +171,7 @@ tasks.named("build") { dependsOn(tasks.named("shadowJar")) }
 
 ```groovy
 plugins {
-    id "com.gradleup.shadow" version "8.3.5"
+    id "com.gradleup.shadow" version "9.4.1"
 }
 
 repositories {
@@ -195,7 +201,7 @@ tasks.build.dependsOn tasks.shadowJar
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 plugins {
-    id("com.gradleup.shadow") version "8.3.5"
+    id("com.gradleup.shadow") version "9.4.1"
 }
 
 repositories {
@@ -225,7 +231,7 @@ tasks.named("build") { dependsOn(tasks.named("shadowJar")) }
 
 ```groovy
 plugins {
-    id "com.gradleup.shadow" version "8.3.5"
+    id "com.gradleup.shadow" version "9.4.1"
 }
 
 repositories {
@@ -261,7 +267,7 @@ reobf {
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 plugins {
-    id("com.gradleup.shadow") version "8.3.5"
+    id("com.gradleup.shadow") version "9.4.1"
 }
 
 repositories {
@@ -297,7 +303,7 @@ tasks.named<ShadowJar>("shadowJar") {
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 plugins {
-    id("com.gradleup.shadow") version "8.3.5"
+    id("com.gradleup.shadow") version "9.4.1"
 }
 
 repositories {
@@ -329,6 +335,13 @@ tasks.named<ShadowJar>("shadowJar") {
 <summary>Fabric (Kotlin DSL)</summary>
 
 ```kotlin
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import net.fabricmc.loom.task.RemapJarTask
+
+plugins {
+    id("com.gradleup.shadow") version "9.4.1"
+}
+
 repositories {
     maven { url = uri("https://jitpack.io") }
 }
@@ -336,11 +349,28 @@ repositories {
 dependencies {
     // Fabric API is required.
     modImplementation("com.github.Maru32768.CommandLib:fabric-1.21.1:latest.release")
-    include("com.github.Maru32768.CommandLib:fabric-1.21.1:latest.release")
-    include("com.github.Maru32768.CommandLib:common:latest.release")
     // Optional: lets permission mods such as LuckPerms answer CommandLib's permission checks.
     modImplementation("me.lucko:fabric-permissions-api:0.3.3")
     include("me.lucko:fabric-permissions-api:0.3.3")
+}
+
+val projectGroup = project.group.toString()
+val projectNameLower = project.name.lowercase()
+val shadowJar = tasks.named<ShadowJar>("shadowJar") {
+    archiveClassifier.set("dev-shadow")
+    dependencies {
+        // The platform artifact and the common artifact it depends on. Loom puts the remapped one in the group
+        // remapped.<group>.
+        include { it.moduleGroup.endsWith("com.github.Maru32768.CommandLib") }
+    }
+    // Keep your fabric.mod.json, not CommandLib's
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    // Avoid package conflicts
+    relocate("dev.marulabs.commandlib", "$projectGroup.$projectNameLower.commandlib")
+}
+// Remap your mod and the relocated CommandLib to intermediary together
+tasks.named<RemapJarTask>("remapJar") {
+    inputFile.set(shadowJar.flatMap { it.archiveFile })
 }
 ```
 
@@ -353,8 +383,10 @@ public final class MyMod implements ModInitializer {
 }
 ```
 
-> **Note:** The jar is a Fabric mod (`commandlib`), so `include` nests it in your mod jar. Without
-> fabric-permissions-api, permission checks use each node's default and the vanilla permission level.
+> **Note:** Declare `fabric-command-api-v2` and `fabric-lifecycle-events-v1` (or `fabric-api`) in your
+> `fabric.mod.json`. The jar is also a Fabric mod (`commandlib`) that `include()` can nest, but only the newest nested
+> copy is loaded; see [packaging](docs/packaging.md#fabric). Without fabric-permissions-api, permission checks use each
+> node's default and the vanilla permission level.
 
 </details>
 
@@ -365,7 +397,7 @@ public final class MyMod implements ModInitializer {
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 plugins {
-    id("com.gradleup.shadow") version "8.3.5"
+    id("com.gradleup.shadow") version "9.4.1"
 }
 
 repositories {
@@ -1345,10 +1377,17 @@ Or in IntelliJ: **View > Tool Windows > Gradle > Download Sources**.
 
 ## Sample Projects
 
-[Overview](samples)  
-[Spigot](samples/spigot)  
-[Paper](samples/paper)  
-[Forge](samples/forge)
+Small buildable plugins and mods that show the main features; see the [overview](samples) for which sample shows
+what.
+
+- [Spigot](samples/spigot) and [Paper](samples/paper): every feature, in Java: optional and variadic arguments,
+  options, middleware and `executeAsync`, confirmation and cooldown, the annotation style, the Java builder, and the
+  diagnostics command.
+- [Paper (Kotlin)](samples/paper-kotlin): the Kotlin DSL.
+- [Velocity](samples/velocity): proxy player and server arguments.
+- [Forge](samples/forge) (1.16.5) and [Fabric](samples/fabric) (1.21.1): the platform-neutral commands in a mod.
+
+Each one shades and relocates CommandLib as described in [packaging](docs/packaging.md).
 
 ## License
 
