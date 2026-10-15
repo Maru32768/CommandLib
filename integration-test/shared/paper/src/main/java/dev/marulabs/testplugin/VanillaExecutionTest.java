@@ -119,7 +119,7 @@ public final class VanillaExecutionTest extends TestBase {
 
         return List.of("execute as " + playerName + " run " + buildCommand(command, name + " @s"),
                        "execute as " + playerName + " at @s run "
-                               + buildCommand(command, name + " @e[type=player,distance=..0.01]"));
+                               + buildCommand(command, name + " @e[type=player,distance=..0.01,limit=1]"));
     }
 
     /**

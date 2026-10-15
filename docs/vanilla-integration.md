@@ -26,7 +26,8 @@ and pitch 45 on every platform. Note that `positioned` centers whole numbers on 
 
 Selector arguments (`EntityArgument`, `PlayerArgument`, and so on) use the vanilla selector parser, so they resolve from
 the changed source: `execute as Steve run mycmd @s` targets Steve, and `@e[distance=..5]` is measured from the position
-that `at` or `positioned` set.
+that `at` or `positioned` set. The parser also keeps vanilla's rule that a single-entity argument such as
+`EntityArgument` rejects a selector that may match several entities, so `@e` needs `limit=1` there.
 
 ### Sender and actor
 
