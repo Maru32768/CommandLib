@@ -28,6 +28,11 @@ tasks.test {
     useJUnitPlatform()
 }
 
+// The annotated example commands take their argument names from their parameters.
+tasks.compileTestJava {
+    options.compilerArgs.add("-parameters")
+}
+
 // The tests run against the classes of :spigot instead of its jar, which bundles the typed NMS modules and would run
 // BuildTools for every supported Spigot version. CommandTester stubs NMSClassRegistry, so the tests never load them.
 configurations.testRuntimeClasspath {

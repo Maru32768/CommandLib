@@ -1,0 +1,80 @@
+# Tree
+arena (aliases: ar) [test.command.arena, OP]
+  create [test.command.arena.create, ALL]
+    --force, -f
+    <name: StringArgument> [size: IntegerArgument] [test.command.arena.create.name.size, ALL]
+  delete [test.command.arena.delete, OP]
+    <name: StringArgument> [test.command.arena.delete.name, OP]
+  invite [test.command.arena.invite, OP]
+    <arena: StringArgument> <players...: PlayerArgument> [test.command.arena.invite.arena.players, OP]
+  join [test.command.arena.join, OP]
+    <arena: StringArgument> [player: PlayerArgument] [test.command.arena.join.arena.player, OP]
+  list [test.command.arena.list, OP]
+    --limit, -n <limit>
+  stats [test.command.arena.stats, OP]
+    <arena: StringArgument> [test.command.arena.stats.arena, OP]
+
+# Permissions
+| Permission | Default | Route | Description |
+| --- | --- | --- | --- |
+| `test.command.arena` | `OP` | `/arena` |  |
+| `test.command.arena.create` | `ALL` | `/arena create` | Create arenas |
+| `test.command.arena.create.name.size` | `ALL` | `/arena create <name> [size]` |  |
+| `test.command.arena.delete` | `OP` | `/arena delete` |  |
+| `test.command.arena.delete.name` | `OP` | `/arena delete <name>` |  |
+| `test.command.arena.invite` | `OP` | `/arena invite` |  |
+| `test.command.arena.invite.arena.players` | `OP` | `/arena invite <arena> <players...>` |  |
+| `test.command.arena.join` | `OP` | `/arena join` |  |
+| `test.command.arena.join.arena.player` | `OP` | `/arena join <arena> [player]` |  |
+| `test.command.arena.list` | `OP` | `/arena list` |  |
+| `test.command.arena.stats` | `OP` | `/arena stats` |  |
+| `test.command.arena.stats.arena` | `OP` | `/arena stats <arena>` |  |
+
+# Suggestions of /arena delete
+help, lobby
+# Admin
+/arena -> 1
+    --------------------------------------------------
+    Manage arenas
+    Usage:
+      /arena create: Create an arena
+      /arena delete
+      /arena invite
+      /arena join
+      /arena list
+      /arena stats
+    --------------------------------------------------
+/arena create -> 1
+    --------------------------------------------------
+    Create an arena
+    Usage:
+      /arena create [options] <name> [size]
+    
+    Options:
+      -f, --force: Replace an existing arena
+    --------------------------------------------------
+/arena create lobby2 -> 1
+    Created lobby2 with 16 slots
+/arena create -f big 32 -> 1
+    Created big with 32 slots (forced)
+/arena create huge 100 -> RuntimeException: Command syntax error: Integer must not be more than 64, found 100 at position 18: ...eate huge <--[HERE]
+    
+/arena list -n 1 -> 1
+    lobby
+/ar list -> 0
+    You must wait 1m before using this command again.
+/arena delete lobby -> 0
+    Run the command again within 10s to confirm. [Confirm]
+/arena delete lobby -> 1
+    Deleted lobby
+/arena invite lobby Steve Alex -> 1
+    Invited Steve, Alex to lobby
+/arena join lobby -> 1
+    Admin joined lobby
+/arena join lobby Steve -> 1
+    Steve joined lobby
+/arena stats lobby -> 1
+    lobby has 5 games
+# Console
+/arena join lobby -> 0
+    This command can only be executed by a player.

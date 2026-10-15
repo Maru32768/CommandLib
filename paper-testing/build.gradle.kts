@@ -29,3 +29,8 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
 }
+
+// The annotated example commands take their argument names from their parameters.
+tasks.compileTestJava {
+    options.compilerArgs.add("-parameters")
+}
