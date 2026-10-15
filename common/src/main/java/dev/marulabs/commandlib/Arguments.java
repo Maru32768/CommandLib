@@ -3,7 +3,6 @@ package dev.marulabs.commandlib;
 import dev.marulabs.commandlib.command.AsyncCommandExecutor;
 import dev.marulabs.commandlib.exception.ArgumentParseException;
 import dev.marulabs.commandlib.exception.CommandPrerequisiteException;
-import dev.marulabs.commandlib.util.ChatColorUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -52,20 +51,8 @@ final class Arguments<C extends CommonCommandContext<?, ?>> {
         }
     }
 
-    String concatTagNames() {
-        if (arguments.isEmpty()) {
-            return "";
-        }
-
-        // Examples: "<target>", "[count]", "<targets...>"
-        return arguments.stream()
-                        .map(x -> {
-                            String name = x.name() + (x instanceof VariadicArgument ? "..." : "");
-                            String open = x.isOptional() ? "[" : "<";
-                            String close = x.isOptional() ? "]" : ">";
-                            return ChatColorUtil.GRAY + open + ChatColorUtil.YELLOW + name + ChatColorUtil.GRAY + close;
-                        })
-                        .collect(Collectors.joining(" "));
+    CommonCommand<C, ?> owner() {
+        return owner;
     }
 
     /**

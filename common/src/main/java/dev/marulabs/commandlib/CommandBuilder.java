@@ -345,6 +345,38 @@ public final class CommandBuilder<C extends CommonCommandContext<?, ?>, T extend
         return this;
     }
 
+    /**
+     * See {@link CommonCommand#helpFormatter(HelpFormatter)}.
+     */
+    public CommandBuilder<C, T> helpFormatter(@NotNull HelpFormatter helpFormatter) {
+        command.helpFormatter(helpFormatter);
+        return this;
+    }
+
+    /**
+     * See {@link CommonCommand#usageFormatter(UsageFormatter)}.
+     */
+    public CommandBuilder<C, T> usageFormatter(@NotNull UsageFormatter usageFormatter) {
+        command.usageFormatter(usageFormatter);
+        return this;
+    }
+
+    /**
+     * See {@link CommonCommand#errorFormatter(ErrorFormatter)}.
+     */
+    public CommandBuilder<C, T> errorFormatter(@NotNull ErrorFormatter errorFormatter) {
+        command.errorFormatter(errorFormatter);
+        return this;
+    }
+
+    /**
+     * See {@link CommonCommand#examples(String...)}.
+     */
+    public CommandBuilder<C, T> examples(@NotNull String... examples) {
+        command.examples(examples);
+        return this;
+    }
+
     public CommandBuilder<C, T> execute(@NotNull CommandExecutor<C> executor) {
         command.execute(executor);
         return this;

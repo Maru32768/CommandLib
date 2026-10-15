@@ -94,6 +94,8 @@ public final class Caption {
     public static final Caption HELP_REQUIRED = builtIn("commandlib.help.required");
     /** {@code up to {count} times}, the note of an option that can be given more than once. */
     public static final Caption HELP_MAX_OCCURRENCES = builtIn("commandlib.help.max_occurrences");
+    /** {@code Examples:}, the heading of the examples in the generated help. */
+    public static final Caption HELP_EXAMPLES = builtIn("commandlib.help.examples");
 
     private final String key;
     private final String defaultText;

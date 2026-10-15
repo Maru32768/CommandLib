@@ -1,0 +1,15 @@
+/arena -> 1
+    [Arena] Manage arenas
+    /arena create - Create an arena
+    /arena mode
+    e.g. /arena create lobby 16
+/arena create -> 1
+    [Arena] Create an arena
+    /arena create <name> [size]
+/arena mode foo 3 -> 0
+    command.unknown.argument
+    ...rena mode foocommand.context.here
+    Usage:
+    /arena mode <mode> <rounds>
+/arena mode solo 3 -> 1
+    Mode SOLO

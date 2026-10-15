@@ -1,0 +1,9 @@
+§7--------------------------------------------------
+Manage arenas
+§cUsage:
+§b  /arena §ecreate§7: Create an arena
+
+§cExamples:
+§b  /arena create lobby
+§b  /arena create lobby 32
+§7--------------------------------------------------

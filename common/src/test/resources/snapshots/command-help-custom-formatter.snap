@@ -1,0 +1,10 @@
+== arena ==
+Manage arenas
+/arena [options] create | Create an arena | OPTIONS,LITERAL
+/arena [options] <arena> join | Join the arena | OPTIONS,ARGUMENT,LITERAL
+/arena [options] <arena> | Show an arena | OPTIONS,ARGUMENT
+option [force] value=false
+example /arena create lobby 16
+== arena create ==
+Create an arena
+/arena create <name> [size] |  | ARGUMENT,ARGUMENT?

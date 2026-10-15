@@ -238,7 +238,10 @@ public final class CommandOption<T, C extends CommonCommandContext<?, ?>> {
         return defaultValue;
     }
 
-    boolean hasValue() {
+    /**
+     * Returns whether this option takes a value, as {@code --limit <limit>} does, instead of being a flag.
+     */
+    public boolean hasValue() {
         return type != null;
     }
 

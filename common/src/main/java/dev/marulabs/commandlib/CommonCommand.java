@@ -45,6 +45,10 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
     private @Nullable Confirmation confirmation = null;
     private @Nullable Cooldown cooldown = null;
     private @Nullable Captions captions = null;
+    private @Nullable HelpFormatter helpFormatter = null;
+    private @Nullable UsageFormatter usageFormatter = null;
+    private @Nullable ErrorFormatter errorFormatter = null;
+    private List<String> examples = List.of();
     // Null until execute is called; the command then runs its help action.
     private @Nullable AsyncCommandExecutor<C> executor;
     private final List<UncaughtExceptionHandler<C>> uncaughtExceptionHandlers = new ArrayList<>();
@@ -606,6 +610,65 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
             return captions;
         }
         return parent != null ? parent.captions() : Captions.DEFAULT;
+    }
+
+    /**
+     * Sets how the generated help of this command and of the child commands that set none of their own is sent.
+     * Without it, the commands use {@link HelpFormatter#DEFAULT}. See {@link HelpFormatter}.
+     */
+    public final void helpFormatter(@NotNull HelpFormatter helpFormatter) {
+        this.helpFormatter = Objects.requireNonNull(helpFormatter);
+    }
+
+    final HelpFormatter helpFormatter() {
+        if (helpFormatter != null) {
+            return helpFormatter;
+        }
+        return parent != null ? parent.helpFormatter() : HelpFormatter.DEFAULT;
+    }
+
+    /**
+     * Sets how the usage lines of this command and of the child commands that set none of their own are formatted,
+     * in the help and in {@link CommandError#usage()}. Without it, the commands use {@link UsageFormatter#DEFAULT}.
+     * See {@link UsageFormatter}.
+     */
+    public final void usageFormatter(@NotNull UsageFormatter usageFormatter) {
+        this.usageFormatter = Objects.requireNonNull(usageFormatter);
+    }
+
+    final UsageFormatter usageFormatter() {
+        if (usageFormatter != null) {
+            return usageFormatter;
+        }
+        return parent != null ? parent.usageFormatter() : UsageFormatter.DEFAULT;
+    }
+
+    /**
+     * Sets how the failures that CommandLib reports for this command, its argument branches and the child commands
+     * that set none of their own are sent. Without it, the commands use {@link ErrorFormatter#DEFAULT}. See
+     * {@link ErrorFormatter}.
+     */
+    public final void errorFormatter(@NotNull ErrorFormatter errorFormatter) {
+        this.errorFormatter = Objects.requireNonNull(errorFormatter);
+    }
+
+    final ErrorFormatter errorFormatter() {
+        if (errorFormatter != null) {
+            return errorFormatter;
+        }
+        return parent != null ? parent.errorFormatter() : ErrorFormatter.DEFAULT;
+    }
+
+    /**
+     * Sets the examples the generated help of this command lists, each a whole input such as
+     * {@code /arena create lobby 16}. A leading {@code /} is added when missing. It replaces the examples set before.
+     */
+    public final void examples(@NotNull String... examples) {
+        this.examples = List.of(examples);
+    }
+
+    final List<String> examples() {
+        return examples;
     }
 
     public final void execute(@NotNull CommandExecutor<C> executor) {

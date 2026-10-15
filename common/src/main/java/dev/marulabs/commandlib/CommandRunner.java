@@ -8,6 +8,7 @@ import dev.marulabs.commandlib.command.CommandMiddleware;
 import dev.marulabs.commandlib.command.Extractor;
 import dev.marulabs.commandlib.command.Prerequisite;
 import dev.marulabs.commandlib.exception.ArgumentParseException;
+import dev.marulabs.commandlib.exception.ArgumentValidationException;
 import dev.marulabs.commandlib.exception.CommandPrerequisiteException;
 import dev.marulabs.commandlib.exception.OptionParseException;
 import dev.marulabs.commandlib.util.UncaughtExceptionHandler;
@@ -86,34 +87,47 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
     private int runInContext(C ctx) throws CommandFailure {
         try {
             if (!platformAdapter.hasPermission(ctx, command.permissionName(permissionPrefix))) {
-                return fail(ctx, () -> ctx.sendFailure(Caption.PERMISSION_DENIED));
+                return fail(ctx,
+                            CommandError.Kind.PERMISSION_DENIED,
+                            null,
+                            null,
+                            () -> ctx.sendFailure(Caption.PERMISSION_DENIED));
             }
 
             try {
                 parseOptions(ctx);
                 validateOptions(ctx);
             } catch (OptionParseException e) {
-                return fail(ctx, () -> e.sendMessage(ctx));
+                return fail(ctx, CommandError.Kind.OPTION, e, null, () -> e.sendMessage(ctx));
             }
 
             for (Arguments<C> arguments : argumentsList) {
                 if (!platformAdapter.hasPermission(ctx, arguments.permissionName(permissionPrefix))) {
-                    return fail(ctx, () -> ctx.sendFailure(Caption.PERMISSION_DENIED));
+                    return fail(ctx,
+                                CommandError.Kind.PERMISSION_DENIED,
+                                null,
+                                null,
+                                () -> ctx.sendFailure(Caption.PERMISSION_DENIED));
                 }
 
                 try {
                     arguments.parse(ctx);
                 } catch (ArgumentParseException e) {
-                    return fail(ctx, () -> e.sendMessage(ctx));
+                    return fail(ctx,
+                                e instanceof ArgumentValidationException ? CommandError.Kind.VALIDATION
+                                        : CommandError.Kind.ARGUMENT,
+                                e,
+                                HelpMessageAction.branchUsage(arguments, ctx),
+                                () -> e.sendMessage(ctx));
                 } catch (CommandPrerequisiteException e) {
                     // The default value of an omitted optional argument can need a prerequisite.
-                    return fail(ctx, () -> e.sendMessage(ctx));
+                    return fail(ctx, CommandError.Kind.PREREQUISITE, e, null, () -> e.sendMessage(ctx));
                 }
             }
             try {
                 prerequisite.check(ctx);
             } catch (CommandPrerequisiteException e) {
-                return fail(ctx, () -> e.sendMessage(ctx));
+                return fail(ctx, CommandError.Kind.PREREQUISITE, e, null, () -> e.sendMessage(ctx));
             }
 
             if (executor == null) {
@@ -232,7 +246,11 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
             return (CommandFailure) e;
         }
         if (e instanceof CommandPrerequisiteException) {
-            return ctx.captureFailure(() -> ((CommandPrerequisiteException) e).sendMessage(ctx));
+            return capture(ctx,
+                           CommandError.Kind.PREREQUISITE,
+                           e,
+                           null,
+                           () -> ((CommandPrerequisiteException) e).sendMessage(ctx));
         }
         if (e instanceof CancellationException) {
             // Someone cancelled the work on purpose, so there is nothing to report.
@@ -240,12 +258,16 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
             });
         }
         if (e instanceof TimeoutException) {
-            CommandFailure failure = ctx.captureFailure(() -> ctx.sendFailure(Caption.TIMEOUT));
+            CommandFailure failure = capture(ctx,
+                                             CommandError.Kind.TIMEOUT,
+                                             e,
+                                             null,
+                                             () -> ctx.sendFailure(Caption.TIMEOUT));
             notifyUncaughtExceptionHandlers(e, ctx);
             return failure;
         }
         e.printStackTrace();
-        CommandFailure failure = ctx.captureFailure(() -> {
+        CommandFailure failure = capture(ctx, CommandError.Kind.UNEXPECTED, e, null, () -> {
             ctx.sendFailure(Caption.UNEXPECTED_ERROR);
             ctx.sendFailure(Caption.SEE_CONSOLE);
         });
@@ -253,8 +275,25 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
         return failure;
     }
 
-    private static int fail(CommonCommandContext<?, ?> ctx, Runnable sendMessages) throws CommandFailure {
-        return fail(ctx.captureFailure(sendMessages));
+    private int fail(C ctx,
+                     CommandError.Kind kind,
+                     @Nullable Throwable exception,
+                     CommandHelp.@Nullable Usage usage,
+                     Runnable sendDefault) throws CommandFailure {
+        return fail(capture(ctx, kind, exception, usage, sendDefault));
+    }
+
+    /**
+     * Collects the messages the command's {@link ErrorFormatter} sends for the failure.
+     */
+    private CommandFailure capture(C ctx,
+                                   CommandError.Kind kind,
+                                   @Nullable Throwable exception,
+                                   CommandHelp.@Nullable Usage usage,
+                                   Runnable sendDefault) {
+        CommandError error = new CommandError(kind, exception, usage, sendDefault);
+        return ctx.captureFailure(() -> command.errorFormatter()
+                                               .format(ctx, error));
     }
 
     private static int fail(CommandFailure failure) throws CommandFailure {
