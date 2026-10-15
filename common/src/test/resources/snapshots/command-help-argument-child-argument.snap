@@ -3,5 +3,4 @@ Sub command
 §cUsage:
 §b  /a §7<§en§7> §7<§ep§7> §esub §7<§efloat§7> §esub§7: Nested sub command
   §b/a §7<§en§7> §7<§ep§7> §esub §7<§eb§7>§7: Boolean argument
-  §b/a §7<§en§7> §7<§ep§7> §esub §7<§efloat§7>§7: Float argument
 §7--------------------------------------------------

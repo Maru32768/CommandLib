@@ -57,7 +57,11 @@ final class HelpMessageAction<S, T, C extends CommonCommandContext<S, T>, U exte
         }
         // Example: "/scan [options] <target>: Scan target"
         for (Arguments<C> arguments : command.argumentsList()) {
-            if (arguments.size() > 0 && hasArgumentPermission(command, arguments, ctx)) {
+            // A branch that only leads to children is listed by its child usages above.
+            boolean endsUsage = arguments.children()
+                                         .isEmpty()
+                    || arguments.isExecutable();
+            if (arguments.size() > 0 && endsUsage && hasArgumentPermission(command, arguments, ctx)) {
                 usages.add(new Usage(path, appendTags(prefix, arguments), arguments.description(ctx)));
             }
         }

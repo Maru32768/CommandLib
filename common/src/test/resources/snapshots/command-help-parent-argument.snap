@@ -5,5 +5,4 @@ Root command
 §b  /a §7<§en§7> §7<§ep§7> §esub §7<§eb§7>§7: Boolean argument
 §b  /a §7<§en§7> §7<§ep§7> §esub §7<§efloat§7> §esub§7: Nested sub command
 §b  /a §7<§en§7> §7<§ep§7> §esub2 §7<§eenum§7>§7: Enum argument
-  §b/a §7<§en§7> §7<§ep§7>§7: Run root arguments
 §7--------------------------------------------------
