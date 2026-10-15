@@ -1051,6 +1051,9 @@ cooldown(Cooldown.of(Duration.ofSeconds(30))
 - Like a middleware, both apply to the command's argument branches and to child commands that set none of their own,
   unless the child calls `disableParentMiddleware()`. Children that inherit a cooldown share it, as do commands given
   the same `Cooldown` instance.
+- Keep the `Cooldown` instance to query or end a sender's cooldown, for example from an admin command:
+  `cooldown.remaining(player.getUniqueId())` is the time left (zero when not on cooldown), `cooldown.remaining(ctx)` the
+  time left for the sender of a context, `reset(uuid)` ends one sender's cooldown and `resetAll()` every one.
 - The state lives in memory and is lost when the server restarts.
 - In tests, pass a `Clock` with `clock(...)` instead of waiting for the time to pass.
 

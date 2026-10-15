@@ -20,7 +20,8 @@ import java.util.function.BiConsumer;
  * The cooldown starts when the command passes its middlewares and is about to execute, and keeps the same sender from
  * executing it again until it ends. Senders are told apart by their unique id, so only senders that have one, such as
  * players and entities, are throttled; the console, remote consoles and command blocks are never on cooldown. Commands
- * given the same instance share one cooldown.
+ * given the same instance share one cooldown. Keep the instance to query or end a sender's cooldown with
+ * {@link #remaining(UUID)} and {@link #reset(UUID)}. The state lives in memory and is lost when the server stops.
  */
 public final class Cooldown {
     private final Duration duration;
@@ -80,19 +81,49 @@ public final class Cooldown {
     }
 
     /**
+     * Returns the time left before the sender with {@code id} may execute the commands again, zero when it is not on
+     * cooldown.
+     */
+    @NotNull
+    public Duration remaining(@NotNull UUID id) {
+        Instant end = endsAt.get(Objects.requireNonNull(id));
+        Instant now = clock.instant();
+        return end == null || !now.isBefore(end) ? Duration.ZERO : Duration.between(now, end);
+    }
+
+    /**
+     * Returns the time left for the sender of {@code ctx}, zero when it is not on cooldown, has no unique id, or has
+     * the bypass permission.
+     */
+    @NotNull
+    public Duration remaining(@NotNull CommonCommandContext<?, ?> ctx) {
+        return throttledId(ctx).map(this::remaining)
+                               .orElse(Duration.ZERO);
+    }
+
+    /**
+     * Ends the cooldown of the sender with {@code id}, so it may execute the commands again at once.
+     */
+    public void reset(@NotNull UUID id) {
+        endsAt.remove(Objects.requireNonNull(id));
+    }
+
+    /**
+     * Ends the cooldown of every sender.
+     */
+    public void resetAll() {
+        endsAt.clear();
+    }
+
+    /**
      * Returns false, after sending the message, when the sender is on cooldown.
      */
     boolean check(CommonCommandContext<?, ?> ctx) {
-        Optional<UUID> id = throttledId(ctx);
-        if (id.isEmpty()) {
+        Duration remaining = remaining(ctx);
+        if (remaining.isZero()) {
             return true;
         }
-        Instant end = endsAt.get(id.get());
-        Instant now = clock.instant();
-        if (end == null || !now.isBefore(end)) {
-            return true;
-        }
-        message.accept(ctx, Duration.between(now, end));
+        message.accept(ctx, remaining);
         return false;
     }
 

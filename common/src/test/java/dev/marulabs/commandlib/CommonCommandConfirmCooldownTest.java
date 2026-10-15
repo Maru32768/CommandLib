@@ -122,6 +122,41 @@ class CommonCommandConfirmCooldownTest {
     }
 
     @Test
+    void cooldown_can_be_queried_and_reset() throws Exception {
+        UUID steve = UUID.randomUUID();
+        UUID alex = UUID.randomUUID();
+        Cooldown cooldown = Cooldown.of(Duration.ofSeconds(30))
+                                    .clock(clock);
+        Duration[] seen = new Duration[1];
+        TestCommand command = new TestCommand("heal") {{
+            cooldown(cooldown);
+            execute(ctx -> seen[0] = cooldown.remaining(ctx));
+        }};
+        TestCommandRunner steveRunner = new TestCommandRunner(command, source("Steve", steve, CommandActorType.PLAYER));
+        TestCommandRunner alexRunner = new TestCommandRunner(command, source("Alex", alex, CommandActorType.PLAYER));
+
+        steveRunner.execute("heal");
+        alexRunner.execute("heal");
+        // The executor runs after the cooldown starts.
+        assertThat(seen[0]).isEqualTo(Duration.ofSeconds(30));
+        clock.advance(Duration.ofSeconds(10));
+        assertThat(cooldown.remaining(steve)).isEqualTo(Duration.ofSeconds(20));
+        assertThat(cooldown.remaining(UUID.randomUUID())).isZero();
+
+        cooldown.reset(steve);
+        assertThat(cooldown.remaining(steve)).isZero();
+        assertThat(cooldown.remaining(alex)).isEqualTo(Duration.ofSeconds(20));
+        assertThat(steveRunner.execute("heal")
+                              .messages()).isEmpty();
+
+        cooldown.resetAll();
+        assertThat(cooldown.remaining(steve)).isZero();
+        assertThat(cooldown.remaining(alex)).isZero();
+        assertThat(alexRunner.execute("heal")
+                             .messages()).isEmpty();
+    }
+
+    @Test
     void cooldown_skips_senders_without_unique_id_and_bypassing_senders() throws Exception {
         TestCommand command = new TestCommand("heal") {{
             cooldown(Cooldown.of(Duration.ofSeconds(30))
