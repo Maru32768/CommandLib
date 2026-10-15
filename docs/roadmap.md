@@ -129,7 +129,8 @@
 
 ### P6: Ecosystem と tooling
 
-- `[ ]` documentation site を作る。
+- `[~]` documentation site を作る。MkDocs Material の設定（`mkdocs.yml`、`mkdocs build --strict` が通る）はあるが、公開（GitHub Pages 等）は
+  CI / 配布方針が決まるまで保留。JitPack の javadoc URL が実際に表示されるかは未確認。
 - `[ ]` CI を整備する。typed NMS module（`nms/*`）は初回 build で BuildTools を version ごとに実行し（1 version あたり
   10 分前後）、paperweight の dev bundle も取得するため、`~/.m2` の Spigot artifact と paperweight cache を CI 間で
   保持する方法を決める。cache がない job や PR では `-Pcommandlib.typedNms=false` で module を外して unit test だけを
