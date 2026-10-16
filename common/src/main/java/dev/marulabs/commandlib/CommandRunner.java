@@ -72,6 +72,8 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
             // After options, Brigadier executes a context without them; the graph adds them back.
             C ctx = platformAdapter.createCommandContext(optionGraph.recover(context));
             checkVisible(ctx);
+            // Brigadier gives the targets of a forked execution copies of one context, which share its node list.
+            ctx.parse(context.getNodes());
             ctx.scheduler(scheduler);
             ctx.captions(command.captions());
             ctx.providers(providers);

@@ -4,6 +4,7 @@ import dev.marulabs.commandlib.util.ChatColorUtil;
 import dev.marulabs.commandlib.util.text.ClickAction;
 import dev.marulabs.commandlib.util.text.RichText;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.time.Clock;
 import java.time.Duration;
@@ -19,7 +20,8 @@ import java.util.function.BiConsumer;
  * The first execution does not run the command; it sends a message asking the sender to run the same command again.
  * Running exactly the same input again within the timeout runs it. Each sender has at most one pending confirmation:
  * a different input, or the same input after the timeout, asks again. Players and entities are told apart by their
- * unique id, other senders, such as the console and command blocks, by their type and name.
+ * unique id, other senders, such as the console and command blocks, by their type and name. Only a later execution
+ * confirms: the targets of one forked execution, such as {@code /execute as @a ... run}, do not confirm each other.
  */
 public final class Confirmation {
     private final Duration timeout;
@@ -83,9 +85,14 @@ public final class Confirmation {
 
         Pending previous = pending.remove(sender);
         if (previous != null && previous.command.equals(command)) {
-            return true;
+            if (previous.parse == null || previous.parse != ctx.parse()) {
+                return true;
+            }
+            // Another target of the same forked execution, which was asked already.
+            pending.put(sender, previous);
+            return false;
         }
-        pending.put(sender, new Pending(command, now.plus(timeout)));
+        pending.put(sender, new Pending(command, ctx.parse(), now.plus(timeout)));
         message.accept(ctx, command);
         return false;
     }
@@ -104,10 +111,13 @@ public final class Confirmation {
 
     private static final class Pending {
         private final String command;
+        // The parse of the execution that asked, which its forked siblings share.
+        private final @Nullable Object parse;
         private final Instant expiresAt;
 
-        private Pending(String command, Instant expiresAt) {
+        private Pending(String command, @Nullable Object parse, Instant expiresAt) {
             this.command = command;
+            this.parse = parse;
             this.expiresAt = expiresAt;
         }
     }

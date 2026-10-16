@@ -44,6 +44,34 @@ class CommonCommandConfirmCooldownTest {
                          .messages()).containsExactly("Run the command again within 10s to confirm. [Confirm]");
     }
 
+    // As the targets of /execute as @a ... run, which Brigadier runs from one parse of the input.
+    @Test
+    void the_targets_of_one_forked_execution_do_not_confirm_each_other() throws Exception {
+        AtomicInteger wiped = new AtomicInteger();
+        TestCommand command = new TestCommand("wipe") {{
+            confirm(Confirmation.within(Duration.ofSeconds(10))
+                                .clock(clock));
+            execute(ctx -> wiped.incrementAndGet());
+        }};
+        TestCommandSource steve = player("Steve");
+        TestCommandRunner runner = new TestCommandRunner(command, steve);
+        com.mojang.brigadier.CommandDispatcher<TestCommandSource> dispatcher = new com.mojang.brigadier.CommandDispatcher<>(runner.root());
+        dispatcher.register(com.mojang.brigadier.builder.LiteralArgumentBuilder.<TestCommandSource>literal("all")
+                                                                                .fork(dispatcher.getRoot(),
+                                                                                      ctx -> List.of(ctx.getSource(),
+                                                                                                     ctx.getSource(),
+                                                                                                     ctx.getSource(),
+                                                                                                     ctx.getSource())));
+
+        dispatcher.execute("all wipe", steve);
+        assertThat(wiped).hasValue(0);
+        // A later execution of the same input confirms.
+        runner.execute("wipe");
+        assertThat(wiped).hasValue(0);
+        runner.execute("wipe");
+        assertThat(wiped).hasValue(1);
+    }
+
     @Test
     void confirm_expires_after_the_timeout() throws Exception {
         TestCommand command = new TestCommand("wipe") {{

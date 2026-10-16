@@ -37,6 +37,8 @@ public abstract class CommonCommandContext<S, C> {
     private @Nullable List<Runnable> failureSends;
     // Set by CommandRunner before the command runs; null in suggestion contexts.
     private @Nullable CommandScheduler scheduler;
+    // The parse this execution came from, which the targets of one forked execution share.
+    private @Nullable Object parse;
     // Set by CommandRunner and the help to those of the command; the default in suggestion contexts.
     private Captions captions = Captions.DEFAULT;
     // The values put by middlewares and those the providers gave so far.
@@ -513,6 +515,15 @@ public abstract class CommonCommandContext<S, C> {
 
     final void scheduler(CommandScheduler scheduler) {
         this.scheduler = Objects.requireNonNull(scheduler);
+    }
+
+    final void parse(Object parse) {
+        this.parse = Objects.requireNonNull(parse);
+    }
+
+    @Nullable
+    final Object parse() {
+        return parse;
     }
 
     /**
