@@ -111,14 +111,15 @@ arg("NMSArgumentBlockPredicate", "ArgumentBlockPredicate", "ArgumentBlockPredica
     ["java.util.function.Predicate", "org.bukkit.block.Block", f"{NMS}.BlockPosition", f"{NMS}.ShapeDetectorBlock",
      f"{CB}.CraftWorld"])
 # ArgumentCriterionValue is Mojang's RangeArgument and CriterionConditionValue its MinMaxBounds, whose a() and b() are
-# getMin() and getMax(). The float range has no static getter.
+# getMin() and getMax(). Spigot leaves the nested argument types (Ints, Floats) obfuscated, and Mohist cannot map
+# them, so the argument type is found by reflection and the value read as its bounds class.
 arg("NMSArgumentIntRange", "ArgumentCriterionValue", "ArgumentCriterionValue", "Range<Integer>",
-    "ArgumentCriterionValue.a()",
-    c("CriterionConditionValue.IntegerRange bounds = ArgumentCriterionValue.b.a(CTX, name);\n"
+    "rangeArgument(ArgumentCriterionValue.class, CriterionConditionValue.IntegerRange.class)",
+    c("CriterionConditionValue.IntegerRange bounds = CTX.getArgument(name, CriterionConditionValue.IntegerRange.class);\n"
       "        return range(bounds.a(), bounds.b());"),
     ["com.google.common.collect.Range", f"{NMS}.CriterionConditionValue"], throws=False)
 arg("NMSArgumentFloatRange", "ArgumentCriterionValue", "ArgumentCriterionValue", "Range<Double>",
-    "ArgumentCriterionValue.b()",
+    "rangeArgument(ArgumentCriterionValue.class, CriterionConditionValue.FloatRange.class)",
     c("CriterionConditionValue.FloatRange bounds = CTX.getArgument(name, CriterionConditionValue.FloatRange.class);\n"
       "        return doubleRange(bounds.a(), bounds.b());"),
     ["com.google.common.collect.Range", f"{NMS}.CriterionConditionValue"], throws=False)

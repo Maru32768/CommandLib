@@ -15,14 +15,14 @@ public class NMSArgumentIntRange_spigot_1_16_5 extends NMSArgumentIntRange {
 
     @Override
     public ArgumentType<?> argument() {
-        return ArgumentCriterionValue.a();
+        return rangeArgument(ArgumentCriterionValue.class, CriterionConditionValue.IntegerRange.class);
     }
 
     @Override
     @SuppressWarnings("unchecked")
     protected Range<Integer> parseImpl(CommandContext<?> ctx, String name) {
         CommandContext<CommandListenerWrapper> context = (CommandContext<CommandListenerWrapper>) ctx;
-        CriterionConditionValue.IntegerRange bounds = ArgumentCriterionValue.b.a(context, name);
+        CriterionConditionValue.IntegerRange bounds = context.getArgument(name, CriterionConditionValue.IntegerRange.class);
         return range(bounds.a(), bounds.b());
     }
 }

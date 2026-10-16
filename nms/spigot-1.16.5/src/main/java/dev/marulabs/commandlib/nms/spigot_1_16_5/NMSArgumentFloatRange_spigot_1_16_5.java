@@ -15,7 +15,7 @@ public class NMSArgumentFloatRange_spigot_1_16_5 extends NMSArgumentFloatRange {
 
     @Override
     public ArgumentType<?> argument() {
-        return ArgumentCriterionValue.b();
+        return rangeArgument(ArgumentCriterionValue.class, CriterionConditionValue.FloatRange.class);
     }
 
     @Override
