@@ -163,7 +163,7 @@ class HelpErrorFormatterTest {
                                              .forEach(x -> ctx.sendMessage(x.plainText())));
             argument(new CommonStringArgument<>("key")).child(key -> new TestCommand("mode") {{
                 argument(new CommonStringArgument<>("value")).execute((value, ctx) -> {
-                                                             })
+                })
                                                              .child(value -> new TestCommand("reset") {{
                                                                  execute(ctx -> {
                                                                  });
@@ -183,9 +183,8 @@ class HelpErrorFormatterTest {
             addAliases("g");
             helpFormatter((ctx, help) -> help.usages()
                                              .forEach(x -> ctx.sendMessage(x.plainText())));
-            errorFormatter((ctx, error) -> ctx.sendFailure(error.usage() == null ? "no usage"
-                    : error.usage()
-                           .plainText()));
+            errorFormatter((ctx, error) -> ctx.sendFailure(error.usage() == null ? "no usage" : error.usage()
+                                                                                                     .plainText()));
             addChildren(new TestCommand("start") {{
                 execute(ctx -> {
                 });

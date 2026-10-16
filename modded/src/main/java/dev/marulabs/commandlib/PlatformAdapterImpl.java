@@ -34,7 +34,7 @@ public final class PlatformAdapterImpl implements PlatformAdapter<CommandSourceS
             return PermissionAPI.hasPermission((Player) commandSource.getEntity(), permissionNode);
         }
         *///?}
-        // The console, RCON and data pack functions, which run as the server, may run every command.
+           // The console, RCON and data pack functions, which run as the server, may run every command.
         if (new ForgeCommandActor(commandSource).isConsole()) {
             return true;
         }

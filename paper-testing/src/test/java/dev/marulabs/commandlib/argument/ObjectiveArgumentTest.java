@@ -47,7 +47,8 @@ class ObjectiveArgumentTest {
 
         try (MockedStatic<Bukkit> ignored = mainScoreboard(Mockito.mock(Scoreboard.class));
              CommandTester tester = new CommandTester(() -> new Command("score") {{
-                 argument(new ObjectiveArgument("objective")).execute((value, ctx) -> ctx.sendMessage("unreachable"));
+                 argument(new ObjectiveArgument("objective")).execute((value,
+                                                                       ctx) -> ctx.sendMessage("unreachable"));
              }}, "test.command")) {
             tester.execute("score kills", sender);
         }

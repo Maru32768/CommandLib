@@ -24,8 +24,8 @@ public final class TestRegistryAccess implements RegistryAccess {
             return Mockito.mock(Registry.class,
                                 invocation -> invocation.getMethod()
                                                         .getReturnType() == Keyed.class
-                                        ? Mockito.mock(PotionEffectType.class)
-                                        : Mockito.RETURNS_DEFAULTS.answer(invocation));
+                                                                ? Mockito.mock(PotionEffectType.class)
+                                                                : Mockito.RETURNS_DEFAULTS.answer(invocation));
         }
         return Mockito.mock(Registry.class);
     }

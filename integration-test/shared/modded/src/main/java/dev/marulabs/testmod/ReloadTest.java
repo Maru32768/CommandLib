@@ -21,7 +21,9 @@ public final class ReloadTest extends TestBase {
     public List<String> build() {
         fail("Command was not executed after /reload.");
         command.addChildren(new Command(PROBE) {{
-            execute(ctx -> putResult(new TestResult(getKey(PROBE), TestStatus.SUCCEEDED, "Command survived /reload.")));
+            execute(ctx -> putResult(new TestResult(getKey(PROBE),
+                                                    TestStatus.SUCCEEDED,
+                                                    "Command survived /reload.")));
         }});
         return List.of();
     }

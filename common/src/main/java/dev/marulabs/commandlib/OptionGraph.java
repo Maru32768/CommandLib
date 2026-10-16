@@ -208,10 +208,10 @@ final class OptionGraph<S, C extends CommonCommandContext<S, ?>> {
             tokenCount += tokens.size();
             if (tokenCount > MAX_NODES) {
                 throw new IllegalStateException("The options of '" + String.join(" ",
-                                                                                   path.stream()
-                                                                                       .map(x -> x.iterator()
-                                                                                                  .next())
-                                                                                       .collect(Collectors.toList()))
+                                                                                 path.stream()
+                                                                                     .map(x -> x.iterator()
+                                                                                                .next())
+                                                                                     .collect(Collectors.toList()))
                         + "' make more than " + MAX_NODES + " command nodes. Give fewer options a short name, or lower "
                         + "their maximums; see docs/options.md#limits.");
             }

@@ -66,11 +66,11 @@ class AdvancementArgumentTest {
                   .thenAnswer(x -> List.of(mineStone, root)
                                        .iterator());
 
-            assertThat(tester.suggest("advancement STONE", FakeSender.player("Alice"))).containsExactly(
-                    "minecraft:story/mine_stone");
-            assertThat(tester.suggest("advancement ", FakeSender.player("Alice"))).contains(
-                    "minecraft:story/mine_stone",
-                    "minecraft:adventure/root");
+            assertThat(tester.suggest("advancement STONE",
+                                      FakeSender.player("Alice"))).containsExactly("minecraft:story/mine_stone");
+            assertThat(tester.suggest("advancement ",
+                                      FakeSender.player("Alice"))).contains("minecraft:story/mine_stone",
+                                                                            "minecraft:adventure/root");
         }
     }
 

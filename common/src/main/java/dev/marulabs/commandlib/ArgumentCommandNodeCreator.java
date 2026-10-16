@@ -55,9 +55,8 @@ final class ArgumentCommandNodeCreator<S, T, C extends CommonCommandContext<S, T
         Predicate<S> requirement = branchRequirement(arguments, parent);
         for (Arguments<C> branch : branches) {
             List<String> branchNames = names(branch);
-            if (branch != arguments && branchNames.size() >= prefix.size()
-                    && branchNames.subList(0, prefix.size())
-                                  .equals(prefix)) {
+            if (branch != arguments && branchNames.size() >= prefix.size() && branchNames.subList(0, prefix.size())
+                                                                                         .equals(prefix)) {
                 requirement = requirement.or(branchRequirement(branch, parent));
             }
         }

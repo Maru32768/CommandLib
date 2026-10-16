@@ -77,9 +77,8 @@ class RecipeArgumentTest {
                                        .iterator());
 
             assertThat(tester.suggest("recipe STI", FakeSender.player("Alice"))).containsExactly("minecraft:stick");
-            assertThat(tester.suggest("recipe ", FakeSender.player("Alice"))).contains(
-                    "minecraft:stick",
-                    "minecraft:torch");
+            assertThat(tester.suggest("recipe ", FakeSender.player("Alice"))).contains("minecraft:stick",
+                                                                                       "minecraft:torch");
         }
     }
 }

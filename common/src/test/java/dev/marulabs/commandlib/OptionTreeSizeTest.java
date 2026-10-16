@@ -34,8 +34,8 @@ class OptionTreeSizeTest {
     void a_command_whose_options_make_too_many_nodes_is_rejected_at_registration() {
         assertThat(nodes(flags(7))).isLessThan(40_000);
         assertThatThrownBy(() -> build(flags(8))).isInstanceOf(IllegalStateException.class)
-                                                .hasMessageContaining("'flags'")
-                                                .hasMessageContaining("options.md");
+                                                 .hasMessageContaining("'flags'")
+                                                 .hasMessageContaining("options.md");
     }
 
     @Test

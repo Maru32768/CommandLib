@@ -57,11 +57,11 @@ class CommonCommandConfirmCooldownTest {
         TestCommandRunner runner = new TestCommandRunner(command, steve);
         com.mojang.brigadier.CommandDispatcher<TestCommandSource> dispatcher = new com.mojang.brigadier.CommandDispatcher<>(runner.root());
         dispatcher.register(com.mojang.brigadier.builder.LiteralArgumentBuilder.<TestCommandSource>literal("all")
-                                                                                .fork(dispatcher.getRoot(),
-                                                                                      ctx -> List.of(ctx.getSource(),
-                                                                                                     ctx.getSource(),
-                                                                                                     ctx.getSource(),
-                                                                                                     ctx.getSource())));
+                                                                               .fork(dispatcher.getRoot(),
+                                                                                     ctx -> List.of(ctx.getSource(),
+                                                                                                    ctx.getSource(),
+                                                                                                    ctx.getSource(),
+                                                                                                    ctx.getSource())));
 
         dispatcher.execute("all wipe", steve);
         assertThat(wiped).hasValue(0);

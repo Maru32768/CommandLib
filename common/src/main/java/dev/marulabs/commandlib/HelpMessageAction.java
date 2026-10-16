@@ -178,7 +178,8 @@ final class HelpMessageAction<S, T, C extends CommonCommandContext<S, T>, U exte
         // Use the raw handle input rather than ctx.getInput(0): some platforms (Paper 1.21+) omit the root
         // literal from CommandContext.getNodes(), so the map-based lookup would return the wrong token.
         reversed.add(Token.literal(rootLiteral(ctx.getHandle()
-                                                  .getInput(), current)));
+                                                  .getInput(),
+                                               current)));
 
         List<Token> path = new ArrayList<>();
         for (int i = reversed.size() - 1; i >= 0; i--) {

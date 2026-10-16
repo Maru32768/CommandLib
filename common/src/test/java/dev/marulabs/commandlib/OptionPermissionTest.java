@@ -103,8 +103,9 @@ class OptionPermissionTest {
         assertRevokedAtExecutionIsRejected(ban(true), "ban Steve -f", BRANCH);
     }
 
-    private static void assertRevokedAtExecutionIsRejected(TestCommand command, String input, String revoked)
-            throws Exception {
+    private static void assertRevokedAtExecutionIsRejected(TestCommand command,
+                                                           String input,
+                                                           String revoked) throws Exception {
         Set<String> permissions = new java.util.HashSet<>(Set.of(COMMAND, BRANCH, SILENT));
         TestCommandSource source = new TestCommandSource("test",
                                                          UUID.randomUUID(),

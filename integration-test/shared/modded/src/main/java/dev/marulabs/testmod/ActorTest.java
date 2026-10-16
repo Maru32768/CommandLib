@@ -34,7 +34,9 @@ public final class ActorTest extends TestBase {
         command.addChildren(new Command(name) {{
             execute(ctx -> {
                 CommandActor actor = ctx.getActor();
-                putResult(key, actor.getType() + "," + actor.isConsole(), CommandActorType.COMMAND_BLOCK + ",false");
+                putResult(key,
+                          actor.getType() + "," + actor.isConsole(),
+                          CommandActorType.COMMAND_BLOCK + ",false");
             });
         }});
 

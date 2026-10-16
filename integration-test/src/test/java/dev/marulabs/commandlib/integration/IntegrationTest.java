@@ -176,8 +176,8 @@ class IntegrationTest {
                 // such as "/gamemode not_a_mode" as well, with Bukkit's unknown command message instead of the error.
                 // There those checks expect that reply, so they still notice when the behaviour changes.
                 boolean syntaxErrorsAreUnknown = "mohist-1.20.1".equals(targetName);
-                java.util.function.UnaryOperator<java.util.function.Predicate<String>> commandError =
-                        expected -> syntaxErrorsAreUnknown ? m -> m.contains("Unknown command. Type") : expected;
+                java.util.function.UnaryOperator<java.util.function.Predicate<String>> commandError = expected -> syntaxErrorsAreUnknown
+                        ? m -> m.contains("Unknown command. Type") : expected;
                 // Invalid argument: the translated "incorrect argument" message points at the rejected token.
                 assertBotReceives(client,
                                   "commandlibtest enumArgument not_a_material",

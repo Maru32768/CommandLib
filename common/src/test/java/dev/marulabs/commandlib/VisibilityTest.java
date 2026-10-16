@@ -106,8 +106,9 @@ class VisibilityTest {
         TestCommand game = new TestCommand("game") {{
             addChildren(new TestCommand("kick") {{
                 argument(new CommonStringArgument<>("player")).visibleWhen(ctx -> !hidden.get())
-                                                              .execute((player, ctx) -> ctx.sendMessage("kicked "
-                                                                      + player));
+                                                              .execute((player,
+                                                                        ctx) -> ctx.sendMessage("kicked "
+                                                                                + player));
             }}, new TestCommand("admin") {{
                 visibleWhen(ctx -> !hidden.get());
                 addChildren(new TestCommand("reset") {{

@@ -73,8 +73,8 @@ final class Arguments<C extends CommonCommandContext<?, ?>> {
             }
             // A greedy argument takes the rest of the input, so nothing after it, or a second value, could be given.
             if (isGreedy(argument) && (i != arguments.size() - 1 || argument instanceof VariadicArgument)) {
-                throw new IllegalStateException("Greedy argument '" + argument.name() + "' of command '"
-                        + parent.name() + "' takes the rest of the input, so it must be the last argument of its "
+                throw new IllegalStateException("Greedy argument '" + argument.name() + "' of command '" + parent.name()
+                        + "' takes the rest of the input, so it must be the last argument of its "
                         + "branch and cannot be variadic");
             }
             if (i > 0 && arguments.get(i - 1)

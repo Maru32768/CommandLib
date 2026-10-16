@@ -148,11 +148,15 @@ class OptionsAnywhereTest {
             optionsAnywhere();
             CommandOption<Boolean, TestCommandContext> force = option(Options.flag("force", 'f'));
             option(Options.flag("verbose", 'v'));
-            argument(new Word("k1"), new Word("k2")).execute((k1, k2, ctx) -> ctx.sendMessage(k1 + " " + k2 + " "
-                                                            + ctx.getOption(force)))
+            argument(new Word("k1"), new Word("k2"))
+                                                    .execute((k1,
+                                                              k2,
+                                                              ctx) -> ctx.sendMessage(k1 + " " + k2 + " "
+                                                                      + ctx.getOption(force)))
                                                     .child((k1, k2) -> new TestCommand("set") {{
-                                                        execute(ctx -> ctx.sendMessage("set " + k1.get(ctx) + " "
-                                                                + k2.get(ctx) + " inputs=" + ctx.getInputs()));
+                                                        execute(ctx -> ctx.sendMessage("set " + k1.get(ctx)
+                                                                + " " + k2.get(ctx) + " inputs="
+                                                                + ctx.getInputs()));
                                                     }});
         }});
 

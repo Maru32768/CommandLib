@@ -34,13 +34,16 @@ public final class PermissionTest extends TestBase {
                     putResult(new TestResult(key,
                                              TestStatus.FAILED,
                                              "A " + ctx.getActor()
-                                                       .getType() + " executed " + DENIED_PROBE + "."));
+                                                       .getType()
+                                                     + " executed " + DENIED_PROBE + "."));
                     ctx.sendFailure(DENIED_PROBE + " executed");
                     refusedElsewhere.set(false);
                     return;
                 }
                 if (refusedElsewhere.get()) {
-                    putResult(new TestResult(key, TestStatus.SUCCEEDED, "The console may run " + DENIED_PROBE + "."));
+                    putResult(new TestResult(key,
+                                             TestStatus.SUCCEEDED,
+                                             "The console may run " + DENIED_PROBE + "."));
                 }
             });
         }});

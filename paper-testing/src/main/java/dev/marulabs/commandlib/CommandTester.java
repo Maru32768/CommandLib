@@ -296,7 +296,8 @@ public final class CommandTester implements AutoCloseable {
      */
     public CommandTester withFakeWorld(@NotNull String key, @NotNull World world) {
         fakeWorlds.put(Objects.requireNonNull(NamespacedKey.fromString(key), "key")
-                              .toString(), world);
+                              .toString(),
+                       world);
         return this;
     }
 

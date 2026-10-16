@@ -53,8 +53,8 @@ class LootTableArgumentTest {
     @Test
     void suggestions_are_loot_table_keys_containing_the_input() {
         try (CommandTester tester = new CommandTester(() -> command(new AtomicReference<>()), "test.command")) {
-            assertThat(tester.suggest("loot SIMPLE_DUNGEON", FakeSender.player("Alice"))).containsExactly(
-                    "minecraft:chests/simple_dungeon");
+            assertThat(tester.suggest("loot SIMPLE_DUNGEON",
+                                      FakeSender.player("Alice"))).containsExactly("minecraft:chests/simple_dungeon");
         }
     }
 }

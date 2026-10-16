@@ -184,9 +184,9 @@ class CommandStructureTest {
         TestCommand give = new TestCommand("give") {{
             argument(new StrArg("player")).execute((player, ctx) -> ctx.sendMessage("one " + player));
             argument(new StrArg("player"), new IntArg("count")).execute((player,
-                                                                        count,
-                                                                        ctx) -> ctx.sendMessage("two " + player + " "
-                    + count));
+                                                                         count,
+                                                                         ctx) -> ctx.sendMessage("two " + player
+                                                                                 + " " + count));
         }};
         TestCommandRunner shortBranch = new TestCommandRunner(give,
                                                               new TestCommandSource("test.command.give",
@@ -234,9 +234,10 @@ class CommandStructureTest {
         }})).isInstanceOf(IllegalStateException.class)
             .hasMessageContaining("'reason'");
         assertThatThrownBy(() -> new TestCommandRunner(new TestCommand("ban") {{
-            argument(new CommonStringArgument<>("reason", CommonStringArgument.Type.PHRASE)).execute((reason, ctx) -> {
-                                                                                       })
-                                                                                       .child(reason -> new TestCommand("confirm"));
+            argument(new CommonStringArgument<>("reason", CommonStringArgument.Type.PHRASE)).execute((reason,
+                                                                                                      ctx) -> {
+            })
+                                                                                            .child(reason -> new TestCommand("confirm"));
         }})).isInstanceOf(IllegalStateException.class)
             .hasMessageContaining("'reason'");
         assertThatThrownBy(() -> new TestCommandRunner(new TestCommand("ban") {{
