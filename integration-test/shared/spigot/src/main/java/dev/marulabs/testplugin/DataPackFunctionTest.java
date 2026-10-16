@@ -11,7 +11,6 @@ import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -32,6 +31,7 @@ public final class DataPackFunctionTest extends TestBase {
     private static final String TAG_PROBE = "functionTagProbe";
     private static final String LOAD_PROBE = "functionLoadProbe";
     private static final String LOAD_COUNT = "functionLoadCount";
+    private static final String LOAD_RESET = "functionLoadReset";
     private final AtomicInteger loadRuns = new AtomicInteger();
     private final AtomicReference<String> loadActor = new AtomicReference<>("none");
 
@@ -52,7 +52,9 @@ public final class DataPackFunctionTest extends TestBase {
         functionTagProbe();
         functionLoadProbe();
 
-        return Collections.emptyList();
+        // A server that starts with the data pack, such as a Mohist image made from a bootstrap run, has run
+        // #minecraft:load at startup, so only the runs after the test commands count.
+        return List.of(command.name() + " " + LOAD_RESET);
     }
 
     @Override
@@ -89,6 +91,8 @@ public final class DataPackFunctionTest extends TestBase {
                 loadActor.set(String.valueOf(ctx.getActor()
                                                 .getType()));
             });
+        }}, new Command(LOAD_RESET) {{
+            execute(ctx -> loadRuns.set(0));
         }}, new Command(LOAD_COUNT) {{
             execute(ctx -> {
                 if (loadRuns.get() == 1) {
