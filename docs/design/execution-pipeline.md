@@ -19,6 +19,11 @@ executor, async executors, and the thread abstraction they share. User documenta
 
 `CommandRunner` (one per Brigadier node that executes) runs:
 
+0. **Visibility**: the `visibleWhen` predicates of the command, its parents and its argument branches. A failure
+   throws Brigadier's unknown command or argument error, which the sender would have got had the node been hidden when
+   the input was parsed. The same predicates are in the nodes' `requires`, evaluated on a context of the source alone
+   (`PlatformAdapter#createSourceContext`); the platforms keep a node's requirement when they copy it (Spigot's label
+   and namespace copies, Paper's `ApiMirrorRootNode`, vanilla's per-player tree), so the tree hides what fails.
 1. **Checks**: the node's permission, options, each argument branch's permission and parsing, and prerequisites. They
    run before the generated help too, which is why prerequisites stay a separate mechanism (`Prerequisite`,
    `require(...)`) rather than becoming middlewares: a middleware wraps only an executor, and a sender who may not run

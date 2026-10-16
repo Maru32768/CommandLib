@@ -5,6 +5,7 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import dev.marulabs.commandlib.command.Extractor;
 
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U extends CommonCommand<C, U>> {
@@ -91,8 +92,7 @@ final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U ext
                                                 List<Arguments<C>> inheritedArguments,
                                                 HelpMessageAction<S, T, C, U> helpAction) {
         LiteralArgumentBuilder<S> builder = LiteralArgumentBuilder.literal(command.name());
-        String permission = command.permissionName(permissionPrefix);
-        builder.requires(x -> platformAdapter.hasPermission(x, permission));
+        builder.requires(requirement(command));
 
         List<Arguments<C>> argumentsList = command.argumentsList();
         OptionGraph<S, C> optionGraph = OptionGraph.of(platformAdapter, command, inheritedArguments, permissionPrefix);
@@ -194,14 +194,23 @@ final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U ext
         return (U) command;
     }
 
+    // The sender has the command's permission and the command is visible to the sender.
+    private Predicate<S> requirement(U command) {
+        String permission = command.permissionName(permissionPrefix);
+        if (!command.hasVisibility()) {
+            return x -> platformAdapter.hasPermission(x, permission);
+        }
+        return x -> platformAdapter.hasPermission(x, permission)
+                && command.isVisible(platformAdapter.createSourceContext(x));
+    }
+
     private List<LiteralCommandNode<S>> createAliasCommands(U source, LiteralCommandNode<S> redirectTarget) {
-        String permission = source.permissionName(permissionPrefix);
+        Predicate<S> requirement = requirement(source);
         return source.aliases()
                      .stream()
                      .map(s -> {
                          LiteralCommandNode<S> node = LiteralArgumentBuilder.<S>literal(s)
-                                                                            .requires(x -> platformAdapter.hasPermission(x,
-                                                                                                                         permission))
+                                                                            .requires(requirement)
                                                                             .executes(x -> redirectTarget.getCommand()
                                                                                                          .run(x))
                                                                             .build();

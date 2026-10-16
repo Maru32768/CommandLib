@@ -15,6 +15,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 public final class TetraArgumentBranch<T1, T2, T3, T4, C extends CommonCommandContext<?, ?>, T extends CommonCommand<C, T>> extends ArgumentBranch<C, T> {
     private final CommonArgument<T1, C, ?> argument1;
@@ -113,6 +114,12 @@ public final class TetraArgumentBranch<T1, T2, T3, T4, C extends CommonCommandCo
     @Override
     public TetraArgumentBranch<T1, T2, T3, T4, C, T> permissionDescription(@NotNull String description) {
         super.permissionDescription(description);
+        return this;
+    }
+
+    @Override
+    public TetraArgumentBranch<T1, T2, T3, T4, C, T> visibleWhen(@NotNull Predicate<? super C> predicate) {
+        super.visibleWhen(predicate);
         return this;
     }
 

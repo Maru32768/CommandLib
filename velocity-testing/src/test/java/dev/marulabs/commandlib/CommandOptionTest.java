@@ -59,6 +59,26 @@ class CommandOptionTest {
     }
 
     @Test
+    void a_command_is_shown_and_run_only_while_its_predicate_holds() {
+        java.util.concurrent.atomic.AtomicBoolean running = new java.util.concurrent.atomic.AtomicBoolean();
+        CommandTester tester = new CommandTester(new Command("game") {{
+            addChildren(new Command("start") {{
+                visibleWhen(ctx -> !running.get() && ctx.getActor()
+                                                        .getName()
+                                                        .equals("Steve"));
+                execute(ctx -> running.set(true));
+            }});
+        }}, "proxy.command");
+        FakeSender steve = FakeSender.player("Steve");
+        FakeSender alex = FakeSender.player("Alex");
+
+        assertThatThrownBy(() -> tester.execute("game start", alex)).hasMessageContaining("Command syntax error");
+        tester.execute("game start", steve);
+        assertThat(running).isTrue();
+        assertThatThrownBy(() -> tester.execute("game start", steve)).hasMessageContaining("Command syntax error");
+    }
+
+    @Test
     void an_option_with_a_permission_is_rejected_without_it() {
         CommandTester tester = new CommandTester(new Command("ban") {{
             CommandOption<Boolean, CommandContext> silent = option(Options.flag("silent", 's')

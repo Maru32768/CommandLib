@@ -14,6 +14,7 @@ import java.util.concurrent.CompletionStage;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 public final class UnaryArgumentBranch<T1, C extends CommonCommandContext<?, ?>, T extends CommonCommand<C, T>> extends ArgumentBranch<C, T> {
     private final CommonArgument<T1, C, ?> argument1;
@@ -94,6 +95,12 @@ public final class UnaryArgumentBranch<T1, C extends CommonCommandContext<?, ?>,
     @Override
     public UnaryArgumentBranch<T1, C, T> permissionDescription(@NotNull String description) {
         super.permissionDescription(description);
+        return this;
+    }
+
+    @Override
+    public UnaryArgumentBranch<T1, C, T> visibleWhen(@NotNull Predicate<? super C> predicate) {
+        super.visibleWhen(predicate);
         return this;
     }
 

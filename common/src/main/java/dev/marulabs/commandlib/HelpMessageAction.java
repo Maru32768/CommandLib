@@ -39,14 +39,14 @@ final class HelpMessageAction<S, T, C extends CommonCommandContext<S, T>, U exte
         //   "/config <key> set <value>: Set config value"
         command.children()
                .stream()
-               .filter(x -> platformAdapter.hasPermission(x, ctx, permissionPrefix))
+               .filter(x -> isUsable(x, ctx))
                .forEach(x -> usages.add(new Usage(path, append(prefix, Token.literal(x.name())), x.description(ctx))));
         for (Arguments<C> arguments : command.argumentsList()) {
             if (!hasArgumentPermission(command, arguments, ctx)) {
                 continue;
             }
             for (CommonCommand<C, ?> child : arguments.children()) {
-                if (platformAdapter.hasPermission(castCommand(child), ctx, permissionPrefix)) {
+                if (isUsable(castCommand(child), ctx)) {
                     addArgumentChildUsages(usages,
                                            path,
                                            append(appendTags(prefix, arguments), Token.literal(child.name())),
@@ -107,7 +107,7 @@ final class HelpMessageAction<S, T, C extends CommonCommandContext<S, T>, U exte
                 continue;
             }
             for (CommonCommand<C, ?> child : arguments.children()) {
-                if (platformAdapter.hasPermission(castCommand(child), ctx, permissionPrefix)) {
+                if (isUsable(castCommand(child), ctx)) {
                     addArgumentChildUsages(usages,
                                            path,
                                            append(argumentTokens, Token.literal(child.name())),
@@ -119,7 +119,13 @@ final class HelpMessageAction<S, T, C extends CommonCommandContext<S, T>, U exte
     }
 
     private boolean hasArgumentPermission(CommonCommand<C, ?> parent, Arguments<C> arguments, C ctx) {
-        return platformAdapter.hasPermission(ctx, arguments.permissionName(parent, permissionPrefix));
+        return platformAdapter.hasPermission(ctx, arguments.permissionName(parent, permissionPrefix))
+                && arguments.isVisible(ctx);
+    }
+
+    // The sender has the command's permission and the command is visible to the sender.
+    private boolean isUsable(U child, C ctx) {
+        return platformAdapter.hasPermission(child, ctx, permissionPrefix) && child.isVisible(ctx);
     }
 
     /**

@@ -131,6 +131,27 @@ class CommandOptionTest {
     }
 
     @Test
+    void a_command_is_shown_and_run_only_while_its_predicate_holds() {
+        java.util.concurrent.atomic.AtomicBoolean running = new java.util.concurrent.atomic.AtomicBoolean();
+        try (CommandTester tester = new CommandTester(() -> new Command("game") {{
+            addChildren(new Command("start") {{
+                visibleWhen(ctx -> !running.get() && ctx.getSender()
+                                                        .getName()
+                                                        .equals("Steve"));
+                execute(ctx -> running.set(true));
+            }});
+        }}, "test.command")) {
+            FakeSender steve = FakeSender.player("Steve");
+            FakeSender alex = FakeSender.player("Alex");
+
+            assertThatThrownBy(() -> tester.execute("game start", alex)).hasMessageContaining("Command syntax error");
+            tester.execute("game start", steve);
+            assertThat(running).isTrue();
+            assertThatThrownBy(() -> tester.execute("game start", steve)).hasMessageContaining("Command syntax error");
+        }
+    }
+
+    @Test
     void help_message_includes_options() {
         try (CommandTester tester = new CommandTester(new Command("scan") {{
             option(Options.flag("force", 'f')

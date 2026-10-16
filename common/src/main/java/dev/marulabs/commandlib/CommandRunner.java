@@ -71,6 +71,7 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
         try {
             // After options, Brigadier executes a context without them; the graph adds them back.
             C ctx = platformAdapter.createCommandContext(optionGraph.recover(context));
+            checkVisible(ctx);
             ctx.scheduler(scheduler);
             ctx.captions(command.captions());
             ctx.providers(providers);
@@ -80,6 +81,23 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
         } catch (Throwable e) {
             e.printStackTrace();
             throw e;
+        }
+    }
+
+    // A command or branch hidden from the sender (visibleWhen) is rejected as Brigadier rejects a node the sender
+    // cannot use, for a state that changed after the input was parsed or a platform that runs it anyway.
+    private void checkVisible(C ctx) throws CommandSyntaxException {
+        for (CommonCommand<C, ?> current = command; current != null; current = current.parent()) {
+            if (!current.isVisible(ctx)) {
+                throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownCommand()
+                                                                .create();
+            }
+        }
+        for (Arguments<C> arguments : argumentsList) {
+            if (!arguments.isVisible(ctx)) {
+                throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument()
+                                                                .create();
+            }
         }
     }
 

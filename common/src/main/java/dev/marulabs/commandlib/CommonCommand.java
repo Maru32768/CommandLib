@@ -39,6 +39,8 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
     private final List<CommandOption<?, C>> options = new ArrayList<>();
     private final List<Set<CommandOption<?, ?>>> exclusiveOptionGroups = new ArrayList<>();
     private boolean optionsAnywhere;
+    // Null unless visibleWhen is called.
+    private @Nullable Predicate<? super C> visibility;
     private Prerequisite<C> prerequisite = ctx -> {
     };
     private final List<CommandMiddleware<? super C>> middlewares = new ArrayList<>();
@@ -442,6 +444,11 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
             @Override
             public void permissionDescription(@NotNull String description) {
                 arguments.permissionDescription(description);
+            }
+
+            @Override
+            public void visibleWhen(@NotNull Predicate<? super C> predicate) {
+                arguments.visibleWhen(predicate);
             }
         };
     }
@@ -869,6 +876,34 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
 
     public final void permissionDescription(@NotNull String description) {
         this.permissionDescription = Objects.requireNonNull(description);
+    }
+
+    /**
+     * Shows this command only to senders for whom {@code predicate} holds, for a state other than a permission, such
+     * as {@code /game start} only while no game runs. A sender for whom it fails neither sees the command in the
+     * command tree, in suggestions or in help, nor can run it, as if the sender lacked its permission; the input is
+     * rejected as an unknown command. The predicate gets a context that has the sender but no arguments.
+     * <p>
+     * Clients keep the command tree they were sent, so after the state changes send it again with the platform's
+     * {@code CommandLib.refresh(player)} or {@code CommandLib.refreshAll()}. The predicate runs often, for each
+     * parse and for each player the tree is sent to, so keep it cheap.
+     */
+    public final void visibleWhen(@NotNull Predicate<? super C> predicate) {
+        this.visibility = Objects.requireNonNull(predicate);
+    }
+
+    /**
+     * Whether the command is shown to the sender of {@code ctx}.
+     */
+    final boolean isVisible(C ctx) {
+        return visibility == null || visibility.test(ctx);
+    }
+
+    /**
+     * Whether a predicate of {@link #visibleWhen(Predicate)} was set.
+     */
+    final boolean hasVisibility() {
+        return visibility != null;
     }
 
     public final String permissionName(@NotNull String prefix) {

@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class ArgumentBranch<C extends CommonCommandContext<?, ?>, T extends CommonCommand<C, T>> {
     protected final ArgumentBranchDelegate<C, T> delegate;
@@ -74,6 +75,15 @@ public class ArgumentBranch<C extends CommonCommandContext<?, ?>, T extends Comm
 
     public ArgumentBranch<C, T> permissionDescription(@NotNull String description) {
         delegate.permissionDescription(Objects.requireNonNull(description));
+        return this;
+    }
+
+    /**
+     * Shows the branch only to senders for whom {@code predicate} holds, like
+     * {@link CommonCommand#visibleWhen(Predicate)}.
+     */
+    public ArgumentBranch<C, T> visibleWhen(@NotNull Predicate<? super C> predicate) {
+        delegate.visibleWhen(Objects.requireNonNull(predicate));
         return this;
     }
 

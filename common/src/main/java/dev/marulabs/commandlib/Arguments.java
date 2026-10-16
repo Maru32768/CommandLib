@@ -11,6 +11,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -26,6 +27,8 @@ final class Arguments<C extends CommonCommandContext<?, ?>> {
     private String permissionDescription = "";
     // Null until the branch sets one; the last argument's own executor applies then.
     private @Nullable AsyncCommandExecutor<C> executor = null;
+    // Null unless visibleWhen is called.
+    private @Nullable Predicate<? super C> visibility = null;
 
     Arguments(CommonCommand<C, ?> owner,
               List<? extends CommonArgument<?, C, ?>> arguments,
@@ -180,6 +183,21 @@ final class Arguments<C extends CommonCommandContext<?, ?>> {
 
     void permissionDescription(@NotNull String description) {
         this.permissionDescription = Objects.requireNonNull(description);
+    }
+
+    void visibleWhen(@NotNull Predicate<? super C> predicate) {
+        this.visibility = Objects.requireNonNull(predicate);
+    }
+
+    /**
+     * Whether the branch is shown to the sender of {@code ctx}.
+     */
+    boolean isVisible(C ctx) {
+        return visibility == null || visibility.test(ctx);
+    }
+
+    boolean hasVisibility() {
+        return visibility != null;
     }
 
     String permissionName(@NotNull CommonCommand<C, ?> parent, @NotNull String prefix) {

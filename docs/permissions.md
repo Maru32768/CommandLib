@@ -180,6 +180,9 @@ no permission plugin sets the node. A `TRUE` or `FALSE` value always wins.
 | Generated help | Only routes the sender may use are listed, and only options the sender may give. |
 | Execution | The runner checks the command node, the node of every given option and every argument branch node on the route again before parsing; a failure sends `You do not have permission to execute this command.` |
 
+A [`visibleWhen`](#refreshing-the-command-tree) predicate is checked in the same places as the command's or branch's
+node.
+
 See [errors](errors.md#permission-denied) for what the sender sees.
 
 ## Refreshing the command tree
@@ -204,10 +207,40 @@ The tree lists every command on the server, not only CommandLib's, so one call c
 Velocity has no API to send the tree again and no `CommandLib.refresh`. It adds the proxy's commands to the tree the
 backend server sends, so a player sees a permission change when the backend next sends it, such as on a server switch.
 
-Only permissions decide what the tree shows. Prerequisites (`addPrerequisite`, `require`, `playerRequirer`) run when the
-command runs and do not hide it. To show a command only in some plugin state, such as `/game start` only before a game
-starts, give the command its own node, grant or revoke that node when the state changes (a `PermissionAttachment`, or
-your permission plugin), and refresh the players it affects.
+Prerequisites (`addPrerequisite`, `require`, `playerRequirer`) run when the command runs and do not hide it. To show a
+command or an argument branch only in some plugin state, such as `/game start` only before a game starts, give it a
+`visibleWhen` predicate and refresh the players it affects when the state changes:
+
+```java
+class GameCommand extends Command {
+    GameCommand(Game game) {
+        super("game");
+
+        addChildren(new Command("start") {{
+            visibleWhen(ctx -> !game.isRunning());
+            execute(ctx -> {
+                game.start();
+                CommandLib.refreshAll(); // the players now see /game stop instead
+            });
+        }}, new Command("stop") {{
+            visibleWhen(ctx -> game.isRunning());
+            execute(ctx -> {
+                game.stop();
+                CommandLib.refreshAll();
+            });
+        }}, new Command("kick") {{
+            argument(new PlayerArgument("target")).visibleWhen(ctx -> game.isHost(ctx.getSender()))
+                                                  .execute((target, ctx) -> game.kick(target));
+        }});
+    }
+}
+```
+
+The predicate is checked where a permission is: a sender for whom it fails does not see the command or branch in the
+command tree, in suggestions or in help, and the input is rejected as an unknown command or argument, also when the
+state changed after the input was parsed. It gets a context with the sender and no arguments, and runs for each parse
+and each player the tree is sent to, so keep it cheap. It does not replace a permission: the nodes are still registered
+and checked. Velocity cannot send the tree again, so a hidden proxy command appears when the backend next sends it.
 
 ## LuckPerms
 

@@ -149,6 +149,14 @@ public final class CommandBuilder<C extends CommonCommandContext<?, ?>, T extend
     }
 
     /**
+     * See {@link CommonCommand#visibleWhen(java.util.function.Predicate)}.
+     */
+    public CommandBuilder<C, T> visibleWhen(@NotNull java.util.function.Predicate<? super C> predicate) {
+        command.visibleWhen(predicate);
+        return this;
+    }
+
+    /**
      * See {@link CommonCommand#optionsAnywhere()}.
      */
     public CommandBuilder<C, T> optionsAnywhere() {

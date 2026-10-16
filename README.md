@@ -66,7 +66,8 @@ with ease.
 - **Brigadier-native.** Commands are real Brigadier nodes, so they get client-side validation, vanilla selectors,
   `/execute` and data pack function support, and per-player command trees.
 - **Permissions without boilerplate.** Every command, subcommand, and argument branch gets a registered permission
-  node with a default, which also hides what a sender cannot use.
+  node with a default, which also hides what a sender cannot use. `visibleWhen(ctx -> !game.isRunning())` hides a
+  command or branch by plugin state as well ([permissions](docs/permissions.md#refreshing-the-command-tree)).
 - **Options, generated help, and test utilities built in.**
 
 | | CommandLib | CommandAPI | Paper command API |

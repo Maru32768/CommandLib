@@ -94,6 +94,26 @@ class CommandOptionTest {
         assertThat(tester.commandTree()).contains("--silent, -s [test.command.ban.option.silent, OP]");
     }
 
+    @Test
+    void aCommandIsShownAndRunOnlyWhileItsPredicateHolds() {
+        java.util.concurrent.atomic.AtomicBoolean running = new java.util.concurrent.atomic.AtomicBoolean();
+        CommandTester tester = new CommandTester(() -> new Command("game") {{
+            addChildren(new Command("start") {{
+                visibleWhen(ctx -> !running.get() && ctx.getSender()
+                                                        .getName()
+                                                        .equals("Steve"));
+                execute(ctx -> running.set(true));
+            }});
+        }}, "test.command");
+        FakeSender steve = FakeSender.player("Steve");
+        FakeSender alex = FakeSender.player("Alex");
+
+        assertThatThrownBy(() -> tester.execute("game start", alex)).hasMessageContaining("Command syntax error");
+        tester.execute("game start", steve);
+        assertThat(running).isTrue();
+        assertThatThrownBy(() -> tester.execute("game start", steve)).hasMessageContaining("Command syntax error");
+    }
+
     private static Player player(String name) {
         Player player = Mockito.mock(Player.class);
         Mockito.when(player.getName())

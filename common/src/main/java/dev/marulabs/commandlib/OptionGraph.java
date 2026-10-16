@@ -121,7 +121,7 @@ final class OptionGraph<S, C extends CommonCommandContext<S, ?>> {
                                  new ArrayList<>(path),
                                  argument -> ArgumentCommandNodeCreator.suggestions(platformAdapter,
                                                                                     argument,
-                                                                                    null,
+                                                                                    source -> true,
                                                                                     providers,
                                                                                     inheritedArguments),
                                  permissions,

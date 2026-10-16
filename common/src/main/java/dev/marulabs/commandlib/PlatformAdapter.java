@@ -1,7 +1,12 @@
 package dev.marulabs.commandlib;
 
+import com.mojang.brigadier.context.StringRange;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.tree.RootCommandNode;
 import dev.marulabs.commandlib.exception.ArgumentParseException;
+
+import java.util.List;
+import java.util.Map;
 
 public interface PlatformAdapter<S, T, C extends CommonCommandContext<S, T>, U extends CommonCommand<C, U>> {
     /**
@@ -13,6 +18,22 @@ public interface PlatformAdapter<S, T, C extends CommonCommandContext<S, T>, U e
     }
 
     C createCommandContext(com.mojang.brigadier.context.CommandContext<S> ctx);
+
+    /**
+     * A context of the source alone, without input or arguments, for a predicate that decides what the source sees.
+     */
+    default C createSourceContext(S source) {
+        return createCommandContext(new com.mojang.brigadier.context.CommandContext<>(source,
+                                                                                      "",
+                                                                                      Map.of(),
+                                                                                      null,
+                                                                                      new RootCommandNode<>(),
+                                                                                      List.of(),
+                                                                                      StringRange.at(0),
+                                                                                      null,
+                                                                                      null,
+                                                                                      false));
+    }
 
     boolean hasPermission(U command, C ctx, String permissionPrefix);
 

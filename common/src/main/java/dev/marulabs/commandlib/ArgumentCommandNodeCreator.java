@@ -9,13 +9,13 @@ import dev.marulabs.commandlib.command.Extractor;
 import dev.marulabs.commandlib.suggestion.SuggestionBuilder;
 import dev.marulabs.commandlib.suggestion.SuggestionProvider;
 import dev.marulabs.commandlib.util.UncaughtExceptionHandler;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -44,9 +44,14 @@ final class ArgumentCommandNodeCreator<S, T, C extends CommonCommandContext<S, T
                                                         CommonCommand<C, ?> parent) {
         RequiredArgumentBuilder<S, ?> builder = RequiredArgumentBuilder.argument(argument.name(), argument.type());
         String permission = arguments.permissionName(parent, permissionPrefix);
-        builder.requires(source -> platformAdapter.hasPermission(source, permission));
+        // The sender has the branch's permission and the branch is visible to the sender.
+        Predicate<S> requirement = arguments.hasVisibility()
+                ? source -> platformAdapter.hasPermission(source, permission)
+                        && arguments.isVisible(platformAdapter.createSourceContext(source))
+                : source -> platformAdapter.hasPermission(source, permission);
+        builder.requires(requirement);
 
-        builder.suggests(suggestions(platformAdapter, argument, permission, parent.providers(), executorArguments));
+        builder.suggests(suggestions(platformAdapter, argument, requirement, parent.providers(), executorArguments));
 
         builder.executes(runner(argument, helpAction, parent));
 
@@ -55,16 +60,16 @@ final class ArgumentCommandNodeCreator<S, T, C extends CommonCommandContext<S, T
 
     /**
      * The suggestions of an argument node: the argument's suggestion providers, with the arguments parsed before it.
-     * Without {@code permission} (null for an option value) they are empty.
+     * They are empty for a source that fails {@code requirement}.
      */
     static <S, C extends CommonCommandContext<S, ?>> com.mojang.brigadier.suggestion.SuggestionProvider<S> suggestions(PlatformAdapter<S, ?, C, ?> platformAdapter,
                                                                                                                        CommonArgument<?, C, ?> argument,
-                                                                                                                       @Nullable String permission,
+                                                                                                                       Predicate<S> requirement,
                                                                                                                        Map<ContextKey<?>, ? extends Extractor<?, ?>> providers,
                                                                                                                        List<Arguments<C>> executorArguments) {
         return (context, sb) -> {
             try {
-                if (permission != null && !platformAdapter.hasPermission(context.getSource(), permission)) {
+                if (!requirement.test(context.getSource())) {
                     return Suggestions.empty();
                 }
                 // Brigadier suggests with the first context of the input, which has the nodes before the first
