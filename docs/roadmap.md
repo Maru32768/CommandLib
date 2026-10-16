@@ -76,7 +76,7 @@
   Paper）、`LootTableArgument`（Spigot / Paper）、`RecipeArgument`（Spigot / Paper）、`ObjectiveArgument`（Spigot /
   Paper）、`ScoreboardDisplaySlotArgument`（Spigot / Paper）、`ChatColorArgument`（Spigot / Paper）を追加済み。
 - `[~]` `/execute`、command blocks、functions、tags の挙動を検証して docs / tests に落とす。2026-10-16 に Spigot 10 / Paper 10 / Mohist 2 /
-  Forge 4 / NeoForge 2 の計 32 target（`paper-26.3-spigot-jar` を含む）で integration test が全て通った（[`integration-test/README.md`](../integration-test/README.md)）。
+  Forge 4 / NeoForge 2 の計 29 target（`paper-26.3-spigot-jar` を含む）で integration test が全て通った（[`integration-test/README.md`](../integration-test/README.md)）。
   残り: command block と tag の tests、Forge / NeoForge の command block / function、未実行の patch release。
 - `[?]` `/execute as` 後の actor を platform 間で揃えるか決める。Spigot / Paper では sender / actor は元の sender（console）のまま、
   Forge / NeoForge では実行 entity に従う（permission 判定も含む）。
