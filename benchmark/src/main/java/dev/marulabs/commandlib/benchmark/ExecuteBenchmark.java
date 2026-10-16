@@ -33,6 +33,10 @@ public class ExecuteBenchmark {
     @Setup
     public void setUp() {
         tester = Trees.tester(commands);
+        // A failing input would measure the failure path instead.
+        if (tester.execute(input, sender) <= 0) {
+            throw new IllegalStateException("The input fails: " + input);
+        }
     }
 
     @Benchmark

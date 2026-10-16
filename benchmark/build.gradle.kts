@@ -32,22 +32,39 @@ tasks.register<JavaExec>("jmh") {
 
 tasks.register("jmhBaseline") {
     group = "benchmark"
-    description = "Writes build/results/jmh/results.json to baseline.json without the raw samples."
+    description = "Writes the metrics jmhCompare reads from build/results/jmh/results.json to baseline.json."
     val resultsFile = jmhResults.get().asFile
     val baselineFile = file("baseline.json")
     doLast {
         @Suppress("UNCHECKED_CAST")
-        val results = groovy.json.JsonSlurper().parse(resultsFile) as List<MutableMap<String, Any?>>
-        results.forEach { result ->
-            (listOf(result["primaryMetric"]) + (result["secondaryMetrics"] as Map<*, *>).values).forEach {
-                (it as MutableMap<*, *>).keys.removeAll(listOf("rawData", "rawDataHistogram"))
-            }
+        val results = groovy.json.JsonSlurper().parse(resultsFile) as List<Map<String, Any?>>
+        // Only what jmhCompare reads, and the JDK it was recorded with.
+        val baseline = results.map { result ->
+            val primary = result["primaryMetric"] as Map<*, *>
+            val percentiles = primary["scorePercentiles"] as Map<*, *>?
+            val alloc = (result["secondaryMetrics"] as Map<*, *>)["gc.alloc.rate.norm"] as Map<*, *>?
+            mapOf(
+                "benchmark" to result["benchmark"],
+                "mode" to result["mode"],
+                "params" to result["params"],
+                "jdkVersion" to result["jdkVersion"],
+                "vmName" to result["vmName"],
+                "primaryMetric" to mapOf(
+                    "score" to primary["score"],
+                    "scoreError" to primary["scoreError"],
+                    "scorePercentiles" to percentiles?.filterKeys { it == "50.0" || it == "95.0" },
+                    "scoreUnit" to primary["scoreUnit"],
+                ).filterValues { it != null },
+                "secondaryMetrics" to mapOf("gc.alloc.rate.norm" to alloc?.filterKeys { it == "score" || it == "scoreUnit" }),
+            ).filterValues { it != null }
         }
-        baselineFile.writeText(groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(results)) + "\n")
+        baselineFile.writeText(groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(baseline)) + "\n")
     }
 }
 
-// The regression tolerances of docs/benchmarks.md: the allowed relative change in the worse direction.
+// The regression tolerances of docs/benchmarks.md: the allowed relative change in the worse direction. Only the
+// allocation fails the task: the baseline's time errors are as large as the scores, so the time metrics are reported
+// until it is recorded again on an idle machine.
 val tolerances = mapOf(
     "p50" to 0.10,
     "p95" to 0.20,
@@ -85,11 +102,21 @@ tasks.register("jmhCompare") {
             if (base == null || now == null || base == 0.0) return
             val change = (now - base) / base * (if (higherIsWorse) 1 else -1)
             val line = "%-100s %-5s %14.3f -> %14.3f (%+.1f%% worse)".format(key, metric, base, now, change * 100)
-            println(line)
-            if (change > tolerances.getValue(metric)) regressions += line
+            if (change <= tolerances.getValue(metric)) {
+                println(line)
+            } else if (metric == "alloc") {
+                println(line)
+                regressions += line
+            } else {
+                println("$line (time, not gated)")
+            }
         }
         for ((key, now) in read(resultsFile)) {
-            val base = baseline[key] ?: continue
+            val base = baseline[key]
+            if (base == null) {
+                println("%-100s no baseline".format(key))
+                continue
+            }
             when (now["mode"]) {
                 "sample" -> {
                     check(key, "p50", percentile(base, "50.0"), percentile(now, "50.0"), true)

@@ -21,9 +21,11 @@ about nine minutes. `--args` replaces these options, for example to run one benc
 ```
 
 `jmhCompare` compares `results.json` with `benchmark/baseline.json` (another file with `-Pbenchmark.baseline=<path>`),
-prints the change of each metric, and fails when one regressed beyond its tolerance. To record a new baseline, run
-`:benchmark:jmhBaseline`, which writes `results.json` to `baseline.json` without the raw samples, and update the
-results below.
+prints the change of each metric, and fails when the allocation of a benchmark regressed beyond its tolerance. The time
+metrics beyond their tolerance are printed with `(time, not gated)`, because the baseline's time errors are as large as
+the scores; they gate once the baseline is recorded again on an idle machine. A benchmark without a baseline is printed
+with `no baseline`. To record a new baseline, run `:benchmark:jmhBaseline`, which writes the metrics `jmhCompare` reads
+from `results.json` to `baseline.json`, and update the results below.
 
 Compare only runs of the same machine, JDK and power settings; the baseline below is from one desktop, so a run on
 another machine needs its own baseline first.
@@ -73,7 +75,8 @@ than:
 
 The tail and the registration cost are noisier than the median, so they get more room. Allocation is nearly
 deterministic, so a small increase already means more work per call. `jmhCompare` applies these values, which are
-also in `benchmark/build.gradle.kts`. An improvement never fails; record it as the new baseline.
+also in `benchmark/build.gradle.kts`. An improvement never fails; record it as the new baseline. Until the baseline
+is recorded on an idle machine, only the allocation fails `jmhCompare`.
 
 ## Results
 
