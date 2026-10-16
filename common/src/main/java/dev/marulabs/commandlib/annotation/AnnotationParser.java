@@ -944,7 +944,16 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
 
         private Object invokeSuggestions(Method source, Object... arguments) {
             try {
-                return source.invoke(instance, arguments);
+                return invoke(source, arguments);
+            } catch (InvocationTargetException e) {
+                throw new IllegalStateException(e.getCause());
+            }
+        }
+
+        // An unchecked exception the method throws propagates unchanged; a checked one stays wrapped for the caller.
+        private Object invoke(Method method, Object... arguments) throws InvocationTargetException {
+            try {
+                return method.invoke(instance, arguments);
             } catch (IllegalAccessException e) {
                 throw new IllegalStateException(e);
             } catch (InvocationTargetException e) {
@@ -955,7 +964,7 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
                 if (cause instanceof Error) {
                     throw (Error) cause;
                 }
-                throw new IllegalStateException(cause);
+                throw e;
             }
         }
 
@@ -1194,19 +1203,11 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
                 }
                 Object returned;
                 try {
-                    returned = method.invoke(instance, values);
-                } catch (IllegalAccessException e) {
-                    throw new IllegalStateException(e);
+                    returned = invoke(method, values);
                 } catch (InvocationTargetException e) {
                     Throwable cause = e.getCause();
                     if (cause instanceof CommandPrerequisiteException) {
                         throw (CommandPrerequisiteException) cause;
-                    }
-                    if (cause instanceof RuntimeException) {
-                        throw (RuntimeException) cause;
-                    }
-                    if (cause instanceof Error) {
-                        throw (Error) cause;
                     }
                     // A checked exception fails the command like the stage of an async executor.
                     return CompletableFuture.failedFuture(cause);

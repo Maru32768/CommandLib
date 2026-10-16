@@ -4,6 +4,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * What one copy of CommandLib reports about the running platform and the registrations it made, from
@@ -102,6 +104,40 @@ public final class CommandLibDiagnostics {
     @Override
     public String toString() {
         return report();
+    }
+
+    /**
+     * Sets up each platform's {@code CommandLibDiagnosticsCommand}: {@code root} sends {@link #summary()}, and the
+     * children it gets from {@code newCommand}, "commands" and "permissions", send {@link #commands()} and
+     * {@link #permissions()}, of what {@code diagnostics} returns when they execute.
+     */
+    static <C extends CommonCommandContext<?, ?>, T extends CommonCommand<C, T>> void configureCommand(T root,
+                                                                                                       Function<String, T> newCommand,
+                                                                                                       Supplier<CommandLibDiagnostics> diagnostics) {
+        root.description("Show the platform and the commands CommandLib registered");
+        root.execute(ctx -> send(ctx,
+                                 diagnostics.get()
+                                            .summary()));
+        T commands = newCommand.apply("commands");
+        commands.description("Show the registered command trees");
+        commands.execute(ctx -> send(ctx,
+                                     diagnostics.get()
+                                                .commands()));
+        T permissions = newCommand.apply("permissions");
+        permissions.description("Show the registered permission nodes and their defaults");
+        permissions.execute(ctx -> send(ctx,
+                                        diagnostics.get()
+                                                   .permissions()));
+        root.addChildren(commands, permissions);
+    }
+
+    private static void send(CommonCommandContext<?, ?> ctx, String report) {
+        if (report.isEmpty()) {
+            ctx.sendMessage("No registrations.");
+            return;
+        }
+        report.lines()
+              .forEach(ctx::sendMessage);
     }
 
     private static void indent(StringBuilder out, String lines) {
