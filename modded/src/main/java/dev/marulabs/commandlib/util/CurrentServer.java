@@ -4,6 +4,7 @@ import net.minecraft.server.MinecraftServer;
 import org.jetbrains.annotations.Nullable;
 //? if fabric {
 /*import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.loader.api.FabricLoader;
 *///?} elif neoforge {
 /*import net.neoforged.neoforge.server.ServerLifecycleHooks;
 *///?} elif >=1.17 {
@@ -37,7 +38,15 @@ public final class CurrentServer {
     @Nullable
     public static MinecraftServer get() {
         //? if fabric {
-        /*return server;
+        /*MinecraftServer current = server;
+        if (current != null) {
+            return current;
+        }
+        // A shaded copy first used after the server started missed the event. A dedicated server is the game
+        // instance; the integrated server of a client is not, so a shaded copy there must be used from onInitialize.
+        Object game = FabricLoader.getInstance()
+                                  .getGameInstance();
+        return game instanceof MinecraftServer ? (MinecraftServer) game : null;
         *///?} else
         return ServerLifecycleHooks.getCurrentServer();
     }

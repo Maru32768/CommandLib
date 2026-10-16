@@ -212,7 +212,9 @@ tasks.named<ShadowJar>("shadowJar") {
 
 Loom remaps a `modImplementation` dependency to the development names, so shade CommandLib from the runtime classpath
 and remap the shadow jar to intermediary together with your mod. CommandLib's own `fabric.mod.json` is left out: the
-relocated copy is not a mod, and starts following the server when you register commands.
+relocated copy is not a mod, and starts following the server when you register commands. Register from
+`onInitialize`: a copy first used later finds a dedicated server through Fabric Loader, but not the integrated server
+of a client (singleplayer), whose commands then appear only after `/reload`.
 
 ```kotlin
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
