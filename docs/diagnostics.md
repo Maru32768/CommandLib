@@ -151,7 +151,7 @@ A registration's path tells how its commands reach the dispatcher:
 | Platform | Paths |
 |---|---|
 | Spigot | `vanilla dispatcher and Bukkit command map`; on Paper 1.20.6+ `Paper dispatcher, added again by a COMMANDS lifecycle handler on data reloads`, or `... on ServerResourcesReloadedEvent` when registered after the plugin enabled. |
-| Paper | `COMMANDS lifecycle handler` (`, waiting for the event` before it fires), `added to the live dispatcher ...` when registered after the plugin's initialization, or `bootstrap COMMANDS lifecycle handler`. |
+| Paper | `COMMANDS lifecycle handler` (`, waiting for the event` before it fires), or `bootstrap COMMANDS lifecycle handler`. |
 | Forge / NeoForge / Fabric | `server dispatcher` while a server runs, `waiting for the server` before. The owner is the permission prefix, since registration takes no mod id. |
 | Velocity | `BrigadierCommand`. The owner is the plugin id. |
 

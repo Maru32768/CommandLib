@@ -256,23 +256,20 @@ class CommandLibLifecycleTest {
     }
 
     @Test
-    void fallback_registration_is_restored_after_reload() {
+    void a_first_registration_after_the_plugins_initialization_is_refused() {
         when(plugin.isEnabled()).thenReturn(true);
         CommandLib.register(plugin, "test", helloCommand());
-        CommandDispatcher<CommandSourceStack> first = fireCommandsEvent();
+        CommandDispatcher<CommandSourceStack> dispatcher = fireCommandsEvent();
 
         Plugin latePlugin = latePlugin();
         try {
-            CommandLib.register(latePlugin, "late", namedCommand("late"));
-            CommandDispatcher<CommandSourceStack> reloaded = fireCommandsEvent();
-            CommandLib.register(latePlugin, "late", namedCommand("later"));
-
-            assertThat(first.getRoot()
-                            .getChild("late")).isNotNull();
-            assertThat(reloaded.getRoot()
-                               .getChild("late")).isNotNull();
-            assertThat(reloaded.getRoot()
-                               .getChild("later")).isNotNull();
+            assertThatThrownBy(() -> CommandLib.register(latePlugin,
+                                                         "late",
+                                                         namedCommand("late"))).isInstanceOf(IllegalStateException.class)
+                                                                               .hasMessageContaining("LatePlugin")
+                                                                               .hasMessageContaining("initialization");
+            assertThat(dispatcher.getRoot()
+                                 .getChild("late")).isNull();
         } finally {
             HandlerList.unregisterAll(latePlugin);
         }

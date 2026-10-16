@@ -27,8 +27,8 @@ final class PluginRegistrationState {
      */
     sealed interface Mode {
         /**
-         * No COMMANDS handler, before the first registration or after Paper refused one and no dispatcher was cached
-         * for a direct add; the next registration tries again.
+         * No COMMANDS handler, before the first registration or after Paper refused one; the next registration tries
+         * again.
          */
         record Unhandled() implements Mode {
         }
@@ -42,13 +42,6 @@ final class PluginRegistrationState {
         }
 
         /**
-         * Registered after the plugin's initialization, when Paper refuses a handler, so the commands are added to the
-         * live dispatcher, and another plugin's handler adds them again to the dispatcher of a data reload.
-         */
-        record Direct(CommandDispatcher<CommandSourceStack> dispatcher) implements Mode {
-        }
-
-        /**
          * The dispatcher the commands are in, or null when they are in none yet.
          */
         @Nullable
@@ -56,7 +49,6 @@ final class PluginRegistrationState {
             return switch (this) {
                 case Unhandled ignored -> null;
                 case Handled handled -> handled.dispatcher();
-                case Direct direct -> direct.dispatcher();
             };
         }
     }

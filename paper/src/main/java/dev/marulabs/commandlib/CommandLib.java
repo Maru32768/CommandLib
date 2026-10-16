@@ -297,9 +297,6 @@ public final class CommandLib implements Listener {
             case Mode.Handled handled when handled.dispatcher() == null ->
                 "COMMANDS lifecycle handler, waiting for the event";
             case Mode.Handled ignored -> "COMMANDS lifecycle handler";
-            case Mode.Direct ignored ->
-                "added to the live dispatcher (registered after the plugin's initialization), added again when "
-                        + "another plugin's COMMANDS handler runs";
         };
     }
 
@@ -333,18 +330,12 @@ public final class CommandLib implements Listener {
                         registrationState.instances.add(this);
                         return;
                     }
-                    // The initialization window has already passed for this plugin, so the lifecycle handler can no
-                    // longer be installed. Fall back to direct dispatcher manipulation.
-                    CommandDispatcher<CommandSourceStack> dispatcher = serverDispatcher;
-                    if (dispatcher == null) {
-                        throw new IllegalStateException("CommandLib.register() was called after Paper's command registration phase, "
-                                + "but no dispatcher is cached yet. Ensure at least one CommandLib.register() call "
-                                + "is made during plugin initialization.", failure);
-                    }
-                    registrationState.mode = new Mode.Direct(dispatcher);
-                    // Kept so that a COMMANDS event fired for another plugin re-adds it after /minecraft:reload.
-                    registrationState.instances.add(this);
-                    registerDirectly(dispatcher);
+                    // The initialization window has passed for this plugin, so Paper refuses the handler that would add
+                    // the commands again on every data reload.
+                    throw new IllegalStateException("CommandLib.register() was first called for " + plugin.getName()
+                            + " after its initialization. Make the first CommandLib.register() call during the "
+                            + "plugin's initialization (constructor, onLoad or onEnable); later ones are kept across "
+                            + "data reloads.", failure);
                 }
                 case Mode.Handled handled when handled.dispatcher() == null -> {
                     // The handler adds it when the event fires.
@@ -594,41 +585,10 @@ public final class CommandLib implements Listener {
                               }
                           }
                       }
-                      reregisterDirectStates(registrationState, dispatcher);
                   });
             return null;
         } catch (IllegalStateException e) {
             return e;
-        }
-    }
-
-    /**
-     * Plugins that registered after their initialization window have no COMMANDS handler of their own, so their
-     * commands are re-added to the fresh dispatcher whenever another plugin's handler observes a reload.
-     */
-    private static void reregisterDirectStates(PluginRegistrationState owner,
-                                               CommandDispatcher<CommandSourceStack> dispatcher) {
-        List<PluginRegistrationState> states;
-        synchronized (REGISTRATION_STATES) {
-            states = new ArrayList<>(REGISTRATION_STATES.values());
-        }
-        for (PluginRegistrationState registrationState : states) {
-            if (registrationState == owner) {
-                continue;
-            }
-            synchronized (registrationState) {
-                if (!(registrationState.mode instanceof Mode.Direct direct) || direct.dispatcher() == dispatcher) {
-                    continue;
-                }
-                registrationState.mode = new Mode.Direct(dispatcher);
-                for (CommandLib instance : registrationState.instances) {
-                    try {
-                        instance.addNodes(dispatcher);
-                    } catch (RuntimeException e) {
-                        instance.logRegistrationFailure(e);
-                    }
-                }
-            }
         }
     }
 
