@@ -101,6 +101,7 @@
   `PlayerArgument` / `ServerArgument`、diagnostics）。Velocity 3.4.0 / 4.2.0 で手動確認（2026-10-15）。
 - `[x]` Fabric support を追加する。`modded` の単一ソースから `fabric-1.20.1` / `fabric-1.21.1` と `fabric-testing-*` を build
   （2026-10-16、実サーバー未検証）。
+- `[x]` modded の version matrix に forge-1.18.2 / forge-1.19.2 / neoforge-1.21.4 / fabric-1.21.4 を追加する（2026-10-16、実サーバー未検証）。
 - `[x]` Folia support 方針を決め、実装する。`paper` artifact で Folia を検出して entity / region / global scheduler を使い、
   `spigot` artifact は Folia を拒否する（2026-10-15、mock test のみ）。
 

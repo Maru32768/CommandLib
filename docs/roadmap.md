@@ -27,12 +27,12 @@
 | Bukkit / Spigot / Paper support     | `[~]` | `spigot` module（Spigot 1.16.5〜26.3 を Tested）と `paper` module（Paper 1.21〜26.3 を Tested、Folia は best effort）がある。 | Folia の実サーバー検証。 |
 | Paper 1.20.6+ registration          | `[x]` | `LifecycleEvents.COMMANDS` + `Commands registrar` + `CommandSourceStack` を使った公式 API 登録が実装済み。Adventure component を標準 message path として利用。 | bootstrap 登録の互換性保証・docs / tests の拡充（`CommandLib.bootstrap(BootstrapContext, ...)` は実装済み）。                                                   |
 | Spigot / Paper module split         | `[x]` | `bukkit` を `spigot` へ rename / move し、`paper` module を新設済み。                                                                               | —                                                                          |
-| Forge support                       | `[~]` | Forge 1.16.5 / 1.20.1 を Architectury Loom + Stonecutter による `modded` の単一ソースから build。                                                                                                                | 1.16.5+ の対象 version 拡充、loader 非依存層の分離、Bukkit との差分整理。                                     |
+| Forge support                       | `[~]` | Forge 1.16.5 / 1.18.2 / 1.19.2 / 1.20.1 を `modded` の Stonecutter 単一ソースから build。 | 1.18.2 / 1.19.2 の実サーバー検証、loader 非依存層の分離（`[?]`）。 |
 | Mohist support                      | `[~]` | README 上で tested version が記載されている。                                                                                                      | integration test の明文化、非対応ケースの整理。                                           |
 | Folia support                       | `[~]` | `paper` artifact が Folia を検出し、`FoliaCommandScheduler` で entity / region / global scheduler に戻す。`spigot` artifact は Folia で登録を拒否する。 | 実 Folia server の integration target（Folia 用 fixture が必要）、region thread からの runtime 登録の guard。 |
 | Velocity support                    | `[~]` | `velocity` / `velocity-testing` module（Velocity 3.4.0+、`PlayerArgument` / `ServerArgument`）がある。Velocity 3.4.0 / 4.2.0 の proxy で手動 smoke test 済み。 | 実 proxy + backend + client の integration target、Velocity sample。 |
-| NeoForge support                    | `[~]` | NeoForge 1.21.1 を Forge と共有の `modded` Stonecutter tree から build（`neoforge-1.21.1`、`neoforge-testing-1.21.1`、integration target あり）。 | 1.21.1 以外の NeoForge version。 |
-| Fabric support                      | `[~]` | `modded` の Stonecutter tree から `fabric-1.20.1` / `fabric-1.21.1` を build（`CommandRegistrationCallback` v2、fabric-permissions-api 任意対応）。`modded-testing` も全 node で通る。 | 実サーバーの integration target、Fabric sample、Fabric 用 Kotlin module、metadata の `minecraft` version range。 |
+| NeoForge support                    | `[~]` | NeoForge 1.21.1 / 1.21.4 を build（integration target あり、1.21.4 は未実行）。 | 1.21.5 以降（1.21.11 で `Identifier` / `PermissionSet` 等の大きな変更）、26.x（非難読化、Java 25、`loom-no-remap`）。 |
+| Fabric support                      | `[~]` | `fabric-1.20.1` / `fabric-1.21.1` / `fabric-1.21.4` を build（`CommandRegistrationCallback` v2、fabric-permissions-api 任意対応）。`modded-testing` も全 node で通る。 | 実サーバーの integration target、Fabric 用 Kotlin module、1.21.5 以降と 26.x。 |
 | Brigadier / NMS hiding              | `[~]` | 利用者 API から Brigadier / NMS を隠している。                                                                                                      | capability detection、公式 API 優先、fallback policy。                            |
 | `/execute` integration              | `[~]` | README と Bukkit registration path で `/execute run` 連携を扱っている。spigot module と paper module の command は `/minecraft:reload` 後や runtime 登録後も data pack function から使える（`/minecraft:reload` 後は両 module に integration test あり）。paper module で plugin から登録した command は次 tick の function 再 compile 後に使える（bootstrap 登録は server の compile 時点から使える）。 | command block / tag での保証と tests。 |
 | Built-in arguments                  | `[~]` | 基本的な primitive、string、player、entity、location、item などがある。CommandAPI / Paper との挙動別 catalog は [`docs/arguments.md`](arguments.md)。 | catalog の missing 一覧（`resourceKey` 相当、angle / rotation、score holder 等）の補完。 |
@@ -117,6 +117,8 @@
 - `[x]` Architectury Loom + Stonecutter の PoC として、`forge:1.16.5` と `forge:1.20.1` を単一ソースから build する。
 - `[?]` mod loader 系 module を `minecraft`（MC version 依存・loader 非依存）と `loader/*`（loader 依存）に分割する。Fabric 追加時点では
   loader 依存部分が登録・permission・server 取得・reflection 2 箇所と metadata だけで、分割は不要だった。
+- `[ ]` modded を 1.21.5〜1.21.11 と 26.x に広げる。1.21.11 は `ResourceLocation` → `Identifier`、permission level → `PermissionSet`、
+  `GameProfile` の record 化などで約 50 箇所が壊れ、26.x は `dev.architectury.loom-no-remap` と Java 25 が必要。
 - `[ ]` Fabric の integration target（test mod と server setup の Fabric 対応）を追加し、`samples/fabric` の shade jar を実サーバーで読み込む。
 - `[~]` sender / message abstraction（Adventure と vanilla `Component` の差分吸収）を Velocity 着手前に設計する。
   message 側は `RichText` と platform ごとの変換（`RichTexts.toBungee` / `toAdventure` / `toVanilla`）で Phase 1 を実装済み
