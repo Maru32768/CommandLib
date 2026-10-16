@@ -44,7 +44,7 @@
 | Permission-aware execution          | `[x]` | command / argument branch permission が実行時に使われる。                                                                                         | option permission、diagnostics、export。                                      |
 | Permission registration             | `[~]` | Bukkit / Forge の permission registration がある。                                                                                           | reload safety の integration tests、LuckPerms guide。                         |
 | Permission-aware help / suggestions | `[~]` | argument branch permission を help / tab completion に反映する設計がある。                                                                          | 網羅 tests と docs。                                                           |
-| Typed command options               | `[~]` | flag / value / count option、default、dependency、repeatable（`List<T>`）、alias、required、`mutuallyExclusive(...)`、`OptionParseException`、help の option section がある（[`docs/options.md`](options.md)）。 | subcommand への継承、positional argument の後の option、固定 arity の multi-value、排他 group の専用 error message。 |
+| Typed command options               | `[x]` | flag / value / count option、任意の argument を値にする `Options.of(...)`、default、dependency、repeatable、alias、required、`mutuallyExclusive(...)`、option 単位の permission、opt-in の `optionsAnywhere()`、`OptionParseException`、help の option section がある（[`docs/options.md`](options.md)）。 | subcommand への継承、固定 arity の multi-value、排他 group の専用 error message、annotation 対応。 |
 | Generated usage / help              | `[x]` | 生成 help / usage に `HelpFormatter` / `UsageFormatter` と `examples(...)` があり、command ごとに継承される（[`docs/help.md`](help.md)）。`serverHelp(...)` は Bukkit 系の `/help` index に載る。 | usage line の RichText 化（hover / click）、`CommandDocs` への examples の出力。 |
 | Error taxonomy                      | `[~]` | parse / validation / prerequisite / option 系の例外があり、各 error で sender に見える message を [`docs/errors.md`](errors.md) で公開仕様化した。 | unknown subcommand、missing argument の専用 error、cooldown / confirmation / preprocess message の error formatter 経由化。 |
 | Exception handling                  | `[x]` | uncaught exception handler と、middleware での exception mapping / result handling がある。 | global な exception handler。 |
@@ -93,12 +93,11 @@
 - `[ ]` optional / variadic argument を実サーバー（Spigot / Paper / modded の integration test）で検証する。各 token を
   platform の `ArgumentType#parse` で読み直す実装のため、command tree の大きさ（`maxCount` × option の展開）も確認する。
 - `[ ]` cooldown の永続化（restart 後に復元する hook）、argument branch 単位の confirm / cooldown / `@Condition`。
-- `[ ]` permission 以外の state で command の表示を切り替える visibility predicate を追加する（現在は permission を付け外しして
-  `CommandLib.refresh(player)` する方式を docs で案内）。
 - `[ ]` option の redirect 化（`OptionGraph`）を実サーバーで検証する（Spigot 1.16.5〜26.x、Paper の `ApiMirrorRootNode`、Velocity、modded）。
   argument child と primitive 以外の value option を持つ command は従来の tree のままで、順列で増える。
-- `[ ]` 比較で劣った点を埋める: positional argument の後の option、option 単位の permission、primitive / string 以外の value option、
-  annotation での argument-first tree、CommandLib 組み込み message の他言語 bundle。
+- `[ ]` annotation API に argument option / option permission / `optionsAnywhere` / `visibleWhen` の対応を追加する。CommandLib 組み込み message の
+  他言語 bundle を増やす。
+- `[ ]` option の redirect 復元の変更後に `ExecuteBenchmark` を idle な環境で baseline と比較する。
 - `[ ]` middleware / option の `requires`・排他 / argument-first child 用の annotation を追加する。
 - `[ ]` Kotlin DSL を Forge / NeoForge に広げ（module 化には Stonecutter の Loom node 5 つ分が必要）、Kotlin 関数の default 引数から
   command を作る形を追加する。
