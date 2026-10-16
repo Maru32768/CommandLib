@@ -18,6 +18,7 @@ final class CommandFailure extends CommandSyntaxException {
     private final transient Supplier<Message> message;
     private final transient List<Runnable> sends;
     private transient @Nullable Message resolved;
+    private transient @Nullable Throwable unexpected;
 
     /**
      * @param message the platform's message joining the failure messages, created only when the platform reads it,
@@ -61,5 +62,23 @@ final class CommandFailure extends CommandSyntaxException {
      */
     void sendMessages() {
         sends.forEach(Runnable::run);
+    }
+
+    /**
+     * Records the exception that a middleware, the executor or the help threw unexpectedly.
+     */
+    CommandFailure unexpected(Throwable e) {
+        this.unexpected = e;
+        return this;
+    }
+
+    /**
+     * Throws the {@link AssertionError} that a middleware, the executor or the help threw, as testers do so that a
+     * failed assertion in a command fails the test.
+     */
+    void rethrowAssertionError() {
+        if (unexpected instanceof AssertionError) {
+            throw (AssertionError) unexpected;
+        }
     }
 }

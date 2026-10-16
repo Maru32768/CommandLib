@@ -311,7 +311,7 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
             ctx.sendFailure(Caption.SEE_CONSOLE);
         });
         notifyUncaughtExceptionHandlers(e, ctx);
-        return failure;
+        return failure.unexpected(e);
     }
 
     private int fail(C ctx,

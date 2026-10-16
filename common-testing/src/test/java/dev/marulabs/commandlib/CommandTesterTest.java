@@ -30,6 +30,31 @@ class CommandTesterTest {
     }
 
     @Test
+    void a_failed_assertion_in_an_executor_fails_execute() {
+        CommandTester tester = new CommandTester(new TestCommand("check") {{
+            execute(ctx -> assertThat(ctx.getInput("missing")).isEqualTo("expected"));
+        }});
+        FakeSender sender = FakeSender.console();
+
+        assertThatThrownBy(() -> tester.execute("check", sender)).isInstanceOf(AssertionError.class);
+        // The sender still gets what the server would send.
+        assertThat(sender.getSentMessageTexts()).isNotEmpty();
+    }
+
+    @Test
+    void an_unexpected_exception_in_an_executor_is_only_reported_to_the_sender() {
+        CommandTester tester = new CommandTester(new TestCommand("broken") {{
+            execute(ctx -> {
+                throw new IllegalStateException("broken");
+            });
+        }});
+        FakeSender sender = FakeSender.console();
+
+        assertThat(tester.execute("broken", sender)).isZero();
+        assertThat(sender.getSentMessageTexts()).isNotEmpty();
+    }
+
+    @Test
     void suggestsLiterals() {
         CommandTester tester = new CommandTester(new TestCommand("root") {{
             addChildren(new TestCommand("child"));

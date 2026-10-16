@@ -98,6 +98,7 @@ public final class CommandTester implements AutoCloseable {
     /**
      * Executes the input as the sender and returns the command's result. A command that fails sends its failure
      * messages to the sender and returns 0.
+     * An {@link AssertionError} the command throws, such as a failed assertion in an executor, is rethrown after them.
      *
      * @throws RuntimeException if the input does not match any registered command
      */
@@ -117,6 +118,7 @@ public final class CommandTester implements AutoCloseable {
             return dispatcher.execute(input, sender);
         } catch (CommandFailure e) {
             e.sendMessages();
+            e.rethrowAssertionError();
             return 0;
         } catch (CommandSyntaxException e) {
             throw new RuntimeException("Command syntax error: " + e.getMessage(), e);

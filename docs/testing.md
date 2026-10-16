@@ -67,7 +67,8 @@ bootstrapped registries on Forge / NeoForge / Fabric. The tester makes those ava
 `execute` throws a `RuntimeException` caused by Brigadier's `CommandSyntaxException` when the platform would reject
 the input: unknown command or subcommand, invalid argument syntax, or a node hidden by a missing permission. Everything
 CommandLib reports itself (validation, prerequisites, unexpected errors) is sent to the sender instead. See
-[errors](errors.md).
+[errors](errors.md). An `AssertionError` that a command throws, such as a failed assertion in an executor, is sent as
+an unexpected error and then rethrown by `execute`, so the test fails.
 
 `common-testing` also has `executeAndGetContext(input, sender)`, which returns the `TestCommandContext` of the run.
 
