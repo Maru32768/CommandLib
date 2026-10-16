@@ -209,7 +209,10 @@ public final class ArgumentTest extends TestBase {
         commands.add(check("recipeArgument",
                            new RecipeArgument("a"),
                            "minecraft:oak_planks",
-                           //? if >=1.20.2 {
+                           // From 1.21.2 the id of a recipe holder is its registry key.
+                           //? if >=1.21.2 {
+                           /*x -> String.valueOf(x.id().location()),
+                           *///?} elif >=1.20.2 {
                            /*x -> String.valueOf(x.id()),
                            *///?} else
                            x -> String.valueOf(x.getId()),
