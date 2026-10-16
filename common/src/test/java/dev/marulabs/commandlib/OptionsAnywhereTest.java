@@ -140,6 +140,37 @@ class OptionsAnywhereTest {
         assertThatThrownBy(() -> runner.execute("config a -f set")).isInstanceOf(CommandSyntaxException.class);
     }
 
+    // The copies of the branch's arguments and the option tokens between them redirect to the hubs of their states, so
+    // the child's context after the last redirect lacks the arguments before it.
+    @Test
+    void an_argument_child_of_a_branch_of_two_arguments_keeps_the_arguments_before_a_redirect() throws Exception {
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("config") {{
+            optionsAnywhere();
+            CommandOption<Boolean, TestCommandContext> force = option(Options.flag("force", 'f'));
+            option(Options.flag("verbose", 'v'));
+            argument(new Word("k1"), new Word("k2")).execute((k1, k2, ctx) -> ctx.sendMessage(k1 + " " + k2 + " "
+                                                            + ctx.getOption(force)))
+                                                    .child((k1, k2) -> new TestCommand("set") {{
+                                                        execute(ctx -> ctx.sendMessage("set " + k1.get(ctx) + " "
+                                                                + k2.get(ctx) + " inputs=" + ctx.getInputs()));
+                                                    }});
+        }});
+
+        for (String input : List.of("config a b set",
+                                    "config --force a b set",
+                                    "config -f a b set",
+                                    "config a -f b set",
+                                    "config a --force b set",
+                                    "config -v -f a b set",
+                                    "config -v a -f b set")) {
+            assertThat(runner.execute(input)
+                             .messages()).as(input)
+                                         .containsExactly("set a b inputs=[config, a, b, set]");
+        }
+        assertThat(runner.execute("config a -f -v b")
+                         .messages()).containsExactly("a b true");
+    }
+
     @Test
     void a_command_that_does_not_opt_in_still_rejects_options_after_arguments() {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("ban") {{

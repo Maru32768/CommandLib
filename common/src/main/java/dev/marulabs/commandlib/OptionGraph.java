@@ -53,7 +53,8 @@ import java.util.stream.Collectors;
  * <p>
  * The re-parse needs a command whose path is literals only, as an argument child's inherited arguments would be lost
  * too. An argument child keeps a tree without redirects, in which the paths with the same state share their child
- * nodes.
+ * nodes. The options of the command it follows can still redirect into its path, so its runner recovers the input
+ * with that command's graph.
  */
 final class OptionGraph<S, C extends CommonCommandContext<S, ?>> {
     private final List<CommandOption<?, C>> options;
@@ -401,12 +402,18 @@ final class OptionGraph<S, C extends CommonCommandContext<S, ?>> {
      */
     @SuppressWarnings("unchecked")
     CommandContext<S> recover(CommandContext<S> context) throws CommandSyntaxException {
-        if (!redirects) {
-            return context;
-        }
         Predicate<S> requirement = context.getRootNode()
                                           .getRequirement();
-        if (!(requirement instanceof OptionNode) || ((OptionNode<S>) requirement).graph() != this) {
+        if (!(requirement instanceof OptionNode)) {
+            return context;
+        }
+        OptionGraph<S, ?> graph = ((OptionNode<S>) requirement).graph();
+        if (graph != this) {
+            // An argument child has no redirects of its own, but the options of the command it follows can redirect
+            // into its path, past arguments it inherits. That command's graph parses them again.
+            return redirects ? context : graph.recover(context);
+        }
+        if (!redirects) {
             return context;
         }
         Object hubState = ((OptionNode<S>) requirement).state();
