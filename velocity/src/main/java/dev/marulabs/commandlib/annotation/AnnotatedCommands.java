@@ -6,11 +6,9 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import dev.marulabs.commandlib.Command;
 import dev.marulabs.commandlib.CommandContext;
-import dev.marulabs.commandlib.CommonArgument;
 import dev.marulabs.commandlib.argument.*;
 import org.jetbrains.annotations.NotNull;
 
-import java.time.Duration;
 
 /**
  * Builds commands from classes annotated with {@link dev.marulabs.commandlib.annotation.Command}. See
@@ -40,51 +38,16 @@ public final class AnnotatedCommands {
     @NotNull
     public static AnnotationParser<CommandContext, Command> parser() {
         return new AnnotationParser<CommandContext, Command>(CommandContext.class,
-                                                             Command::new).registerArgument(String.class,
-                                                                                            p -> p.annotation(Greedy.class) == null
-                                                                                                    ? new StringArgument(p.name())
-                                                                                                    : new StringArgument(p.name(),
-                                                                                                                         StringArgument.Type.PHRASE))
-                                                                          .registerArgument(Integer.class, p -> {
-                                                                              Range range = p.annotation(Range.class);
-                                                                              return range == null
-                                                                                      ? new IntegerArgument(p.name())
-                                                                                      : new IntegerArgument(p.name(),
-                                                                                                            (int) range.min(),
-                                                                                                            (int) range.max());
-                                                                          })
-                                                                          .registerArgument(Long.class, p -> {
-                                                                              Range range = p.annotation(Range.class);
-                                                                              return range == null
-                                                                                      ? new LongArgument(p.name())
-                                                                                      : new LongArgument(p.name(),
-                                                                                                         (long) range.min(),
-                                                                                                         (long) range.max());
-                                                                          })
-                                                                          .registerArgument(Float.class, p -> {
-                                                                              Range range = p.annotation(Range.class);
-                                                                              return range == null
-                                                                                      ? new FloatArgument(p.name())
-                                                                                      : new FloatArgument(p.name(),
-                                                                                                          (float) Math.max(range.min(),
-                                                                                                                           -Float.MAX_VALUE),
-                                                                                                          (float) Math.min(range.max(),
-                                                                                                                           Float.MAX_VALUE));
-                                                                          })
-                                                                          .registerArgument(Double.class, p -> {
-                                                                              Range range = p.annotation(Range.class);
-                                                                              return range == null
-                                                                                      ? new DoubleArgument(p.name())
-                                                                                      : new DoubleArgument(p.name(),
-                                                                                                           range.min(),
-                                                                                                           range.max());
-                                                                          })
-                                                                          .registerArgument(Boolean.class,
-                                                                                            p -> new BooleanArgument(p.name()))
-                                                                          .registerArgument(Enum.class,
-                                                                                            AnnotatedCommands::enumArgument)
-                                                                          .registerArgument(Duration.class,
-                                                                                            p -> new DurationArgument(p.name()))
+                                                             Command::new).registerStandardArguments(StringArgument::new,
+                                                                                                     name -> new StringArgument(name,
+                                                                                                                                StringArgument.Type.PHRASE),
+                                                                                                     IntegerArgument::new,
+                                                                                                     LongArgument::new,
+                                                                                                     FloatArgument::new,
+                                                                                                     DoubleArgument::new,
+                                                                                                     BooleanArgument::new,
+                                                                                                     EnumArgument::new,
+                                                                                                     DurationArgument::new)
                                                                           .registerArgument(Player.class,
                                                                                             p -> new PlayerArgument(p.name()))
                                                                           .registerArgument(RegisteredServer.class,
@@ -95,10 +58,5 @@ public final class AnnotatedCommands {
                                                                                                 Command.playerRequirer())
                                                                           .registerContextValue(ConsoleCommandSource.class,
                                                                                                 Command.consoleRequirer());
-    }
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    private static CommonArgument<?, CommandContext, ?> enumArgument(AnnotatedParameter parameter) {
-        return new EnumArgument(parameter.name(), parameter.type());
     }
 }

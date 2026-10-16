@@ -150,6 +150,70 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
     }
 
     /**
+     * Maps the value types every platform has to the platform's arguments made by the given constructors:
+     * {@code String} ({@code greedyString} when annotated {@link Greedy}), {@code int}, {@code long}, {@code float} and
+     * {@code double} (bounded by {@link Range}, or by the limits of the type without it), {@code boolean}, enums and
+     * {@link Duration}.
+     */
+    public AnnotationParser<C, T> registerStandardArguments(@NotNull Function<String, ? extends CommonArgument<String, C, ?>> string,
+                                                            @NotNull Function<String, ? extends CommonArgument<String, C, ?>> greedyString,
+                                                            @NotNull NumberArgumentFactory<Integer, C> integer,
+                                                            @NotNull NumberArgumentFactory<Long, C> longArgument,
+                                                            @NotNull NumberArgumentFactory<Float, C> floatArgument,
+                                                            @NotNull NumberArgumentFactory<Double, C> doubleArgument,
+                                                            @NotNull Function<String, ? extends CommonArgument<Boolean, C, ?>> bool,
+                                                            @NotNull EnumArgumentFactory<C> enumArgument,
+                                                            @NotNull Function<String, ? extends CommonArgument<Duration, C, ?>> duration) {
+        registerArgument(String.class,
+                         p -> (p.annotation(Greedy.class) == null ? string : greedyString).apply(p.name()));
+        registerArgument(Integer.class, p -> integer.create(p.name(), (int) min(p), (int) max(p)));
+        registerArgument(Long.class, p -> longArgument.create(p.name(), (long) min(p), (long) max(p)));
+        registerArgument(Float.class,
+                         p -> floatArgument.create(p.name(),
+                                                   (float) Math.max(min(p), -Float.MAX_VALUE),
+                                                   (float) Math.min(max(p), Float.MAX_VALUE)));
+        registerArgument(Double.class, p -> doubleArgument.create(p.name(), min(p), max(p)));
+        registerArgument(Boolean.class, p -> bool.apply(p.name()));
+        registerArgument(Enum.class, p -> createEnumArgument(enumArgument, p));
+        return registerArgument(Duration.class, p -> duration.apply(p.name()));
+    }
+
+    // Without @Range the bounds are its defaults, which the casts above clamp to the limits of each type.
+    private static double min(AnnotatedParameter parameter) {
+        Range range = parameter.annotation(Range.class);
+        return range == null ? -Double.MAX_VALUE : range.min();
+    }
+
+    private static double max(AnnotatedParameter parameter) {
+        Range range = parameter.annotation(Range.class);
+        return range == null ? Double.MAX_VALUE : range.max();
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private static <C extends CommonCommandContext<?, ?>> CommonArgument<?, C, ?> createEnumArgument(EnumArgumentFactory<C> factory,
+                                                                                                     AnnotatedParameter parameter) {
+        return factory.create(parameter.name(), (Class) parameter.type());
+    }
+
+    /**
+     * Creates a numeric argument with inclusive bounds, such as {@code IntegerArgument::new}.
+     */
+    @FunctionalInterface
+    public interface NumberArgumentFactory<N extends Number, C extends CommonCommandContext<?, ?>> {
+        @NotNull
+        CommonArgument<N, C, ?> create(@NotNull String name, @NotNull N min, @NotNull N max);
+    }
+
+    /**
+     * Creates an argument of the constants of an enum, such as {@code EnumArgument::new}.
+     */
+    @FunctionalInterface
+    public interface EnumArgumentFactory<C extends CommonCommandContext<?, ?>> {
+        @NotNull
+        <E extends Enum<E>> CommonArgument<E, C, ?> create(@NotNull String name, @NotNull Class<E> type);
+    }
+
+    /**
      * Resolves parameters of {@code type} from the context with {@code extractor}: those annotated {@link Sender},
      * those whose type has no argument factory, and the value of an omitted {@link Optional} argument of the type. A
      * {@link CommandPrerequisiteException} thrown by the extractor fails the command with its message.

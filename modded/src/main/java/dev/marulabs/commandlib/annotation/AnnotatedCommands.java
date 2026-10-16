@@ -3,7 +3,6 @@ package dev.marulabs.commandlib.annotation;
 import com.mojang.authlib.GameProfile;
 import dev.marulabs.commandlib.Command;
 import dev.marulabs.commandlib.CommandContext;
-import dev.marulabs.commandlib.CommonArgument;
 import dev.marulabs.commandlib.argument.*;
 import dev.marulabs.commandlib.util.Location;
 import net.minecraft.ChatFormatting;
@@ -37,14 +36,14 @@ import net.minecraft.advancements.Advancement;
 import net.minecraft.world.item.crafting.Recipe;
 //?}
 //? if >=1.20.5 {
-/*import net.minecraft.core.Holder;
+/*import dev.marulabs.commandlib.CommonArgument;
+import net.minecraft.core.Holder;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
 *///?}
 
-import java.time.Duration;
 import java.util.UUID;
 
 /**
@@ -75,34 +74,15 @@ public final class AnnotatedCommands {
     @NotNull
     public static AnnotationParser<CommandContext, Command> parser() {
         AnnotationParser<CommandContext, Command> parser = new AnnotationParser<>(CommandContext.class, Command::new);
-        parser.registerArgument(String.class,
-                                p -> p.annotation(Greedy.class) == null ? new StringArgument(p.name())
-                                        : new StringArgument(p.name(), StringArgument.Type.PHRASE))
-              .registerArgument(Integer.class, p -> {
-                  Range range = p.annotation(Range.class);
-                  return range == null ? new IntegerArgument(p.name())
-                          : new IntegerArgument(p.name(), (int) range.min(), (int) range.max());
-              })
-              .registerArgument(Long.class, p -> {
-                  Range range = p.annotation(Range.class);
-                  return range == null ? new LongArgument(p.name())
-                          : new LongArgument(p.name(), (long) range.min(), (long) range.max());
-              })
-              .registerArgument(Float.class, p -> {
-                  Range range = p.annotation(Range.class);
-                  return range == null ? new FloatArgument(p.name())
-                          : new FloatArgument(p.name(),
-                                              (float) Math.max(range.min(), -Float.MAX_VALUE),
-                                              (float) Math.min(range.max(), Float.MAX_VALUE));
-              })
-              .registerArgument(Double.class, p -> {
-                  Range range = p.annotation(Range.class);
-                  return range == null ? new DoubleArgument(p.name())
-                          : new DoubleArgument(p.name(), range.min(), range.max());
-              })
-              .registerArgument(Boolean.class, p -> new BooleanArgument(p.name()))
-              .registerArgument(Enum.class, AnnotatedCommands::enumArgument)
-              .registerArgument(Duration.class, p -> new DurationArgument(p.name()))
+        parser.registerStandardArguments(StringArgument::new,
+                                         name -> new StringArgument(name, StringArgument.Type.PHRASE),
+                                         IntegerArgument::new,
+                                         LongArgument::new,
+                                         FloatArgument::new,
+                                         DoubleArgument::new,
+                                         BooleanArgument::new,
+                                         EnumArgument::new,
+                                         DurationArgument::new)
               .registerArgument(UUID.class, p -> new UUIDArgument(p.name()))
               .registerArgument(ServerPlayer.class, p -> new PlayerArgument(p.name()))
               .registerArgument(GameProfile.class, p -> new GameProfileArgument(p.name()))
@@ -142,11 +122,6 @@ public final class AnnotatedCommands {
               .registerArgument(Recipe.class, p -> new RecipeArgument(p.name()));
         //?}
         return parser;
-    }
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    private static CommonArgument<?, CommandContext, ?> enumArgument(AnnotatedParameter parameter) {
-        return new EnumArgument(parameter.name(), parameter.type());
     }
 
     //? if >=1.20.5 {
