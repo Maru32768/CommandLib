@@ -599,11 +599,12 @@ public final class ArgumentTest extends TestBase {
                 putResult(key,
                           PlainTextComponentSerializer.plainText()
                                                       .serialize(a),
-                          "hello, world!");
+                          "hello, " + playerName + "!");
             });
         }});
 
-        return List.of(buildCommand(command, name + " hello, world!"));
+        // The console may use selectors, and @p selects the only player.
+        return List.of(buildCommand(command, name + " hello, @p!"));
     }
 
     public List<String> nbtCompoundArgument() {

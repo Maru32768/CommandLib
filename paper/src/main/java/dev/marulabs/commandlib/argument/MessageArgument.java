@@ -48,19 +48,27 @@ public class MessageArgument extends Argument<Component, MessageArgument> {
 
     /**
      * Resolves the selectors as vanilla's {@code MessageArgument.getMessage} does. Paper's resolver keeps the vanilla
-     * message, which has no API, so it is read by its Mojang names. Returns null for another resolver (such as a test
-     * double), whose content is then used as written.
+     * message, which has no API, so it is read by its Mojang names: the record accessor {@code message()} and the
+     * message's {@code resolveComponent(CommandSourceStack)}, both present from Paper 1.21 to 26.3. A Paper resolver
+     * without them fails the parse rather than passing the selectors on unresolved. Returns null for a resolver that is
+     * not Paper's (such as a test double), whose content is then used as written.
      */
     @Nullable
-    private static Message resolveSelectors(SignedMessageResolver resolver,
-                                            Object source) throws CommandSyntaxException {
+    static Message resolveSelectors(SignedMessageResolver resolver, Object source) throws CommandSyntaxException {
+        if (!resolver.getClass()
+                     .getName()
+                     .startsWith("io.papermc.paper.")) {
+            return null;
+        }
         Object message;
         try {
             message = resolver.getClass()
                               .getMethod("message")
                               .invoke(resolver);
         } catch (ReflectiveOperationException e) {
-            return null;
+            throw new IllegalStateException("Cannot resolve the selectors of a message: " + resolver.getClass()
+                                                                                                    .getName()
+                    + " has no message()", e);
         }
         for (Method method : message.getClass()
                                     .getDeclaredMethods()) {

@@ -67,6 +67,14 @@ commands again after it registers them, and on later `/minecraft:reload`s, so th
 command" load error of such a function can be ignored. On Paper, registering from a `PluginBootstrap` with
 `CommandLib.bootstrap(...)` makes the commands exist before the first compilation.
 
+## Java 26 warns that a final field "has been mutated reflectively"
+
+On Spigot and Paper, CommandLib swaps the children maps of Brigadier command nodes when it registers or unregisters
+commands, because Paper reads those maps on another thread. The maps are in `final` fields. From Java 26 the JVM warns
+on the first such write, and a JVM that denies it (`--illegal-final-field-mutation=deny`, planned as the default of a
+later release) makes registration fail. Start the server with `--enable-final-field-mutation=ALL-UNNAMED` to allow
+the write and silence the warning.
+
 ## Two plugins shading CommandLib conflict
 
 Relocate `dev.marulabs.commandlib` in the shadow jar (see the README installation snippets). Each plugin then has its

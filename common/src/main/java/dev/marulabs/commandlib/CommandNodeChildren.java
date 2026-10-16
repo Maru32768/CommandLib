@@ -15,6 +15,11 @@ import java.util.Map;
  * each player's command tree on an asynchronous pool by iterating the dispatcher root's children, so changing those maps
  * on the main thread meanwhile throws ConcurrentModificationException there. Instead, the changes are made on copies,
  * which then replace the node's maps: a tree being built keeps iterating the old maps, and a later one reads the new.
+ *
+ * <p>The maps are in Brigadier's {@code final} fields, and only a write to those fields swaps them: a VarHandle cannot
+ * write a final field, and changing the maps in place is what this avoids. From Java 26 (JEP 500) the JVM warns on the
+ * first such write, and a JVM run with {@code --illegal-final-field-mutation=deny}, which a later release makes the
+ * default, refuses it unless started with {@code --enable-final-field-mutation=ALL-UNNAMED}.
  */
 final class CommandNodeChildren {
     private static final Field CHILDREN = field("children");
@@ -71,7 +76,8 @@ final class CommandNodeChildren {
         try {
             field.set(node, map);
         } catch (IllegalAccessException e) {
-            throw new IllegalStateException(e);
+            throw new IllegalStateException("The JVM refused to replace the command tree's children;"
+                    + " start it with --enable-final-field-mutation=ALL-UNNAMED", e);
         }
     }
 
