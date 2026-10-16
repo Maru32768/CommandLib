@@ -1,5 +1,6 @@
 package dev.marulabs.commandlib;
 
+import com.mojang.brigadier.arguments.StringArgumentType;
 import dev.marulabs.commandlib.command.AsyncCommandExecutor;
 import dev.marulabs.commandlib.exception.ArgumentParseException;
 import dev.marulabs.commandlib.exception.CommandPrerequisiteException;
@@ -70,6 +71,12 @@ final class Arguments<C extends CommonCommandContext<?, ?>> {
                 throw new IllegalStateException("Variadic argument '" + argument.name() + "' of command '"
                         + parent.name() + "' must be the last argument of its branch");
             }
+            // A greedy argument takes the rest of the input, so nothing after it, or a second value, could be given.
+            if (isGreedy(argument) && (i != arguments.size() - 1 || argument instanceof VariadicArgument)) {
+                throw new IllegalStateException("Greedy argument '" + argument.name() + "' of command '"
+                        + parent.name() + "' takes the rest of the input, so it must be the last argument of its "
+                        + "branch and cannot be variadic");
+            }
             if (i > 0 && arguments.get(i - 1)
                                   .isOptional()
                     && !argument.isOptional()) {
@@ -80,10 +87,15 @@ final class Arguments<C extends CommonCommandContext<?, ?>> {
             }
         }
         CommonArgument<?, C, ?> last = arguments.get(arguments.size() - 1);
-        if (!children.isEmpty() && (last.isOptional() || last instanceof VariadicArgument)) {
+        if (!children.isEmpty() && (last.isOptional() || last instanceof VariadicArgument || isGreedy(last))) {
             throw new IllegalStateException("The branch of command '" + parent.name() + "' ending with argument '"
-                    + last.name() + "' cannot have child commands, since the argument is optional or variadic");
+                    + last.name() + "' cannot have child commands, since the argument is optional, variadic or greedy");
         }
+    }
+
+    private static boolean isGreedy(CommonArgument<?, ?, ?> argument) {
+        return argument.type() instanceof StringArgumentType
+                && ((StringArgumentType) argument.type()).getType() == StringArgumentType.StringType.GREEDY_PHRASE;
     }
 
     /**

@@ -59,6 +59,8 @@ Notes:
   string, so it does not validate the value or show it as a literal; the server rejects other values with
   "Incorrect argument for command". The value list can change at runtime. For a single fixed literal use a
   subcommand: `addChildren(new Command("start"))`.
+- `StringArgument(name, Type.PHRASE)` takes the rest of the input, so registration fails when it is not the last
+  argument of its branch, is variadic, or has child commands.
 - `UnparsedArgument` is advertised as a greedy string so that the client accepts any characters. Arguments after it
   are parsed by the server but get no client-side completion, so put it last.
 - `EnumArgument`, `ObjectArgument`, `NameableObjectArgument`, `LiteralArgument` filter suggestions with

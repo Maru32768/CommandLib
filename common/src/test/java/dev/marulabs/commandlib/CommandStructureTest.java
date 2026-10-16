@@ -224,6 +224,28 @@ class CommandStructureTest {
             .hasMessageContaining("'x'");
     }
 
+    // A greedy argument takes the rest of the input, so nothing after it could be reached.
+    @Test
+    void a_greedy_argument_must_end_its_branch() {
+        assertThatThrownBy(() -> new TestCommandRunner(new TestCommand("ban") {{
+            argument(new CommonStringArgument<>("reason", CommonStringArgument.Type.PHRASE),
+                     new IntArg("days")).execute((reason, days, ctx) -> {
+                     });
+        }})).isInstanceOf(IllegalStateException.class)
+            .hasMessageContaining("'reason'");
+        assertThatThrownBy(() -> new TestCommandRunner(new TestCommand("ban") {{
+            argument(new CommonStringArgument<>("reason", CommonStringArgument.Type.PHRASE)).execute((reason, ctx) -> {
+                                                                                       })
+                                                                                       .child(reason -> new TestCommand("confirm"));
+        }})).isInstanceOf(IllegalStateException.class)
+            .hasMessageContaining("'reason'");
+        assertThatThrownBy(() -> new TestCommandRunner(new TestCommand("ban") {{
+            argument(new PhraseArg("reasons").variadic()).execute((reasons, ctx) -> {
+            });
+        }})).isInstanceOf(IllegalStateException.class)
+            .hasMessageContaining("'reasons'");
+    }
+
     @Test
     void repeated_names_within_one_child_are_accepted() throws Exception {
         TestCommand list = new TestCommand("list") {{
@@ -492,6 +514,12 @@ class CommandStructureTest {
     private static final class IntArg extends CommonIntegerArgument<TestCommandContext, IntArg> {
         IntArg(String name) {
             super(name);
+        }
+    }
+
+    private static final class PhraseArg extends CommonStringArgument<TestCommandContext, PhraseArg> {
+        PhraseArg(String name) {
+            super(name, Type.PHRASE);
         }
     }
 
