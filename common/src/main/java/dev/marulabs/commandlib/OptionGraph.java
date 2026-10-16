@@ -57,6 +57,9 @@ import java.util.stream.Collectors;
  * with that command's graph.
  */
 final class OptionGraph<S, C extends CommonCommandContext<S, ?>> {
+    // Seven short flags make about 37,500 nodes and eight about 300,000, which take seconds to build and are too large
+    // to send to players.
+    private static final int MAX_NODES = 50_000;
     private final List<CommandOption<?, C>> options;
     private final BiPredicate<CommandOption<?, C>, CommandOption<?, C>> excludes;
     private final boolean redirects;
@@ -175,6 +178,8 @@ final class OptionGraph<S, C extends CommonCommandContext<S, ?>> {
         private final Map<State, CommandNode<S>> hubs = new HashMap<>();
         // The copy of an argument node for the counts it follows, keyed by the state after it.
         private final Map<State, CommandNode<S>> copies = new HashMap<>();
+        // The option tokens of the states built so far, about the number of nodes.
+        private int tokenCount;
 
         private Builder(Command<S> executor) {
             this.executor = executor;
@@ -199,7 +204,18 @@ final class OptionGraph<S, C extends CommonCommandContext<S, ?>> {
             // Input that ends after the options runs what input ending at the position runs.
             Command<S> command = position == null ? executor : position.getCommand();
             Map<String, Transition> stateTransitions = new HashMap<>();
-            for (OptionToken<C> token : tokens(state.counts)) {
+            List<OptionToken<C>> tokens = tokens(state.counts);
+            tokenCount += tokens.size();
+            if (tokenCount > MAX_NODES) {
+                throw new IllegalStateException("The options of '" + String.join(" ",
+                                                                                   path.stream()
+                                                                                       .map(x -> x.iterator()
+                                                                                                  .next())
+                                                                                       .collect(Collectors.toList()))
+                        + "' make more than " + MAX_NODES + " command nodes. Give fewer options a short name, or lower "
+                        + "their maximums; see docs/options.md#limits.");
+            }
+            for (OptionToken<C> token : tokens) {
                 State next = new State(next(state.counts, token.options), position);
                 if (token.isValue()) {
                     CommandOption<?, C> option = token.options.get(0);

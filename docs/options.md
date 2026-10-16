@@ -264,7 +264,8 @@ branch for each set of options already given; the tokens that reach the same set
 server nor the players get a copy for every order of the options. Each set still offers every token of the options left,
 and combined short flags are a token for each order of the flags (`-fv`, `-vf`), so keep the number of options per
 command and the maximums of counts and repeatable options small: a few options with maximums of 3 to 5 are fine, and
-six short flags already make about 5,500 nodes.
+six short flags already make about 5,500 nodes. Registration fails with an `IllegalStateException` when a
+command's options would make more than 50,000 nodes (eight short flags would make about 300,000).
 
 An argument child (a command under an argument) keeps a tree without redirects, which players receive with a copy for
 every order of the options. Keep its options fewer still.

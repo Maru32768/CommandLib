@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * The size of the option trees. "Nodes" are the distinct node objects the server keeps. "Sent" are the nodes a server
@@ -26,6 +27,15 @@ class OptionTreeSizeTest {
         assertThat(nodes(flags(6))).isLessThan(6_000);
         assertThat(sent(flags(6))).isLessThan(6_000);
         assertThat(sent(flags(4))).isLessThan(250);
+    }
+
+    // Each set of options given offers every order of the short flags left, so the tree grows exponentially.
+    @Test
+    void a_command_whose_options_make_too_many_nodes_is_rejected_at_registration() {
+        assertThat(nodes(flags(7))).isLessThan(40_000);
+        assertThatThrownBy(() -> build(flags(8))).isInstanceOf(IllegalStateException.class)
+                                                .hasMessageContaining("'flags'")
+                                                .hasMessageContaining("options.md");
     }
 
     @Test
