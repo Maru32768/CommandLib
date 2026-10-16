@@ -52,9 +52,11 @@ Forge 1.16.5, 1.18.2, 1.19.2 and 1.20.1, NeoForge 1.21.1 and 1.21.4, and Fabric
   The argument set is the same as on Forge / NeoForge of the same Minecraft
   version. Loom remaps the jars to intermediary.
 - Public API still exposes each Minecraft version's native types. The 1.16.5
-  artifact keeps its `DefaultPermissionLevel` overloads and
-  `FMLServerStartedEvent` registration; 1.20.1 uses `RegisterCommandsEvent` and
-  `PermissionNode`.
+  artifact keeps its `DefaultPermissionLevel` overloads and registers its
+  permission nodes with `PermissionAPI.registerNode` when the server has
+  started; 1.20.1 uses `PermissionNode`. Every version adds the commands in
+  `RegisterCommandsEvent`, which fires again for the new dispatcher of each
+  `/reload`.
 
 The previous 1.16.5-only module used MCP snapshot mappings
 (`snapshot`, `20210309-1.16.5`) and ForgeGradle. ForgeGradle does not support

@@ -45,7 +45,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 //?} else {
-/*import net.minecraftforge.fml.event.server.FMLServerStartedEvent;
+/*import net.minecraftforge.event.RegisterCommandsEvent;
+import net.minecraftforge.fml.event.server.FMLServerStartedEvent;
 *///?}
 
 public final class CommandLib {
@@ -132,7 +133,8 @@ public final class CommandLib {
                 + "dispatcher when registered later");
         platform.add("Permission nodes: PermissionGatherEvent.Nodes, named commandlib.<node>");
         //?} else {
-        /*platform.add("Command registration: the server's dispatcher when the server has started");
+        /*platform.add("Command registration: RegisterCommandsEvent on every data reload, or the running server's "
+                + "dispatcher when registered later");
         platform.add("Permission nodes: PermissionAPI.registerNode when the server has started");
         *///?}
         platform.add("Server: " + (running ? "running" : "not running"));
@@ -327,31 +329,45 @@ public final class CommandLib {
         this.commands = commands;
         this.permissionPrefix = permissionPrefix;
 
+        // Always listen: RegisterCommandsEvent fires again on /reload and on every integrated server start.
+        MinecraftForge.EVENT_BUS.register(this);
+
         MinecraftServer server = CurrentServer.get();
-        if (server == null) {
-            MinecraftForge.EVENT_BUS.register(this);
-        } else {
-            register(server);
+        if (server != null) {
+            // The current dispatcher has already been built, so add the commands to it directly.
+            registerPermissionNodes();
+            register(server.getCommands()
+                           .getDispatcher()
+                           .getRoot());
+            server.getPlayerList()
+                  .getPlayers()
+                  .forEach(player -> server.getCommands()
+                                           .sendCommands(player));
         }
     }
 
     @SubscribeEvent
-    public void onRegisterCommands(FMLServerStartedEvent e) {
-        register(e.getServer());
+    public void onRegisterCommands(RegisterCommandsEvent e) {
+        register(e.getDispatcher()
+                  .getRoot());
     }
 
-    private void register(MinecraftServer server) {
-        RootCommandNode<CommandSourceStack> root = server.getCommands()
-                                                         .getDispatcher()
-                                                         .getRoot();
+    // The nodes are registered once the server has started, after a permission mod has installed its handler.
+    @SubscribeEvent
+    public void onServerStarted(FMLServerStartedEvent e) {
+        registerPermissionNodes();
+    }
 
-        new CommandNodeCreator<>(commands, permissionPrefix, ServerCommandScheduler.INSTANCE).build()
-                                                            .forEach(root::addChild);
-
+    private void registerPermissionNodes() {
         commands.stream()
                 .flatMap(x -> x.permissionEntries(permissionPrefix)
                                .stream())
                 .forEach(e -> PermissionAPI.registerNode(e.getKey(), e.getValue(), ""));
+    }
+
+    private void register(RootCommandNode<CommandSourceStack> root) {
+        new CommandNodeCreator<>(commands, permissionPrefix, ServerCommandScheduler.INSTANCE).build()
+                                                                                             .forEach(root::addChild);
     }
     *///?}
 }
