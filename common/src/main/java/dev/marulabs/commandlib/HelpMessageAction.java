@@ -57,11 +57,7 @@ final class HelpMessageAction<S, T, C extends CommonCommandContext<S, T>, U exte
         }
         // Example: "/scan [options] <target>: Scan target"
         for (Arguments<C> arguments : command.argumentsList()) {
-            // A branch that only leads to children is listed by its child usages above.
-            boolean endsUsage = arguments.children()
-                                         .isEmpty()
-                    || arguments.isExecutable();
-            if (arguments.size() > 0 && endsUsage && hasArgumentPermission(command, arguments, ctx)) {
+            if (arguments.size() > 0 && arguments.endsUsage() && hasArgumentPermission(command, arguments, ctx)) {
                 usages.add(new Usage(path, appendTags(prefix, arguments), arguments.description(ctx)));
             }
         }
@@ -99,12 +95,10 @@ final class HelpMessageAction<S, T, C extends CommonCommandContext<S, T>, U exte
                 continue;
             }
             List<Token> argumentTokens = appendTags(tokens, arguments);
-            if (arguments.children()
-                         .isEmpty()) {
-                // Terminal argument branches have no command node of their own, so this is the only place where
-                // their description can appear in parent-command help.
+            if (arguments.endsUsage()) {
+                // An argument branch has no command node of its own, so this is the only place where its description
+                // can appear in parent-command help.
                 usages.add(new Usage(path, argumentTokens, arguments.description(ctx)));
-                continue;
             }
             for (CommonCommand<C, ?> child : arguments.children()) {
                 if (isUsable(castCommand(child), ctx)) {

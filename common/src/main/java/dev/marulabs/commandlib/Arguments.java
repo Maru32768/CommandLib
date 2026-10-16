@@ -228,6 +228,14 @@ final class Arguments<C extends CommonCommandContext<?, ?>> {
         return arguments.isEmpty() ? executor != null : executorFor(arguments.get(arguments.size() - 1)) != null;
     }
 
+    /**
+     * Whether input that ends with this branch is a usage of its own, which help lists: it runs there, or it has no
+     * child commands to lead to. A branch that only leads to children is listed by their usages.
+     */
+    boolean endsUsage() {
+        return isExecutable() || children.isEmpty();
+    }
+
     DefaultPermission effectiveDefaultPermission() {
         if (defaultPermissionOverride != null) {
             return defaultPermissionOverride;

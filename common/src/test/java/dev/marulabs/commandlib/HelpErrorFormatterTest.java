@@ -157,6 +157,26 @@ class HelpErrorFormatterTest {
     }
 
     @Test
+    void help_lists_a_nested_branch_that_executes_and_has_child_commands() throws Exception {
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("config") {{
+            helpFormatter((ctx, help) -> help.usages()
+                                             .forEach(x -> ctx.sendMessage(x.plainText())));
+            argument(new CommonStringArgument<>("key")).child(key -> new TestCommand("mode") {{
+                argument(new CommonStringArgument<>("value")).execute((value, ctx) -> {
+                                                             })
+                                                             .child(value -> new TestCommand("reset") {{
+                                                                 execute(ctx -> {
+                                                                 });
+                                                             }});
+            }});
+        }});
+
+        assertThat(runner.execute("config")
+                         .messages()).containsExactlyInAnyOrder("/config <key> mode <value>",
+                                                                "/config <key> mode <value> reset");
+    }
+
+    @Test
     void the_help_subcommand_runs_the_prerequisites_and_reports_its_failures() throws Exception {
         List<CommandError.Kind> kinds = new ArrayList<>();
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("game") {{
