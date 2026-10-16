@@ -1242,6 +1242,11 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
             Type type = parameter.getParameterizedType();
             if (type instanceof ParameterizedType) {
                 Type element = ((ParameterizedType) type).getActualTypeArguments()[0];
+                // A generic element such as Holder<Enchantment> resolves by its raw class; the factory reads the
+                // full type from AnnotatedParameter.parameter().
+                if (element instanceof ParameterizedType) {
+                    element = ((ParameterizedType) element).getRawType();
+                }
                 if (element instanceof Class) {
                     return box((Class<?>) element);
                 }

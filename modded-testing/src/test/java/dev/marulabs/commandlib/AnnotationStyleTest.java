@@ -1,11 +1,19 @@
 package dev.marulabs.commandlib;
 
 import dev.marulabs.commandlib.annotation.AnnotatedCommands;
+//? if >=1.20.5 {
+/*import dev.marulabs.commandlib.annotation.Execute;
+import dev.marulabs.commandlib.annotation.Option;
+import net.minecraft.core.Holder;
+import net.minecraft.world.item.enchantment.Enchantment;
+*///?}
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
+//? if >=1.20.5
+/*import java.util.stream.Collectors;*/
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -36,6 +44,39 @@ class AnnotationStyleTest {
                                        "Steve joined lobby",
                                        "This command can only be executed by a player.");
     }
+
+    //? if >=1.20.5 {
+    /*@dev.marulabs.commandlib.annotation.Command("enchant")
+    static final class EnchantCommand {
+        @Execute
+        void enchant(CommandContext ctx,
+                     @Option(value = "extra", repeatable = 2) List<Holder<Enchantment>> extra,
+                     List<Holder<Enchantment>> enchantments) {
+            ctx.sendSuccess(names(enchantments) + " + " + names(extra));
+        }
+
+        private static String names(List<Holder<Enchantment>> holders) {
+            return holders.stream()
+                          .map(x -> x.unwrapKey()
+                                     .orElseThrow()
+                                     .location()
+                                     .toString())
+                          .collect(Collectors.joining(", "));
+        }
+    }
+
+    @Test
+    void holder_lists_are_variadic_arguments_and_repeatable_options() {
+        FakeSender console = FakeSender.console();
+        try (CommandTester tester = new CommandTester(() -> AnnotatedCommands.parse(new EnchantCommand()),
+                                                      "test.command")) {
+            tester.execute("enchant --extra minecraft:unbreaking minecraft:sharpness minecraft:mending", console);
+        }
+
+        assertThat(console.getSentMessageTexts()).containsExactly(
+                "minecraft:sharpness, minecraft:mending + minecraft:unbreaking");
+    }
+    *///?}
 
     /**
      * The command tree, the permissions, the suggestions and what each input sends.

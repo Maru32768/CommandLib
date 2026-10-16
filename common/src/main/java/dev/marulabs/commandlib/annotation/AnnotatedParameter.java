@@ -30,7 +30,7 @@ public final class AnnotatedParameter {
 
     /**
      * The value type of the argument: the parameter type with primitives boxed, or the element type of a
-     * {@code List} parameter.
+     * {@code List} parameter. A generic type is raw; {@link #parameter()} has its type arguments.
      */
     @NotNull
     public Class<?> type() {
