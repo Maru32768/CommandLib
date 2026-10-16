@@ -23,7 +23,7 @@ player's command packet. Only the work an `executeAsync` command hands to the as
 | `as <entity>` | The executing entity | `ctx.getEntity()` |
 | `at <entity>`, `positioned <pos>`, `in <dimension>` | The position and world | `ctx.getLocation()`, `ctx.getWorld()` |
 | `rotated <yaw> <pitch>`, `facing ...`, `at <entity>` | The rotation | the yaw and pitch of `ctx.getLocation()` |
-| `store result` / `store success` | What is stored | `ctx.setResult(int)`, a failure stores 0 (see [errors](errors.md#results-and-failures)) |
+| `store result` / `store success` | What is stored | `ctx.setResult(int)`; a failure with a message stores 0, one without a message only returns 0 (see [errors](errors.md#results-and-failures)) |
 
 `execute positioned 10.25 70.5 -20.75 rotated 90 45 run mycmd` gives a location of `10.25, 70.5, -20.75` with yaw 90
 and pitch 45 on every platform. Note that `positioned` centers whole numbers on the block, as vanilla does:
