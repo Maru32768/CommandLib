@@ -33,7 +33,10 @@ import java.util.stream.Collectors;
 /**
  * Executes Velocity commands in tests without a running proxy. {@link CommandContext#getProxy()} returns a Mockito
  * {@link ProxyServer} ({@link #proxy()}) that knows the players and servers added with {@link #withFakePlayer} and
- * {@link #withFakeServer}, which {@code PlayerArgument} and {@code ServerArgument} look up.
+ * {@link #withFakeServer}, which {@code PlayerArgument} and {@code ServerArgument} look up. It returns the proxy of the
+ * tester that last ran a command until that tester is closed, so async work a command queues can use it after
+ * {@code execute} returns. The proxy is shared by the JVM, so testers running commands on parallel threads see each
+ * other's proxy.
  */
 public final class CommandTester implements AutoCloseable {
     private final CommandDispatcher<CommandSource> dispatcher = new CommandDispatcher<>();
@@ -112,7 +115,6 @@ public final class CommandTester implements AutoCloseable {
      * @throws RuntimeException if the input does not match any registered command
      */
     public int execute(@NotNull String input, @NotNull CommandSource sender) {
-        ProxyServer previous = CommandContext.proxy;
         CommandContext.proxy = proxy;
         try {
             return dispatcher.execute(input, sender);
@@ -122,8 +124,6 @@ public final class CommandTester implements AutoCloseable {
             return 0;
         } catch (CommandSyntaxException e) {
             throw new RuntimeException("Command syntax error: " + e.getMessage(), e);
-        } finally {
-            CommandContext.proxy = previous;
         }
     }
 
@@ -138,19 +138,14 @@ public final class CommandTester implements AutoCloseable {
      * Returns the texts of the suggestions for the given partial input, waiting for them to complete.
      */
     public List<String> suggest(@NotNull String input, @NotNull CommandSource sender) {
-        ProxyServer previous = CommandContext.proxy;
         CommandContext.proxy = proxy;
-        try {
-            ParseResults<CommandSource> parseResults = dispatcher.parse(input, sender);
-            CompletableFuture<Suggestions> suggestions = dispatcher.getCompletionSuggestions(parseResults);
-            return suggestions.join()
-                              .getList()
-                              .stream()
-                              .map(Suggestion::getText)
-                              .collect(Collectors.toList());
-        } finally {
-            CommandContext.proxy = previous;
-        }
+        ParseResults<CommandSource> parseResults = dispatcher.parse(input, sender);
+        CompletableFuture<Suggestions> suggestions = dispatcher.getCompletionSuggestions(parseResults);
+        return suggestions.join()
+                          .getList()
+                          .stream()
+                          .map(Suggestion::getText)
+                          .collect(Collectors.toList());
     }
 
     /**
@@ -223,8 +218,15 @@ public final class CommandTester implements AutoCloseable {
         return this;
     }
 
+    /**
+     * Stops {@link CommandContext#getProxy()} returning this tester's proxy, unless another tester has run a command
+     * since.
+     */
     @Override
     public void close() {
+        if (CommandContext.proxy == proxy) {
+            CommandContext.proxy = null;
+        }
     }
 
     private static String key(String name) {

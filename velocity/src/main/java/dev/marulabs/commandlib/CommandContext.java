@@ -19,7 +19,7 @@ import java.util.Locale;
 import java.util.Objects;
 
 public final class CommandContext extends CommonCommandContext<CommandSource, Component> {
-    // Set by CommandLib.register, and by the tester while it runs a command. One proxy runs per JVM.
+    // Set by CommandLib.register, and by the tester from its first command until it closes. One proxy runs per JVM.
     static volatile @Nullable ProxyServer proxy;
 
     public CommandContext(com.mojang.brigadier.context.CommandContext<CommandSource> ctx) {

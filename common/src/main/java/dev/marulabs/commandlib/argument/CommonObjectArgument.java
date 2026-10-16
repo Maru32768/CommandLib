@@ -4,7 +4,6 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import dev.marulabs.commandlib.CommonArgument;
 import dev.marulabs.commandlib.CommonCommandContext;
 import dev.marulabs.commandlib.exception.ArgumentParseException;
-import dev.marulabs.commandlib.util.StringUtil;
 
 import java.util.Map;
 import java.util.Objects;
@@ -20,17 +19,12 @@ public class CommonObjectArgument<T, C extends CommonCommandContext<?, ?>, SELF 
     public CommonObjectArgument(String name, Supplier<Map<String, ? extends T>> mapSupplier) {
         super(name, StringArgumentType.string());
         this.mapSupplier = Objects.requireNonNull(mapSupplier);
-        addSuggestionProvider(sb -> {
-            mapSupplier.get()
-                       .entrySet()
-                       .stream()
-                       .filter(x -> filter(sb.getContext()).test(x.getValue()))
-                       .map(Map.Entry::getKey)
-                       .filter(x -> sb.getLatestInput()
-                                      .isEmpty()
-                               || StringUtil.containsIgnoreCase(x, sb.getLatestInput()))
-                       .forEach(sb::suggest);
-        });
+        addSuggestionProvider(sb -> QuotableSuggestions.suggestMatching(sb,
+                                                                        mapSupplier.get()
+                                                                                   .entrySet()
+                                                                                   .stream()
+                                                                                   .filter(x -> filter(sb.getContext()).test(x.getValue()))
+                                                                                   .map(Map.Entry::getKey)));
     }
 
     @Override

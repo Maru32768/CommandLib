@@ -48,4 +48,26 @@ class AsyncCommandTest {
             assertThat(sender.getSentMessageTexts()).containsExactly("abc has 3 letters");
         }
     }
+
+    @Test
+    void a_follow_up_after_execute_returned_still_sees_the_proxy() {
+        Queue<Runnable> asyncTasks = new ArrayDeque<>();
+        try (CommandTester tester = CommandTester.builder()
+                                                 .command(new Command("version") {{
+                                                     executeAsync(ctx -> ctx.supplyAsync(() -> ctx.getProxy()
+                                                                                                  .getVersion()
+                                                                                                  .getName())
+                                                                            .thenAccept(ctx::sendMessage));
+                                                 }})
+                                                 .permissionPrefix("test")
+                                                 .scheduler(CommandScheduler.of(Runnable::run, asyncTasks::add))
+                                                 .build()) {
+            FakeSender sender = FakeSender.player("Steve");
+
+            tester.execute("version", sender);
+            asyncTasks.forEach(Runnable::run);
+
+            assertThat(sender.getSentMessageTexts()).containsExactly("Velocity");
+        }
+    }
 }

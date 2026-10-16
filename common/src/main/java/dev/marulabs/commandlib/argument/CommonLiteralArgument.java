@@ -4,7 +4,6 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import dev.marulabs.commandlib.CommonArgument;
 import dev.marulabs.commandlib.CommonCommandContext;
 import dev.marulabs.commandlib.exception.ArgumentParseException;
-import dev.marulabs.commandlib.util.StringUtil;
 
 import java.util.Collection;
 import java.util.Objects;
@@ -20,14 +19,9 @@ public class CommonLiteralArgument<C extends CommonCommandContext<?, ?>, SELF ex
     public CommonLiteralArgument(String name, Supplier<Collection<String>> literalsSupplier) {
         super(name, StringArgumentType.string());
         this.literalsSupplier = Objects.requireNonNull(literalsSupplier);
-        addSuggestionProvider(sb -> {
-            literalsSupplier.get()
-                            .stream()
-                            .filter(x -> sb.getLatestInput()
-                                           .isEmpty()
-                                    || StringUtil.containsIgnoreCase(x, sb.getLatestInput()))
-                            .forEach(sb::suggest);
-        });
+        addSuggestionProvider(sb -> QuotableSuggestions.suggestMatching(sb,
+                                                                        literalsSupplier.get()
+                                                                                        .stream()));
     }
 
     @Override

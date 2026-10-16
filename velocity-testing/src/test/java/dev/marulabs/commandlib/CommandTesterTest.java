@@ -3,6 +3,7 @@ package dev.marulabs.commandlib;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import dev.marulabs.commandlib.argument.IntegerArgument;
+import dev.marulabs.commandlib.argument.LiteralArgument;
 import dev.marulabs.commandlib.argument.PlayerArgument;
 import dev.marulabs.commandlib.argument.ServerArgument;
 import dev.marulabs.commandlib.argument.StringArgument;
@@ -107,6 +108,42 @@ class CommandTesterTest {
 
         assertThat(targets).containsExactly(lobby);
         assertThat(tester.suggest("send ", sender)).containsExactly("help", "lobby", "survival");
+    }
+
+    @Test
+    void server_argument_suggests_a_name_that_needs_quotes_quoted() {
+        List<RegisteredServer> targets = new ArrayList<>();
+        CommandTester tester = new CommandTester(new Command("send") {{
+            argument(new ServerArgument("server")).execute((server, ctx) -> targets.add(server));
+        }}, "proxy.command");
+        RegisteredServer myLobby = tester.withFakeServer("my lobby");
+        tester.withFakeServer("lobby");
+        FakeSender sender = FakeSender.player("Alice");
+
+        assertThat(tester.suggest("send ", sender)).containsExactly("\"my lobby\"", "help", "lobby");
+        assertThat(tester.suggest("send my", sender)).containsExactly("\"my lobby\"");
+        assertThat(tester.suggest("send \"my lo", sender)).containsExactly("\"my lobby\"");
+        assertThat(tester.suggest("send \"lob", sender)).containsExactly("\"my lobby\"", "lobby");
+
+        tester.execute("send \"My Lobby\"", sender);
+
+        assertThat(targets).containsExactly(myLobby);
+    }
+
+    @Test
+    void literal_argument_suggests_a_literal_that_needs_quotes_quoted() {
+        List<String> chosen = new ArrayList<>();
+        List<String> drinks = List.of("red wine", "beer");
+        CommandTester tester = new CommandTester(new Command("pick") {{
+            argument(new LiteralArgument("choice", drinks)).execute((choice, ctx) -> chosen.add(choice));
+        }}, "proxy.command");
+        FakeSender sender = FakeSender.player("Alice");
+
+        assertThat(tester.suggest("pick \"red", sender)).containsExactly("\"red wine\"");
+
+        tester.execute("pick \"red wine\"", sender);
+
+        assertThat(chosen).containsExactly("red wine");
     }
 
     @Test
