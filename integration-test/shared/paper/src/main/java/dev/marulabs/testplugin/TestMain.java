@@ -102,6 +102,8 @@ public class TestMain {
             HelpTopicTest helpTopicTest = new HelpTopicTest(mainCommand, plugin);
             DataPackFunctionTest dataPackFunctionTest = new DataPackFunctionTest(mainCommand);
             RuntimeFeatureTest runtimeFeatureTest = new RuntimeFeatureTest(mainCommand);
+            OptionalVariadicArgumentTest optionalVariadicArgumentTest = new OptionalVariadicArgumentTest(mainCommand,
+                                                                                                         TEST_PLAYER_NAME);
             new HelpMessageTest(mainCommand); // registers helpMessageRoot for bot-side help message verification
             List<TestBase> tests = List.of(argumentTest,
                                            optionTest,
@@ -112,7 +114,8 @@ public class TestMain {
                                            vanillaExecutionTest,
                                            helpTopicTest,
                                            dataPackFunctionTest,
-                                           runtimeFeatureTest);
+                                           runtimeFeatureTest,
+                                           optionalVariadicArgumentTest);
             List<String> commands = tests.stream()
                                          .flatMap(x -> x.build()
                                                         .stream())

@@ -19,7 +19,7 @@
 |-------------------------------------|------:|-----------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------|
 | Fluent / tree API                   | `[x]` | `Command`、`argument(...)`、`addChildren(...)` による command tree 定義がある。                                                                    | API stability policy と migration guide。                                    |
 | 型安全な argument callback              | `[x]` | `Unary` から `Hept` までの typed branch callback と、任意個の引数を `argument(a, b, ..., i)` / `argument(List)` で受けて `ctx.getArgument(arg)` で型付きに読む形がある。 | — |
-| Variadic / optional arguments       | `[x]` | 末尾の `optional(default)` / `optional(Extractor)` と `variadic([max])`（`List<T>`）がある。配置違反は登録時に `IllegalStateException`（[`docs/design/optional-variadic-arguments.md`](design/optional-variadic-arguments.md)）。 | 上限なしの variadic、`Optional<T>` 形式、実サーバーでの検証（fixture なし）。 |
+| Variadic / optional arguments       | `[x]` | 末尾の `optional(default)` / `optional(Extractor)` と `variadic([max])`（`List<T>`）がある。配置違反は登録時に `IllegalStateException`（[`docs/design/optional-variadic-arguments.md`](design/optional-variadic-arguments.md)）。実サーバーでは Spigot / Paper / modded fixture の `OptionalVariadicArgumentTest` が console から、省略時の default、指定値での上書き、`optional(Extractor)`、`variadic(3)` の順序、player 名と `@p` の variadic、空の optional variadic を確認する（spigot-1.21.8、paper-1.21.4、forge-1.20.1、fabric-1.21.1 で実行済み）。 | 上限なしの variadic、`Optional<T>` 形式、player からの実行、command tree の大きさ（`maxCount` × option の展開）の測定。 |
 | Execution result                    | `[x]` | `ctx.setResult(int)` が `/execute store result` に、message のある失敗（例外・権限・prerequisite 等）が `store success 0` に反映される（message のない失敗は 0 を返すだけで、`store success` は 1）。spigot-1.16.5 / paper-26.3 の integration test あり。 | Forge / NeoForge の実サーバー検証。 |
 | Async execution                     | `[x]` | `executeAsync(...)`（全 typed branch）と `ctx.supplyAsync` / `runAsync`、platform 別の `CommandScheduler` で sync thread へ復帰する（[`docs/execution.md`](execution.md)）。 | Folia の command block（region scheduler）経路の実サーバー検証（Bukkit / Forge / NeoForge と、Folia の player / console は 2026-10-16 に検証済み）。 |
 | Dynamic command tree refresh        | `[x]` | `CommandLib.refresh(player)` / `refreshAll()` が Spigot / Paper / Forge / NeoForge にある（[`docs/permissions.md`](permissions.md)）。 | permission 以外の state による表示切替 predicate、実 client での検証。 |
@@ -84,8 +84,8 @@
 - `[ ]` modded-testing の fake source は level を持たないため selector を解決できない。`docs/arguments.md` の「real selectors」の記述を見直す。
 - `[ ]` Paper で resolve error の translatable component が実 client で翻訳されること、`MessageComponentSerializer` が
   Paper 1.21.3〜26.x で動くことを integration test（`CommandSyntaxExceptionTest`）で確認する。
-- `[ ]` optional / variadic argument を実サーバー（Spigot / Paper / modded の integration test）で検証する（fixture がまだない）。各 token を
-  platform の `ArgumentType#parse` で読み直す実装のため、command tree の大きさ（`maxCount` × option の展開）も確認する。
+- `[ ]` optional / variadic argument の command tree の大きさ（`maxCount` × option の展開）を確認する。実サーバーでの parse と実行は
+  `OptionalVariadicArgumentTest`（Spigot / Paper / modded fixture）で確認済み。
 - `[ ]` cooldown の永続化（restart 後に復元する hook）、argument branch 単位の confirm / cooldown / `@Condition`。
 - `[~]` option の redirect 化（`OptionGraph`）を実サーバーで検証する。Spigot / Paper / Mohist / Forge / NeoForge は 2026-10-16 に検証済み、Velocity が残り。
   argument child（argument の下の command）は redirect を使わない tree のままで、同じ state の path が子 node を共有する。

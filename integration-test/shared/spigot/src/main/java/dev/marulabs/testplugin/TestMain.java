@@ -102,6 +102,8 @@ public class TestMain {
             HelpTopicTest helpTopicTest = new HelpTopicTest(mainCommand, plugin);
             DataPackFunctionTest dataPackFunctionTest = new DataPackFunctionTest(mainCommand);
             RuntimeFeatureTest runtimeFeatureTest = new RuntimeFeatureTest(mainCommand);
+            OptionalVariadicArgumentTest optionalVariadicArgumentTest = new OptionalVariadicArgumentTest(mainCommand,
+                                                                                                         TEST_PLAYER_NAME);
             new HelpMessageTest(mainCommand); // registers helpMessageRoot for bot-side help message verification
             // Runs after the other tests, whose commands initialize the NMS wrappers it inspects.
             TypedNmsTest typedNmsTest = new TypedNmsTest(mainCommand);
@@ -115,6 +117,7 @@ public class TestMain {
                                            helpTopicTest,
                                            dataPackFunctionTest,
                                            runtimeFeatureTest,
+                                           optionalVariadicArgumentTest,
                                            typedNmsTest);
             List<String> commands = tests.stream()
                                          .flatMap(x -> x.build()

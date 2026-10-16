@@ -49,7 +49,8 @@ public final class TestMain {
                                            new CommandSyntaxExceptionTest(mainCommand),
                                            new OptionTest(mainCommand),
                                            new RuntimeFeatureTest(mainCommand),
-                                           new PermissionTest(mainCommand));
+                                           new PermissionTest(mainCommand),
+                                           new OptionalVariadicArgumentTest(mainCommand, TEST_PLAYER_NAME));
             new HelpMessageTest(mainCommand);
             List<String> commands = tests.stream()
                                          .flatMap(x -> x.build()
