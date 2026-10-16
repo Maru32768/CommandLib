@@ -57,8 +57,8 @@ Each target owns its fixture project:
 integration-test/targets/{platform}-{version}/test-plugin/
 ```
 
-Bukkit-compatible targets build their plugin in that nested `test-plugin` project. Forge targets have no nested
-project; see [Forge Targets](#forge-targets).
+Bukkit-compatible targets build their plugin in that nested `test-plugin` project. Forge, NeoForge and Fabric targets
+have no nested project; see [Forge, NeoForge And Fabric Targets](#forge-neoforge-and-fabric-targets).
 
 Shared fixture code is split by responsibility:
 
@@ -138,33 +138,43 @@ artifacts only for a version that has a typed NMS module. The first run of a ver
 `minecraftIntegrationTest` is the aggregate task for all configured targets.
 The aggregate task depends on per-target subprojects, so Gradle can run independent targets in parallel by default.
 
-## Forge Targets
+## Forge, NeoForge And Fabric Targets
 
-Forge targets (`forge-1.16.5`, `forge-1.18.2`, `forge-1.19.2`, `forge-1.20.1`) and the NeoForge targets
-(`neoforge-1.21.1`, `neoforge-1.21.4`) reuse the same runner, Docker image flow, and MCProtocolLib bot, but
-prepare the server differently:
+Forge targets (`forge-1.16.5`, `forge-1.18.2`, `forge-1.19.2`, `forge-1.20.1`), the NeoForge targets
+(`neoforge-1.21.1`, `neoforge-1.21.4`) and the Fabric targets (`fabric-1.20.1`, `fabric-1.21.1`) reuse the same runner,
+Docker image flow, and MCProtocolLib bot, but prepare the server differently:
 
 - The test mod lives in `integration-test/shared/modded` and is built in the main Gradle build as a Stonecutter tree
-  (`:integration-test:shared:modded-fixture:<loader>-<minecraft-version>`, for example `forge-1.20.1` or
-  `neoforge-1.21.1`), like the `modded` module. Conditional comments follow
+  (`:integration-test:shared:modded-fixture:<loader>-<minecraft-version>`, for example `forge-1.20.1`,
+  `neoforge-1.21.1` or `fabric-1.21.1`), like the `modded` module. Conditional comments follow
   `docs/agents/modded.md`.
 - `testModJar` bundles the published `:modded:<node>` jar (SRG-remapped for Forge, Mojang names for NeoForge) together with `common` and `shared/core`.
+  On Fabric it nests the published, intermediary-remapped `:modded:<node>` jar and `common` as jar-in-jar (Loom
+  `include`), so Fabric Loader loads CommandLib as its own mod with its `fabric.mod.json` and entrypoint, and merges
+  only `shared/core`. The Fabric test mod's entrypoint is a `ModInitializer` declared in its `fabric.mod.json`.
   The tests therefore run the same artifact downstream mods use, which catches bugs that only appear with production
   names.
-- `integration-test/gradle/forge-integration-target.gradle.kts` registers `prepareTestPlugin`. It downloads the Forge
-  or NeoForge installer (selected by `commandlib.integration.platform`), installs the server into
+- `integration-test/gradle/forge-integration-target.gradle.kts` registers `prepareTestPlugin`. It downloads the Forge,
+  NeoForge or Fabric installer (selected by `commandlib.integration.platform`), installs the server into
   `targets/<target>/work/server`, and copies the test mod into `mods`. The NeoForge test mod ships
-  `META-INF/neoforge.mods.toml` instead of `mods.toml`.
+  `META-INF/neoforge.mods.toml` instead of `mods.toml`. On Fabric the official Fabric installer installs Fabric Loader
+  and downloads the vanilla server jar, and the Fabric API jar of the node (`deps.fabricApi`, from maven.fabricmc.net)
+  is copied into `mods` next to the test mod.
 - The loader build is read from `modded/versions/<node>/gradle.properties`, so the server runs the build the
   CommandLib jars are compiled against. The server is started with arguments derived from it (an
-  `@libraries/.../unix_args.txt` file for 1.17+ and NeoForge, `-jar forge-<version>.jar` for 1.16.5).
+  `@libraries/.../unix_args.txt` file for 1.17+ and NeoForge, `-jar forge-<version>.jar` for 1.16.5,
+  `-jar fabric-server-launch.jar` for Fabric).
 - Test commands are performed through `Commands#performPrefixedCommand`, like typed commands. On 1.20.3+ commands
   performed during another command are queued, so the report is written by a `reportTests` command queued after
   them. It writes the report two seconds later, after the asynchronous commands have completed.
 
 Test cases run from the server console source while the bot is online, and cover every public Forge argument
 (enforced by `ArgumentIntegrationCoverageTest`) plus `CommandActor` behavior, options, `visibleWhen`, `executeAsync`
-with a middleware and the diagnostics.
+with a middleware, the diagnostics, a command after `/reload` and a sub command that no player may use. The Fabric
+targets run the same suite on Fabric Loader 0.16.14 with Fabric API, so they check registration through
+`CommandRegistrationCallback`, the commands after `/reload`, and the production (intermediary) names, such as the raw
+command source that `unwrap` reads by reflection. They do not cover command blocks, RCON, fabric-permissions-api (no
+permission mod is installed), or CommandLib shaded into a mod instead of nested.
 
 Notes:
 
@@ -172,6 +182,8 @@ Notes:
   builds such as 36.2.20 crash on current Java 11 updates with `NoSuchMethodError` in `ManifestEntryVerifier`.
 - NeoForge pings a connecting client during the configuration phase and waits for the pong. MCProtocolLib does not
   answer pings, so the bot replies to `ClientboundPingPacket` itself.
+- Fabric API on 1.20.1 sends login queries and waits for the answers. MCProtocolLib does not answer them, so the bot
+  answers each `ClientboundCustomQueryPacket` as not understood, as a vanilla client does.
 - From Minecraft 1.20.3, a command performed while another command runs is queued until that command finishes. The
   test mod therefore executes the test commands through Brigadier directly on 1.20.3+, so their results exist when
   `runTests` collects them.

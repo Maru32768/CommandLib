@@ -1,7 +1,7 @@
 /*
- * Prepares a Forge or NeoForge integration-test target. Apply it before integration-test-target.gradle.kts:
+ * Prepares a Forge, NeoForge or Fabric integration-test target. Apply it before integration-test-target.gradle.kts:
  *
- *   extra["commandlib.integration.platform"] = "forge"    // or "neoforge"
+ *   extra["commandlib.integration.platform"] = "forge"    // or "neoforge" or "fabric"
  *   apply(from = "../../gradle/forge-integration-target.gradle.kts")
  *   apply(from = "../../gradle/integration-test-target.gradle.kts")
  *
@@ -10,7 +10,8 @@
  * against, and the server launch arguments are derived from it.
  *
  * It registers prepareTestPlugin, which installs the server with the loader's official installer and copies
- * the test mod built by :integration-test:shared:modded-fixture:<loader>-<minecraft version> into the mods directory.
+ * the test mod built by :integration-test:shared:modded-fixture:<loader>-<minecraft version> into the mods directory,
+ * together with Fabric API on Fabric.
  * The shared target script then uses that task instead of building a nested test-plugin project.
  */
 
@@ -26,23 +27,25 @@ val nodeProperties = Properties().apply {
         .reader()
         .use { load(it) }
 }
-val forgeVersion = if (loader == "neoforge") {
-    nodeProperties.getProperty("deps.neoforge")
-} else {
-    "$forgeMinecraftVersion-${nodeProperties.getProperty("deps.forge")}"
+val forgeVersion = when (loader) {
+    "neoforge" -> nodeProperties.getProperty("deps.neoforge")
+    "fabric" -> nodeProperties.getProperty("deps.fabricLoader")
+    else -> "$forgeMinecraftVersion-${nodeProperties.getProperty("deps.forge")}"
 }
-// Forge 1.17+ and NeoForge installers write an argument file; older Forge installers write a server jar.
+// Forge 1.17+ and NeoForge installers write an argument file; older Forge installers write a server jar, and the
+// Fabric installer writes a launcher jar that starts the vanilla server.jar.
 if (!extra.has("commandlib.integration.serverLaunchArgs")) {
     extra["commandlib.integration.serverLaunchArgs"] = when {
+        loader == "fabric" -> "-jar fabric-server-launch.jar"
         loader == "neoforge" -> "@libraries/net/neoforged/neoforge/$forgeVersion/unix_args.txt"
         forgeMinecraftVersion.split('.')[1].toInt() < 17 -> "-jar forge-$forgeVersion.jar"
         else -> "@libraries/net/minecraftforge/forge/$forgeVersion/unix_args.txt"
     }
 }
-val installerUrl = if (loader == "neoforge") {
-    "https://maven.neoforged.net/releases/net/neoforged/neoforge/$forgeVersion/neoforge-$forgeVersion-installer.jar"
-} else {
-    "https://maven.minecraftforge.net/net/minecraftforge/forge/$forgeVersion/forge-$forgeVersion-installer.jar"
+val installerUrl = when (loader) {
+    "neoforge" -> "https://maven.neoforged.net/releases/net/neoforged/neoforge/$forgeVersion/neoforge-$forgeVersion-installer.jar"
+    "fabric" -> "https://maven.fabricmc.net/net/fabricmc/fabric-installer/1.0.1/fabric-installer-1.0.1.jar"
+    else -> "https://maven.minecraftforge.net/net/minecraftforge/forge/$forgeVersion/forge-$forgeVersion-installer.jar"
 }
 val forgeJavaVersion = extra["commandlib.integration.javaVersion"].toString().toInt()
 val forgeWorkDir = project.file(extra["commandlib.integration.workDirectory"].toString())
@@ -60,6 +63,21 @@ val forgeJavaLauncher = extensions.getByType<JavaToolchainService>()
 val fixturePath = ":integration-test:shared:modded-fixture:$loader-$forgeMinecraftVersion"
 evaluationDependsOn(fixturePath)
 val testModJar = project(fixturePath).tasks.named<Jar>("testModJar")
+
+// CommandLib's Fabric jar needs Fabric API (fabric-command-api-v2, fabric-lifecycle-events-v1) on the server.
+val fabricApi = configurations.create("fabricApi") {
+    isTransitive = false
+}
+if (loader == "fabric") {
+    repositories {
+        maven("https://maven.fabricmc.net/") {
+            content {
+                includeGroup("net.fabricmc.fabric-api")
+            }
+        }
+    }
+    dependencies.add(fabricApi.name, "net.fabricmc.fabric-api:fabric-api:${nodeProperties.getProperty("deps.fabricApi")}")
+}
 
 val downloadForgeInstaller = tasks.register("downloadForgeInstaller") {
     group = "setup"
@@ -82,8 +100,9 @@ val installForgeServer = tasks.register<Exec>("installForgeServer") {
     description = "Installs the $loader $forgeVersion server into ${forgeServerDir.relativeTo(projectDir)}."
     dependsOn(downloadForgeInstaller)
     // The installer creates the libraries directory before running its processors, so an interrupted
-    // install would leave it behind. Check the file the server is launched from instead, which is written last.
-    val installedMarker = forgeServerDir.resolve(forgeLaunchFile)
+    // install would leave it behind. Check the file the server is launched from instead, which is written last,
+    // or on Fabric the vanilla server jar, which the installer downloads after the launcher.
+    val installedMarker = forgeServerDir.resolve(if (loader == "fabric") "server.jar" else forgeLaunchFile)
     onlyIf { !installedMarker.exists() }
 
     doFirst {
@@ -91,7 +110,18 @@ val installForgeServer = tasks.register<Exec>("installForgeServer") {
         executable(forgeJavaLauncher.get().executablePath.asFile.absolutePath)
     }
     workingDir(forgeServerDir)
-    args("-jar", forgeInstaller.get().asFile.absolutePath, "--installServer", forgeServerDir.absolutePath)
+    args("-jar", forgeInstaller.get().asFile.absolutePath)
+    if (loader == "fabric") {
+        args(
+            "server",
+            "-dir", forgeServerDir.absolutePath,
+            "-mcversion", forgeMinecraftVersion,
+            "-loader", forgeVersion,
+            "-downloadMinecraft",
+        )
+    } else {
+        args("--installServer", forgeServerDir.absolutePath)
+    }
 }
 
 tasks.register<Sync>("prepareTestPlugin") {
@@ -99,5 +129,6 @@ tasks.register<Sync>("prepareTestPlugin") {
     description = "Installs the $loader server and copies the CommandLib test mod into its mods directory."
     dependsOn(installForgeServer)
     from(testModJar)
+    from(fabricApi)
     into(forgeServerDir.resolve("mods"))
 }

@@ -110,7 +110,8 @@ in `modded/versions/<node>/build/libs`.
 The build needs JDK 21 for the Gradle daemon (`gradle/gradle-daemon-jvm.properties`).
 
 Behavior that depends on a real server, such as command registration, argument parsing against registries, or
-production (SRG) names, is covered by the Forge / NeoForge integration targets. They need Docker:
+production (SRG or intermediary) names, is covered by the Forge / NeoForge / Fabric integration targets. They need
+Docker:
 
 ```bash
 ./gradlew :integration-test:targets:forge-1.16.5:minecraftIntegrationTest
@@ -119,19 +120,22 @@ production (SRG) names, is covered by the Forge / NeoForge integration targets. 
 ./gradlew :integration-test:targets:forge-1.20.1:minecraftIntegrationTest
 ./gradlew :integration-test:targets:neoforge-1.21.1:minecraftIntegrationTest
 ./gradlew :integration-test:targets:neoforge-1.21.4:minecraftIntegrationTest
+./gradlew :integration-test:targets:fabric-1.20.1:minecraftIntegrationTest
+./gradlew :integration-test:targets:fabric-1.21.1:minecraftIntegrationTest
 ```
 
 The test mod is in `integration-test/shared/modded` (see `integration-test/README.md`). When adding or changing a
 public argument class, add a case to its `ArgumentTest`; `:integration-test:test` fails when one is missing.
 
-Fabric has no integration target yet: the test mod tree and the integration server setup cover Forge and NeoForge
-only, so Fabric registration and production (intermediary) names are not checked on a real server.
+The Fabric targets (`fabric-1.20.1`, `fabric-1.21.1`) run the same test mod on a Fabric server with Fabric API, with
+the intermediary-remapped CommandLib jar nested as its own mod. `fabric-1.21.4` has no target, and no target installs
+fabric-permissions-api or runs a command block.
 
 ## Adding A Node
 
 1. Add `version("<loader>-<version>", "<version>")` to each of the three
    Stonecutter trees in `settings.gradle.kts` (`modded`, `modded-testing`, and
-   the test mod tree; Fabric nodes are not in the test mod tree yet).
+   the test mod tree, which has `fabric-1.20.1` and `fabric-1.21.1` but not `fabric-1.21.4`).
 2. Create `modded/versions/<node>/gradle.properties` with
    `loom.platform=forge` and `deps.forge=<forge build>`,
    `loom.platform=neoforge` and `deps.neoforge=<neoforge build>`, or
@@ -148,9 +152,9 @@ only, so Fabric registration and production (intermediary) names are not checked
    `loom.platform`, which Loom reads per project) and add the project to the
    root publication lists.
 7. Create `integration-test/shared/modded/versions/<node>/gradle.properties`
-   (`loom.platform` and `deps.forgeLoader`, the mod loader version range lower
-   bound), and add an `integration-test/targets/<node>` target. `settings.gradle.kts`
-   and the `minecraftIntegrationTest` aggregate task pick up every target directory.
-   Forge and NeoForge only for now.
+   (`loom.platform`, and on Forge / NeoForge `deps.forgeLoader`, the mod loader
+   version range lower bound), and add an `integration-test/targets/<node>` target.
+   `settings.gradle.kts` and the `minecraftIntegrationTest` aggregate task pick up
+   every target directory.
 8. Update the supported versions in `README.md` and
    `docs/design/forge-version-support.md`.

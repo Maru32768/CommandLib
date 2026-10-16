@@ -112,6 +112,9 @@
 - `[x]` Fabric support を追加する。`modded` の単一ソースから `fabric-1.20.1` / `fabric-1.21.1` と `fabric-testing-*` を build
   （2026-10-16、実サーバー未検証）。
 - `[x]` modded の version matrix に forge-1.18.2 / forge-1.19.2 / neoforge-1.21.4 / fabric-1.21.4 を追加する（2026-10-16、実サーバー未検証）。
+- `[x]` Fabric の integration target `fabric-1.20.1` / `fabric-1.21.1` を追加する。Forge / NeoForge と同じ test mod を Fabric
+  Loader 0.16.14 と Fabric API の実サーバーで動かし、intermediary に remap した CommandLib jar を jar-in-jar で読み込む。
+  2 target とも 65 case が全て通った（2026-10-17）。command block、fabric-permissions-api、`fabric-1.21.4` は対象外。
 - `[x]` Folia support 方針を決め、実装する。`paper` artifact で Folia を検出して entity / region / global scheduler を使い、
   `spigot` artifact は Folia を拒否する（2026-10-15、mock test のみ）。
 - `[x]` Folia の integration target `folia-26.3`（Folia 26.3 build 3）を追加する。Folia 用の smoke fixture

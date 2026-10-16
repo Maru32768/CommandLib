@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "id": "commandlibtest",
+  "version": "1.0.0",
+  "name": "CommandLib Test Mod",
+  "description": "Runs CommandLib integration test cases on a real Fabric server.",
+  "license": "MIT",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "dev.marulabs.testmod.TestMod"
+    ]
+  },
+  "depends": {
+    "fabricloader": "*",
+    "commandlib": "*"
+  }
+}

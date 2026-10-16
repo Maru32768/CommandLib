@@ -32,7 +32,7 @@
 | Folia support                       | `[~]` | `paper` artifact が Folia を検出し、`FoliaCommandScheduler` で entity / region / global scheduler に戻す。`spigot` artifact は Folia で登録を拒否する。 | smoke target `folia-26.3` で登録、bot の実行と message、`executeAsync` の thread（player は region thread、console は global region thread）、補完を確認済み（2026-10-16）。command block の region 経路、`/execute as`、`spigot` artifact の拒否、region thread からの runtime 登録の guard は未検証。 |
 | Velocity support                    | `[~]` | `velocity` / `velocity-testing` module（Velocity 3.4.0+、`PlayerArgument` / `ServerArgument`）がある。Velocity 3.4.0 / 4.2.0 の proxy で手動 smoke test 済み。 | 実 proxy + backend + client の integration target、Velocity sample。 |
 | NeoForge support                    | `[~]` | NeoForge 1.21.1 / 1.21.4 を build（両方とも integration test 済み）。 | 1.21.5 以降（1.21.11 で `Identifier` / `PermissionSet` 等の大きな変更）、26.x（非難読化、Java 25、`loom-no-remap`）。 |
-| Fabric support                      | `[~]` | `fabric-1.20.1` / `fabric-1.21.1` / `fabric-1.21.4` を build（`CommandRegistrationCallback` v2、fabric-permissions-api 任意対応）。`modded-testing` も全 node で通る。 | 実サーバーの integration target、Fabric 用 Kotlin module、1.21.5 以降と 26.x。 |
+| Fabric support                      | `[~]` | `fabric-1.20.1` / `fabric-1.21.1` / `fabric-1.21.4` を build（`CommandRegistrationCallback` v2、fabric-permissions-api 任意対応）。`modded-testing` も全 node で通る。`fabric-1.20.1` / `fabric-1.21.1` の integration target で Forge / NeoForge と同じ suite が実サーバーで通る。 | `fabric-1.21.4` の integration target、fabric-permissions-api と command block の実サーバー確認、Fabric 用 Kotlin module、1.21.5 以降と 26.x。 |
 | Brigadier / NMS hiding              | `[~]` | 利用者 API から Brigadier / NMS を隠している。                                                                                                      | capability detection、公式 API 優先、fallback policy。                            |
 | `/execute` integration              | `[~]` | README と Bukkit registration path で `/execute run` 連携を扱っている。spigot module と paper module の command は `/minecraft:reload` 後や runtime 登録後も data pack function から使える（`/minecraft:reload` 後は両 module に integration test あり）。paper module で plugin から登録した command は次 tick の function 再 compile 後に使える（bootstrap 登録は server の compile 時点から使える）。 | command block / tag での保証と tests。 |
 | Built-in arguments                  | `[~]` | 基本的な primitive、string、player、entity、location、item などがある。CommandAPI / Paper との挙動別 catalog は [`docs/arguments.md`](arguments.md)。 | catalog の missing 一覧（`resourceKey` 相当、angle / rotation、score holder 等）の補完。 |
@@ -111,7 +111,8 @@
   loader 依存部分が登録・permission・server 取得・reflection 2 箇所と metadata だけで、分割は不要だった。
 - `[ ]` modded を 1.21.5〜1.21.11 と 26.x に広げる。1.21.11 は `ResourceLocation` → `Identifier`、permission level → `PermissionSet`、
   `GameProfile` の record 化などで約 50 箇所が壊れ、26.x は `dev.architectury.loom-no-remap` と Java 25 が必要。
-- `[ ]` Fabric の integration target（test mod と server setup の Fabric 対応）を追加し、`samples/fabric` の shade jar を実サーバーで読み込む。
+- `[~]` Fabric の integration target（test mod と server setup の Fabric 対応）を追加し、`samples/fabric` の shade jar を実サーバーで読み込む。
+  `fabric-1.20.1` / `fabric-1.21.1` target は追加済み（2026-10-17）。残りは `samples/fabric` の shade jar と `fabric-1.21.4` target。
 - `[~]` sender / message abstraction（Adventure と vanilla `Component` の差分吸収）を Velocity 着手前に設計する。
   message 側は `RichText` と platform ごとの変換（`RichTexts.toBungee` / `toAdventure` / `toVanilla`）で Phase 1 を実装済み
   （[`docs/design/rich-text-messages.md`](design/rich-text-messages.md)）。sender 側は未着手。

@@ -1,6 +1,7 @@
-// Forge / NeoForge test mod for the Docker-based integration tests. It is built once per loader and Minecraft
+// Forge / NeoForge / Fabric test mod for the Docker-based integration tests. It is built once per loader and Minecraft
 // version with Stonecutter, like the modded module, and bundles the published CommandLib jars (remapped to SRG on
-// Forge, Mojang names on NeoForge) so the tests exercise the same artifacts that downstream mods use.
+// Forge, Mojang names on NeoForge, intermediary on Fabric) so the tests exercise the same artifacts that downstream
+// mods use.
 plugins {
     id("dev.architectury.loom") version "1.17.493"
 }
@@ -13,7 +14,7 @@ apply(from = rootProject.file("gradle/modded-node.gradle.kts"))
 val loader = extra["modded.loader"].toString()
 
 stonecutter {
-    constants.match(loader, "forge", "neoforge")
+    constants.match(loader, "forge", "neoforge", "fabric")
 }
 
 val bundled: Configuration by configurations.creating {
@@ -25,26 +26,38 @@ dependencies {
     compileOnly(project(path = ":modded:${sc.current.project}", configuration = "namedElements"))
     compileOnly(project(":integration-test:shared:core"))
 
-    bundled(project(":modded:${sc.current.project}"))
+    if (loader == "fabric") {
+        // The CommandLib jar is a Fabric mod with its own fabric.mod.json and entrypoint, so it is nested (jar-in-jar)
+        // as a downstream mod ships it, together with common, instead of being merged into the test mod.
+        "include"(project(":modded:${sc.current.project}"))
+        "include"(project(":common"))
+    } else {
+        bundled(project(":modded:${sc.current.project}"))
+    }
     bundled(project(":integration-test:shared:core"))
 }
 
-val forgeLoaderVersion = property("deps.forgeLoader").toString()
+val metadataFiles = mapOf(
+    "forge" to "META-INF/mods.toml",
+    "neoforge" to "META-INF/neoforge.mods.toml",
+    "fabric" to "fabric.mod.json",
+)
 
 tasks.processResources {
-    val properties = mapOf("forgeLoader" to forgeLoaderVersion)
-    inputs.properties(properties)
-    // NeoForge reads neoforge.mods.toml, Forge reads mods.toml.
-    exclude(if (loader == "neoforge") "META-INF/mods.toml" else "META-INF/neoforge.mods.toml")
-    filesMatching(listOf("META-INF/mods.toml", "META-INF/neoforge.mods.toml")) {
-        expand(properties)
+    exclude(metadataFiles.filterKeys { it != loader }.values)
+    if (loader != "fabric") {
+        val properties = mapOf("forgeLoader" to project.property("deps.forgeLoader").toString())
+        inputs.properties(properties)
+        filesMatching(metadataFiles.getValue(loader)) {
+            expand(properties)
+        }
     }
 }
 
 // The test mod jar that is copied into the server's mods directory.
 val testModJar = tasks.register<Jar>("testModJar") {
     group = "build"
-    description = "Builds the test mod jar with the remapped CommandLib jars bundled in."
+    description = "Builds the test mod jar with the remapped CommandLib jars bundled or nested in."
     archiveFileName.set("TestMod-${sc.current.project}.jar")
     destinationDirectory.set(layout.buildDirectory.dir("test-mod"))
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE

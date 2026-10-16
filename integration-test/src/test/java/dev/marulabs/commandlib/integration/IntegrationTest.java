@@ -606,7 +606,7 @@ class IntegrationTest {
                                                       if (args.length == 2) {
                                                           // Modern MCProtocolLib: packetReceived(Session, Packet)
                                                           botSession.receivedPackets.add(args[1]);
-                                                          botSession.answerPing(args[1]);
+                                                          botSession.answerRequest(args[1]);
                                                       } else if (args.length == 1) {
                                                           // Legacy MCProtocolLib (1.16.5): packetReceived(PacketReceivedEvent)
                                                           try {
@@ -780,25 +780,37 @@ class IntegrationTest {
             }
         }
 
-        // Vanilla clients answer every ping with a pong, but MCProtocolLib does not. NeoForge pings a connecting
-        // client during the configuration phase and waits for the pong before letting it join.
-        void answerPing(Object packet) {
+        // Vanilla clients answer every ping with a pong and every login query with an answer, but MCProtocolLib does
+        // neither. NeoForge pings a connecting client during the configuration phase, and Fabric API on 1.20.1 sends
+        // login queries; both wait for the answer before letting it join.
+        void answerRequest(Object packet) {
             Class<?> packetClass = packet.getClass();
-            if (!packetClass.getSimpleName()
-                            .equals("ClientboundPingPacket")) {
-                return;
+            String answerName;
+            String[] idAccessors;
+            switch (packetClass.getSimpleName()) {
+                case "ClientboundPingPacket":
+                    answerName = "ServerboundPongPacket";
+                    idAccessors = new String[]{"getId", "id"};
+                    break;
+                case "ClientboundCustomQueryPacket":
+                    // Without data, the answer says the query is not understood, as a vanilla client answers.
+                    answerName = "ServerboundCustomQueryPacket";
+                    idAccessors = new String[]{"getMessageId", "messageId"};
+                    break;
+                default:
+                    return;
             }
             try {
-                int id = (int) findAccessor(packetClass, "getId", "id").invoke(packet);
-                String pongClassName = packetClass.getPackageName()
-                                                  .replace(".clientbound", ".serverbound")
-                        + ".ServerboundPongPacket";
-                Object pong = Class.forName(pongClassName, true, packetClass.getClassLoader())
-                                   .getConstructor(int.class)
-                                   .newInstance(id);
-                sendMethod.invoke(delegate, pong);
+                int id = (int) findAccessor(packetClass, idAccessors).invoke(packet);
+                String answerClassName = packetClass.getPackageName()
+                                                    .replace(".clientbound", ".serverbound")
+                        + "." + answerName;
+                Object answer = Class.forName(answerClassName, true, packetClass.getClassLoader())
+                                     .getConstructor(int.class)
+                                     .newInstance(id);
+                sendMethod.invoke(delegate, answer);
             } catch (ReflectiveOperationException e) {
-                String reason = "Failed to answer " + packetClass.getName() + " with a pong: " + e;
+                String reason = "Failed to answer " + packetClass.getName() + " with " + answerName + ": " + e;
                 disconnectionReason.compareAndSet(null, reason);
                 throw new IllegalStateException(reason, e);
             }
