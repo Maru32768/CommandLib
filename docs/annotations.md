@@ -100,7 +100,8 @@ public final class ArenaCommand extends Command {
 ```
 
 `spigot-testing`, `paper-testing` and `modded-testing` check that the two give the same tree, permissions, suggestions,
-help and execution results (`AnnotationStyleTest`).
+help and execution results (`AnnotationStyleTest`). `velocity-testing` only checks that an annotated command runs and
+parses its arguments (`AnnotatedCommandsTest`).
 
 ## Parameter names
 
@@ -220,7 +221,8 @@ a middleware's value are all parameters this way; see [context values](context-v
 | `int`, `long`, `float`, `double` | `IntegerArgument`, `LongArgument`, `FloatArgument`, `DoubleArgument` (bounds from `@Range`) |
 | `boolean` | `BooleanArgument` |
 | an enum | `EnumArgument` |
-| `Duration`, `UUID` | `DurationArgument`, `UUIDArgument` |
+| `Duration` | `DurationArgument` |
+| `UUID` | `UUIDArgument` (Spigot, Paper, Forge, NeoForge, Fabric; Velocity has none) |
 | `Player`, `OfflinePlayer`, `Entity`, `World`, `Location`, `GameMode`, `EntityType`, `Biome`, `Sound`, `Attribute`, `Enchantment`, `Particle`, `PotionEffect`, `ItemStack`, `BlockData`, `NamespacedKey`, `Advancement`, `LootTable`, `Recipe`, `Team`, `Objective`, `DisplaySlot`, `ChatColor` (Paper: `NamedTextColor`) | the argument of the same name (Spigot, Paper) |
 | `Player`, `RegisteredServer` | `PlayerArgument`, `ServerArgument` (Velocity) |
 | `ServerPlayer`, `GameProfile`, `Entity`, `ServerLevel`, `Location` (CommandLib's), `BlockPos`, `GameType`, `EntityType`, `Biome`, `SoundEvent`, `ParticleOptions`, `ItemStack`, `BlockInput`, `CompoundTag`, `ResourceLocation`, `LootTable`, `PlayerTeam`, `Objective`, `ChatFormatting` | `PlayerArgument`, `GameProfileArgument`, `EntityArgument`, `WorldArgument`, `LocationArgument`, `BlockPositionArgument`, `GameModeArgument`, `EntityTypeArgument`, `BiomeArgument`, `SoundArgument`, `ParticleArgument`, `ItemStackArgument`, `BlockStateArgument`, `NBTCompoundArgument`, `ResourceLocationArgument`, `LootTableArgument`, `TeamArgument`, `ObjectiveArgument`, `ChatColorArgument` (Forge, NeoForge, Fabric) |

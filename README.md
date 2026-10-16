@@ -13,8 +13,8 @@ with ease.
 |------------|----------|------------------------------------------------------------|---------------------------------------------------------------|
 | **Spigot** | `spigot` | `1.16.5`, `1.17.1`, `1.18`–`1.18.2`, `1.19`–`1.19.4`, `1.20`–`1.20.6`, `1.21`–`1.21.11`, `26.1`–`26.3` | Each release in the range is tested on Spigot, and `1.16.5`–`1.21.1` also on Paper. Requires Java 11+. |
 | **Paper**  | `paper`  | `1.21`, `1.21.3`–`1.21.11`, `26.1.1`–`26.3` | Uses Paper official command/lifecycle API. Requires Java 21+. Use `spigot` on Paper `1.20.6` and earlier. |
-| **Forge**  | `forge-<minecraft-version>` | `1.16.5`, `1.18.2`, `1.19.2`, `1.20.1` (`1.18.2` and `1.19.2` built and unit-tested; not yet run on a real server) | Use the artifact that matches the target Minecraft version.   |
-| **NeoForge** | `neoforge-<minecraft-version>` | `1.21.1`, `1.21.4` (`1.21.4` built and unit-tested; not yet run on a real server) | Use the artifact that matches the target Minecraft version. Requires Java 21+. |
+| **Forge**  | `forge-<minecraft-version>` | `1.16.5`, `1.18.2`, `1.19.2`, `1.20.1` | Use the artifact that matches the target Minecraft version.   |
+| **NeoForge** | `neoforge-<minecraft-version>` | `1.21.1`, `1.21.4` | Use the artifact that matches the target Minecraft version. Requires Java 21+. |
 | **Fabric** | `fabric-<minecraft-version>` | `1.20.1`, `1.21.1`, `1.21.4` (`1.21.4` built and unit-tested; not yet run on a real server) | Use the artifact that matches the target Minecraft version. Requires Fabric API. |
 | **Mohist** | `spigot` | `1.16.5`, `1.20.1`                                         | Works on Mohist since it's compatible with Spigot.            |
 | **Folia**  | `paper`  | `26.3` (smoke test: registration, player commands, async threads, suggestions) | Detected at runtime; async commands return to the entity, region or global region thread. Declare `folia-supported: true`. See [Folia](docs/execution.md#folia). |
@@ -60,14 +60,17 @@ with ease.
 ## Why CommandLib
 
 - **One command model for Spigot, Paper, Forge, NeoForge, and Fabric.** The same `Command` / `argument(...)` code compiles
-  against each platform artifact, from Minecraft 1.16.5 to 26.x.
+  against each platform artifact: Spigot from Minecraft 1.16.5 to 26.3, Paper from 1.21, and Forge, NeoForge and
+  Fabric from 1.16.5 to 1.21.4 (see [Supported Versions](#supported-versions)).
 - **Typed values in the executor.** `argument(new PlayerArgument("target"), new IntegerArgument("amount"))` hands a
   `Player` and an `Integer` to the lambda: no lookup by name, no casts.
 - **Brigadier-native.** Commands are real Brigadier nodes, so they get client-side validation, vanilla selectors,
   `/execute` and data pack function support, and per-player command trees.
-- **Permissions without boilerplate.** Every command, subcommand, and argument branch gets a registered permission
-  node with a default, which also hides what a sender cannot use. `visibleWhen(ctx -> !game.isRunning())` hides a
-  command or branch by plugin state as well ([permissions](docs/permissions.md#refreshing-the-command-tree)).
+- **Permissions without boilerplate.** Every command, subcommand, and argument branch gets a permission node, which
+  also hides what a sender cannot use. On Spigot, Paper, Forge, NeoForge and Fabric the node has a default. Velocity
+  has no permission defaults, so a player gets a node other than `DefaultPermission.ALL` only from a permission plugin.
+  `visibleWhen(ctx -> !game.isRunning())` hides a command or branch by plugin state as well
+  ([permissions](docs/permissions.md#refreshing-the-command-tree)).
 - **Options, generated help, and test utilities built in.**
 
 | | CommandLib | CommandAPI | Paper command API |
@@ -992,7 +995,9 @@ See [localization](docs/localization.md) for the lookup order, the keys, and `Ca
 `sendSuccess` sends command feedback the way vanilla commands do: a player does not get it while the
 `sendCommandFeedback` gamerule is off, and a silent source such as a function gets nothing. `sendSuccess(message, true)`
 also broadcasts it to the other operators in gray italics and to the server log when `logAdminCommands` is on, like
-`/gamemode`. `sendMessage`, `sendWarn`, and `sendFailure` always reach the sender.
+`/gamemode`. `sendMessage`, `sendWarn`, and `sendFailure` always reach the sender. The Velocity proxy has no gamerules
+or operators, so there `sendSuccess` always reaches the sender and ignores `broadcastToOps`. A source without vanilla
+feedback, such as a test sender, gets `sendSuccess` as a plain message.
 
 `sendSuccessFor` words the feedback of a command on a selector the way vanilla does, naming the target when there is one
 and counting them otherwise:

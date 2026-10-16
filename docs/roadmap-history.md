@@ -49,8 +49,9 @@
   `logAdminCommands` gamerule を尊重する（2026-10-15）。
 - `[x]` `IntegerRangeArgument` / `DoubleRangeArgument`（vanilla `int_range` / `float_range`、Guava `Range`）と
   `DurationArgument`（`1h30m`、`20t`、`java.time.Duration`）を Spigot / Paper / Forge / NeoForge に追加する（2026-10-15）。
-- `[x]` error を platform 間で揃える。実行中の resolve error は全 platform で vanilla の translatable component と context
-  line、空の selector は Paper でも vanilla の `argument.entity.notfound.*`（2026-10-15）。
+- `[x]` error を platform 間で揃える。実行中の resolve error は全 platform で vanilla の translatable component（context line は
+  例外が入力と cursor を持つときだけ付く。vanilla が resolve 中に投げる例外は入力を持たないため付かない。`docs/errors.md`）、
+  空の selector は Paper でも vanilla の `argument.entity.notfound.*`（2026-10-15）。
 - `[x]` `BlockPositionArgument` / `ItemPredicateArgument` / `BlockPredicateArgument` と `LocationArgument` の centering 無効化を
   Spigot / Paper / Forge / NeoForge に追加する（Paper の `BlockPredicateArgument` は 1.21.8+、2026-10-15）。
 - `[x]` `ComponentArgument` / `MessageArgument` / `NBTCompoundArgument` を Spigot / Paper / Forge / NeoForge / Fabric に追加する
@@ -88,8 +89,9 @@
   `@MutuallyExclusive`、`@Examples`、`@CaptionBundle`、`@Variadic(max)`、option の `@Permission` を追加する（2026-10-16）。
 - `[x]` 任意の argument を option の値にする `Options.of(...)`、option 単位の permission、positional argument の後に option を置く
   `optionsAnywhere()`、state で表示を切り替える `visibleWhen(...)` を追加する（2026-10-16）。
-- `[x]` option の順列展開を redirect で抑える。player ごとの tree は short flag 6 個で 491,607 → 5,490 node、argument node を共有
-  （`docs/design/command-options.md`、2026-10-16、実サーバー未検証）。
+- `[x]` option の順列展開を redirect で抑える。player ごとの tree は short flag 6 個で 491,607 → 5,490 node（`OptionTreeBenchmark` の
+  計測。`OptionTreeSizeTest` は 6,000 未満であることだけを確認）、argument node を共有（`docs/design/command-options.md`、2026-10-16、
+  実サーバー未検証）。
 - `[x]` modded に Bukkit 側の argument（World / Sound / Biome / Attribute / EntityType / Advancement / Recipe / LootTable / Objective /
   ScoreboardDisplaySlot / GameMode / ChatColor）、`AnnotatedCommands`、modded-testing の `CommandLibExtension` を追加する（2026-10-16）。
 - `[x]` registration 全体の middleware / provider（`CommandDefaults`）、cooldown の `remaining` / `reset`、typed executor からの
@@ -111,7 +113,8 @@
   `PlayerArgument` / `ServerArgument`、diagnostics）。Velocity 3.4.0 / 4.2.0 で手動確認（2026-10-15）。
 - `[x]` Fabric support を追加する。`modded` の単一ソースから `fabric-1.20.1` / `fabric-1.21.1` と `fabric-testing-*` を build
   （2026-10-16、実サーバー未検証）。
-- `[x]` modded の version matrix に forge-1.18.2 / forge-1.19.2 / neoforge-1.21.4 / fabric-1.21.4 を追加する（2026-10-16、実サーバー未検証）。
+- `[x]` modded の version matrix に forge-1.18.2 / forge-1.19.2 / neoforge-1.21.4 / fabric-1.21.4 を追加する（2026-10-16、追加時点では
+  実サーバー未検証。forge-1.18.2 / forge-1.19.2 / neoforge-1.21.4 は同日の 29 target の integration test で検証、fabric-1.21.4 は target なし）。
 - `[x]` Fabric の integration target `fabric-1.20.1` / `fabric-1.21.1` を追加する。Forge / NeoForge と同じ test mod を Fabric
   Loader 0.16.14 と Fabric API の実サーバーで動かし、intermediary に remap した CommandLib jar を jar-in-jar で読み込む。
   2 target とも 65 case が全て通った（2026-10-17）。command block、fabric-permissions-api、`fabric-1.21.4` は対象外。
