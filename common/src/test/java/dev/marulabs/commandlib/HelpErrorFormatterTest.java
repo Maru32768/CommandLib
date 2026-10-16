@@ -176,6 +176,33 @@ class HelpErrorFormatterTest {
                                                                 "/config <key> mode <value> reset");
     }
 
+    // As /execute ... run game reaches the command through a redirect, whose input starts with execute.
+    @Test
+    void help_and_syntax_advice_name_the_command_when_it_runs_through_a_redirect() throws Exception {
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("game") {{
+            addAliases("g");
+            helpFormatter((ctx, help) -> help.usages()
+                                             .forEach(x -> ctx.sendMessage(x.plainText())));
+            errorFormatter((ctx, error) -> ctx.sendFailure(error.usage() == null ? "no usage"
+                    : error.usage()
+                           .plainText()));
+            addChildren(new TestCommand("start") {{
+                execute(ctx -> {
+                });
+            }});
+            argument(new IntArg("rounds").validator(x -> x > 0)).execute((rounds, ctx) -> {
+            });
+        }});
+        runner.redirectToRoot("run");
+
+        assertThat(runner.execute("run game")
+                         .messages()).containsExactly("/game start", "/game <rounds>");
+        assertThat(runner.execute("run g help")
+                         .messages()).containsExactly("/g start", "/g <rounds>");
+        assertThat(runner.execute("run game 0")
+                         .messages()).containsExactly("/game <rounds>");
+    }
+
     @Test
     void the_help_subcommand_runs_the_prerequisites_and_reports_its_failures() throws Exception {
         List<CommandError.Kind> kinds = new ArrayList<>();

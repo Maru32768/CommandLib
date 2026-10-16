@@ -5,7 +5,9 @@ import dev.marulabs.commandlib.CommandHelp.Usage;
 import dev.marulabs.commandlib.command.CommandExecutor;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Builds the {@link CommandHelp} of a command for the sender and sends it with the command's {@link HelpFormatter}.
@@ -137,6 +139,23 @@ final class HelpMessageAction<S, T, C extends CommonCommandContext<S, T>, U exte
      * The path to {@code command}. Examples: {@code game} for the root help, {@code game start} for a child's help,
      * {@code config <key> set} for an argument child's help.
      */
+    // The token the root command was typed as. Through a redirect such as /execute ... run game, the input starts with
+    // another command, so it is the last token at the start or after "run" that names the root command or an alias,
+    // with or without a namespace.
+    private static String rootLiteral(String input, CommonCommand<?, ?> root) {
+        String[] tokens = (input.startsWith("/") ? input.substring(1) : input).split(" ", -1);
+        Set<String> names = new HashSet<>(root.aliases());
+        names.add(root.name());
+        for (int i = tokens.length - 1; i >= 0; i--) {
+            String token = tokens[i];
+            String name = token.substring(token.indexOf(':') + 1);
+            if ((i == 0 || tokens[i - 1].equals("run")) && names.contains(name)) {
+                return token;
+            }
+        }
+        return tokens[0];
+    }
+
     private static List<Token> path(CommonCommand<?, ?> command, CommonCommandContext<?, ?> ctx) {
         List<Token> reversed = new ArrayList<>();
         CommonCommand<?, ?> current = command;
@@ -158,13 +177,8 @@ final class HelpMessageAction<S, T, C extends CommonCommandContext<S, T>, U exte
         // The parsed input may use an alias for the root command; help should echo what the sender actually typed.
         // Use the raw handle input rather than ctx.getInput(0): some platforms (Paper 1.21+) omit the root
         // literal from CommandContext.getNodes(), so the map-based lookup would return the wrong token.
-        String rawInput = ctx.getHandle()
-                             .getInput();
-        if (rawInput.startsWith("/")) {
-            rawInput = rawInput.substring(1);
-        }
-        int space = rawInput.indexOf(' ');
-        reversed.add(Token.literal(space == -1 ? rawInput : rawInput.substring(0, space)));
+        reversed.add(Token.literal(rootLiteral(ctx.getHandle()
+                                                  .getInput(), current)));
 
         List<Token> path = new ArrayList<>();
         for (int i = reversed.size() - 1; i >= 0; i--) {
