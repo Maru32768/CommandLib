@@ -21,7 +21,7 @@ repositories {
 dependencies {
     api(project(path = ":modded:${sc.current.project}", configuration = "namedElements"))
     api("org.mockito:mockito-core:5.11.0")
-    // CommandLibExtension; tests that use it already have JUnit.
+    // CommandLibExtension; tests that use it already have JUnit. 5.8.1 is the oldest docs/testing.md supports.
     compileOnly("org.junit.jupiter:junit-jupiter-api:5.8.1")
 
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")

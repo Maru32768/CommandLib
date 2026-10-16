@@ -13,7 +13,7 @@ dependencies {
 
     testImplementation("com.mojang:brigadier:1.0.18")
     testImplementation("org.apache.logging.log4j:log4j-core:2.17.1")
-    testImplementation("org.junit.jupiter:junit-jupiter:5.8.1")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("org.assertj:assertj-core:3.25.1")
 }

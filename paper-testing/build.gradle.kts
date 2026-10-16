@@ -14,8 +14,8 @@ dependencies {
     api(project(":paper"))
     compileOnly("io.papermc.paper:paper-api:1.21-R0.1-SNAPSHOT")
     compileOnly("com.mojang:brigadier:1.0.18")
-    // CommandLibExtension; tests that use it already have JUnit.
-    compileOnly("org.junit.jupiter:junit-jupiter-api:5.10.2")
+    // CommandLibExtension; tests that use it already have JUnit. 5.8.1 is the oldest docs/testing.md supports.
+    compileOnly("org.junit.jupiter:junit-jupiter-api:5.8.1")
     api("org.mockito:mockito-core:5.11.0")
 
     // 1.21.8 added ArgumentTypes.blockInWorldPredicate(), which CommandTester stubs when the API has it.
