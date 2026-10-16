@@ -351,7 +351,7 @@ depends on the artifact:
 | `LocationArgument` | mock: `x y z` numbers | mock: `x y z` numbers, world `null` | real |
 | `BlockPositionArgument` | mock: integer `x y z` | mock: integer `x y z`, world `null` | real |
 | `ItemPredicateArgument`, `BlockPredicateArgument` | mock: an item or block id, matched by material; suggests ids | mock: a material id, matched by material; suggests ids (the block predicate needs the Paper 1.21.8 API on the test classpath) | real; tags are not loaded |
-| `WorldArgument` | mock (`withFakeWorld("minecraft:overworld", world)`) | mock (`withFakeWorld(world)`, by key) | real over the levels added with `withLevel(level)` |
+| `WorldArgument` | mock (`withFakeWorld("minecraft:overworld", world)`) | mock (`withFakeWorld("minecraft:overworld", world)`) | real over the levels added with `withLevel(level)` |
 | `BlockDataArgument` / `BlockStateArgument` | mock | mock (`withFakeBlockData`) | real |
 | `ItemStackArgument` | mock | mock (`withFakeItemStack`) | real |
 | `EnchantmentArgument` | mock | mock (`withFakeEnchantment`) | real (1.20.5+: from the bootstrapped registries) |

@@ -24,6 +24,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class LightweightArgumentExecutionTest {
     @Test
@@ -105,7 +106,8 @@ class LightweightArgumentExecutionTest {
 
         tester.execute("args Steve @a Zombie @a", sender);
 
-        assertThat(sender.getSentMessageTexts()).containsExactly("Steve:1:Zombie:2");
+        // @a selects the players only, also for an entities argument.
+        assertThat(sender.getSentMessageTexts()).containsExactly("Steve:1:Zombie:1");
     }
 
     @Test
@@ -142,6 +144,8 @@ class LightweightArgumentExecutionTest {
         tester.execute("args creative", sender);
 
         assertThat(sender.getSentMessageTexts()).containsExactly("CREATIVE");
+        // Vanilla takes the lower-case names only.
+        assertThatThrownBy(() -> tester.execute("args CREATIVE", sender)).isInstanceOf(RuntimeException.class);
     }
 
     @Test

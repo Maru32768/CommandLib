@@ -77,7 +77,7 @@ an unexpected error and then rethrown by `execute`, so the test fails.
 | Artifact | Methods | Provides |
 |---|---|---|
 | `spigot-testing` | `withFakePlayer(Player)`, `withFakeEntity(name, Entity)`, `withFakeWorld(key, World)` | Values for player / entity selectors (names, `@s`, `@p`, `@r`, `@a`, `@e`) and `WorldArgument` |
-| `paper-testing` | `withFakePlayer`, `withFakeEntity`, `withFakeWorld`, `withFakeBlockData`, `withFakeItemStack`, `withFakeEnchantment`, `withFakeParticle`, `withFakePotionEffectType`, `withFakeBiome`, `withFakeAttribute`, `withFakeEntityType`, `withFakeSound` | The value each stubbed Paper argument returns |
+| `paper-testing` | `withFakePlayer`, `withFakeEntity`, `withFakeWorld(key, World)`, `withFakeBlockData`, `withFakeItemStack`, `withFakeEnchantment`, `withFakeParticle`, `withFakePotionEffectType`, `withFakeBiome`, `withFakeAttribute`, `withFakeEntityType`, `withFakeSound` | The value each stubbed Paper argument returns |
 | `forge-testing` / `neoforge-testing` / `fabric-testing` | `withPlayer(FakeSender)`, `withLevel(ServerLevel)`, `withServer(Consumer<MinecraftServer>)` | Online players for selectors, `GameProfileArgument`, `UUIDArgument`; levels for `WorldArgument`; any other stub of the server mock, such as `getScoreboard()`, `getAdvancements()`, `getRecipeManager()` or the loot tables |
 | `velocity-testing` | `withFakePlayer(FakeSender)`, `withFakeServer(name)`, `proxy()` | Players and servers of the fake `ProxyServer` for `PlayerArgument` and `ServerArgument` |
 

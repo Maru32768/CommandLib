@@ -290,8 +290,13 @@ public final class CommandTester implements AutoCloseable {
         return this;
     }
 
-    public CommandTester withFakeWorld(@NotNull World world) {
-        fakeWorlds.put(world.getName(), world);
+    /**
+     * Registers a fake world by dimension key, e.g. {@code minecraft:overworld}, which {@code WorldArgument} takes as
+     * the server does.
+     */
+    public CommandTester withFakeWorld(@NotNull String key, @NotNull World world) {
+        fakeWorlds.put(Objects.requireNonNull(NamespacedKey.fromString(key), "key")
+                              .toString(), world);
         return this;
     }
 
@@ -316,7 +321,7 @@ public final class CommandTester implements AutoCloseable {
     private MockedStatic<ArgumentTypes> mockArgumentTypes() {
         MockedStatic<ArgumentTypes> argumentTypes = Mockito.mockStatic(ArgumentTypes.class);
         argumentTypes.when(ArgumentTypes::gameMode)
-                     .thenReturn(word(token -> GameMode.valueOf(token.toUpperCase(Locale.ROOT))));
+                     .thenReturn(word(CommandTester::gameMode));
         argumentTypes.when(ArgumentTypes::scoreboardDisplaySlot)
                      .thenReturn(word(DisplaySlot.NAMES::value));
         argumentTypes.when(ArgumentTypes::namedColor)
@@ -324,7 +329,10 @@ public final class CommandTester implements AutoCloseable {
         argumentTypes.when(ArgumentTypes::namespacedKey)
                      .thenReturn(word(NamespacedKey::fromString));
         argumentTypes.when(ArgumentTypes::world)
-                     .thenReturn(word(token -> requireCurrent().fakeWorlds.get(token)));
+                     .thenReturn(word(token -> {
+                         NamespacedKey key = NamespacedKey.fromString(token);
+                         return key == null ? null : requireCurrent().fakeWorlds.get(key.toString());
+                     }));
         argumentTypes.when(ArgumentTypes::entity)
                      .thenReturn(word(token -> entityResolver(token, false)));
         argumentTypes.when(ArgumentTypes::entities)
@@ -469,7 +477,8 @@ public final class CommandTester implements AutoCloseable {
         return source -> {
             CommandTester tester = requireCurrent();
             if (multiple && "@a".equals(token)) {
-                return new ArrayList<>(tester.fakeEntities.values());
+                // @a selects players only.
+                return new ArrayList<>(tester.fakePlayers.values());
             }
             Entity entity = tester.fakeEntities.get(token);
             return entity == null ? List.of() : List.of(entity);
@@ -533,6 +542,19 @@ public final class CommandTester implements AutoCloseable {
         } else {
             current.set(previous);
         }
+    }
+
+    // Vanilla's game mode argument takes the lower-case names only.
+    @Nullable
+    private static GameMode gameMode(String token) {
+        for (GameMode mode : GameMode.values()) {
+            if (mode.name()
+                    .toLowerCase(Locale.ROOT)
+                    .equals(token)) {
+                return mode;
+            }
+        }
+        return null;
     }
 
     private static <T> ArgumentType<T> word(Function<String, T> parser) {
