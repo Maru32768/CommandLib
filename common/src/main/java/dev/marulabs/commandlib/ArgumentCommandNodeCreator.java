@@ -74,8 +74,21 @@ final class ArgumentCommandNodeCreator<S, T, C extends CommonCommandContext<S, T
         String permission = branch.permissionName(parent, permissionPrefix);
         return branch.hasVisibility()
                 ? source -> platformAdapter.hasPermission(source, permission)
-                        && branch.isVisible(platformAdapter.createSourceContext(source))
+                        && isVisibleTo(branch, parent, platformAdapter.createSourceContext(source))
                 : source -> platformAdapter.hasPermission(source, permission);
+    }
+
+    // As CommonCommand#isVisibleTo, for a branch of the command.
+    private static <C extends CommonCommandContext<?, ?>> boolean isVisibleTo(Arguments<C> branch,
+                                                                              CommonCommand<C, ?> parent,
+                                                                              C ctx) {
+        ctx.providers(parent.providers());
+        try {
+            return branch.isVisible(ctx);
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     private static List<String> names(Arguments<?> branch) {

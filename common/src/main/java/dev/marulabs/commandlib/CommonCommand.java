@@ -156,6 +156,20 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
         setParentFor(children, null);
     }
 
+    /**
+     * Whether a source sees this command, for a predicate that has no execution: the context has the command's
+     * providers, and a predicate that throws hides the command, after printing the exception.
+     */
+    final boolean isVisibleTo(C ctx) {
+        ctx.providers(providers());
+        try {
+            return isVisible(ctx);
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     private void validateChildren(@NotNull Collection<? extends T> children) {
         for (T child : children) {
             Objects.requireNonNull(child);

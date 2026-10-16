@@ -49,6 +49,29 @@ class VisibilityTest {
     }
 
     @Test
+    void a_predicate_reads_the_commands_provided_values_and_hides_when_it_throws() throws Exception {
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("game") {{
+            provide(String.class, ctx -> "host");
+            addChildren(new TestCommand("start") {{
+                visibleWhen(ctx -> ctx.get(String.class)
+                                      .equals("host"));
+                execute(ctx -> ctx.sendMessage("started"));
+            }}, new TestCommand("broken") {{
+                visibleWhen(ctx -> {
+                    throw new IllegalStateException("broken predicate");
+                });
+                execute(ctx -> ctx.sendMessage("broken ran"));
+            }});
+        }}, player(false));
+
+        assertThat(runner.visibleChildren("game")).contains("start")
+                                                  .doesNotContain("broken");
+        assertThat(runner.execute("game start")
+                         .messages()).containsExactly("started");
+        assertThatThrownBy(() -> runner.execute("game broken")).isInstanceOf(CommandSyntaxException.class);
+    }
+
+    @Test
     void the_tree_shows_only_what_the_predicate_allows() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(game(), player(false));
 

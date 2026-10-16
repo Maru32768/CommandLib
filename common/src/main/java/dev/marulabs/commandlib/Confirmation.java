@@ -20,7 +20,8 @@ import java.util.function.BiConsumer;
  * The first execution does not run the command; it sends a message asking the sender to run the same command again.
  * Running exactly the same input again within the timeout runs it. Each sender has at most one pending confirmation:
  * a different input, or the same input after the timeout, asks again. Players and entities are told apart by their
- * unique id, other senders, such as the console and command blocks, by their type and name. Only a later execution
+ * unique id, other senders, such as the console and command blocks, by their type and name, so command blocks that
+ * keep the default name {@code @} share one confirmation. Only a later execution
  * confirms: the targets of one forked execution, such as {@code /execute as @a ... run}, do not confirm each other.
  */
 public final class Confirmation {

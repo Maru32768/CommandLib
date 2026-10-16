@@ -653,6 +653,12 @@ public abstract class CommonCommandContext<S, C> {
         failureSends = sends;
         try {
             sendMessages.run();
+        } catch (Throwable e) {
+            // The messages sent before the exception still reach the sender, ahead of what the exception reports.
+            failureMessages = null;
+            failureSends = null;
+            sends.forEach(Runnable::run);
+            throw e;
         } finally {
             failureMessages = null;
             failureSends = null;

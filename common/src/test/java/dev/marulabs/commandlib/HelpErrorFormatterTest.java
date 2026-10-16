@@ -235,6 +235,39 @@ class HelpErrorFormatterTest {
     }
 
     @Test
+    void a_throwing_error_formatter_falls_back_to_the_default_and_the_handlers_get_the_executors_exception() throws Exception {
+        List<String> handled = new ArrayList<>();
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("game") {{
+            errorFormatter((ctx, error) -> {
+                throw new IllegalStateException("formatter broke");
+            });
+            addUncaughtExceptionHandler((e, ctx) -> handled.add(e.getMessage()));
+            execute(ctx -> {
+                throw new IllegalStateException("executor broke");
+            });
+        }});
+
+        assertThat(runner.execute("game")
+                         .messages()).contains("Check the console for details.");
+        assertThat(handled).containsExactly("executor broke");
+    }
+
+    @Test
+    void help_shows_no_options_tag_when_the_sender_may_give_none() throws Exception {
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("ban") {{
+            helpFormatter((ctx, help) -> help.usages()
+                                             .forEach(x -> ctx.sendMessage(x.plainText())));
+            option(Options.flag("silent", 's')
+                          .permission("secret.silent"));
+            argument(new CommonStringArgument<>("target")).execute((target, ctx) -> {
+            });
+        }}, new TestCommandSource("test.command.ban", "test.command.ban.target"));
+
+        assertThat(runner.execute("ban help")
+                         .messages()).containsExactly("/ban <target>");
+    }
+
+    @Test
     void syntax_advice_shows_the_usage_of_the_failed_branch() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("game") {{
             errorFormatter(ErrorFormatter.SYNTAX_ADVICE);

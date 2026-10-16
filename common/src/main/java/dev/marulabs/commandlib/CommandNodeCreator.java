@@ -234,7 +234,7 @@ final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U ext
             return x -> platformAdapter.hasPermission(x, permission);
         }
         return x -> platformAdapter.hasPermission(x, permission)
-                && command.isVisible(platformAdapter.createSourceContext(x));
+                && command.isVisibleTo(platformAdapter.createSourceContext(x));
     }
 
     private List<LiteralCommandNode<S>> createAliasCommands(U source, LiteralCommandNode<S> redirectTarget) {

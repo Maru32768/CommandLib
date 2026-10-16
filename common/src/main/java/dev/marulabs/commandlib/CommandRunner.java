@@ -68,22 +68,24 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
 
     @Override
     public int run(CommandContext<S> context) throws CommandSyntaxException {
+        C ctx;
         try {
             // After options, Brigadier executes a context without them; the graph adds them back.
-            C ctx = platformAdapter.createCommandContext(optionGraph.recover(context));
-            checkVisible(ctx);
+            ctx = platformAdapter.createCommandContext(optionGraph.recover(context));
             // Brigadier gives the targets of a forked execution copies of one context, which share its node list.
             ctx.parse(context.getNodes());
             ctx.scheduler(scheduler);
             ctx.captions(command.captions());
             ctx.providers(providers);
-            return CurrentCommandContext.call(ctx, () -> runInContext(ctx));
+            checkVisible(ctx);
         } catch (CommandSyntaxException e) {
             throw e;
         } catch (Throwable e) {
             e.printStackTrace();
             throw e;
         }
+        // runInContext prints and reports what it does not send to the sender itself.
+        return CurrentCommandContext.call(ctx, () -> runInContext(ctx));
     }
 
     // A command or branch hidden from the sender (visibleWhen) is rejected as Brigadier rejects a node the sender
@@ -299,21 +301,15 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
             });
         }
         if (e instanceof TimeoutException) {
-            CommandFailure failure = capture(ctx,
-                                             CommandError.Kind.TIMEOUT,
-                                             e,
-                                             null,
-                                             () -> ctx.sendFailure(Caption.TIMEOUT));
             notifyUncaughtExceptionHandlers(e, ctx);
-            return failure;
+            return capture(ctx, CommandError.Kind.TIMEOUT, e, null, () -> ctx.sendFailure(Caption.TIMEOUT));
         }
         e.printStackTrace();
-        CommandFailure failure = capture(ctx, CommandError.Kind.UNEXPECTED, e, null, () -> {
+        notifyUncaughtExceptionHandlers(e, ctx);
+        return capture(ctx, CommandError.Kind.UNEXPECTED, e, null, () -> {
             ctx.sendFailure(Caption.UNEXPECTED_ERROR);
             ctx.sendFailure(Caption.SEE_CONSOLE);
-        });
-        notifyUncaughtExceptionHandlers(e, ctx);
-        return failure.unexpected(e);
+        }).unexpected(e);
     }
 
     private int fail(C ctx,
@@ -333,8 +329,16 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
                                    CommandHelp.@Nullable Usage usage,
                                    Runnable sendDefault) {
         CommandError error = new CommandError(kind, exception, usage, sendDefault);
-        return ctx.captureFailure(() -> command.errorFormatter()
-                                               .format(ctx, error));
+        return ctx.captureFailure(() -> {
+            try {
+                command.errorFormatter()
+                       .format(ctx, error);
+            } catch (RuntimeException e) {
+                // A broken formatter must not hide the failure it reports.
+                e.printStackTrace();
+                sendDefault.run();
+            }
+        });
     }
 
     private static int fail(CommandFailure failure) throws CommandFailure {

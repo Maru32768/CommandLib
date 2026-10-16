@@ -29,6 +29,7 @@ public final class CommandPrerequisiteException extends Exception {
     }
 
     public CommandPrerequisiteException(String message, String... additionalMessages) {
+        super(message);
         this.sendMessage = ctx -> {
             ctx.sendFailure(message);
             for (String additionalMessage : additionalMessages) {

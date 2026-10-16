@@ -33,7 +33,14 @@ final class HelpMessageAction<S, T, C extends CommonCommandContext<S, T>, U exte
     CommandHelp help(C ctx) {
         List<Token> path = path(command, ctx);
         UsageFormatter formatter = command.usageFormatter();
-        List<Token> prefix = optionTokens(command);
+        List<CommandOption<?, C>> options = new ArrayList<>();
+        for (CommandOption<?, C> option : command.options()) {
+            String permission = option.permissionName(command, permissionPrefix);
+            if (permission == null || platformAdapter.hasPermission(ctx, permission)) {
+                options.add(option);
+            }
+        }
+        List<Token> prefix = options.isEmpty() ? List.of() : List.of(Token.options());
 
         List<Usage> usages = new ArrayList<>();
         // Examples:
@@ -63,19 +70,10 @@ final class HelpMessageAction<S, T, C extends CommonCommandContext<S, T>, U exte
                 usages.add(new Usage(path, appendTags(prefix, arguments), arguments.description(ctx)));
             }
         }
-        if (usages.isEmpty() && !command.options()
-                                        .isEmpty()) {
+        if (usages.isEmpty() && !options.isEmpty()) {
             usages.add(new Usage(path, prefix, ""));
         }
         usages.forEach(x -> x.format(ctx, formatter));
-
-        List<CommandOption<?, C>> options = new ArrayList<>();
-        for (CommandOption<?, C> option : command.options()) {
-            String permission = option.permissionName(command, permissionPrefix);
-            if (permission == null || platformAdapter.hasPermission(ctx, permission)) {
-                options.add(option);
-            }
-        }
         return new CommandHelp(path, command.description(ctx), usages, options, command.examples());
     }
 

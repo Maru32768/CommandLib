@@ -24,6 +24,26 @@ class CommonCommandExecutionTest {
     }
 
     @Test
+    void a_preprocess_that_throws_keeps_the_messages_it_sent() throws Exception {
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("game") {{
+            addPreprocess((Predicate<TestCommandContext>) ctx -> {
+                ctx.sendMessage("context line");
+                throw ctx.fail("refused");
+            });
+            execute(ctx -> ctx.sendMessage("ran"));
+        }});
+
+        assertThat(runner.execute("game")
+                         .messages()).containsExactly("context line", "refused");
+    }
+
+    @Test
+    void a_prerequisite_exception_has_its_first_message() {
+        assertThat(new CommandPrerequisiteException("The database is down.",
+                                                    "Try later.").getMessage()).isEqualTo("The database is down.");
+    }
+
+    @Test
     void alias_executes_same_command_tree() throws Exception {
         TestCommand command = new TestCommand("message") {{
             addAliases("msg");
