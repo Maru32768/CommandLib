@@ -61,6 +61,14 @@
 - `[x]` CommandAPI migration guide を追加する（`docs/migration/from-commandapi.md`、2026-10-15）。
 - `[x]` Cloud、Lamp、ACF からの migration guide を追加する（`docs/migration/from-cloud.md` / `from-lamp.md` /
   `from-acf.md`、2026-10-15）。
+- `[x]` `IntegerRangeArgument` / `DoubleRangeArgument` / `DurationArgument` を実サーバーで検証する（旧 target の
+  MCProtocolLib bot が `int_range` / `float_range` を decode できるか、NMS range class の link）2026-10-16 に 32 target で検証した。
+- `[x]` `BlockPositionArgument` / `ItemPredicateArgument` / `BlockPredicateArgument` を実サーバーで検証する（新しい NMS class の
+  link、Paper 1.21.8+ の `blockInWorldPredicate` の reflection、vanilla argument type の補完が client に届くこと）2026-10-16 に 32 target で検証した。
+- `[x]` `TimeArgument` / `RegistryArgument` と Spigot の vanilla 型の display slot / color を実サーバーで検証する（旧 bot の `minecraft:time` decode を含む）2026-10-16 に 32 target で検証した。
+- `[x]` `ComponentArgument` / `MessageArgument` / `NBTCompoundArgument` を実サーバーで検証する（2026-10-16）。
+- `[x]` integration test で見つかった bug を直す（2026-10-16）: fixture plugin に common の resource（caption bundle）を同梱、Spigot 26.2+ の
+  `TeamColorArgument` 改名、Mohist 1.16.5 での range argument の link、modded の sync executor が 1 task 遅れる件。
 
 ### P4: Developer experience（完了分）
 

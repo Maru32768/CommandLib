@@ -19,19 +19,19 @@
 |-------------------------------------|------:|-----------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------|
 | Fluent / tree API                   | `[x]` | `Command`、`argument(...)`、`addChildren(...)` による command tree 定義がある。                                                                    | API stability policy と migration guide。                                    |
 | 型安全な argument callback              | `[x]` | `Unary` から `Hept` までの typed branch callback と、任意個の引数を `argument(a, b, ..., i)` / `argument(List)` で受けて `ctx.getArgument(arg)` で型付きに読む形がある。 | — |
-| Variadic / optional arguments       | `[x]` | 末尾の `optional(default)` / `optional(Extractor)` と `variadic([max])`（`List<T>`）がある。配置違反は登録時に `IllegalStateException`（[`docs/design/optional-variadic-arguments.md`](design/optional-variadic-arguments.md)）。 | 上限なしの variadic、`Optional<T>` 形式、実サーバーでの検証。 |
+| Variadic / optional arguments       | `[x]` | 末尾の `optional(default)` / `optional(Extractor)` と `variadic([max])`（`List<T>`）がある。配置違反は登録時に `IllegalStateException`（[`docs/design/optional-variadic-arguments.md`](design/optional-variadic-arguments.md)）。 | 上限なしの variadic、`Optional<T>` 形式、実サーバーでの検証（fixture なし）。 |
 | Execution result                    | `[x]` | `ctx.setResult(int)` が `/execute store result` に、失敗（例外・権限・prerequisite 等）が `store success 0` に反映される。spigot-1.16.5 / paper-26.3 の integration test あり。 | Forge / NeoForge の実サーバー検証。 |
-| Async execution                     | `[x]` | `executeAsync(...)`（全 typed branch）と `ctx.supplyAsync` / `runAsync`、platform 別の `CommandScheduler` で sync thread へ復帰する（[`docs/execution.md`](execution.md)）。 | 実サーバーでの scheduler 検証（Bukkit / Forge / Folia）。 |
+| Async execution                     | `[x]` | `executeAsync(...)`（全 typed branch）と `ctx.supplyAsync` / `runAsync`、platform 別の `CommandScheduler` で sync thread へ復帰する（[`docs/execution.md`](execution.md)）。 | Folia での scheduler 検証（Bukkit / Forge / NeoForge は 2026-10-16 に検証済み）。 |
 | Dynamic command tree refresh        | `[x]` | `CommandLib.refresh(player)` / `refreshAll()` が Spigot / Paper / Forge / NeoForge にある（[`docs/permissions.md`](permissions.md)）。 | permission 以外の state による表示切替 predicate、実 client での検証。 |
 | Vanilla-style feedback              | `[x]` | `ctx.sendSuccess(message, broadcastToOps)` が全 platform で vanilla の `CommandSourceStack#sendSuccess` を通り、gamerule と silent source を尊重する。 | selector で複数 target に適用した場合の集計 message、gamerule の tests。 |
 | Bukkit / Spigot / Paper support     | `[~]` | `spigot` module（Spigot 1.16.5〜26.3 を Tested）と `paper` module（Paper 1.21〜26.3 を Tested、Folia は best effort）がある。 | Folia の実サーバー検証。 |
 | Paper 1.20.6+ registration          | `[x]` | `LifecycleEvents.COMMANDS` + `Commands registrar` + `CommandSourceStack` を使った公式 API 登録が実装済み。Adventure component を標準 message path として利用。 | bootstrap 登録の互換性保証・docs / tests の拡充（`CommandLib.bootstrap(BootstrapContext, ...)` は実装済み）。                                                   |
 | Spigot / Paper module split         | `[x]` | `bukkit` を `spigot` へ rename / move し、`paper` module を新設済み。                                                                               | —                                                                          |
-| Forge support                       | `[~]` | Forge 1.16.5 / 1.18.2 / 1.19.2 / 1.20.1 を `modded` の Stonecutter 単一ソースから build。 | 1.18.2 / 1.19.2 の実サーバー検証、loader 非依存層の分離（`[?]`）。 |
-| Mohist support                      | `[~]` | README 上で tested version が記載されている。                                                                                                      | integration test の明文化、非対応ケースの整理。                                           |
+| Forge support                       | `[~]` | Forge 1.16.5 / 1.18.2 / 1.19.2 / 1.20.1 を `modded` の Stonecutter 単一ソースから build。 | loader 非依存層の分離（`[?]`）。4 version とも実サーバーで検証済み（2026-10-16）。 |
+| Mohist support                      | `[~]` | README 上で tested version が記載されている。                                                                                                      | 1.20.1 で失敗 message が player に届かない件。1.16.5 / 1.20.1 は integration test 済み（2026-10-16）。                                           |
 | Folia support                       | `[~]` | `paper` artifact が Folia を検出し、`FoliaCommandScheduler` で entity / region / global scheduler に戻す。`spigot` artifact は Folia で登録を拒否する。 | 実 Folia server の integration target（Folia 用 fixture が必要）、region thread からの runtime 登録の guard。 |
 | Velocity support                    | `[~]` | `velocity` / `velocity-testing` module（Velocity 3.4.0+、`PlayerArgument` / `ServerArgument`）がある。Velocity 3.4.0 / 4.2.0 の proxy で手動 smoke test 済み。 | 実 proxy + backend + client の integration target、Velocity sample。 |
-| NeoForge support                    | `[~]` | NeoForge 1.21.1 / 1.21.4 を build（integration target あり、1.21.4 は未実行）。 | 1.21.5 以降（1.21.11 で `Identifier` / `PermissionSet` 等の大きな変更）、26.x（非難読化、Java 25、`loom-no-remap`）。 |
+| NeoForge support                    | `[~]` | NeoForge 1.21.1 / 1.21.4 を build（両方とも integration test 済み）。 | 1.21.5 以降（1.21.11 で `Identifier` / `PermissionSet` 等の大きな変更）、26.x（非難読化、Java 25、`loom-no-remap`）。 |
 | Fabric support                      | `[~]` | `fabric-1.20.1` / `fabric-1.21.1` / `fabric-1.21.4` を build（`CommandRegistrationCallback` v2、fabric-permissions-api 任意対応）。`modded-testing` も全 node で通る。 | 実サーバーの integration target、Fabric 用 Kotlin module、1.21.5 以降と 26.x。 |
 | Brigadier / NMS hiding              | `[~]` | 利用者 API から Brigadier / NMS を隠している。                                                                                                      | capability detection、公式 API 優先、fallback policy。                            |
 | `/execute` integration              | `[~]` | README と Bukkit registration path で `/execute run` 連携を扱っている。spigot module と paper module の command は `/minecraft:reload` 後や runtime 登録後も data pack function から使える（`/minecraft:reload` 後は両 module に integration test あり）。paper module で plugin から登録した command は次 tick の function 再 compile 後に使える（bootstrap 登録は server の compile 時点から使える）。 | command block / tag での保証と tests。 |
@@ -62,7 +62,7 @@
 | NMS Reflection test strategy        | `[~]` | `CommandTester` が `Mockito.mockStatic` で `NMSClassRegistry` をスタブし、軽量な Mock 実装クラス方式で NMS なしテストを実現している。                 | Builder / mock 差し込みの保証拡充、新引数の Mock + Test ルールの継続適用。              |
 | Documentation                       | `[~]` | README（Why CommandLib、比較表）、`docs/compatibility.md`、`arguments` / `errors` / `options` / `suggestions` / `permissions` / `testing` / `troubleshooting` と design docs がある。 | compatibility の結果公開・更新、documentation site。 |
 | Migration guides                    | `[x]` | CommandAPI、Cloud、Lamp、ACF からの移行 guide が `docs/migration/` にある。 | 未実装機能（annotation、Kotlin、DI、locale 等）の実装に合わせた更新。 |
-| Runtime diagnostics                 | `[x]` | `CommandLib.diagnostics()` と opt-in の `CommandLibDiagnosticsCommand` が Spigot / Paper / Forge / NeoForge にある（[`docs/diagnostics.md`](diagnostics.md)）。 | 実サーバーでの検証、plugin 別 filter。 |
+| Runtime diagnostics                 | `[x]` | `CommandLib.diagnostics()` と opt-in の `CommandLibDiagnosticsCommand` が Spigot / Paper / Forge / NeoForge にある（[`docs/diagnostics.md`](diagnostics.md)）。 | plugin 別 filter（実サーバー検証は 2026-10-16 に済み）。 |
 | Generated docs / exports            | `[x]` | `CommandDocs` が command docs と permission tree を Markdown / JSON で出力する。 | 排他 option group と option の `requires` の出力、sender 依存の description（examples は出力済み）。 |
 
 ## 優先度別バックログ
@@ -75,26 +75,21 @@
   Paper）、`EntityTypeArgument`（Spigot / Paper）、`AttributeArgument`（Spigot / Paper）、`AdvancementArgument`（Spigot /
   Paper）、`LootTableArgument`（Spigot / Paper）、`RecipeArgument`（Spigot / Paper）、`ObjectiveArgument`（Spigot /
   Paper）、`ScoreboardDisplaySlotArgument`（Spigot / Paper）、`ChatColorArgument`（Spigot / Paper）を追加済み。
-- `[~]` `/execute`、command blocks、functions、tags の挙動を検証して docs / tests に落とす。spigot-1.16.5（75/0）、spigot-26.3（76/0）、
-  paper-26.3（74/0）、paper-1.20.4（76/0）で integration test が通った（range / block position / predicate / `/execute store` を含む）。
-  残りの Spigot / Paper target、mohist、forge / neoforge と、component / message / NBT の fixture は未実行。
+- `[~]` `/execute`、command blocks、functions、tags の挙動を検証して docs / tests に落とす。2026-10-16 に Spigot 10 / Paper 10 / Mohist 2 /
+  Forge 4 / NeoForge 2 の計 32 target（`paper-26.3-spigot-jar` を含む）で integration test が全て通った（[`integration-test/README.md`](../integration-test/README.md)）。
+  残り: command block と tag の tests、Forge / NeoForge の command block / function、未実行の patch release。
 - `[?]` `/execute as` 後の actor を platform 間で揃えるか決める。Spigot / Paper では sender / actor は元の sender（console）のまま、
   Forge / NeoForge では実行 entity に従う（permission 判定も含む）。
-- `[ ]` `IntegerRangeArgument` / `DoubleRangeArgument` / `DurationArgument` を実サーバーで検証する（旧 target の
-  MCProtocolLib bot が `int_range` / `float_range` を decode できるか、NMS range class の link）。
-- `[ ]` `BlockPositionArgument` / `ItemPredicateArgument` / `BlockPredicateArgument` を実サーバーで検証する（新しい NMS class の
-  link、Paper 1.21.8+ の `blockInWorldPredicate` の reflection、vanilla argument type の補完が client に届くこと）。
-- `[ ]` `ComponentArgument` / `MessageArgument` / `NBTCompoundArgument` を実サーバーで検証する（Paper 1.21.3〜26.x での message の
-  reflection と vanilla NBT type、旧 bot の parser decode）。modded-testing の fake source は level を持たないため selector を解決できず、
-  `docs/arguments.md` の「real selectors」の記述を見直す。
-- `[ ]` `TimeArgument` / `RegistryArgument` と Spigot の vanilla 型の display slot / color を実サーバーで検証する（旧 bot の `minecraft:time` decode を含む）。
+- `[ ]` modded-testing の fake source は level を持たないため selector を解決できない。`docs/arguments.md` の「real selectors」の記述を見直す。
 - `[ ]` Paper で resolve error の translatable component が実 client で翻訳されること、`MessageComponentSerializer` が
   Paper 1.21.3〜26.x で動くことを integration test（`CommandSyntaxExceptionTest`）で確認する。
-- `[ ]` optional / variadic argument を実サーバー（Spigot / Paper / modded の integration test）で検証する。各 token を
+- `[ ]` optional / variadic argument を実サーバー（Spigot / Paper / modded の integration test）で検証する（fixture がまだない）。各 token を
   platform の `ArgumentType#parse` で読み直す実装のため、command tree の大きさ（`maxCount` × option の展開）も確認する。
 - `[ ]` cooldown の永続化（restart 後に復元する hook）、argument branch 単位の confirm / cooldown / `@Condition`。
-- `[ ]` option の redirect 化（`OptionGraph`）を実サーバーで検証する（Spigot 1.16.5〜26.x、Paper の `ApiMirrorRootNode`、Velocity、modded）。
+- `[~]` option の redirect 化（`OptionGraph`）を実サーバーで検証する。Spigot / Paper / Mohist / Forge / NeoForge は 2026-10-16 に検証済み、Velocity が残り。
   argument child と primitive 以外の value option を持つ command は従来の tree のままで、順列で増える。
+- `[ ]` Mohist 1.20.1 は player の構文エラーを Bukkit の "Unknown command" で返すため、CommandLib の失敗 message（caption を含む）が player に届かない。回避できるか調べる。
+- `[ ]` caption の locale を実サーバーで確かめる test が bot の既定 `en_us` だけなので、他 locale の bot を追加する。
 - `[ ]` CommandLib 組み込み message の他言語 bundle を増やす（現在は en / ja）。annotation の `java.util.Optional<T>` 引数（core が null default を許さない）。
 - `[ ]` option の redirect 復元の変更後に `ExecuteBenchmark` を idle な環境で baseline と比較する。
 - `[ ]` Kotlin DSL を Forge / NeoForge に広げ（module 化には Stonecutter の Loom node 5 つ分が必要）、Kotlin 関数の default 引数から
