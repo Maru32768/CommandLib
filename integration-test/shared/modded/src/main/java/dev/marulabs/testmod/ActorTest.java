@@ -20,7 +20,30 @@ public final class ActorTest extends TestBase {
         return List.of(consoleActorType(),
                        consoleActorUnwrapsServer(),
                        executeAsPlayerChangesActor(),
-                       executePositionedSetsLocation());
+                       executePositionedSetsLocation(),
+                       commandBlockActorType());
+    }
+
+    // The command block runs the probe on a later tick, before the results are reported. Production class names
+    // differ from development ones, so this only passes when the source is recognized by type.
+    private String commandBlockActorType() {
+        String name = getMethodName();
+        String key = getKey(name);
+
+        putCommandNotExecutedResult(key);
+        command.addChildren(new Command(name) {{
+            execute(ctx -> {
+                CommandActor actor = ctx.getActor();
+                putResult(key, actor.getType() + "," + actor.isConsole(), CommandActorType.COMMAND_BLOCK + ",false");
+            });
+        }});
+
+        return commandBlock(buildCommand(name), 3);
+    }
+
+    // Places a command block above the console's position that runs the command once.
+    static String commandBlock(String command, int height) {
+        return "setblock ~ ~" + height + " ~ minecraft:command_block{auto:1b,Command:\"" + command + "\"}";
     }
 
     // Unlike Bukkit, whose sender stays the console, the actor follows the entity of execute as.

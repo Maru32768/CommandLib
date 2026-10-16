@@ -1,6 +1,8 @@
 package dev.marulabs.commandlib;
 
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.server.rcon.RconConsoleSource;
+import net.minecraft.world.level.BaseCommandBlock;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
@@ -47,21 +49,13 @@ final class ForgeCommandActor implements CommandActor {
             return CommandActorType.ENTITY;
         }
 
+        // By type: the class names are remapped in production, to intermediary names on Fabric.
         Object rawSource = findRawSource();
-        if (rawSource != null && rawSource.getClass()
-                                          .getName()
-                                          .contains("CommandBlock")) {
+        if (rawSource instanceof BaseCommandBlock) {
             return CommandActorType.COMMAND_BLOCK;
         }
-        if (rawSource != null && rawSource.getClass()
-                                          .getName()
-                                          .contains("RCon")) {
+        if (rawSource instanceof RconConsoleSource) {
             return CommandActorType.REMOTE_CONSOLE;
-        }
-        if (rawSource != null && rawSource.getClass()
-                                          .getName()
-                                          .contains("MinecraftServer")) {
-            return CommandActorType.CONSOLE;
         }
         return CommandActorType.CONSOLE;
     }

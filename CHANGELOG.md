@@ -74,6 +74,9 @@ This file lists the changes in each CommandLib release that affect plugin and mo
   command and argument branch gets its own node. Update your permission plugin configuration
   ([permissions](docs/permissions.md#node-names)).
 - Spigot: `permission(PermissionDefault.NOT_OP)` throws `IllegalArgumentException`.
+- Forge / NeoForge / Fabric: a command block or a non-player entity that `/execute as` runs as no longer passes every
+  check. It gets a node by its default and its own permission level, so a command block cannot run an `OP` or `NONE`
+  command. The console, RCON and data pack functions still pass every check ([permissions](docs/permissions.md)).
 - Forge: `CommandLib.register(commands...)` is now `CommandLib.register(permissionPrefix, commands...)`, and
   `permissionLevel(int)` is replaced by `permission(DefaultPermission)` (or `permission(DefaultPermissionLevel)` on
   1.16.5).

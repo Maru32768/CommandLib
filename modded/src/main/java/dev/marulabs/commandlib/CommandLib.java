@@ -28,6 +28,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 //? if >=1.18 {
 //? if neoforge {
@@ -40,9 +42,7 @@ import net.minecraftforge.server.permission.events.PermissionGatherEvent;
 import net.minecraftforge.server.permission.nodes.PermissionNode;
 //?}
 
-import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 //?} else {
 /*import net.minecraftforge.event.RegisterCommandsEvent;
@@ -50,9 +50,9 @@ import net.minecraftforge.fml.event.server.FMLServerStartedEvent;
 *///?}
 
 public final class CommandLib {
-    //? if fabric {
-    /*private static final Map<String, DefaultPermission> PERMISSIONS = new ConcurrentHashMap<>();
-    *///?} elif >=1.18 {
+    // The default of each node. The first command that declares a node decides it, as on Forge.
+    private static final Map<String, DefaultPermission> DEFAULTS = new ConcurrentHashMap<>();
+    //? if >=1.18 && !fabric {
     private static final Map<String, PermissionNode<Boolean>> PERMISSIONS = new ConcurrentHashMap<>();
     //?}
 
@@ -84,6 +84,8 @@ public final class CommandLib {
                                       @NotNull CommandDefaults<CommandContext> defaults,
                                       @NotNull Collection<? extends Command> commands) {
         defaults.applyTo(commands);
+        commands.forEach(command -> command.permissionConfigs(permissionPrefix)
+                                           .forEach(c -> DEFAULTS.putIfAbsent(c.node(), c.defaultPermission())));
         CommandLib registration = new CommandLib(commands, permissionPrefix);
         REGISTRATIONS.add(registration);
         return registration;
@@ -184,6 +186,23 @@ public final class CommandLib {
         }
     }
 
+    // A source that is neither a player nor the console, such as a command block or an entity that /execute runs as,
+    // gets a node by its default and its own permission level, as with vanilla's commands.
+    static boolean hasDefaultPermission(CommandSourceStack source, String node) {
+        DefaultPermission defaultPermission = DEFAULTS.get(node);
+        if (defaultPermission == null) {
+            return source.hasPermission(4);
+        }
+        switch (defaultPermission) {
+            case ALL:
+                return true;
+            case NONE:
+                return false;
+            default:
+                return source.hasPermission(4);
+        }
+    }
+
     /**
      * Sends the command tree to the player again, so the commands and branches they see follow a change of their
      * permissions without a rejoin. The server sends the tree on join and when the player's operator status changes,
@@ -216,9 +235,6 @@ public final class CommandLib {
     /*private CommandLib(Collection<? extends Command> commands, String permissionPrefix) {
         this.commands = commands;
         this.permissionPrefix = permissionPrefix;
-        // The first command that declares a node decides its default, as on Forge.
-        commands.forEach(command -> command.permissionConfigs(permissionPrefix)
-                                           .forEach(c -> PERMISSIONS.putIfAbsent(c.node(), c.defaultPermission())));
 
         // The callback fires again on /reload and on every integrated server start.
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> register(dispatcher.getRoot()));
@@ -242,7 +258,7 @@ public final class CommandLib {
     }
 
     static boolean hasPermission(CommandSourceStack source, ServerPlayer player, String node) {
-        DefaultPermission defaultPermission = PERMISSIONS.get(node);
+        DefaultPermission defaultPermission = DEFAULTS.get(node);
         boolean fallback = defaultPermission == null ? source.hasPermission(4)
                                                      : Command.resolveDefault(defaultPermission, player);
         // fabric-permissions-api is optional: a mod that wants permission handlers such as LuckPerms ships it.
