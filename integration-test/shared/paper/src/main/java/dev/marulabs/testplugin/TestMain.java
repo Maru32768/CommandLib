@@ -2,6 +2,7 @@ package dev.marulabs.testplugin;
 
 import dev.marulabs.commandlib.Command;
 import dev.marulabs.commandlib.CommandLib;
+import dev.marulabs.commandlib.CommandLibDiagnosticsCommand;
 import dev.marulabs.commandlib.util.bukkit.BukkitUtil;
 import dev.marulabs.integration.core.JUnitXmlReport;
 import dev.marulabs.integration.core.TestResult;
@@ -75,7 +76,7 @@ public class TestMain {
             CommandDispatchProbe dispatchProbe = new CommandDispatchProbe(plugin);
 
             ArgumentTest argumentTest = new ArgumentTest(mainCommand, TEST_PLAYER_NAME);
-            OptionTest optionTest = new OptionTest(mainCommand);
+            OptionTest optionTest = new OptionTest(mainCommand, TEST_PLAYER_NAME);
             CommandSyntaxExceptionTest commandSyntaxExceptionTest = new CommandSyntaxExceptionTest(mainCommand);
             RuntimePermissionTest runtimePermissionTest = new RuntimePermissionTest(mainCommand, plugin);
             SuggestionTest suggestionTest = new SuggestionTest(mainCommand);
@@ -83,6 +84,7 @@ public class TestMain {
             VanillaExecutionTest vanillaExecutionTest = new VanillaExecutionTest(mainCommand, TEST_PLAYER_NAME);
             HelpTopicTest helpTopicTest = new HelpTopicTest(mainCommand, plugin);
             DataPackFunctionTest dataPackFunctionTest = new DataPackFunctionTest(mainCommand);
+            RuntimeFeatureTest runtimeFeatureTest = new RuntimeFeatureTest(mainCommand);
             new HelpMessageTest(mainCommand); // registers helpMessageRoot for bot-side help message verification
             List<TestBase> tests = List.of(argumentTest,
                                            optionTest,
@@ -92,7 +94,8 @@ public class TestMain {
                                            scenarioTest,
                                            vanillaExecutionTest,
                                            helpTopicTest,
-                                           dataPackFunctionTest);
+                                           dataPackFunctionTest,
+                                           runtimeFeatureTest);
             List<String> commands = tests.stream()
                                          .flatMap(x -> x.build()
                                                         .stream())
@@ -209,7 +212,7 @@ public class TestMain {
                     execute.run();
                 });
             }});
-            CommandLib.register(plugin, mainCommand);
+            CommandLib.register(plugin, mainCommand, new CommandLibDiagnosticsCommand("commandlibdiagnostics"));
         } catch (Throwable e) {
             errorOccurredOnRegister = true;
             logger.log(Level.SEVERE, "COMMANDLIB_TEST_PLUGIN_ENABLE_FAILED", e);

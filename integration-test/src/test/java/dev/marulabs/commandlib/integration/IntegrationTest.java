@@ -195,6 +195,24 @@ class IntegrationTest {
                                                                         || m.contains("Incorrect argument")
                                                                         || m.contains("Unknown command"));
                 assertThat(deniedMessages).noneMatch(m -> m.contains("deniedProbe executed"));
+                if (isBukkitPlatform(System.getProperty("commandlib.platform", ""))) {
+                    // An option whose permission ops lack is left out of the tree and rejected.
+                    List<String> optionMessages = assertBotReceives(client,
+                                                                    "commandlibtest optionPermissionProbe --secret",
+                                                                    "incorrect argument message for an option without permission",
+                                                                    m -> m.contains("command.unknown.argument")
+                                                                            || m.contains("Incorrect argument"));
+                    assertThat(optionMessages).noneMatch(m -> m.contains("secret=true"));
+                    assertBotReceives(client,
+                                      "commandlibtest optionPermissionProbe",
+                                      "execution of a command whose option is denied",
+                                      m -> m.contains("optionPermissionProbe secret=false"));
+                    // The caption is looked up for the player's locale, en_us, before the root locale.
+                    assertBotReceives(client,
+                                      "commandlibtest captionProbe",
+                                      "caption text for the player's locale",
+                                      m -> m.contains("captionProbe English text"));
+                }
             } finally {
                 client.disconnect("Test completed");
             }
