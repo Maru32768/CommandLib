@@ -243,9 +243,28 @@ else:
         "ScoreboardSlotArgument.displaySlot()",
         "return Scoreboard.getDisplaySlotName(ScoreboardSlotArgument.getDisplaySlot(CTX, name));",
         ["net.minecraft.world.scores.Scoreboard"], throws=False)
-arg("NMSArgumentChatFormat", "commands.arguments.ColorArgument", "ChatColor", "ColorArgument.color()",
-    "return CraftChatMessage.getColor(ColorArgument.getColor(CTX, name));",
-    ["org.bukkit.ChatColor", f"{CB}.util.CraftChatMessage"], throws=False)
+# 26.2 renamed ColorArgument to TeamColorArgument, whose TeamColor enum has the colors of ChatFormatting without
+# reset, and the 26.x module runs on both, so it finds the class at run time and converts the value by its name.
+if V >= (26,):
+    w("NMSArgumentChatFormat", '''    public NMSArgumentChatFormat_SUFFIX() {
+        super(null, colorArgumentClass());
+    }
+
+    @Override
+    public ArgumentType<?> argument() {
+        return colorArgument();
+    }
+
+    @Override
+    protected ChatColor parseImpl(CommandContext<?> ctx, String name) {
+        return chatColor(ctx.getArgument(name, Enum.class));
+    }
+''', ["com.mojang.brigadier.arguments.ArgumentType", "com.mojang.brigadier.context.CommandContext",
+      "org.bukkit.ChatColor"])
+else:
+    arg("NMSArgumentChatFormat", "commands.arguments.ColorArgument", "ChatColor", "ColorArgument.color()",
+        "return CraftChatMessage.getColor(ColorArgument.getColor(CTX, name));",
+        ["org.bukkit.ChatColor", f"{CB}.util.CraftChatMessage"], throws=False)
 # TimeArgument takes a minimum from 1.19.4; before, it only rejects negative values.
 arg("NMSArgumentTime", "commands.arguments.TimeArgument", "Integer", "TimeArgument.time()",
     "return CTX.getArgument(name, Integer.class);", throws=False, extra=f'''
