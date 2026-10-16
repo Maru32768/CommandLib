@@ -212,7 +212,7 @@ the node of every step on it. See [permissions](../permissions.md).
 ## Flags and switches
 
 Lamp flags become CommandLib options. They are typed keys, and they are written right after the command name, before
-the positional arguments, not anywhere in the input.
+the positional arguments, unless the command calls `optionsAnywhere()`, which lets them follow each argument too.
 
 ```java
 // Lamp: /scan <target> [--force] [--limit <n>]
@@ -242,7 +242,7 @@ class ScanCommand extends Command {
 |---|---|
 | `@Switch boolean` | `Options.flag(name[, short])` |
 | `@Flag` with a primitive or `String` | `Options.bool`, `integer`, `longValue`, `floatValue`, `doubleValue`, `string` |
-| `@Flag` with another type (`Player`, an enum) | **Not available** |
+| `@Flag` with another type (`Player`, an enum) | `Options.of(name[, short], argument)` |
 | `@Flag` without `@Default` / `@Optional` (required) | `.required()` |
 | — | `Options.count`, `repeatable(max)`, `requires(...)`, `mutuallyExclusive(...)` |
 
@@ -386,7 +386,7 @@ providers are `addSuggestionProviderSuspend { sb -> }`. Functions with default p
 ## Not available yet
 
 Tracked in the roadmap: registration
-hooks, response handlers, global parameter types and suggestion
-providers, and options with non-primitive values.
+hooks, response handlers, and global parameter types and suggestion
+providers.
 
 See also: the [comparison of seven use cases](../comparison.md), [Migrating from CommandAPI](from-commandapi.md), [Cloud](from-cloud.md), [ACF](from-acf.md).

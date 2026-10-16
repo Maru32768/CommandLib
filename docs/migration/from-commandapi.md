@@ -208,8 +208,8 @@ Aliases: `withAliases("g")` → `addAliases("g")`.
 | `withPermission(CommandPermission.NONE)` | `permission(DefaultPermission.ALL)` |
 | `withoutPermission(...)` | **Not available** |
 | `argument.withPermission(...)` | `argument(...).permission(...)` on the branch; every branch also gets a generated node |
-| `withRequirement(sender -> ...)` (hides the command) | **Not available** as a visibility predicate. `addPrerequisite(ctx -> ...)` checks at execution and sends a message |
-| `CommandAPI.updateRequirements(player)` | **Not available**; Bukkit's `Player#updateCommands()` resends the tree |
+| `withRequirement(sender -> ...)` (hides the command) | `visibleWhen(ctx -> ...)` on the command or the branch ([permissions](../permissions.md#refreshing-the-command-tree)) |
+| `CommandAPI.updateRequirements(player)` | `CommandLib.refresh(player)` |
 
 CommandLib registers a Bukkit permission for each node with its default and description. See
 [permissions](../permissions.md) for node names and the LuckPerms setup.

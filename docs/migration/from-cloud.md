@@ -202,8 +202,8 @@ A literal after an argument (`config <key> get`) is `argument(...).child(key -> 
 | `permission("myplugin.game")` | `permission("myplugin.game")`, or the generated `<prefix>.game` |
 | No permission | `permission(DefaultPermission.ALL)`; root commands default to OP |
 | `Permission.anyOf(...)`, `Permission.allOf(...)` | **Not available** as one node; check the extra nodes in `addPrerequisite(...)` |
-| `PredicatePermission.of(sender -> ...)` (hides the command) | **Not available** as a visibility predicate. `addPrerequisite(ctx -> ...)` checks at execution and sends a message |
-| `CommandFlag.Builder#withPermission(...)` | **Not available** for options |
+| `PredicatePermission.of(sender -> ...)` (hides the command) | `visibleWhen(ctx -> ...)` on the command or the branch ([permissions](../permissions.md#refreshing-the-command-tree)) |
+| `CommandFlag.Builder#withPermission(...)` | `permission(...)` on the option ([permissions](../permissions.md#options)) |
 
 CommandLib registers a Bukkit permission for every command, subcommand, and argument branch with its default and
 description, and leaves the nodes a sender lacks out of the sender's command tree. See
@@ -261,7 +261,7 @@ class ScanCommand extends Command {
 | Cloud | CommandLib |
 |---|---|
 | Presence flag | `Options.flag(name[, short])` |
-| Value flag (`withComponent(parser)`) | `Options.bool`, `integer`, `longValue`, `floatValue`, `doubleValue`, `string`; **not available** for other types such as players or enums |
+| Value flag (`withComponent(parser)`) | `Options.bool`, `integer`, `longValue`, `floatValue`, `doubleValue`, `string`, or `Options.of(name[, short], argument)` for any argument, such as a player or an enum |
 | `asRepeatable()` + `ctx.flags().count(...)` | `Options.count(name, short, max)` |
 | `asRepeatable()` + `getAll(...)` | `valueOption.repeatable(max)` (`List<T>`) |
 | — | `required()`, `requires(other)`, `mutuallyExclusive(...)` |
@@ -372,7 +372,6 @@ CommandLib's `spigot-testing` / `paper-testing` run commands without a server:
 
 ## Not available yet
 
-Tracked in the roadmap: permission predicates that hide commands, typed value options beyond primitives and strings, and the
-arguments listed as missing in the [catalog](../arguments.md).
+Tracked in the roadmap: the arguments listed as missing in the [catalog](../arguments.md).
 
 See also: the [comparison of seven use cases](../comparison.md), [Migrating from CommandAPI](from-commandapi.md), [Lamp](from-lamp.md), [ACF](from-acf.md).
