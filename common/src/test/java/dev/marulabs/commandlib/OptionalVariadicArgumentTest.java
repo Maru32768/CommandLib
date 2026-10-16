@@ -96,8 +96,9 @@ class OptionalVariadicArgumentTest {
                                            .optional(List.of())).execute((targets, ctx) -> ctx.sendMessage("healed " + targets));
         }});
 
+        // Input without a value ends at the command, which shows its usage.
         assertThat(runner.execute("heal")
-                         .messages()).doesNotContain("unreachable");
+                         .messages()).anyMatch(x -> x.contains("/heal") && x.contains("targets..."));
         assertThat(optional.execute("heal")
                            .messages()).containsExactly("healed []");
         assertThat(optional.execute("heal Steve")
@@ -141,7 +142,8 @@ class OptionalVariadicArgumentTest {
         assertThat(runner.execute("go south east")
                          .messages()).containsExactly("[NORTH, WEST]");
         assertThat(runner.execute("go south")
-                         .messages()).doesNotContain("[NORTH]");
+                         .messages()).first()
+                                     .isEqualTo("command.unknown.argument");
     }
 
     @Test

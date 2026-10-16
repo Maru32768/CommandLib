@@ -89,7 +89,7 @@ class CaptionsTest {
     }
 
     @Test
-    void the_command_sends_captions_in_the_senders_locale() throws Exception {
+    void the_command_sends_captions_in_the_default_locale_of_a_sender_without_one() throws Exception {
         TestCommand command = new TestCommand("deny") {{
             execute(ctx -> {
                 throw new CommandPrerequisiteException();

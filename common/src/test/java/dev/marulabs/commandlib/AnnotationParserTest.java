@@ -233,6 +233,9 @@ class AnnotationParserTest {
         assertThat(runner.execute("calc deny")
                          .messages()).containsExactly("Denied.");
         assertThat(runner.executeAndGetResult("calc fail")).isZero();
+        // The IOException is unexpected: the sender is told to check the console.
+        assertThat(runner.execute("calc fail")
+                         .messages()).endsWith("Check the console for details.");
     }
 
     @Command("arena")

@@ -1,5 +1,6 @@
 package dev.marulabs.commandlib;
 
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.marulabs.commandlib.argument.CommonIntegerArgument;
 import dev.marulabs.commandlib.argument.CommonStringArgument;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,7 +41,9 @@ class CommandLibExtensionTest {
         assertThat(alice.hasPermission("myplugin.command.greet.admin")).isFalse();
         assertThat(console.isConsole()).isTrue();
         assertThat(console.isOperator()).isTrue();
-        assertThatThrownBy(() -> tester.execute("greet admin 1 spam", console)).isInstanceOf(RuntimeException.class);
+        // The denied branch is hidden, so Brigadier rejects the input; the same console without the deny runs it.
+        assertThatThrownBy(() -> tester.execute("greet admin 1 spam", console)).hasCauseInstanceOf(CommandSyntaxException.class);
+        assertThat(tester.execute("greet admin 1 spam", FakeSender.console())).isPositive();
     }
 
     @Test

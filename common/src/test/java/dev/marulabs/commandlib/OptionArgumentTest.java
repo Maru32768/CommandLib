@@ -82,12 +82,17 @@ class OptionArgumentTest {
     void the_argument_rejects_a_value_it_does_not_parse_or_validate() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(scan());
 
+        // The argument's own error, with the rejected value in the context line.
         assertThat(runner.execute("scan -m slow Alex")
-                         .messages()).noneMatch(x -> x.startsWith("Alex"))
-                                     .isNotEmpty();
+                         .messages()).first()
+                                     .isEqualTo("command.unknown.argument");
+        assertThat(runner.execute("scan -m slow Alex")
+                         .messages()).anyMatch(x -> x.contains("slow"));
         assertThat(runner.execute("scan -f --at -1,2 Alex")
-                         .messages()).noneMatch(x -> x.startsWith("Alex"))
-                                     .isNotEmpty();
+                         .messages()).first()
+                                     .isEqualTo("command.unknown.argument");
+        assertThat(runner.execute("scan -f --at -1,2 Alex")
+                         .messages()).anyMatch(x -> x.contains("-1,2"));
         // The type itself rejects the value while Brigadier parses.
         assertThatThrownBy(() -> runner.execute("scan --at 1 Alex")).isInstanceOf(CommandSyntaxException.class);
     }

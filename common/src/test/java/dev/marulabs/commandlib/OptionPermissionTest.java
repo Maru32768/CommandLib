@@ -135,6 +135,22 @@ class OptionPermissionTest {
     }
 
     @Test
+    void a_combined_token_needs_the_permission_of_every_flag_in_it() {
+        TestCommand command = new TestCommand("ban") {{
+            option(Options.flag("silent", 's')
+                          .permission("myplugin.ban.silent"));
+            option(Options.flag("zap", 'z')
+                          .permission("myplugin.ban.zap"));
+            execute(ctx -> {
+            });
+        }};
+        TestCommandRunner runner = new TestCommandRunner(command, new TestCommandSource(COMMAND, "myplugin.ban.silent"));
+
+        assertThat(runner.visibleChildren("ban")).contains("-s")
+                                                 .doesNotContain("-z", "-sz", "-zs");
+    }
+
+    @Test
     void help_lists_only_the_options_the_sender_may_give() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(ban(), new TestCommandSource(COMMAND, BRANCH));
 
