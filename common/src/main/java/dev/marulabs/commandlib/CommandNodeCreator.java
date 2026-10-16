@@ -2,7 +2,6 @@ package dev.marulabs.commandlib;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.tree.LiteralCommandNode;
-import dev.marulabs.commandlib.command.Extractor;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -42,7 +41,7 @@ final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U ext
                });
 
         if (shouldAddHelpChild(command)) {
-            node.addChild(createHelpNode(command, helpAction));
+            node.addChild(createHelpNode(command, inheritedArguments, helpAction));
         }
 
         nodes.addAll(createAliasCommands(command, node));
@@ -69,22 +68,28 @@ final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U ext
                                   .contains("help"));
     }
 
-    private LiteralCommandNode<S> createHelpNode(U command, HelpMessageAction<S, T, C, U> helpAction) {
-        Map<ContextKey<?>, ? extends Extractor<?, ?>> providers = command.providers();
+    // A runner without an executor sends the help after the same checks as the command, and reports its failures.
+    private LiteralCommandNode<S> createHelpNode(U command,
+                                                 List<Arguments<C>> inheritedArguments,
+                                                 HelpMessageAction<S, T, C, U> helpAction) {
         String permission = command.permissionName(permissionPrefix);
+        CommandRunner<S, C> runner = new CommandRunner<>(platformAdapter,
+                                                         scheduler,
+                                                         command,
+                                                         permissionPrefix,
+                                                         inheritedArguments,
+                                                         OptionGraph.of(platformAdapter,
+                                                                        command,
+                                                                        inheritedArguments,
+                                                                        permissionPrefix),
+                                                         command.prerequisite(),
+                                                         helpAction,
+                                                         command.middlewares(),
+                                                         null,
+                                                         command.uncaughtExceptionHandlers());
         return LiteralArgumentBuilder.<S>literal("help")
                                      .requires(x -> platformAdapter.hasPermission(x, permission))
-                                     .executes(context -> {
-                                         try {
-                                             C ctx = platformAdapter.createCommandContext(context);
-                                             ctx.providers(providers);
-                                             CurrentCommandContext.run(ctx, () -> helpAction.accept(ctx));
-                                             return 1;
-                                         } catch (Exception e) {
-                                             e.printStackTrace();
-                                             return 0;
-                                         }
-                                     })
+                                     .executes(runner)
                                      .build();
     }
 

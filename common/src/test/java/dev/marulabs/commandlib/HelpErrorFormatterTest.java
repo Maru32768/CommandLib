@@ -157,6 +157,38 @@ class HelpErrorFormatterTest {
     }
 
     @Test
+    void the_help_subcommand_runs_the_prerequisites_and_reports_its_failures() throws Exception {
+        List<CommandError.Kind> kinds = new ArrayList<>();
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("game") {{
+            errorFormatter((ctx, error) -> {
+                kinds.add(error.kind());
+                error.sendDefault();
+            });
+            addChildren(new TestCommand("locked") {{
+                addPrerequisite(ctx -> {
+                    throw new CommandPrerequisiteException("Locked.");
+                });
+                addChildren(new TestCommand("start") {{
+                    execute(ctx -> ctx.sendMessage("started"));
+                }});
+            }}, new TestCommand("broken") {{
+                helpFormatter((ctx, help) -> {
+                    throw new IllegalStateException("broken help");
+                });
+                addChildren(new TestCommand("start") {{
+                    execute(ctx -> ctx.sendMessage("started"));
+                }});
+            }});
+        }});
+
+        assertThat(runner.execute("game locked help")
+                         .messages()).containsExactly("Locked.");
+        assertThat(runner.execute("game broken help")
+                         .messages()).contains("Check the console for details.");
+        assertThat(kinds).containsExactly(CommandError.Kind.PREREQUISITE, CommandError.Kind.UNEXPECTED);
+    }
+
+    @Test
     void syntax_advice_shows_the_usage_of_the_failed_branch() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("game") {{
             errorFormatter(ErrorFormatter.SYNTAX_ADVICE);
