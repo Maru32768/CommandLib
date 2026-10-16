@@ -51,13 +51,15 @@ final class Messages {
   (for example `>=1.19` for `Component.literal`, `>=1.18` for Forge permission
   nodes). Only the nodes in `settings.gradle.kts` are built, so boundaries
   for versions in between are unverified until such a version is added.
+  The boundaries in use are listed in `docs/design/forge-version-support.md`.
 - Loader-specific code uses the `forge`, `neoforge` and `fabric` constants,
   defined from `loom.platform` in each build script. Most Forge / NeoForge
   differences are package renames (`net.minecraftforge` ->
   `net.neoforged.neoforge`, `net.neoforged.bus` for `SubscribeEvent`,
   `NeoForge.EVENT_BUS`). Fabric registers commands through Fabric API's
   `CommandRegistrationCallback` and has no Forge-style permission API or access
-  transformer (`CommandSourceStack.source` stays private). Put the loader
+  transformer (`CommandSourceStack.source` stays private, as it does on Forge
+  before 1.19). Put the loader
   condition first and fall back to version conditions with `elif`. A
   version-only `elif` such as `elif >=1.17` also matches Fabric, so write
   `elif forge && >=1.17` or handle `fabric` first:
@@ -85,8 +87,8 @@ Compile every node after any change under `modded/`, not only the node you
 were working on, and run the `modded-testing` tests:
 
 ```bash
-./gradlew :modded:forge-1.16.5:compileJava :modded:forge-1.20.1:compileJava :modded:neoforge-1.21.1:compileJava :modded:fabric-1.20.1:compileJava :modded:fabric-1.21.1:compileJava
-./gradlew :modded-testing:forge-1.16.5:test :modded-testing:forge-1.20.1:test :modded-testing:neoforge-1.21.1:test :modded-testing:fabric-1.20.1:test :modded-testing:fabric-1.21.1:test
+./gradlew :modded:forge-1.16.5:compileJava :modded:forge-1.18.2:compileJava :modded:forge-1.19.2:compileJava :modded:forge-1.20.1:compileJava :modded:neoforge-1.21.1:compileJava :modded:neoforge-1.21.4:compileJava :modded:fabric-1.20.1:compileJava :modded:fabric-1.21.1:compileJava :modded:fabric-1.21.4:compileJava
+./gradlew :modded-testing:forge-1.16.5:test :modded-testing:forge-1.18.2:test :modded-testing:forge-1.19.2:test :modded-testing:forge-1.20.1:test :modded-testing:neoforge-1.21.1:test :modded-testing:neoforge-1.21.4:test :modded-testing:fabric-1.20.1:test :modded-testing:fabric-1.21.1:test :modded-testing:fabric-1.21.4:test
 ```
 
 `modded-testing` holds the public testing artifacts (`forge-testing-<version>`, `neoforge-testing-<version>` and
@@ -95,12 +97,14 @@ were working on, and run the `modded-testing` tests:
 rules. It bootstraps Minecraft's registries and mocks the server, Forge's `NetworkHooks` during bootstrap (NeoForge:
 `FeatureFlagLoader`, which needs FML's mod list; Fabric bootstraps plain vanilla), and the permission lookup while a
 command executes. The mocked server's `registryAccess()` holds the built-in registries (before 1.19.3,
-`RegistryAccess.builtin()`, whose static registries stay in `Registry.REGISTRY`). On 1.20.5+ it also holds copies of the
-data-driven ones built by `VanillaRegistries.createLookup()` (no tags are loaded), so data-driven registries such as
-enchantments resolve.
+`RegistryAccess.BUILTIN` on 1.18.2 and `RegistryAccess.builtin()` on 1.16.5, whose static registries stay in
+`Registry.REGISTRY`). From 1.19.3 it also holds copies of the data-driven ones built by
+`VanillaRegistries.createLookup()` (no tags are loaded), so data-driven registries such as biomes and, on 1.21+,
+enchantments resolve. From 1.21.2 `ServerPlayer` is no longer a `CommandSource`, so a fake player's
+`commandSource()` is stubbed with a source that sends to the player.
 
 When a change can affect the public API or published jars, also run
-`./gradlew :modded:forge-1.16.5:build :modded:forge-1.20.1:build :modded:neoforge-1.21.1:build :modded:fabric-1.20.1:build :modded:fabric-1.21.1:build` and inspect the jars
+`./gradlew :modded:forge-1.16.5:build :modded:forge-1.18.2:build :modded:forge-1.19.2:build :modded:forge-1.20.1:build :modded:neoforge-1.21.1:build :modded:neoforge-1.21.4:build :modded:fabric-1.20.1:build :modded:fabric-1.21.1:build :modded:fabric-1.21.4:build` and inspect the jars
 in `modded/versions/<node>/build/libs`.
 
 The build needs JDK 21 for the Gradle daemon (`gradle/gradle-daemon-jvm.properties`).
@@ -110,8 +114,11 @@ production (SRG) names, is covered by the Forge / NeoForge integration targets. 
 
 ```bash
 ./gradlew :integration-test:targets:forge-1.16.5:minecraftIntegrationTest
+./gradlew :integration-test:targets:forge-1.18.2:minecraftIntegrationTest
+./gradlew :integration-test:targets:forge-1.19.2:minecraftIntegrationTest
 ./gradlew :integration-test:targets:forge-1.20.1:minecraftIntegrationTest
 ./gradlew :integration-test:targets:neoforge-1.21.1:minecraftIntegrationTest
+./gradlew :integration-test:targets:neoforge-1.21.4:minecraftIntegrationTest
 ```
 
 The test mod is in `integration-test/shared/modded` (see `integration-test/README.md`). When adding or changing a

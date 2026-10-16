@@ -54,15 +54,16 @@ import java.util.stream.Collectors;
 *///?} elif forge && >=1.17 {
 import net.minecraftforge.network.NetworkHooks;
 //?}
-//? if >=1.18 {
+//? if >=1.19.3 {
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.level.storage.WorldData;
-//?} else
+//?}
+//? if <1.18
 /*import net.minecraftforge.server.permission.PermissionAPI;*/
 //? if neoforge {
 /*import net.minecraft.commands.SharedSuggestionProvider;
 import net.neoforged.neoforge.common.CommonHooks;
-*///?} elif forge && >=1.18 {
+*///?} elif forge && >=1.19 {
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraftforge.common.ForgeHooks;
 //?}
@@ -271,7 +272,7 @@ public final class CommandTester implements AutoCloseable {
                    hooks.when(() -> CommonHooks.canUseEntitySelectors(Mockito.any()))
                         .thenAnswer(invocation -> invocation.<SharedSuggestionProvider>getArgument(0)
                                                             .hasPermission(2));
-                   *///?} elif forge && >=1.18 {
+                   *///?} elif forge && >=1.19 {
                 MockedStatic<ForgeHooks> hooks = Mockito.mockStatic(ForgeHooks.class, Mockito.CALLS_REAL_METHODS);
                 staticMocks.add(hooks);
                 hooks.when(() -> ForgeHooks.canUseEntitySelectors(Mockito.any()))
@@ -355,7 +356,7 @@ public final class CommandTester implements AutoCloseable {
                .thenReturn(levelMap.keySet());
         Mockito.when(server.getAllLevels())
                .thenReturn(levelMap.values());
-        //? if >=1.18 {
+        //? if >=1.19.3 {
         WorldData worldData = Mockito.mock(WorldData.class);
         Mockito.when(worldData.enabledFeatures())
                .thenReturn(FeatureFlags.DEFAULT_FLAGS);
@@ -364,7 +365,9 @@ public final class CommandTester implements AutoCloseable {
         //?}
         //? if >=1.19.3 {
         RegistryAccess.Frozen registryAccess = MinecraftBootstrap.registryAccess();
-        //?} else
+        //?} elif >=1.18.2 {
+        /*RegistryAccess.Frozen registryAccess = RegistryAccess.BUILTIN.get();
+        *///?} else
         /*RegistryAccess registryAccess = RegistryAccess.builtin();*/
         Mockito.when(server.registryAccess())
                .thenReturn(registryAccess);
@@ -459,7 +462,11 @@ public final class CommandTester implements AutoCloseable {
             List<Registry<?>> registries = new ArrayList<>();
             BuiltInRegistries.REGISTRY.forEach(registries::add);
             HolderLookup.Provider vanilla = VanillaRegistries.createLookup();
-            //? if >=1.20.5 {
+            //? if >=1.21.2 {
+            /*vanilla.listRegistryKeys()
+                   .filter(key -> !BuiltInRegistries.REGISTRY.containsKey(key.location()))
+                   .forEach(key -> registries.add(copy(vanilla.lookupOrThrow(key))));
+            *///?} elif >=1.20.5 {
             /*vanilla.listRegistries()
                    .filter(key -> !BuiltInRegistries.REGISTRY.containsKey(key.location()))
                    .forEach(key -> registries.add(copy(vanilla.lookupOrThrow(key))));
@@ -495,7 +502,7 @@ public final class CommandTester implements AutoCloseable {
             if (bootstrapped) {
                 return;
             }
-            //? if >=1.19
+            //? if >=1.18
             SharedConstants.tryDetectVersion();
             //? if neoforge {
             /*// NeoForge's FeatureFlags patch loads modded feature flags from FML's mod list, which only exists in a

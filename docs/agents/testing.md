@@ -34,8 +34,8 @@ nodes other than the active one is only type-checked when that node compiles
 (see `docs/agents/modded.md`):
 
 ```bash
-./gradlew :modded:forge-1.16.5:compileJava :modded:forge-1.20.1:compileJava :modded:neoforge-1.21.1:compileJava :modded:fabric-1.20.1:compileJava :modded:fabric-1.21.1:compileJava
-./gradlew :modded-testing:forge-1.16.5:test :modded-testing:forge-1.20.1:test :modded-testing:neoforge-1.21.1:test :modded-testing:fabric-1.20.1:test :modded-testing:fabric-1.21.1:test
+./gradlew :modded:forge-1.16.5:compileJava :modded:forge-1.18.2:compileJava :modded:forge-1.19.2:compileJava :modded:forge-1.20.1:compileJava :modded:neoforge-1.21.1:compileJava :modded:neoforge-1.21.4:compileJava :modded:fabric-1.20.1:compileJava :modded:fabric-1.21.1:compileJava :modded:fabric-1.21.4:compileJava
+./gradlew :modded-testing:forge-1.16.5:test :modded-testing:forge-1.18.2:test :modded-testing:forge-1.19.2:test :modded-testing:forge-1.20.1:test :modded-testing:neoforge-1.21.1:test :modded-testing:neoforge-1.21.4:test :modded-testing:fabric-1.20.1:test :modded-testing:fabric-1.21.1:test :modded-testing:fabric-1.21.4:test
 ```
 
 The samples under `samples/` are separate builds, so the root build does not
@@ -94,8 +94,7 @@ annotation of a method on the line above it, as the existing code does.
 The published modules, including the modded nodes, publish a javadoc jar, and their `javadoc` task runs doclint
 without the `missing` group: broken Javadoc (malformed HTML, a bad `@param` name, an unknown `{@link}`) fails it, an
 undocumented member does not. Check with `./gradlew :common:javadoc :spigot:javadoc :paper:javadoc` and, for the modded
-nodes, `./gradlew :modded:forge-1.16.5:javadoc :modded:forge-1.20.1:javadoc :modded:neoforge-1.21.1:javadoc
-:modded:fabric-1.20.1:javadoc :modded:fabric-1.21.1:javadoc`.
+nodes, `./gradlew :modded:forge-1.16.5:javadoc :modded:forge-1.18.2:javadoc :modded:forge-1.19.2:javadoc :modded:forge-1.20.1:javadoc :modded:neoforge-1.21.1:javadoc :modded:neoforge-1.21.4:javadoc :modded:fabric-1.20.1:javadoc :modded:fabric-1.21.1:javadoc :modded:fabric-1.21.4:javadoc`.
 
 `./gradlew :common:japicmp :spigot:japicmp` compares the public API with the JitPack release named in `apiBaselines`
 in the root `build.gradle.kts` and writes `build/reports/japicmp/`. It lists binary-incompatible changes, and fails on

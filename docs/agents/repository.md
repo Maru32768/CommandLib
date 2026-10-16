@@ -25,8 +25,9 @@ instructions.
   Bukkit-compatible plugin fixtures; Forge fixtures may be added separately.
 - `modded`: Forge-, NeoForge- and Fabric-facing integration. One shared source
   tree in `modded/src` builds every supported loader and Minecraft version
-  (`:modded:forge-1.16.5`, `:modded:forge-1.20.1`, `:modded:neoforge-1.21.1`,
-  `:modded:fabric-1.20.1`, `:modded:fabric-1.21.1`)
+  (`:modded:forge-1.16.5`, `:modded:forge-1.18.2`, `:modded:forge-1.19.2`,
+  `:modded:forge-1.20.1`, `:modded:neoforge-1.21.1`, `:modded:neoforge-1.21.4`,
+  `:modded:fabric-1.20.1`, `:modded:fabric-1.21.1`, `:modded:fabric-1.21.4`)
   through Stonecutter conditional comments and Architectury Loom. Read
   `docs/agents/modded.md` before editing it.
 - `sample`: sample usage.

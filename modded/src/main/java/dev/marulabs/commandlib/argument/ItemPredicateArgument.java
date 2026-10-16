@@ -17,7 +17,7 @@ import java.util.function.Predicate;
  */
 public class ItemPredicateArgument extends Argument<Predicate<ItemStack>, ItemPredicateArgument> {
     public ItemPredicateArgument(String name) {
-        //? if >=1.19.3 {
+        //? if >=1.19 {
         super(name,
               net.minecraft.commands.arguments.item.ItemPredicateArgument.itemPredicate(BuiltInCommandBuildContext.INSTANCE));
         //?} else

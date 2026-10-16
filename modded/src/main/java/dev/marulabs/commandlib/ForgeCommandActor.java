@@ -9,7 +9,7 @@ import org.jetbrains.annotations.Nullable;
 import net.minecraft.server.level.ServerPlayer;
 //? if <1.18
 /*import net.minecraftforge.server.permission.PermissionAPI;*/
-//? if fabric || <1.18 {
+//? if fabric || <1.19 {
 /*import net.minecraft.commands.CommandSource;
 
 import java.lang.reflect.Field;
@@ -118,7 +118,7 @@ final class ForgeCommandActor implements CommandActor {
 
     @Nullable
     private Object findRawSource() {
-        //? if >=1.18 && !fabric {
+        //? if >=1.19 && !fabric {
         return source.source;
         //?} else {
         /*if (RAW_SOURCE_FIELD == null) {
@@ -132,10 +132,10 @@ final class ForgeCommandActor implements CommandActor {
         *///?}
     }
 
-    //? if fabric || <1.18 {
-    /*// The field is private here (Forge 1.18+ makes it public) and named differently in development (Mojang) and
-    // production (SRG, or intermediary on Fabric), so look it up by its type. CommandSourceStack has exactly one
-    // CommandSource field.
+    //? if fabric || <1.19 {
+    /*// The field is private here (Forge 1.19+ and NeoForge make it public) and named differently in development
+    // (Mojang) and production (SRG, or intermediary on Fabric), so look it up by its type. CommandSourceStack has
+    // exactly one CommandSource field.
     @Nullable
     private static final Field RAW_SOURCE_FIELD = findRawSourceField();
 

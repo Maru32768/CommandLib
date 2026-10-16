@@ -19,7 +19,7 @@ This document describes CommandLib's module / artifact layout and the rules that
 | `spigot` | Yes | Bukkit/Spigot implementation. Includes the typed NMS bridge (bundles the `nms:*` modules), the Bungee `BaseComponent` message path, and the legacy command registration path. |
 | `paper` | Yes | Paper implementation on the official Paper command API and Adventure components. |
 | `velocity` | Yes | Velocity proxy implementation on `BrigadierCommand`, Velocity's permission API, and Adventure components. |
-| `modded` | Yes | Forge, NeoForge and Fabric implementation. One shared source tree built as Stonecutter nodes `forge-1.16.5`, `forge-1.20.1`, `neoforge-1.21.1`, `fabric-1.20.1`, and `fabric-1.21.1` (Gradle paths `:modded:<node>`). |
+| `modded` | Yes | Forge, NeoForge and Fabric implementation. One shared source tree built as Stonecutter nodes `forge-1.16.5`, `forge-1.18.2`, `forge-1.19.2`, `forge-1.20.1`, `neoforge-1.21.1`, `neoforge-1.21.4`, `fabric-1.20.1`, `fabric-1.21.1`, and `fabric-1.21.4` (Gradle paths `:modded:<node>`). |
 | `nms:*` | No | Typed NMS modules bundled into `spigot`, one per directory under `nms/`. |
 | `common-testing` | Yes | Test helpers for commands built against `common`. |
 | `spigot-testing` | Yes | `CommandTester` / `FakeSender` and NMS mocks for downstream Spigot plugins. |
@@ -57,19 +57,27 @@ What does not go into `common`:
 | `:paper` | `paper` |
 | `:velocity` | `velocity` |
 | `:modded:forge-1.16.5` | `forge-1.16.5` |
+| `:modded:forge-1.18.2` | `forge-1.18.2` |
+| `:modded:forge-1.19.2` | `forge-1.19.2` |
 | `:modded:forge-1.20.1` | `forge-1.20.1` |
 | `:modded:neoforge-1.21.1` | `neoforge-1.21.1` |
+| `:modded:neoforge-1.21.4` | `neoforge-1.21.4` |
 | `:modded:fabric-1.20.1` | `fabric-1.20.1` |
 | `:modded:fabric-1.21.1` | `fabric-1.21.1` |
+| `:modded:fabric-1.21.4` | `fabric-1.21.4` |
 | `:common-testing` | `common-testing` |
 | `:spigot-testing` | `spigot-testing` |
 | `:paper-testing` | `paper-testing` |
 | `:velocity-testing` | `velocity-testing` |
 | `:modded-testing:forge-1.16.5` | `forge-testing-1.16.5` |
+| `:modded-testing:forge-1.18.2` | `forge-testing-1.18.2` |
+| `:modded-testing:forge-1.19.2` | `forge-testing-1.19.2` |
 | `:modded-testing:forge-1.20.1` | `forge-testing-1.20.1` |
 | `:modded-testing:neoforge-1.21.1` | `neoforge-testing-1.21.1` |
+| `:modded-testing:neoforge-1.21.4` | `neoforge-testing-1.21.4` |
 | `:modded-testing:fabric-1.20.1` | `fabric-testing-1.20.1` |
 | `:modded-testing:fabric-1.21.1` | `fabric-testing-1.21.1` |
+| `:modded-testing:fabric-1.21.4` | `fabric-testing-1.21.4` |
 | `:common-kotlin` | `common-kotlin` |
 | `:spigot-kotlin` | `spigot-kotlin` |
 | `:paper-kotlin` | `paper-kotlin` |

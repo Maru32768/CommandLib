@@ -56,18 +56,26 @@ include("modded-testing")
 stonecutter {
     create("modded") {
         version("forge-1.16.5", "1.16.5")
+        version("forge-1.18.2", "1.18.2")
+        version("forge-1.19.2", "1.19.2")
         version("forge-1.20.1", "1.20.1")
         version("neoforge-1.21.1", "1.21.1")
+        version("neoforge-1.21.4", "1.21.4")
         version("fabric-1.20.1", "1.20.1")
         version("fabric-1.21.1", "1.21.1")
+        version("fabric-1.21.4", "1.21.4")
         vcsVersion = "forge-1.20.1"
     }
     create("modded-testing") {
         version("forge-1.16.5", "1.16.5")
+        version("forge-1.18.2", "1.18.2")
+        version("forge-1.19.2", "1.19.2")
         version("forge-1.20.1", "1.20.1")
         version("neoforge-1.21.1", "1.21.1")
+        version("neoforge-1.21.4", "1.21.4")
         version("fabric-1.20.1", "1.20.1")
         version("fabric-1.21.1", "1.21.1")
+        version("fabric-1.21.4", "1.21.4")
         vcsVersion = "forge-1.20.1"
     }
 }
@@ -84,8 +92,11 @@ project(":integration-test:shared:modded-fixture").projectDir = file("integratio
 stonecutter {
     create(":integration-test:shared:modded-fixture") {
         version("forge-1.16.5", "1.16.5")
+        version("forge-1.18.2", "1.18.2")
+        version("forge-1.19.2", "1.19.2")
         version("forge-1.20.1", "1.20.1")
         version("neoforge-1.21.1", "1.21.1")
+        version("neoforge-1.21.4", "1.21.4")
         vcsVersion = "forge-1.20.1"
     }
 }

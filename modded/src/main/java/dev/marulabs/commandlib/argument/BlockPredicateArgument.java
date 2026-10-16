@@ -19,7 +19,7 @@ import java.util.function.Predicate;
  */
 public class BlockPredicateArgument extends Argument<Predicate<BlockInWorld>, BlockPredicateArgument> {
     public BlockPredicateArgument(String name) {
-        //? if >=1.19.3 {
+        //? if >=1.19 {
         super(name,
               net.minecraft.commands.arguments.blocks.BlockPredicateArgument.blockPredicate(BuiltInCommandBuildContext.INSTANCE));
         //?} else

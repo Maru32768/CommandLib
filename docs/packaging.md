@@ -11,7 +11,7 @@ on each platform and why. The [sample projects](../samples) build with the setup
 | Spigot, Paper, Folia | Shadow (or Maven Shade) + relocate | Bukkit has no library mechanism for CommandLib, and plugin class loaders also find classes in other plugins, so two plugins with the same unrelocated packages can run against each other's copy. |
 | Velocity | Shadow + relocate | Same as Bukkit: Velocity's plugin class loaders also look up classes in other plugins. |
 | Forge 1.16.5 | Shadow + relocate, then `reobfShadowJar` | Forge 1.16.5 has no Jar-in-Jar. |
-| Forge 1.20.1, NeoForge 1.21.1 | Shadow + relocate | Mods are Java modules there, and two mods that contain the same package fail to load, so relocation is required. The `forge-*` / `neoforge-*` jars are plain libraries (no `mods.toml`, no `FMLModType` manifest entry) and are not tested as Jar-in-Jar entries. See [version conflicts](#jar-in-jar-and-version-conflicts). |
+| Forge 1.18.2, 1.19.2 and 1.20.1, NeoForge | Shadow + relocate | Mods are Java modules there, and two mods that contain the same package fail to load, so relocation is required. The `forge-*` / `neoforge-*` jars are plain libraries (no `mods.toml`, no `FMLModType` manifest entry) and are not tested as Jar-in-Jar entries. See [version conflicts](#jar-in-jar-and-version-conflicts). |
 | Fabric | Shadow + relocate, then `remapJar` | `include()` works (the jar is a Fabric mod), but only the newest nested CommandLib is loaded. See [version conflicts](#jar-in-jar-and-version-conflicts). |
 
 In short: **shade and relocate on every platform.** CommandLib is designed for it: several relocated copies in one
@@ -90,9 +90,9 @@ breaks your code.
 | `paper` | Paper 1.21+ and Folia |
 | `velocity` | Velocity 3.4+ |
 | `spigot-kotlin`, `paper-kotlin`, `velocity-kotlin` | Kotlin DSL; brings the platform artifact and `common-kotlin` |
-| `forge-1.16.5`, `forge-1.20.1` | Forge |
-| `neoforge-1.21.1` | NeoForge |
-| `fabric-1.20.1`, `fabric-1.21.1` | Fabric (needs Fabric API) |
+| `forge-1.16.5`, `forge-1.18.2`, `forge-1.19.2`, `forge-1.20.1` | Forge |
+| `neoforge-1.21.1`, `neoforge-1.21.4` | NeoForge |
+| `fabric-1.20.1`, `fabric-1.21.1`, `fabric-1.21.4` | Fabric (needs Fabric API) |
 | `common-testing`, `spigot-testing`, `paper-testing`, `velocity-testing`, `forge-testing-<version>`, `neoforge-testing-<version>`, `fabric-testing-<version>` | Test utilities, `testImplementation` only; never shade them |
 
 Every platform artifact depends on `common`, which Gradle adds transitively. Publishing to Maven Central is planned;

@@ -88,7 +88,7 @@ Run focused checks for touched modules. Typical commands:
 ```bash
 ./gradlew :spigot:compileJava :spigot-testing:test
 ./gradlew :paper:compileJava :paper-testing:test
-./gradlew :modded:forge-1.16.5:compileJava :modded:forge-1.20.1:compileJava :modded:neoforge-1.21.1:compileJava :modded:fabric-1.20.1:compileJava :modded:fabric-1.21.1:compileJava
+./gradlew :modded:forge-1.16.5:compileJava :modded:forge-1.18.2:compileJava :modded:forge-1.19.2:compileJava :modded:forge-1.20.1:compileJava :modded:neoforge-1.21.1:compileJava :modded:neoforge-1.21.4:compileJava :modded:fabric-1.20.1:compileJava :modded:fabric-1.21.1:compileJava :modded:fabric-1.21.4:compileJava
 ```
 
 For integration fixture source changes, compile representative fixtures:

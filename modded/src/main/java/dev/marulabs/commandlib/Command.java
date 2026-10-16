@@ -84,8 +84,8 @@ public class Command extends CommonCommand<CommandContext, Command> {
                                                                                                  playerId,
                                                                                                  context) -> resolveDefault(c.defaultPermission(),
                                                                                                                             player));
-                                            node.setInformation(Component.literal(c.node()),
-                                                                Component.literal(c.description()));
+                                            node.setInformation(Component.nullToEmpty(c.node()),
+                                                                Component.nullToEmpty(c.description()));
                                             return node;
                                         })
                                         .collect(Collectors.toList());

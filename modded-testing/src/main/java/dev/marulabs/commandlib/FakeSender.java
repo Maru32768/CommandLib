@@ -204,6 +204,9 @@ public final class FakeSender {
     }
 
     CommandSourceStack createSource(MinecraftServer server) {
+        //? if >=1.21.2 {
+        /*CommandSource source = player != null ? player.commandSource() : new ConsoleSource();
+        *///?} else
         CommandSource source = player != null ? player : new ConsoleSource();
         return new CommandSourceStack(source,
                                       Vec3.ZERO,
@@ -247,12 +250,18 @@ public final class FakeSender {
                .thenReturn(true);
         Mockito.when(player.hasPermissions(Mockito.anyInt()))
                .thenAnswer(invocation -> op || (int) invocation.getArgument(0) <= 0);
+        //? if >=1.21.2 {
+        /*// ServerPlayer is no longer a CommandSource; its command source sends to the player, as vanilla's does.
+        Mockito.when(player.commandSource())
+               .thenReturn(new PlayerSource(player));
+        *///?} else {
         Mockito.when(player.acceptsSuccess())
                .thenReturn(true);
         Mockito.when(player.acceptsFailure())
                .thenReturn(true);
         Mockito.when(player.shouldInformAdmins())
                .thenReturn(false);
+        //?}
         //? if >=1.19 {
         Mockito.doAnswer(invocation -> {
             sentMessages.add(invocation.getArgument(0));
@@ -352,6 +361,36 @@ public final class FakeSender {
             return sender;
         }
     }
+
+    //? if >=1.21.2 {
+    /*private static final class PlayerSource implements CommandSource {
+        private final ServerPlayer player;
+
+        private PlayerSource(ServerPlayer player) {
+            this.player = player;
+        }
+
+        @Override
+        public void sendSystemMessage(Component component) {
+            player.sendSystemMessage(component);
+        }
+
+        @Override
+        public boolean acceptsSuccess() {
+            return true;
+        }
+
+        @Override
+        public boolean acceptsFailure() {
+            return true;
+        }
+
+        @Override
+        public boolean shouldInformAdmins() {
+            return false;
+        }
+    }
+    *///?}
 
     private final class ConsoleSource implements CommandSource {
         //? if >=1.19 {

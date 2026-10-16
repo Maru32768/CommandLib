@@ -335,8 +335,8 @@ class CommandTesterTest {
                 execute(ctx -> result.set(ctx.getHandle()
                                              .getSource()
                                              .registryAccess()
-                                             .registryOrThrow(Registries.ENCHANTMENT)
-                                             .getHolderOrThrow(Enchantments.SHARPNESS)));
+                                             .lookupOrThrow(Registries.ENCHANTMENT)
+                                             .getOrThrow(Enchantments.SHARPNESS)));
             }}, "test")) {
                 tester.execute("arg", FakeSender.console());
             }

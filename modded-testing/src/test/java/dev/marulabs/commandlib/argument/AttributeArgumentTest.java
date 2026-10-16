@@ -11,6 +11,12 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class AttributeArgumentTest {
+    // 1.21.2 dropped the generic. prefix of the attribute keys.
+    //? if >=1.21.2 {
+    /*private static final String MAX_HEALTH = "max_health";
+    *///?} else
+    private static final String MAX_HEALTH = "generic.max_health";
+
     @Test
     void attribute_is_read_by_its_key_and_suggested() {
         List<String> messages;
@@ -25,14 +31,14 @@ class AttributeArgumentTest {
             });
         }}, "test.command")) {
             FakeSender sender = FakeSender.player("Alice");
-            tester.execute("attribute minecraft:generic.max_health", sender);
+            tester.execute("attribute minecraft:" + MAX_HEALTH, sender);
             String unknown = RegistryArgumentTestSupport.failure(tester, "attribute commandlib:missing", sender);
-            suggestions = tester.suggest("attribute generic.max_h", sender);
+            suggestions = tester.suggest("attribute " + MAX_HEALTH.replace("health", "h"), sender);
             messages = sender.getSentMessageTexts();
             assertThat(unknown).contains("commandlib:missing");
         }
 
         assertThat(messages).startsWith("true");
-        assertThat(suggestions).containsExactly("minecraft:generic.max_health");
+        assertThat(suggestions).containsExactly("minecraft:" + MAX_HEALTH);
     }
 }

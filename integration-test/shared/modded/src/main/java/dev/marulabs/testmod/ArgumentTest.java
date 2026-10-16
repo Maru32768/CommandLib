@@ -59,6 +59,9 @@ public final class ArgumentTest extends TestBase {
                            "minecraft:story/mine_stone"));
         commands.add(check("attributeArgument",
                            new AttributeArgument("a"),
+                           //? if >=1.21.2 {
+                           /*"minecraft:max_health",
+                           *///?} else
                            "minecraft:generic.max_health",
                            //? if >=1.20.5 {
                            /*x -> String.valueOf(x.value() == Attributes.MAX_HEALTH.value()),
@@ -305,7 +308,12 @@ public final class ArgumentTest extends TestBase {
     }
 
     private static String biomeKey(Biome biome) {
-        //? if >=1.19.3 {
+        //? if >=1.21.2 {
+        /*return String.valueOf(CurrentServer.get()
+                                           .registryAccess()
+                                           .lookupOrThrow(Registries.BIOME)
+                                           .getKey(biome));
+        *///?} elif >=1.19.3 {
         return String.valueOf(CurrentServer.get()
                                            .registryAccess()
                                            .registryOrThrow(Registries.BIOME)

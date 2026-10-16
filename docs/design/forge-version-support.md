@@ -5,13 +5,14 @@ module beyond Minecraft 1.16.5.
 
 ## Current State
 
-Forge 1.16.5 and 1.20.1, NeoForge 1.21.1, and Fabric 1.20.1 and 1.21.1 are
-built from one shared source tree with
+Forge 1.16.5, 1.18.2, 1.19.2 and 1.20.1, NeoForge 1.21.1 and 1.21.4, and Fabric
+1.20.1, 1.21.1 and 1.21.4 are built from one shared source tree with
 [Stonecutter](https://stonecutter.kikugie.dev/) and Architectury Loom:
 
-- The tree lives in `modded/` because it serves both loaders. Its nodes are
-  named `<loader>-<minecraft-version>`: `forge-1.16.5`, `forge-1.20.1`, and
-  `neoforge-1.21.1`.
+- The tree lives in `modded/` because it serves every loader. Its nodes are
+  named `<loader>-<minecraft-version>`: `forge-1.16.5`, `forge-1.18.2`,
+  `forge-1.19.2`, `forge-1.20.1`, `neoforge-1.21.1`, `neoforge-1.21.4`,
+  `fabric-1.20.1`, `fabric-1.21.1`, and `fabric-1.21.4`.
 - `modded/src/main/java` is the only Forge / NeoForge source tree.
   Version-specific code is selected with Stonecutter conditional comments
   (`//? if >=1.19 { ... }`).
@@ -28,8 +29,8 @@ built from one shared source tree with
   Loom remaps the built jars to SRG, so published jars keep the same public API
   and the same runtime member references as the previous ForgeGradle builds
   (verified by comparing `javap` output of both builds).
-- NeoForge is a node of the same tree (`neoforge-1.21.1`, Gradle path
-  `:modded:neoforge-1.21.1`, artifact `neoforge-1.21.1`). Loader differences use
+- NeoForge is a loader of the same tree (`neoforge-1.21.1`, `neoforge-1.21.4`,
+  Gradle paths `:modded:<node>`, artifacts of the same names). Loader differences use
   the `forge` / `neoforge` Stonecutter constants. Most of them are package
   renames; the main Minecraft-level difference is that 1.20.5+
   `CommandBuildContext` is a `HolderLookup.Provider`, and 1.21+ enchantments are
@@ -38,7 +39,7 @@ built from one shared source tree with
   `EffectArgument` return the registry `Holder`, which the Minecraft APIs that
   apply enchantments and effects take there.
 - Fabric is a loader of the same tree (`fabric-1.20.1`, `fabric-1.21.1`,
-  artifacts of the same names) under the `fabric` constant. Commands are added
+  `fabric-1.21.4`, artifacts of the same names) under the `fabric` constant. Commands are added
   through Fabric API's `CommandRegistrationCallback` (v2), which fires on every
   server start and `/reload`. The running server comes from Fabric API's
   `ServerLifecycleEvents`, behind `util.CurrentServer`, which Forge and
@@ -180,7 +181,9 @@ Example:
 | Artifact | Compile target | Supported Forge range | Notes |
 |---|---|---|---|
 | `forge-1.16.5` | `1.16.5-36.2.42` | `36.2.x` | Compiles against the recommended build. 36.2.20 crashes on current Java 11 updates (see `integration-test/README.md`). `36.0.x` and `36.1.x` are not promised unless tested. |
-| `forge-1.20.1` | `1.20.1-47.3.x` | `47.3.x` | Exact lower bound should be set by integration tests. |
+| `forge-1.18.2` | `1.18.2-40.3.0` | `40.3.x` | Compiles against the recommended build. The lower bound is not set by integration tests yet. |
+| `forge-1.19.2` | `1.19.2-43.5.0` | `43.5.x` | Compiles against the recommended build. The lower bound is not set by integration tests yet. |
+| `forge-1.20.1` | `1.20.1-47.4.10` | `47.4.x` | Compiles against the recommended build. Exact lower bound should be set by integration tests. |
 
 Do not split a module just because Forge has a different patch version. Split
 below the Minecraft-version level only when the same artifact cannot honestly
@@ -239,9 +242,11 @@ Recommended split:
   changed when it is known (for example `>=1.19` for `Component.literal`,
   `>=1.19.3` for `Registries`, `>=1.19.4` for `BlockPos.containing`,
   `>=1.18` for the Forge permission node API, `>=1.20.5` for
-  `CommandBuildContext` as a `HolderLookup.Provider`). Only 1.16.5, 1.20.1, and
-  1.21.1 are built today, so boundaries for versions in between are not verified yet; adding a
-  version is expected to adjust some of them.
+  `CommandBuildContext` as a `HolderLookup.Provider`). Only the Minecraft
+  versions of the nodes (1.16.5, 1.18.2, 1.19.2, 1.20.1, 1.21.1 and 1.21.4) are
+  built, so a boundary between two of them is the version where the API is
+  known to change, not a verified one; adding a version is expected to adjust
+  some of them. See [Version Boundaries](#version-boundaries).
 - Java does not allow nested block comments, so code inside a conditional block
   must not contain `/* */` or Javadoc. Use `//` comments there.
 - Switching the active node in the IDE rewrites `modded/src` in place. Reset
@@ -250,6 +255,34 @@ Recommended split:
   `settings.gradle.kts`, creating `modded/versions/<node>/gradle.properties`,
   adding the artifact mapping in the root `build.gradle.kts`, and fixing
   compile errors with conditions.
+
+### Version Boundaries
+
+The Minecraft-level boundaries the shared source uses. "Verified" means a node
+on each side of the boundary is built; the other boundaries are the version the
+API is known to change in, between two built nodes.
+
+| Boundary | Change | Verified by |
+|---|---|---|
+| `>=1.17` | `GameProfileCache#get` returning `Optional`, `Entity#getYRot`, `Style#withUnderlined`, Forge's `net.minecraftforge.server.ServerLifecycleHooks` | 1.16.5 / 1.18.2 |
+| `>=1.18` | Forge's permission node API (`PermissionNode`, `PermissionGatherEvent`), `RegisterCommandsEvent` registration, `SharedConstants.tryDetectVersion()` | 1.16.5 / 1.18.2 |
+| `>=1.19` | `Component.literal`, `sendSystemMessage`, `CommandBuildContext` for item and block arguments, Forge making `CommandSourceStack.source` public, `ForgeHooks.canUseEntitySelectors` | 1.18.2 / 1.19.2 |
+| `>=1.19.3` | `Registries` / `BuiltInRegistries`, `CommandBuildContext` as an interface, `ResourceArgument`, feature flags, particle arguments taking a context | 1.19.2 / 1.20.1 |
+| `>=1.19.4` | `BlockPos.containing`, vanilla `GameModeArgument`, `TimeArgument.time(int)` | 1.19.2 / 1.20.1 |
+| `>=1.20` | `CommandSourceStack#sendSuccess` taking a `Supplier` | 1.19.2 / 1.20.1 |
+| `>=1.20.2` | `AdvancementHolder`, `RecipeHolder`, `DisplaySlot` | 1.20.1 / 1.21.1 |
+| `>=1.20.3` | `Scoreboard#addObjective` with a number format (tests) | 1.20.1 / 1.21.1 |
+| `>=1.20.5` | `CommandBuildContext` as a `HolderLookup.Provider`, holder-valued enchantment, effect and attribute arguments, Java 21 | 1.20.1 / 1.21.1 |
+| `>=1.21.2` | `HolderLookup.Provider#listRegistryKeys`, `CommandBuildContext#enabledFeatures`, `RegistryAccess#lookupOrThrow` returning the `Registry`, advancements and recipes read with `ResourceKeyArgument`, `RecipeManager#getRecipes` keyed by `ResourceKey`, `ServerPlayer` no longer a `CommandSource`, attribute keys without the `generic.` prefix | 1.21.1 / 1.21.4 |
+| `>=1.21.5` | `ComponentArgument.getRawComponent` | Not built |
+
+The 1.21.2 changes were made over the 1.21.2 snapshots, so a node for 1.21.2 or
+1.21.3 may move some of them. Releases after 1.21.4 are not built. Known
+changes there include `ServerPlayer#server` (1.21.6), the record `GameProfile`
+and `NameAndId` replacing `GameProfileCache` (1.21.9), `ResourceLocation`
+renamed to `Identifier` and the permission level replaced by `PermissionSet`
+(1.21.11), and unobfuscated jars with Java 25 (26.1), which need Loom's
+no-remap plugin instead of `officialMojangMappings()`.
 
 ## Migration Path
 
@@ -274,10 +307,14 @@ Use compile checks as the first gate:
 
 ```text
 ./gradlew :modded:forge-1.16.5:compileJava
+./gradlew :modded:forge-1.18.2:compileJava
+./gradlew :modded:forge-1.19.2:compileJava
 ./gradlew :modded:forge-1.20.1:compileJava
 ./gradlew :modded:neoforge-1.21.1:compileJava
+./gradlew :modded:neoforge-1.21.4:compileJava
 ./gradlew :modded:fabric-1.20.1:compileJava
 ./gradlew :modded:fabric-1.21.1:compileJava
+./gradlew :modded:fabric-1.21.4:compileJava
 ```
 
 Then add fixture-level checks:

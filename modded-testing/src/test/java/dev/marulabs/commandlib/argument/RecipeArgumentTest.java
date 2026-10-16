@@ -15,6 +15,10 @@ import java.util.stream.Stream;
 
 //? if >=1.20.2
 /*import net.minecraft.world.item.crafting.RecipeHolder;*/
+//? if >=1.21.2 {
+/*import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+*///?}
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -27,7 +31,11 @@ class RecipeArgumentTest {
 
         try (CommandTester tester = new CommandTester(() -> new Command("recipe") {{
             argument(new RecipeArgument("recipe")).execute((recipe, ctx) -> {
-                //? if >=1.20.2 {
+                //? if >=1.21.2 {
+                /*ctx.sendMessage(recipe.id()
+                  .location()
+                  .toString());
+                *///?} elif >=1.20.2 {
                 /*ctx.sendMessage(recipe.id()
                   .toString());
                 *///?} else
@@ -37,19 +45,30 @@ class RecipeArgumentTest {
             FakeSender sender = FakeSender.player("Alice");
             Recipe<?> recipe = Mockito.mock(Recipe.class);
             RecipeManager recipes = Mockito.mock(RecipeManager.class);
-            //? if >=1.20.2 {
+            //? if >=1.21.2 {
+            /*ResourceKey<Recipe<?>> key = ResourceKey.create(Registries.RECIPE, id);
+            RecipeHolder<?> holder = new RecipeHolder<>(key, recipe);
+            Mockito.doReturn(Optional.of(holder))
+                   .when(recipes)
+                   .byKey(key);
+            Mockito.doReturn(List.of(holder))
+                   .when(recipes)
+                   .getRecipes();
+            *///?} elif >=1.20.2 {
             /*Mockito.doReturn(Optional.of(new RecipeHolder<>(id, recipe)))
                    .when(recipes)
                    .byKey(id);
+            Mockito.when(recipes.getRecipeIds())
+                   .thenAnswer(invocation -> Stream.of(id));
             *///?} else {
             Mockito.when(recipe.getId())
                    .thenReturn(id);
             Mockito.doReturn(Optional.of(recipe))
                    .when(recipes)
                    .byKey(id);
-            //?}
             Mockito.when(recipes.getRecipeIds())
                    .thenAnswer(invocation -> Stream.of(id));
+            //?}
             tester.withServer(server -> Mockito.when(server.getRecipeManager())
                                                .thenReturn(recipes));
 

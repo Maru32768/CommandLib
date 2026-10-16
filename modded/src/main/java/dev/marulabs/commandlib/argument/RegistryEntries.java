@@ -50,7 +50,10 @@ final class RegistryEntries {
 
     @SuppressWarnings("unchecked")
     static <T> Registry<T> registry(MinecraftServer server, ResourceKey<? extends Registry<T>> registryKey) {
-        //? if >=1.19.3 {
+        //? if >=1.21.2 {
+        /*return server.registryAccess()
+                     .lookupOrThrow(registryKey);
+        *///?} elif >=1.19.3 {
         return server.registryAccess()
                      .registryOrThrow(registryKey);
         //?} else {

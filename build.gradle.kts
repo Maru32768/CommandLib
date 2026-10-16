@@ -61,15 +61,23 @@ spotless {
 
 val publishedArtifactIds = mapOf(
     ":modded:forge-1.16.5" to "forge-1.16.5",
+    ":modded:forge-1.18.2" to "forge-1.18.2",
+    ":modded:forge-1.19.2" to "forge-1.19.2",
     ":modded:forge-1.20.1" to "forge-1.20.1",
     ":modded:neoforge-1.21.1" to "neoforge-1.21.1",
+    ":modded:neoforge-1.21.4" to "neoforge-1.21.4",
     ":modded:fabric-1.20.1" to "fabric-1.20.1",
     ":modded:fabric-1.21.1" to "fabric-1.21.1",
+    ":modded:fabric-1.21.4" to "fabric-1.21.4",
     ":modded-testing:forge-1.16.5" to "forge-testing-1.16.5",
+    ":modded-testing:forge-1.18.2" to "forge-testing-1.18.2",
+    ":modded-testing:forge-1.19.2" to "forge-testing-1.19.2",
     ":modded-testing:forge-1.20.1" to "forge-testing-1.20.1",
     ":modded-testing:neoforge-1.21.1" to "neoforge-testing-1.21.1",
+    ":modded-testing:neoforge-1.21.4" to "neoforge-testing-1.21.4",
     ":modded-testing:fabric-1.20.1" to "fabric-testing-1.20.1",
     ":modded-testing:fabric-1.21.1" to "fabric-testing-1.21.1",
+    ":modded-testing:fabric-1.21.4" to "fabric-testing-1.21.4",
 )
 
 val publishedProjectPaths = setOf(
@@ -86,15 +94,23 @@ val publishedProjectPaths = setOf(
     ":paper-kotlin",
     ":velocity-kotlin",
     ":modded:forge-1.16.5",
+    ":modded:forge-1.18.2",
+    ":modded:forge-1.19.2",
     ":modded:forge-1.20.1",
     ":modded:neoforge-1.21.1",
+    ":modded:neoforge-1.21.4",
     ":modded:fabric-1.20.1",
     ":modded:fabric-1.21.1",
+    ":modded:fabric-1.21.4",
     ":modded-testing:forge-1.16.5",
+    ":modded-testing:forge-1.18.2",
+    ":modded-testing:forge-1.19.2",
     ":modded-testing:forge-1.20.1",
     ":modded-testing:neoforge-1.21.1",
+    ":modded-testing:neoforge-1.21.4",
     ":modded-testing:fabric-1.20.1",
     ":modded-testing:fabric-1.21.1",
+    ":modded-testing:fabric-1.21.4",
 )
 
 subprojects {

@@ -44,27 +44,48 @@ final class BuiltInCommandBuildContext implements CommandBuildContext {
                   .map(RegistryDataLoader.RegistryData::key)
                   .collect(Collectors.toSet());
 
-    @Override
-    public Stream<ResourceKey<? extends Registry<?>>> listRegistries() {
-        Stream<ResourceKey<? extends Registry<?>>> keys = Stream.concat(BUILT_IN.listRegistries(), DATA_DRIVEN.stream());
+    private static Stream<ResourceKey<? extends Registry<?>>> registryKeys() {
+        Stream<ResourceKey<? extends Registry<?>>> keys = Stream.concat(keys(BUILT_IN), DATA_DRIVEN.stream());
         MinecraftServer server = CurrentServer.get();
         if (server != null) {
-            keys = Stream.concat(keys,
-                                 server.registryAccess()
-                                       .listRegistries());
+            keys = Stream.concat(keys, keys(server.registryAccess()));
         }
         return keys.distinct();
     }
 
+    private static Stream<ResourceKey<? extends Registry<?>>> keys(RegistryAccess registries) {
+        return registries.registries()
+                         .<ResourceKey<? extends Registry<?>>>map(RegistryAccess.RegistryEntry::key);
+    }
+
     @Override
     public <T> Optional<HolderLookup.RegistryLookup<T>> lookup(ResourceKey<? extends Registry<? extends T>> key) {
-        if (listRegistries().noneMatch(key::equals)) {
+        if (registryKeys().noneMatch(key::equals)) {
             return Optional.empty();
         }
         return Optional.of(new LazyRegistryLookup<>(key));
     }
+    *///?}
 
-    private static HolderLookup.Provider registries() {
+    //? if >=1.21.2 {
+    /*@Override
+    public Stream<ResourceKey<? extends Registry<?>>> listRegistryKeys() {
+        return registryKeys();
+    }
+
+    @Override
+    public FeatureFlagSet enabledFeatures() {
+        return currentFeatures();
+    }
+    *///?} elif >=1.20.5 {
+    /*@Override
+    public Stream<ResourceKey<? extends Registry<?>>> listRegistries() {
+        return registryKeys();
+    }
+    *///?}
+
+    //? if >=1.20.5 {
+    /*private static HolderLookup.Provider registries() {
         MinecraftServer server = CurrentServer.get();
         if (server == null) {
             return BUILT_IN;
@@ -91,13 +112,14 @@ final class BuiltInCommandBuildContext implements CommandBuildContext {
         @Override
         public HolderLookup.RegistryLookup<T> parent() {
             HolderLookup.Provider registries = registries();
-            FeatureFlagSet flags = enabledFeatures();
+            FeatureFlagSet flags = currentFeatures();
             Resolved<T> current = resolved;
             if (current == null || current.registries() != registries || !current.flags()
                                                                                  .equals(flags)) {
                 // Without a server, data-driven registries are missing, so parsing fails with an unknown element.
                 HolderLookup.RegistryLookup<T> lookup = CommandBuildContext.simple(registries, flags)
                                                                            .<T>lookup(key)
+                                                                           .<HolderLookup.RegistryLookup<T>>map(x -> x)
                                                                            .orElseGet(() -> new EmptyRegistryLookup<>(key));
                 current = new Resolved<>(registries, flags, lookup);
                 resolved = current;
@@ -157,7 +179,7 @@ final class BuiltInCommandBuildContext implements CommandBuildContext {
         }
 
         private HolderLookup<T> current() {
-            FeatureFlagSet flags = enabledFeatures();
+            FeatureFlagSet flags = currentFeatures();
             Filtered<T> current = filtered;
             if (current == null || !current.flags()
                                            .equals(flags)) {
@@ -192,7 +214,7 @@ final class BuiltInCommandBuildContext implements CommandBuildContext {
     }
     //?}
 
-    private static FeatureFlagSet enabledFeatures() {
+    private static FeatureFlagSet currentFeatures() {
         MinecraftServer server = CurrentServer.get();
         if (server == null) {
             return FeatureFlags.DEFAULT_FLAGS;
@@ -201,4 +223,18 @@ final class BuiltInCommandBuildContext implements CommandBuildContext {
                      .enabledFeatures();
     }
 }
-//?}
+//?} elif >=1.19 {
+/*import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
+
+// Before 1.19.3 CommandBuildContext is a final class, and the argument types that take one read the static
+// registries, whose tags the server binds when it loads its data. A context over them works before the server exists.
+final class BuiltInCommandBuildContext {
+    static final CommandBuildContext INSTANCE =
+            new CommandBuildContext(RegistryAccess.fromRegistryOfRegistries(Registry.REGISTRY));
+
+    private BuiltInCommandBuildContext() {
+    }
+}
+*///?}

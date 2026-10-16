@@ -132,7 +132,8 @@ The aggregate task depends on per-target subprojects, so Gradle can run independ
 
 ## Forge Targets
 
-Forge targets (`forge-1.16.5`, `forge-1.20.1`) and the NeoForge target (`neoforge-1.21.1`) reuse the same runner, Docker image flow, and MCProtocolLib bot, but
+Forge targets (`forge-1.16.5`, `forge-1.18.2`, `forge-1.19.2`, `forge-1.20.1`) and the NeoForge targets
+(`neoforge-1.21.1`, `neoforge-1.21.4`) reuse the same runner, Docker image flow, and MCProtocolLib bot, but
 prepare the server differently:
 
 - The test mod lives in `integration-test/shared/modded` and is built in the main Gradle build as a Stonecutter tree

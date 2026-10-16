@@ -9,7 +9,7 @@ import net.minecraft.world.item.ItemStack;
 
 public class ItemStackArgument extends Argument<ItemStack, ItemStackArgument> {
     public ItemStackArgument(String name) {
-        //? if >=1.19.3 {
+        //? if >=1.19 {
         super(name, ItemArgument.item(BuiltInCommandBuildContext.INSTANCE));
         //?} else
         /*super(name, ItemArgument.item());*/

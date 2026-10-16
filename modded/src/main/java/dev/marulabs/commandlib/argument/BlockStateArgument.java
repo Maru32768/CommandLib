@@ -7,7 +7,7 @@ import net.minecraft.commands.arguments.blocks.BlockInput;
 
 public class BlockStateArgument extends Argument<BlockInput, BlockStateArgument> {
     public BlockStateArgument(String name) {
-        //? if >=1.19.3 {
+        //? if >=1.19 {
         super(name,
               net.minecraft.commands.arguments.blocks.BlockStateArgument.block(BuiltInCommandBuildContext.INSTANCE));
         //?} else
