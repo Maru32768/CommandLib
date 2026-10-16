@@ -73,6 +73,8 @@ class CommandLibLifecycleTest {
         when(plugin.getLifecycleManager()).thenReturn(lifecycleManager);
 
         bukkit = mockStatic(Bukkit.class);
+        bukkit.when(Bukkit::isPrimaryThread)
+              .thenReturn(true);
         bukkit.when(Bukkit::getPluginManager)
               .thenReturn(pluginManager);
         bukkit.when(Bukkit::getOnlinePlayers)
@@ -97,6 +99,20 @@ class CommandLibLifecycleTest {
         // CommandLib registers its listeners on the static handler lists, so remove them to keep tests isolated.
         HandlerList.unregisterAll(plugin);
         bukkit.close();
+    }
+
+    @Test
+    void registration_and_unregistration_off_the_main_thread_are_refused() {
+        CommandLib lib = CommandLib.register(plugin, "test", helloCommand());
+        bukkit.when(Bukkit::isPrimaryThread)
+              .thenReturn(false);
+
+        assertThatThrownBy(() -> CommandLib.register(plugin,
+                                                     "test",
+                                                     namedCommand("other"))).isInstanceOf(IllegalStateException.class)
+                                                                            .hasMessageContaining("main server thread");
+        assertThatThrownBy(lib::unregister).isInstanceOf(IllegalStateException.class)
+                                           .hasMessageContaining("main server thread");
     }
 
     @Test

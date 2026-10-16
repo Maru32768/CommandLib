@@ -140,6 +140,7 @@ public final class CommandLib implements Listener {
                                       @NotNull CommandDefaults<CommandContext> defaults,
                                       @NotNull Collection<? extends Command> commands) {
         Objects.requireNonNull(plugin);
+        requirePrimaryThread("Commands must be registered");
         defaults.applyTo(commands);
         CommandSet commandSet = CommandSet.of(permissionPrefix,
                                               commands,
@@ -360,7 +361,7 @@ public final class CommandLib implements Listener {
      */
     public static void refresh(@NotNull Player player) {
         Objects.requireNonNull(player);
-        requirePrimaryThread();
+        requirePrimaryThread("Command trees must be refreshed");
         player.updateCommands();
     }
 
@@ -370,17 +371,17 @@ public final class CommandLib implements Listener {
      * @throws IllegalStateException if called from another thread
      */
     public static void refreshAll() {
-        requirePrimaryThread();
+        requirePrimaryThread("Command trees must be refreshed");
         Bukkit.getOnlinePlayers()
               .forEach(Player::updateCommands);
     }
 
-    private static void requirePrimaryThread() {
-        // Sending the tree reads the dispatcher, which only the main thread may touch; permission plugins often fire
-        // their change events asynchronously. On Folia every region thread is a primary thread and reads it as well.
+    // The dispatcher and the help and permission maps are main-thread only; permission plugins and config reloads
+    // often run on other threads. On Folia every region thread is a primary thread.
+    private static void requirePrimaryThread(String action) {
         if (!Bukkit.isPrimaryThread()) {
-            throw new IllegalStateException("Command trees must be refreshed on the main server thread (on Folia, a "
-                    + "region or global region thread)");
+            throw new IllegalStateException(action + " on the main server thread (on Folia, a region or global region "
+                    + "thread)");
         }
     }
 
@@ -389,6 +390,7 @@ public final class CommandLib implements Listener {
      * Must be called on the main server thread, on Folia the global region thread.
      */
     public void unregister() {
+        requirePrimaryThread("Commands must be unregistered");
         unregister(true);
     }
 
