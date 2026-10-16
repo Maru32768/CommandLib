@@ -109,17 +109,22 @@ public final class TestMain {
             scoreboard.addPlayerTeam(TEST_TEAM_NAME);
         }
         if (scoreboard.getObjective(TEST_OBJECTIVE_NAME) == null) {
+            // Component.nullToEmpty is client-only on 1.16.5, which the dedicated server leaves out.
+            //? if >=1.19 {
+            Component displayName = Component.literal(TEST_OBJECTIVE_NAME);
+            //?} else
+            /*Component displayName = new net.minecraft.network.chat.TextComponent(TEST_OBJECTIVE_NAME);*/
             //? if >=1.20.3 {
             /*scoreboard.addObjective(TEST_OBJECTIVE_NAME,
                                     ObjectiveCriteria.DUMMY,
-                                    Component.nullToEmpty(TEST_OBJECTIVE_NAME),
+                                    displayName,
                                     ObjectiveCriteria.RenderType.INTEGER,
                                     false,
                                     null);
             *///?} else {
             scoreboard.addObjective(TEST_OBJECTIVE_NAME,
                                     ObjectiveCriteria.DUMMY,
-                                    Component.nullToEmpty(TEST_OBJECTIVE_NAME),
+                                    displayName,
                                     ObjectiveCriteria.RenderType.INTEGER);
             //?}
         }
