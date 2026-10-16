@@ -91,7 +91,7 @@ CommandLib は `1.16.5` から最新安定版までのサポートを目標に�
 | `common-kotlin` / `spigot-kotlin` / `paper-kotlin` / `velocity-kotlin` | Kotlin DSL。Forge / NeoForge / Fabric 向けはまだない。 |
 | `integration-test` | 非公開の実サーバー integration test aggregator。 |
 
-未実装の module（`fabric`）は Planned。Mohist は専用 module を持たず、`spigot` 互換と integration target で扱う。Folia も専用 module を持たず、`paper` module で扱う。
+Fabric は専用 module を持たず、`modded` の Stonecutter node で扱う。Mohist は専用 module を持たず、`spigot` 互換と integration target で扱う。Folia も専用 module を持たず、`paper` module で扱う。
 
 方針:
 
