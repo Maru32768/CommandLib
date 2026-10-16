@@ -22,18 +22,23 @@ import java.util.stream.IntStream;
 final class ArgumentCommandNodeCreator<S, T, C extends CommonCommandContext<S, T>> {
     private final PlatformAdapter<S, T, C, ?> platformAdapter = PlatformAdapter.get();
     private final Arguments<C> arguments;
+    // The branches of the command. One shares the node of an argument with this branch when the names of the arguments
+    // up to it are the same.
+    private final List<Arguments<C>> branches;
     private final List<Arguments<C>> executorArguments;
     private final OptionGraph<S, C> optionGraph;
     private final String permissionPrefix;
     private final CommandScheduler scheduler;
 
     ArgumentCommandNodeCreator(Arguments<C> arguments,
+                               List<Arguments<C>> branches,
                                List<Arguments<C>> executorArguments,
                                OptionGraph<S, C> optionGraph,
                                String permissionPrefix,
                                CommandScheduler scheduler) {
         this.scheduler = scheduler;
         this.arguments = arguments;
+        this.branches = List.copyOf(branches);
         this.executorArguments = List.copyOf(executorArguments);
         this.optionGraph = optionGraph;
         this.permissionPrefix = permissionPrefix;
@@ -43,12 +48,19 @@ final class ArgumentCommandNodeCreator<S, T, C extends CommonCommandContext<S, T
                                                         CommandExecutor<C> helpAction,
                                                         CommonCommand<C, ?> parent) {
         RequiredArgumentBuilder<S, ?> builder = RequiredArgumentBuilder.argument(argument.name(), argument.type());
-        String permission = arguments.permissionName(parent, permissionPrefix);
-        // The sender has the branch's permission and the branch is visible to the sender.
-        Predicate<S> requirement = arguments.hasVisibility()
-                ? source -> platformAdapter.hasPermission(source, permission)
-                        && arguments.isVisible(platformAdapter.createSourceContext(source))
-                : source -> platformAdapter.hasPermission(source, permission);
+        // Brigadier merges the nodes of the branches that share the argument and keeps one requirement, so it lets
+        // through the sender of any of them; the runner checks the branch it executes.
+        List<String> names = names(arguments);
+        List<String> prefix = names.subList(0, names.indexOf(argument.name()) + 1);
+        Predicate<S> requirement = branchRequirement(arguments, parent);
+        for (Arguments<C> branch : branches) {
+            List<String> branchNames = names(branch);
+            if (branch != arguments && branchNames.size() >= prefix.size()
+                    && branchNames.subList(0, prefix.size())
+                                  .equals(prefix)) {
+                requirement = requirement.or(branchRequirement(branch, parent));
+            }
+        }
         builder.requires(requirement);
 
         builder.suggests(suggestions(platformAdapter, argument, requirement, parent.providers(), executorArguments));
@@ -56,6 +68,21 @@ final class ArgumentCommandNodeCreator<S, T, C extends CommonCommandContext<S, T
         builder.executes(runner(argument, helpAction, parent));
 
         return builder;
+    }
+
+    // The sender has the branch's permission and the branch is visible to the sender.
+    private Predicate<S> branchRequirement(Arguments<C> branch, CommonCommand<C, ?> parent) {
+        String permission = branch.permissionName(parent, permissionPrefix);
+        return branch.hasVisibility()
+                ? source -> platformAdapter.hasPermission(source, permission)
+                        && branch.isVisible(platformAdapter.createSourceContext(source))
+                : source -> platformAdapter.hasPermission(source, permission);
+    }
+
+    private static List<String> names(Arguments<?> branch) {
+        return branch.stream()
+                     .map(CommonArgument::name)
+                     .collect(Collectors.toList());
     }
 
     /**

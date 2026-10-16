@@ -183,6 +183,11 @@ no permission plugin sets the node. A `TRUE` or `FALSE` value always wins.
 A [`visibleWhen`](#refreshing-the-command-tree) predicate is checked in the same places as the command's or branch's
 node.
 
+Branches whose first arguments have the same names, such as `/give <player>` and `/give <player> <count>`, share the
+nodes of those arguments. A shared node is shown to a sender who may use any of the branches, and the runner then
+checks the branch the input runs. The shared arguments must parse the same way: arguments of different types under one
+name are rejected at registration.
+
 See [errors](errors.md#permission-denied) for what the sender sees.
 
 ## Refreshing the command tree

@@ -147,6 +147,7 @@ final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U ext
                                       command.executor(),
                                       command.uncaughtExceptionHandlers())
                 : new ArgumentCommandNodeCreator<>(allOptional.get(0),
+                                                   argumentsList,
                                                    appendArgument(inheritedArguments, allOptional.get(0)),
                                                    optionGraph,
                                                    permissionPrefix,
@@ -175,6 +176,7 @@ final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U ext
                                                                            .flatMap(Collection::stream)
                                                                            .collect(Collectors.toList());
                          argumentNodes.addChild(new ArgumentCommandNodeCreator<>(arguments,
+                                                                                 argumentsList,
                                                                                  executorArguments,
                                                                                  optionGraph,
                                                                                  permissionPrefix,

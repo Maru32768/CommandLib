@@ -1,5 +1,6 @@
 package dev.marulabs.commandlib;
 
+import com.mojang.brigadier.arguments.ArgumentType;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -37,7 +38,7 @@ final class CommandNameValidator {
             List<String> path = new ArrayList<>();
             arguments.stream()
                      .forEach(argument -> {
-                         childNamesAt(childNamesByPath, command, path).addArgument(argument.name());
+                         childNamesAt(childNamesByPath, command, path).addArgument(argument.name(), argument.type());
                          path.add(argument.name());
                      });
             for (CommonCommand<?, ?> child : arguments.children()) {
@@ -65,7 +66,7 @@ final class CommandNameValidator {
     private static final class ChildNames {
         private final @Nullable String location;
         private final Map<String, CommonCommand<?, ?>> literals = new HashMap<>();
-        private final Set<String> arguments = new HashSet<>();
+        private final Map<String, ArgumentType<?>> arguments = new HashMap<>();
 
         private ChildNames(@Nullable String location) {
             this.location = location;
@@ -76,7 +77,7 @@ final class CommandNameValidator {
             names.add(command.name());
             names.addAll(command.aliases());
             for (String name : names) {
-                if (arguments.contains(name)) {
+                if (arguments.containsKey(name)) {
                     throw conflictWithArgument(name);
                 }
                 // Repeating a name within one command, or adding the same command twice, merges identical nodes and
@@ -89,13 +90,32 @@ final class CommandNameValidator {
             }
         }
 
-        void addArgument(String name) {
+        void addArgument(String name, ArgumentType<?> type) {
             // Argument nodes with the same name at the same position are the shared prefix of variable-length
             // branches and merge on purpose, so only a literal of the same name is a conflict.
             if (literals.containsKey(name)) {
                 throw conflictWithArgument(name);
             }
-            arguments.add(name);
+            // The merged node parses with the type of one of them, whose value the other branches then read.
+            ArgumentType<?> shared = arguments.putIfAbsent(name, type);
+            if (shared != null && !sameType(shared, type)) {
+                throw new IllegalArgumentException("Arguments named '" + name + "' share one node" + suffix()
+                        + " but parse differently: " + shared + " and " + type);
+            }
+        }
+
+        // A type without its own equals, such as a vanilla one, has no settings that change what it accepts.
+        private static boolean sameType(ArgumentType<?> a, ArgumentType<?> b) {
+            if (a.getClass() != b.getClass()) {
+                return false;
+            }
+            try {
+                return a.getClass()
+                        .getMethod("equals", Object.class)
+                        .getDeclaringClass() == Object.class || a.equals(b);
+            } catch (NoSuchMethodException e) {
+                throw new AssertionError(e);
+            }
         }
 
         private IllegalArgumentException conflictWithArgument(String name) {

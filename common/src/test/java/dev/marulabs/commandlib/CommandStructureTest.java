@@ -178,6 +178,52 @@ class CommandStructureTest {
                          .messages()).containsExactly("1");
     }
 
+    // The branches share the node of their first argument, so it must be usable with the permission of either branch.
+    @Test
+    void a_shared_argument_node_is_usable_with_the_permission_of_any_branch_that_shares_it() throws Exception {
+        TestCommand give = new TestCommand("give") {{
+            argument(new StrArg("player")).execute((player, ctx) -> ctx.sendMessage("one " + player));
+            argument(new StrArg("player"), new IntArg("count")).execute((player,
+                                                                        count,
+                                                                        ctx) -> ctx.sendMessage("two " + player + " "
+                    + count));
+        }};
+        TestCommandRunner shortBranch = new TestCommandRunner(give,
+                                                              new TestCommandSource("test.command.give",
+                                                                                    "test.command.give.player"));
+        TestCommandRunner longBranch = new TestCommandRunner(give,
+                                                             new TestCommandSource("test.command.give",
+                                                                                   "test.command.give.player.count"));
+
+        assertThat(shortBranch.visibleChildren("give")).contains("player");
+        assertThat(shortBranch.execute("give Steve")
+                              .messages()).containsExactly("one Steve");
+        assertThatThrownBy(() -> shortBranch.execute("give Steve 3")).isInstanceOf(CommandSyntaxException.class);
+        assertThat(longBranch.visibleChildren("give")).contains("player");
+        assertThat(longBranch.execute("give Steve 3")
+                             .messages()).containsExactly("two Steve 3");
+        assertThat(longBranch.execute("give Steve")
+                             .messages()).containsExactly("You do not have permission to execute this command.");
+    }
+
+    @Test
+    void arguments_sharing_a_node_must_have_the_same_type() {
+        assertThatThrownBy(() -> new TestCommandRunner(new TestCommand("t") {{
+            argument(new IntArg("x")).execute((x, ctx) -> {
+            });
+            argument(new StrArg("x"), new IntArg("y")).execute((x, y, ctx) -> {
+            });
+        }})).isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("'x'");
+        assertThatThrownBy(() -> new TestCommandRunner(new TestCommand("t") {{
+            argument(new CommonIntegerArgument<>("x", 0, 10)).execute((x, ctx) -> {
+            });
+            argument(new CommonIntegerArgument<>("x", 0, 5), new IntArg("y")).execute((x, y, ctx) -> {
+            });
+        }})).isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("'x'");
+    }
+
     @Test
     void repeated_names_within_one_child_are_accepted() throws Exception {
         TestCommand list = new TestCommand("list") {{
