@@ -410,9 +410,8 @@ val stageDockerServerDirectory = tasks.register<Sync>("stageDockerServerDirector
     exclude(
         "logs/**",
         "crash-reports/**",
-        "world/session.lock",
-        "world/DIM1/**",
-        "world/DIM-1/**",
+        // A world left by a local run would carry its blocks and spawn into every test; the warm-up generates one.
+        "world/**",
         "world_*/**",
         "flat/**",
         "flat_*/**",
