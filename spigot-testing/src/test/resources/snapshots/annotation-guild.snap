@@ -1,0 +1,63 @@
+# Tree
+guild [test.command.guild, OP]
+  <guild: StringArgument> [test.command.guild.guild, OP]
+    invite [test.command.guild.invite, OP]
+      <players...: PlayerArgument> [test.command.guild.invite.players, OP]
+    kick [test.command.guild.kick, OP]
+      --silent, -s
+      --loud, -l [test.command.guild.kick.option.loud, ALL]
+      --reason, -r <reason>
+      --by, -b <by>
+      <target: PlayerArgument> [test.command.guild.kick.target, OP]
+
+# Permissions
+| Permission | Default | Route | Description |
+| --- | --- | --- | --- |
+| `test.command.guild` | `OP` | `/guild` |  |
+| `test.command.guild.guild` | `OP` | `/guild <guild>` |  |
+| `test.command.guild.invite` | `OP` | `/guild <guild> invite` |  |
+| `test.command.guild.invite.players` | `OP` | `/guild <guild> invite <players...>` |  |
+| `test.command.guild.kick` | `OP` | `/guild <guild> kick` |  |
+| `test.command.guild.kick.option.loud` | `ALL` | `/guild <guild> kick --loud` |  |
+| `test.command.guild.kick.target` | `OP` | `/guild <guild> kick <target>` |  |
+
+# Suggestions of /guild red kick -
+--by, --loud, --reason, --silent, -b, -l, -r, -s
+# Admin
+/guild -> 1
+    audit
+    Guilds: red
+/guild help -> 1
+    --------------------------------------------------
+    Manage guilds
+    Usage:
+      /guild <guild> invite <players...>
+      /guild <guild> kick <target>
+    
+    Examples:
+      /guild red invite Steve
+      /guild red kick -s Steve
+    --------------------------------------------------
+/guild red invite Steve Alex -> 1
+    audit
+    Invited Steve, Alex to red
+/guild red invite Steve Alex Steve Alex -> RuntimeException: Command syntax error: Incorrect argument for command at position 34: ...lex Steve <--[HERE]
+    
+/guild red kick Steve -> 1
+    audit
+    Kicked Steve from red by Admin for ''
+/guild red kick Steve -s -> 1
+    audit
+    Kicked Steve from red by Admin for '' silently
+/guild red kick -s -l Steve -> RuntimeException: Command syntax error: Incorrect argument for command at position 21: ...ick -s -l <--[HERE]
+    
+/guild red kick -r spam Steve -> 0
+    --reason requires --by.
+/guild red kick -r spam -b Alex Steve -l -> 1
+    audit
+    Kicked Steve from red by Alex for 'spam' loudly
+# Console
+/guild -> 1
+    audit
+    Guilds: red
+/guild red kick Steve -> RuntimeException: Command syntax error: Incorrect argument for command at position 10: guild red <--[HERE]

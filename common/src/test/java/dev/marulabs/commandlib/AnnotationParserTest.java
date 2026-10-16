@@ -5,6 +5,7 @@ import dev.marulabs.commandlib.annotation.Optional;
 import dev.marulabs.commandlib.argument.CommonEnumArgument;
 import dev.marulabs.commandlib.argument.CommonIntegerArgument;
 import dev.marulabs.commandlib.argument.CommonStringArgument;
+import dev.marulabs.commandlib.command.CommandMiddleware;
 import dev.marulabs.commandlib.exception.CommandPrerequisiteException;
 import org.junit.jupiter.api.Test;
 
@@ -528,5 +529,328 @@ class AnnotationParserTest {
                 + GamePlayer.class.getName() + " is registered; register one with registerDependency");
         assertThatThrownBy(() -> parser().registerDependency(Economy.class, new Economy())
                                          .parse(new FinalDependency())).hasMessage("FinalDependency.economy has @Dependency, but is static or final");
+    }
+
+    @Command("export")
+    @Examples("/export -j data")
+    @MutuallyExclusive({"json", "yaml"})
+    static final class AnnotatedExport {
+        @Execute
+        void export(TestCommandContext ctx,
+                    @Flag(value = "force", shortName = 'f') boolean force,
+                    @Option(value = "reason", shortName = 'r') @Requires("force") @Permission(defaultPermission = DefaultPermission.OP) String reason,
+                    @Option(value = "mode", shortName = 'm') @Default("survival") Mode mode,
+                    @Option("threads") @Requires(value = "mode", equalTo = "creative") @Default("1") int threads,
+                    @Flag(value = "json", shortName = 'j') boolean json,
+                    @Flag(value = "yaml", shortName = 'y') boolean yaml,
+                    @Name("file") String file) {
+            ctx.sendMessage(file + " " + force + " " + reason + " " + mode + " " + threads + " " + json + " " + yaml);
+        }
+    }
+
+    private static TestCommand fluentExport() {
+        return new TestCommand("export") {{
+            examples("/export -j data");
+            CommandOption<Boolean, TestCommandContext> force = option(Options.flag("force", 'f'));
+            CommandOption<String, TestCommandContext> reason = option(Options.<TestCommandContext>string("reason",
+                                                                                                         'r',
+                                                                                                         "")
+                                                                             .permission(DefaultPermission.OP)
+                                                                             .requires(force));
+            CommandOption<Mode, TestCommandContext> mode = option(Options.of("mode",
+                                                                             'm',
+                                                                             new EnumArg<>("mode",
+                                                                                           Mode.class).optional(Mode.SURVIVAL)));
+            CommandOption<Integer, TestCommandContext> threads = option(Options.<TestCommandContext>integer("threads",
+                                                                                                            1,
+                                                                                                            Integer.MIN_VALUE,
+                                                                                                            Integer.MAX_VALUE)
+                                                                               .requires(mode, Mode.CREATIVE));
+            CommandOption<Boolean, TestCommandContext> json = option(Options.flag("json", 'j'));
+            CommandOption<Boolean, TestCommandContext> yaml = option(Options.flag("yaml", 'y'));
+            mutuallyExclusive(json, yaml);
+            argument(new StrArg("file")).execute((file, ctx) -> ctx.sendMessage(file + " " + ctx.getOption(force)
+                    + " " + ctx.getOption(reason) + " " + ctx.getOption(mode) + " " + ctx.getOption(threads) + " "
+                    + ctx.getOption(json) + " " + ctx.getOption(yaml)));
+        }};
+    }
+
+    @Test
+    void option_annotations_match_the_fluent_options() throws Exception {
+        TestCommand annotated = parser().parse(new AnnotatedExport());
+        TestCommand fluent = fluentExport();
+
+        assertSameCommand(annotated, fluent);
+        List<String> inputs = List.of("export",
+                                      "export data",
+                                      "export -f -r late data",
+                                      "export -r late data",
+                                      "export --threads 4 data",
+                                      "export -m creative --threads 4 data",
+                                      "export -jf data",
+                                      "export -j -y data");
+        assertThat(transcriptOrError(annotated, inputs)).isEqualTo(transcriptOrError(fluent, inputs))
+                                                        .contains("export -f -r late data -> data true late SURVIVAL 1 false false",
+                                                                  "export -m creative --threads 4 data -> data false  CREATIVE 4 false false",
+                                                                  "export -jf data -> data true  SURVIVAL 1 true false")
+                                                        .anyMatch(x -> x.startsWith("export -j -y data -> rejected"))
+                                                        .anyMatch(x -> x.startsWith("export -> ")
+                                                                && x.contains("/export -j data"));
+        assertThat(CommandDocs.of("test.command", annotated)
+                              .permissionsMarkdown()).contains("test.command.export.option.reason");
+    }
+
+    @Command("team")
+    @Middleware("audit")
+    static final class AnnotatedTeam {
+        @Execute
+        void list(TestCommandContext ctx) {
+            ctx.sendMessage("teams");
+        }
+
+        @Subcommand("<team>")
+        @Description(value = "Show a team", caption = "test.team.show")
+        void show(TestCommandContext ctx, @Name("team") String team) {
+            ctx.sendMessage("team " + team);
+        }
+
+        @Subcommand("<team> add")
+        @Description("Add players")
+        @VisibleWhen("open")
+        void add(TestCommandContext ctx,
+                 @Name("team") String team,
+                 @Name("players") @Variadic(max = 3) List<String> players) {
+            ctx.sendMessage("add " + players + " to " + team);
+        }
+
+        @Subcommand("<team> remove")
+        @OptionsAnywhere
+        void remove(TestCommandContext ctx,
+                    @Flag(value = "silent", shortName = 's') boolean silent,
+                    @Name("team") String team,
+                    @Name("player") String player) {
+            ctx.sendMessage("remove " + player + " from " + team + " " + silent);
+        }
+    }
+
+    private static TestCommand fluentTeam(CommandMiddleware<TestCommandContext> audit, boolean[] open) {
+        Caption show = Caption.of("test.team.show", "Show a team");
+        return new TestCommand("team") {{
+            addMiddleware(audit);
+            execute(ctx -> ctx.sendMessage("teams"));
+            argument(new StrArg("team")).description(ctx -> ctx.caption(show))
+                                        .execute((team, ctx) -> ctx.sendMessage("team " + team))
+                                        .child(team -> new TestCommand("add") {{
+                                            description("Add players");
+                                            visibleWhen(ctx -> open[0]);
+                                            argument(new StrArg("players").variadic(3)).execute((players,
+                                                                                                 ctx) -> ctx.sendMessage("add "
+                                                                                                         + players
+                                                                                                         + " to "
+                                                                                                         + team.get()));
+                                        }})
+                                        .child(team -> new TestCommand("remove") {{
+                                            optionsAnywhere();
+                                            CommandOption<Boolean, TestCommandContext> silent = option(Options.flag("silent",
+                                                                                                                    's'));
+                                            argument(new StrArg("player")).execute((player,
+                                                                                    ctx) -> ctx.sendMessage("remove "
+                                                                                            + player + " from "
+                                                                                            + team.get() + " "
+                                                                                            + ctx.getOption(silent)));
+                                        }});
+        }};
+    }
+
+    @Test
+    void placeholders_middlewares_and_visibility_match_the_fluent_command() throws Exception {
+        boolean[] open = {true};
+        CommandMiddleware<TestCommandContext> audit = (ctx, next) -> {
+            ctx.sendMessage("audit");
+            return next.proceed();
+        };
+        TestCommand annotated = parser().registerMiddleware("audit", audit)
+                                        .registerVisibility("open", ctx -> open[0])
+                                        .parse(new AnnotatedTeam());
+        TestCommand fluent = fluentTeam(audit, open);
+
+        assertSameCommand(annotated, fluent);
+        List<String> inputs = List.of("team",
+                                      "team red",
+                                      "team red add Steve Alex",
+                                      "team red add a b c d",
+                                      "team red remove Steve -s");
+        assertThat(transcriptOrError(annotated, inputs)).isEqualTo(transcriptOrError(fluent, inputs))
+                                                        .contains("team -> audit | teams",
+                                                                  "team red -> audit | team red",
+                                                                  "team red add Steve Alex -> audit | add [Steve, Alex] to red",
+                                                                  "team red remove Steve -s -> audit | remove Steve from red true")
+                                                        .anyMatch(x -> x.startsWith("team red add a b c d -> rejected"));
+        open[0] = false;
+        List<String> closed = List.of("team red add Steve");
+        assertThat(transcriptOrError(annotated, closed)).isEqualTo(transcriptOrError(fluent, closed))
+                                                        .allMatch(x -> x.contains("rejected"));
+    }
+
+    @Command("pair")
+    static final class AdjacentPlaceholders {
+        @Subcommand("<a> <b> swap")
+        void swap(TestCommandContext ctx, @Name("b") int b, @Name("a") String a) {
+            ctx.sendMessage(b + " " + a);
+        }
+    }
+
+    @Test
+    void adjacent_placeholders_form_one_branch() throws Exception {
+        TestCommand annotated = parser().parse(new AdjacentPlaceholders());
+        TestCommand fluent = new TestCommand("pair") {{
+            argument(new StrArg("a"), new IntArg("b")).child((a, b) -> new TestCommand("swap") {{
+                execute(ctx -> ctx.sendMessage(b.get() + " " + a.get()));
+            }});
+        }};
+
+        assertSameCommand(annotated, fluent);
+        assertThat(new TestCommandRunner(annotated).execute("pair x 3 swap")
+                                                   .messages()).containsExactly("3 x");
+    }
+
+    @Command("x")
+    static final class UnknownMiddleware {
+        @Subcommand("a")
+        @Middleware("audit")
+        void a() {
+        }
+    }
+
+    @Command("x")
+    static final class UnknownVisibility {
+        @Execute
+        @VisibleWhen("open")
+        void run(@Name("n") int n) {
+        }
+    }
+
+    @Command("x")
+    static final class UnknownRequiredOption {
+        @Execute
+        void run(@Flag("force") @Requires("yes") boolean force) {
+        }
+    }
+
+    @Command("x")
+    @MutuallyExclusive({"json", "yaml"})
+    static final class UnknownExclusiveOption {
+        @Execute
+        void run(@Flag("json") boolean json) {
+        }
+    }
+
+    @Command("x")
+    static final class MissingPlaceholder {
+        @Subcommand("<team> add")
+        void add(@Name("name") String name) {
+        }
+    }
+
+    @Command("x")
+    static final class DifferentPlaceholders {
+        @Subcommand("<team> add")
+        void add(@Name("team") String team) {
+        }
+
+        @Subcommand("<team> remove")
+        void remove(@Name("team") int team) {
+        }
+    }
+
+    @Command("x")
+    static final class ArgumentsAfterPlaceholder {
+        @Subcommand("<team>")
+        void show(@Name("team") String team, @Name("page") int page) {
+        }
+    }
+
+    @Command("x")
+    static final class VariadicString {
+        @Execute
+        void run(@Name("text") @Variadic(max = 2) String text) {
+        }
+    }
+
+    @Command("x")
+    static final class ArgumentPermission {
+        @Execute
+        void run(@Name("text") @Permission(defaultPermission = DefaultPermission.OP) String text) {
+        }
+    }
+
+    @Command("x")
+    static final class CaptionedOption {
+        @Execute
+        void run(@Flag("force") @Description(value = "Force", caption = "x.force") boolean force) {
+        }
+    }
+
+    @Command("x")
+    static final class UnknownOptionType {
+        @Execute
+        void run(@Option("thread") Thread thread) {
+        }
+    }
+
+    @Command("x")
+    static final class ConfirmedPlaceholder {
+        @Subcommand("<team>")
+        @Confirm
+        void show(@Name("team") String team) {
+        }
+    }
+
+    @Test
+    void invalid_uses_of_the_newer_annotations_fail_with_the_method() {
+        AnnotationParser<TestCommandContext, TestCommand> parser = parser();
+
+        assertThatThrownBy(() -> parser.parse(new UnknownMiddleware())).hasMessageContaining("@Middleware(\"audit\"), but no middleware of that name is registered; register one with registerMiddleware");
+        assertThatThrownBy(() -> parser.parse(new UnknownVisibility())).hasMessageContaining("@VisibleWhen(\"open\"), but no visibility predicate");
+        assertThatThrownBy(() -> parser.parse(new UnknownRequiredOption())).hasMessageContaining("has @Requires(\"yes\"), but 'x' has no option of that name");
+        assertThatThrownBy(() -> parser.parse(new UnknownExclusiveOption())).hasMessageContaining("@MutuallyExclusive with --yaml");
+        assertThatThrownBy(() -> parser.parse(new MissingPlaceholder())).hasMessageContaining("has <team> in its @Subcommand path, but no argument parameter named team");
+        assertThatThrownBy(() -> parser.parse(new DifferentPlaceholders())).hasMessageContaining("declares the arguments of '<team>' differently");
+        assertThatThrownBy(() -> parser.parse(new ArgumentsAfterPlaceholder())).hasMessageContaining("takes arguments after the placeholders of its path");
+        assertThatThrownBy(() -> parser.parse(new VariadicString())).hasMessageContaining("has @Variadic, which applies to a List argument");
+        assertThatThrownBy(() -> parser.parse(new ArgumentPermission())).hasMessageContaining("has @Permission, which does not apply to an argument");
+        assertThatThrownBy(() -> parser.parse(new CaptionedOption())).hasMessageContaining("has @Description with a caption");
+        assertThatThrownBy(() -> parser.parse(new UnknownOptionType())).hasMessageContaining("has @Option, but there is no argument type for java.lang.Thread");
+        assertThatThrownBy(() -> parser.parse(new ConfirmedPlaceholder())).hasMessageContaining("has @Confirm; its path ends in a placeholder");
+    }
+
+    private static void assertSameCommand(TestCommand annotated, TestCommand fluent) {
+        assertThat(CommandTreeRenderer.render(List.of(annotated),
+                                              "test.command")).isEqualTo(CommandTreeRenderer.render(List.of(fluent),
+                                                                                                    "test.command"));
+        assertThat(CommandDocs.of("test.command", annotated)
+                              .json()).isEqualTo(CommandDocs.of("test.command", fluent)
+                                                            .json());
+        assertThat(CommandDocs.of("test.command", annotated)
+                              .markdown()).isEqualTo(CommandDocs.of("test.command", fluent)
+                                                                .markdown());
+    }
+
+    /**
+     * What each input sends, or how Brigadier rejects it.
+     */
+    private static List<String> transcriptOrError(TestCommand command, List<String> inputs) {
+        TestCommandRunner runner = new TestCommandRunner(command);
+        List<String> lines = new ArrayList<>();
+        for (String input : inputs) {
+            try {
+                lines.add(input + " -> " + String.join(" | ",
+                                                       runner.execute(input)
+                                                             .messages()));
+            } catch (com.mojang.brigadier.exceptions.CommandSyntaxException e) {
+                lines.add(input + " -> rejected: " + e.getMessage());
+            }
+        }
+        return lines;
     }
 }

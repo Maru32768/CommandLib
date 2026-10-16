@@ -27,17 +27,49 @@ class AnnotationStyleTest {
 
     @Test
     void annotated_and_fluent_arena_commands_have_the_same_help_permissions_and_behavior() {
-        String annotated = describe(() -> AnnotatedCommands.parse(new AnnotatedArenaCommand()));
-        String fluent = describe(FluentArenaCommand::new);
+        String annotated = describe(() -> AnnotatedCommands.parse(new AnnotatedArenaCommand()),
+                                    INPUTS,
+                                    "arena delete ",
+                                    List.of("arena join lobby"));
+        String fluent = describe(FluentArenaCommand::new, INPUTS, "arena delete ", List.of("arena join lobby"));
 
         assertThat(annotated).isEqualTo(fluent);
         Snapshots.assertMatches("annotation-arena.snap", annotated);
     }
 
+    private static final List<String> GUILD_INPUTS = List.of("guild",
+                                                             "guild help",
+                                                             "guild red invite Steve Alex",
+                                                             "guild red invite Steve Alex Steve Alex",
+                                                             "guild red kick Steve",
+                                                             "guild red kick Steve -s",
+                                                             "guild red kick -s -l Steve",
+                                                             "guild red kick -r spam Steve",
+                                                             "guild red kick -r spam -b Alex Steve -l");
+
+    @Test
+    void annotated_and_fluent_guild_commands_have_the_same_help_permissions_and_behavior() {
+        List<String> console = List.of("guild", "guild red kick Steve");
+        String annotated = describe(() -> AnnotatedCommands.parser()
+                                                           .registerMiddleware("audit", FluentGuildCommand.AUDIT)
+                                                           .registerVisibility("players", FluentGuildCommand.PLAYERS)
+                                                           .parse(new AnnotatedGuildCommand()),
+                                    GUILD_INPUTS,
+                                    "guild red kick -",
+                                    console);
+        String fluent = describe(FluentGuildCommand::new, GUILD_INPUTS, "guild red kick -", console);
+
+        assertThat(annotated).isEqualTo(fluent);
+        Snapshots.assertMatches("annotation-guild.snap", annotated);
+    }
+
     /**
      * The command tree, the permissions, the suggestions and what each input sends.
      */
-    private static String describe(Supplier<Command> command) {
+    private static String describe(Supplier<Command> command,
+                                   List<String> inputs,
+                                   String suggestion,
+                                   List<String> consoleInputs) {
         List<String> lines = new ArrayList<>();
         // The tester creates the command, since Paper's arguments can only be created while it stubs the server.
         List<Command> created = new ArrayList<>();
@@ -57,14 +89,16 @@ class AnnotationStyleTest {
             lines.add("# Permissions");
             lines.add(CommandDocs.of("test.command", created.get(0))
                                  .permissionsMarkdown());
-            lines.add("# Suggestions of /arena delete");
-            lines.add(String.join(", ", tester.suggest("arena delete ", admin)));
+            lines.add("# Suggestions of /" + suggestion.trim());
+            lines.add(String.join(", ", tester.suggest(suggestion, admin)));
             lines.add("# Admin");
-            for (String input : INPUTS) {
+            for (String input : inputs) {
                 lines.add("/" + input + " -> " + run(tester, input, admin));
             }
             lines.add("# Console");
-            lines.add("/arena join lobby -> " + run(tester, "arena join lobby", console));
+            for (String input : consoleInputs) {
+                lines.add("/" + input + " -> " + run(tester, input, console));
+            }
         }
         return String.join("\n", lines);
     }

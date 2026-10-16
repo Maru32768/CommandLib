@@ -3,10 +3,12 @@ package dev.marulabs.commandlib.annotation;
 import java.lang.annotation.*;
 
 /**
- * Makes a parameter a value option, such as {@code --limit 10}, of type {@code boolean}, {@code int}, {@code long},
- * {@code float}, {@code double} or {@code String}. {@link Default} gives the value when the option is not given,
- * otherwise it is {@code false}, {@code 0} or an empty string. A {@code List} parameter takes the option up to
- * {@link #repeatable()} times.
+ * Makes a parameter a value option, such as {@code --limit 10}. A {@code boolean}, {@code int}, {@code long},
+ * {@code float}, {@code double} or {@code String} parameter is a value option of that type, whose value when the option
+ * is not given is {@link Default} or else {@code false}, {@code 0} or an empty string. A parameter of any other type
+ * takes the argument registered for the type as its value, as {@code Options.of(name, argument)} does, with
+ * {@link Suggest} and the registered annotations; it is required unless {@link Default} or {@link Optional} makes the
+ * argument optional. A {@code List} parameter takes the option up to {@link #repeatable()} times.
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)

@@ -1,5 +1,7 @@
 package dev.marulabs.commandlib.annotation;
 
+import dev.marulabs.commandlib.Caption;
+import dev.marulabs.commandlib.Captions;
 import dev.marulabs.commandlib.CommandOption;
 import dev.marulabs.commandlib.CommonArgument;
 import dev.marulabs.commandlib.CommonCommand;
@@ -10,6 +12,7 @@ import dev.marulabs.commandlib.DefaultPermission;
 import dev.marulabs.commandlib.Options;
 import dev.marulabs.commandlib.branch.ArgumentBranch;
 import dev.marulabs.commandlib.command.AsyncCommandExecutor;
+import dev.marulabs.commandlib.command.CommandMiddleware;
 import dev.marulabs.commandlib.command.Extractor;
 import dev.marulabs.commandlib.command.Prerequisite;
 import dev.marulabs.commandlib.exception.CommandPrerequisiteException;
@@ -27,6 +30,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -80,8 +84,23 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
                                                                                            Description.class,
                                                                                            Flag.class,
                                                                                            Option.class,
+                                                                                           Permission.class,
+                                                                                           Requires.class,
+                                                                                           Variadic.class,
                                                                                            // Last, so that a @Sender parameter can allow it.
                                                                                            Sender.class);
+    // The annotations that configure a command, and those that describe an argument branch on an @Execute method.
+    private static final List<Class<? extends Annotation>> COMMAND_ANNOTATIONS = List.of(Confirm.class,
+                                                                                         Cooldown.class,
+                                                                                         Condition.class,
+                                                                                         Middleware.class,
+                                                                                         OptionsAnywhere.class,
+                                                                                         MutuallyExclusive.class,
+                                                                                         Examples.class,
+                                                                                         CaptionBundle.class);
+    private static final List<Class<? extends Annotation>> BRANCH_ANNOTATIONS = List.of(Description.class,
+                                                                                        Permission.class,
+                                                                                        VisibleWhen.class);
 
     // The values of an omitted @Optional argument and of an @Option without @Default.
     private static final Map<Class<?>, Object> EMPTY_VALUES = Map.of(Boolean.class,
@@ -105,6 +124,8 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
     private final Map<Class<?>, Extractor<C, ?>> contextValues = new LinkedHashMap<>();
     private final Map<Class<?>, Object> dependencies = new HashMap<>();
     private final Map<String, Prerequisite<C>> conditions = new HashMap<>();
+    private final Map<String, Predicate<? super C>> visibilities = new HashMap<>();
+    private final Map<String, CommandMiddleware<? super C>> middlewares = new HashMap<>();
     // In registration order, which is the order the handlers apply in.
     private final Map<Class<? extends Annotation>, RegisteredHandler<?, ?, C>> annotationHandlers = new LinkedHashMap<>();
 
@@ -181,6 +202,27 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
     }
 
     /**
+     * Registers {@code predicate} under {@code name}, so that {@link VisibleWhen @VisibleWhen("name")} shows the
+     * command or the branch only to senders for whom it holds, as {@code visibleWhen(predicate)} does. It replaces the
+     * predicate registered before under the name.
+     */
+    public AnnotationParser<C, T> registerVisibility(@NotNull String name, @NotNull Predicate<? super C> predicate) {
+        visibilities.put(Objects.requireNonNull(name), Objects.requireNonNull(predicate));
+        return this;
+    }
+
+    /**
+     * Registers {@code middleware} under {@code name}, so that {@link Middleware @Middleware("name")} on a class or a
+     * subcommand method adds it to the command, as {@code addMiddleware(middleware)} does. It replaces the middleware
+     * registered before under the name.
+     */
+    public AnnotationParser<C, T> registerMiddleware(@NotNull String name,
+                                                     @NotNull CommandMiddleware<? super C> middleware) {
+        middlewares.put(Objects.requireNonNull(name), Objects.requireNonNull(middleware));
+        return this;
+    }
+
+    /**
      * Applies {@code handler} to every argument parameter annotated with {@code annotationType} whose value type is a
      * {@code valueType}. Handlers apply in registration order, after the factory and {@link Suggest}, and before the
      * argument is made variadic or optional, so a handler of a {@code List} parameter configures each value.
@@ -211,7 +253,11 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
         private final T root;
         // The commands by their path below the root, separated by spaces; the root is "".
         private final Map<String, T> commands = new HashMap<>();
+        // The argument branches of path placeholders by their path, such as "<team>".
+        private final Map<String, PathBranch> branches = new HashMap<>();
         private final IdentityHashMap<T, CommandState> states = new IdentityHashMap<>();
+        // What needs every option of the commands: @Requires and @MutuallyExclusive.
+        private final List<Runnable> deferred = new ArrayList<>();
 
         Parse(Object instance) {
             this.instance = instance;
@@ -241,6 +287,7 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
                                                            .thenComparing(Method::toGenericString))
                                          .collect(Collectors.toList());
             methods.forEach(this::addMethod);
+            deferred.forEach(Runnable::run);
             return root;
         }
 
@@ -276,16 +323,20 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
             if (method.isAnnotationPresent(Execute.class) || method.isAnnotationPresent(Subcommand.class)) {
                 return true;
             }
-            for (Class<? extends Annotation> x : List.of(Description.class,
-                                                         Permission.class,
-                                                         Confirm.class,
-                                                         Cooldown.class,
-                                                         Condition.class)) {
-                if (method.isAnnotationPresent(x)) {
+            for (Class<? extends Annotation> x : allOf(BRANCH_ANNOTATIONS, COMMAND_ANNOTATIONS)) {
+                if (has(method, x)) {
                     throw error(method, "has @" + x.getSimpleName() + " but neither @Execute nor @Subcommand");
                 }
             }
             return false;
+        }
+
+        private void rejectCommandAnnotations(Method method, String reason) {
+            for (Class<? extends Annotation> x : COMMAND_ANNOTATIONS) {
+                if (has(method, x)) {
+                    throw error(method, "has @" + x.getSimpleName() + "; " + reason);
+                }
+            }
         }
 
         private void addMethod(Method method) {
@@ -299,18 +350,23 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
                     && !CompletionStage.class.isAssignableFrom(returnType)) {
                 throw error(method, "must return void, int or a CompletionStage, not " + returnType.getName());
             }
-            T command;
-            if (subcommand != null) {
-                command = commandAt(method, subcommand);
-                configure(command, method, describe(method), subcommand.aliases());
+            Target target;
+            if (subcommand == null) {
+                target = new Target(root, null, Map.of());
+                rejectCommandAnnotations(method, "put it on the class");
             } else {
-                command = root;
-                for (Class<? extends Annotation> x : List.of(Confirm.class, Cooldown.class, Condition.class)) {
-                    if (method.isAnnotationPresent(x)) {
-                        throw error(method, "has @" + x.getSimpleName() + "; put it on the class");
+                target = commandAt(method, subcommand);
+                if (target.branch == null) {
+                    configure(target.command, method, describe(method), subcommand.aliases());
+                } else {
+                    rejectCommandAnnotations(method,
+                                             "its path ends in a placeholder, so it describes an argument branch");
+                    if (subcommand.aliases().length > 0) {
+                        throw error(method, "has aliases, but its path ends in a placeholder");
                     }
                 }
             }
+            T command = target.command;
             try {
                 method.setAccessible(true);
             } catch (RuntimeException e) {
@@ -320,16 +376,33 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
             List<CommonArgument<?, C, ?>> arguments = new ArrayList<>();
             List<Extractor<C, ?>> resolvers = new ArrayList<>();
             for (Parameter parameter : method.getParameters()) {
-                resolvers.add(resolve(method, parameter, command, arguments));
+                CommonArgument<?, C, ?> placeholder = target.placeholders.get(parameter);
+                resolvers.add(placeholder != null ? ctx -> ctx.getArgument(placeholder)
+                        : resolve(method, parameter, command, arguments));
             }
             AsyncCommandExecutor<C> executor = executor(method, resolvers);
 
-            if (arguments.isEmpty()) {
-                if (execute != null && (method.isAnnotationPresent(Description.class)
-                        || method.isAnnotationPresent(Permission.class))) {
+            PathBranch pathBranch = target.branch;
+            if (pathBranch != null) {
+                if (!arguments.isEmpty()) {
                     throw error(method,
-                                "has no arguments, so its @Description and @Permission would describe the "
-                                        + "command; put them on the class");
+                                "takes arguments after the placeholders of its path; put them in the path or in a "
+                                        + "subcommand");
+                }
+                if (pathBranch.hasExecutor) {
+                    throw error(method, "executes '" + pathOf(method) + "', as another method does");
+                }
+                pathBranch.hasExecutor = true;
+                pathBranch.branch.executeAsync(executor);
+                describeBranch(method, pathBranch.branch);
+                return;
+            }
+            if (arguments.isEmpty()) {
+                if (execute != null && BRANCH_ANNOTATIONS.stream()
+                                                         .anyMatch(x -> has(method, x))) {
+                    throw error(method,
+                                "has no arguments, so its @Description, @Permission and @VisibleWhen would describe "
+                                        + "the command; put them on the class");
                 }
                 CommandState state = state(command);
                 if (state.hasExecutor) {
@@ -342,53 +415,153 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
             ArgumentBranch<C, T> branch = command.argument(arguments)
                                                  .executeAsync(executor);
             if (execute != null) {
-                Description description = method.getAnnotation(Description.class);
-                if (description != null) {
-                    branch.description(description.value());
-                }
-                Permission permission = method.getAnnotation(Permission.class);
-                if (permission != null) {
-                    applyPermission(method,
-                                    permission,
-                                    branch::permission,
-                                    branch::permission,
-                                    branch::permissionDescription);
-                }
+                describeBranch(method, branch);
             }
         }
 
-        private T commandAt(Method method, Subcommand subcommand) {
+        private void describeBranch(Method method, ArgumentBranch<C, T> branch) {
+            Description description = method.getAnnotation(Description.class);
+            if (description != null) {
+                Function<C, String> localized = localized(description);
+                if (localized != null) {
+                    branch.description(localized);
+                } else {
+                    branch.description(description.value());
+                }
+            }
+            Permission permission = method.getAnnotation(Permission.class);
+            if (permission != null) {
+                applyPermission(method,
+                                permission,
+                                branch::permission,
+                                branch::permission,
+                                branch::permissionDescription);
+            }
+            VisibleWhen visibleWhen = method.getAnnotation(VisibleWhen.class);
+            if (visibleWhen != null) {
+                branch.visibleWhen(named(visibilities,
+                                         visibleWhen.value(),
+                                         describe(method),
+                                         "@VisibleWhen",
+                                         "visibility predicate",
+                                         "registerVisibility"));
+            }
+        }
+
+        /**
+         * The command of a {@code @Subcommand} path, creating the commands and the argument branches of its
+         * placeholders that are missing, and the branch when the path ends in placeholders.
+         */
+        private Target commandAt(Method method, Subcommand subcommand) {
             List<String> segments = segments(subcommand);
             if (segments.isEmpty()) {
                 throw error(method, "has an empty @Subcommand; use @Execute for the command itself");
             }
             T current = root;
+            PathBranch branch = null;
+            Map<Parameter, CommonArgument<?, C, ?>> placeholders = new HashMap<>();
             List<String> path = new ArrayList<>();
-            for (String segment : segments) {
+            for (int i = 0; i < segments.size(); i++) {
+                String segment = segments.get(i);
+                if (isPlaceholder(segment)) {
+                    // Adjacent placeholders form one branch, as argument(a, b).child(...) does.
+                    List<Parameter> parameters = new ArrayList<>();
+                    for (; i < segments.size() && isPlaceholder(segments.get(i)); i++) {
+                        String name = segments.get(i);
+                        parameters.add(placeholderParameter(method, name.substring(1, name.length() - 1)));
+                        path.add(name);
+                    }
+                    i--;
+                    branch = branchAt(method, current, String.join(" ", path), parameters);
+                    for (int j = 0; j < parameters.size(); j++) {
+                        placeholders.put(parameters.get(j), branch.arguments.get(j));
+                    }
+                    continue;
+                }
                 path.add(segment);
                 T parent = current;
+                PathBranch parentBranch = branch;
                 current = commands.computeIfAbsent(String.join(" ", path), x -> {
                     T child = commandFactory.apply(segment);
-                    parent.addChildren(List.of(child));
+                    if (parentBranch != null) {
+                        parentBranch.branch.child(child);
+                    } else {
+                        parent.addChildren(List.of(child));
+                    }
                     return child;
                 });
+                branch = null;
             }
-            return current;
+            return new Target(current, branch, placeholders);
+        }
+
+        private PathBranch branchAt(Method method, T command, String path, List<Parameter> parameters) {
+            List<Set<Object>> keys = parameters.stream()
+                                               .map(AnnotationParser::declaration)
+                                               .collect(Collectors.toList());
+            PathBranch branch = branches.get(path);
+            if (branch != null) {
+                if (!branch.keys.equals(keys)) {
+                    throw error(method, "declares the arguments of '" + path + "' differently from another method");
+                }
+                return branch;
+            }
+            List<CommonArgument<?, C, ?>> arguments = new ArrayList<>();
+            for (Parameter parameter : parameters) {
+                boolean variadic = parameter.getType() == List.class;
+                Class<?> valueType = variadic ? elementType(method, parameter) : box(parameter.getType());
+                ArgumentFactory<C> factory = factory(valueType);
+                if (factory == null) {
+                    throw error(method,
+                                parameter,
+                                "has no argument type for " + valueType.getName()
+                                        + "; register one with registerArgument");
+                }
+                arguments.add(argument(method, parameter, factory, valueType, variadic));
+            }
+            branch = new PathBranch(command.argument(arguments), arguments, keys);
+            branches.put(path, branch);
+            return branch;
+        }
+
+        private Parameter placeholderParameter(Method method, String name) {
+            for (Parameter parameter : method.getParameters()) {
+                Class<?> rawType = parameter.getType();
+                boolean isContext = CommonCommandContext.class.isAssignableFrom(rawType)
+                        && rawType.isAssignableFrom(contextType);
+                if (isContext || has(parameter, Sender.class) || has(parameter, Flag.class)
+                        || has(parameter, Option.class)) {
+                    continue;
+                }
+                Name declared = parameter.getAnnotation(Name.class);
+                String parameterName = declared != null ? declared.value()
+                        : parameter.isNamePresent() ? parameter.getName() : null;
+                if (name.equals(parameterName)) {
+                    return parameter;
+                }
+            }
+            throw error(method,
+                        "has <" + name + "> in its @Subcommand path, but no argument parameter named " + name
+                                + " (compile with -parameters or annotate it with @Name)");
         }
 
         /**
          * Applies the command annotations of {@code element}, which only one element of a command may give.
          */
         private void configure(T command, AnnotatedElement element, String source, String[] aliases) {
+            if (aliases.length == 0 && allOf(BRANCH_ANNOTATIONS, COMMAND_ANNOTATIONS).stream()
+                                                                                     .noneMatch(x -> has(element, x))) {
+                return;
+            }
             Description description = element.getAnnotation(Description.class);
             Permission permission = element.getAnnotation(Permission.class);
             Confirm confirm = element.getAnnotation(Confirm.class);
             Cooldown cooldown = element.getAnnotation(Cooldown.class);
             Condition condition = element.getAnnotation(Condition.class);
-            if (description == null && permission == null && confirm == null && cooldown == null && condition == null
-                    && aliases.length == 0) {
-                return;
-            }
+            VisibleWhen visibleWhen = element.getAnnotation(VisibleWhen.class);
+            Middleware middleware = element.getAnnotation(Middleware.class);
+            Examples examples = element.getAnnotation(Examples.class);
+            CaptionBundle captionBundle = element.getAnnotation(CaptionBundle.class);
             CommandState state = state(command);
             if (state.configuredBy != null) {
                 throw new IllegalArgumentException(source + " configures '" + command.name() + "', which "
@@ -398,8 +571,44 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
             if (aliases.length > 0) {
                 command.addAliases(Arrays.asList(aliases));
             }
+            if (captionBundle != null) {
+                command.captions(Captions.create()
+                                         .bundle(captionBundle.value(), type.getClassLoader()));
+            }
             if (description != null) {
-                command.description(description.value());
+                Function<C, String> localized = localized(description);
+                if (localized != null) {
+                    command.description(localized);
+                } else {
+                    command.description(description.value());
+                }
+            }
+            if (examples != null) {
+                command.examples(examples.value());
+            }
+            if (element.isAnnotationPresent(OptionsAnywhere.class)) {
+                command.optionsAnywhere();
+            }
+            if (visibleWhen != null) {
+                command.visibleWhen(named(visibilities,
+                                          visibleWhen.value(),
+                                          source,
+                                          "@VisibleWhen",
+                                          "visibility predicate",
+                                          "registerVisibility"));
+            }
+            if (middleware != null) {
+                for (String name : middleware.value()) {
+                    command.addMiddleware(named(middlewares,
+                                                name,
+                                                source,
+                                                "@Middleware",
+                                                "middleware",
+                                                "registerMiddleware"));
+                }
+            }
+            for (MutuallyExclusive group : element.getAnnotationsByType(MutuallyExclusive.class)) {
+                deferred.add(() -> mutuallyExclusive(command, source, group.value()));
             }
             if (permission != null) {
                 applyPermission(element,
@@ -418,15 +627,52 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
             }
             if (condition != null) {
                 for (String name : condition.value()) {
-                    Prerequisite<C> prerequisite = conditions.get(name);
-                    if (prerequisite == null) {
-                        throw new IllegalArgumentException(source + " has @Condition(\"" + name
-                                + "\"), but no condition of that name is registered; register one with "
-                                + "registerCondition");
-                    }
-                    command.addPrerequisite(prerequisite);
+                    command.addPrerequisite(named(conditions,
+                                                  name,
+                                                  source,
+                                                  "@Condition",
+                                                  "condition",
+                                                  "registerCondition"));
                 }
             }
+        }
+
+        private <V> V named(Map<String, V> registry,
+                            String name,
+                            String source,
+                            String annotation,
+                            String kind,
+                            String register) {
+            V value = registry.get(name);
+            if (value == null) {
+                throw new IllegalArgumentException(source + " has " + annotation + "(\"" + name + "\"), but no " + kind
+                        + " of that name is registered; register one with " + register);
+            }
+            return value;
+        }
+
+        @Nullable
+        private Function<C, String> localized(Description description) {
+            if (description.caption()
+                           .isEmpty()) {
+                return null;
+            }
+            Caption caption = Caption.of(description.caption(), description.value());
+            return ctx -> ctx.caption(caption);
+        }
+
+        @SuppressWarnings({"unchecked", "rawtypes"})
+        private void mutuallyExclusive(T command, String source, String[] names) {
+            List<CommandOption<?, C>> group = new ArrayList<>();
+            for (String name : names) {
+                RegisteredOption option = state(command).options.get(name);
+                if (option == null) {
+                    throw new IllegalArgumentException(source + " has @MutuallyExclusive with --" + name + ", but '"
+                            + command.name() + "' has no option of that name");
+                }
+                group.add(option.option);
+            }
+            command.mutuallyExclusive(group.toArray(new CommandOption[0]));
         }
 
         private void applyPermission(AnnotatedElement element,
@@ -480,10 +726,7 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
 
             boolean variadic = rawType == List.class;
             Class<?> valueType = variadic ? elementType(method, parameter) : box(rawType);
-            ArgumentFactory<C> factory = argumentFactories.get(valueType);
-            if (factory == null && valueType.isEnum()) {
-                factory = argumentFactories.get(Enum.class);
-            }
+            ArgumentFactory<C> factory = factory(valueType);
             if (factory == null) {
                 if (variadic || !contextTypes.contains(valueType)) {
                     throw error(method,
@@ -499,19 +742,40 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
             return ctx -> ctx.getArgument(argument);
         }
 
+        @Nullable
+        private ArgumentFactory<C> factory(Class<?> valueType) {
+            ArgumentFactory<C> factory = argumentFactories.get(valueType);
+            return factory == null && valueType.isEnum() ? argumentFactories.get(Enum.class) : factory;
+        }
+
         private CommonArgument<?, C, ?> argument(Method method,
                                                  Parameter parameter,
                                                  ArgumentFactory<C> factory,
                                                  Class<?> valueType,
                                                  boolean variadic) {
-            reject(method, parameter, "an argument", List.of(Description.class));
+            reject(method, parameter, "an argument", List.of(Description.class, Permission.class, Requires.class));
+            return argument(method, parameter, factory, valueType, variadic, argumentName(method, parameter));
+        }
+
+        /**
+         * The argument of a parameter, or of the value of an option when {@code name} is the option's.
+         */
+        private CommonArgument<?, C, ?> argument(Method method,
+                                                 Parameter parameter,
+                                                 ArgumentFactory<C> factory,
+                                                 Class<?> valueType,
+                                                 boolean variadic,
+                                                 String name) {
             if (parameter.isAnnotationPresent(Range.class) && !Number.class.isAssignableFrom(valueType)) {
                 throw error(method, parameter, "has @Range, but " + valueType.getName() + " is not a number");
             }
             if (parameter.isAnnotationPresent(Greedy.class) && valueType != String.class) {
                 throw error(method, parameter, "has @Greedy, but " + valueType.getName() + " is not a String");
             }
-            String name = argumentName(method, parameter);
+            Variadic maximum = parameter.getAnnotation(Variadic.class);
+            if (maximum != null && !variadic) {
+                throw error(method, parameter, "has @Variadic, which applies to a List argument");
+            }
             CommonArgument<?, C, ?> argument = factory.create(new AnnotatedParameter(name, valueType, parameter));
             Suggest suggest = parameter.getAnnotation(Suggest.class);
             if (suggest != null) {
@@ -539,7 +803,7 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
                 }
             }
             if (variadic) {
-                argument = argument.variadic();
+                argument = maximum == null ? argument.variadic() : argument.variadic(maximum.max());
             }
 
             Default defaultValue = parameter.getAnnotation(Default.class);
@@ -634,7 +898,7 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
         private CommandOption<?, C> option(Method method, Parameter parameter, T command) {
             Flag flag = parameter.getAnnotation(Flag.class);
             Option option = parameter.getAnnotation(Option.class);
-            reject(method, parameter, "an option", List.of(Optional.class, Suggest.class, Name.class, Greedy.class));
+            reject(method, parameter, "an option", List.of(Name.class, Variadic.class));
             String declaredName;
             if (flag != null) {
                 if (option != null) {
@@ -649,8 +913,7 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
 
             // Methods of one command share its options, so a second declaration must match the first.
             CommandState state = state(command);
-            Set<Object> key = new HashSet<>(Arrays.asList(parameter.getAnnotations()));
-            key.add(parameter.getParameterizedType());
+            Set<Object> key = declaration(parameter);
             RegisteredOption registered = state.options.get(name);
             if (registered != null) {
                 if (!registered.key.equals(key)) {
@@ -663,12 +926,51 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
             CommandOption<?, C> created = flag != null ? flagOption(method, parameter, name, flag)
                     : valueOption(method, parameter, name, Objects.requireNonNull(option));
             CommandOption<?, C> added = command.option(created);
-            state.options.put(name, new RegisteredOption(key, added));
+            // A repeatable option has no single value for @Requires(equalTo) to compare.
+            Class<?> valueType = parameter.getType() == List.class ? null : box(parameter.getType());
+            state.options.put(name, new RegisteredOption(key, added, valueType));
+            for (Requires requires : parameter.getAnnotationsByType(Requires.class)) {
+                deferred.add(() -> require(method, parameter, command, added, requires));
+            }
             return added;
         }
 
+        private void require(Method method,
+                             Parameter parameter,
+                             T command,
+                             CommandOption<?, C> option,
+                             Requires requires) {
+            RegisteredOption other = state(command).options.get(requires.value());
+            if (other == null) {
+                throw error(method,
+                            parameter,
+                            "has @Requires(\"" + requires.value() + "\"), but '" + command.name()
+                                    + "' has no option of that name");
+            }
+            String[] equalTo = requires.equalTo();
+            if (equalTo.length > 1) {
+                throw error(method, parameter, "has @Requires with more than one equalTo value");
+            }
+            if (equalTo.length == 0) {
+                option.requires(other.option);
+                return;
+            }
+            Class<?> valueType = other.valueType;
+            if (valueType == null) {
+                throw error(method,
+                            parameter,
+                            "has @Requires(\"" + requires.value() + "\") with equalTo, but --" + requires.value()
+                                    + " is repeatable");
+            }
+            String what = "@Requires(value = \"" + requires.value() + "\", equalTo = \"" + equalTo[0] + "\")";
+            requireValue(option, other.option, parseValue(method, parameter, valueType, equalTo[0], what));
+        }
+
         private CommandOption<?, C> flagOption(Method method, Parameter parameter, String name, Flag flag) {
-            reject(method, parameter, "a @Flag parameter", List.of(Default.class, Range.class));
+            reject(method,
+                   parameter,
+                   "a @Flag parameter",
+                   List.of(Default.class, Range.class, Optional.class, Suggest.class, Greedy.class));
             Class<?> valueType = box(parameter.getType());
             char shortName = flag.shortName();
             CommandOption<?, C> option;
@@ -686,7 +988,7 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
             } else {
                 throw error(method, parameter, "has @Flag, which needs a boolean or int parameter");
             }
-            return finishOption(option, flag.aliases(), parameter);
+            return finishOption(method, option, flag.aliases(), parameter);
         }
 
         private CommandOption<?, C> valueOption(Method method, Parameter parameter, String name, Option annotation) {
@@ -698,30 +1000,40 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
                                     : "has repeatable, which needs a List parameter");
             }
             Class<?> valueType = repeatable ? elementType(method, parameter) : box(parameter.getType());
-            Object empty = emptyValue(valueType);
-            if (empty == null) {
+            Default defaultValue = parameter.getAnnotation(Default.class);
+            if (repeatable && (defaultValue != null || parameter.isAnnotationPresent(Optional.class))) {
                 throw error(method,
                             parameter,
-                            "has @Option, which needs a boolean, int, long, float, double or " + "String parameter");
+                            "is repeatable and cannot take @Default or @Optional; it gives an empty list");
             }
-            Range range = parameter.getAnnotation(Range.class);
-            if (range != null && valueType != Integer.class) {
-                throw error(method, parameter, "has @Range, which applies to int options only");
+            Object empty = emptyValue(valueType);
+            CommandOption<?, C> created;
+            if (empty == null) {
+                ArgumentFactory<C> factory = factory(valueType);
+                if (factory == null) {
+                    throw error(method,
+                                parameter,
+                                "has @Option, but there is no argument type for " + valueType.getName()
+                                        + "; register one with registerArgument");
+                }
+                created = argumentOption(name,
+                                         annotation.shortName(),
+                                         argument(method, parameter, factory, valueType, false, name));
+            } else {
+                reject(method,
+                       parameter,
+                       "an option of " + valueType.getSimpleName(),
+                       List.of(Optional.class, Suggest.class, Greedy.class));
+                Range range = parameter.getAnnotation(Range.class);
+                if (range != null && valueType != Integer.class) {
+                    throw error(method, parameter, "has @Range, which applies to int options only");
+                }
+                Object value = defaultValue == null ? empty
+                        : parseDefault(method, parameter, valueType, defaultValue.value());
+                created = createValueOption(name, annotation.shortName(), valueType, value, range);
             }
-            Default defaultValue = parameter.getAnnotation(Default.class);
-            if (defaultValue != null && repeatable) {
-                throw error(method, parameter, "is repeatable and cannot take @Default; it gives an empty list");
-            }
-            Object value = defaultValue == null ? empty
-                    : parseDefault(method, parameter, valueType, defaultValue.value());
 
-            CommandOption<?, C> option = finishOption(createValueOption(name,
-                                                                        annotation.shortName(),
-                                                                        valueType,
-                                                                        value,
-                                                                        range),
-                                                      annotation.aliases(),
-                                                      parameter);
+            CommandOption<?, C> option = finishOption(method, created, annotation.aliases(), parameter);
             if (repeatable) {
                 option = option.repeatable(annotation.repeatable());
             }
@@ -763,7 +1075,12 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
                     : Options.<C>string(name, (String) value);
         }
 
-        private <V> CommandOption<V, C> finishOption(CommandOption<V, C> option,
+        private <V> CommandOption<V, C> argumentOption(String name, char shortName, CommonArgument<V, C, ?> argument) {
+            return shortName == 0 ? Options.of(name, argument) : Options.of(name, shortName, argument);
+        }
+
+        private <V> CommandOption<V, C> finishOption(Method method,
+                                                     CommandOption<V, C> option,
                                                      String[] aliases,
                                                      Parameter parameter) {
             if (aliases.length > 0) {
@@ -771,7 +1088,33 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
             }
             Description description = parameter.getAnnotation(Description.class);
             if (description != null) {
+                if (!description.caption()
+                                .isEmpty()) {
+                    throw error(method,
+                                parameter,
+                                "has @Description with a caption; an option has a fixed description");
+                }
                 option.description(description.value());
+            }
+            Permission permission = parameter.getAnnotation(Permission.class);
+            if (permission != null) {
+                DefaultPermission[] defaults = permission.defaultPermission();
+                String node = permission.value();
+                if (!permission.description()
+                               .isEmpty()
+                        || defaults.length > 1 || (node.isEmpty() && defaults.length == 0)) {
+                    throw error(method,
+                                parameter,
+                                "has @Permission, which on an option needs a node or one defaultPermission, and "
+                                        + "takes no description");
+                }
+                if (node.isEmpty()) {
+                    option.permission(defaults[0]);
+                } else if (defaults.length == 0) {
+                    option.permission(node);
+                } else {
+                    option.permission(node, defaults[0]);
+                }
             }
             return option;
         }
@@ -843,6 +1186,13 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
         }
 
         private Object parseDefault(Method method, Parameter parameter, Class<?> valueType, String text) {
+            return parseValue(method, parameter, valueType, text, "@Default(\"" + text + "\")");
+        }
+
+        /**
+         * Converts {@code text}, which {@code what} names in errors, to a value of {@code valueType}.
+         */
+        private Object parseValue(Method method, Parameter parameter, Class<?> valueType, String text, String what) {
             try {
                 if (valueType == String.class) {
                     return text;
@@ -860,9 +1210,7 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
                     return Double.valueOf(text);
                 }
             } catch (NumberFormatException e) {
-                throw error(method,
-                            parameter,
-                            "has @Default(\"" + text + "\"), which is not a valid " + valueType.getSimpleName());
+                throw error(method, parameter, "has " + what + ", which is not a valid " + valueType.getSimpleName());
             }
             if (valueType == Boolean.class && (text.equals("true") || text.equals("false"))) {
                 return Boolean.valueOf(text);
@@ -878,8 +1226,8 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
             }
             throw error(method,
                         parameter,
-                        "has @Default(\"" + text + "\"), which is not a valid " + valueType.getName()
-                                + "; @Default takes strings, numbers, booleans and enum constants");
+                        "has " + what + ", which is not a valid " + valueType.getName()
+                                + "; it takes strings, numbers, booleans and enum constants");
         }
 
         private void reject(Method method,
@@ -887,7 +1235,7 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
                             String kind,
                             List<Class<? extends Annotation>> annotationTypes) {
             for (Class<? extends Annotation> x : annotationTypes) {
-                if (parameter.isAnnotationPresent(x)) {
+                if (has(parameter, x)) {
                     throw error(method, parameter, "has @" + x.getSimpleName() + ", which does not apply to " + kind);
                 }
             }
@@ -918,6 +1266,37 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
         String value = subcommand.value()
                                  .trim();
         return value.isEmpty() ? List.of() : Arrays.asList(value.split("\\s+"));
+    }
+
+    private static boolean isPlaceholder(String segment) {
+        return segment.length() > 2 && segment.startsWith("<") && segment.endsWith(">");
+    }
+
+    // Repeatable annotations are found only through getAnnotationsByType.
+    private static boolean has(AnnotatedElement element, Class<? extends Annotation> annotationType) {
+        return element.getAnnotationsByType(annotationType).length > 0;
+    }
+
+    private static List<Class<? extends Annotation>> allOf(List<Class<? extends Annotation>> a,
+                                                           List<Class<? extends Annotation>> b) {
+        List<Class<? extends Annotation>> result = new ArrayList<>(a);
+        result.addAll(b);
+        return result;
+    }
+
+    /**
+     * What makes two parameters declare the same option or placeholder argument: their annotations and type.
+     */
+    private static Set<Object> declaration(Parameter parameter) {
+        Set<Object> key = new HashSet<>(Arrays.asList(parameter.getAnnotations()));
+        key.add(parameter.getParameterizedType());
+        return key;
+    }
+
+    // The value was converted to the type of the other option.
+    @SuppressWarnings("unchecked")
+    private static void requireValue(CommandOption<?, ?> option, CommandOption<?, ?> other, Object value) {
+        option.requires((CommandOption<Object, ?>) other, value);
     }
 
     private static <D extends CommonCommandContext<?, ?>> Extractor<D, ?> contextValue(Class<?> type) {
@@ -960,10 +1339,45 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
     private final class RegisteredOption {
         private final Set<Object> key;
         private final CommandOption<?, C> option;
+        // The type of the value, or null for a repeatable option.
+        private final @Nullable Class<?> valueType;
 
-        RegisteredOption(Set<Object> key, CommandOption<?, C> option) {
+        RegisteredOption(Set<Object> key, CommandOption<?, C> option, @Nullable Class<?> valueType) {
             this.key = key;
             this.option = option;
+            this.valueType = valueType;
+        }
+    }
+
+    /**
+     * The argument branch of the placeholders of a {@code @Subcommand} path, shared by the methods below it.
+     */
+    private final class PathBranch {
+        private final ArgumentBranch<C, T> branch;
+        private final List<CommonArgument<?, C, ?>> arguments;
+        private final List<Set<Object>> keys;
+        private boolean hasExecutor;
+
+        PathBranch(ArgumentBranch<C, T> branch, List<CommonArgument<?, C, ?>> arguments, List<Set<Object>> keys) {
+            this.branch = branch;
+            this.arguments = arguments;
+            this.keys = keys;
+        }
+    }
+
+    /**
+     * Where a method runs: its command, the branch when its path ends in placeholders, and the parameters that take
+     * the placeholders' values.
+     */
+    private final class Target {
+        private final T command;
+        private final @Nullable PathBranch branch;
+        private final Map<Parameter, CommonArgument<?, C, ?>> placeholders;
+
+        Target(T command, @Nullable PathBranch branch, Map<Parameter, CommonArgument<?, C, ?>> placeholders) {
+            this.command = command;
+            this.branch = branch;
+            this.placeholders = placeholders;
         }
     }
 
