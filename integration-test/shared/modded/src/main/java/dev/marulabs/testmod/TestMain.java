@@ -48,7 +48,8 @@ public final class TestMain {
                                            new SuggestionTest(mainCommand),
                                            new CommandSyntaxExceptionTest(mainCommand),
                                            new OptionTest(mainCommand),
-                                           new RuntimeFeatureTest(mainCommand));
+                                           new RuntimeFeatureTest(mainCommand),
+                                           new PermissionTest(mainCommand));
             new HelpMessageTest(mainCommand);
             List<String> commands = tests.stream()
                                          .flatMap(x -> x.build()

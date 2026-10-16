@@ -189,7 +189,8 @@ class IntegrationTest {
                                   "converted CommandSyntaxException message",
                                   m -> m.contains("argument.integer.big") || m.contains("Integer must not be more than")
                                           || unknownCommand.test(m));
-                // A node with PermissionDefault.FALSE is not usable even by an operator.
+                // A node with PermissionDefault.FALSE (DefaultPermission.NONE in the modded fixture) is not usable even by
+                // an operator. The modded fixture's console runs it during the tests, so it is known to be registered.
                 List<String> deniedMessages = assertBotReceives(client,
                                                                 "commandlibtest deniedProbe",
                                                                 "unknown command message for a node without permission",
