@@ -179,8 +179,9 @@ version、Brigadier、NMS の差分を意識しなくて済む状態を目指す
 backlog は作業項目、Product Pillars は仕様の詳細、Release Phases は公開可能なまとまりを示す。
 同じ機能の状態は実装状況サマリを基準に更新し、完了の証拠は roadmap-history に残す。
 
-1. **現在地と配布を固める**: 実装済み API の docs / tests を揃え、0.18.0 の移行、CI、binary compatibility、Maven Central を整える。
-   P6 の配布・品質項目は Phase 5 まで待たず、各 phase の公開前に必要な範囲を実施する。
+1. **現在地と配布を固める**: 実装済み API の docs / tests を揃え、0.18.0 の移行と release notes（`CHANGELOG.md`）を整える。
+   CI、CI での binary compatibility check、Maven Central への移行は 0.18.0 の release 後に回す（2026-10-17 決定）。
+   それ以外の P6 の配布・品質項目は Phase 5 まで待たず、各 phase の公開前に必要な範囲を実施する。
 2. **vanilla semantics を完成させる**: argument catalog、result / success、feedback、command block / function / tag の保証を優先する。
 3. **共通モデルを拡張する**: optional / variadic、8 引数以上の型安全な表現、options、sender / message、thread / async / middleware を設計する。
 4. **定義方法と platform を広げる**: 共通モデル上に builder / annotation / Kotlin、DI、locale と Folia / Velocity / Fabric、modded version matrix を載せる。
@@ -609,7 +610,8 @@ Exit criteria:
 - Folia の entity / region thread 復帰と安全な scheduler 利用を実サーバーで検証している。
 - Forge / NeoForge の対象 version matrix と公開 testing artifact の保証範囲を文書化している。
 - Forge / NeoForge / Fabric が Stonecutter による単一ソースから build されている。
-- public API の binary compatibility check が CI で動いている。
+- public API の binary compatibility check が CI で動いている（0.18.0 の後。CI 整備を 0.18.0 の後に回したため、0.18.0 の
+  release 条件にはしない）。
 - runtime platform capability diagnostics が使える。
 
 ### Phase 5: Ecosystem And Tooling
@@ -627,7 +629,8 @@ Exit criteria:
 
 - downstream plugins が command / permission documentation を生成できる。
 - server admins が registered commands、permissions、platform capabilities を確認できる。
-- Maven Central 配布、documentation site、競合からの migration guides と downstream compatibility test kit が利用できる。
+- Maven Central 配布、documentation site、競合からの migration guides と downstream compatibility test kit が利用できる
+  （Maven Central は 0.18.0 の後）。
 - 競合比較 suite と再現可能な benchmark 結果を公開し、未解決の差分と regression を追跡できる。
 
 ## Non-Goals
