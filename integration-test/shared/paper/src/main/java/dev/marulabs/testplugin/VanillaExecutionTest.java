@@ -28,7 +28,8 @@ public final class VanillaExecutionTest extends TestBase {
     private static final String SUCCESS_COUNT = "commandBlockSuccessCount";
     private final String playerName;
     private final World world;
-    // Two command blocks over the world spawn, which is loaded and ticking near the bot.
+    // Command blocks over the world spawn, in a chunk the test force-loads: some Paper versions tick neither the spawn
+    // chunks nor the chunks around the bot.
     private final int blockX;
     private final int blockY;
     private final int blockZ;
@@ -57,6 +58,7 @@ public final class VanillaExecutionTest extends TestBase {
     public List<String> afterReload() {
         return List.of(storeSuccessCount("#success", blockX),
                        storeSuccessCount("#failure", blockX + 2),
+                       storeSuccessCount("#vanilla", blockX + 4),
                        buildCommand(command, SUCCESS_COUNT));
     }
 
@@ -159,15 +161,19 @@ public final class VanillaExecutionTest extends TestBase {
         commandBlockSuccessCount();
 
         return List.of("scoreboard objectives add " + OBJECTIVE + " dummy",
+                       "forceload add " + blockX + " " + blockZ,
                        setCommandBlock(blockX, buildCommand(command, name)),
                        "setblock " + blockX + " " + (blockY + 1) + " " + blockZ + " minecraft:redstone_block",
                        setCommandBlock(blockX + 2, buildCommand(command, name + "Failure")),
-                       "setblock " + (blockX + 2) + " " + (blockY + 1) + " " + blockZ + " minecraft:redstone_block");
+                       "setblock " + (blockX + 2) + " " + (blockY + 1) + " " + blockZ + " minecraft:redstone_block",
+                       setCommandBlock(blockX + 4, "time query gametime"),
+                       "setblock " + (blockX + 4) + " " + (blockY + 1) + " " + blockZ + " minecraft:redstone_block");
     }
 
     /**
-     * SuccessCount counts the successful runs of the command block's command, not the result the command sets. It is
-     * dispatched after the reload, by when the blocks have run.
+     * SuccessCount counts the successful runs of the command block's command, not the result the command sets, as it
+     * does for the vanilla command of a third block: Spigot 1.20.3 counts none. It is dispatched after the reload, by
+     * when the blocks have run.
      */
     private void commandBlockSuccessCount() {
         String key = getClass().getSimpleName() + "." + SUCCESS_COUNT;
@@ -178,12 +184,19 @@ public final class VanillaExecutionTest extends TestBase {
                 Objective scores = Bukkit.getScoreboardManager()
                                          .getMainScoreboard()
                                          .getObjective(OBJECTIVE);
-                String actual = scores == null ? "no objective" : scores.getScore("#success")
-                                                                        .getScore()
+                if (scores == null) {
+                    putResult(key, "no objective", "an objective");
+                    return;
+                }
+                String actual = scores.getScore("#success")
+                                      .getScore()
                         + "," + scores.getScore("#failure")
                                       .getScore()
                         + "," + failureBlockRan.get();
-                putResult(key, actual, "1,0,true");
+                putResult(key,
+                          actual,
+                          scores.getScore("#vanilla")
+                                .getScore() + ",0,true");
             });
         }});
     }

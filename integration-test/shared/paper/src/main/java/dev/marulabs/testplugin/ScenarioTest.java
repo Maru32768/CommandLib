@@ -113,16 +113,26 @@ public final class ScenarioTest extends TestBase {
                 Objective scores = Bukkit.getScoreboardManager()
                                          .getMainScoreboard()
                                          .getObjective(objective);
-                String actual = scores == null ? "no objective" : scores.getScore("#result")
-                                                                        .getScore()
+                if (scores == null) {
+                    putResult(key, "no objective", "an objective");
+                    return;
+                }
+                String actual = scores.getScore("#result")
+                                      .getScore()
                         + "," + scores.getScore("#success")
                                       .getScore();
-                putResult(key, actual, "42,0");
+                // Spigot 1.20.3 stores 0 for every command, vanilla ones too; the result is stored as a vanilla one is.
+                boolean storeWorks = scores.getScore("#vanilla")
+                                           .getScore() == 7;
+                putResult(key, actual, storeWorks ? "42,0" : "0,0");
             });
         }});
 
         return List.of("scoreboard objectives add " + objective + " dummy",
                        "scoreboard players set #success " + objective + " 7",
+                       "scoreboard players set #seven " + objective + " 7",
+                       "execute store result score #vanilla " + objective + " run scoreboard players get #seven "
+                               + objective,
                        "execute store result score #result " + objective + " run "
                                + buildCommand(command, name + "Result"),
                        "execute store success score #success " + objective + " run "
