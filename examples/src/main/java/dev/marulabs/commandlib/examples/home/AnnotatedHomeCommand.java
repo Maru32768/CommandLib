@@ -1,8 +1,9 @@
 package dev.marulabs.commandlib.examples.home;
 
 import dev.marulabs.commandlib.CommandContext;
-import dev.marulabs.commandlib.annotation.AnnotatedCommands;
+import dev.marulabs.commandlib.annotation.CaptionBundle;
 import dev.marulabs.commandlib.annotation.Command;
+import dev.marulabs.commandlib.annotation.Description;
 import dev.marulabs.commandlib.annotation.Subcommand;
 import dev.marulabs.commandlib.exception.CommandPrerequisiteException;
 
@@ -11,19 +12,15 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * {@link FluentHomeCommand} written with annotations. There are no annotations for the captions or a localized
- * description, so {@link #create} sets them on the parsed command.
+ * {@link FluentHomeCommand} written with annotations: {@link CaptionBundle} loads the same bundle as
+ * {@link HomeCaptions#create()}, and the description is the caption {@link HomeCaptions#DESCRIPTION};
+ * {@code AnnotatedCommands.parse(new AnnotatedHomeCommand())}.
  */
 @Command("home")
+@CaptionBundle("lang/homes")
+@Description(value = "Manage your homes", caption = "example.home.description")
 public final class AnnotatedHomeCommand {
     private final Set<String> homes = new HashSet<>();
-
-    public static dev.marulabs.commandlib.Command create() {
-        dev.marulabs.commandlib.Command command = AnnotatedCommands.parse(new AnnotatedHomeCommand());
-        command.captions(HomeCaptions.create());
-        command.description(ctx -> ctx.caption(HomeCaptions.DESCRIPTION));
-        return command;
-    }
 
     @Subcommand("go")
     public void go(CommandContext ctx, String name) throws CommandPrerequisiteException {

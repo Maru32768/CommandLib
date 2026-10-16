@@ -123,21 +123,80 @@ Without it, name each argument with `@Name("target")`, and give `@Flag` and `@Op
 | `@Command(value, aliases)` | the class | `new Command(value)`, `addAliases(...)` |
 | `@Execute` | a method | `execute(...)` without arguments, `argument(...).execute(...)` with them |
 | `@Subcommand("start")`, `@Subcommand("arena create")` | a method | `addChildren(new Command("start") ...)`; the path creates missing commands |
+| `@Subcommand("<team> add")` | a method | `argument(team).child(team -> new Command("add") ...)`; see [argument-first paths](#argument-first-paths) |
 | `@Description("...")` | class, method, option parameter | `description(...)` of the command, the subcommand, the branch of an `@Execute` method, or the option |
-| `@Permission(value, defaultPermission, description)` | class, method | `permission(...)` of the command, the subcommand, or the branch of an `@Execute` method; attributes left out keep the generated node and the inherited default |
+| `@Description(value = "Manage homes", caption = "myplugin.home.description")` | class, method | `description(ctx -> ctx.caption(Caption.of(caption, value)))`, the description in the sender's locale ([localization](localization.md)) |
+| `@Permission(value, defaultPermission, description)` | class, method, option parameter | `permission(...)` of the command, the subcommand, the branch of an `@Execute` method, or the option; attributes left out keep the generated node and the inherited default |
+| `@VisibleWhen("running")` | class, method | `visibleWhen(...)` of the command, the subcommand, or the branch of an `@Execute` method, with the predicate registered under the name with `registerVisibility` ([permissions](permissions.md#refreshing-the-command-tree)) |
 | `@Confirm(seconds = 10)` | class, `@Subcommand` method | `confirm(Confirmation.within(...))` |
 | `@Cooldown(value, unit)` | class, `@Subcommand` method | `cooldown(Duration)` |
 | `@Condition({"daytime", ...})` | class, `@Subcommand` method | `addPrerequisite(...)` with each prerequisite registered under the name with `registerCondition` |
+| `@Middleware({"audit", ...})` | class, `@Subcommand` method | `addMiddleware(...)` with each middleware registered under the name with `registerMiddleware`, in this order ([execution](execution.md#middleware)) |
+| `@OptionsAnywhere` | class, `@Subcommand` method | `optionsAnywhere()`: the options may follow the arguments ([options](options.md#options-after-the-arguments)) |
+| `@MutuallyExclusive({"json", "yaml"})` | class, `@Subcommand` method, repeatable | `mutuallyExclusive(json, yaml)` of the command's options with these names |
+| `@Examples({"/arena create lobby 16"})` | class, `@Subcommand` method | `examples(...)` ([help](help.md)) |
+| `@CaptionBundle("lang/homes")` | class, `@Subcommand` method | `captions(Captions.create().bundle("lang/homes", classLoader))` with the class loader of the parsed class |
 
 - Every method with arguments adds an argument branch to its command, so several methods can share a path:
   `@Subcommand("give") void give(Player target)` and `@Subcommand("give") void give(Player target, int count)`.
-  At most one of them may run the command without arguments, and only one may give `@Description`, `@Permission`,
-  `@Confirm`, `@Cooldown`, `@Condition` or aliases for the subcommand.
-- The class describes the command itself. On an `@Execute` method, `@Description` and `@Permission` describe its
-  argument branch, so a method without arguments cannot have them.
+  At most one of them may run the command without arguments, and only one may give the annotations that configure
+  the subcommand (everything in the table but `@Execute` and `@Subcommand`) or aliases.
+- The class describes the command itself. On an `@Execute` method, `@Description`, `@Permission` and `@VisibleWhen`
+  describe its argument branch, so a method without arguments cannot have them; the other command annotations go on
+  the class.
 - Methods are added in the order of their path and then their name, because reflection does not give the order of the
   source. Help lists subcommands and branches in that order.
 - Methods may be private and static. Methods of superclasses are not read.
+
+### Argument-first paths
+
+A placeholder such as `<team>` in a `@Subcommand` path is an argument that the rest of the path follows, as
+`argument(...).child(...)` does ([argument children](design/argument-child-command.md)):
+
+```java
+@Command("team")
+public final class TeamCommand {
+    @Execute
+    public void list(CommandContext ctx) {
+    }
+
+    @Subcommand("<team>")
+    @Description("Show a team")
+    public void show(CommandContext ctx, Team team) {
+    }
+
+    @Subcommand("<team> add")
+    public void add(CommandContext ctx, Team team, Player player) {
+    }
+
+    @Subcommand("<team> remove")
+    public void remove(CommandContext ctx, Team team, Player player) {
+    }
+}
+```
+
+```java
+// The same command, fluently.
+execute(ctx -> {});
+argument(new TeamArgument("team")).description("Show a team")
+                                  .execute((team, ctx) -> {})
+                                  .child(team -> new Command("add") {{
+                                      argument(new PlayerArgument("player")).execute((player, ctx) -> {});
+                                  }})
+                                  .child(team -> new Command("remove") {{
+                                      argument(new PlayerArgument("player")).execute((player, ctx) -> {});
+                                  }});
+```
+
+- The method takes the placeholder's value as its argument parameter of the same name (`Team team` for `<team>`).
+  The argument is made by the factory of the parameter's type, once for the path, so every method below `<team>`
+  must declare the parameter alike (the same type and annotations). The children read the parsed value, which is
+  parsed once.
+- Adjacent placeholders form one argument branch: `@Subcommand("<x> <y> go")` is `argument(x, y).child(...)`.
+- A path that ends in a placeholder, such as `"<team>"` above, executes the branch. The method takes no other
+  arguments; `@Description`, `@Permission` and `@VisibleWhen` on it describe the branch, and the other command
+  annotations go on a method of the command, or on the class.
+- `/team red` without a method for `"<team>"` shows the help, as a fluent branch without an executor does.
 
 ## Parameters
 
@@ -180,6 +239,7 @@ Context values: `CommandSender`, `ConsoleCommandSender` and `Player` on Spigot a
 | `@Range(min, max)` | Bounds of a numeric argument |
 | `@Suggest({"a", "b"})`, `@Suggest(method = "names")` | Replaces the suggestions with fixed values and / or the values of a method of the class, which returns an `Iterable<String>` or takes the `SuggestionBuilder` |
 | `@Greedy` | A string argument that takes the rest of the input |
+| `@Variadic(max = 5)` | A `List` argument that accepts up to 5 values, `variadic(5)` |
 
 Optional arguments must be the last arguments of a method, and a variadic one the very last; registration fails
 otherwise, as for fluent commands ([optional and variadic arguments](design/optional-variadic-arguments.md)).
@@ -194,10 +254,27 @@ otherwise, as for fluent commands ([optional and variadic arguments](design/opti
 | `@Option("tag") String tag` | `Options.string("tag", "")` |
 | `@Option(value = "tag", repeatable = 3) List<String> tags` | `Options.string("tag", "").repeatable(3)` |
 | `@Option(value = "env", required = true) String env` | `Options.string("env", "").required()` |
+| `@Option("world") World world` | `Options.of("world", new WorldArgument("world"))`, required |
+| `@Option(value = "target", shortName = 't') @Optional Player target` | `Options.of("target", 't', new PlayerArgument("target").optional(playerRequirer()))` |
+| `@Option("mode") @Default("creative") GameMode mode` | `Options.of("mode", new GameModeArgument("mode").optional(GameMode.CREATIVE))` |
+| `@Flag("silent") @Permission(defaultPermission = DefaultPermission.OP) boolean silent` | `Options.flag("silent").permission(DefaultPermission.OP)` |
+| `@Option("reason") @Permission("myplugin.ban.reason") String reason` | `Options.string("reason", "").permission("myplugin.ban.reason")` |
+| `@Option("reason") @Requires("force") String reason` | `Options.string("reason", "").requires(force)` |
+| `@Option("threads") @Requires(value = "mode", equalTo = "parallel") int threads` | `Options.integer("threads", 0).requires(mode, "parallel")` |
 
-`@Option` takes `boolean`, `int`, `long`, `float`, `double` and `String`; without `@Default` the default is `false`,
-`0` or `""`. Both take `aliases`, and `@Description` on the parameter describes the option. Options belong to the
-command of the method; methods of one command that declare the same option must declare it identically.
+A `boolean`, `int`, `long`, `float`, `double` or `String` parameter is a value option of that type; without
+`@Default` its default is `false`, `0` or `""`. A parameter of any other type takes the argument registered for the
+type as the option's value, with `@Suggest` and the registered annotations, as `Options.of` does
+([options](options.md#kinds)): it is required unless `@Default` or `@Optional` makes the argument optional. Both take
+`aliases`, and `@Description` on the parameter describes the option.
+
+- `@Permission` on an option gives it its own node: `value` as the exact node, or the generated
+  `<command node>.option.<name>` with `defaultPermission`; at least one of them, and no description.
+- `@Requires` names another option of the command by its long name: `requires(other)` needs it to be given, and
+  `equalTo` (converted like `@Default`) `requires(other, value)`. Repeat it for several requirements.
+- `@MutuallyExclusive` on the class or a `@Subcommand` method names the options of its command.
+- Options belong to the command of the method; methods of one command that declare the same option must declare it
+  identically.
 
 ### Results
 
@@ -228,6 +305,10 @@ Command command = AnnotatedCommands.parser()
         .registerAnnotation(Online.class, Player.class, (online, argument) -> argument.validator(Player::isOnline))
         // A named prerequisite for @Condition("daytime").
         .registerCondition("daytime", Conditions.DAYTIME)
+        // A named middleware for @Middleware("audit").
+        .registerMiddleware("audit", new AuditMiddleware(getLogger()))
+        // A named predicate for @VisibleWhen("open").
+        .registerVisibility("open", ctx -> shop.isOpen())
         .parse(new ShopCommand());
 ```
 
@@ -240,10 +321,13 @@ Command command = AnnotatedCommands.parser()
 - `registerCondition(name, prerequisite)` names a `Prerequisite` for `@Condition`. Parsing fails for a name nobody
   registered. Fluent commands add the same constant with `addPrerequisite`, see
   [errors](errors.md#reusable-conditions).
+- `registerMiddleware(name, middleware)` and `registerVisibility(name, predicate)` name a `CommandMiddleware` for
+  `@Middleware` and a predicate for `@VisibleWhen` the same way; a name nobody registered fails parsing too.
 - `registerContextValue` and `registerDependency` are described in [context values](context-values.md#annotated-commands):
   the parsed command provides the registered values, so fluent code added to it reads them with `ctx.get(type)`.
-- The parsed command is an ordinary `Command`: add middlewares, prerequisites or children with the fluent API before
-  registering it.
+- The parsed command is an ordinary `Command`: add what the annotations do not cover, such as
+  `requires(option, predicate, description)`, captions built in code, or `disableParentMiddleware()`, with the fluent
+  API before registering it.
 
 ## Errors
 

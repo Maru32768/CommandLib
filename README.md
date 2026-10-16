@@ -1170,8 +1170,10 @@ CommandLib.register(this, AnnotatedCommands.parse(new BanCommand()));
 
 Parameters map by type to the built-in arguments (`Player` to `PlayerArgument`, `int` to `IntegerArgument`, ...), a
 last `List<T>` parameter is variadic, `@Optional` / `@Default` make arguments optional, and a method returning a
-`CompletionStage` runs as `executeAsync`. Argument names come from the parameter names, so compile with `-parameters`
-or use `@Name`. See [annotated commands](docs/annotations.md) for every annotation, custom types and annotations, and
+`CompletionStage` runs as `executeAsync`. `@Subcommand("<team> add")` puts a subcommand after an argument, and
+`@Middleware`, `@VisibleWhen`, `@Requires`, `@MutuallyExclusive`, `@OptionsAnywhere`, `@Examples` and
+`@Description(caption = ...)` match the fluent settings of the same names. Argument names come from the parameter
+names, so compile with `-parameters` or use `@Name`. See [annotated commands](docs/annotations.md) for every annotation, custom types and annotations, and
 the fluent equivalent.
 
 ## Help and Error Formatting

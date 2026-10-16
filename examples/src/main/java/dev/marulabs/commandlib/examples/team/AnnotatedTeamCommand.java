@@ -5,14 +5,16 @@ import dev.marulabs.commandlib.annotation.AnnotatedCommands;
 import dev.marulabs.commandlib.annotation.Command;
 import dev.marulabs.commandlib.annotation.Description;
 import dev.marulabs.commandlib.annotation.Execute;
+import dev.marulabs.commandlib.annotation.Subcommand;
 import dev.marulabs.commandlib.argument.ObjectArgument;
-import dev.marulabs.commandlib.argument.PlayerArgument;
+import org.bukkit.entity.Player;
 
 import java.util.Set;
 
 /**
- * {@link FluentTeamCommand} with annotations. {@code @Subcommand} paths are literals, so annotations cannot put a
- * child after an argument; {@link #create} parses the class and adds the argument-first part with the fluent API.
+ * {@link FluentTeamCommand} with annotations. The {@code <team>} placeholder of the paths is the argument the children
+ * follow, made by the factory registered for {@code Set}, and each method takes its value as the {@code team}
+ * parameter.
  */
 @Command("team")
 @Description("Manage team members")
@@ -24,25 +26,9 @@ public final class AnnotatedTeamCommand {
     }
 
     public static dev.marulabs.commandlib.Command create(Teams teams) {
-        dev.marulabs.commandlib.Command command = AnnotatedCommands.parse(new AnnotatedTeamCommand(teams));
-        command.argument(new ObjectArgument<Set<String>>("team", teams::byName))
-               .child(team -> new dev.marulabs.commandlib.Command("add") {{
-                   description("Add a player to the team");
-                   argument(new PlayerArgument("player")).execute((player, ctx) -> {
-                       team.get()
-                           .add(player.getName());
-                       ctx.sendSuccess("Members: " + team.get());
-                   });
-               }})
-               .child(team -> new dev.marulabs.commandlib.Command("remove") {{
-                   description("Remove a player from the team");
-                   argument(new PlayerArgument("player")).execute((player, ctx) -> {
-                       team.get()
-                           .remove(player.getName());
-                       ctx.sendSuccess("Members: " + team.get());
-                   });
-               }});
-        return command;
+        return AnnotatedCommands.parser()
+                                .registerArgument(Set.class, p -> new ObjectArgument<>(p.name(), teams::byName))
+                                .parse(new AnnotatedTeamCommand(teams));
     }
 
     @Execute
@@ -50,5 +36,19 @@ public final class AnnotatedTeamCommand {
         ctx.sendMessage("Teams: " + String.join(", ",
                                                 teams.byName()
                                                      .keySet()));
+    }
+
+    @Subcommand("<team> add")
+    @Description("Add a player to the team")
+    public void add(CommandContext ctx, Set<String> team, Player player) {
+        team.add(player.getName());
+        ctx.sendSuccess("Members: " + team);
+    }
+
+    @Subcommand("<team> remove")
+    @Description("Remove a player from the team")
+    public void remove(CommandContext ctx, Set<String> team, Player player) {
+        team.remove(player.getName());
+        ctx.sendSuccess("Members: " + team);
     }
 }

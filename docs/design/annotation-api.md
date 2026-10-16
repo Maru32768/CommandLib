@@ -10,7 +10,8 @@ options, suggestions, execution and tests. User documentation: [annotations.md](
 
 `AnnotationParser<C, T>` in `common` reads a class and calls the public fluent API of `CommonCommand`:
 `new Command(name)`, `addAliases`, `addChildren`, `option`, `argument(List)`, `execute`/`executeAsync`,
-`permission`, `description`, `confirm`, `cooldown`. The result is an ordinary platform `Command`; nothing below it knows
+`permission`, `description`, `confirm`, `cooldown`, `child`, `addMiddleware`, `visibleWhen`, `mutuallyExclusive` and
+the others named below. The result is an ordinary platform `Command`; nothing below it knows
 it came from annotations. That gives the equivalence by construction: the command tree, the help, the permission
 configs and the docs exports are computed from the same objects as for a fluent command, and every rule of the core
 (optional arguments last, a variadic argument last, unique option names, command name validation) is checked by the
@@ -55,12 +56,15 @@ Consequences of reflection:
 |---|---|
 | `@Command(value, aliases)` on the class | the root `T`, `addAliases` |
 | `@Subcommand("a b")` | child commands along the path, created once and shared by the methods of that path |
+| `@Subcommand("<x> a")` | `argument(x)` on the command before the placeholder, created once for the path, and `child(a)` on it; adjacent placeholders are one branch |
 | method without argument parameters | `execute` / `executeAsync` on its command (at most one per command) |
 | method with argument parameters | one `argument(...)` branch on its command |
-| `@Description`, `@Permission`, `@Confirm`, `@Cooldown`, `@Condition`, `aliases` | on the command: from the class for the root, from one `@Subcommand` method for a subcommand |
-| `@Description`, `@Permission` on an `@Execute` method | on its argument branch |
-| `@Flag` / `@Option` parameter | `Options.flag` / `count` / `bool` / `integer` / `longValue` / `floatValue` / `doubleValue` / `string`, `aliases`, `description`, `repeatable`, `required`, registered on the method's command |
-| other parameter | an argument from the factory of its type; `List<T>` → `variadic()`; `@Default` → `optional(value)`; `@Optional` → `optional(contextValue)` or the empty value of the type |
+| `@Subcommand` path ending in placeholders | `executeAsync` on the placeholders' branch (at most one method) |
+| `@Description`, `@Permission`, `@VisibleWhen`, `@Confirm`, `@Cooldown`, `@Condition`, `@Middleware`, `@OptionsAnywhere`, `@MutuallyExclusive`, `@Examples`, `@CaptionBundle`, `aliases` | on the command: from the class for the root, from one `@Subcommand` method for a subcommand |
+| `@Description`, `@Permission`, `@VisibleWhen` on an `@Execute` method, or a path ending in placeholders | on its argument branch |
+| `@Description(caption = "key")` | `description(ctx -> ctx.caption(Caption.of(key, value)))` |
+| `@Flag` / `@Option` parameter | `Options.flag` / `count` / `bool` / `integer` / `longValue` / `floatValue` / `doubleValue` / `string`, or `Options.of(name, argument)` for any other type, `aliases`, `description`, `permission`, `repeatable`, `required`, registered on the method's command; `@Requires` → `requires(other[, value])` |
+| other parameter | an argument from the factory of its type; `List<T>` → `variadic()`, or `variadic(max)` with `@Variadic`; `@Default` → `optional(value)`; `@Optional` → `optional(contextValue)` or the empty value of the type |
 | return `int` / `CompletionStage` | `ctx.setResult` / the stage of `executeAsync` |
 
 Parameters resolve in a fixed order: the context type, `@Sender`, options, registered argument types, then context
@@ -72,6 +76,32 @@ the result depend on the method order, and two different `@Description`s have no
 
 Options are per command in the core, so all methods of a command share them. A second method declaring an option of the
 same name gets the same `CommandOption` when its annotations and type are equal, and a parse error otherwise.
+`@Requires` and `@MutuallyExclusive` name options by their long name, which another parameter or another method of the
+command may declare, so the parser applies them after every method is added. The core reads both only when a command
+runs or its tree is built, so applying them after registering the options gives the same command.
+
+An option of a type other than the primitives and `String` is `Options.of(name, argument)` with the argument the
+parameter would get as an argument (factory, `@Suggest`, registered annotations, `@Default` / `@Optional`), named
+after the option. Its being required follows from the argument, as in the core: an argument that is not optional makes
+a required option.
+
+### Placeholders
+
+Lamp and Cloud write argument-first trees as path placeholders (`"team <name> add"`), and so does the parser:
+`@Subcommand("<team> add")` is `argument(team).child(add)`. The alternatives were nested classes, which need a second
+way of declaring a command and of passing the parsed value down, and an attribute naming the parent argument, which
+splits one path over two places. The placeholder keeps the path readable as the input it accepts.
+
+A placeholder binds to the method's argument parameter of the same name, so the method still receives every value it
+uses as a parameter, read with `ctx.getArgument(argument)` like the core's `ArgRef`. The branch is keyed by the path up
+to the placeholder and created by the first method in parse order; the others must declare the parameter with the same
+type and annotations, the rule options follow, since one argument object serves every child. Adjacent placeholders form
+one branch, as `argument(a, b).child(...)` does. A path that ends in a placeholder executes that branch and takes no
+other arguments, because more arguments would make a second branch starting with the same argument.
+
+Named registries (`registerCondition`, `registerMiddleware`, `registerVisibility`) hold the objects an annotation cannot
+hold, so `@Middleware("audit")` and `@VisibleWhen("open")` add the same instances a fluent command adds. A name nobody
+registered fails parsing.
 
 `@Default` values are converted when the class is parsed (string, numbers, booleans, enum constants), so a bad default
 fails at startup. An `@Optional` argument without `@Default` takes the context value registered for its type, which
@@ -108,8 +138,11 @@ return a `CompletionStage` that returns null fails with a clear message.
 ## Not done
 
 - `@Subcommand` on nested classes, inherited methods, and an explicit method order (`@Order`).
-- Annotations for middlewares (`addMiddleware`), prerequisites, option dependencies (`requires`, `mutuallyExclusive`)
-  and argument-first children (`child(...)`). The parsed command is an ordinary `Command`, so these can be added
-  fluently after parsing.
-- A variadic maximum other than the default, and `java.util.Optional<T>` parameters.
+- `requires(option, predicate, description)`, captions other than one properties bundle, and
+  `disableParentMiddleware()` / `disableParentPrerequisite()`. The parsed command is an ordinary `Command`, so these
+  can be added fluently after parsing.
+- Prerequisites per argument branch: the core has prerequisites per command only, so `@Condition` stays on the class
+  and `@Subcommand` methods.
+- `java.util.Optional<T>` parameters: the core requires an optional argument's default to be non-null, so an absent
+  value has no representation without a change to the core.
 - `@Range` bounds beyond 2^53 for `long` arguments lose precision, since the bounds are `double`.

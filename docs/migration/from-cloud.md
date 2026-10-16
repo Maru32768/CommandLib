@@ -347,6 +347,7 @@ CommandLib's [annotation API](../annotations.md) reads annotated methods instead
 |---|---|
 | `@Command("give <target> [amount]")` | `super("give")` and `argument(new PlayerArgument("target"), new IntegerArgument("amount").optional(1))` |
 | `@Command("game start")` | `addChildren(new Command("start") {{ ... }})` inside `game` |
+| `@Command("team <name> add")` | `argument(new StringArgument("name")).child(name -> new Command("add") {{ ... }})`; annotated: `@Subcommand("<name> add")` |
 | `@Argument("target")` | The argument's name |
 | `@Default("1")` | `.optional(1)` |
 | `@Flag("force")` | `option(Options.flag("force"))` |

@@ -28,9 +28,9 @@ Corrections and newer versions are welcome; this page is only as good as the evi
 
 | Use case | CommandLib | CommandAPI | Cloud | Lamp | ACF | Paper |
 |---|---|---|---|---|---|---|
-| 1. Admin options (`-s`, `--reason`) | Typed options, before the arguments | No flags; optional literals, order-dependent | Flags, any order | `@Flag` / `@Switch`, any order | No flags; parse `String[]` yourself | No flags; a branch per combination |
+| 1. Admin options (`-s`, `--reason`) | Typed options, before the arguments or also after them (`optionsAnywhere()`) | No flags; optional literals, order-dependent | Flags, any order | `@Flag` / `@Switch`, any order | No flags; parse `String[]` yourself | No flags; a branch per combination |
 | 2. Optional and variadic arguments | `optional(v)`, `variadic()` (space-separated values) | `withOptionalArguments`, `ListArgument` | `optional(..., DefaultValue)`; no generic variadic | `@Default`, greedy `List<T>` | `@Default`, comma-separated arrays | A branch per optional argument |
-| 3. Argument-first tree | `argument(...).child(...)` (not in annotations) | `CommandTree` | Literal after an argument | `@Command("team <name> add")` | Not supported | Native |
+| 3. Argument-first tree | `argument(...).child(...)`; annotations: `@Subcommand("<team> add")` | `CommandTree` | Literal after an argument | `@Command("team <name> add")` | Not supported | Native |
 | 4. Async I/O, back to the main thread | `executeAsync` + `ctx.supplyAsync`, `executeSuspend` | Manual scheduler | Coordinators; main thread is manual | `CompletionStage` return; main thread is manual | Manual scheduler | Manual scheduler |
 | 5. Dependency injection | `provide(Type.class, ...)` per command tree, `ctx.get(Type.class)`; annotations: `registerDependency`, `@Dependency`, `registerContextValue` | Constructor | Parameter injectors, Guice, `SenderMapper` | `@Dependency`, context parameters, sender resolvers | `registerDependency`, issuer-aware contexts | Constructor |
 | 6. Per-locale messages | Captions, bundles, the sender's locale, localized help headings | None | Captions, translations, locale extractor | None in v4 | Locales, message keys, per-issuer locale | None in the command API |
@@ -46,10 +46,10 @@ The sections below give the detail and the sources.
 |---|---|---|---|---|---|
 | 1. [`ban`](../examples/src/main/java/dev/marulabs/commandlib/examples/ban) | 15 | 20 | 12 | 10 | none |
 | 2. [`kit`](../examples/src/main/java/dev/marulabs/commandlib/examples/kit) | 20 | 24 | 16 | 16 | none |
-| 3. [`team`](../examples/src/main/java/dev/marulabs/commandlib/examples/team) | 27 | 33 | 35 (annotations + fluent) | 25 | none |
+| 3. [`team`](../examples/src/main/java/dev/marulabs/commandlib/examples/team) | 27 | 33 | 31 | 25 | none |
 | 4. [`stats`](../examples/src/main/java/dev/marulabs/commandlib/examples/stats) | 9 | 14 | 13 | 10 | none |
 | 5. [`balance`](../examples/src/main/java/dev/marulabs/commandlib/examples/balance) | 20 | 23 | 25 | 16 | none; the account is read by type, `ctx.get(Economy.Account.class)` |
-| 6. [`home`](../examples/src/main/java/dev/marulabs/commandlib/examples/home) | 23 | 27 | 22 | 22 | none |
+| 6. [`home`](../examples/src/main/java/dev/marulabs/commandlib/examples/home) | 23 | 27 | 18 | 22 | none |
 | 7. [`score`](../examples/src/main/java/dev/marulabs/commandlib/examples/score) | 16 | 18 | 13 | 11 | none (the untyped executor reads `ctx.getArgument(argument)`) |
 
 The numbers count the lines of each file that are not blank, comments, imports or the package line, including the
@@ -160,9 +160,9 @@ runtime. CommandAPI has no flags argument in a release; one is proposed in an op
   [arguments and literals](https://docs.papermc.io/paper/dev/command-api/basics/arguments-and-literals/)).
 
 **Compared.** Lamp and Cloud's annotations are the shortest. Cloud and Lamp accept the flags anywhere in the input and
-Cloud adds permissions per flag and greedy flag values; CommandLib requires the options **before** the positional
-arguments (`/ban Steve -s` is rejected), has no per-option permission, and its value options are primitives and strings
-only. CommandLib's options are typed (`ctx.getOption(option)`, a delegated property in Kotlin) and come with
+Cloud adds greedy flag values; CommandLib takes the options **before** the positional arguments (`/ban Steve -s` is
+rejected) unless the command calls `optionsAnywhere()` (`@OptionsAnywhere`), and also has permissions per option and
+any argument as an option's value (`Options.of`). CommandLib's options are typed (`ctx.getOption(option)`, a delegated property in Kotlin) and come with
 `required()`, `requires(...)`, `mutuallyExclusive(...)` and generated help, which the builder styles of Cloud and the
 others do with string keys or not at all.
 
@@ -260,9 +260,15 @@ argument(ObjectArgument<MutableSet<String>>("team") { teams.byName() }) { team -
 Fluent: `argument(new ObjectArgument<>("team", teams::byName)).child(team -> new Command("add") {{ ... }}).child(...)`.
 Each child reads the team through its `ArgRef`, `team.get()`, and gets its own permission node
 (`myplugin.command.team.add`) and help line ([snapshot](../examples/src/test/resources/snapshots/team.snap)).
-**Annotations cannot express this**: `@Subcommand` paths are literals, so
-[`AnnotatedTeamCommand`](../examples/src/main/java/dev/marulabs/commandlib/examples/team/AnnotatedTeamCommand.java)
-parses the class and adds the argument-first part with the fluent API.
+With annotations, a placeholder in the path is the argument the child follows, and each method takes its value as the
+parameter of the same name
+([`AnnotatedTeamCommand`](../examples/src/main/java/dev/marulabs/commandlib/examples/team/AnnotatedTeamCommand.java),
+which registers the `ObjectArgument` for `Set` parameters):
+
+```java
+@Subcommand("<team> add") public void add(CommandContext ctx, Set<String> team, Player player) { team.add(player.getName()); }
+@Subcommand("<team> remove") public void remove(CommandContext ctx, Set<String> team, Player player) { team.remove(player.getName()); }
+```
 
 ```java
 // Cloud: about 3 lines
@@ -302,9 +308,9 @@ Partly verified: [command trees](https://docs.commandapi.dev/create-commands/com
   [command tree](https://docs.papermc.io/paper/dev/command-api/basics/command-tree/)), with
   `getArgument("name", String.class)` in each executor.
 
-**Compared.** Lamp's path placeholders are the shortest and also work in its annotations, where CommandLib's
-annotations need the fluent API. CommandLib's tree parses the team once, as a typed value shared by the children,
-where the others look up the name in each handler.
+**Compared.** Lamp's path placeholders are the shortest; CommandLib's annotations use the same syntax. CommandLib's
+tree parses the team once, as a typed value shared by the children, where the others look up the name in each
+handler.
 
 ## 4. Async I/O with thread return
 
@@ -470,8 +476,8 @@ argument(new StringArgument("name")).execute((name, ctx) -> ctx.sendSuccess(Home
 
 A player whose client is Japanese gets `ホーム base を設定しました。` and the help heading `使い方:`; CommandLib's own
 messages, such as the cooldown, the options' errors and the permission message, come in English and Japanese
-([snapshot](../examples/src/test/resources/snapshots/home.snap)). Annotations have no attribute for the captions or a
-localized description, so `AnnotatedHomeCommand.create()` sets both on the parsed command.
+([snapshot](../examples/src/test/resources/snapshots/home.snap)). With annotations, `@CaptionBundle("lang/homes")` and
+`@Description(value = "Manage your homes", caption = "example.home.description")` on the class do the same.
 
 ```java
 // Cloud: about 5 lines
@@ -607,23 +613,21 @@ less code in a large plugin.
 
 ## Where the others are better
 
-- **Lamp** is the most concise for annotated commands: options anywhere in the input, path placeholders for
-  argument-first trees, and injection with one call.
-- **Cloud** has the most complete flags (any position, aliases, chaining, permissions per flag, greedy values),
-  execution coordinators that move parsing and execution off the main thread, a manager-wide sender mapper and
-  injectors, and community translations.
-- **ACF** has per-issuer locales with message keys and formats, issuer-aware contexts, reusable named conditions, and
-  `{@@key}` descriptions in annotations.
+- **Lamp** is the most concise for annotated commands: options anywhere in the input without opting in, and
+  injection with one call.
+- **Cloud** has flags anywhere in the input by default and with greedy values, execution coordinators that move
+  parsing and execution off the main thread, a manager-wide sender mapper and injectors, and community translations.
+- **ACF** has per-issuer locales with message keys and formats, issuer-aware contexts, and reusable named conditions.
 - **CommandAPI** has the largest catalog of typed vanilla arguments, a plain `int` return for `/execute store`, and a
   test toolkit on MockBukkit that asserts the parsed values.
 - **Paper** needs no dependency and no shading, follows vanilla exactly, and is the reference for what Brigadier can do.
 
 ## CommandLib's constraints in these use cases
 
-- Options must come before the positional arguments; value options take primitives and strings only; options have no
-  permission of their own.
-- Annotations do not cover argument-first children, captions, localized descriptions or middlewares; the parsed
-  command takes them through the fluent API.
+- Options come before the positional arguments unless the command calls `optionsAnywhere()`, and never follow the
+  values of a variadic argument.
+- Annotations do not cover `requires(option, predicate, description)`, captions other than one properties bundle, or
+  `java.util.Optional<T>` parameters; the parsed command takes the first two through the fluent API.
 - Context values are provided per command tree, per annotation parser or per registration (`CommandDefaults`), and
   the sender type stays the platform's.
 - Help is a child of commands only: `/team red help` is rejected, while `/team red` shows the help of `/team`.

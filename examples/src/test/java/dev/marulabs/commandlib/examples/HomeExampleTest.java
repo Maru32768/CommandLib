@@ -1,6 +1,7 @@
 package dev.marulabs.commandlib.examples;
 
 import dev.marulabs.commandlib.FakeSender;
+import dev.marulabs.commandlib.annotation.AnnotatedCommands;
 import dev.marulabs.commandlib.examples.home.AnnotatedHomeCommand;
 import dev.marulabs.commandlib.examples.home.BuilderHomeCommand;
 import dev.marulabs.commandlib.examples.home.FluentHomeCommand;
@@ -13,7 +14,7 @@ class HomeExampleTest {
         StyleParity.assertSameInEveryStyle("home.snap",
                                            FluentHomeCommand::new,
                                            BuilderHomeCommand::create,
-                                           AnnotatedHomeCommand::create,
+                                           () -> AnnotatedCommands.parse(new AnnotatedHomeCommand()),
                                            KotlinHomeCommandKt::kotlinHomeCommand,
                                            t -> {
                                                FakeSender japanese = FakeSender.player("Taro")
