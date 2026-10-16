@@ -20,6 +20,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
@@ -29,6 +31,7 @@ public final class TestMain {
     static final String TEST_OBJECTIVE_NAME = "test";
     private static final Logger LOGGER = LogManager.getLogger(TestMain.class);
     private static final String REPORT_COMMAND = MainCommand.NAME + " reportTests";
+    private static final long REPORT_DELAY_SECONDS = 2;
 
     public void register() {
         try {
@@ -38,7 +41,9 @@ public final class TestMain {
             List<TestBase> tests = List.of(new ArgumentTest(mainCommand, TEST_PLAYER_NAME),
                                            new ActorTest(mainCommand),
                                            new SuggestionTest(mainCommand),
-                                           new CommandSyntaxExceptionTest(mainCommand));
+                                           new CommandSyntaxExceptionTest(mainCommand),
+                                           new OptionTest(mainCommand),
+                                           new RuntimeFeatureTest(mainCommand));
             new HelpMessageTest(mainCommand);
             List<String> commands = tests.stream()
                                          .flatMap(x -> x.build()
@@ -76,12 +81,18 @@ public final class TestMain {
                         LOGGER.info("No CommandLib test run to report.");
                         return;
                     }
-                    try {
-                        reportTests(tests, dispatchErrors);
-                    } finally {
-                        dispatchErrors.clear();
-                        running.set(false);
-                    }
+                    // Asynchronous commands complete on a later tick, so the report waits for them.
+                    MinecraftServer server = ctx.getSender()
+                                                .getServer();
+                    CompletableFuture.delayedExecutor(REPORT_DELAY_SECONDS, TimeUnit.SECONDS, server)
+                                     .execute(() -> {
+                                         try {
+                                             reportTests(tests, dispatchErrors);
+                                         } finally {
+                                             dispatchErrors.clear();
+                                             running.set(false);
+                                         }
+                                     });
                 });
             }});
 
@@ -128,7 +139,7 @@ public final class TestMain {
     }
 
     // Runs the command through the same pipeline as a typed command.
-    private static void perform(MinecraftServer server, CommandSourceStack source, String command) {
+    static void perform(MinecraftServer server, CommandSourceStack source, String command) {
         //? if >=1.19 {
         server.getCommands()
               .performPrefixedCommand(source, command);
