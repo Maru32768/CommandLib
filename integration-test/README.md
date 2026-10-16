@@ -152,10 +152,11 @@ prepare the server differently:
   `@libraries/.../unix_args.txt` file for 1.17+ and NeoForge, `-jar forge-<version>.jar` for 1.16.5).
 - Test commands are performed through `Commands#performPrefixedCommand`, like typed commands. On 1.20.3+ commands
   performed during another command are queued, so the report is written by a `reportTests` command queued after
-  them.
+  them. It writes the report two seconds later, after the asynchronous commands have completed.
 
 Test cases run from the server console source while the bot is online, and cover every public Forge argument
-(enforced by `ArgumentIntegrationCoverageTest`) plus `CommandActor` behavior.
+(enforced by `ArgumentIntegrationCoverageTest`) plus `CommandActor` behavior, options, `visibleWhen`, `executeAsync`
+with a middleware and the diagnostics.
 
 Notes:
 

@@ -6,7 +6,12 @@ function tags. This page describes what a command sees in each case and where th
 
 The integration fixtures check these cases on real servers (`VanillaExecutionTest` and `DataPackFunctionTest` in
 `integration-test/shared/spigot` and `integration-test/shared/paper`, `ActorTest` in `integration-test/shared/modded`).
-[Compatibility](compatibility.md) lists the targets.
+[Compatibility](compatibility.md) lists the targets; on 2026-10-16 every case passed on a Spigot, Paper, Mohist,
+Forge or NeoForge target of each minor version from 1.16 to 26.3.
+
+On every platform a command's executor runs during the dispatch when it is called on the server thread, so a command
+that `/execute`, a function or another command runs has finished before the next one, also while the server handles a
+player's command packet. Only the work an `executeAsync` command hands to the async executor finishes later.
 
 ## `/execute`
 
