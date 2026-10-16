@@ -13,6 +13,7 @@ import dev.marulabs.commandlib.argument.StringArgument
 import dev.marulabs.commandlib.exception.CommandPrerequisiteException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.yield
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.util.ArrayDeque
@@ -178,6 +179,68 @@ class KotlinDslTest {
             }
 
         assertThat(sender.sentMessageTexts).containsExactly("Alex has 4 kills")
+    }
+
+    // The platforms' sync executors run a task at once on the thread they stand for, as the server's main thread.
+    @Test
+    fun `yield in executeSuspend gives the sync thread back until a later tick`() {
+        var onSyncThread = true
+        val ticks = ArrayDeque<Runnable>()
+        val asyncTasks = ArrayDeque<Runnable>()
+        val sync = java.util.concurrent.Executor { if (onSyncThread) it.run() else ticks.add(it) }
+        val sender = FakeSender.player("Steve")
+        val loop =
+            command("loop") {
+                executeSuspend { ctx ->
+                    repeat(3) {
+                        ctx.sendMessage("step $it")
+                        yield()
+                    }
+                    ctx.sendMessage("done")
+                }
+            }
+
+        CommandTester
+            .builder()
+            .command(loop)
+            .permissionPrefix("test.command")
+            .scheduler(CommandScheduler.of(sync, asyncTasks::add))
+            .build()
+            .use { tester ->
+                tester.execute("loop", sender)
+                assertThat(sender.sentMessageTexts).containsExactly("step 0")
+
+                onSyncThread = false
+                generateSequence { asyncTasks.poll() }.forEach(Runnable::run)
+                onSyncThread = true
+                ticks.poll().run()
+                assertThat(sender.sentMessageTexts).containsExactly("step 0", "step 1")
+
+                while (asyncTasks.isNotEmpty() || ticks.isNotEmpty()) {
+                    onSyncThread = false
+                    generateSequence { asyncTasks.poll() }.forEach(Runnable::run)
+                    onSyncThread = true
+                    generateSequence { ticks.poll() }.forEach(Runnable::run)
+                }
+            }
+
+        assertThat(sender.sentMessageTexts).containsExactly("step 0", "step 1", "step 2", "done")
+    }
+
+    @Test
+    fun `many yields with executors that run at once do not overflow the stack`() {
+        val sender = FakeSender.player("Steve")
+        val loop =
+            command("loop") {
+                executeSuspend { ctx ->
+                    repeat(200_000) { yield() }
+                    ctx.sendMessage("done")
+                }
+            }
+
+        CommandTester(loop, "test.command").use { it.execute("loop", sender) }
+
+        assertThat(sender.sentMessageTexts).containsExactly("done")
     }
 
     @Test

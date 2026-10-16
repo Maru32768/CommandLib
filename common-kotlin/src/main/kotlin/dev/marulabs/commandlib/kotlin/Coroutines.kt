@@ -19,16 +19,48 @@ import kotlin.coroutines.CoroutineContext
 /**
  * Dispatches to [executor] and makes [ctx] the current context while the coroutine runs, so that `ref.get()` and the
  * option properties work after the coroutine resumed on another thread.
+ *
+ * The platforms' executors run a task at once on the thread they stand for. A dispatch made while a block runs there,
+ * as `yield()` makes, goes through [async] and comes back to [executor] from that thread, which queues it, so the
+ * thread is given back meanwhile.
  */
 private class CommandContextDispatcher(
     private val ctx: CommonCommandContext<*, *>,
     private val executor: Executor,
+    private val async: Executor,
 ) : CoroutineDispatcher() {
     override fun dispatch(
         context: CoroutineContext,
         block: Runnable,
     ) {
-        executor.execute { runInCommandContext(ctx, block) }
+        val task = Runnable { runQueued { runInCommandContext(ctx, block) } }
+        if (queuedOnThisThread.get() == null) {
+            executor.execute(task)
+        } else {
+            async.execute { executor.execute(task) }
+        }
+    }
+}
+
+// The tasks dispatched while a block runs on this thread that executors running every task at once, as the testers'
+// do, would nest in that block. They run after it instead.
+private val queuedOnThisThread = ThreadLocal<ArrayDeque<Runnable>>()
+
+private fun runQueued(task: Runnable) {
+    val running = queuedOnThisThread.get()
+    if (running != null) {
+        running.addLast(task)
+        return
+    }
+    val queue = ArrayDeque<Runnable>()
+    queuedOnThisThread.set(queue)
+    try {
+        task.run()
+        while (true) {
+            (queue.removeFirstOrNull() ?: break).run()
+        }
+    } finally {
+        queuedOnThisThread.remove()
     }
 }
 
@@ -37,14 +69,14 @@ private class CommandContextDispatcher(
  * runs its block on it.
  */
 val CommonCommandContext<*, *>.syncDispatcher: CoroutineDispatcher
-    get() = CommandContextDispatcher(this, syncExecutor())
+    get() = CommandContextDispatcher(this, syncExecutor(), asyncExecutor())
 
 /**
  * The dispatcher of the async executor, for blocking work such as file or database access:
  * `withContext(ctx.asyncDispatcher) { database.load(id) }`.
  */
 val CommonCommandContext<*, *>.asyncDispatcher: CoroutineDispatcher
-    get() = CommandContextDispatcher(this, asyncExecutor())
+    get() = CommandContextDispatcher(this, asyncExecutor(), asyncExecutor())
 
 private fun <C : CommonCommandContext<*, *>> C.startCommand(action: suspend CoroutineScope.(C) -> Unit): CompletableFuture<Unit> =
     CoroutineScope(syncDispatcher).future { action(this@startCommand) }
@@ -109,6 +141,6 @@ fun <V, C : CommonCommandContext<*, *>, S : CommonArgument<V, C, S>> S.addSugges
 ): S =
     addSuggestionProvider { builder ->
         // The context of a suggestion has no scheduler, so the provider resumes on the thread that resumes it.
-        val dispatcher = CommandContextDispatcher(builder.context, Runnable::run)
+        val dispatcher = CommandContextDispatcher(builder.context, Runnable::run, Runnable::run)
         builder.await(CoroutineScope(dispatcher).future { provider(builder) })
     }

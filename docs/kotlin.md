@@ -215,6 +215,8 @@ executor ([execution](execution.md)) whose stage is a coroutine started with kot
 - The block starts on the sync thread (the server thread on Spigot and Paper) and resumes there after each suspension,
   through `ctx.syncDispatcher`, which uses the platform's `CommandScheduler`. Messages and the platform API may be used
   between suspensions.
+- `yield()` gives the sync thread back: the block resumes on a later tick, so a long loop can spread its work over
+  several ticks.
 - `withContext(ctx.asyncDispatcher) { ... }` runs blocking work, such as a database query, on the scheduler's async
   executor. Do not use the platform API there.
 - Both dispatchers keep the command's context current, so `ref.get()` and the option properties work after the
