@@ -13,8 +13,8 @@ import dev.marulabs.commandlib.argument.StringArgument
 import dev.marulabs.commandlib.exception.CommandPrerequisiteException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.yield
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test

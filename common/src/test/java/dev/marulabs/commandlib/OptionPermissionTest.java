@@ -144,7 +144,8 @@ class OptionPermissionTest {
             execute(ctx -> {
             });
         }};
-        TestCommandRunner runner = new TestCommandRunner(command, new TestCommandSource(COMMAND, "myplugin.ban.silent"));
+        TestCommandRunner runner = new TestCommandRunner(command,
+                                                         new TestCommandSource(COMMAND, "myplugin.ban.silent"));
 
         assertThat(runner.visibleChildren("ban")).contains("-s")
                                                  .doesNotContain("-z", "-sz", "-zs");
