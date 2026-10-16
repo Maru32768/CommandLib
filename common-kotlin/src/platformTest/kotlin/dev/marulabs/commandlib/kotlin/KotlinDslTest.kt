@@ -12,6 +12,8 @@ import dev.marulabs.commandlib.argument.IntegerArgument
 import dev.marulabs.commandlib.argument.StringArgument
 import dev.marulabs.commandlib.exception.CommandPrerequisiteException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.yield
 import org.assertj.core.api.Assertions.assertThat
@@ -241,6 +243,17 @@ class KotlinDslTest {
         CommandTester(loop, "test.command").use { it.execute("loop", sender) }
 
         assertThat(sender.sentMessageTexts).containsExactly("done")
+    }
+
+    @Test
+    fun `a withTimeout that runs out reports the timeout`() {
+        val sender = FakeSender.player("Steve")
+        // A timeout of zero runs out at once, on the sync thread, so the failure is reported before execute returns.
+        val slow = command("slow") { executeSuspend { withTimeout(0) { delay(10_000) } } }
+
+        CommandTester(slow, "test.command").use { it.execute("slow", sender) }
+
+        assertThat(sender.sentMessageTexts).containsExactly("The command timed out.")
     }
 
     @Test

@@ -224,7 +224,8 @@ executor ([execution](execution.md)) whose stage is a coroutine started with kot
   there, or read the values first.
 - The command is done when the block returns. An exception it throws is reported like an executor's: a
   `CommandPrerequisiteException` sends its message, anything else the generic error and the
-  `UncaughtExceptionHandler`s. A cancelled coroutine reports nothing.
+  `UncaughtExceptionHandler`s. A cancelled coroutine reports nothing, but a `withTimeout` that runs out is reported as a
+  timeout (`The command timed out.`).
 - `/execute store` gets the result set before the first suspension, as for any async command.
 - The coroutine has no parent job, so disabling the plugin does not cancel it; the Bukkit scheduler then refuses its
   remaining sync work. Bound slow work with `withTimeout`.

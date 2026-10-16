@@ -10,10 +10,12 @@ import dev.marulabs.commandlib.runInCommandContext
 import dev.marulabs.commandlib.suggestion.SuggestionBuilder
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.future.future
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executor
+import java.util.concurrent.TimeoutException
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -79,7 +81,14 @@ val CommonCommandContext<*, *>.asyncDispatcher: CoroutineDispatcher
     get() = CommandContextDispatcher(this, asyncExecutor(), asyncExecutor())
 
 private fun <C : CommonCommandContext<*, *>> C.startCommand(action: suspend CoroutineScope.(C) -> Unit): CompletableFuture<Unit> =
-    CoroutineScope(syncDispatcher).future { action(this@startCommand) }
+    CoroutineScope(syncDispatcher).future {
+        try {
+            action(this@startCommand)
+        } catch (e: TimeoutCancellationException) {
+            // A cancellation reports nothing, but a timeout is reported like the timeout of an async executor.
+            throw TimeoutException(e.message)
+        }
+    }
 
 /**
  * Sets a suspending executor, run with [executeAsync][CommonCommand.executeAsync]: the block starts on the sync thread,
