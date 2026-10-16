@@ -8,6 +8,7 @@ import dev.marulabs.integration.core.JUnitXmlReport;
 import dev.marulabs.integration.core.TestResult;
 import dev.marulabs.integration.core.TestStatus;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.scores.Scoreboard;
@@ -32,13 +33,17 @@ public final class TestMain {
     private static final Logger LOGGER = LogManager.getLogger(TestMain.class);
     private static final String REPORT_COMMAND = MainCommand.NAME + " reportTests";
     private static final long REPORT_DELAY_SECONDS = 2;
+    private static final long RELOAD_POLL_MILLIS = 250;
+    private static final long RELOAD_TIMEOUT_SECONDS = 120;
 
     public void register() {
         try {
             Command mainCommand = new MainCommand();
             AtomicBoolean running = new AtomicBoolean(false);
 
-            List<TestBase> tests = List.of(new ArgumentTest(mainCommand, TEST_PLAYER_NAME),
+            ReloadTest reloadTest = new ReloadTest(mainCommand);
+            List<TestBase> tests = List.of(reloadTest,
+                                           new ArgumentTest(mainCommand, TEST_PLAYER_NAME),
                                            new ActorTest(mainCommand),
                                            new SuggestionTest(mainCommand),
                                            new CommandSyntaxExceptionTest(mainCommand),
@@ -84,15 +89,16 @@ public final class TestMain {
                     // Asynchronous commands complete on a later tick, so the report waits for them.
                     MinecraftServer server = ctx.getSender()
                                                 .getServer();
+                    Runnable report = () -> {
+                        try {
+                            reportTests(tests, dispatchErrors);
+                        } finally {
+                            dispatchErrors.clear();
+                            running.set(false);
+                        }
+                    };
                     CompletableFuture.delayedExecutor(REPORT_DELAY_SECONDS, TimeUnit.SECONDS, server)
-                                     .execute(() -> {
-                                         try {
-                                             reportTests(tests, dispatchErrors);
-                                         } finally {
-                                             dispatchErrors.clear();
-                                             running.set(false);
-                                         }
-                                     });
+                                     .execute(() -> reloadThenReport(server, reloadTest, report));
                 });
             }});
 
@@ -141,6 +147,43 @@ public final class TestMain {
                                                   ExceptionUtil.stackTraceToString(e)));
             }
         }
+    }
+
+    // /reload builds a new command dispatcher. It runs last, and the probe waits until the server has swapped in the
+    // reloaded resources; probing earlier would reach the old dispatcher and pass without checking.
+    private static void reloadThenReport(MinecraftServer server, ReloadTest reloadTest, Runnable report) {
+        try {
+            LOGGER.info("Reloading data packs to verify registered commands survive.");
+            Commands before = server.getCommands();
+            perform(server, server.createCommandSourceStack(), "reload");
+            long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(RELOAD_TIMEOUT_SECONDS);
+            probeAfterReload(server, before, deadline, reloadTest, report);
+        } catch (Throwable e) {
+            reloadTest.fail("/reload failed: " + ExceptionUtil.stackTraceToString(e));
+            report.run();
+        }
+    }
+
+    private static void probeAfterReload(MinecraftServer server,
+                                         Commands before,
+                                         long deadline,
+                                         ReloadTest reloadTest,
+                                         Runnable report) {
+        try {
+            if (server.getCommands() == before) {
+                if (System.nanoTime() < deadline) {
+                    CompletableFuture.delayedExecutor(RELOAD_POLL_MILLIS, TimeUnit.MILLISECONDS, server)
+                                     .execute(() -> probeAfterReload(server, before, deadline, reloadTest, report));
+                    return;
+                }
+                reloadTest.fail("/reload did not finish within " + RELOAD_TIMEOUT_SECONDS + " seconds.");
+            } else {
+                perform(server, server.createCommandSourceStack(), reloadTest.probeCommand());
+            }
+        } catch (Throwable e) {
+            reloadTest.fail(ExceptionUtil.stackTraceToString(e));
+        }
+        report.run();
     }
 
     // Runs the command through the same pipeline as a typed command.

@@ -151,7 +151,7 @@ class IntegrationTest {
                 // reported, by CommandLib's compilation. The function tags that list the fixture's functions are built
                 // again with them, so their errors are dropped as well. Only errors from then count: a server that
                 // starts with the data pack, such as a Mohist image made from a bootstrap run, compiles it before
-                // plugins load. The Forge and NeoForge fixture has no data pack and does not reload.
+                // plugins load. The Forge and NeoForge fixture has no data pack.
                 if (isBukkitPlatform(System.getProperty("commandlib.platform", ""))) {
                     String logs = container.getLogs();
                     String reloadMarker = "Reloading data packs to verify registered commands survive.";
