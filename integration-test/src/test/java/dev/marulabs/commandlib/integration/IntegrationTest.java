@@ -174,21 +174,22 @@ class IntegrationTest {
                                   m -> m.contains("commandlibtest helpMessageRoot"));
                 // Mohist 1.20.1 answers a player's command that fails with a CommandSyntaxException, a vanilla one
                 // such as "/gamemode not_a_mode" as well, with Bukkit's unknown command message instead of the error.
+                // There those checks expect that reply, so they still notice when the behaviour changes.
                 boolean syntaxErrorsAreUnknown = "mohist-1.20.1".equals(targetName);
-                java.util.function.Predicate<String> unknownCommand = m -> syntaxErrorsAreUnknown
-                        && m.contains("Unknown command. Type");
+                java.util.function.UnaryOperator<java.util.function.Predicate<String>> commandError =
+                        expected -> syntaxErrorsAreUnknown ? m -> m.contains("Unknown command. Type") : expected;
                 // Invalid argument: the translated "incorrect argument" message points at the rejected token.
                 assertBotReceives(client,
                                   "commandlibtest enumArgument not_a_material",
                                   "incorrect argument message",
-                                  m -> m.contains("command.unknown.argument") || m.contains("Incorrect argument")
-                                          || unknownCommand.test(m));
+                                  commandError.apply(m -> m.contains("command.unknown.argument")
+                                          || m.contains("Incorrect argument")));
                 // CommandSyntaxException thrown by an argument is converted into a failure message for the sender.
                 assertBotReceives(client,
                                   "commandlibtest testConvertCommandSyntaxException true",
                                   "converted CommandSyntaxException message",
-                                  m -> m.contains("argument.integer.big") || m.contains("Integer must not be more than")
-                                          || unknownCommand.test(m));
+                                  commandError.apply(m -> m.contains("argument.integer.big")
+                                          || m.contains("Integer must not be more than")));
                 // A node with PermissionDefault.FALSE (DefaultPermission.NONE in the modded fixture) is not usable even by
                 // an operator. The modded fixture's console runs it during the tests, so it is known to be registered.
                 List<String> deniedMessages = assertBotReceives(client,
@@ -207,9 +208,8 @@ class IntegrationTest {
                     List<String> optionMessages = assertBotReceives(client,
                                                                     "commandlibtest optionPermissionProbe --secret",
                                                                     "incorrect argument message for an option without permission",
-                                                                    m -> m.contains("command.unknown.argument")
-                                                                            || m.contains("Incorrect argument")
-                                                                            || unknownCommand.test(m));
+                                                                    commandError.apply(m -> m.contains("command.unknown.argument")
+                                                                            || m.contains("Incorrect argument")));
                     assertThat(optionMessages).noneMatch(m -> m.contains("secret=true"));
                     assertBotReceives(client,
                                       "commandlibtest optionPermissionProbe",
@@ -219,7 +219,7 @@ class IntegrationTest {
                     assertBotReceives(client,
                                       "commandlibtest captionProbe",
                                       "caption text for the player's locale",
-                                      m -> m.contains("captionProbe English text") || unknownCommand.test(m));
+                                      commandError.apply(m -> m.contains("captionProbe English text")));
                     // The fixture unregisters its commands in onDisable, after CommandLib did on the disable event,
                     // as a plugin may. The bot is an operator, so it can stop the server.
                     client.sendCommand("stop");
