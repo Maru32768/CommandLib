@@ -98,8 +98,11 @@ This file lists the changes in each CommandLib release that affect plugin and mo
 
 Velocity, Fabric and Folia are new in this release. Folia has a smoke integration target (`folia-26.3`). Fabric 1.20.1
 and 1.21.1 run the Forge / NeoForge integration suite on a real Fabric server (`fabric-1.20.1`, `fabric-1.21.1`), but
-`fabric-1.21.4`, fabric-permissions-api and command blocks on Fabric are not verified there. Velocity is not yet
-verified on a real server.
+`fabric-1.21.4` and fabric-permissions-api are not verified there. Velocity 3.4.0 has a smoke
+integration target (`velocity-3.4.0`): a bot joins a Paper backend through a real proxy and receives CommandLib's
+command tree, the messages and failure messages of its commands, the refusal of a command whose default is not `ALL`,
+`ServerArgument` suggestions and an `executeAsync` message. Options, `PlayerArgument`, permission plugins and Velocity
+4.x are not verified there.
 
 #### Ways to define commands
 

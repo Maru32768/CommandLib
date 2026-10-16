@@ -250,10 +250,10 @@ class IntegrationTest {
         assertThat(isPlayerJoinLog("[12:47:42 INFO]: OtherPlayer joined the game")).isFalse();
     }
 
-    private static List<String> assertBotReceives(BotSession client,
-                                                  String command,
-                                                  String description,
-                                                  java.util.function.Predicate<String> expected) {
+    static List<String> assertBotReceives(BotSession client,
+                                          String command,
+                                          String description,
+                                          java.util.function.Predicate<String> expected) {
         client.clearReceivedPackets();
         client.sendCommand(command);
         List<String> received = new ArrayList<>();
@@ -296,7 +296,7 @@ class IntegrationTest {
     // A client that cannot decode the command tree, such as an MCProtocolLib release that lacks one of its argument
     // types, is disconnected right after joining. Waiting for the tree makes that disconnect fail here instead of in a
     // later step.
-    private static void waitForCommandTree(BotSession client) {
+    static void waitForCommandTree(BotSession client) {
         try {
             Awaitility.await()
                       .atMost(Duration.ofSeconds(30))
@@ -362,7 +362,7 @@ class IntegrationTest {
         }
     }
 
-    private static void assertDockerAvailable() {
+    static void assertDockerAvailable() {
         try {
             DockerClientFactory.instance()
                                .client();
@@ -373,7 +373,7 @@ class IntegrationTest {
         }
     }
 
-    private static Path findTestPluginJar(Path pluginsDir, String jarPattern) throws IOException {
+    static Path findTestPluginJar(Path pluginsDir, String jarPattern) throws IOException {
         try (var files = Files.list(pluginsDir)) {
             return files.filter(Files::isRegularFile)
                         .filter(path -> path.getFileName()
@@ -439,7 +439,7 @@ class IntegrationTest {
                                                                              .withStartupTimeout(Duration.ofMinutes(8));
     }
 
-    private static BotSession connectBot(GenericContainer<?> container) {
+    static BotSession connectBot(GenericContainer<?> container) {
         try {
             return connectWithLegacyProtocol(container);
         } catch (ReflectiveOperationException ignored) {
@@ -683,7 +683,7 @@ class IntegrationTest {
         }
     }
 
-    private static final class BotSession {
+    static final class BotSession {
         private final Object delegate;
         private final Method isConnectedMethod;
         private final Method sendMethod;

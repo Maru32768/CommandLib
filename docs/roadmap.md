@@ -30,7 +30,7 @@
 | Forge support                       | `[~]` | Forge 1.16.5 / 1.18.2 / 1.19.2 / 1.20.1 を `modded` の Stonecutter 単一ソースから build。 | loader 非依存層の分離（`[?]`）。4 version とも実サーバーで検証済み（2026-10-16）。 |
 | Mohist support                      | `[~]` | README 上で tested version が記載されている。                                                                                                      | 1.20.1 で失敗 message が player に届かない件。1.16.5 / 1.20.1 は integration test 済み（2026-10-16）。                                           |
 | Folia support                       | `[~]` | `paper` artifact が Folia を検出し、`FoliaCommandScheduler` で entity / region / global scheduler に戻す。`spigot` artifact は Folia で登録を拒否する。 | smoke target `folia-26.3` で登録、bot の実行と message、`executeAsync` の thread（player は region thread、console は global region thread）、補完を確認済み（2026-10-16）。command block の region 経路、`/execute as`、`spigot` artifact の拒否、region thread からの runtime 登録の guard は未検証。 |
-| Velocity support                    | `[~]` | `velocity` / `velocity-testing` module（Velocity 3.4.0+、`PlayerArgument` / `ServerArgument`）がある。Velocity 3.4.0 / 4.2.0 の proxy で手動 smoke test 済み。 | 実 proxy + backend + client の integration target、Velocity sample。 |
+| Velocity support                    | `[~]` | `velocity` / `velocity-testing` module（Velocity 3.4.0+、`PlayerArgument` / `ServerArgument`）がある。smoke target `velocity-3.4.0`（Velocity 3.4.0 の proxy、Paper 1.21.4 の backend、proxy 経由の bot）で command tree、実行と message、失敗 message、permission の拒否、`ServerArgument` の補完、`executeAsync` を確認済み（2026-10-17）。4.2.0 は手動確認のみ。 | option（`OptionGraph`）、`PlayerArgument`、permission plugin、Velocity 4.x の実 proxy での確認、Velocity sample。 |
 | NeoForge support                    | `[~]` | NeoForge 1.21.1 / 1.21.4 を build（両方とも integration test 済み）。 | 1.21.5 以降（1.21.11 で `Identifier` / `PermissionSet` 等の大きな変更）、26.x（非難読化、Java 25、`loom-no-remap`）。 |
 | Fabric support                      | `[~]` | `fabric-1.20.1` / `fabric-1.21.1` / `fabric-1.21.4` を build（`CommandRegistrationCallback` v2、fabric-permissions-api 任意対応）。`modded-testing` も全 node で通る。`fabric-1.20.1` / `fabric-1.21.1` の integration target で Forge / NeoForge と同じ suite が実サーバーで通る。 | `fabric-1.21.4` の integration target、fabric-permissions-api と command block の実サーバー確認、Fabric 用 Kotlin module、1.21.5 以降と 26.x。 |
 | Brigadier / NMS hiding              | `[~]` | 利用者 API から Brigadier / NMS を隠している。                                                                                                      | capability detection、公式 API 優先、fallback policy。                            |
@@ -105,7 +105,7 @@
 - `[x]` Forge testing strategy を決め、`forge-testing` を追加する。実サーバーの integration targets（`forge-1.16.5`、`forge-1.20.1`）と、サーバーなしの `forge-testing-<version>`（`CommandTester` / `FakeSender`）を追加済み。
 - `[~]` NeoForge / Fabric / Forge の module 方針を決める。方針案は
   [11. Platform Architecture](#11-platform-architecture) を参照。
-- `[ ]` Velocity の integration target（proxy + backend + bot）を追加する。`ServerArgument` の補完で quote が必要な名前を quote する。
+- `[ ]` `ServerArgument` の補完で quote が必要な名前を quote する。
 - `[x]` Architectury Loom + Stonecutter の PoC として、`forge:1.16.5` と `forge:1.20.1` を単一ソースから build する。
 - `[?]` mod loader 系 module を `minecraft`（MC version 依存・loader 非依存）と `loader/*`（loader 依存）に分割する。Fabric 追加時点では
   loader 依存部分が登録・permission・server 取得・reflection 2 箇所と metadata だけで、分割は不要だった。

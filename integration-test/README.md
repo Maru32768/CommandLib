@@ -120,6 +120,17 @@ module:
 - `paper-26.3-spigot-jar`: the `spigot` module on Paper 26.3, which it does not support. The target sets
   `commandlib.integration.expectedEnableFailure`, so it starts no bot and passes when the plugin fails to enable with
   that text, which names the paper artifact.
+- `velocity-3.4.0`: the `velocity` module in a plugin on a Velocity 3.4.0 proxy (build 566), in front of a Paper 1.21.4
+  backend. `VelocityIntegrationTest` runs it instead of `IntegrationTest`, which the target selects with
+  `commandlib.integration.testClass`. The target compiles the plugin from its `testPlugin` source set with `velocity`
+  and `common` inside it. Its image holds the backend in `work/server` and the proxy in `work/server/proxy`. The test
+  starts one container of each on a Docker network, and the bot (MCProtocolLib 1.21.4) joins through the proxy. The
+  smoke test checks that the command tree the bot receives has CommandLib's nodes and leaves out a
+  `DefaultPermission.OP` node, and that `ServerArgument` suggestions reach the bot. It checks that the bot receives the
+  messages of a child command with an argument, of a `ServerArgument` command, of an unknown server, of a
+  `requireConsole` command and of an `executeAsync` command. It also checks that the `OP` command is refused and does
+  not run: Velocity has no operators, and no permission plugin is installed. Options, `PlayerArgument`, permission
+  plugins, the console and Velocity 4.x are not covered.
 
 From 26.1 the servers need Java 25, and from 26.2 MCProtocolLib needs Java 21 and Adventure 5, so those targets set
 `commandlib.integration.botJavaVersion` to 21. A bot that brings adventure-api 5 goes before the test's own

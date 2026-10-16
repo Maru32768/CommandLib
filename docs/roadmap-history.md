@@ -121,6 +121,11 @@
   （`integration-test/shared/folia`）で、登録、bot の command 実行と message、bot への補完、`executeAsync` の work が
   sender を持つ thread の外で走り、続きが player では region thread、console では global region thread で走ることを確認する
   （2026-10-16）。command block、`/execute as`、`spigot` artifact の拒否は対象外。
+- `[x]` Velocity の integration target `velocity-3.4.0`（Velocity 3.4.0 build 566、Paper 1.21.4 の backend）を追加する。
+  `VelocityIntegrationTest` が proxy と backend の container を起動し、bot は proxy 経由で接続する。bot が受け取る command tree の
+  CommandLib の node（`DefaultPermission.OP` の node は除かれる）、`ServerArgument` の補完、子 command と argument の実行 message、
+  失敗 message、`OP` の command の拒否、`executeAsync` の message を確認する（2026-10-17）。option、`PlayerArgument`、
+  permission plugin、Velocity 4.x は対象外。
 
 ### P6: Ecosystem と tooling（完了分）
 

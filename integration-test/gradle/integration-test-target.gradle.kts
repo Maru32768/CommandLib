@@ -137,6 +137,14 @@ val botJavaVersion = if (extra.has("commandlib.integration.botJavaVersion")) {
     17
 }
 
+// Test class that drives the target. A target whose servers the shared runner cannot start, such as a proxy with a
+// backend, sets its own.
+val integrationTestClass = if (extra.has("commandlib.integration.testClass")) {
+    extra["commandlib.integration.testClass"].toString()
+} else {
+    "dev.marulabs.commandlib.integration.IntegrationTest"
+}
+
 // Set by a target whose plugin the server must refuse: the text its enable failure has to log. Such a target starts
 // no bot.
 val expectedEnableFailure = if (extra.has("commandlib.integration.expectedEnableFailure")) {
@@ -652,7 +660,7 @@ tasks.register<Test>("minecraftIntegrationTest") {
     })
     useJUnitPlatform()
     filter {
-        includeTestsMatching("dev.marulabs.commandlib.integration.IntegrationTest")
+        includeTestsMatching(integrationTestClass)
     }
     testLogging {
         events("started", "passed", "skipped", "failed", "standardOut", "standardError")
