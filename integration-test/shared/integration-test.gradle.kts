@@ -188,7 +188,7 @@ configure<JavaPluginExtension> {
             "../../../shared/core/src/main/java",
             "../../../shared/$testPluginSuite/src/main/java"
         )
-        resources.srcDirs("../../../../$commandlibModule/src/main/resources")
+        resources.srcDirs("../../../../$commandlibModule/src/main/resources", "../../../../common/src/main/resources")
     }
 }
 
