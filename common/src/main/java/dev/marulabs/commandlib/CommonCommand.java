@@ -38,6 +38,7 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
     private final List<Arguments<C>> argumentsList = new ArrayList<>();
     private final List<CommandOption<?, C>> options = new ArrayList<>();
     private final List<Set<CommandOption<?, ?>>> exclusiveOptionGroups = new ArrayList<>();
+    private boolean optionsAnywhere;
     private Prerequisite<C> prerequisite = ctx -> {
     };
     private final List<CommandMiddleware<? super C>> middlewares = new ArrayList<>();
@@ -248,6 +249,25 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
             }
         }
         exclusiveOptionGroups.add(Set.copyOf(group));
+    }
+
+    /**
+     * Lets the options of this command follow its arguments too, as in {@code /ban Steve -s}, in addition to coming
+     * before them. The options still count across the whole input: a limit, a mutually exclusive group and a
+     * permission apply wherever the option is given. Options cannot follow the values of a variadic argument.
+     * <p>
+     * The command tree then has a copy of each argument node for each set of options it can follow, so it grows with
+     * the number of arguments as well as with the options.
+     */
+    public final void optionsAnywhere() {
+        this.optionsAnywhere = true;
+    }
+
+    /**
+     * Whether {@link #optionsAnywhere()} was called.
+     */
+    final boolean allowsOptionsAnywhere() {
+        return optionsAnywhere;
     }
 
     public final void disableParentPrerequisite() {

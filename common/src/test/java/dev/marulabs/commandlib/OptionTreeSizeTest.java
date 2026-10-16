@@ -1,6 +1,7 @@
 package dev.marulabs.commandlib;
 
 import com.mojang.brigadier.tree.CommandNode;
+import com.mojang.brigadier.tree.LiteralCommandNode;
 import dev.marulabs.commandlib.argument.CommonIntegerArgument;
 import dev.marulabs.commandlib.argument.CommonStringArgument;
 import org.junit.jupiter.api.Test;
@@ -47,6 +48,65 @@ class OptionTreeSizeTest {
         assertThat(sent(command)).isLessThan(1_000);
     }
 
+    @Test
+    void options_after_the_arguments_grow_the_tree_with_the_arguments_only() {
+        TestCommand command = benchmarkCommand();
+        command.optionsAnywhere();
+        // The 8 states each copy target and count, which offer the tokens of their state again (133 nodes). The
+        // copies redirect like the tokens, so a player gets each node once.
+        assertThat(nodes(command)).isLessThan(150);
+        assertThat(sent(command)).isEqualTo(nodes(command));
+        // One argument: the tokens of each state before and after it, twice the 187 nodes of flags(4) (386).
+        assertThat(nodes(anywhere(flags(4)))).isLessThan(2 * nodes(flags(4)) + 20);
+        assertThat(sent(anywhere(flags(4)))).isLessThan(400);
+        assertThat(sent(anywhere(flags(6)))).isLessThan(12_000);
+    }
+
+    @Test
+    void every_redirect_follows_its_target_in_the_per_player_copy() {
+        TestCommand restricted = flags(4);
+        restricted.optionsAnywhere();
+        restricted.option(Options.flag("secret", 'z')
+                                 .permission(DefaultPermission.OP));
+        for (TestCommand command : List.of(benchmarkCommand(), anywhere(benchmarkCommand()), restricted)) {
+            for (boolean operator : List.of(true, false)) {
+                Set<CommandNode<?>> copied = Collections.newSetFromMap(new IdentityHashMap<>());
+                TestCommandSource source = new TestCommandSource(operator ? "test.flags.option.secret" : "none") {
+                    @Override
+                    public boolean hasPermission(String permission) {
+                        return !permission.endsWith(".option.secret") || super.hasPermission(permission);
+                    }
+                };
+                for (CommandNode<TestCommandSource> node : build(command)) {
+                    copy(node, source, copied);
+                }
+            }
+        }
+    }
+
+    // Copies the tree as vanilla's Commands#fillUsableCommands does, which resolves a redirect to the copy of its
+    // target made so far.
+    private static void copy(CommandNode<TestCommandSource> node,
+                             TestCommandSource source,
+                             Set<CommandNode<?>> copied) {
+        copied.add(node);
+        for (CommandNode<TestCommandSource> child : node.getChildren()) {
+            if (!child.canUse(source)) {
+                continue;
+            }
+            if (child.getRedirect() != null) {
+                assertThat(copied).as("the target of %s", child.getName())
+                                  .contains(child.getRedirect());
+            }
+            copy(child, source, copied);
+        }
+    }
+
+    private static TestCommand anywhere(TestCommand command) {
+        command.optionsAnywhere();
+        return command;
+    }
+
     static int nodes(TestCommand command) {
         Set<CommandNode<?>> seen = Collections.newSetFromMap(new IdentityHashMap<>());
         Deque<CommandNode<?>> queue = new ArrayDeque<>(build(command));
@@ -79,8 +139,10 @@ class OptionTreeSizeTest {
         return count;
     }
 
-    private static List<? extends CommandNode<?>> build(TestCommand command) {
-        return new CommandNodeCreator<>(List.of(command), "test", TestCommandRunner.INLINE).build();
+    private static List<LiteralCommandNode<TestCommandSource>> build(TestCommand command) {
+        return new CommandNodeCreator<TestCommandSource, String, TestCommandContext, TestCommand>(List.of(command),
+                                                                                                  "test",
+                                                                                                  TestCommandRunner.INLINE).build();
     }
 
     static TestCommand flags(int count) {

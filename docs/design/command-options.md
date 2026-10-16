@@ -13,7 +13,8 @@ public API is expected to behave, and which internal boundaries are intentional.
 ## Goals
 
 - Support Unix-style optional flags and value options before positional
-  arguments.
+  arguments, and after them for a command that opts in
+  (`CommonCommand#optionsAnywhere()`).
 - Keep the caller-facing API type-safe: each option returns a typed value from
   the context.
 - Allow a caller to distinguish "option was supplied" from "option was omitted
@@ -26,9 +27,12 @@ public API is expected to behave, and which internal boundaries are intentional.
 - Options are not inherited from parent commands. Each command declares its own
   option set.
 - Option ordering relative to other options is not enforced; any order is valid.
-- Options after positional arguments are not supported. Brigadier argument nodes
-  follow option literal nodes in the tree, so an option token placed after an
-  argument would not match.
+- Options after positional arguments are not accepted by default. Brigadier
+  argument nodes follow option literal nodes in the tree, so an option token
+  placed after an argument does not match unless the command opts in (see
+  [Options after the arguments](#options-after-the-arguments)).
+- Options do not follow the values of a variadic argument, and an argument's
+  child commands do not follow the options after the argument.
 
 ## Public API Shape
 
@@ -402,9 +406,11 @@ requirement names. The options end at the space before the context, and the
 graph parses them again from the input, from the empty state, as Brigadier
 matched them: each token is a literal of the state up to the next space, and a
 value literal is followed by its value, parsed with the option's argument type.
-The start is one of the last `Σ maxOccurrences × (1 or 2)` token starts; the
-earliest start that parses to the hub's state is taken, since the token before
-the true start is the command's literal and no option token. The literals of the
+The options start right after the command's literal (its name or an alias, with
+an optional namespace for a root command and a leading slash), so every token
+that follows such a literal is a candidate start; the earliest one that parses
+to the hub's state is taken, since an option value can repeat the literal but
+comes after the true one. The literals of the
 command's path (its name or an alias, optionally with a namespace, and the
 names of its parent commands) typed before the options are added back, so
 `CommandContext#getInputs()` stays `[scan, Alex]`. The runner then works on a
@@ -427,8 +433,8 @@ keeps the tree without redirects, in which the paths with the same state share
 their children: its inherited arguments are parsed before its options and would
 be lost by the redirect too.
 
-The re-parse runs only when options were given, and only over the option
-tokens.
+The re-parse runs only when options were given, and only over the input before
+the last redirect.
 
 #### Platforms
 
@@ -446,16 +452,13 @@ tokens.
   `CommandGraphInjector` copies each node once (`done` map) and copies the
   redirect target, so the client tree keeps the shape too.
 
-### Why Options Precede Arguments
+### Options after the arguments
 
 Brigadier resolves a path through the tree by matching one node at a time from
 left to right. Because option literals branch from the command literal node
-(before argument nodes), Brigadier will only match them if they appear before the
-first argument token. Placing an option token after an argument token means
-Brigadier has already descended into the argument branch, where option literals
-do not exist.
-
-This constraint is surfaced in tests:
+(before argument nodes), Brigadier only matches them before the first argument
+token by default; after an argument token it has descended into the argument
+branch, where no option literal exists:
 
 ```java
 class CommandOptionTest {
@@ -473,9 +476,53 @@ class CommandOptionTest {
 }
 ```
 
-Options after arguments would need option tokens under every argument node, and
-the arguments of a branch can be optional or variadic, so the tree would grow
-with the arguments as well.
+`CommonCommand#optionsAnywhere()` puts option tokens under the argument nodes.
+The graph's state then has a *position* besides the counts: the argument node
+it follows, or none before the first argument (compared by identity, since a
+node's equality compares its subtree). An option token keeps the position, and
+an argument advances it, so the counts flow through the arguments into the same
+state machine: limits, mutually exclusive groups and permissions apply over the
+whole input.
+
+```
+/ban
+  <target>            (copy for {}, hub of ({}, target))
+    [reason]          (copy for {}, hub of ({}, reason))
+      --silent        (hub of ({silent}, reason))
+      -s              → redirect to the hub of ({silent}, reason)
+    --silent          (hub of ({silent}, target))
+      [reason]        → redirect to the hub of ({silent}, reason)
+    -s                → redirect to the hub of ({silent}, target)
+  --silent            (hub of ({silent}, none))
+    <target>          → redirect to the hub of ({silent}, target)
+  -s                  → redirect to the hub of ({silent}, none)
+```
+
+Each argument node is copied for each count it follows, so the copy offers the
+tokens of that count. A copy is a node of the state after it, as a token is: it
+redirects to the hub of its state or is the hub, so each state's children exist
+once and a player's copy of the tree has each node once. Its requirement is an
+`OptionNode` that names the state and tests the argument's own requirement, so
+the runner finds the state after a redirect to the copy. The tree grows with the
+number of argument positions: about the nodes of the options times the positions
+plus one.
+
+Two places keep the template nodes:
+
+- the nodes of a variadic argument, found as a node with an argument child of
+  its own name, are shared, so options do not follow its values; copying them
+  would multiply the tree by the maximum count;
+- the child commands under an argument hang under every copy of the argument
+  but not under the option tokens after it, so such a copy holds its own children
+  instead of redirecting. A redirect to it would let the child command follow
+  options, whose redirect would lose the parent's arguments for the child.
+
+The recovery parses arguments too: a token that is no literal of the state is
+parsed with the type of each argument node that may follow the position, with
+backtracking, as Brigadier tries every argument child. A literal that matches the
+token is the only candidate, as in Brigadier. The recovered arguments are put in
+the options context with the template node, which has the argument's name and
+type.
 
 ## Execution Flow
 
@@ -644,6 +691,13 @@ Key cases:
 - An argument child does not count the option tokens of its parent
 - The tree size of short flags, counts and repeatable options, and the shared
   argument nodes (`OptionTreeSizeTest`)
+- Options after the arguments: after each argument, mixed with options before
+  them, limits and exclusive groups over the whole input, after an alias, a
+  leading slash and a redirect, not after variadic values, child commands of an
+  argument, and the tree size (`OptionsAnywhereTest`, `OptionTreeSizeTest`, and
+  the Spigot, Paper and Velocity testers); every redirect target is copied before
+  the redirect in vanilla's per-player copy, also with a hidden option
+  (`OptionTreeSizeTest`)
 - Option permissions: hidden and rejected without the node, also inside
   combined flags, rejected by the runner when the node is gone at execution,
   left out of help, registered and exported (`OptionPermissionTest`, and the

@@ -148,6 +148,14 @@ public final class CommandBuilder<C extends CommonCommandContext<?, ?>, T extend
         return this;
     }
 
+    /**
+     * See {@link CommonCommand#optionsAnywhere()}.
+     */
+    public CommandBuilder<C, T> optionsAnywhere() {
+        command.optionsAnywhere();
+        return this;
+    }
+
     public CommandBuilder<C, T> disableParentPrerequisite() {
         command.disableParentPrerequisite();
         return this;

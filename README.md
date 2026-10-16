@@ -753,6 +753,9 @@ Options must appear before regular arguments. This is invalid:
 /scan Steve -f
 ```
 
+unless the command calls `optionsAnywhere()`, which lets its options follow each argument too
+([options](docs/options.md#options-after-the-arguments)).
+
 For subcommands, options belong to the most specific child command and are placed after that child command name:
 
 ```java

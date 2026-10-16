@@ -83,6 +83,29 @@ class CommandOptionTest {
     }
 
     @Test
+    void options_follow_the_arguments_when_the_command_allows_it() {
+        FakeSender steve = FakeSender.player("Steve");
+        FakeSender admin = FakeSender.player("Admin");
+
+        try (CommandTester tester = new CommandTester(() -> new Command("heal") {{
+            optionsAnywhere();
+            CommandOption<Boolean, CommandContext> force = option(Options.flag("force", 'f'));
+            CommandOption<Integer, CommandContext> times = option(Options.integer("times", 't', 1));
+            argument(new PlayerArgument("target"), new IntegerArgument("amount")).execute((target, amount, ctx) -> {
+                ctx.sendMessage(target.getName() + ":" + amount + ":" + ctx.getOption(force) + ":"
+                        + ctx.getOption(times));
+            });
+        }}, "test.command")) {
+            tester.withFakePlayer((Player) steve.asSender());
+            tester.execute("heal Steve -f 5", admin);
+            tester.execute("heal Steve 5 -t 3 -f", admin);
+            tester.execute("heal -t 2 Steve -f 5", admin);
+        }
+
+        assertThat(admin.getSentMessageTexts()).containsExactly("Steve:5:true:1", "Steve:5:true:3", "Steve:5:true:2");
+    }
+
+    @Test
     void an_option_with_a_permission_is_hidden_and_rejected_without_it() {
         try (CommandTester tester = new CommandTester(() -> new Command("ban") {{
             CommandOption<Boolean, CommandContext> silent = option(Options.flag("silent", 's')

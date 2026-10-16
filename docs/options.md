@@ -1,7 +1,7 @@
 # Command Options
 
 Options are named modifiers such as `-f`, `--force` or `--limit 10`, given between the command name and its
-positional arguments. Each option is a typed `CommandOption<T, C>`: register it with `option(...)` and read it with
+positional arguments, or also after them with [`optionsAnywhere()`](#options-after-the-arguments). Each option is a typed `CommandOption<T, C>`: register it with `option(...)` and read it with
 `ctx.getOption(option)`, which returns `T` without casts.
 
 ```java
@@ -132,6 +132,41 @@ public final class DeployCommand extends Command {
 The default value of a required option is never returned. Input that ends where the command has no executor, such as
 `/deploy` above, shows help instead of asking for the option.
 
+## Options After the Arguments
+
+By default options come before the positional arguments, so `/ban Steve -s` is rejected. `optionsAnywhere()` on the
+command lets them follow each argument as well:
+
+```java
+public final class BanCommand extends Command {
+    public BanCommand() {
+        super("ban");
+        optionsAnywhere();
+
+        CommandOption<Boolean, CommandContext> silent = option(Options.flag("silent", 's'));
+        argument(new PlayerArgument("target"), new StringArgument("reason").optional("")).execute((target, reason, ctx) -> {
+            boolean isSilent = ctx.getOption(silent);
+        });
+    }
+}
+```
+
+```text
+/ban Steve -s            ok
+/ban Steve spam -s       ok
+/ban -s Steve spam       ok, as before
+/ban Steve -s spam -s    rejected: -s is given twice
+```
+
+- The options count over the whole input: the maximum of a count or repeatable option, the mutually exclusive groups
+  and the permissions apply wherever the option is given.
+- Options cannot follow the values of a variadic argument; give them before it.
+- The child commands of an argument follow the argument itself: `/config <key> set` works, `/config <key> -f set` does
+  not. Options may still come before the argument: `/config -f <key> set`.
+- A word or string argument takes a token that is no option the input may still give, as it takes an unknown option:
+  in `/ban -s Steve -s` the second `-s` is the reason.
+- Help keeps the usage `/ban [options] <target> [reason]`.
+
 ## Permissions
 
 `permission(DefaultPermission)` gives an option its own node, `<command node>.option.<name>`; `permission(node)` and
@@ -189,7 +224,8 @@ Option errors are separate from argument errors:
 
 - Brigadier rejects input the command tree does not accept before the command runs: a malformed or out-of-range
   value (`--limit abc`), a value option without its value, an option given more often than allowed, an option of a
-  mutually exclusive group after another one, or an option after a positional argument. The client marks these
+  mutually exclusive group after another one, or an option after a positional argument (without
+  `optionsAnywhere()`). The client marks these
   inputs as it marks any incorrect command. An unknown option such as `--bogus` is rejected the same way unless the
   first positional argument accepts it as a value, as a word string argument does.
 - A missing required option and an unmet `requires(...)` throw `OptionParseException`, whose messages are sent to the
@@ -233,4 +269,8 @@ six short flags already make about 5,500 nodes.
 An argument child (a command under an argument) keeps a tree without redirects, which players receive with a copy for
 every order of the options. Keep its options fewer still.
 
-Options cannot follow positional arguments, and one occurrence of an option takes exactly one value.
+`optionsAnywhere()` copies each argument node for each set of options it can follow, so the tree grows with the
+number of arguments too: with one argument it has about twice the nodes (four short flags: 386 instead of 187), and
+the benchmark's command with three options and two arguments has 133 nodes. Players get each node once.
+
+One occurrence of an option takes exactly one value.
