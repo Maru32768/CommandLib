@@ -18,7 +18,8 @@ import java.util.function.BiConsumer;
  * A per-sender cooldown for {@link CommonCommand#cooldown(Cooldown)}.
  * <p>
  * The cooldown starts when the command passes its middlewares and is about to execute, and keeps the same sender from
- * executing it again until it ends. Senders are told apart by their unique id, so only senders that have one, such as
+ * executing it again until it ends. While an execution that passed the check is still in the middlewares, such as one
+ * waiting for an asynchronous lookup, the sender's other executions are rejected as well. Senders are told apart by their unique id, so only senders that have one, such as
  * players and entities, are throttled; the console, remote consoles and command blocks are never on cooldown. Commands
  * given the same instance share one cooldown. Keep the instance to query or end a sender's cooldown with
  * {@link #remaining(UUID)} and {@link #reset(UUID)}. The state lives in memory and is lost when the server stops.
@@ -26,6 +27,8 @@ import java.util.function.BiConsumer;
 public final class Cooldown {
     private final Duration duration;
     private final Map<UUID, Instant> endsAt = new ConcurrentHashMap<>();
+    // The executions that passed the check and have not reached the start yet, by sender, with the time they passed.
+    private final Map<UUID, Reservation> reservations = new ConcurrentHashMap<>();
     private @Nullable String bypassPermission = null;
     private BiConsumer<CommonCommandContext<?, ?>, Duration> message = (ctx,
                                                                         remaining) -> ctx.sendFailure(Caption.COOLDOWN,
@@ -106,6 +109,7 @@ public final class Cooldown {
      */
     public void reset(@NotNull UUID id) {
         endsAt.remove(Objects.requireNonNull(id));
+        reservations.remove(id);
     }
 
     /**
@@ -113,18 +117,36 @@ public final class Cooldown {
      */
     public void resetAll() {
         endsAt.clear();
+        reservations.clear();
     }
 
     /**
-     * Returns false, after sending the message, when the sender is on cooldown.
+     * Returns false, after sending the message, when the sender is on cooldown or another of its executions passed the
+     * check and has not started the cooldown yet. Otherwise reserves the cooldown for this execution until
+     * {@link #start} or {@link #release}.
      */
-    boolean check(CommonCommandContext<?, ?> ctx) {
+    boolean reserve(CommonCommandContext<?, ?> ctx) {
         Duration remaining = remaining(ctx);
-        if (remaining.isZero()) {
+        if (!remaining.isZero()) {
+            message.accept(ctx, remaining);
+            return false;
+        }
+        Optional<UUID> id = throttledId(ctx);
+        if (id.isEmpty()) {
             return true;
         }
-        message.accept(ctx, remaining);
-        return false;
+        Instant now = clock.instant();
+        Reservation reservation = new Reservation(ctx, now);
+        // A reservation as old as the cooldown is dropped, so a middleware that never finishes does not keep the
+        // sender waiting forever.
+        Reservation held = reservations.merge(id.get(),
+                                              reservation,
+                                              (old, x) -> now.isBefore(old.at.plus(duration)) ? old : x);
+        if (held != reservation) {
+            message.accept(ctx, duration);
+            return false;
+        }
+        return true;
     }
 
     void start(CommonCommandContext<?, ?> ctx) {
@@ -137,6 +159,25 @@ public final class Cooldown {
         endsAt.values()
               .removeIf(end -> !now.isBefore(end));
         endsAt.put(id.get(), now.plus(duration));
+        release(ctx);
+    }
+
+    /**
+     * Drops the reservation of this execution, which ends without reaching {@link #start}, or has started.
+     */
+    void release(CommonCommandContext<?, ?> ctx) {
+        throttledId(ctx).ifPresent(id -> reservations.computeIfPresent(id,
+                                                                       (key, held) -> held.owner == ctx ? null : held));
+    }
+
+    private static final class Reservation {
+        private final CommonCommandContext<?, ?> owner;
+        private final Instant at;
+
+        private Reservation(CommonCommandContext<?, ?> owner, Instant at) {
+            this.owner = owner;
+            this.at = at;
+        }
     }
 
     private Optional<UUID> throttledId(CommonCommandContext<?, ?> ctx) {

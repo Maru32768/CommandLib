@@ -764,7 +764,10 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
         Cooldown cooldown = effectiveCooldown();
         Confirmation confirmation = effectiveConfirmation();
         if (cooldown != null) {
-            result.add(preprocessMiddleware(cooldown::check));
+            CommandMiddleware<C> reserve = preprocessMiddleware(cooldown::reserve);
+            result.add((ctx, next) -> reserve.handle(ctx,
+                                                     () -> next.proceed()
+                                                               .whenComplete((x, e) -> cooldown.release(ctx))));
         }
         if (confirmation != null) {
             result.add(preprocessMiddleware(confirmation::confirm));

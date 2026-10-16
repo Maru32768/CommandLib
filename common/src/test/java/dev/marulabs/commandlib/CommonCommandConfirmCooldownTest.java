@@ -8,9 +8,13 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -202,6 +206,47 @@ class CommonCommandConfirmCooldownTest {
         // On cooldown, the sender is not asked to confirm.
         assertThat(runner.execute("reset")
                          .messages()).containsExactly("wait");
+    }
+
+    @Test
+    void cooldown_rejects_another_execution_while_one_waits_in_a_middleware() throws Exception {
+        List<Runnable> waiting = new ArrayList<>();
+        AtomicInteger healed = new AtomicInteger();
+        boolean[] allow = {true};
+        TestCommand command = new TestCommand("heal") {{
+            cooldown(Cooldown.of(Duration.ofSeconds(30))
+                             .clock(clock)
+                             .message((ctx, remaining) -> ctx.sendFailure("wait " + remaining.toSeconds())));
+            // A lookup that finishes later, such as one on the async executor.
+            addMiddleware((ctx, next) -> {
+                CompletableFuture<Void> looked = new CompletableFuture<>();
+                waiting.add(() -> looked.complete(null));
+                return looked.thenCompose(x -> allow[0] ? next.proceed() : CompletableFuture.completedFuture(null));
+            });
+            execute(ctx -> healed.incrementAndGet());
+        }};
+        TestCommandRunner runner = new TestCommandRunner(command, player("Steve"));
+
+        assertThat(runner.execute("heal")
+                         .messages()).isEmpty();
+        assertThat(runner.execute("heal")
+                         .messages()).containsExactly("wait 30");
+        waiting.forEach(Runnable::run);
+        waiting.clear();
+        assertThat(healed).hasValue(1);
+        assertThat(runner.execute("heal")
+                         .messages()).containsExactly("wait 30");
+
+        // A run that the middleware skips does not keep the sender waiting.
+        clock.advance(Duration.ofSeconds(30));
+        allow[0] = false;
+        runner.execute("heal");
+        waiting.forEach(Runnable::run);
+        waiting.clear();
+        allow[0] = true;
+        runner.execute("heal");
+        waiting.forEach(Runnable::run);
+        assertThat(healed).hasValue(2);
     }
 
     @Test
