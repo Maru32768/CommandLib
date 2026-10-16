@@ -26,11 +26,12 @@ import java.nio.file.Files
  *
  * - javaVersion: Java toolchain version as a stringified integer.
  *
- * - platform: Runtime server family. Current values: "paper", "mohist", "spigot".
+ * - platform: Runtime server family. Current values: "paper", "folia", "mohist", "spigot".
  *   This describes the server executable, not the CommandLib module.
  *   - "mohist" uses a Mohist server jar but compiles against spigot module sources.
  *   - "paper" uses a Paper server jar and compiles against spigot module sources by default.
  *   - "spigot" uses the Spigot server jar that the root build's buildSpigotServer task builds with BuildTools.
+ *   - "folia" uses a Folia server jar with the paper module and the "folia" suite.
  *
  * - minecraftServerVersion:
  *   Minecraft version of the server, used to pick plugin downloads such as PlugManX. This is
@@ -55,7 +56,8 @@ import java.nio.file.Files
  *   are bundled too, as the published spigot jar bundles them.
  *
  * - testPluginSuite:
- *   Shared Bukkit-family test plugin suite to compile: "spigot" or "paper".
+ *   Shared Bukkit-family test plugin suite to compile: "spigot", "paper" or "folia". "folia" is a smoke suite for
+ *   Folia, which refuses the Bukkit scheduler the other suites use.
  *   Defaults to "paper" when commandlibModule is "paper"; otherwise "spigot".
  *
  * - copyTargets:
@@ -128,7 +130,7 @@ val minecraftServerVersion = project.requiredStringProperty("minecraftServerVers
 val commandlibModule: String = project.requiredStringProperty("commandlibModule")
 val testPluginSuite: String = project.optionalStringProperty("testPluginSuite")
     ?: if (commandlibModule == "paper") "paper" else "spigot"
-require(testPluginSuite == "spigot" || testPluginSuite == "paper") {
+require(testPluginSuite in listOf("spigot", "paper", "folia")) {
     "Unsupported testPluginSuite: $testPluginSuite"
 }
 val serverJarDownloads = if (platform == "spigot") {

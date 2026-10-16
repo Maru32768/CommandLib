@@ -277,6 +277,8 @@ if (targetPlatform == "spigot") {
 
 fun writeServerProperties(serverDir: File, port: Int) {
     serverDir.mkdirs()
+    // Folia 26.3 rejects the only player as "The server is full!" when max-players is 1.
+    val maxPlayers = if (targetPlatform == "folia") 2 else 1
     serverDir.resolve("server.properties").writeText(
         """
         online-mode=false
@@ -286,7 +288,7 @@ fun writeServerProperties(serverDir: File, port: Int) {
         gamemode=creative
         force-gamemode=true
         difficulty=peaceful
-        max-players=1
+        max-players=$maxPlayers
         spawn-animals=false
         spawn-monsters=false
         spawn-npcs=false

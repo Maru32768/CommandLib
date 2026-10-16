@@ -17,7 +17,7 @@ with ease.
 | **NeoForge** | `neoforge-<minecraft-version>` | `1.21.1`, `1.21.4` (`1.21.4` built and unit-tested; not yet run on a real server) | Use the artifact that matches the target Minecraft version. Requires Java 21+. |
 | **Fabric** | `fabric-<minecraft-version>` | `1.20.1`, `1.21.1`, `1.21.4` (built and unit-tested; not yet run on a real server) | Use the artifact that matches the target Minecraft version. Requires Fabric API. |
 | **Mohist** | `spigot` | `1.16.5`, `1.20.1`                                         | Works on Mohist since it's compatible with Spigot.            |
-| **Folia**  | `paper`  | Not tested on a real server yet | Detected at runtime; async commands return to the entity, region or global region thread. Declare `folia-supported: true`. See [Folia](docs/execution.md#folia). |
+| **Folia**  | `paper`  | `26.3` (smoke test: registration, player commands, async threads, suggestions) | Detected at runtime; async commands return to the entity, region or global region thread. Declare `folia-supported: true`. See [Folia](docs/execution.md#folia). |
 | **Velocity** | `velocity` | `3.4.0`, `4.2.0` (manual proxy runs, no client)        | Built against Velocity API `3.4.0`. Requires Java 17+. Proxy arguments only; see [Velocity](#velocity). |
 
 ## Features

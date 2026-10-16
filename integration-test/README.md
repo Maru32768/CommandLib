@@ -66,6 +66,7 @@ Shared fixture code is split by responsibility:
 integration-test/shared/core
 integration-test/shared/spigot
 integration-test/shared/paper
+integration-test/shared/folia
 integration-test/shared/modded
 ```
 
@@ -109,6 +110,13 @@ module:
   1.21.2 and 1.21.9, such as the parameters of `ServerFunctionLibrary#reload`, which the paper module reads by
   reflection.
 - `mohist-1.16.5` and `mohist-1.20.1`.
+- `folia-26.3`: the `paper` module on Folia 26.3 (build 3), with the smoke fixture in `shared/folia` instead of the
+  Paper suite, which schedules with the Bukkit scheduler that Folia refuses. It checks that the commands register, that
+  the bot gets the messages of the bot-side checks every target runs, that `executeAsync` runs its work off the thread
+  that owns the sender and its continuation on the player's region thread for the bot and on the global region thread
+  for the console, and that the suggestions of a CommandLib argument are sent to the bot. Command blocks,
+  `/execute as` and the `spigot` module's refusal of Folia are not covered. Folia rejects the only player as "The
+  server is full!" when `max-players` is 1, so this target sets it to 2.
 - `paper-26.3-spigot-jar`: the `spigot` module on Paper 26.3, which it does not support. The target sets
   `commandlib.integration.expectedEnableFailure`, so it starts no bot and passes when the plugin fails to enable with
   that text, which names the paper artifact.

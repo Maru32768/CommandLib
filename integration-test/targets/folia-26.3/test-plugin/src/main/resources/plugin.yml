@@ -1,0 +1,5 @@
+name: '${name}'
+version: '${version}'
+main: '${MainClass}'
+api-version: 1.16
+folia-supported: true

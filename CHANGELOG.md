@@ -93,7 +93,8 @@ This file lists the changes in each CommandLib release that affect plugin and mo
   `neoforge-1.21.4`.
 - The `spigot` artifact runs on Spigot up to 26.3.
 
-Velocity, Fabric and Folia are new in this release and are not yet verified on a real server.
+Velocity, Fabric and Folia are new in this release. Folia has a smoke integration target (`folia-26.3`); Velocity and
+Fabric are not yet verified on a real server.
 
 #### Ways to define commands
 
