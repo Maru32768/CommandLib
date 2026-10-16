@@ -99,7 +99,8 @@ Only the last arguments of a branch can be optional, as in Cloud. See [optional 
 | `MultiplePlayerSelectorParser`, `SingleEntitySelectorParser`, `MultipleEntitySelectorParser` | `PlayersArgument` (`List<Player>`), `EntityArgument`, `EntitiesArgument` (`List<Entity>`) |
 | `OfflinePlayerParser`, `WorldParser`, `LocationParser`, `NamespacedKeyParser`, `EnchantmentParser`, `ItemStackParser` | `OfflinePlayerArgument`, `WorldArgument`, `LocationArgument`, `NamespacedKeyArgument`, `EnchantmentArgument`, `ItemStackArgument` |
 | `MaterialParser` | **Not available**; `ItemStackArgument` for items, `BlockDataArgument` for blocks |
-| `Location2DParser`, `BlockPredicateParser`, `ItemStackPredicateParser`, `eitherParser`, aggregate parsers | **Not available**. See [missing arguments](../arguments.md#missing-arguments-by-priority) |
+| `BlockPredicateParser`, `ItemStackPredicateParser` | `BlockPredicateArgument`, `ItemPredicateArgument` |
+| `Location2DParser`, `eitherParser`, aggregate parsers | **Not available**. See [missing arguments](../arguments.md#missing-arguments-by-priority) |
 
 See the [argument catalog](../arguments.md) for the full list and result types.
 

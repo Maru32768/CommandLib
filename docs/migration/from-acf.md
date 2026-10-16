@@ -323,8 +323,9 @@ fields of `JoinCommand` annotated `@Dependency` (from `dev.marulabs.commandlib.a
 
 ## Not available yet
 
-Tracked in the roadmap: reusable named conditions, catch-unknown handlers, hidden commands, root aliases
-for subcommands, and global contexts and completions by type. Asynchronous execution is `executeAsync(...)`, see
+Tracked in the roadmap: reusable named conditions for fluent commands (annotated commands have `@Condition`, see
+[conditions](#conditions)), catch-unknown handlers, hidden commands, root aliases for subcommands, and global contexts
+and completions by type. Asynchronous execution is `executeAsync(...)`, see
 [execution](../execution.md#async-executors).
 
 See also: the [comparison of seven use cases](../comparison.md), [Migrating from CommandAPI](from-commandapi.md), [Cloud](from-cloud.md), [Lamp](from-lamp.md).
