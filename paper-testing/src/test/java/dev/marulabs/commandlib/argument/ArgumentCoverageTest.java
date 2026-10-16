@@ -26,11 +26,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
 /**
- * Verifies Paper argument coverage at the command-testing layer.
- *
- * <p>Paper API-backed arguments are expected to be fully exercised by integration-test
- * targets on real Paper servers. This test keeps paper-testing honest by ensuring every
- * public argument can at least be wired into a command tree here.
+ * Verifies Paper argument coverage at the command-testing layer: every public argument can be wired into a command
+ * tree here, and has a {@code <Name>Test} class or an entry in {@link #COVERED_BY_SHARED_TESTS}. A new argument without
+ * either fails the build.
  */
 @SuppressWarnings({"rawtypes"})
 class ArgumentCoverageTest {
@@ -142,6 +140,55 @@ class ArgumentCoverageTest {
                                                                                                                                  () -> new UUIDArgument("value")),
                                                                                                                        Map.entry(UUIDsArgument.class,
                                                                                                                                  () -> new UUIDsArgument("value")));
+
+    /**
+     * Arguments executed by a test shared with other arguments instead of their own {@code <Name>Test}.
+     */
+    private static final Map<Class<?>, Class<?>> COVERED_BY_SHARED_TESTS = Map.ofEntries(Map.entry(BlockDataArgument.class, LightweightArgumentExecutionTest.class),
+                                                                                         Map.entry(BooleanArgument.class, LightweightArgumentExecutionTest.class),
+                                                                                         Map.entry(ChatColorArgument.class, LightweightArgumentExecutionTest.class),
+                                                                                         Map.entry(DoubleArgument.class, LightweightArgumentExecutionTest.class),
+                                                                                         Map.entry(DoubleRangeArgument.class, RangeArgumentTest.class),
+                                                                                         Map.entry(EntitiesArgument.class, LightweightArgumentExecutionTest.class),
+                                                                                         Map.entry(EntityArgument.class, LightweightArgumentExecutionTest.class),
+                                                                                         Map.entry(EnumArgument.class, LightweightArgumentExecutionTest.class),
+                                                                                         Map.entry(FloatArgument.class, LightweightArgumentExecutionTest.class),
+                                                                                         Map.entry(GameModeArgument.class, LightweightArgumentExecutionTest.class),
+                                                                                         Map.entry(IntegerArgument.class, LightweightArgumentExecutionTest.class),
+                                                                                         Map.entry(IntegerRangeArgument.class, RangeArgumentTest.class),
+                                                                                         Map.entry(ItemStackArgument.class, LightweightArgumentExecutionTest.class),
+                                                                                         Map.entry(LiteralArgument.class, LightweightArgumentExecutionTest.class),
+                                                                                         Map.entry(LocationArgument.class, LightweightArgumentExecutionTest.class),
+                                                                                         Map.entry(LongArgument.class, LightweightArgumentExecutionTest.class),
+                                                                                         Map.entry(NameableObjectArgument.class, LightweightArgumentExecutionTest.class),
+                                                                                         Map.entry(ObjectArgument.class, LightweightArgumentExecutionTest.class),
+                                                                                         Map.entry(OfflinePlayerArgument.class, PlayerLookupArgumentTest.class),
+                                                                                         Map.entry(OfflinePlayersArgument.class, PlayerLookupArgumentTest.class),
+                                                                                         Map.entry(ParticleArgument.class, LightweightArgumentExecutionTest.class),
+                                                                                         Map.entry(PlayerArgument.class, LightweightArgumentExecutionTest.class),
+                                                                                         Map.entry(PlayersArgument.class, LightweightArgumentExecutionTest.class),
+                                                                                         Map.entry(ScoreboardDisplaySlotArgument.class, LightweightArgumentExecutionTest.class),
+                                                                                         Map.entry(StringArgument.class, LightweightArgumentExecutionTest.class),
+                                                                                         Map.entry(UUIDArgument.class, PlayerLookupArgumentTest.class),
+                                                                                         Map.entry(UUIDsArgument.class, PlayerLookupArgumentTest.class));
+
+    @Test
+    void allArgumentClassesHaveATest() throws Exception {
+        List<String> missing = new ArrayList<>();
+        for (Class<?> argumentClass : findConcreteArgumentClasses()) {
+            if (COVERED_BY_SHARED_TESTS.containsKey(argumentClass)) {
+                continue;
+            }
+            try {
+                Class.forName(argumentClass.getName() + "Test", false, getClass().getClassLoader());
+            } catch (ClassNotFoundException e) {
+                missing.add(argumentClass.getSimpleName());
+            }
+        }
+
+        assertThat(missing).as("Argument classes without a <Name>Test class or a COVERED_BY_SHARED_TESTS entry")
+                           .isEmpty();
+    }
 
     @Test
     void allArgumentClassesHaveFactories() throws Exception {

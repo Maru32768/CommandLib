@@ -112,10 +112,6 @@ class LightweightArgumentExecutionTest {
 
     @Test
     void paperRegistryAndValueArgumentsExecuteWithFakes() {
-        // EnchantmentArgument and PotionEffectArgument are covered by ArgumentCoverageTest for command-tree wiring,
-        // but not executed here. Paper API initializes Bukkit RegistryAccess when those concrete registry value
-        // classes are mocked or touched, and that bootstrap exists only on a real Paper server. The real registry
-        // behavior is therefore covered by integration-test Paper targets.
         BlockData blockData = Mockito.mock(BlockData.class);
         ItemStack itemStack = Mockito.mock(ItemStack.class);
         CommandTester tester = new CommandTester(() -> new Command("args") {{
