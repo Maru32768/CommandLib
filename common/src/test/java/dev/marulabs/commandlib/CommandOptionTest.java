@@ -27,6 +27,44 @@ class CommandOptionTest {
     }
 
     @Test
+    void repeatable_keeps_required_and_the_dependencies() throws Exception {
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("tag") {{
+            CommandOption<Boolean, TestCommandContext> force = option(Options.flag("force", 'f'));
+            CommandOption<List<String>, TestCommandContext> tags = option(Options.string("tag", 't', "")
+                                                                                 .required()
+                                                                                 .requires(force)
+                                                                                 .repeatable(3));
+            execute(ctx -> ctx.sendMessage("tags=" + ctx.getOption(tags)));
+        }});
+
+        assertThat(runner.execute("tag")
+                         .messages()).containsExactly("Missing required option --tag.");
+        assertThat(runner.execute("tag -t a")
+                         .messages()).hasSize(1)
+                                     .noneMatch(x -> x.startsWith("tags="));
+        assertThat(runner.execute("tag -f -t a -t b")
+                         .messages()).containsExactly("tags=[a, b]");
+    }
+
+    @Test
+    void a_dash_is_not_a_short_name() {
+        assertThatThrownBy(() -> Options.flag("dash", '-')).isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void an_option_that_requires_an_option_of_no_command_is_rejected_at_registration() {
+        CommandOption<Boolean, TestCommandContext> elsewhere = Options.flag("elsewhere", 'e');
+
+        assertThatThrownBy(() -> new TestCommandRunner(new TestCommand("scan") {{
+            option(Options.flag("force", 'f')
+                          .requires(elsewhere));
+            execute(ctx -> {
+            });
+        }})).isInstanceOf(IllegalStateException.class)
+            .hasMessageContaining("--elsewhere");
+    }
+
+    @Test
     void flag_is_available_from_context() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("scan") {{
             CommandOption<Boolean, TestCommandContext> force = option(Options.flag("force", 'f'));

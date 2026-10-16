@@ -102,6 +102,14 @@ final class OptionGraph<S, C extends CommonCommandContext<S, ?>> {
                                                                           List<Arguments<C>> inheritedArguments,
                                                                           String permissionPrefix) {
         List<CommandOption<?, C>> options = command.options();
+        for (CommandOption<?, C> option : options) {
+            for (CommandOption<?, ?> required : option.requiredOptions()) {
+                if (!options.contains(required)) {
+                    throw new IllegalStateException("Option " + option.formatName() + " of command '" + command.name()
+                            + "' requires " + required.formatName() + ", which is not an option of the command");
+                }
+            }
+        }
         Map<CommandOption<?, C>, String> permissions = new HashMap<>();
         for (CommandOption<?, C> option : options) {
             String permission = option.permissionName(command, permissionPrefix);

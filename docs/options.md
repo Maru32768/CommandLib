@@ -161,6 +161,8 @@ public final class BanCommand extends Command {
 - The options count over the whole input: the maximum of a count or repeatable option, the mutually exclusive groups
   and the permissions apply wherever the option is given.
 - Options cannot follow the values of a variadic argument; give them before it.
+- A greedy string argument (`Type.PHRASE`) takes the rest of the input, option tokens included, so give the options
+  before it.
 - The child commands of an argument follow the argument itself: `/config <key> set` works, `/config <key> -f set` does
   not. Options may still come before the argument: `/config -f <key> set`.
 - A word or string argument takes a token that is no option the input may still give, as it takes an unknown option:

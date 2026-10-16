@@ -159,6 +159,12 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
     private void validateChildren(@NotNull Collection<? extends T> children) {
         for (T child : children) {
             Objects.requireNonNull(child);
+            // The parent decides the child's permission node, middlewares and route, so it can have only one.
+            T parent = child.parent();
+            if (parent != null && parent != this) {
+                throw new IllegalArgumentException("Command '" + child.name() + "' is already a child of '"
+                        + parent.name() + "'");
+            }
         }
     }
 

@@ -42,8 +42,12 @@ public final class CommandOption<T, C extends CommonCommandContext<?, ?>> {
     private @Nullable CommonArgument<?, C, ?> suggestionArgument;
     private final int maxOccurrences;
     private final List<OptionValidator<C>> validators = new ArrayList<>();
+    // The options that requires(...) names, which must be options of the same command.
+    private final List<CommandOption<?, ?>> requiredOptions = new ArrayList<>();
     private String description = "";
     private boolean required;
+    // Whether required() was called, as opposed to an option of an argument that is not optional.
+    private boolean requiredByCall;
     // Whether the option needs a permission; the node is generated unless permissionNode is set.
     private boolean restricted;
     private @Nullable String permissionNode;
@@ -74,7 +78,8 @@ public final class CommandOption<T, C extends CommonCommandContext<?, ?>> {
                           int maxOccurrences,
                           Reader<C, T> reader) {
         this.name = validateName(name);
-        if (shortName != null && !StringReader.isAllowedInUnquotedString(shortName)) {
+        // "-" would make the token "--", and combined tokens such as "--f" that collide with long names.
+        if (shortName != null && (shortName == '-' || !StringReader.isAllowedInUnquotedString(shortName))) {
             throw new IllegalArgumentException("Invalid option short name: " + shortName);
         }
         this.shortName = shortName;
@@ -189,6 +194,7 @@ public final class CommandOption<T, C extends CommonCommandContext<?, ?>> {
      */
     public CommandOption<T, C> required() {
         this.required = true;
+        this.requiredByCall = true;
         return this;
     }
 
@@ -258,8 +264,9 @@ public final class CommandOption<T, C extends CommonCommandContext<?, ?>> {
      * default value of this option is not used. Each further occurrence adds a level of option nodes to the command
      * tree, so keep {@code maxCount} small.
      * <p>
-     * Call this before {@link #requires(CommandOption)} and the other modifiers, which the returned option does not
-     * copy except for the aliases, the description and the permission.
+     * The returned option keeps the aliases, the description, the permission, {@link #required()} and the
+     * {@code requires(...)} dependencies; after {@link #required()} it needs at least one occurrence. An option of a
+     * required argument ({@link Options#of}) becomes optional and gives an empty list.
      *
      * @throws IllegalStateException if this option is a flag
      */
@@ -284,11 +291,17 @@ public final class CommandOption<T, C extends CommonCommandContext<?, ?>> {
         option.defaultPermission = defaultPermission;
         option.aliases.addAll(aliases);
         option.description = description;
+        // A repeatable option of a required argument gives an empty list when it is not given; required() is kept.
+        option.required = requiredByCall;
+        option.requiredByCall = requiredByCall;
+        option.validators.addAll(validators);
+        option.requiredOptions.addAll(requiredOptions);
         return option;
     }
 
     public CommandOption<T, C> requires(@NotNull CommandOption<?, ?> option) {
         Objects.requireNonNull(option);
+        requiredOptions.add(option);
         validators.add(ctx -> {
             if (!ctx.hasOption(option)) {
                 throw new OptionParseException(Caption.OPTION_REQUIRES,
@@ -310,6 +323,7 @@ public final class CommandOption<T, C extends CommonCommandContext<?, ?>> {
         Objects.requireNonNull(option);
         Objects.requireNonNull(predicate);
         Objects.requireNonNull(expectedDescription);
+        requiredOptions.add(option);
         validators.add(ctx -> {
             E value = ctx.getOption(option);
             if (!predicate.test(value)) {
@@ -385,6 +399,10 @@ public final class CommandOption<T, C extends CommonCommandContext<?, ?>> {
 
     T read(C ctx, List<String> occurrenceNames) throws ArgumentParseException {
         return reader.read(ctx, occurrenceNames);
+    }
+
+    List<CommandOption<?, ?>> requiredOptions() {
+        return requiredOptions;
     }
 
     void validate(C ctx, boolean checkRequired) throws OptionParseException {

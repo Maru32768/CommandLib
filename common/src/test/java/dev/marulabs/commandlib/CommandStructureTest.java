@@ -248,6 +248,44 @@ class CommandStructureTest {
     }
 
     @Test
+    void two_branches_that_run_for_the_same_input_are_rejected() {
+        assertThatThrownBy(() -> new TestCommandRunner(new TestCommand("a") {{
+            argument(new StrArg("w")).execute((w, ctx) -> {
+            });
+            argument(new StrArg("w"), new IntArg("n").optional(7)).execute((w, n, ctx) -> {
+            });
+        }})).isInstanceOf(IllegalStateException.class)
+            .hasMessageContaining("<w>");
+        assertThatThrownBy(() -> new TestCommandRunner(new TestCommand("a") {{
+            argument(new StrArg("w")).execute((w, ctx) -> {
+            });
+            argument(new StrArg("w")).execute((w, ctx) -> {
+            });
+        }})).isInstanceOf(IllegalStateException.class);
+    }
+
+    @Test
+    void a_first_argument_named_help_keeps_its_executor() throws Exception {
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("faq") {{
+            argument(new StrArg("help")).execute((topic, ctx) -> ctx.sendMessage("topic " + topic));
+        }});
+
+        assertThat(runner.execute("faq options")
+                         .messages()).containsExactly("topic options");
+        assertThat(runner.execute("faq help")
+                         .messages()).containsExactly("topic help");
+    }
+
+    @Test
+    void a_command_cannot_be_the_child_of_two_parents() {
+        TestCommand start = new TestCommand("start");
+        new TestCommand("game").addChildren(start);
+
+        assertThatThrownBy(() -> new TestCommand("arena").addChildren(start)).isInstanceOf(IllegalArgumentException.class)
+                                                                             .hasMessageContaining("'start'");
+    }
+
+    @Test
     void repeated_names_within_one_child_are_accepted() throws Exception {
         TestCommand list = new TestCommand("list") {{
             addAliases("list", "ls", "ls");

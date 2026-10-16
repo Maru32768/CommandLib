@@ -58,14 +58,21 @@ final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U ext
                           .isEmpty()) {
             return false;
         }
-        // A child named or aliased "help" replaces the generated help node; adding both would make Brigadier merge
-        // the two literals.
+        // A child named or aliased "help", or a first argument named so, replaces the generated help node; adding
+        // both would make Brigadier merge the two.
         return command.children()
                       .stream()
                       .noneMatch(x -> x.name()
                                        .equals("help")
                               || x.aliases()
-                                  .contains("help"));
+                                  .contains("help"))
+                && command.argumentsList()
+                          .stream()
+                          .noneMatch(x -> x.stream()
+                                           .findFirst()
+                                           .map(argument -> argument.name()
+                                                                    .equals("help"))
+                                           .orElse(false));
     }
 
     // A runner without an executor sends the help after the same checks as the command, and reports its failures.
@@ -128,6 +135,25 @@ final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U ext
         if (allOptional.size() > 1 || (allOptional.size() == 1 && command.executor() != null)) {
             throw new IllegalStateException("Command '" + command.name()
                     + "' has more than one action for input without arguments: its own executor or a branch whose arguments are all optional");
+        }
+        // Brigadier keeps one node for the same argument names, so of two branches that run for input ending there,
+        // the order of definition would silently pick one.
+        Map<List<String>, Arguments<C>> runsAt = new HashMap<>();
+        for (Arguments<C> arguments : argumentsList) {
+            List<String> names = new ArrayList<>();
+            for (CommonArgument<?, C, ?> argument : arguments.stream()
+                                                             .collect(Collectors.toList())) {
+                names.add(argument.name());
+                if (arguments.executorFor(argument) == null) {
+                    continue;
+                }
+                Arguments<C> other = runsAt.putIfAbsent(List.copyOf(names), arguments);
+                if (other != null && other != arguments) {
+                    throw new IllegalStateException("Command '" + command.name()
+                            + "' has more than one argument branch that runs for input ending at <"
+                            + String.join("> <", names) + ">");
+                }
+            }
         }
 
         // Input that stops at the command literal (optionally followed by options only) consumes no branch, so its
