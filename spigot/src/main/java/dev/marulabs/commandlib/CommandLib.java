@@ -782,7 +782,11 @@ public final class CommandLib implements Listener {
     // command-tree serialization and cause ConcurrentModificationException. Runtime unregisters still
     // need to refresh online players, so keep the update controlled by this flag.
     private void unregister(boolean updatePlayerCommands) {
-        INSTANCES.remove(this);
+        // CommandLib unregisters on the plugin's disable event, before onDisable, where the plugin may call this again
+        // and the scheduler refuses the tasks of the disabled plugin.
+        if (!INSTANCES.remove(this)) {
+            return;
+        }
         try {
             unregisterCommands();
         } finally {

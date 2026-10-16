@@ -35,6 +35,7 @@ public class TestMain {
     private final Plugin plugin;
     private final Logger logger;
     private boolean errorOccurredOnRegister = false;
+    private CommandLib registration;
 
 
     public TestMain(Plugin plugin) {
@@ -49,6 +50,22 @@ public class TestMain {
             errorFailedResults(results);
             logTestResultCount(results);
         });
+    }
+
+    /**
+     * Unregisters the commands as a plugin may in its onDisable, after CommandLib has already unregistered them on the
+     * plugin's disable event. The runner stops the server and checks the result in the log.
+     */
+    public void unregisterOnDisable() {
+        if (registration == null) {
+            return;
+        }
+        try {
+            registration.unregister();
+            logger.info("COMMANDLIB_UNREGISTER_ON_DISABLE_SUCCEEDED");
+        } catch (Throwable e) {
+            logger.log(Level.SEVERE, "COMMANDLIB_UNREGISTER_ON_DISABLE_FAILED", e);
+        }
     }
 
     public void registerPluginDisableListener() {
@@ -215,7 +232,9 @@ public class TestMain {
                     execute.run();
                 });
             }});
-            CommandLib.register(plugin, mainCommand, new CommandLibDiagnosticsCommand("commandlibdiagnostics"));
+            registration = CommandLib.register(plugin,
+                                               mainCommand,
+                                               new CommandLibDiagnosticsCommand("commandlibdiagnostics"));
         } catch (Throwable e) {
             errorOccurredOnRegister = true;
             logger.log(Level.SEVERE, "COMMANDLIB_TEST_PLUGIN_ENABLE_FAILED", e);

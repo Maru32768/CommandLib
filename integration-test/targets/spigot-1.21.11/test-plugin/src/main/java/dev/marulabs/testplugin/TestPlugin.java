@@ -6,13 +6,19 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.util.Objects;
 
 public final class TestPlugin extends JavaPlugin {
+    private TestMain main;
+
     @Override
     public void onEnable() {
-        new TestMain(this).register();
+        main = new TestMain(this);
+        main.register();
     }
 
     @Override
     public void onDisable() {
+        if (main != null) {
+            main.unregisterOnDisable();
+        }
     }
 
     public static void print(Object obj) {

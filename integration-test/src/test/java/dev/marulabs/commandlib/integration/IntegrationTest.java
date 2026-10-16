@@ -220,6 +220,17 @@ class IntegrationTest {
                                       "commandlibtest captionProbe",
                                       "caption text for the player's locale",
                                       m -> m.contains("captionProbe English text") || unknownCommand.test(m));
+                    // The fixture unregisters its commands in onDisable, after CommandLib did on the disable event,
+                    // as a plugin may. The bot is an operator, so it can stop the server.
+                    client.sendCommand("stop");
+                    Awaitility.await()
+                              .atMost(Duration.ofSeconds(60))
+                              .pollInterval(Duration.ofSeconds(1))
+                              .until(() -> container.getLogs()
+                                                    .contains("COMMANDLIB_UNREGISTER_ON_DISABLE"));
+                    assertThat(container.getLogs()).as("server log while the test plugin disables")
+                                                   .contains("COMMANDLIB_UNREGISTER_ON_DISABLE_SUCCEEDED")
+                                                   .doesNotContain("COMMANDLIB_UNREGISTER_ON_DISABLE_FAILED");
                 }
             } finally {
                 client.disconnect("Test completed");
