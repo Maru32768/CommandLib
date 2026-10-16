@@ -28,8 +28,8 @@ public final class VanillaExecutionTest extends TestBase {
     private static final String SUCCESS_COUNT = "commandBlockSuccessCount";
     private final String playerName;
     private final World world;
-    // Command blocks over the world spawn, in a chunk the test force-loads: some Paper versions tick neither the spawn
-    // chunks nor the chunks around the bot.
+    // Command blocks over the world spawn, in a chunk the test force-loads: Paper 1.20.5 sets spawnChunkRadius to 0 and
+    // does not tick the spawn chunk next to the bot.
     private final int blockX;
     private final int blockY;
     private final int blockZ;

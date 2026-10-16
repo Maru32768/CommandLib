@@ -410,9 +410,17 @@ val stageDockerServerDirectory = tasks.register<Sync>("stageDockerServerDirector
     exclude(
         "logs/**",
         "crash-reports/**",
-        // A world left by a local run would carry its blocks and spawn into every test; the warm-up generates one.
+        // A world or a config a local run left behind would carry its state into every test: an old paper.yml's
+        // keep-spawn-loaded-range keeps Paper 1.16.5 from ticking the test's command blocks. The warm-up generates
+        // them.
         "world/**",
         "world_*/**",
+        "paper.yml",
+        "spigot.yml",
+        "commands.yml",
+        "help.yml",
+        "permissions.yml",
+        "config/**",
         "flat/**",
         "flat_*/**",
         "plugins/TestPlugin*.jar",

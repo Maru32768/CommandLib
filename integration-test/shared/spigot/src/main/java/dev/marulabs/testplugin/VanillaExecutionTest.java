@@ -28,17 +28,12 @@ public final class VanillaExecutionTest extends TestBase {
     private static final String SUCCESS_COUNT = "commandBlockSuccessCount";
     private final String playerName;
     private final World world;
-    // Command blocks over the world spawn, in a chunk the test force-loads: some Paper versions tick neither the spawn
-    // chunks nor the chunks around the bot.
+    // Command blocks over the world spawn, in a chunk the test force-loads: Paper 1.20.5 sets spawnChunkRadius to 0 and
+    // does not tick the spawn chunk next to the bot.
     private final int blockX;
     private final int blockY;
     private final int blockZ;
     private final AtomicBoolean failureBlockRan = new AtomicBoolean();
-    // Paper 1.16.5 runs no powered command block here, not even one with a vanilla command, in a force-loaded chunk.
-    private final boolean blocksRun = !(Bukkit.getName()
-                                              .equals("Paper")
-            && Bukkit.getBukkitVersion()
-                     .startsWith("1.16.5-"));
 
     public VanillaExecutionTest(Command command, String playerName) {
         super(command);
@@ -56,14 +51,11 @@ public final class VanillaExecutionTest extends TestBase {
         return concat(executeAsKeepsSenderAndSetsEntity(),
                       executePositionedSetsLocation(),
                       selectorsResolveFromExecutor(),
-                      blocksRun ? commandBlockRunsAsBlockSender() : List.of());
+                      commandBlockRunsAsBlockSender());
     }
 
     @Override
     public List<String> afterReload() {
-        if (!blocksRun) {
-            return List.of();
-        }
         return List.of(storeSuccessCount("#success", blockX),
                        storeSuccessCount("#failure", blockX + 2),
                        storeSuccessCount("#vanilla", blockX + 4),
