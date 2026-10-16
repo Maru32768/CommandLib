@@ -871,12 +871,18 @@ public final class CommandLib implements Listener {
                                                                                       .getRoot();
 
             for (CommandNode<?> node : registeredCommands) {
-                removeRegisteredCommand(root, knownCommands, node.getName());
+                // Another registration may have taken the label since, and keeps it. The namespaced label names this
+                // plugin, so it is this registration's.
+                if (ownsLabel(root, knownCommands, node)) {
+                    removeRegisteredCommand(root, knownCommands, node.getName());
+                }
                 removeRegisteredCommand(root, knownCommands, namespace(plugin) + ":" + node.getName());
 
                 // Only the Spigot dispatcher has a vanilla root of its own.
                 if (vanillaRoot != null) {
-                    removeCommand(vanillaRoot, node.getName());
+                    if (vanillaRoot.getChild(node.getName()) == node) {
+                        removeCommand(vanillaRoot, node.getName());
+                    }
                     removeMinecraftNamespacedCommand(root, knownCommands, node);
                 }
             }
@@ -957,6 +963,18 @@ public final class CommandLib implements Listener {
         } catch (NoSuchFieldException e) {
             return null;
         }
+    }
+
+    // On Paper 1.20.6+ the command map makes a wrapper on each lookup, so the dispatcher's node tells the owner; on the
+    // vanilla dispatcher the command map's wrapper does.
+    private static boolean ownsLabel(RootCommandNode<?> root,
+                                     Map<String, org.bukkit.command.Command> knownCommands,
+                                     CommandNode<?> node) throws IllegalAccessException {
+        if (usesPaperCommandDispatcher()) {
+            return root.getChild(node.getName()) == node;
+        }
+        org.bukkit.command.Command command = knownCommands.get(node.getName());
+        return command == null || wrappedVanillaCommand(command) == node;
     }
 
     private static void removeRegisteredCommand(RootCommandNode<?> root,

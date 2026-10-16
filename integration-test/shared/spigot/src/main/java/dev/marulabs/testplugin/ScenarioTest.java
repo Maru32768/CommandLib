@@ -55,6 +55,7 @@ public final class ScenarioTest extends TestBase {
         commands.addAll(executeStoreReadsResultAndFailure());
         commands.addAll(runtimeRegisteredCommandIsExecutableUntilUnregistered());
         commands.addAll(lateRegisteredCommandSurvivesReload());
+        commands.addAll(unregisteringKeepsALabelTakenSince());
         deniedProbe();
         reloadProbe();
 
@@ -198,6 +199,38 @@ public final class ScenarioTest extends TestBase {
                        commandName,
                        namespacedName,
                        buildCommand(command, name));
+    }
+
+    /**
+     * A second registration of the same label takes it over; unregistering the first must leave the second's command.
+     */
+    public List<String> unregisteringKeepsALabelTakenSince() {
+        String name = getMethodName();
+        String key = getKey();
+        String label = "commandlibowned";
+        AtomicReference<CommandLib> first = new AtomicReference<>();
+
+        putCommandNotExecutedResult(key);
+        command.addChildren(new Command(name + "Register") {{
+            execute(ctx -> {
+                first.set(CommandLib.register(plugin, new Command(label) {{
+                    permission(PermissionDefault.TRUE);
+                    execute(inner -> putResult(new TestResult(key,
+                                                              TestStatus.FAILED,
+                                                              "The unregistered registration ran.")));
+                }}));
+                CommandLib.register(plugin, new Command(label) {{
+                    permission(PermissionDefault.TRUE);
+                    execute(inner -> putResult(new TestResult(key,
+                                                              TestStatus.SUCCEEDED,
+                                                              "The label kept the later registration.")));
+                }});
+                first.get()
+                     .unregister();
+            });
+        }});
+
+        return List.of(buildCommand(command, name + "Register"), label);
     }
 
     public List<String> lateRegisteredCommandSurvivesReload() {
