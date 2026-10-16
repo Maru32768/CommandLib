@@ -190,9 +190,9 @@ public final class CommandLib {
      */
     public static void refresh(@NotNull ServerPlayer player) {
         MinecraftServer server = player.server;
-        // execute runs at once on the server thread and queues the task from other threads.
-        server.execute(() -> server.getCommands()
-                                   .sendCommands(player));
+        ServerCommandScheduler.runOnServerThread(server,
+                                                 () -> server.getCommands()
+                                                             .sendCommands(player));
     }
 
     /**
@@ -203,10 +203,11 @@ public final class CommandLib {
         if (server == null) {
             return;
         }
-        server.execute(() -> server.getPlayerList()
-                                   .getPlayers()
-                                   .forEach(player -> server.getCommands()
-                                                            .sendCommands(player)));
+        ServerCommandScheduler.runOnServerThread(server,
+                                                 () -> server.getPlayerList()
+                                                             .getPlayers()
+                                                             .forEach(player -> server.getCommands()
+                                                                                      .sendCommands(player)));
     }
 
     //? if fabric {

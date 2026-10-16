@@ -1,14 +1,16 @@
 package dev.marulabs.commandlib;
 
+import net.minecraft.server.MinecraftServer;
+
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Runs async commands on the server: sync tasks through the server of the command's source, which runs a task at once
- * on the server thread and queues it for the next tick from another thread, and async work on a pool of daemon threads
- * that this copy of CommandLib owns. The pool grows with the work, since the work, such as file or database access,
+ * Runs async commands on the server: sync tasks at once on the server thread and through the server of the command's
+ * source from another thread, which queues them for the next tick, and async work on a pool of daemon threads that this
+ * copy of CommandLib owns. The pool grows with the work, since the work, such as file or database access,
  * usually blocks.
  */
 final class ServerCommandScheduler implements CommandScheduler {
@@ -25,8 +27,21 @@ final class ServerCommandScheduler implements CommandScheduler {
 
     @Override
     public Executor sync(CommonCommandContext<?, ?> ctx) {
-        return ((CommandContext) ctx).getSender()
-                                     .getServer();
+        MinecraftServer server = ((CommandContext) ctx).getSender()
+                                                       .getServer();
+        return task -> runOnServerThread(server, task);
+    }
+
+    /**
+     * Runs {@code task} at once on the server thread and queues it from another thread. {@link MinecraftServer#execute}
+     * alone also queues a task while the server runs one, such as the packet of a command a player typed.
+     */
+    static void runOnServerThread(MinecraftServer server, Runnable task) {
+        if (server.isSameThread()) {
+            task.run();
+        } else {
+            server.execute(task);
+        }
     }
 
     @Override
