@@ -52,7 +52,7 @@
 | Middleware / interceptor            | `[x]` | `addMiddleware(CommandMiddleware)` で pre / post hook、exception mapping、result handling を合成でき、child と argument branch に継承される。`confirm()` / `cooldown()` / preprocess も middleware 上にある。 | — |
 | Sender abstraction                  | `[x]` | `provide(Type, ctx -> ...)` で sender を plugin の型に変換し、`ctx.get(Type)` で cast なしに読める。middleware は `ctx.put` で値を足せる（[`docs/context-values.md`](context-values.md)）。 | platform 単位の provider 登録。 |
 | Dependency injection                | `[x]` | context value の provider と、annotation API の `registerDependency` / `@Dependency` field がある。DI framework 非依存。 | platform 単位の provider 登録、`require(Class)` の短縮形。 |
-| Annotation API                      | `[~]` | `AnnotationParser` と `@Command` / `@Subcommand` / `@Permission` / `@Optional` / `@Default` / `@Range` / `@Suggest` / `@Flag` / `@Option` / `@Confirm` / `@Cooldown` 等、custom annotation の拡張点が Spigot / Paper / Velocity / modded にある。fluent と同じ help / permission / 実行結果を snapshot で確認（[`docs/annotations.md`](annotations.md)）。 | middleware / option 依存（`requires`・排他）/ argument-first child の annotation。 |
+| Annotation API                      | `[~]` | `AnnotationParser` と `@Command` / `@Subcommand` / `@Permission` / `@Optional` / `@Default` / `@Range` / `@Suggest` / `@Flag` / `@Option` / `@Confirm` / `@Cooldown` 等、custom annotation の拡張点が Spigot / Paper / Velocity / modded にある。fluent と同じ help / permission / 実行結果を snapshot で確認（[`docs/annotations.md`](annotations.md)）。 | `java.util.Optional<T>` 引数、`requires(option, predicate)` の annotation。 |
 | Kotlin DSL                          | `[~]` | `common-kotlin` + `spigot-kotlin` / `paper-kotlin` / `velocity-kotlin` に型推論の効く builder、delegated option、`executeSuspend`、suspend suggestions がある（[`docs/kotlin.md`](kotlin.md)）。 | Forge / NeoForge 版、Kotlin 関数の default 引数から command を作る形。`common-kotlin` は package-private の `CurrentCommandContext` を同じ package から読むため `common` と同じ class loader が必要。 |
 | Java builder API                    | `[x]` | `Command.builder(name)`（common の `CommandBuilder`）が全 platform にあり、fluent と同じ command tree / permission / 結果を snapshot で確認（[`docs/java-builder.md`](java-builder.md)）。 | — |
 | Localization / captions             | `[~]` | `Caption` / `Captions` で組み込み message を key 化し、sender の locale で解決する（en / ja 同梱、override、ResourceBundle、`CaptionSender`。[`docs/localization.md`](localization.md)）。 | help / usage formatter API、diagnostics / `CommandDocs` の文言、Fabric node での locale 取得の確認。 |
@@ -95,10 +95,8 @@
 - `[ ]` cooldown の永続化（restart 後に復元する hook）、argument branch 単位の confirm / cooldown / `@Condition`。
 - `[ ]` option の redirect 化（`OptionGraph`）を実サーバーで検証する（Spigot 1.16.5〜26.x、Paper の `ApiMirrorRootNode`、Velocity、modded）。
   argument child と primitive 以外の value option を持つ command は従来の tree のままで、順列で増える。
-- `[ ]` annotation API に argument option / option permission / `optionsAnywhere` / `visibleWhen` の対応を追加する。CommandLib 組み込み message の
-  他言語 bundle を増やす。
+- `[ ]` CommandLib 組み込み message の他言語 bundle を増やす（現在は en / ja）。annotation の `java.util.Optional<T>` 引数（core が null default を許さない）。
 - `[ ]` option の redirect 復元の変更後に `ExecuteBenchmark` を idle な環境で baseline と比較する。
-- `[ ]` middleware / option の `requires`・排他 / argument-first child 用の annotation を追加する。
 - `[ ]` Kotlin DSL を Forge / NeoForge に広げ（module 化には Stonecutter の Loom node 5 つ分が必要）、Kotlin 関数の default 引数から
   command を作る形を追加する。
 - `[~]` options の継承と配置拡張（subcommand への継承、positional argument の後の option、固定 arity の multi-value）を実装する。

@@ -76,6 +76,8 @@
   `provide` / `ctx.put` / `ctx.get`、annotation の `registerDependency` と `@Dependency`（`docs/context-values.md`、2026-10-16）。
 - `[x]` help / usage / error formatter API と command の `examples(...)`、opt-in の syntax advice を追加する（`docs/help.md`、
   2026-10-16）。
+- `[x]` annotation に argument-first path（`@Subcommand("<team> add")`）、`@Middleware`、`@VisibleWhen`、`@OptionsAnywhere`、`@Requires`、
+  `@MutuallyExclusive`、`@Examples`、`@CaptionBundle`、`@Variadic(max)`、option の `@Permission` を追加する（2026-10-16）。
 - `[x]` 任意の argument を option の値にする `Options.of(...)`、option 単位の permission、positional argument の後に option を置く
   `optionsAnywhere()`、state で表示を切り替える `visibleWhen(...)` を追加する（2026-10-16）。
 - `[x]` option の順列展開を redirect で抑える。player ごとの tree は short flag 6 個で 491,607 → 5,490 node、argument node を共有
