@@ -99,4 +99,32 @@ class VisibilityTest {
                                                             .hasMessageContaining("Unknown command");
         assertThat(running).isTrue();
     }
+
+    @Test
+    void the_runner_rejects_a_branch_or_a_parent_hidden_after_the_input_was_parsed() {
+        AtomicBoolean hidden = new AtomicBoolean();
+        TestCommand game = new TestCommand("game") {{
+            addChildren(new TestCommand("kick") {{
+                argument(new CommonStringArgument<>("player")).visibleWhen(ctx -> !hidden.get())
+                                                              .execute((player, ctx) -> ctx.sendMessage("kicked "
+                                                                      + player));
+            }}, new TestCommand("admin") {{
+                visibleWhen(ctx -> !hidden.get());
+                addChildren(new TestCommand("reset") {{
+                    execute(ctx -> ctx.sendMessage("reset"));
+                }});
+            }});
+        }};
+        TestCommandSource source = player(false);
+        TestCommandRunner runner = new TestCommandRunner(game, source);
+        CommandDispatcher<TestCommandSource> dispatcher = new CommandDispatcher<>(runner.root());
+        ParseResults<TestCommandSource> kick = dispatcher.parse("game kick Steve", source);
+        ParseResults<TestCommandSource> reset = dispatcher.parse("game admin reset", source);
+        hidden.set(true);
+
+        assertThatThrownBy(() -> dispatcher.execute(kick)).isInstanceOf(CommandSyntaxException.class)
+                                                          .hasMessageContaining("Incorrect argument");
+        assertThatThrownBy(() -> dispatcher.execute(reset)).isInstanceOf(CommandSyntaxException.class)
+                                                           .hasMessageContaining("Unknown command");
+    }
 }

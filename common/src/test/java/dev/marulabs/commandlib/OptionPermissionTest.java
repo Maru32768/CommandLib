@@ -22,7 +22,14 @@ class OptionPermissionTest {
     private static final String SILENT = "test.command.ban.option.silent";
 
     private static TestCommand ban() {
+        return ban(false);
+    }
+
+    private static TestCommand ban(boolean anywhere) {
         return new TestCommand("ban") {{
+            if (anywhere) {
+                optionsAnywhere();
+            }
             permission(DefaultPermission.ALL);
             CommandOption<Boolean, TestCommandContext> force = option(Options.flag("force", 'f'));
             CommandOption<Boolean, TestCommandContext> silent = option(Options.flag("silent", 's')
@@ -68,8 +75,36 @@ class OptionPermissionTest {
         assertThatThrownBy(() -> runner.execute("ban -r spam Steve")).isInstanceOf(CommandSyntaxException.class);
     }
 
+    // With optionsAnywhere() the argument nodes are per-state copies made by OptionGraph, a separate path that has to
+    // keep the branch's requirement.
+    @Test
+    void a_sender_without_the_branch_permission_neither_sees_nor_runs_it_when_options_go_anywhere() throws Exception {
+        TestCommandRunner allowed = new TestCommandRunner(ban(true), new TestCommandSource(COMMAND, BRANCH));
+        TestCommandRunner denied = new TestCommandRunner(ban(true), new TestCommandSource(COMMAND));
+
+        assertThat(allowed.execute("ban Steve -f")
+                          .messages()).containsExactly("Steve force=true silent=false reason=");
+        assertThat(allowed.visibleChildren("ban")).contains("target");
+        assertThat(denied.visibleChildren("ban")).contains("-f")
+                                                 .doesNotContain("target");
+        assertThatThrownBy(() -> denied.execute("ban Steve")).isInstanceOf(CommandSyntaxException.class);
+        assertThatThrownBy(() -> denied.execute("ban -f Steve")).isInstanceOf(CommandSyntaxException.class);
+        assertThatThrownBy(() -> denied.execute("ban Steve -f")).isInstanceOf(CommandSyntaxException.class);
+    }
+
     @Test
     void the_runner_rejects_an_option_whose_permission_is_gone_at_execution() throws Exception {
+        assertRevokedAtExecutionIsRejected(ban(), "ban -s Steve", SILENT);
+    }
+
+    @Test
+    void the_runner_rejects_a_branch_whose_permission_is_gone_at_execution() throws Exception {
+        assertRevokedAtExecutionIsRejected(ban(), "ban -f Steve", BRANCH);
+        assertRevokedAtExecutionIsRejected(ban(true), "ban Steve -f", BRANCH);
+    }
+
+    private static void assertRevokedAtExecutionIsRejected(TestCommand command, String input, String revoked)
+            throws Exception {
         Set<String> permissions = new java.util.HashSet<>(Set.of(COMMAND, BRANCH, SILENT));
         TestCommandSource source = new TestCommandSource("test",
                                                          UUID.randomUUID(),
@@ -81,10 +116,11 @@ class OptionPermissionTest {
                 return permissions.contains(permission);
             }
         };
-        TestCommandRunner runner = new TestCommandRunner(ban(), source);
+        TestCommandRunner runner = new TestCommandRunner(command, source);
         CommandDispatcher<TestCommandSource> dispatcher = new CommandDispatcher<>(runner.root());
-        ParseResults<TestCommandSource> parsed = dispatcher.parse("ban -s Steve", source);
-        permissions.remove(SILENT);
+        ParseResults<TestCommandSource> parsed = dispatcher.parse(input, source);
+        permissions.remove(revoked);
+        TestCommandContext.clearLatest();
 
         try {
             dispatcher.execute(parsed);
@@ -93,7 +129,8 @@ class OptionPermissionTest {
         }
 
         assertThat(TestCommandContext.latest()
-                                     .messages()).containsExactly("You do not have permission to execute this command.");
+                                     .messages()).as(input)
+                                                 .containsExactly("You do not have permission to execute this command.");
     }
 
     @Test
