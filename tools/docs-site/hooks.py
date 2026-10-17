@@ -45,7 +45,9 @@ def on_page_markdown(markdown, page, config, files):
         if resolved == readme:
             resolved = os.path.join(docs, "index.md")
         relative_to_docs = os.path.relpath(resolved, docs).replace(os.sep, "/")
-        if files.get_file_from_path(relative_to_docs) is not None:
+        built = files.get_file_from_path(relative_to_docs)
+        # Excluded docs (exclude_docs) stay in Files but are not built, so they go to GitHub like other files.
+        if built is not None and built.inclusion.is_included():
             return "](" + os.path.relpath(resolved, page_dir).replace(os.sep, "/") + anchor + ")"
         if not os.path.exists(resolved):
             # Left as it is, so that MkDocs reports the broken link.
