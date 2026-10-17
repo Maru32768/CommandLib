@@ -12,11 +12,14 @@ import dev.marulabs.commandlib.argument.IntegerArgument
 import dev.marulabs.commandlib.argument.StringArgument
 import dev.marulabs.commandlib.exception.CommandPrerequisiteException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.yield
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 import java.util.ArrayDeque
 
@@ -267,6 +270,52 @@ class KotlinDslTest {
     }
 
     @Test
+    fun `executeSuspend reports an exception like a synchronous executor`() {
+        val sender = FakeSender.player("Steve")
+        val broken = command("broken") { executeSuspend { error("x") } }
+
+        CommandTester(broken, "test.command").use { it.execute("broken", sender) }
+
+        // The first line is vanilla's "command.failed", which the platforms' testers render differently.
+        assertThat(sender.sentMessageTexts).hasSize(2).endsWith("Check the console for details.")
+    }
+
+    @Test
+    fun `a cancelled executeSuspend reports nothing, also through a suspending middleware`() {
+        val sender = FakeSender.player("Steve")
+        val log = mutableListOf<String>()
+        val cancelled =
+            command("cancelled") {
+                subcommand("plain") {
+                    executeSuspend {
+                        cancel()
+                        ensureActive()
+                        log += "never"
+                    }
+                }
+                subcommand("wrapped") {
+                    addMiddlewareSuspend { _, next ->
+                        log += "before"
+                        next()
+                        log += "never"
+                    }
+                    executeSuspend {
+                        cancel()
+                        ensureActive()
+                    }
+                }
+            }
+
+        CommandTester(cancelled, "test.command").use { tester ->
+            tester.execute("cancelled plain", sender)
+            tester.execute("cancelled wrapped", sender)
+        }
+
+        assertThat(log).containsExactly("before")
+        assertThat(sender.sentMessageTexts).isEmpty()
+    }
+
+    @Test
     fun `a suspending suggestion provider adds suggestions after it resumes`() {
         val warp =
             command("warp") {
@@ -292,8 +341,18 @@ class KotlinDslTest {
                     ctx.actor.name.takeIf { it != "Guest" } ?: throw CommandPrerequisiteException("VIPs only.")
                 }) {
                     execute { name, ctx -> ctx.sendMessage("Welcome $name") }
-                    executeSuspend { name, ctx -> ctx.sendMessage("Welcome back $name") }
                     subcommand("lounge") { execute { ctx -> ctx.sendMessage("Lounge") } }
+                }
+            }
+        val back =
+            command("back") {
+                require({ ctx -> ctx.actor.name }) {
+                    executeSuspend {
+                        name,
+                        ctx,
+                        ->
+                        ctx.sendMessage("Welcome back $name")
+                    }
                 }
             }
 
@@ -302,9 +361,39 @@ class KotlinDslTest {
             tester.execute("vip lounge", sender)
             tester.execute("vip lounge", guest)
         }
+        CommandTester(back, "test.command").use { it.execute("back", sender) }
 
-        assertThat(sender.sentMessageTexts).containsExactly("Welcome back Steve", "Lounge")
+        assertThat(sender.sentMessageTexts).containsExactly("Welcome Steve", "Lounge", "Welcome back Steve")
         assertThat(guest.sentMessageTexts).containsExactly("VIPs only.")
+    }
+
+    @Test
+    fun `a require block after arguments reads the value and the arguments`() {
+        val sender = FakeSender.player("Steve")
+        val join =
+            command("join") {
+                argument(StringArgument("room")) { room ->
+                    require({ ctx -> ctx.actor.name }) { execute { name, ctx -> ctx.sendMessage("$name joins ${room.get()}") } }
+                }
+            }
+
+        CommandTester(join, "test.command").use { it.execute("join lobby", sender) }
+
+        assertThat(sender.sentMessageTexts).containsExactly("Steve joins lobby")
+    }
+
+    @Test
+    fun `an option property read outside of a callback fails`() {
+        lateinit var read: () -> Boolean
+        command("x") {
+            val force by flag("force")
+            read = { force }
+            execute { }
+        }
+
+        assertThatThrownBy { read() }
+            .isInstanceOf(IllegalStateException::class.java)
+            .hasMessageContaining("outside of a command callback")
     }
 
     @Test
