@@ -1446,9 +1446,18 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
         }
 
         private IllegalArgumentException error(Method method, Parameter parameter, String message) {
+            return new IllegalArgumentException(describe(method) + ": parameter " + errorName(parameter) + " "
+                    + message);
+        }
+
+        // An option parameter cannot have @Name, so without -parameters the option's name is the readable one.
+        private String errorName(Parameter parameter) {
             Name name = parameter.getAnnotation(Name.class);
-            return new IllegalArgumentException(describe(method) + ": parameter "
-                    + (name != null ? name.value() : parameter.getName()) + " " + message);
+            Flag flag = parameter.getAnnotation(Flag.class);
+            Option option = parameter.getAnnotation(Option.class);
+            String declared = name != null ? name.value()
+                    : flag != null ? flag.value() : option != null ? option.value() : "";
+            return declared.isEmpty() ? parameter.getName() : declared;
         }
 
         private String describe(Method method) {

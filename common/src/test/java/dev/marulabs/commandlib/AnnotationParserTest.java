@@ -332,7 +332,7 @@ class AnnotationParserTest {
                                                                                                (upper,
                                                                                                 argument) -> argument);
 
-        assertThatThrownBy(() -> parser.parse(new UpperFlag())).hasMessageContaining("has @Upper, which does not apply to a @Flag parameter");
+        assertThatThrownBy(() -> parser.parse(new UpperFlag())).hasMessageContaining("parameter loud has @Upper, which does not apply to a @Flag parameter");
         assertThatThrownBy(() -> parser.parse(new UpperSender())).hasMessageContaining("has @Upper, which does not apply to a @Sender parameter");
     }
 
