@@ -1,5 +1,6 @@
 package dev.marulabs.commandlib;
 
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.marulabs.commandlib.argument.IntegerArgument;
 import dev.marulabs.commandlib.argument.PlayerArgument;
 import org.junit.jupiter.api.Test;
@@ -26,8 +27,14 @@ class CommandLibExtensionTest {
 
     @Test
     void annotation_configures_permissions(CommandTester tester,
-                                           @Sender(value = "Guest", permissions = "myplugin.command.heal") FakeSender guest) {
-        assertThatThrownBy(() -> tester.execute("heal Guest 5", guest)).isInstanceOf(RuntimeException.class);
+                                           @Sender(value = "Guest", permissions = "myplugin.command.heal") FakeSender guest,
+                                           @Sender("Medic") FakeSender medic) {
+        // Without the branch node Brigadier hides the branch; a sender with every node runs the same input.
+        assertThatThrownBy(() -> tester.execute("heal Guest 5",
+                                                guest)).hasCauseInstanceOf(CommandSyntaxException.class);
+        tester.execute("heal Guest 5", medic);
+
+        assertThat(medic.getSentMessageTexts()).containsExactly("Healed Guest by 5");
     }
 
     @Test

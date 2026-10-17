@@ -55,10 +55,14 @@ class DocumentedErrorBehaviorTest {
         try (CommandTester tester = new CommandTester(() -> new Command("config") {{
             argument(new StringArgument("key")).execute((key, ctx) -> ctx.sendMessage("config " + key));
         }}, "myplugin.command")) {
-            assertThatThrownBy(() -> tester.execute("config difficulty", sender)).isInstanceOf(RuntimeException.class);
-        }
+            assertThatThrownBy(() -> tester.execute("config difficulty",
+                                                    sender)).hasCauseInstanceOf(CommandSyntaxException.class);
+            assertThat(sender.getSentMessageTexts()).isEmpty();
 
-        assertThat(sender.getSentMessageTexts()).isEmpty();
+            FakeSender allowed = FakeSender.player("Bob");
+            tester.execute("config difficulty", allowed);
+            assertThat(allowed.getSentMessageTexts()).containsExactly("config difficulty");
+        }
     }
 
     @Test

@@ -1,5 +1,6 @@
 package dev.marulabs.commandlib;
 
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.marulabs.commandlib.argument.IntegerArgument;
 import dev.marulabs.commandlib.argument.PlayerArgument;
 import dev.marulabs.commandlib.argument.StringArgument;
@@ -83,9 +84,13 @@ class OptionalVariadicArgumentTest {
         try (CommandTester tester = new CommandTester(() -> new Command("say") {{
             argument(new StringArgument("words").variadic()).execute((words, ctx) -> ctx.sendMessage(words));
         }}, "test.command")) {
-            assertThatThrownBy(() -> tester.execute("say hi there", sender)).isInstanceOf(RuntimeException.class);
-        }
+            assertThatThrownBy(() -> tester.execute("say hi there",
+                                                    sender)).hasCauseInstanceOf(CommandSyntaxException.class);
+            assertThat(sender.getSentMessageTexts()).isEmpty();
 
-        assertThat(sender.getSentMessageTexts()).doesNotContain("[hi, there]");
+            FakeSender allowed = FakeSender.player("Bob");
+            tester.execute("say hi there", allowed);
+            assertThat(allowed.getSentMessageTexts()).containsExactly("[hi, there]");
+        }
     }
 }
