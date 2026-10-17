@@ -369,7 +369,8 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
                 Method[] declared = x.getDeclaredMethods();
                 for (Method method : declared) {
                     Method override = method.isBridge() ? overrideOf(method, declared) : null;
-                    if (override != null) {
+                    // A bridge for a covariant return type keeps the parameter types, so its key is the override's.
+                    if (override != null && !Arrays.equals(method.getParameterTypes(), override.getParameterTypes())) {
                         overrides.putIfAbsent(key(method), override);
                     }
                 }
@@ -394,6 +395,7 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
         }
 
         // The classes from the most derived, then their interfaces, since a class method wins over a default method.
+        // An interface comes before the interfaces it extends, whose default methods it may override.
         private List<Class<?>> hierarchy() {
             List<Class<?>> classes = new ArrayList<>();
             for (Class<?> x = type; x != null && x != Object.class; x = x.getSuperclass()) {
@@ -401,7 +403,16 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
             }
             Set<Class<?>> interfaces = new LinkedHashSet<>();
             classes.forEach(x -> addInterfaces(x, interfaces));
-            classes.addAll(interfaces);
+            List<Class<?>> ordered = new ArrayList<>();
+            for (Class<?> x : interfaces) {
+                int i = 0;
+                while (i < ordered.size() && !ordered.get(i)
+                                                     .isAssignableFrom(x)) {
+                    i++;
+                }
+                ordered.add(i, x);
+            }
+            classes.addAll(ordered);
             return classes;
         }
 

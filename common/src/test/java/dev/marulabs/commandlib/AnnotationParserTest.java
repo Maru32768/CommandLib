@@ -1,5 +1,6 @@
 package dev.marulabs.commandlib;
 
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.marulabs.commandlib.annotation.*;
 import dev.marulabs.commandlib.annotation.Optional;
 import dev.marulabs.commandlib.argument.CommonEnumArgument;
@@ -404,6 +405,31 @@ class AnnotationParserTest {
         assertThatThrownBy(() -> parser().parse(new UnannotatedGenericOverride())).hasMessageContaining("GenericBase#run(TestCommandContext, Object) is overridden by UnannotatedGenericOverride#run(TestCommandContext, String)");
     }
 
+    abstract static class AsyncBase {
+        @Execute
+        CompletionStage<Void> run(TestCommandContext ctx) {
+            return CompletableFuture.completedFuture(null);
+        }
+    }
+
+    @Command("x")
+    static final class CovariantOverride extends AsyncBase {
+        @Override
+        CompletableFuture<Void> run(TestCommandContext ctx) {
+            ctx.sendMessage("override");
+            return CompletableFuture.completedFuture(null);
+        }
+    }
+
+    // javac adds a bridge with the same parameter types for the covariant return type.
+    @Test
+    void an_override_with_a_covariant_return_type_takes_the_annotations_of_the_base() throws Exception {
+        TestCommandRunner runner = new TestCommandRunner(parser().parse(new CovariantOverride()));
+
+        assertThat(runner.execute("x")
+                         .messages()).containsExactly("override");
+    }
+
     @Description("Base")
     @Permission("base.node")
     abstract static class DescribedBase {
@@ -468,6 +494,31 @@ class AnnotationParserTest {
                          .messages()).containsExactly("pong");
         assertThat(runner.execute("x")
                          .messages()).containsExactly("run");
+    }
+
+    interface ReportingPingable extends Pingable {
+        @Override
+        @Subcommand("pong")
+        default void ping(TestCommandContext ctx) {
+            ctx.sendMessage("reported");
+        }
+    }
+
+    // getInterfaces gives Pingable first.
+    @Command("x")
+    static final class ReportingPingCommand implements Pingable, ReportingPingable {
+        @Override
+        public void run(TestCommandContext ctx) {
+        }
+    }
+
+    @Test
+    void a_sub_interface_override_of_a_default_method_gives_its_annotations() throws Exception {
+        TestCommandRunner runner = new TestCommandRunner(parser().parse(new ReportingPingCommand()));
+
+        assertThat(runner.execute("x pong")
+                         .messages()).containsExactly("reported");
+        assertThatThrownBy(() -> runner.execute("x ping")).isInstanceOf(CommandSyntaxException.class);
     }
 
     @Command("x")
