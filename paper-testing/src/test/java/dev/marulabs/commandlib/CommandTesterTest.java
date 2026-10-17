@@ -15,6 +15,7 @@ import java.util.UUID;
 import java.util.concurrent.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class CommandTesterTest {
     @Nested
@@ -175,6 +176,22 @@ class CommandTesterTest {
             }}, "test.command");
 
             assertThat(tester.execute("count", FakeSender.player("Steve"))).isEqualTo(7);
+        }
+
+        @Test
+        void an_assertion_error_in_an_executor_fails_the_test_after_its_messages() {
+            try (CommandTester tester = new CommandTester(new Command("check") {{
+                execute(ctx -> {
+                    throw new AssertionError("expected");
+                });
+            }}, "test.command")) {
+                FakeSender sender = FakeSender.player("Steve");
+
+                assertThatThrownBy(() -> tester.execute("check", sender)).isInstanceOf(AssertionError.class)
+                                                                         .hasMessage("expected");
+                // The sender still gets what the server would send.
+                assertThat(sender.getSentMessageTexts()).isNotEmpty();
+            }
         }
 
         @Test
