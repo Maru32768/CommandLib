@@ -376,6 +376,11 @@ public final class CommandTester implements AutoCloseable {
             defaultOverworld = Mockito.mock(ServerLevel.class);
             Mockito.when(defaultOverworld.dimension())
                    .thenReturn(Level.OVERWORLD);
+            //? if >=1.19.3 {
+            // Selectors check entity types against the source's features, which some versions read from its level.
+            Mockito.when(defaultOverworld.enabledFeatures())
+                   .thenReturn(FeatureFlags.DEFAULT_FLAGS);
+            //?}
         }
         Map<ResourceKey<Level>, ServerLevel> serverLevels = new LinkedHashMap<>();
         serverLevels.put(Level.OVERWORLD, defaultOverworld);
