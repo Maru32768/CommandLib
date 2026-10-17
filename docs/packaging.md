@@ -35,7 +35,7 @@ combination fails at startup with a clear message instead of failing later:
 
 ```json
 "depends": {
-  "commandlib": ">=0.17.0 <0.18.0"
+  "commandlib": ">=0.18.0 <0.19.0"
 }
 ```
 
