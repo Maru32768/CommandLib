@@ -184,7 +184,7 @@ Test cases run from the server console source while the bot is online, and cover
 with a middleware, the diagnostics, a command after `/reload` and a sub command that no player may use. The Fabric
 targets run the same suite on Fabric Loader 0.16.14 with Fabric API, so they check registration through
 `CommandRegistrationCallback`, the commands after `/reload`, and the production (intermediary) names, such as the raw
-command source that `unwrap` reads by reflection. They do not cover command blocks, RCON, fabric-permissions-api (no
+command source that `unwrap` reads by reflection. They do not cover RCON, fabric-permissions-api (no
 permission mod is installed), or CommandLib shaded into a mod instead of nested.
 
 Notes:
@@ -195,9 +195,6 @@ Notes:
   answer pings, so the bot replies to `ClientboundPingPacket` itself.
 - Fabric API on 1.20.1 sends login queries and waits for the answers. MCProtocolLib does not answer them, so the bot
   answers each `ClientboundCustomQueryPacket` as not understood, as a vanilla client does.
-- From Minecraft 1.20.3, a command performed while another command runs is queued until that command finishes. The
-  test mod therefore executes the test commands through Brigadier directly on 1.20.3+, so their results exist when
-  `runTests` collects them.
 - MCProtocolLib 1.16.5 cannot decode `brigadier:long`, so the `LongArgument` case is not registered on 1.16.5, the
   same as the Spigot fixture.
 

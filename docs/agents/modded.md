@@ -129,7 +129,7 @@ public argument class, add a case to its `ArgumentTest`; `:integration-test:test
 
 The Fabric targets (`fabric-1.20.1`, `fabric-1.21.1`) run the same test mod on a Fabric server with Fabric API, with
 the intermediary-remapped CommandLib jar nested as its own mod. `fabric-1.21.4` has no target, and no target installs
-fabric-permissions-api or runs a command block.
+fabric-permissions-api.
 
 ## Adding A Node
 
