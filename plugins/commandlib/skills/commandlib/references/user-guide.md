@@ -49,12 +49,26 @@ public class MyPlugin extends JavaPlugin {
 }
 ```
 
+A Paper plugin with a bootstrapper (`paper-plugin.yml`) can register from
+`PluginBootstrap#bootstrap` instead, so the commands exist before data pack
+functions are compiled and functions can use them. Bootstrap commands stay for
+the server's lifetime and cannot be unregistered.
+
+```java
+public class MyBootstrap implements PluginBootstrap {
+    @Override
+    public void bootstrap(BootstrapContext context) {
+        CommandLib.bootstrap(context, new MyCommand());
+    }
+}
+```
+
 The `Command` and `CommandContext` classes in the `paper` artifact are in the
 same package (`dev.marulabs.commandlib`) as in `spigot`, so command class
 source is portable between the two artifacts with no import changes. The key
-differences are the registration timing and the message path:
-`CommandContext.sendSuccess(String)` uses Adventure `Component` internally on
-Paper.
+differences are the registration (`CommandLib.bootstrap` exists only on Paper)
+and the message path: `CommandContext.sendSuccess(String)` uses Adventure
+`Component` internally on Paper.
 
 This makes generated command and argument branch permissions use nodes such as
 `myplugin.command.spawn` and `myplugin.command.config.key`.
