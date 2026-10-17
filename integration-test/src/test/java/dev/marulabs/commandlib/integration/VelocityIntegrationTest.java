@@ -157,8 +157,10 @@ class VelocityIntegrationTest {
                          "the message of an executeAsync command",
                          m -> m.contains("async done, work off the calling thread: true"));
                 // CommandLib logs the unexpected errors of executors and suggestion providers with their stack trace.
+                // An Error such as NoSuchMethodError names its class; a bare "Error" may be a benign log line.
                 assertThat(proxy.getLogs()).as("proxy log")
-                                           .doesNotContain("Exception");
+                                           .doesNotContain("Exception", "\tat ")
+                                           .doesNotContainPattern("\\w+Error\\b");
             } finally {
                 client.disconnect("Test completed");
             }
