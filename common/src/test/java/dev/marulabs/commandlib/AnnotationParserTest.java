@@ -526,6 +526,28 @@ class AnnotationParserTest {
         }
     }
 
+    @Command("x")
+    @dev.marulabs.commandlib.annotation.Cooldown(0)
+    static final class ZeroCooldown {
+        @Execute
+        void run() {
+        }
+    }
+
+    @Command("x")
+    static final class ZeroVariadic {
+        @Execute
+        void run(@Name("names") @Variadic(max = 0) List<String> names) {
+        }
+    }
+
+    // The builder methods do not know the annotation their value comes from.
+    @Test
+    void builder_errors_name_the_class_or_the_method() {
+        assertThatThrownBy(() -> parser().parse(new ZeroCooldown())).hasMessageStartingWith("class ZeroCooldown: duration must be positive");
+        assertThatThrownBy(() -> parser().parse(new ZeroVariadic())).hasMessageStartingWith("ZeroVariadic#run(List): maxCount must be at least 1");
+    }
+
     @Test
     void contradictory_or_malformed_annotations_are_rejected() {
         AnnotationParser<TestCommandContext, TestCommand> parser = parser();

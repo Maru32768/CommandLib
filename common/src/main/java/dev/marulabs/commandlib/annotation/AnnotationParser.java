@@ -330,7 +330,7 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
             this.type = instance.getClass();
             Command command = type.getAnnotation(Command.class);
             if (command == null) {
-                throw new IllegalArgumentException(type.getName() + " is not annotated with @Command");
+                throw new ParseException(type.getName() + " is not annotated with @Command");
             }
             this.root = commandFactory.apply(command.value());
             if (command.aliases().length > 0) {
@@ -342,7 +342,8 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
             injectDependencies();
             contextValues.forEach((x, extractor) -> provide(root, x, extractor));
             commands.put("", root);
-            configure(root, type, "class " + type.getSimpleName(), new String[0]);
+            String source = "class " + type.getSimpleName();
+            at(source, () -> configure(root, type, source, new String[0]));
 
             List<Method> methods = methods(this::isCommandMethod).stream()
                                                                  .sorted(Comparator.comparing((Method x) -> pathOf(x))
@@ -350,7 +351,7 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
                                                                                    .thenComparingInt(Method::getParameterCount)
                                                                                    .thenComparing(Method::toGenericString))
                                                                  .collect(Collectors.toList());
-            methods.forEach(this::addMethod);
+            methods.forEach(x -> at(describe(x), () -> addMethod(x)));
             deferred.forEach(Runnable::run);
             return root;
         }
@@ -445,6 +446,20 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
             return null;
         }
 
+        /**
+         * Runs {@code step}, naming {@code source} in what the builder methods and the registered factories throw, which
+         * do not know the annotation they come from, such as {@code duration must be positive} for {@code @Cooldown(0)}.
+         */
+        private void at(String source, Runnable step) {
+            try {
+                step.run();
+            } catch (ParseException e) {
+                throw e;
+            } catch (IllegalArgumentException | IllegalStateException e) {
+                throw new ParseException(source + ": " + e.getMessage(), e);
+            }
+        }
+
         private void injectDependencies() {
             for (Class<?> x = type; x != null && x != Object.class; x = x.getSuperclass()) {
                 for (Field field : x.getDeclaredFields()) {
@@ -454,20 +469,19 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
                     String name = x.getSimpleName() + "." + field.getName();
                     int modifiers = field.getModifiers();
                     if (Modifier.isStatic(modifiers) || Modifier.isFinal(modifiers)) {
-                        throw new IllegalArgumentException(name + " has @Dependency, but is static or final");
+                        throw new ParseException(name + " has @Dependency, but is static or final");
                     }
                     Object dependency = dependencies.get(box(field.getType()));
                     if (dependency == null) {
-                        throw new IllegalArgumentException(name
-                                + " has @Dependency, but no dependency of type " + field.getType()
-                                                                                        .getName()
+                        throw new ParseException(name + " has @Dependency, but no dependency of type " + field.getType()
+                                                                                                              .getName()
                                 + " is registered; register one with registerDependency");
                     }
                     try {
                         field.setAccessible(true);
                         field.set(instance, dependency);
                     } catch (IllegalAccessException | RuntimeException e) {
-                        throw new IllegalArgumentException(name + " is not accessible", e);
+                        throw new ParseException(name + " is not accessible", e);
                     }
                 }
             }
@@ -524,7 +538,7 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
             try {
                 method.setAccessible(true);
             } catch (RuntimeException e) {
-                throw new IllegalArgumentException(describe(method) + " is not accessible", e);
+                throw new ParseException(describe(method) + " is not accessible", e);
             }
 
             List<CommonArgument<?, C, ?>> arguments = new ArrayList<>();
@@ -725,8 +739,8 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
             CaptionBundle captionBundle = element.getAnnotation(CaptionBundle.class);
             CommandState state = state(command);
             if (state.configuredBy != null) {
-                throw new IllegalArgumentException(source + " configures '" + command.name() + "', which "
-                        + state.configuredBy + " already configures; give the command annotations on one method");
+                throw new ParseException(source + " configures '" + command.name() + "', which " + state.configuredBy
+                        + " already configures; give the command annotations on one method");
             }
             state.configuredBy = source;
             if (aliases.length > 0) {
@@ -769,7 +783,7 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
                 }
             }
             for (MutuallyExclusive group : element.getAnnotationsByType(MutuallyExclusive.class)) {
-                deferred.add(() -> mutuallyExclusive(command, source, group.value()));
+                deferred.add(() -> at(source, () -> mutuallyExclusive(command, source, group.value())));
             }
             if (permission != null) {
                 applyPermission(source,
@@ -806,7 +820,7 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
                             String register) {
             V value = registry.get(name);
             if (value == null) {
-                throw new IllegalArgumentException(source + " has " + annotation + "(\"" + name + "\"), but no " + kind
+                throw new ParseException(source + " has " + annotation + "(\"" + name + "\"), but no " + kind
                         + " of that name is registered; register one with " + register);
             }
             return value;
@@ -828,7 +842,7 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
             for (String name : names) {
                 RegisteredOption option = state(command).options.get(name);
                 if (option == null) {
-                    throw new IllegalArgumentException(source + " has @MutuallyExclusive with --" + name + ", but '"
+                    throw new ParseException(source + " has @MutuallyExclusive with --" + name + ", but '"
                             + command.name() + "' has no option of that name");
                 }
                 group.add(option.option);
@@ -847,7 +861,7 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
             }
             DefaultPermission[] defaults = permission.defaultPermission();
             if (defaults.length > 1) {
-                throw new IllegalArgumentException(source + " gives more than one defaultPermission");
+                throw new ParseException(source + " gives more than one defaultPermission");
             }
             if (defaults.length == 1) {
                 defaultPermission.accept(defaults[0]);
@@ -1137,7 +1151,7 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
             Class<?> valueType = parameter.getType() == List.class ? null : box(parameter.getType());
             state.options.put(name, new RegisteredOption(key, added, valueType));
             for (Requires requires : parameter.getAnnotationsByType(Requires.class)) {
-                deferred.add(() -> require(method, parameter, command, added, requires));
+                deferred.add(() -> at(describe(method), () -> require(method, parameter, command, added, requires)));
             }
             return added;
         }
@@ -1462,13 +1476,12 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
             reject(method, parameter, kind, new ArrayList<>(annotationHandlers.keySet()));
         }
 
-        private IllegalArgumentException error(Method method, String message) {
-            return new IllegalArgumentException(describe(method) + " " + message);
+        private ParseException error(Method method, String message) {
+            return new ParseException(describe(method) + " " + message);
         }
 
-        private IllegalArgumentException error(Method method, Parameter parameter, String message) {
-            return new IllegalArgumentException(describe(method) + ": parameter " + errorName(parameter) + " "
-                    + message);
+        private ParseException error(Method method, Parameter parameter, String message) {
+            return new ParseException(describe(method) + ": parameter " + errorName(parameter) + " " + message);
         }
 
         // An option parameter cannot have @Name, so without -parameters the option's name is the readable one.
@@ -1560,6 +1573,19 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
         return MethodType.methodType(type)
                          .wrap()
                          .returnType();
+    }
+
+    // An error the parser describes itself, with the class or the method it comes from.
+    private static final class ParseException extends IllegalArgumentException {
+        private static final long serialVersionUID = 1L;
+
+        ParseException(String message) {
+            super(message);
+        }
+
+        ParseException(String message, Throwable cause) {
+            super(message, cause);
+        }
     }
 
     private final class CommandState {
