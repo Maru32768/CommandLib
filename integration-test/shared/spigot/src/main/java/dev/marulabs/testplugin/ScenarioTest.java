@@ -4,6 +4,7 @@ import dev.marulabs.commandlib.Command;
 import dev.marulabs.commandlib.CommandLib;
 import dev.marulabs.commandlib.argument.StringArgument;
 import dev.marulabs.commandlib.exception.CommandPrerequisiteException;
+import dev.marulabs.commandlib.util.bukkit.BukkitUtil;
 import dev.marulabs.integration.core.TestResult;
 import dev.marulabs.integration.core.TestStatus;
 import org.bukkit.Bukkit;
@@ -128,11 +129,11 @@ public final class ScenarioTest extends TestBase {
                 String actual = scores.getScore("#result")
                                       .getScore()
                         + "," + scores.getScore("#success")
+                                      .getScore()
+                        + "," + scores.getScore("#vanilla")
                                       .getScore();
-                // Spigot 1.20.3 stores 0 for every command, vanilla ones too; the result is stored as a vanilla one is.
-                boolean storeWorks = scores.getScore("#vanilla")
-                                           .getScore() == 7;
-                putResult(key, actual, storeWorks ? "42,0" : "0,0");
+                // Spigot 1.20.3 stores 0 for every command, vanilla ones too; Paper has no 1.20.3.
+                putResult(key, actual, "1.20.3".equals(BukkitUtil.getMinecraftVersion()) ? "0,0,0" : "42,0,7");
             });
         }});
 

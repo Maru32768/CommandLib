@@ -120,11 +120,10 @@ public final class ScenarioTest extends TestBase {
                 String actual = scores.getScore("#result")
                                       .getScore()
                         + "," + scores.getScore("#success")
+                                      .getScore()
+                        + "," + scores.getScore("#vanilla")
                                       .getScore();
-                // Spigot 1.20.3 stores 0 for every command, vanilla ones too; the result is stored as a vanilla one is.
-                boolean storeWorks = scores.getScore("#vanilla")
-                                           .getScore() == 7;
-                putResult(key, actual, storeWorks ? "42,0" : "0,0");
+                putResult(key, actual, "42,0,7");
             });
         }});
 
