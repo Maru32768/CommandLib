@@ -148,8 +148,9 @@ Responsibilities:
 - Sender bridge for `CommandSource`, `Player`, and `ConsoleCommandSource`.
 - Permission checks through `PermissionSubject#getPermissionValue`, applying CommandLib's defaults to unset nodes,
   since Velocity has no permission registry and no operators.
-- Adventure messages. The `RichText` converter is a copy of paper's (the modules share no source), written against the
-  click-event factories so that it links against Adventure 4 (Velocity 3) and Adventure 5 (Velocity 4).
+- Adventure messages. Paper and Velocity both compile the `RichText` converter from `common/src/adventure`. It is
+  written against the click-event factories so that it links against Adventure 4 (Velocity 3) and Adventure 5
+  (Velocity 4).
 - Proxy arguments as string arguments with proxy-side parsing and suggestions (`PlayerArgument`, `ServerArgument`),
   since the client knows only Brigadier's own argument types through a proxy. Spigot / Paper argument parity does not
   apply.

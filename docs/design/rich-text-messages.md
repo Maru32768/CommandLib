@@ -229,7 +229,8 @@ Notes:
 - The network format changes of text components after 1.20.3 (NBT, snake_case in 1.21.5) are handled by the server and
   do not affect the API. Only modded's Java API changes in 1.21.5+ (table above); handle it with Stonecutter conditions
   when such a node is added. All current targets are below 1.21.5.
-- `velocity` has a copy of paper's `RichTexts.toAdventure`; the modules share no source. Both build click events
+- `paper` and `velocity` share `RichTexts.toAdventure` and its test from `common/src/adventure` and
+  `common/src/adventureTest`, which both builds add to their sources. It builds click events
   with the `ClickEvent` factory methods, which link against Adventure 4 and Adventure 5 (Paper 26.x, Velocity 4.x),
   where `ClickEvent.clickEvent(Action, String)` no longer exists.
 
@@ -275,7 +276,7 @@ calls `sendMessage(RichText)`.
 
 - `common:test`: `RichTextTest` (immutability, tri-state decorations, `equals` / `hashCode` / `toString`, `plainText`,
   empty hover removal, `ClickAction` factories).
-- Converter tests per platform: `spigot` and `paper` have `util.text.RichTextsTest`; modded's is in `modded-testing`
+- Converter tests per platform: `spigot` has `util.text.RichTextsTest`, `paper` and `velocity` run the shared one; modded's is in `modded-testing`
   (the `modded` module has no test setup). They cover colors and named-color mapping, tri-state decorations, hover,
   empty hover, the four click actions, translatable arguments, and children.
 - `*-testing`: `CommandContextTest` (spigot / paper) and `CommandTesterTest` (modded) send `RichText` and assert the

@@ -10,6 +10,14 @@ configure<JavaPluginExtension> {
     toolchain.languageVersion.set(JavaLanguageVersion.of(21))
 }
 
+// The Adventure converter and its test are the same on Paper and Velocity.
+sourceSets.main {
+    java.srcDir(rootProject.file("common/src/adventure/java"))
+}
+sourceSets.test {
+    java.srcDir(rootProject.file("common/src/adventureTest/java"))
+}
+
 dependencies {
     api(project(":common"))
     compileOnly("io.papermc.paper:paper-api:1.21-R0.1-SNAPSHOT")

@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 /**
  * Converts {@link RichText} to Adventure components.
  */
-// A copy of paper's converter, since the modules share no source.
+// Shared by paper and velocity, which add this directory to their sources.
 public final class RichTexts {
     private RichTexts() {
     }
@@ -58,7 +58,7 @@ public final class RichTexts {
                                       .collect(Collectors.toList()));
     }
 
-    // Adventure 5 (Velocity 4.x) has no ClickEvent.clickEvent(Action, String) and no enum Action, while the factory
+    // Adventure 5 (Paper 26.x, Velocity 4.x) has no ClickEvent.clickEvent(Action, String) and no enum Action, while the factory
     // methods link against both Adventure 4 and 5.
     private static ClickEvent clickEvent(ClickAction click) {
         switch (click.type()) {

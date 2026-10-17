@@ -194,6 +194,9 @@ configure<JavaPluginExtension> {
         if (testPluginSuite != "folia") {
             java.srcDir("../../../shared/bukkit/src/main/java")
         }
+        if (commandlibModule == "paper") {
+            java.srcDir("../../../../common/src/adventure/java")
+        }
         resources.srcDirs("../../../../$commandlibModule/src/main/resources", "../../../../common/src/main/resources")
     }
 }
