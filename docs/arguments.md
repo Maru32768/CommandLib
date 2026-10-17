@@ -357,11 +357,11 @@ depends on the artifact:
 | `WorldArgument` | mock (`withFakeWorld("minecraft:overworld", world)`) | mock (`withFakeWorld("minecraft:overworld", world)`) | real over the levels added with `withLevel(level)` |
 | `BlockDataArgument` / `BlockStateArgument` | mock | mock (`withFakeBlockData`) | real |
 | `ItemStackArgument` | mock | mock (`withFakeItemStack`) | real |
-| `EnchantmentArgument` | mock | mock (`withFakeEnchantment`) | real (1.20.5+: from the bootstrapped registries) |
-| `PotionEffectArgument` / `EffectArgument` | mock | mock (`withFakePotionEffectType`) | real |
-| `ParticleArgument` | mock | mock (`withFakeParticle`) | real |
+| `EnchantmentArgument` | mock | mock (`withFakeRegistryValue`) | real (1.20.5+: from the bootstrapped registries) |
+| `PotionEffectArgument` / `EffectArgument` | mock | mock (`withFakeRegistryValue`) | real |
+| `ParticleArgument` | mock | mock (`withFakeRegistryValue`) | real |
 | `NamespacedKeyArgument` / `ResourceLocationArgument` | real key parsing | real key parsing | real |
-| `SoundArgument`, `BiomeArgument`, `AttributeArgument`, `EntityTypeArgument` | static (`Registry`) | mock (`withFakeSound`, `withFakeBiome`, `withFakeAttribute`, `withFakeEntityType`) | real (biomes from vanilla's registry bootstrap; no data pack) |
+| `SoundArgument`, `BiomeArgument`, `AttributeArgument`, `EntityTypeArgument` | static (`Registry`) | mock (`withFakeRegistryValue`) | real (biomes from vanilla's registry bootstrap; no data pack) |
 | `AdvancementArgument`, `LootTableArgument`, `RecipeArgument` | static | static | server only, or stub the server's managers with `withServer(...)` |
 | `RegistryArgument` | real over the Bukkit `Registry`; static when it needs a server | mock (`withFakeRegistryValue(registryKey, key, value)`) | real over the built-in registries (1.19.3+: also the data-driven ones) |
 | `TeamArgument` | mock vanilla type plus static scoreboard; real with `scoreboard(Supplier)` | static, or real with `scoreboard(Supplier)` | real with `scoreboard(Supplier)`; the server has no scoreboard unless `withServer(...)` stubs `getScoreboard()` |
@@ -370,5 +370,6 @@ depends on the artifact:
 | `MessageArgument` | mock: the text as written, selectors not resolved | mock: the text as written, selectors not resolved | real; selectors are resolved only with a level, which the fake sources lack |
 | `NBTCompoundArgument` | mock: the compound as written, not checked | mock: the compound as written, not checked | real |
 
-`paper-testing`'s registry mocks return the single fake value for any token, so they do not check that a key exists.
-Tests that depend on unknown-key errors, real registries, tags, or worlds belong in integration tests.
+`paper-testing`'s registry mocks know only the values added with `withFakeRegistryValue` and reject other keys while
+parsing, as a server does; see [registry values on Paper](testing.md#registry-values-on-paper). Tests that depend on
+real registries, tags, or worlds belong in integration tests.

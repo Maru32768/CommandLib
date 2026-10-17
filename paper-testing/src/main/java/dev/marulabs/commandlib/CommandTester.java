@@ -32,21 +32,14 @@ import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
-import org.bukkit.Particle;
-import org.bukkit.Sound;
 import org.bukkit.World;
-import org.bukkit.attribute.Attribute;
-import org.bukkit.block.Biome;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.command.CommandSender;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -80,16 +73,6 @@ public final class CommandTester implements AutoCloseable {
     private final Map<String, World> fakeWorlds = new LinkedHashMap<>();
     private BlockData fakeBlockData = Mockito.mock(BlockData.class);
     private ItemStack fakeItemStack = Mockito.mock(ItemStack.class);
-    // These registry value classes trigger Paper/Bukkit RegistryAccess initialization when
-    // touched directly outside a real Paper server. Tests may inject real/bootstrap-safe
-    // values if available, but paper-testing intentionally does not create defaults.
-    private @Nullable Enchantment fakeEnchantment;
-    private Particle fakeParticle = Particle.POOF;
-    private @Nullable PotionEffectType fakePotionEffectType;
-    private @Nullable Biome fakeBiome;
-    private @Nullable Attribute fakeAttribute;
-    private EntityType fakeEntityType = EntityType.ZOMBIE;
-    private @Nullable Sound fakeSound;
     private final Map<RegistryKey<?>, Map<String, Object>> fakeRegistryValues = new LinkedHashMap<>();
     private final String permissionPrefix;
     private final List<Command> commands = new ArrayList<>();
@@ -242,44 +225,10 @@ public final class CommandTester implements AutoCloseable {
         return this;
     }
 
-    public CommandTester withFakeEnchantment(@NotNull Enchantment enchantment) {
-        this.fakeEnchantment = enchantment;
-        return this;
-    }
-
-    public CommandTester withFakeParticle(@NotNull Particle particle) {
-        this.fakeParticle = particle;
-        return this;
-    }
-
-    public CommandTester withFakePotionEffectType(@NotNull PotionEffectType potionEffectType) {
-        this.fakePotionEffectType = potionEffectType;
-        return this;
-    }
-
-    public CommandTester withFakeBiome(@NotNull Biome biome) {
-        this.fakeBiome = biome;
-        return this;
-    }
-
-    public CommandTester withFakeAttribute(@NotNull Attribute attribute) {
-        this.fakeAttribute = attribute;
-        return this;
-    }
-
-    public CommandTester withFakeEntityType(@NotNull EntityType entityType) {
-        this.fakeEntityType = entityType;
-        return this;
-    }
-
-    public CommandTester withFakeSound(@NotNull Sound sound) {
-        this.fakeSound = sound;
-        return this;
-    }
-
     /**
      * Adds a value that {@code ArgumentTypes.resource(registryKey)}, and so {@code RegistryArgument}, returns for its
-     * key, such as {@code minecraft:sharpness}. Once a registry has a value here, other keys of it fail while parsing.
+     * key, such as {@code minecraft:sharpness}. Other keys fail while parsing, as on a server, so a registry without
+     * values here accepts no key.
      */
     public <T> CommandTester withFakeRegistryValue(@NotNull RegistryKey<T> registryKey,
                                                    @NotNull String key,
@@ -520,32 +469,9 @@ public final class CommandTester implements AutoCloseable {
     private Object resourceValue(RegistryKey<?> key, String token) {
         CommandTester tester = requireCurrent();
         Map<String, Object> values = tester.fakeRegistryValues.get(key);
-        if (values != null) {
-            NamespacedKey valueKey = NamespacedKey.fromString(token);
-            return valueKey == null ? null : values.get(valueKey.toString());
-        }
-        if (RegistryKey.ENCHANTMENT.equals(key)) {
-            return tester.fakeEnchantment;
-        }
-        if (RegistryKey.PARTICLE_TYPE.equals(key)) {
-            return tester.fakeParticle;
-        }
-        if (RegistryKey.MOB_EFFECT.equals(key)) {
-            return tester.fakePotionEffectType;
-        }
-        if (RegistryKey.BIOME.equals(key)) {
-            return tester.fakeBiome;
-        }
-        if (RegistryKey.ATTRIBUTE.equals(key)) {
-            return tester.fakeAttribute;
-        }
-        if (RegistryKey.ENTITY_TYPE.equals(key)) {
-            return tester.fakeEntityType;
-        }
-        if (RegistryKey.SOUND_EVENT.equals(key)) {
-            return tester.fakeSound;
-        }
-        throw new UnsupportedOperationException("Unsupported Paper registry argument in CommandTester: " + key);
+        NamespacedKey valueKey = NamespacedKey.fromString(token);
+        // A server rejects a key its registry lacks while parsing; word() turns null into that error.
+        return values == null || valueKey == null ? null : values.get(valueKey.toString());
     }
 
     private static CommandTester requireCurrent() {

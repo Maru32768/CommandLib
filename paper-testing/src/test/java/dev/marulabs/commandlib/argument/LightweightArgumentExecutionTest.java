@@ -3,6 +3,7 @@ package dev.marulabs.commandlib.argument;
 import dev.marulabs.commandlib.Command;
 import dev.marulabs.commandlib.CommandTester;
 import dev.marulabs.commandlib.FakeSender;
+import io.papermc.paper.registry.RegistryKey;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
@@ -122,12 +123,24 @@ class LightweightArgumentExecutionTest {
                      });
         }}, "test.command").withFakeBlockData(blockData)
                            .withFakeItemStack(itemStack)
-                           .withFakeParticle(Particle.POOF);
+                           .withFakeRegistryValue(RegistryKey.PARTICLE_TYPE, "minecraft:poof", Particle.POOF);
         FakeSender sender = FakeSender.player("Steve");
 
         tester.execute("args minecraft:stone minecraft:stone minecraft:poof", sender);
 
         assertThat(sender.getSentMessageTexts()).containsExactly("true:true:POOF");
+    }
+
+    @Test
+    void registryArgumentsWithoutFakeValuesRejectEveryKey() {
+        CommandTester tester = new CommandTester(() -> new Command("args") {{
+            argument(new ParticleArgument("particle")).execute((particle, ctx) -> ctx.sendMessage(particle.name()));
+        }}, "test.command");
+        FakeSender sender = FakeSender.player("Steve");
+
+        assertThatThrownBy(() -> tester.execute("args minecraft:poof",
+                                                sender)).hasCauseInstanceOf(com.mojang.brigadier.exceptions.CommandSyntaxException.class);
+        assertThat(sender.getSentMessageTexts()).isEmpty();
     }
 
     @Test

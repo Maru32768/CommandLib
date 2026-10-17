@@ -77,9 +77,28 @@ an unexpected error and then rethrown by `execute`, so the test fails.
 | Artifact | Methods | Provides |
 |---|---|---|
 | `spigot-testing` | `withFakePlayer(Player)`, `withFakeEntity(name, Entity)`, `withFakeWorld(key, World)` | Values for player / entity selectors (names, `@s`, `@p`, `@r`, `@a`, `@e`) and `WorldArgument` |
-| `paper-testing` | `withFakePlayer`, `withFakeEntity`, `withFakeWorld(key, World)`, `withFakeBlockData`, `withFakeItemStack`, `withFakeEnchantment`, `withFakeParticle`, `withFakePotionEffectType`, `withFakeBiome`, `withFakeAttribute`, `withFakeEntityType`, `withFakeSound` | The value each stubbed Paper argument returns |
+| `paper-testing` | `withFakePlayer`, `withFakeEntity`, `withFakeWorld(key, World)`, `withFakeBlockData`, `withFakeItemStack`, `withFakeRegistryValue(registryKey, key, value)` | The value each stubbed Paper argument returns; see [registry values on Paper](#registry-values-on-paper) |
 | `forge-testing` / `neoforge-testing` / `fabric-testing` | `withPlayer(FakeSender)`, `withLevel(ServerLevel)`, `withServer(Consumer<MinecraftServer>)` | Online players for selectors, `GameProfileArgument`, `UUIDArgument`; levels for `WorldArgument`; any other stub of the server mock, such as `getScoreboard()`, `getAdvancements()`, `getRecipeManager()` or the loot tables |
 | `velocity-testing` | `withFakePlayer(FakeSender)`, `withFakeServer(name)`, `proxy()` | Players and servers of the fake `ProxyServer` for `PlayerArgument` and `ServerArgument` |
+
+### Registry values on Paper
+
+`withFakeRegistryValue(RegistryKey.ENCHANTMENT, "minecraft:sharpness", value)` adds a value that `RegistryArgument` and
+the Paper registry arguments (`EnchantmentArgument`, `ParticleArgument`, `EntityTypeArgument`, ...) return for its key.
+As on a server, other keys fail while parsing, and so does every key of a registry without values.
+
+Some value classes, such as `Enchantment`, `Attribute`, `PotionEffectType` and `Biome`, read Paper's registries while
+they initialize, so Mockito cannot mock them without a server. MockBukkit provides those registries. Without it, add
+`ServiceLoader` providers to your test sources and list them in `META-INF/services`:
+
+- an `io.papermc.paper.registry.RegistryAccess` whose registries are empty mocks, except that `RegistryKey.MOB_EFFECT`
+  returns a mock `PotionEffectType` for every lookup, since `PotionEffectType` keeps its constants in a map that
+  rejects a second null;
+- for `Biome`, an `io.papermc.paper.InternalAPIBridge` whose `constructLegacyCustomBiome()` returns null.
+
+`paper-testing` does not ship them: they implement Paper internals that change between Paper versions, and they would
+compete with MockBukkit's providers on the same classpath. The repository's `paper-testing/src/test/java/io/papermc/paper`
+has copies that work with the Paper 1.21.8 API.
 
 The [argument catalog](arguments.md#testing-each-argument) lists, argument by argument, what runs for real, what is
 mocked, and what needs Bukkit static mocks.

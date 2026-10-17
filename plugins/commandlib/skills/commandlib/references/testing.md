@@ -179,7 +179,11 @@ argument paths for command-level tests. It does not emulate Paper lifecycle
 registration; registration is covered by integration tests on real Paper
 servers.
 
-`EnchantmentArgument` and `PotionEffectArgument` can be wired into commands in
-`paper-testing`, but command-level execution with concrete registry values needs
-Paper's server-side `RegistryAccess` bootstrap. Verify their real registry values
-with integration tests.
+Registry arguments (`RegistryArgument`, `EnchantmentArgument`, `ParticleArgument`,
+`EntityTypeArgument`, ...) resolve only the values added with
+`tester.withFakeRegistryValue(RegistryKey.PARTICLE_TYPE, "minecraft:poof", Particle.POOF)`;
+every other key fails while parsing, as on a server. Value classes such as
+`Enchantment`, `Attribute`, `PotionEffectType` and `Biome` cannot be mocked
+without Paper's `RegistryAccess`; use MockBukkit, or the `ServiceLoader` setup
+in the CommandLib testing docs ("Registry values on Paper"). Verify real
+registry values with integration tests.
