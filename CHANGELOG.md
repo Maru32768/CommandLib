@@ -81,13 +81,11 @@ This file lists the changes in each CommandLib release that affect plugin and mo
   command and argument branch gets its own node. Update your permission plugin configuration
   ([permissions](docs/permissions.md#node-names)).
 - Spigot: `permission(PermissionDefault.NOT_OP)` throws `IllegalArgumentException`.
-- Forge / NeoForge / Fabric: a command block or a non-player entity that `/execute as` runs as no longer passes every
-  check. It gets a node by its default and its own permission level, so a command block cannot run an `OP` or `NONE`
-  command. The console, RCON and data pack functions still pass every check ([permissions](docs/permissions.md)).
-- Forge / NeoForge / Fabric: `ctx.getActor().getType()` is `UNKNOWN`, not `CONSOLE`, for a source that is not a
-  player, an entity, the server, RCON or a command block, such as another mod's, and such a source fails
-  `requireConsole()`. `ctx.getActor().hasPermission(...)` is now `true` for the console and RCON; it was `false` for
-  every non-player.
+- Forge: 0.17.2 judged every source by a permission level (default 4). Levels 1-3 are gone: `OP` needs level 4 and
+  `ALL` lets everyone in, so a command can no longer be opened to command blocks (level 2) while staying closed to
+  players. A command block or an entity that `/execute as` runs as runs only `ALL` commands. Data pack functions, the
+  console and RCON pass every CommandLib check; the function permission level still guards vanilla's own commands in a
+  function ([permissions](docs/permissions.md)).
 - Forge: `CommandLib.register(commands...)` is now `CommandLib.register(permissionPrefix, commands...)`, and
   `permissionLevel(int)` is replaced by `permission(DefaultPermission)` (or `permission(DefaultPermissionLevel)` on
   1.16.5).
@@ -95,12 +93,14 @@ This file lists the changes in each CommandLib release that affect plugin and mo
 
 #### Registration
 
-- Spigot and Paper: `CommandLib.register` and `unregister` throw `IllegalStateException` off the main thread (on Folia,
-  off the global region thread; region threads are refused too).
+- Spigot and Paper: `CommandLib.register` and `unregister` throw `IllegalStateException` off the main thread. On Folia,
+  call them from `onEnable` / `onDisable` or the global region thread; region threads are refused.
 - Registration rejects trees it used to accept:
   - two argument branches that both run for the same input (`IllegalStateException`)
   - same-named first arguments of different types, which share one node (`IllegalArgumentException`)
   - a command added under a second parent (`addChildren` throws `IllegalArgumentException`)
+  - a child command or alias whose name a sibling already has (`addChildren` / `addAliases` throw
+    `IllegalArgumentException`)
   - a greedy string argument that does not end its branch (`IllegalStateException`)
 
 ### Added
@@ -209,7 +209,6 @@ suggestions) and a command for each argument type. Options, permission plugins a
 - Vanilla argument types such as item, block and entity selector arguments keep their own suggestions.
 - An argument named like the literal before it keeps its own input.
 - `UncaughtExceptionHandler` receives exceptions thrown by executors.
-- Adding a child or alias whose name is already taken fails at once instead of when the tree is built.
 - Spigot: commands work after Bukkit `/reload`, because CommandLib adds them to the vanilla dispatcher.
 - Spigot: commands appear under the plugin's `/help` index with their permission and description, instead of as "A
   Mojang provided command", and lose the stray `minecraft:` label.
