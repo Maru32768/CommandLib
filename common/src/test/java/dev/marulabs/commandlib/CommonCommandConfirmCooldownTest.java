@@ -308,6 +308,50 @@ class CommonCommandConfirmCooldownTest {
     }
 
     @Test
+    void cooldown_drops_a_reservation_as_old_as_the_cooldown() throws Exception {
+        AtomicInteger calls = new AtomicInteger();
+        AtomicInteger healed = new AtomicInteger();
+        TestCommand command = new TestCommand("heal") {{
+            cooldown(Cooldown.of(Duration.ofSeconds(30))
+                             .clock(clock)
+                             .message((ctx, remaining) -> ctx.sendFailure("wait " + remaining.toSeconds())));
+            // The first run hangs in the middleware forever.
+            addMiddleware((ctx, next) -> calls.getAndIncrement() == 0 ? new CompletableFuture<>() : next.proceed());
+            execute(ctx -> healed.incrementAndGet());
+        }};
+        TestCommandRunner runner = new TestCommandRunner(command, player("Steve"));
+
+        runner.execute("heal");
+        clock.advance(Duration.ofSeconds(29));
+        assertThat(runner.execute("heal")
+                         .messages()).containsExactly("wait 30");
+        clock.advance(Duration.ofSeconds(1));
+        runner.execute("heal");
+        assertThat(healed).hasValue(1);
+    }
+
+    @Test
+    void cooldown_releases_the_reservation_when_a_middleware_fails() throws Exception {
+        AtomicInteger calls = new AtomicInteger();
+        AtomicInteger healed = new AtomicInteger();
+        TestCommand command = new TestCommand("heal") {{
+            cooldown(Cooldown.of(Duration.ofSeconds(30))
+                             .clock(clock)
+                             .message((ctx, remaining) -> ctx.sendFailure("wait " + remaining.toSeconds())));
+            addMiddleware((ctx, next) -> calls.getAndIncrement() == 0
+                    ? CompletableFuture.failedFuture(new IllegalStateException("lookup failed")) : next.proceed());
+            execute(ctx -> healed.incrementAndGet());
+        }};
+        TestCommandRunner runner = new TestCommandRunner(command, player("Steve"));
+
+        runner.execute("heal");
+        assertThat(healed).hasValue(0);
+        assertThat(runner.execute("heal")
+                         .messages()).doesNotContain("wait 30");
+        assertThat(healed).hasValue(1);
+    }
+
+    @Test
     void child_commands_share_the_parent_cooldown_unless_they_disable_the_parent_preprocess() throws Exception {
         TestCommand command = new TestCommand("kit") {{
             cooldown(Cooldown.of(Duration.ofSeconds(30))
