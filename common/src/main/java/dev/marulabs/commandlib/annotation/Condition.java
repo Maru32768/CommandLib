@@ -8,6 +8,7 @@ import java.lang.annotation.*;
  * Like a prerequisite, a condition of the class applies to its subcommands.
  */
 @Documented
+@Inherited
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.METHOD})
 public @interface Condition {

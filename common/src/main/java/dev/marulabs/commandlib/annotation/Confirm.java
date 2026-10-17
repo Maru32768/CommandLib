@@ -7,6 +7,7 @@ import java.lang.annotation.*;
  * does, on a {@link Command} class or a {@link Subcommand} method.
  */
 @Documented
+@Inherited
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.METHOD})
 public @interface Confirm {

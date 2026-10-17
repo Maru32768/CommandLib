@@ -144,7 +144,8 @@ Without it, name each argument with `@Name("target")`, and give `@Flag` and `@Op
   the subcommand (everything in the table but `@Execute` and `@Subcommand`) or aliases.
 - The class describes the command itself. On an `@Execute` method, `@Description`, `@Permission` and `@VisibleWhen`
   describe its argument branch, so a method without arguments cannot have them; the other command annotations go on
-  the class.
+  the class. The class inherits each command annotation of its superclasses that it does not give itself (they are
+  `@Inherited`); annotations on interfaces do not apply.
 - Methods are added in the order of their path and then their name, because reflection does not give the order of the
   source. Help lists subcommands and branches in that order.
 - Methods may be private and static. Methods of superclasses and interfaces, default or abstract, are read too; for a

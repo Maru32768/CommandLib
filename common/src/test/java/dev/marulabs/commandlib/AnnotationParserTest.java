@@ -404,6 +404,27 @@ class AnnotationParserTest {
         assertThatThrownBy(() -> parser().parse(new UnannotatedGenericOverride())).hasMessageContaining("GenericBase#run(TestCommandContext, Object) is overridden by UnannotatedGenericOverride#run(TestCommandContext, String)");
     }
 
+    @Description("Base")
+    @Permission("base.node")
+    abstract static class DescribedBase {
+        @Execute
+        void run(TestCommandContext ctx) {
+        }
+    }
+
+    @Command("x")
+    @Description("Derived")
+    static final class DescribedDerived extends DescribedBase {
+    }
+
+    @Test
+    void class_annotations_of_superclasses_apply_unless_the_class_gives_its_own() {
+        TestCommand command = parser().parse(new DescribedDerived());
+
+        assertThat(command.staticDescription()).isEqualTo("Derived");
+        assertThat(command.permissionName("test.command")).isEqualTo("base.node");
+    }
+
     interface Pingable {
         @Subcommand("ping")
         default void ping(TestCommandContext ctx) {

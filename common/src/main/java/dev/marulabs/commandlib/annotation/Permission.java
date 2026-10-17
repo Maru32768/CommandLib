@@ -14,6 +14,7 @@ import java.lang.annotation.*;
  * {@link #defaultPermission()} or the command's default. It needs a node or a default there, and takes no description.
  */
 @Documented
+@Inherited
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.METHOD, ElementType.PARAMETER})
 public @interface Permission {

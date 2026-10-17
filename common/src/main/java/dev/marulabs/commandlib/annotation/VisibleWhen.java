@@ -9,6 +9,7 @@ import java.lang.annotation.*;
  * arguments or a {@link Subcommand} method whose path ends in a placeholder.
  */
 @Documented
+@Inherited
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.METHOD})
 public @interface VisibleWhen {

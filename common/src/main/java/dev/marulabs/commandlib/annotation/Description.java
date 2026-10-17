@@ -9,6 +9,7 @@ import java.lang.annotation.*;
  * parameter.
  */
 @Documented
+@Inherited
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.METHOD, ElementType.PARAMETER})
 public @interface Description {
