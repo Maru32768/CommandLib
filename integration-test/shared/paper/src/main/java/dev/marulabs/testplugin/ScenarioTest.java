@@ -38,6 +38,7 @@ public final class ScenarioTest extends TestBase {
 
     private final Plugin plugin;
     private final String playerName;
+    private final List<String> afterReloadCommands = new ArrayList<>();
 
     public ScenarioTest(Command command, Plugin plugin, String playerName) {
         super(command);
@@ -55,6 +56,7 @@ public final class ScenarioTest extends TestBase {
         commands.addAll(runtimeRegisteredCommandIsExecutableUntilUnregistered());
         commands.addAll(lateRegisteredCommandSurvivesReload());
         commands.addAll(unregisteringKeepsALabelTakenSince());
+        commands.addAll(enableRegisteredCommandIsRemovedByUnregister());
         deniedProbe();
         reloadProbe();
 
@@ -210,35 +212,73 @@ public final class ScenarioTest extends TestBase {
     }
 
     /**
-     * A second registration of the same label takes it over; unregistering the first must leave the second's command.
+     * A second registration of the same label takes it over; unregistering the first must leave the second's command
+     * under both labels.
      */
     public List<String> unregisteringKeepsALabelTakenSince() {
         String name = getMethodName();
         String key = getKey();
         String label = "commandlibowned";
-        AtomicReference<CommandLib> first = new AtomicReference<>();
+        String namespacedLabel = namespacedLabel(label);
+        List<String> executions = Collections.synchronizedList(new ArrayList<>());
 
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name + "Register") {{
             execute(ctx -> {
-                first.set(CommandLib.register(plugin, new Command(label) {{
+                CommandLib first = CommandLib.register(plugin, new Command(label) {{
                     permission(PermissionDefault.TRUE);
-                    execute(inner -> putResult(new TestResult(key,
-                                                              TestStatus.FAILED,
-                                                              "The unregistered registration ran.")));
-                }}));
+                    execute(inner -> executions.add("unregistered"));
+                }});
                 CommandLib.register(plugin, new Command(label) {{
                     permission(PermissionDefault.TRUE);
-                    execute(inner -> putResult(new TestResult(key,
-                                                              TestStatus.SUCCEEDED,
-                                                              "The label kept the later registration.")));
+                    execute(inner -> executions.add("later"));
                 }});
-                first.get()
-                     .unregister();
+                first.unregister();
             });
+        }}, new Command(name) {{
+            // One execution per label.
+            execute(ctx -> putResult(key, executions.toString(), "[later, later]"));
         }});
 
-        return List.of(buildCommand(command, name + "Register"), label);
+        return List.of(buildCommand(command, name + "Register"), label, namespacedLabel, buildCommand(command, name));
+    }
+
+    /**
+     * A command registered while the plugin enables runs under both labels until it is unregistered, and stays
+     * unknown under both after {@code /minecraft:reload}.
+     */
+    public List<String> enableRegisteredCommandIsRemovedByUnregister() {
+        String name = getMethodName();
+        String key = getKey();
+        String label = "commandlibenabled";
+        String namespacedLabel = namespacedLabel(label);
+        AtomicInteger executions = new AtomicInteger();
+        CommandLib registration = CommandLib.register(plugin, new Command(label) {{
+            permission(PermissionDefault.TRUE);
+            execute(inner -> executions.incrementAndGet());
+        }});
+
+        putCommandNotExecutedResult(key);
+        command.addChildren(new Command(name + "Unregister") {{
+            execute(ctx -> registration.unregister());
+        }}, new Command(name) {{
+            // One execution per label before unregistering, none after it or after the reload.
+            execute(ctx -> putResult(key, String.valueOf(executions.get()), "2"));
+        }});
+        afterReloadCommands.addAll(List.of(label, namespacedLabel, buildCommand(command, name)));
+
+        return List.of(label, namespacedLabel, buildCommand(command, name + "Unregister"), label, namespacedLabel);
+    }
+
+    @Override
+    public List<String> afterReload() {
+        return afterReloadCommands;
+    }
+
+    private String namespacedLabel(String label) {
+        return plugin.getName()
+                     .toLowerCase(Locale.ROOT)
+                + ":" + label;
     }
 
     public List<String> lateRegisteredCommandSurvivesReload() {
