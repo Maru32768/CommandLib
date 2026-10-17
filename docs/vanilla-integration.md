@@ -2,7 +2,8 @@
 
 CommandLib registers its commands in the server's Brigadier dispatcher, the one vanilla commands live in. They can
 therefore be run by everything that runs vanilla commands: `/execute ... run`, command blocks, data pack functions and
-function tags. This page describes what a command sees in each case and where the platforms differ.
+function tags. This page describes what a command sees in each case and where the platforms differ. Velocity is a
+proxy without `/execute`, command blocks or functions, so this page does not apply to it.
 
 The integration fixtures check these cases on real servers (`VanillaExecutionTest` and `DataPackFunctionTest` in
 `integration-test/shared/spigot` and `integration-test/shared/paper`, `ActorTest` in `integration-test/shared/modded`).
@@ -42,7 +43,7 @@ The platforms disagree on who the sender is after `execute as`:
 |---|---|---|---|
 | Spigot | The original sender, such as the console | The original sender (`CONSOLE`) | The entity of `as` |
 | Paper | The original sender (`CommandSourceStack#getSender`) | The original sender (`CONSOLE`) | The entity of `as` (`CommandSourceStack#getExecutor`) |
-| Forge / NeoForge | The `CommandSourceStack` itself | The entity of `as` (`PLAYER`), named after it | The entity of `as` |
+| Forge / NeoForge / Fabric | The `CommandSourceStack` itself | The entity of `as` (`PLAYER`), named after it | The entity of `as` |
 
 On Bukkit the sender is the `CommandSender` that started the command, so `ctx.getSender()`, `ctx.getPlayer()` and
 permission checks keep using the console when the console runs `execute as Steve run mycmd`. Use `ctx.getEntity()` for
@@ -78,8 +79,8 @@ A function is compiled when the data packs load: at startup, on `/minecraft:relo
 `Bukkit#reloadData`. Each line is parsed against the dispatcher then, and a function with a line that does not parse is
 dropped.
 
-- **Forge / NeoForge** add the commands on `RegisterCommandsEvent`, which the server fires before it compiles the
-  functions, so functions see them without help from CommandLib.
+- **Forge / NeoForge** add the commands on `RegisterCommandsEvent` and **Fabric** on `CommandRegistrationCallback`,
+  which the server fires before it compiles the functions, so functions see them without help from CommandLib.
 - **Spigot** compiles the functions before plugins can add commands, and has no event for a data reload. CommandLib
   checks every tick whether the data pack resources were replaced or its commands changed, and then compiles the
   functions and function tags again with its commands.
@@ -110,7 +111,7 @@ registration in a `bootstrap`.
 
 ## Platform differences
 
-| Behavior | Spigot | Paper | Forge / NeoForge |
+| Behavior | Spigot | Paper | Forge / NeoForge / Fabric |
 |---|---|---|---|
 | Sender after `execute as` | Original sender | Original sender | The source, whose entity changed |
 | Actor after `execute as` | Original sender | Original sender | The entity |

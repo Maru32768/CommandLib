@@ -37,8 +37,10 @@ execute(ctx -> ctx.sendSuccess(HOME_SET, Map.of("name", "base")));
 ## The sender's locale
 
 `ctx.getLocale()` decides the language: the client language of a player (Spigot / Paper `Player#getLocale`, Velocity
-`Player#getEffectiveLocale`, Forge / NeoForge `ServerPlayer#getLanguage`), and the JVM's default locale for the console,
-command blocks and other senders. A player whose client has not sent its settings yet gets the JVM default too.
+`Player#getEffectiveLocale`, Forge / NeoForge `ServerPlayer#getLanguage`, Fabric 1.20.2+
+`ServerPlayer#clientInformation().language()`), and the JVM's default locale for the console,
+command blocks and other senders. A player whose client has not sent its settings yet, and every player on Fabric
+1.20.1, gets the JVM default too.
 
 For a locale such as `ja_JP`, the text of a caption is looked up for `ja_JP`, then `ja`, then the root locale. At each
 step the texts given to `set` and `load` come first, then the bundles added with `bundle(...)` from the last added, then

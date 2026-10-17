@@ -74,8 +74,8 @@ Notes:
   anything scheduled in ticks. `DurationArgument` counts real time: `t` is 50 ms (a tick at 20 TPS) and `d` is 24 hours;
   it combines units (`1h30m`) but rejects decimals and bare numbers. The client sees a word, so malformed input fails
   when the command runs with "Incorrect argument for command". Use it for cooldowns, bans and other wall-clock times.
-- `TimeArgument`'s minimum is checked by the client and the parser from 1.19.4. Older Spigot servers and Forge 1.16.5
-  have no minimum in the vanilla type (it only rejects negative values), so CommandLib rejects a smaller value when the
+- `TimeArgument`'s minimum is checked by the client and the parser from 1.19.4. Older Spigot servers and Forge 1.16.5,
+  1.18.2 and 1.19.2 have no minimum in the vanilla type (it only rejects negative values), so CommandLib rejects a smaller value when the
   command runs with `Tick count must not be less than <minimum>, found <ticks>`.
 
 ## Entities and players

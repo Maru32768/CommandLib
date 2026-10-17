@@ -936,7 +936,7 @@ Configure each value (validator, suggestions) before `variadic()` and the whole 
 
 `ctx.sendMessage`, `sendSuccess` (green), `sendWarn` (yellow), and `sendFailure` (red) accept a `String`, a native
 component, or a `RichText`. `RichText` is an immutable, platform-independent message that works the same on Spigot,
-Paper, and Forge / NeoForge, so code shared between platforms can send colors, decorations, hover text, and click
+Paper, Velocity, and Forge / NeoForge / Fabric, so code shared between platforms can send colors, decorations, hover text, and click
 actions:
 
 ```java
@@ -961,8 +961,8 @@ public final class DifficultyCommand extends Command {
 ```
 
 `sendSuccess` / `sendWarn` / `sendFailure` only color a message that has no color of its own and never change the value
-or component passed in. `RichTexts.toBungee` (spigot), `RichTexts.toAdventure` (paper), and `RichTexts.toVanilla`
-(Forge / NeoForge) convert a `RichText` to the native component. For Paper-only plugins, Adventure and MiniMessage can
+or component passed in. `RichTexts.toBungee` (spigot), `RichTexts.toAdventure` (paper, velocity), and `RichTexts.toVanilla`
+(Forge / NeoForge / Fabric) convert a `RichText` to the native component. For Paper-only plugins, Adventure and MiniMessage can
 be used directly: `ctx.sendMessage(MiniMessage.miniMessage().deserialize("<red>Hello"))`.
 
 ### Translated Messages
@@ -1227,14 +1227,14 @@ public final class SpawnCommand extends Command {
 ```
 
 Without either, the command is listed as "A command by the &lt;plugin&gt; plugin.". Without the page, `/help <command>`
-shows the short text, the usage and the aliases. Only top-level commands use it, and Forge / NeoForge, which have no
-server help, ignore it.
+shows the short text, the usage and the aliases. Only top-level commands use it, and only Spigot and Paper read it:
+Forge, NeoForge, Fabric and Velocity have no server help and ignore it.
 
 ## Permissions
 
 CommandLib automatically generates and registers permission nodes for each command, subcommand, and argument branch.
 Bukkit uses Bukkit permissions. Forge and NeoForge use their permission node APIs. Fabric uses fabric-permissions-api
-when a mod ships it.
+when a mod ships it. Velocity uses the proxy's permission subjects.
 
 ### Permission Prefix
 
@@ -1411,6 +1411,8 @@ CommandLib delegates permission checks to the platform permission system:
 - Forge / NeoForge: `PermissionAPI.getPermission(player, permissionNode)` (Forge 1.16.5:
   `PermissionAPI.hasPermission(player, permissionNode)`)
 - Fabric: `Permissions.check(player, permissionNode, default)` of fabric-permissions-api
+- Velocity: `PermissionSubject#getPermissionValue(permissionNode)`; an unset node is granted only when its default is
+  `DefaultPermission.ALL`
 
 LuckPerms can provide those platform permissions. Configure the same generated or custom permission nodes in LuckPerms;
 CommandLib does not need additional LuckPerms-specific integration. On Forge 1.18+ and NeoForge the nodes are in the
