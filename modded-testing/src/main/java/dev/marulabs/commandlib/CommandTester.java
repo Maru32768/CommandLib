@@ -250,10 +250,14 @@ public final class CommandTester implements AutoCloseable {
 
     /**
      * Adds a level to the server under its {@link ServerLevel#dimension()}, so {@code WorldArgument} parses and
-     * suggests it. The level is usually a Mockito mock.
+     * suggests it. The level is usually a Mockito mock. From 1.19.3, a mock whose {@code enabledFeatures()} answers
+     * null is stubbed to answer the default feature flags, which selectors check entity types against.
      */
     public CommandTester withLevel(@NotNull ServerLevel level) {
         levels.put(Objects.requireNonNull(level.dimension(), "level.dimension()"), level);
+        //? if >=1.19.3 {
+        stubFeatures(level);
+        //?}
         return this;
     }
 
@@ -378,9 +382,7 @@ public final class CommandTester implements AutoCloseable {
             Mockito.when(defaultOverworld.dimension())
                    .thenReturn(Level.OVERWORLD);
             //? if >=1.19.3 {
-            // Selectors check entity types against the source's features, which some versions read from its level.
-            Mockito.when(defaultOverworld.enabledFeatures())
-                   .thenReturn(FeatureFlags.DEFAULT_FLAGS);
+            stubFeatures(defaultOverworld);
             //?}
         }
         Map<ResourceKey<Level>, ServerLevel> serverLevels = new LinkedHashMap<>();
@@ -388,6 +390,19 @@ public final class CommandTester implements AutoCloseable {
         serverLevels.putAll(levels);
         return serverLevels;
     }
+
+    //? if >=1.19.3 {
+    // Selectors check entity types against the source's features, which some versions read from its level.
+    private static void stubFeatures(ServerLevel level) {
+        if (Mockito.mockingDetails(level)
+                   .isMock()
+                && level.enabledFeatures() == null) {
+            Mockito.lenient()
+                   .when(level.enabledFeatures())
+                   .thenReturn(FeatureFlags.DEFAULT_FLAGS);
+        }
+    }
+    //?}
 
     private static boolean hasPermission(Map<String, FakeSender> onlinePlayers, Object player, String node) {
         return onlinePlayers.values()

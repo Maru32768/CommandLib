@@ -3,7 +3,10 @@ package dev.marulabs.commandlib.argument;
 import dev.marulabs.commandlib.Command;
 import dev.marulabs.commandlib.CommandTester;
 import dev.marulabs.commandlib.FakeSender;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -43,6 +46,22 @@ class MessageArgumentTest {
         }
 
         assertThat(sender.getSentMessageTexts()).containsExactly("2: hello Bob, Alice!");
+    }
+
+    @Test
+    void an_operator_gets_the_selectors_resolved_in_an_overworld_the_test_adds() {
+        FakeSender sender = FakeSender.player("Alice")
+                                      .op(true);
+        ServerLevel overworld = Mockito.mock(ServerLevel.class);
+        Mockito.when(overworld.dimension())
+               .thenReturn(Level.OVERWORLD);
+
+        try (CommandTester tester = new CommandTester(MessageArgumentTest::command,
+                                                      "test.command").withLevel(overworld)) {
+            tester.execute("shout 2 hello @a!", sender);
+        }
+
+        assertThat(sender.getSentMessageTexts()).containsExactly("2: hello Alice!");
     }
 
     @Test
