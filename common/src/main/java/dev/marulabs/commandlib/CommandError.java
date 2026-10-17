@@ -56,8 +56,9 @@ public final class CommandError {
     }
 
     /**
-     * For an {@link Kind#ARGUMENT} or {@link Kind#VALIDATION} error, the usage of the argument branch whose argument
-     * failed, which the sender has the permission for; null for the other kinds.
+     * For an {@link Kind#ARGUMENT} or {@link Kind#VALIDATION} error of a positional argument, the usage of the argument
+     * branch whose argument failed, which the sender has the permission for; null for the other kinds and for the
+     * value of an option ({@link Options#of}) that fails its argument's parsing or validation.
      */
     public CommandHelp.@Nullable Usage usage() {
         return usage;
