@@ -41,6 +41,7 @@ import net.minecraft.core.Holder;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.lang.reflect.WildcardType;
 import java.util.List;
 *///?}
 
@@ -131,6 +132,10 @@ public final class AnnotatedCommands {
         // The holder of a variadic argument is the element of the List.
         if (type instanceof ParameterizedType && ((ParameterizedType) type).getRawType() == List.class) {
             type = ((ParameterizedType) type).getActualTypeArguments()[0];
+        }
+        // Kotlin declares a List<Holder<Enchantment>> parameter as List<? extends Holder<Enchantment>>.
+        if (type instanceof WildcardType) {
+            type = ((WildcardType) type).getUpperBounds()[0];
         }
         Type value = type instanceof ParameterizedType ? ((ParameterizedType) type).getActualTypeArguments()[0] : type;
         if (value == Enchantment.class) {
