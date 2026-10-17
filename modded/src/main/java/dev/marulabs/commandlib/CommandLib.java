@@ -6,6 +6,7 @@ import net.minecraft.SharedConstants;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.players.PlayerList;
 //? if fabric {
 /*import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
@@ -29,6 +30,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 //? if >=1.18 {
@@ -210,7 +212,7 @@ public final class CommandLib {
      * server thread later.
      */
     public static void refresh(@NotNull ServerPlayer player) {
-        MinecraftServer server = player.server;
+        MinecraftServer server = Objects.requireNonNull(player.getServer(), "player.getServer()");
         ServerCommandScheduler.runOnServerThread(server,
                                                  () -> server.getCommands()
                                                              .sendCommands(player));
@@ -224,11 +226,15 @@ public final class CommandLib {
         if (server == null) {
             return;
         }
-        ServerCommandScheduler.runOnServerThread(server,
-                                                 () -> server.getPlayerList()
-                                                             .getPlayers()
-                                                             .forEach(player -> server.getCommands()
-                                                                                      .sendCommands(player)));
+        ServerCommandScheduler.runOnServerThread(server, () -> {
+            // Fabric reports the server from SERVER_STARTING, before it has a player list.
+            PlayerList players = server.getPlayerList();
+            if (players != null) {
+                players.getPlayers()
+                       .forEach(player -> server.getCommands()
+                                                .sendCommands(player));
+            }
+        });
     }
 
     //? if fabric {
@@ -245,10 +251,7 @@ public final class CommandLib {
             register(server.getCommands()
                            .getDispatcher()
                            .getRoot());
-            server.getPlayerList()
-                  .getPlayers()
-                  .forEach(player -> server.getCommands()
-                                           .sendCommands(player));
+            refreshAll();
         }
     }
 
@@ -288,10 +291,7 @@ public final class CommandLib {
             register(server.getCommands()
                            .getDispatcher()
                            .getRoot());
-            server.getPlayerList()
-                  .getPlayers()
-                  .forEach(player -> server.getCommands()
-                                           .sendCommands(player));
+            refreshAll();
         }
     }
 
@@ -355,10 +355,7 @@ public final class CommandLib {
             register(server.getCommands()
                            .getDispatcher()
                            .getRoot());
-            server.getPlayerList()
-                  .getPlayers()
-                  .forEach(player -> server.getCommands()
-                                           .sendCommands(player));
+            refreshAll();
         }
     }
 

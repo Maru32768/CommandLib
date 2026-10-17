@@ -18,6 +18,11 @@ repositories {
     mavenCentral()
 }
 
+if (loader == "fabric") {
+    // modTestImplementation, for fabric-permissions-api below.
+    loom.createRemapConfigurations(sourceSets.test.get())
+}
+
 dependencies {
     api(project(path = ":modded:${sc.current.project}", configuration = "namedElements"))
     api("org.mockito:mockito-core:5.11.0")
@@ -27,6 +32,10 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("org.assertj:assertj-core:3.25.3")
+    if (loader == "fabric") {
+        // FabricPermissionTest stubs CommandLib's optional fabric-permissions-api lookup.
+        "modTestImplementation"("me.lucko:fabric-permissions-api:0.3.1") { isTransitive = false }
+    }
 }
 
 // The annotated example commands take their argument names from their parameters.
