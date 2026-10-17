@@ -22,8 +22,8 @@ import java.util.function.Supplier;
  * runs as ({@code /execute as} included), the region of a command block, and the global region for the console. A task
  * given on that thread runs at once. Async work runs on the async scheduler.
  *
- * <p>The entity scheduler drops the tasks of an entity that was removed, such as a player who left, so the follow-up of
- * a command still running then is dropped, as it is for a disabled plugin.
+ * <p>The follow-up for an entity that was removed, such as a player who left, runs on the global region thread instead,
+ * so the post-hooks of the middlewares still run.
  */
 @SuppressWarnings("UnstableApiUsage")
 final class FoliaCommandScheduler implements CommandScheduler {
@@ -75,8 +75,14 @@ final class FoliaCommandScheduler implements CommandScheduler {
                 if (Bukkit.isOwnedByCurrentRegion(entity)) {
                     task.run();
                 } else {
-                    entity.getScheduler()
-                          .execute(plugin(), task, null, 1L);
+                    // The entity scheduler drops the task of a removed entity: retired runs if it is removed before the
+                    // task, and execute returns false if it already was.
+                    Runnable global = () -> Bukkit.getGlobalRegionScheduler()
+                                                  .execute(plugin(), task);
+                    if (!entity.getScheduler()
+                               .execute(plugin(), task, global, 1L)) {
+                        global.run();
+                    }
                 }
             };
         }

@@ -82,12 +82,32 @@ class FoliaCommandSchedulerTest {
         Entity entity = mock(Entity.class);
         EntityScheduler entityScheduler = mock(EntityScheduler.class);
         when(entity.getScheduler()).thenReturn(entityScheduler);
+        when(entityScheduler.execute(eq(plugin), eq(task), any(), eq(1L))).thenReturn(true);
 
         scheduler.sync(context(mock(ConsoleCommandSender.class), entity))
                  .execute(task);
 
         verifyNoInteractions(task, globalScheduler);
-        verify(entityScheduler).execute(plugin, task, null, 1L);
+        ArgumentCaptor<Runnable> retired = ArgumentCaptor.forClass(Runnable.class);
+        verify(entityScheduler).execute(eq(plugin), eq(task), retired.capture(), eq(1L));
+
+        // The entity is removed before the task runs.
+        retired.getValue()
+               .run();
+        verify(globalScheduler).execute(plugin, task);
+    }
+
+    @Test
+    void sync_task_of_an_entity_already_removed_goes_to_the_global_region() {
+        Entity entity = mock(Entity.class);
+        EntityScheduler entityScheduler = mock(EntityScheduler.class);
+        when(entity.getScheduler()).thenReturn(entityScheduler);
+
+        scheduler.sync(context(mock(ConsoleCommandSender.class), entity))
+                 .execute(task);
+
+        verify(globalScheduler).execute(plugin, task);
+        verifyNoInteractions(task);
     }
 
     @Test

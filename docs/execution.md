@@ -168,7 +168,8 @@ folia-supported: true
   the global region thread. Blocks and entities of other regions are not safe to touch from any of them; use Folia's
   own schedulers for those.
 - **Removed entities**: Folia drops the tasks of an entity that was removed, so the follow-up of a command run by a
-  player who left is dropped, without the post-hooks of the middlewares.
+  player who left runs on the global region thread instead, and the post-hooks of the middlewares still run. Do not
+  touch the entity there: it is gone, and Folia's thread checks may throw.
 - **Registration**: register commands during the plugin's initialization, as on Paper. A later `register` or
   `unregister` must run on the global region thread (`Bukkit.getGlobalRegionScheduler()`).
 - **`CommandLib.refresh` / `refreshAll`**: call them on any region thread or the global region thread; Folia sends the

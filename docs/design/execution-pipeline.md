@@ -163,7 +163,7 @@ command on:
 
 | Source | Sync executor | Runs inline when |
 |---|---|---|
-| An executor entity (players, `/execute as`, command minecarts) | `entity.getScheduler().execute(plugin, task, null, 1)` | `Bukkit.isOwnedByCurrentRegion(entity)` |
+| An executor entity (players, `/execute as`, command minecarts) | `entity.getScheduler().execute(plugin, task, retired, 1)`, with the global region scheduler as the fallback | `Bukkit.isOwnedByCurrentRegion(entity)` |
 | A `BlockCommandSender` (command blocks) | `Bukkit.getRegionScheduler().execute(plugin, blockLocation, task)` | `Bukkit.isOwnedByCurrentRegion(blockLocation)` |
 | Anything else (console, RCON) | `Bukkit.getGlobalRegionScheduler().execute(plugin, task)` | `RegionizedServer.isGlobalTickThread()` |
 
@@ -171,9 +171,11 @@ Async is `Bukkit.getAsyncScheduler().runNow`. All of these are in Paper's API fr
 check, which Paper's API has only from 1.21.1 and is called reflectively on Folia's `RegionizedServer`. The executor
 entity comes before the sender because it is what Folia's dispatch ran on and what the command acts on.
 
-The entity scheduler takes no retired callback, so a task for an entity that was removed (a player who left) is dropped,
-like a task of a disabled plugin on the Bukkit scheduler. Running it elsewhere would complete the stages but run the
-executor or the post-hooks off the entity's thread, where Folia's thread checks may throw.
+The entity scheduler drops a task for an entity that was removed (a player who left): it runs the retired callback if
+the entity is removed before the task, and `execute` returns false if it already was. Both send the task to the global
+region scheduler, so the stages complete and the middlewares' post-hooks (a released lock or cooldown) and late failure
+reports still run. Code there must not touch the removed entity, where Folia's thread checks may throw; dropping the task
+instead would leave the hooks unrun with nothing reported.
 
 Elsewhere in the paper module: the command tree update and the function work were already scheduled on the global
 region scheduler; Folia's `Commands#sendCommands` sends the tree through the player's own scheduler, so
