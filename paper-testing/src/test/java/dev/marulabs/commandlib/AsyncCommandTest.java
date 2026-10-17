@@ -5,6 +5,9 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -46,6 +49,26 @@ class AsyncCommandTest {
 
             // The follow-up still reaches the sender after execute has returned.
             assertThat(sender.getSentMessageTexts()).containsExactly("abc has 3 letters");
+        }
+    }
+
+    @Test
+    void an_async_executor_on_another_thread_still_reaches_the_sender() throws Exception {
+        ExecutorService async = Executors.newSingleThreadExecutor();
+        try (CommandTester tester = CommandTester.builder()
+                                                 .command(loadCommand())
+                                                 .permissionPrefix("test")
+                                                 .scheduler(CommandScheduler.of(Runnable::run, async))
+                                                 .build()) {
+            FakeSender sender = FakeSender.player("Steve");
+
+            tester.execute("load abc", sender);
+            async.shutdown();
+
+            assertThat(async.awaitTermination(5, TimeUnit.SECONDS)).isTrue();
+            assertThat(sender.getSentMessageTexts()).containsExactly("abc has 3 letters");
+        } finally {
+            async.shutdownNow();
         }
     }
 }

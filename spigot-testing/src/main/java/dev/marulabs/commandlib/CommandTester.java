@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -89,6 +90,8 @@ public class CommandTester implements AutoCloseable {
     }
 
     private final MockedStatic<NMSClassRegistry> nmsRegistryMock;
+    private final Map<Class<? extends NMSClass>, Class<? extends NMSClass>> nmsMocks;
+    private final Thread ownerThread = Thread.currentThread();
     private final List<Command> commands = new ArrayList<>();
     private final String permissionPrefix;
 
@@ -130,15 +133,24 @@ public class CommandTester implements AutoCloseable {
 
         current.set(this);
 
-        nmsRegistryMock = Mockito.mockStatic(NMSClassRegistry.class);
-        nmsRegistryMock.when(() -> NMSClassRegistry.findClass(Mockito.any()))
-                       .thenThrow(new UnsupportedOperationException("This NMS class is not supported in CommandTester."));
-
-        builder.nmsMocks.forEach((lookUpClass, mockClass) -> registerNmsMock(nmsRegistryMock, lookUpClass, mockClass));
+        nmsMocks = Map.copyOf(builder.nmsMocks);
+        nmsRegistryMock = mockNmsRegistry();
 
         try {
             commands.addAll(builder.createCommands());
-            new CommandNodeCreator<>(commands, permissionPrefix, builder.scheduler).build()
+            CommandScheduler scheduler = builder.scheduler;
+            CommandScheduler onAnyThread = new CommandScheduler() {
+                @Override
+                public Executor sync(CommonCommandContext<?, ?> ctx) {
+                    return withMocks(scheduler.sync(ctx));
+                }
+
+                @Override
+                public Executor async(CommonCommandContext<?, ?> ctx) {
+                    return withMocks(scheduler.async(ctx));
+                }
+            };
+            new CommandNodeCreator<>(commands, permissionPrefix, onAnyThread).build()
                                                                                    .forEach(dispatcher.getRoot()::addChild);
         } catch (Exception e) {
             close();
@@ -280,6 +292,40 @@ public class CommandTester implements AutoCloseable {
         }
     }
 
+    private MockedStatic<NMSClassRegistry> mockNmsRegistry() {
+        MockedStatic<NMSClassRegistry> registryMock = Mockito.mockStatic(NMSClassRegistry.class);
+        registryMock.when(() -> NMSClassRegistry.findClass(Mockito.any()))
+                    .thenThrow(new UnsupportedOperationException("This NMS class is not supported in CommandTester."));
+        nmsMocks.forEach((lookUpClass, mockClass) -> registerNmsMock(registryMock, lookUpClass, mockClass));
+        return registryMock;
+    }
+
+    /**
+     * Makes this tester and its NMS mocks, which Mockito keeps per thread, active while a task of the scheduler runs,
+     * so an executor on another thread reaches the sender too.
+     */
+    private Executor withMocks(Executor executor) {
+        return task -> executor.execute(() -> {
+            CommandTester previous = current.get();
+            if (previous == this) {
+                task.run();
+                return;
+            }
+            current.set(this);
+            try {
+                if (Thread.currentThread() == ownerThread) {
+                    task.run();
+                } else {
+                    try (MockedStatic<NMSClassRegistry> ignored = mockNmsRegistry()) {
+                        task.run();
+                    }
+                }
+            } finally {
+                restoreCurrent(previous);
+            }
+        });
+    }
+
     private static CommandTester requireCurrent() {
         CommandTester tester = current.get();
         if (tester == null) {
@@ -335,7 +381,8 @@ public class CommandTester implements AutoCloseable {
         /**
          * Sets the threads of {@code executeAsync} commands. By default both executors run tasks at once, so an async
          * command completes before {@code execute} returns; pass executors that queue tasks to test what happens in
-         * between.
+         * between. An executor may also run tasks on threads of its own, since the tester activates its NMS mocks on
+         * the thread of each task.
          */
         public Builder scheduler(@NotNull CommandScheduler scheduler) {
             this.scheduler = Objects.requireNonNull(scheduler, "scheduler");

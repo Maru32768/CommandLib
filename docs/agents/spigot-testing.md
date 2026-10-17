@@ -19,7 +19,10 @@ tester instance:
 The mocks pass `Object.class` as the wrapped server class. `CommandTester`
 implements `AutoCloseable` and tears down the mock in `close()`. Tests should use try-with-resources. Mockito static mocks are scoped
 to the thread that created them, so independent `CommandTester` instances may
-run concurrently on different test threads.
+run concurrently on different test threads. A task of the builder's
+`CommandScheduler` that runs on another thread opens the same mock on that
+thread while it runs (`withMocks`), so an async executor with threads of its
+own still reaches the sender.
 
 ## Package Structure
 
