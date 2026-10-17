@@ -1,9 +1,12 @@
 package dev.marulabs.commandlib;
 
+import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.marulabs.commandlib.argument.CommonEnumArgument;
 import dev.marulabs.commandlib.argument.CommonStringArgument;
 import dev.marulabs.commandlib.exception.ArgumentParseException;
 import dev.marulabs.commandlib.exception.ArgumentValidationException;
+import dev.marulabs.commandlib.exception.CommandPrerequisiteException;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -151,5 +154,27 @@ class ArgumentErrorMessageTest {
     void text_and_caption_exceptions_have_a_message() {
         assertThat(new ArgumentParseException("bad", "worse").getMessage()).isEqualTo("bad");
         assertThat(new ArgumentValidationException().getMessage()).startsWith(Caption.INVALID_VALUE.key());
+        assertThat(new CommandPrerequisiteException().getMessage()).startsWith(Caption.PERMISSION_DENIED.key());
+    }
+
+    @Test
+    void validator_and_syntax_exceptions_have_a_message() throws Exception {
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("go") {{
+            errorFormatter((ctx, error) -> ctx.sendFailure(String.valueOf(error.exception()
+                                                                               .getMessage())));
+            argument(new StrArg("dir").validator(x -> false)).execute((dir, ctx) -> {
+            });
+        }});
+        CommandSyntaxException syntax = CommandSyntaxException.BUILT_IN_EXCEPTIONS.integerTooLow()
+                                                                                  .createWithContext(new StringReader("x 0"),
+                                                                                                     1,
+                                                                                                     0);
+
+        assertThat(runner.execute("go up")
+                         .messages()).containsExactly("Incorrect input for <dir>: 'up'");
+        assertThat(ArgumentParseException.ofCommandSyntaxException(syntax)
+                                         .getMessage()).isEqualTo(syntax.getMessage());
+        assertThat(ArgumentParseException.ofCommandSyntaxException(syntax)
+                                         .getCause()).isSameAs(syntax);
     }
 }

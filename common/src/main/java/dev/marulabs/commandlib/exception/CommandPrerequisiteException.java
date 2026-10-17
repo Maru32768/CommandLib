@@ -25,7 +25,7 @@ public final class CommandPrerequisiteException extends Exception {
      * {@link CommonCommandContext#sendFailure(Caption, Map)}.
      */
     public CommandPrerequisiteException(Caption caption, Map<String, ?> placeholders) {
-        this(ctx -> ctx.sendFailure(caption, placeholders));
+        this(caption.key() + " " + placeholders, ctx -> ctx.sendFailure(caption, placeholders));
     }
 
     public CommandPrerequisiteException(String message, String... additionalMessages) {
@@ -39,6 +39,12 @@ public final class CommandPrerequisiteException extends Exception {
     }
 
     public CommandPrerequisiteException(Consumer<CommonCommandContext<?, ?>> sendMessage) {
+        this.sendMessage = sendMessage;
+    }
+
+    // Gives getMessage() a text for logs and handlers; the sender sees what sendMessage sends.
+    private CommandPrerequisiteException(String message, Consumer<CommonCommandContext<?, ?>> sendMessage) {
+        super(message);
         this.sendMessage = sendMessage;
     }
 

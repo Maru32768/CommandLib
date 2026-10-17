@@ -92,10 +92,15 @@ public class ArgumentParseException extends Exception {
         return index >= 0 ? index : parsedEnd;
     }
 
+    protected static String incorrectInputText(String argumentName, String incorrectInput) {
+        return "Incorrect input for <" + argumentName + ">: '" + incorrectInput + "'";
+    }
+
     public static <C extends CommonCommandContext<?, ?>> ArgumentParseException ofIncorrectInput(String argumentName,
                                                                                                  C ctx,
                                                                                                  String incorrectInput) {
-        return new ArgumentParseException(buildIncorrectInputMessage(argumentName, ctx, incorrectInput));
+        return new ArgumentParseException(incorrectInputText(argumentName, incorrectInput),
+                                          buildIncorrectInputMessage(argumentName, ctx, incorrectInput));
     }
 
     /**
@@ -110,15 +115,20 @@ public class ArgumentParseException extends Exception {
         ArgumentParseException message = PlatformAdapter.get()
                                                         .convertCommandSyntaxException(e);
         String input = e.getInput();
-        if (input == null || e.getCursor() < 0) {
-            return message;
+        RichText context = null;
+        if (input != null && e.getCursor() >= 0) {
+            int cursor = Math.min(input.length(), e.getCursor());
+            context = contextLine(abbreviateBefore(input, cursor), input.substring(cursor));
         }
-        int cursor = Math.min(input.length(), e.getCursor());
-        RichText context = contextLine(abbreviateBefore(input, cursor), input.substring(cursor));
-        return new ArgumentParseException(ctx -> {
+        RichText line = context;
+        ArgumentParseException converted = new ArgumentParseException(String.valueOf(e.getMessage()), ctx -> {
             message.sendMessage(ctx);
-            ctx.sendMessage(context);
+            if (line != null) {
+                ctx.sendMessage(line);
+            }
         });
+        converted.initCause(e);
+        return converted;
     }
 
     public ArgumentParseException(String message, String... messages) {
@@ -143,7 +153,7 @@ public class ArgumentParseException extends Exception {
     }
 
     // Gives getMessage() a text for logs and handlers; the sender sees what sendMessages sends.
-    private ArgumentParseException(String message, Consumer<CommonCommandContext<?, ?>> sendMessages) {
+    protected ArgumentParseException(String message, Consumer<CommonCommandContext<?, ?>> sendMessages) {
         super(message);
         this.sendMessages = sendMessages;
     }

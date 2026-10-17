@@ -10,7 +10,8 @@ public class ArgumentValidationException extends ArgumentParseException {
     public static <C extends CommonCommandContext<?, ?>> ArgumentValidationException ofIncorrectInput(String argumentName,
                                                                                                       C ctx,
                                                                                                       String incorrectInput) {
-        return new ArgumentValidationException(buildIncorrectInputMessage(argumentName, ctx, incorrectInput));
+        return new ArgumentValidationException(incorrectInputText(argumentName, incorrectInput),
+                                               buildIncorrectInputMessage(argumentName, ctx, incorrectInput));
     }
 
     public ArgumentValidationException() {
@@ -31,5 +32,9 @@ public class ArgumentValidationException extends ArgumentParseException {
 
     public ArgumentValidationException(Consumer<CommonCommandContext<?, ?>> sendMessages) {
         super(sendMessages);
+    }
+
+    protected ArgumentValidationException(String message, Consumer<CommonCommandContext<?, ?>> sendMessages) {
+        super(message, sendMessages);
     }
 }
