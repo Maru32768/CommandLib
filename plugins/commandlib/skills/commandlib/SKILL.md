@@ -1,6 +1,6 @@
 ---
 name: commandlib
-description: Generate, test, or explain code that uses the CommandLib library in a Spigot/Paper plugin or Forge/NeoForge mod. Usage: /commandlib:commandlib <request>
+description: Generate, test, or explain code that uses the CommandLib library in a Spigot/Paper/Velocity plugin or Forge/NeoForge/Fabric mod. Usage: /commandlib:commandlib <request>
 allowed-tools: Bash Read Glob Grep
 ---
 
@@ -54,8 +54,8 @@ Read the files relevant to the user's request. Common public API files include:
 - `common/src/main/java/dev/marulabs/commandlib/CommonArgument.java`
 - `spigot/src/main/java/dev/marulabs/commandlib/argument/`
 
-Paper and Forge/NeoForge projects use `paper/` or `modded/` in place of
-`spigot/`. For extracted JAR sources, map those paths to the extracted package layout.
+Paper, Velocity and Forge/NeoForge/Fabric projects use `paper/`, `velocity/`
+or `modded/` in place of `spigot/`. For extracted JAR sources, map those paths to the extracted package layout.
 
 ## Step 4 - Respond to the request
 

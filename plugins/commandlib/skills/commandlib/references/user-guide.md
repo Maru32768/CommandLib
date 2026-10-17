@@ -1,7 +1,7 @@
 # CommandLib User Guide
 
-This reference is for downstream Spigot or Paper plugin projects that depend
-on CommandLib. It is not repository-maintenance guidance for CommandLib itself.
+This reference is for downstream Spigot, Paper or Velocity plugin projects and
+Forge, NeoForge or Fabric mod projects that depend on CommandLib. It is not repository-maintenance guidance for CommandLib itself.
 
 ## Choosing the Right Artifact
 
@@ -9,6 +9,11 @@ on CommandLib. It is not repository-maintenance guidance for CommandLib itself.
 |---|---|---|
 | `spigot` | Spigot, Paper up to 1.21.1, Mohist | 11+ |
 | `paper` | Paper 1.21.0+ (official command/lifecycle API) | 21+ |
+| `velocity` | Velocity 3.4+ proxy | 17+ |
+| `forge-1.16.5`, `forge-1.18.2`, `forge-1.19.2`, `forge-1.20.1` | Forge, one artifact per Minecraft version | same as the Minecraft version |
+| `neoforge-1.21.1`, `neoforge-1.21.4` | NeoForge | 21+ |
+| `fabric-1.20.1`, `fabric-1.21.1`, `fabric-1.21.4` | Fabric, needs Fabric API (`modImplementation`) | same as the Minecraft version |
+| `spigot-kotlin`, `paper-kotlin`, `velocity-kotlin` | Kotlin DSL on top of the platform artifact | as the platform |
 
 Use the `paper` artifact to take advantage of Paper's official command
 registration API and Adventure component messages. Use `spigot` for Spigot,
@@ -54,11 +59,66 @@ Paper.
 This makes generated command and argument branch permissions use nodes such as
 `myplugin.command.spawn` and `myplugin.command.config.key`.
 
+### Forge, NeoForge and Fabric
+
+There is no plugin object: the permission prefix is the first argument.
+Register from the mod constructor on Forge / NeoForge and from
+`onInitialize()` on Fabric. `Command` and `CommandContext` are in the same
+package; the arguments return vanilla types (`ServerPlayer`, `ServerLevel`, ...).
+
+```java
+@Mod("mymod")
+public final class MyMod {
+    public MyMod() {
+        CommandLib.register("mymod.command", new MyCommand());
+    }
+}
+
+public final class MyFabricMod implements ModInitializer {
+    @Override
+    public void onInitialize() {
+        CommandLib.register("mymod.command", new MyCommand());
+    }
+}
+```
+
+On Fabric, declare `fabric-command-api-v2` and `fabric-lifecycle-events-v1` (or
+`fabric-api`) in `fabric.mod.json`.
+
+### Velocity
+
+Register from the proxy initialize event with the plugin instance and the
+`ProxyServer`. The default prefix is `<plugin id>.command`. Velocity has only
+proxy arguments (primitives, strings, duration, enum, literal, object,
+`PlayerArgument`, `ServerArgument`); there are no world, entity or location
+arguments.
+
+```java
+@Plugin(id = "myproxy", name = "MyProxy", version = "1.0.0")
+public final class MyProxyPlugin {
+    private final ProxyServer proxy;
+
+    @Inject
+    public MyProxyPlugin(ProxyServer proxy) {
+        this.proxy = proxy;
+    }
+
+    @Subscribe
+    public void onProxyInitialize(ProxyInitializeEvent event) {
+        CommandLib.register(this, proxy, new MyCommand());
+    }
+}
+```
+
+The README of the CommandLib repository also covers annotated commands
+(`AnnotatedCommands`), the Kotlin DSL (`*-kotlin` artifacts) and
+`executeAsync(...)`.
+
 ## Messages
 
 `ctx.sendMessage`, `sendSuccess` (green), `sendWarn` (yellow), and `sendFailure` (red) accept a `String`, a native
 component, or a `RichText`. `RichText` is an immutable, platform-independent message that works the same on Spigot,
-Paper, and Forge / NeoForge, so code shared between platforms can send colors, decorations, hover text, and click
+Paper, Velocity, and Forge / NeoForge / Fabric, so code shared between platforms can send colors, decorations, hover text, and click
 actions:
 
 ```java
@@ -83,8 +143,8 @@ class DifficultyCommand extends Command {
 ```
 
 `sendSuccess` / `sendWarn` / `sendFailure` only color a message that has no color of its own and never change the value
-or component passed in. `RichTexts.toBungee` (spigot), `RichTexts.toAdventure` (paper), and `RichTexts.toVanilla`
-(Forge / NeoForge) convert a `RichText` to the native component. For Paper-only plugins, Adventure and MiniMessage can
+or component passed in. `RichTexts.toBungee` (spigot), `RichTexts.toAdventure` (paper, velocity), and `RichTexts.toVanilla`
+(Forge / NeoForge / Fabric) convert a `RichText` to the native component. For Paper-only plugins, Adventure and MiniMessage can
 be used directly: `ctx.sendMessage(MiniMessage.miniMessage().deserialize("<red>Hello"))`.
 
 ### Translated Messages
@@ -136,7 +196,7 @@ argument(new PlayersArgument("targets")).execute((targets, ctx) -> {
 
 `serverHelp(shortText)` sets the text the server's `/help` lists a top-level Bukkit command with, and
 `serverHelp(shortText, fullText)` also replaces the whole `/help <command>` page. Without it the command is listed as
-"A command by the <plugin> plugin."; `description(...)` is not used there. Forge / NeoForge ignore it.
+"A command by the <plugin> plugin."; `description(...)` is not used there. Only Spigot and Paper read it.
 
 ```java
 class SpawnCommand extends Command {

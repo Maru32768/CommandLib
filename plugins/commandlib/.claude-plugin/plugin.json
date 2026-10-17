@@ -7,5 +7,5 @@
   "homepage": "https://github.com/Maru32768/CommandLib",
   "repository": "https://github.com/Maru32768/CommandLib",
   "license": "MIT",
-  "keywords": ["minecraft", "spigot", "paper", "forge", "neoforge", "commands"]
+  "keywords": ["minecraft", "spigot", "paper", "velocity", "forge", "neoforge", "fabric", "commands"]
 }
