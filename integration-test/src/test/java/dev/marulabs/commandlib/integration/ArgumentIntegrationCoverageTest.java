@@ -75,8 +75,7 @@ class ArgumentIntegrationCoverageTest {
                                        .filter(argument -> !instantiatesArgument(argumentTestSource, argument))
                                        .collect(Collectors.toCollection(java.util.TreeSet::new));
 
-        assertThat(missing).as("Add integration coverage in shared " + moduleName
-                + " ArgumentTest or document an exclusion")
+        assertThat(missing).as("Add integration coverage in " + argumentTestPath + " or document an exclusion")
                            .isEmpty();
     }
 
