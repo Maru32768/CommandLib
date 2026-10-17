@@ -12,6 +12,8 @@ import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
+import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.RemoteConsoleCommandSender;
@@ -32,19 +34,22 @@ class CommandContextTest {
     void entity_is_the_executing_entity_and_location_is_the_source_location() {
         List<Object> seen = new ArrayList<>();
         FakeSender steve = FakeSender.player("Steve");
+        World world = Mockito.mock(World.class);
+        Location at = new Location(world, 5, 6, 7);
+        Mockito.when(((Player) steve.asSender()).getLocation())
+               .thenReturn(at);
 
         try (CommandTester tester = new CommandTester(new Command("where") {{
             execute(ctx -> {
                 seen.add(ctx.getEntity());
-                seen.add(ctx.getLocation()
-                            .getX());
+                seen.add(ctx.getLocation());
             });
         }}, "test.command")) {
             tester.execute("where", steve);
             tester.execute("where", FakeSender.console());
         }
 
-        assertThat(seen).containsExactly(steve.asSender(), 0.0, null, 0.0);
+        assertThat(seen).containsExactly(steve.asSender(), at, null, new Location(null, 0, 0, 0));
     }
 
     @Test

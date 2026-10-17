@@ -317,8 +317,10 @@ public final class CommandTester implements AutoCloseable {
         CommandSourceStack source = Mockito.mock(CommandSourceStack.class);
         Mockito.when(source.getSender())
                .thenReturn(sender);
+        // An entity's source is at the entity, as on a server.
+        Location location = sender instanceof Entity ? ((Entity) sender).getLocation() : null;
         Mockito.when(source.getLocation())
-               .thenReturn(new Location(null, 0, 0, 0));
+               .thenReturn(location != null ? location : new Location(null, 0, 0, 0));
         Mockito.when(source.getExecutor())
                .thenReturn(sender instanceof Entity ? (Entity) sender : null);
         return source;
