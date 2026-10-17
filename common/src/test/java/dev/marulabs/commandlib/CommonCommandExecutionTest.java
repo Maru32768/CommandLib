@@ -26,7 +26,7 @@ class CommonCommandExecutionTest {
     @Test
     void a_preprocess_that_throws_keeps_the_messages_it_sent() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("game") {{
-            addPreprocess((Predicate<TestCommandContext>) ctx -> {
+            addPreprocess(ctx -> {
                 ctx.sendMessage("context line");
                 throw ctx.fail("refused");
             });

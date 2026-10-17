@@ -7,7 +7,6 @@ import dev.marulabs.commandlib.exception.CommandPrerequisiteException;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import java.util.function.Predicate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -88,7 +87,7 @@ class CommandResultTest {
     @Test
     void preprocess_returning_false_fails_with_its_messages() {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("run") {{
-            addPreprocess((Predicate<TestCommandContext>) ctx -> {
+            addPreprocess(ctx -> {
                 ctx.sendFailure("not in a game");
                 return false;
             });
@@ -102,7 +101,7 @@ class CommandResultTest {
     @Test
     void preprocess_messages_are_sent_when_it_passes() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("run") {{
-            addPreprocess((Predicate<TestCommandContext>) ctx -> {
+            addPreprocess(ctx -> {
                 ctx.sendMessage("checked");
                 return true;
             });
@@ -116,7 +115,7 @@ class CommandResultTest {
     @Test
     void failure_without_a_message_returns_zero_instead_of_throwing() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("run") {{
-            addPreprocess((Predicate<TestCommandContext>) ctx -> false);
+            addPreprocess(ctx -> false);
             execute(ctx -> ctx.sendMessage("unreachable"));
         }});
 

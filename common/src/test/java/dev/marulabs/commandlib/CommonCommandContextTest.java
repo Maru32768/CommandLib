@@ -147,10 +147,11 @@ class CommonCommandContextTest {
     }
 
     @Test
-    void consumer_preprocess_runs_before_executor_and_does_not_cancel() throws Exception {
+    void preprocess_returning_true_runs_before_executor() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("run") {{
             addPreprocess(ctx -> {
                 ctx.sendMessage("pre");
+                return true;
             });
             execute(ctx -> ctx.sendMessage("executed"));
         }});
@@ -164,6 +165,7 @@ class CommonCommandContextTest {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("game") {{
             addPreprocess(ctx -> {
                 ctx.sendMessage("pre");
+                return true;
             });
             addChildren(new TestCommand("start") {{
                 execute(ctx -> ctx.sendMessage("start"));

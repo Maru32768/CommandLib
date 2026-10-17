@@ -13,7 +13,6 @@ import org.jetbrains.annotations.Nullable;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -510,15 +509,6 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
 
     public final void addPrerequisite(@NotNull Prerequisite<C> prerequisite) {
         this.prerequisite = this.prerequisite.and(Objects.requireNonNull(prerequisite));
-    }
-
-    public final void addPreprocess(@NotNull Consumer<C> preprocess) {
-        Objects.requireNonNull(preprocess);
-
-        addPreprocess(ctx -> {
-            preprocess.accept(ctx);
-            return true;
-        });
     }
 
     /**

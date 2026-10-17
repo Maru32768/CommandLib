@@ -14,6 +14,7 @@ public class MainCommand extends Command {
             if (ctx.getSender() instanceof Player) {
                 ctx.sendSuccess(ctx.getArguments());
             }
+            return true;
         });
     }
 }

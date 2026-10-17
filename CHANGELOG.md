@@ -50,8 +50,9 @@ This file lists the changes in each CommandLib release that affect plugin and mo
   unknown argument instead of returning `null`.
 - `setInheritParentPrerequisite(false)` is now `disableParentPrerequisite()`, and `setInheritParentPreprocess(false)` is
   now `disableParentMiddleware()`.
-- Each execution runs through a middleware chain. `addPreprocess` still works and runs as a middleware
-  ([execution](docs/execution.md#middleware)).
+- Each execution runs through a middleware chain. `addPreprocess(Predicate)` runs as a middleware
+  ([execution](docs/execution.md#middleware)). `addPreprocess(Consumer)` is removed, because an expression lambda
+  matched both overloads; return `true` from the preprocess or use `addMiddleware`.
 - Forge 1.16.5: `BlockPosArgument` is now `BlockPositionArgument`.
 
 #### Messages

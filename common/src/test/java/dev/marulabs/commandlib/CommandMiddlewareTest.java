@@ -178,6 +178,7 @@ class CommandMiddlewareTest {
             addMiddleware(around(log, "m"));
             addPreprocess(ctx -> {
                 log.add("preprocess");
+                return true;
             });
             execute(ctx -> log.add("execute"));
         }});

@@ -23,10 +23,7 @@ class CommandBuilderTest {
                                                             "permissionConfig(String)",
                                                             // A callback cannot follow varargs; the List form covers
                                                             // it.
-                                                            "argument(CommonArgument[])",
-                                                            // The Predicate overload covers it; configure(...) still
-                                                            // reaches this one.
-                                                            "addPreprocess(Consumer)");
+                                                            "argument(CommonArgument[])");
 
     /**
      * Each method of {@link CommonCommand} that configures the command has a builder method of the same name. One that
