@@ -1,7 +1,9 @@
 package dev.marulabs.commandlib.argument;
 
+import com.mojang.brigadier.LiteralMessage;
 import com.mojang.brigadier.Message;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import io.papermc.paper.commandlibtest.PaperResolvers;
 import org.junit.jupiter.api.Test;
 
@@ -22,6 +24,14 @@ class MessageArgumentSelectorTest {
         assertThatThrownBy(() -> MessageArgument.resolveSelectors(PaperResolvers.withoutMessage(),
                                                                   new Object())).isInstanceOf(IllegalStateException.class)
                                                                                 .hasMessageContaining("Cannot resolve the selectors");
+    }
+
+    @Test
+    void a_selector_that_fails_to_resolve_is_a_syntax_error() {
+        CommandSyntaxException failure = new SimpleCommandExceptionType(new LiteralMessage("No entity was found")).create();
+
+        assertThatThrownBy(() -> MessageArgument.resolveSelectors(PaperResolvers.failing(failure),
+                                                                  new Object())).isSameAs(failure);
     }
 
     @Test
