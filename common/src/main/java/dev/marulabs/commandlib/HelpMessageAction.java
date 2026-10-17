@@ -51,7 +51,7 @@ final class HelpMessageAction<S, T, C extends CommonCommandContext<S, T>, U exte
                .filter(x -> isUsable(x, ctx))
                .forEach(x -> usages.add(new Usage(path, append(prefix, Token.literal(x.name())), x.description(ctx))));
         for (Arguments<C> arguments : command.argumentsList()) {
-            if (!hasArgumentPermission(command, arguments, ctx)) {
+            if (!hasArgumentPermission(arguments, ctx)) {
                 continue;
             }
             for (CommonCommand<C, ?> child : arguments.children()) {
@@ -66,7 +66,7 @@ final class HelpMessageAction<S, T, C extends CommonCommandContext<S, T>, U exte
         }
         // Example: "/scan [options] <target>: Scan target"
         for (Arguments<C> arguments : command.argumentsList()) {
-            if (arguments.size() > 0 && arguments.endsUsage() && hasArgumentPermission(command, arguments, ctx)) {
+            if (arguments.size() > 0 && arguments.endsUsage() && hasArgumentPermission(arguments, ctx)) {
                 usages.add(new Usage(path, appendTags(prefix, arguments), arguments.description(ctx)));
             }
         }
@@ -91,7 +91,7 @@ final class HelpMessageAction<S, T, C extends CommonCommandContext<S, T>, U exte
             usages.add(new Usage(path, tokens, command.description(ctx)));
         }
         for (Arguments<C> arguments : command.argumentsList()) {
-            if (!hasArgumentPermission(command, arguments, ctx)) {
+            if (!hasArgumentPermission(arguments, ctx)) {
                 continue;
             }
             List<Token> argumentTokens = appendTags(tokens, arguments);
@@ -112,8 +112,8 @@ final class HelpMessageAction<S, T, C extends CommonCommandContext<S, T>, U exte
         }
     }
 
-    private boolean hasArgumentPermission(CommonCommand<C, ?> parent, Arguments<C> arguments, C ctx) {
-        return platformAdapter.hasPermission(ctx, arguments.permissionName(parent, permissionPrefix))
+    private boolean hasArgumentPermission(Arguments<C> arguments, C ctx) {
+        return platformAdapter.hasPermission(ctx, arguments.permissionName(permissionPrefix))
                 && arguments.isVisible(ctx);
     }
 

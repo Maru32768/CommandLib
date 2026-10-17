@@ -71,7 +71,7 @@ final class ArgumentCommandNodeCreator<S, T, C extends CommonCommandContext<S, T
 
     // The sender has the branch's permission and the branch is visible to the sender.
     private Predicate<S> branchRequirement(Arguments<C> branch, CommonCommand<C, ?> parent) {
-        String permission = branch.permissionName(parent, permissionPrefix);
+        String permission = branch.permissionName(permissionPrefix);
         return branch.hasVisibility()
                 ? source -> platformAdapter.hasPermission(source, permission)
                         && isVisibleTo(branch, parent, platformAdapter.createSourceContext(source))

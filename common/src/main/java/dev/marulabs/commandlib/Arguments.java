@@ -212,25 +212,15 @@ final class Arguments<C extends CommonCommandContext<?, ?>> {
         return visibility != null;
     }
 
-    String permissionName(@NotNull CommonCommand<C, ?> parent, @NotNull String prefix) {
+    String permissionName(@NotNull String prefix) {
         if (permissionNodeOverride != null) {
             return permissionNodeOverride;
         }
-        return prefix + "." + permissionNameWithoutPrefix(parent);
-    }
-
-    String permissionName(@NotNull String prefix) {
-        return permissionName(owner, prefix);
-    }
-
-    PermissionConfig permissionConfig(@NotNull CommonCommand<C, ?> parent, @NotNull String prefix) {
-        return new PermissionConfig(permissionName(parent, prefix),
-                                    effectiveDefaultPermission(),
-                                    permissionDescription);
+        return prefix + "." + permissionNameWithoutPrefix();
     }
 
     PermissionConfig permissionConfig(@NotNull String prefix) {
-        return permissionConfig(owner, prefix);
+        return new PermissionConfig(permissionName(prefix), effectiveDefaultPermission(), permissionDescription);
     }
 
     /**
@@ -255,13 +245,13 @@ final class Arguments<C extends CommonCommandContext<?, ?>> {
         return owner.effectiveDefaultPermission();
     }
 
-    private String permissionNameWithoutPrefix(@NotNull CommonCommand<C, ?> parent) {
+    private String permissionNameWithoutPrefix() {
         String argumentNames = arguments.stream()
                                         .map(CommonArgument::name)
                                         .collect(Collectors.joining("."));
         if (argumentNames.isEmpty()) {
-            return parent.permissionNameWithoutPrefix();
+            return owner.permissionNameWithoutPrefix();
         }
-        return parent.permissionNameWithoutPrefix() + "." + argumentNames;
+        return owner.permissionNameWithoutPrefix() + "." + argumentNames;
     }
 }

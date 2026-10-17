@@ -948,7 +948,7 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
                .filter(Objects::nonNull)
                .forEach(configs::add);
         argumentsList.stream()
-                     .map(x -> x.permissionConfig(this, prefix))
+                     .map(x -> x.permissionConfig(prefix))
                      .forEach(configs::add);
         children().forEach(x -> configs.addAll(x.permissionConfigs(prefix)));
         argumentChildren().forEach(x -> configs.addAll(x.permissionConfigs(prefix)));
