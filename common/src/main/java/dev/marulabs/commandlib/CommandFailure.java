@@ -72,12 +72,16 @@ final class CommandFailure extends CommandSyntaxException {
         return this;
     }
 
+    boolean hasAssertionError() {
+        return unexpected instanceof AssertionError;
+    }
+
     /**
      * Throws the {@link AssertionError} that a middleware, the executor or the help threw, as testers do so that a
      * failed assertion in a command fails the test.
      */
     void rethrowAssertionError() {
-        if (unexpected instanceof AssertionError) {
+        if (hasAssertionError()) {
             throw (AssertionError) unexpected;
         }
     }

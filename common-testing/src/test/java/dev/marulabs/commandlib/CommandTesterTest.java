@@ -42,6 +42,17 @@ class CommandTesterTest {
     }
 
     @Test
+    void a_failed_assertion_fails_execute_when_the_error_formatter_sends_nothing() {
+        CommandTester tester = new CommandTester(new TestCommand("check") {{
+            errorFormatter((ctx, error) -> {
+            });
+            execute(ctx -> assertThat(ctx.getInput("missing")).isEqualTo("expected"));
+        }});
+
+        assertThatThrownBy(() -> tester.execute("check", FakeSender.console())).isInstanceOf(AssertionError.class);
+    }
+
+    @Test
     void an_unexpected_exception_in_an_executor_is_only_reported_to_the_sender() {
         CommandTester tester = new CommandTester(new TestCommand("broken") {{
             execute(ctx -> {
