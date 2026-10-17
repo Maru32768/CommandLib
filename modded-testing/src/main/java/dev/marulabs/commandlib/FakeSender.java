@@ -211,7 +211,7 @@ public final class FakeSender {
         return new CommandSourceStack(source,
                                       Vec3.ZERO,
                                       Vec2.ZERO,
-                                      null,
+                                      server.overworld(),
                                       op ? 4 : 0,
                                       name,
                                       Component.nullToEmpty(name),

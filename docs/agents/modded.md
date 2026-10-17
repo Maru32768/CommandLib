@@ -77,7 +77,7 @@ final class Messages {
   version.
 - Use `dev.marulabs.commandlib.util.CurrentServer.get()` for the running server.
   It wraps Forge's `ServerLifecycleHooks` and follows Fabric's server lifecycle
-  events, and `modded-testing` mocks it.
+  events, and `modded-testing` mocks it (and `ServerLifecycleHooks` on Forge and NeoForge).
 - If the active node was switched in the IDE, switch back to the
   `vcsVersion` before committing.
 
@@ -96,7 +96,7 @@ were working on, and run the `modded-testing` tests:
 `CommandTester`, `FakeSender`). It is a Stonecutter tree like `modded`, with the same nodes and conditional comment
 rules. It bootstraps Minecraft's registries and mocks the server, Forge's `NetworkHooks` during bootstrap (NeoForge:
 `FeatureFlagLoader`, which needs FML's mod list; Fabric bootstraps plain vanilla), and the permission lookup while a
-command executes. The mocked server's `registryAccess()` holds the built-in registries (before 1.19.3,
+command executes or a task it handed to the scheduler runs. The mocked server's `registryAccess()` holds the built-in registries (before 1.19.3,
 `RegistryAccess.BUILTIN` on 1.18.2 and `RegistryAccess.builtin()` on 1.16.5, whose static registries stay in
 `Registry.REGISTRY`). From 1.19.3 it also holds copies of the data-driven ones built by
 `VanillaRegistries.createLookup()` (no tags are loaded), so data-driven registries such as biomes and, on 1.21+,

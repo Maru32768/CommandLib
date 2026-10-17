@@ -8,6 +8,7 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import dev.marulabs.commandlib.util.CurrentServer;
 import net.minecraft.SharedConstants;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.Bootstrap;
@@ -46,14 +47,18 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 //? if neoforge {
 /*import net.neoforged.neoforge.common.util.flag.FeatureFlagLoader;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
 *///?} elif forge && >=1.17 {
 import net.minecraftforge.network.NetworkHooks;
-//?}
+import net.minecraftforge.server.ServerLifecycleHooks;
+//?} elif forge
+/*import net.minecraftforge.fml.server.ServerLifecycleHooks;*/
 //? if >=1.19.3 {
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.level.storage.WorldData;
@@ -77,16 +82,27 @@ import net.minecraftforge.common.ForgeHooks;
  * as biomes and enchantments, built from vanilla's registry bootstrap code. Tags are not loaded. The server is a
  * Mockito mock whose player list contains the fake players added with {@link #withPlayer(FakeSender)} and the player
  * executing each command, so player and entity arguments resolve those players by name, and whose levels are those
- * added with {@link #withLevel(ServerLevel)}. {@link #withServer(Consumer)} stubs more of it. Permission nodes are
- * answered by the executing {@link FakeSender}.</p>
+ * added with {@link #withLevel(ServerLevel)} and, unless one is added, a mock overworld. Each command source is in the
+ * overworld. The server treats every thread as its own, so it runs tasks at once, and its {@code getCommands()}
+ * dispatcher holds the tester's commands, so {@code CommandLib.refresh} works. {@link #withServer(Consumer)} stubs more of it. Permission
+ * nodes are answered by the executing fake player; the console passes every check, as on a server.</p>
+ *
+ * <p>The server and the static stubs, such as Forge's {@code ServerLifecycleHooks.getCurrentServer()}, live while a
+ * command executes, and again while a task it handed to the {@link Builder#scheduler(CommandScheduler) scheduler}
+ * runs later, on whichever thread runs it.</p>
  */
 public final class CommandTester implements AutoCloseable {
+    // The scope open on this thread, which tasks handed to the scheduler from it reopen.
+    private static final ThreadLocal<Scope> CURRENT_SCOPE = new ThreadLocal<>();
+
     private final CommandDispatcher<CommandSourceStack> dispatcher = new CommandDispatcher<>();
     private final Map<String, FakeSender> players = new LinkedHashMap<>();
     private final Map<ResourceKey<Level>, ServerLevel> levels = new LinkedHashMap<>();
     private final List<Consumer<MinecraftServer>> serverSetups = new ArrayList<>();
     private final List<Command> commands = new ArrayList<>();
     private final String permissionPrefix;
+    @Nullable
+    private ServerLevel defaultOverworld;
 
     public static Builder builder() {
         return new Builder();
@@ -115,8 +131,39 @@ public final class CommandTester implements AutoCloseable {
 
         MinecraftBootstrap.ensureBootstrapped();
         commands.addAll(builder.createCommands());
-        new CommandNodeCreator<>(commands, permissionPrefix, builder.scheduler).build()
-                                                                               .forEach(dispatcher.getRoot()::addChild);
+        new CommandNodeCreator<>(commands, permissionPrefix, inScope(builder.scheduler)).build()
+                                                                                        .forEach(dispatcher.getRoot()::addChild);
+    }
+
+    // MockedStatic applies only on the thread that opened it and until execute returns, so a task the command hands to
+    // the scheduler reopens the command's scope on the thread that runs it.
+    private CommandScheduler inScope(CommandScheduler scheduler) {
+        return new CommandScheduler() {
+            @Override
+            public Executor sync(CommonCommandContext<?, ?> ctx) {
+                return inScope(scheduler.sync(ctx));
+            }
+
+            @Override
+            public Executor async(CommonCommandContext<?, ?> ctx) {
+                return inScope(scheduler.async(ctx));
+            }
+        };
+    }
+
+    private Executor inScope(Executor executor) {
+        return task -> {
+            Scope scope = CURRENT_SCOPE.get();
+            executor.execute(scope == null ? task : () -> {
+                if (CURRENT_SCOPE.get() != null) {
+                    task.run();
+                    return;
+                }
+                try (Scope reopened = new Scope(scope)) {
+                    task.run();
+                }
+            });
+        };
     }
 
     /**
@@ -185,7 +232,8 @@ public final class CommandTester implements AutoCloseable {
     }
 
     /**
-     * Adds a fake player to the server's player list, so player and entity arguments can find it by name.
+     * Adds a fake player to the server's player list, so player and entity arguments can find it by name. It replaces
+     * an added player with the same name.
      */
     public CommandTester withPlayer(@NotNull FakeSender player) {
         if (!player.isPlayer()) {
@@ -193,6 +241,10 @@ public final class CommandTester implements AutoCloseable {
         }
         players.put(player.getName(), player);
         return this;
+    }
+
+    boolean hasPlayer(String name) {
+        return players.containsKey(name);
     }
 
     /**
@@ -219,33 +271,51 @@ public final class CommandTester implements AutoCloseable {
     }
 
     /**
-     * Does nothing. Mocks only live while a command executes; this exists so tests can use try-with-resources like
-     * the other CommandLib testing artifacts.
+     * Does nothing. Mocks only live while a command, or a task it handed to the scheduler, runs; this exists so tests
+     * can use try-with-resources like the other CommandLib testing artifacts.
      */
     @Override
     public void close() {
     }
 
     /**
-     * Keeps the server mock and the static stubs for one command execution.
+     * Keeps the server mock and the static stubs for one command execution, or for a task it handed to the scheduler.
      */
     private final class Scope implements AutoCloseable {
         private final MinecraftServer server;
+        private final Map<String, FakeSender> onlinePlayers;
         private final List<MockedStatic<?>> staticMocks = new ArrayList<>();
 
         private Scope(FakeSender sender) {
-            Map<String, FakeSender> onlinePlayers = new LinkedHashMap<>(players);
+            onlinePlayers = new LinkedHashMap<>(players);
             if (sender.isPlayer()) {
-                onlinePlayers.putIfAbsent(sender.getName(), sender);
+                // The executing player is online, even when an added player has its name.
+                onlinePlayers.put(sender.getName(), sender);
             }
-            server = createServer(onlinePlayers, levels);
+            server = createServer(onlinePlayers, serverLevels(), dispatcher);
             serverSetups.forEach(setup -> setup.accept(server));
+            open();
+        }
 
+        // Reopens the stubs of a command's scope on the thread running a task the command handed to the scheduler.
+        private Scope(Scope command) {
+            onlinePlayers = command.onlinePlayers;
+            server = command.server;
+            open();
+        }
+
+        private void open() {
             try {
                 MockedStatic<CurrentServer> currentServer = Mockito.mockStatic(CurrentServer.class);
                 staticMocks.add(currentServer);
                 currentServer.when(CurrentServer::get)
                              .thenReturn(server);
+                //? if forge || neoforge {
+                MockedStatic<ServerLifecycleHooks> lifecycleHooks = Mockito.mockStatic(ServerLifecycleHooks.class);
+                staticMocks.add(lifecycleHooks);
+                lifecycleHooks.when(ServerLifecycleHooks::getCurrentServer)
+                              .thenReturn(server);
+                //?}
 
                 //? if >=1.18 {
                 MockedStatic<CommandLib> commandLib = Mockito.mockStatic(CommandLib.class, Mockito.CALLS_REAL_METHODS);
@@ -285,6 +355,7 @@ public final class CommandTester implements AutoCloseable {
                 close();
                 throw e;
             }
+            CURRENT_SCOPE.set(this);
         }
 
         @Override
@@ -294,7 +365,26 @@ public final class CommandTester implements AutoCloseable {
                            .close();
             }
             staticMocks.clear();
+            if (CURRENT_SCOPE.get() == this) {
+                CURRENT_SCOPE.remove();
+            }
         }
+    }
+
+    // A server always has an overworld, the level of every command source.
+    private Map<ResourceKey<Level>, ServerLevel> serverLevels() {
+        if (levels.containsKey(Level.OVERWORLD)) {
+            return levels;
+        }
+        if (defaultOverworld == null) {
+            defaultOverworld = Mockito.mock(ServerLevel.class);
+            Mockito.when(defaultOverworld.dimension())
+                   .thenReturn(Level.OVERWORLD);
+        }
+        Map<ResourceKey<Level>, ServerLevel> serverLevels = new LinkedHashMap<>();
+        serverLevels.put(Level.OVERWORLD, defaultOverworld);
+        serverLevels.putAll(levels);
+        return serverLevels;
     }
 
     private static boolean hasPermission(Map<String, FakeSender> onlinePlayers, Object player, String node) {
@@ -308,7 +398,8 @@ public final class CommandTester implements AutoCloseable {
     }
 
     private static MinecraftServer createServer(Map<String, FakeSender> onlinePlayers,
-                                                Map<ResourceKey<Level>, ServerLevel> levels) {
+                                                Map<ResourceKey<Level>, ServerLevel> levels,
+                                                CommandDispatcher<CommandSourceStack> dispatcher) {
         List<ServerPlayer> playerList = new ArrayList<>();
         onlinePlayers.values()
                      .forEach(sender -> sender.asPlayer()
@@ -358,6 +449,18 @@ public final class CommandTester implements AutoCloseable {
                .thenReturn(levelMap.keySet());
         Mockito.when(server.getAllLevels())
                .thenReturn(levelMap.values());
+        Mockito.when(server.overworld())
+               .thenReturn(levelMap.get(Level.OVERWORLD));
+        // Tasks such as CommandLib.refresh run at once, as on the server thread.
+        Mockito.when(server.isSameThread())
+               .thenReturn(true);
+        Commands commands = Mockito.mock(Commands.class);
+        Mockito.when(commands.getDispatcher())
+               .thenReturn(dispatcher);
+        Mockito.when(server.getCommands())
+               .thenReturn(commands);
+        playerList.forEach(player -> Mockito.when(player.getServer())
+                                            .thenReturn(server));
         //? if >=1.19.3 {
         WorldData worldData = Mockito.mock(WorldData.class);
         Mockito.when(worldData.enabledFeatures())
