@@ -5,9 +5,9 @@ therefore be run by everything that runs vanilla commands: `/execute ... run`, c
 function tags. This page describes what a command sees in each case and where the platforms differ. Velocity is a
 proxy without `/execute`, command blocks or functions, so this page does not apply to it.
 
-The integration fixtures check these cases on real servers (`VanillaExecutionTest` and `DataPackFunctionTest` in
-`integration-test/shared/spigot` and `integration-test/shared/paper`, `ActorTest` in `integration-test/shared/modded`).
-[Compatibility](compatibility.md) lists the targets. On 2026-10-17 (commit `89b9503f`) every case passed on all 78
+The integration fixtures check these cases on real servers (`VanillaExecutionTest` in `integration-test/shared/bukkit`,
+`DataPackFunctionTest` in `integration-test/shared/spigot` and `integration-test/shared/paper`, `ActorTest` in
+`integration-test/shared/modded`). [Compatibility](compatibility.md) lists the targets. On 2026-10-17 (commit `89b9503f`) every case passed on all 78
 integration targets, which cover each minor version from 1.16 to 26.3.
 
 On every platform a command's executor runs during the dispatch when it is called on the server thread, so a command

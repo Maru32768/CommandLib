@@ -33,8 +33,9 @@ public final class ScenarioTest extends TestBase {
     public static final String RELOAD_PROBE = "reloadProbe";
     /**
      * Command registered while the tests run, after the plugin was enabled, and dispatched after
-     * {@code /minecraft:reload}. On Paper 1.20.6+ it has no COMMANDS lifecycle handler, so it is added again after the
-     * reload has sent players their trees.
+     * {@code /minecraft:reload}. The paper module adds it again through the plugin's COMMANDS lifecycle handler. The
+     * spigot module on Paper 1.20.6+ has no such handler, so it is added again after the reload has sent players their
+     * trees.
      */
     public static final String LATE_COMMAND = "commandliblate";
 
