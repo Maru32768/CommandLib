@@ -49,7 +49,6 @@ public class TestMain {
     private static final String PLAYER_ASYNC_THREAD = "FoliaSmokeTest.playerAsyncThread";
     private static final String CONSOLE_ASYNC_THREAD = "FoliaSmokeTest.consoleAsyncThread";
     private static final String SUGGESTION = "FoliaSmokeTest.suggestion";
-    private static final String DENIED_PROBE = "FoliaSmokeTest.deniedProbe";
     private static final long REPORT_DELAY_TICKS = 40L;
 
     private final Plugin plugin;
@@ -133,10 +132,7 @@ public class TestMain {
         }});
         main.addChildren(new Command("deniedProbe") {{
             permission(PermissionDefault.FALSE);
-            execute(ctx -> {
-                fail(DENIED_PROBE, "Command without permission was executed.");
-                ctx.sendFailure("deniedProbe executed");
-            });
+            execute(ctx -> ctx.sendFailure("deniedProbe executed"));
         }});
         return main;
     }

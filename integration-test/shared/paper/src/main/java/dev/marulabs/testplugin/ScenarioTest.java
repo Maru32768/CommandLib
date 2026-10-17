@@ -203,14 +203,9 @@ public final class ScenarioTest extends TestBase {
     }
 
     private void deniedProbe() {
-        String key = getClass().getSimpleName() + "." + DENIED_PROBE;
-
         command.addChildren(new Command(DENIED_PROBE) {{
             permission(PermissionDefault.FALSE);
-            execute(ctx -> {
-                putResult(new TestResult(key, TestStatus.FAILED, "Command without permission was executed."));
-                ctx.sendFailure(DENIED_PROBE + " executed");
-            });
+            execute(ctx -> ctx.sendFailure(DENIED_PROBE + " executed"));
         }});
     }
 

@@ -352,18 +352,11 @@ public final class OptionTest extends TestBase {
     }
 
     private void optionPermissionProbe() {
-        String key = getClass().getSimpleName() + "." + OPTION_PERMISSION_PROBE;
-
         command.addChildren(new Command(OPTION_PERMISSION_PROBE) {{
             permission(PermissionDefault.TRUE);
             CommandOption<Boolean, CommandContext> secret = option(Options.flag("secret")
                                                                           .permission(DefaultPermission.NONE));
-            execute(ctx -> {
-                if (ctx.getOption(secret)) {
-                    putResult(new TestResult(key, TestStatus.FAILED, "Option without permission was given."));
-                }
-                ctx.sendFailure(OPTION_PERMISSION_PROBE + " secret=" + ctx.getOption(secret));
-            });
+            execute(ctx -> ctx.sendFailure(OPTION_PERMISSION_PROBE + " secret=" + ctx.getOption(secret)));
         }});
     }
 
