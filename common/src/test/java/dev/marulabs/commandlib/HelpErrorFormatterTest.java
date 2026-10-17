@@ -199,6 +199,34 @@ class HelpErrorFormatterTest {
                                                                                                                        .messages()).containsExactly("/scan [options] <count>");
     }
 
+    // The child runs the parent's branch, so the tag follows the options of the command the failing argument belongs to.
+    @Test
+    void the_usage_of_an_inherited_argument_error_shows_the_options_of_the_branch_owner() throws Exception {
+        TestCommand config = new TestCommand("config") {{
+            errorFormatter((ctx, error) -> ctx.sendFailure(error.usage()
+                                                                .plainText()));
+            argument(new IntArg("key").validator(x -> x > 0)).child(key -> new TestCommand("set") {{
+                option(Options.flag("force"));
+                execute(ctx -> {
+                });
+            }});
+        }};
+        TestCommand game = new TestCommand("game") {{
+            errorFormatter((ctx, error) -> ctx.sendFailure(error.usage()
+                                                                .plainText()));
+            option(Options.flag("force"));
+            argument(new IntArg("key").validator(x -> x > 0)).child(key -> new TestCommand("set") {{
+                execute(ctx -> {
+                });
+            }});
+        }};
+
+        assertThat(new TestCommandRunner(config).execute("config 0 set")
+                                                .messages()).containsExactly("/config <key>");
+        assertThat(new TestCommandRunner(game).execute("game 0 set")
+                                              .messages()).containsExactly("/game [options] <key>");
+    }
+
     // As /execute ... run game reaches the command through a redirect, whose input starts with execute.
     @Test
     void help_and_syntax_advice_name_the_command_when_it_runs_through_a_redirect() throws Exception {

@@ -160,7 +160,7 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
                                 e instanceof ArgumentValidationException ? CommandError.Kind.VALIDATION
                                         : CommandError.Kind.ARGUMENT,
                                 e,
-                                HelpMessageAction.branchUsage(arguments, ctx, hasUsableOption(ctx)),
+                                HelpMessageAction.branchUsage(arguments, ctx, hasUsableOption(arguments.owner(), ctx)),
                                 () -> e.sendMessage(ctx));
                 } catch (CommandPrerequisiteException e) {
                     // The default value of an omitted optional argument can need a prerequisite.
@@ -312,9 +312,10 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
         }).unexpected(e);
     }
 
-    private boolean hasUsableOption(C ctx) {
-        for (CommandOption<?, C> option : optionGraph.options()) {
-            String permission = optionGraph.permissionName(option);
+    // The options of the branch's owner, which is a parent of this command for an inherited branch.
+    private boolean hasUsableOption(CommonCommand<C, ?> owner, C ctx) {
+        for (CommandOption<?, C> option : owner.options()) {
+            String permission = option.permissionName(owner, permissionPrefix);
             if (permission == null || platformAdapter.hasPermission(ctx, permission)) {
                 return true;
             }
