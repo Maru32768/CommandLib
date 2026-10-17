@@ -73,6 +73,36 @@ class CommonCommandConfirmCooldownTest {
     }
 
     @Test
+    void a_forked_execution_that_confirms_runs_for_every_target() throws Exception {
+        AtomicInteger wiped = new AtomicInteger();
+        AtomicInteger asked = new AtomicInteger();
+        TestCommand command = new TestCommand("wipe") {{
+            confirm(Confirmation.within(Duration.ofSeconds(10))
+                                .clock(clock)
+                                .message((ctx, input) -> asked.incrementAndGet()));
+            execute(ctx -> wiped.incrementAndGet());
+        }};
+        TestCommandSource steve = player("Steve");
+        TestCommandRunner runner = new TestCommandRunner(command, steve);
+        com.mojang.brigadier.CommandDispatcher<TestCommandSource> dispatcher = new com.mojang.brigadier.CommandDispatcher<>(runner.root());
+        dispatcher.register(com.mojang.brigadier.builder.LiteralArgumentBuilder.<TestCommandSource>literal("all")
+                                                                               .fork(dispatcher.getRoot(),
+                                                                                     ctx -> List.of(ctx.getSource(),
+                                                                                                    ctx.getSource(),
+                                                                                                    ctx.getSource(),
+                                                                                                    ctx.getSource())));
+
+        dispatcher.execute("all wipe", steve);
+        dispatcher.execute("all wipe", steve);
+        assertThat(wiped).hasValue(4);
+        assertThat(asked).hasValue(1);
+        // The confirmation is used up by that execution.
+        dispatcher.execute("all wipe", steve);
+        assertThat(wiped).hasValue(4);
+        assertThat(asked).hasValue(2);
+    }
+
+    @Test
     void confirm_expires_after_the_timeout() throws Exception {
         TestCommand command = new TestCommand("wipe") {{
             confirm(Confirmation.within(Duration.ofSeconds(10))

@@ -22,7 +22,8 @@ import java.util.function.BiConsumer;
  * a different input, or the same input after the timeout, asks again. Players and entities are told apart by their
  * unique id, other senders, such as the console and command blocks, by their type and name, so command blocks that
  * keep the default name {@code @} share one confirmation. Only a later execution
- * confirms: the targets of one forked execution, such as {@code /execute as @a ... run}, do not confirm each other.
+ * confirms: the targets of one forked execution, such as {@code /execute as @a ... run}, do not confirm each other,
+ * and a forked execution that confirms runs for all of its targets.
  */
 public final class Confirmation {
     private final Duration timeout;
@@ -86,14 +87,18 @@ public final class Confirmation {
 
         Pending previous = pending.remove(sender);
         if (previous != null && previous.command.equals(command)) {
-            if (previous.parse == null || previous.parse != ctx.parse()) {
+            if (previous.parse != null && previous.parse == ctx.parse()) {
+                // Another target of the same forked execution, which was asked or confirmed already.
+                pending.put(sender, previous);
+                return previous.confirmed;
+            }
+            if (!previous.confirmed) {
+                // Kept so that the other targets of a confirming forked execution run too.
+                pending.put(sender, new Pending(command, ctx.parse(), previous.expiresAt, true));
                 return true;
             }
-            // Another target of the same forked execution, which was asked already.
-            pending.put(sender, previous);
-            return false;
         }
-        pending.put(sender, new Pending(command, ctx.parse(), now.plus(timeout)));
+        pending.put(sender, new Pending(command, ctx.parse(), now.plus(timeout), false));
         message.accept(ctx, command);
         return false;
     }
@@ -112,14 +117,17 @@ public final class Confirmation {
 
     private static final class Pending {
         private final String command;
-        // The parse of the execution that asked, which its forked siblings share.
+        // The parse of the execution that asked or confirmed, which its forked siblings share.
         private final @Nullable Object parse;
         private final Instant expiresAt;
+        // The execution confirmed rather than asked; only its forked siblings pass, a later execution asks again.
+        private final boolean confirmed;
 
-        private Pending(String command, @Nullable Object parse, Instant expiresAt) {
+        private Pending(String command, @Nullable Object parse, Instant expiresAt, boolean confirmed) {
             this.command = command;
             this.parse = parse;
             this.expiresAt = expiresAt;
+            this.confirmed = confirmed;
         }
     }
 }
