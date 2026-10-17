@@ -75,6 +75,18 @@ class CommandDocsTest {
     }
 
     @Test
+    void json_escapes_quotes_backslashes_and_control_characters() {
+        TestCommand command = new TestCommand("quote") {{
+            description("say \"a\\b\"\nnext\r\tend\u0001");
+            execute(ctx -> {
+            });
+        }};
+
+        assertThat(CommandDocs.of("p", command)
+                              .json()).contains("\"description\": \"say \\\"a\\\\b\\\"\\nnext\\r\\tend\\u0001\"");
+    }
+
+    @Test
     void examples_are_listed_with_a_leading_slash() {
         TestCommand command = new TestCommand("arena") {{
             examples("/arena create lobby 16", "arena lobby join");
