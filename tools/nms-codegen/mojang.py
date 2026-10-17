@@ -222,15 +222,21 @@ arg("NMSArgumentFloatRange", "commands.arguments.RangeArgument", "Range<Double>"
 # Vanilla components reach Bungee through the JSON that CraftChatMessage writes, which is one object or string, so
 # ComponentSerializer.parse returns one component. ComponentArgument takes the registries from 1.20.5 and reads SNBT,
 # with getRawComponent in place of getComponent, from 1.21.5.
+# Spigot 1.20.3 ships a Bungee chat that cannot read the int array entity UUID of a hover event, which 1.20.3 writes.
 BUNGEE = [f"{CB}.util.CraftChatMessage", "net.md_5.bungee.api.chat.BaseComponent",
           "net.md_5.bungee.chat.ComponentSerializer"]
+if V == (1, 20, 3):
+    BUNGEE.append("dev.marulabs.commandlib.util.nms.argument.BungeeChatJson")
+    TO_JSON = "BungeeChatJson.withStringEntityIds(CraftChatMessage.toJSON({}))"
+else:
+    TO_JSON = "CraftChatMessage.toJSON({})"
 arg("NMSArgumentChatComponent", "commands.arguments.ComponentArgument", "BaseComponent",
     "ComponentArgument.textComponent(BuildContexts.current())" if V >= (1, 20, 5)
     else "ComponentArgument.textComponent()",
-    "return ComponentSerializer.parse(CraftChatMessage.toJSON(ComponentArgument.GET(CTX, name)))[0];"
-    .replace("GET", "getRawComponent" if V >= (1, 21, 5) else "getComponent"), BUNGEE, throws=False)
+    "return ComponentSerializer.parse(" + TO_JSON.format("ComponentArgument.{}(CTX, name)")
+    .format("getRawComponent" if V >= (1, 21, 5) else "getComponent") + ")[0];", BUNGEE, throws=False)
 arg("NMSArgumentChat", "commands.arguments.MessageArgument", "BaseComponent", "MessageArgument.message()",
-    "return ComponentSerializer.parse(CraftChatMessage.toJSON(MessageArgument.getMessage(CTX, name)))[0];", BUNGEE)
+    "return ComponentSerializer.parse(" + TO_JSON.format("MessageArgument.getMessage(CTX, name)") + ")[0];", BUNGEE)
 arg("NMSArgumentNBTTag", "commands.arguments.CompoundTagArgument", "String", "CompoundTagArgument.compoundTag()",
     "return CompoundTagArgument.getCompoundTag(CTX, name).toString();", throws=False)
 # The slot is a number until 1.20.2, which made it the DisplaySlot enum. Both convert to the vanilla name.
