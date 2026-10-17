@@ -83,9 +83,11 @@ This file lists the changes in each CommandLib release that affect plugin and mo
 - Spigot: `permission(PermissionDefault.NOT_OP)` throws `IllegalArgumentException`.
 - Forge: 0.17.2 judged every source by a permission level (default 4). Levels 1-3 are gone: `OP` needs level 4 and
   `ALL` lets everyone in, so a command can no longer be opened to command blocks (level 2) while staying closed to
-  players. A command block or an entity that `/execute as` runs as runs only `ALL` commands. Data pack functions, the
-  console and RCON pass every CommandLib check; the function permission level still guards vanilla's own commands in a
-  function ([permissions](docs/permissions.md)).
+  players. A command block runs only `ALL` commands; a source that `/execute as` changes keeps the permission level of
+  whoever ran `/execute`. The console, RCON, data pack functions that run as the server (tick, load, `/function` from
+  the console) and the compiling of functions pass every CommandLib check; when a player runs `/function`, that player's
+  nodes are checked. The function permission level still guards vanilla's own commands in a function
+  ([permissions](docs/permissions.md)).
 - Forge: `CommandLib.register(commands...)` is now `CommandLib.register(permissionPrefix, commands...)`, and
   `permissionLevel(int)` is replaced by `permission(DefaultPermission)` (or `permission(DefaultPermissionLevel)` on
   1.16.5).

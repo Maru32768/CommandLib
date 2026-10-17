@@ -289,6 +289,9 @@ void suggests_modes() {
 `suggest` waits for the suggestions and returns their texts. For tooltips or ranges, read the `Suggestions` that
 `suggestions(input, sender).join()` returns.
 
+A provider that throws an exception does not fail `suggest` or `suggestions`, as on a server: the exception is printed
+and only that provider's suggestions are missing. Assert the expected suggestions to catch it.
+
 ### Command tree snapshots
 
 `commandTree()` renders the registered commands: each command with its aliases, permission node and
