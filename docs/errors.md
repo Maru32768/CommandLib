@@ -21,7 +21,7 @@ The runner works in this order and stops at the first failure:
 | Step | What runs | Failure reported as |
 |---|---|---|
 | 1 | Permission of the command node | `You do not have permission to execute this command.` |
-| 2 | Option values and option dependencies (`requires(...)`) | The option message, see [Option errors](#option-errors) |
+| 2 | Option values, the permission of each given option, and option dependencies (`requires(...)`) | The option message, see [Option errors](#option-errors), or the permission message |
 | 3 | For each argument branch on the path: branch permission, then each argument's parse → `validator` → `transformer`, or the default of an omitted optional argument | The permission message, the argument's `ArgumentParseException`, or the `CommandPrerequisiteException` of an `optional(extractor)` default |
 | 4 | Prerequisites (`addPrerequisite`, `require(...)`, `requirePlayer()`, `requireConsole()`) | The `CommandPrerequisiteException` message |
 | 5 | No executor on this node: the generated help is sent instead | (help text, not an error) |
@@ -124,8 +124,8 @@ CommandLib uses two message shapes:
 The message is the same on every platform. The translatable parts are translated by the client, the captions are sent
 in the sender's locale.
 
-If the argument has an `additionalParser(...)`, it gets the raw input first; the error is reported only when it returns
-`null`.
+If the argument has an `additionalParser(...)`, it gets the raw input after the parse fails; the error is reported only
+when it also returns `null`.
 
 ### Argument value rejected by Minecraft while resolving (`CommandSyntaxException` in `parseImpl`)
 
@@ -182,7 +182,7 @@ uses it in two places:
    get the node in the client command tree, does not get it in tab completion, and the server parses the input as if
    the node did not exist: they see the [unknown command](#unknown-command) or [unknown subcommand](#unknown-subcommand-or-trailing-input)
    message of the platform. Generated help lists only the routes the sender may use.
-2. **Execution.** The runner checks the command node and every argument branch on the path again before parsing them,
+2. **Execution.** The runner checks the command node, each option given, and every argument branch on the path again,
    and sends `You do not have permission to execute this command.` in red when the check fails. Normally the
    visibility check rejects the input first; this message appears when the check result changes between parsing and
    execution, or when the input was parsed for another source.

@@ -120,12 +120,12 @@ context and a `CommandError`:
 |---|---|
 | `kind()` | What failed, see below |
 | `exception()` | The exception that carries the failure, null for `PERMISSION_DENIED` |
-| `usage()` | For an argument error, the usage of the argument branch that failed |
+| `usage()` | For an argument error, the usage of the argument branch that failed; null for an option value's error |
 | `sendDefault()` | Sends the messages CommandLib sends for it by default |
 
 | `CommandError.Kind` | When | Default message |
 |---|---|---|
-| `PERMISSION_DENIED` | The runner's own check of the command or an argument branch on the path fails | `You do not have permission to execute this command.` |
+| `PERMISSION_DENIED` | The runner's own check of the command, a given option, or an argument branch on the path fails | `You do not have permission to execute this command.` |
 | `OPTION` | A required option is missing or an option dependency is not met | The `OptionParseException` message |
 | `ARGUMENT` | An argument's value is rejected while converting it | The `ArgumentParseException` message |
 | `VALIDATION` | A validator rejects an argument's value | The `ArgumentValidationException` message |
@@ -161,8 +161,9 @@ Not every error reaches it:
 
 ### Syntax advice
 
-`ErrorFormatter.SYNTAX_ADVICE` sends the default messages and, after an `ARGUMENT` or `VALIDATION` error, the
-`Usage:` heading and the usage line of the argument branch whose argument failed:
+`ErrorFormatter.SYNTAX_ADVICE` sends the default messages and, after an `ARGUMENT` or `VALIDATION` error of an argument
+branch (not of an option's value), the `Usage:` heading and the usage line of the argument branch whose argument
+failed:
 
 ```java
 errorFormatter(ErrorFormatter.SYNTAX_ADVICE);
