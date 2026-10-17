@@ -391,6 +391,24 @@ class CommandStructureTest {
                                                                                 .hasMessageContaining("target");
     }
 
+    // Option tokens such as -f share the node of the child commands and arguments.
+    @Test
+    void names_that_look_like_options_are_rejected() {
+        TestCommand command = new TestCommand("x");
+
+        assertThatThrownBy(() -> command.addChildren(new TestCommand("-f"))).isInstanceOf(IllegalArgumentException.class)
+                                                                            .hasMessageContaining("'-f'");
+        assertThatThrownBy(() -> command.addChildren(new TestCommand("y") {{
+            addAliases("--force");
+        }})).hasMessageContaining("'--force'");
+        assertThatThrownBy(() -> command.argument(new StrArg("-name"))).hasMessageContaining("'-name'");
+        assertThatThrownBy(() -> command.argument(new StrArg(CommandOption.INTERNAL_NAME_PREFIX
+                + "name"))).hasMessageContaining(CommandOption.INTERNAL_NAME_PREFIX);
+        assertThatThrownBy(() -> new CommandNodeCreator<>(List.of(new TestCommand("-x")),
+                                                          "test.command",
+                                                          TestCommandRunner.INLINE).build()).hasMessageContaining("'-x'");
+    }
+
     @Test
     void argument_children_of_branches_sharing_a_path_must_not_collide() {
         TestCommand command = new TestCommand("game") {{

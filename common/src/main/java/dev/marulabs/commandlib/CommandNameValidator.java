@@ -80,6 +80,7 @@ final class CommandNameValidator {
             names.add(command.name());
             names.addAll(command.aliases());
             for (String name : names) {
+                rejectOptionName(name);
                 if (arguments.containsKey(name)) {
                     throw conflictWithArgument(name);
                 }
@@ -96,6 +97,7 @@ final class CommandNameValidator {
         void addArgument(String name, ArgumentType<?> type) {
             // Argument nodes with the same name at the same position are the shared prefix of variable-length
             // branches and merge on purpose, so only a literal of the same name is a conflict.
+            rejectOptionName(name);
             if (literals.containsKey(name)) {
                 throw conflictWithArgument(name);
             }
@@ -104,6 +106,14 @@ final class CommandNameValidator {
             if (shared != null && !sameType(shared, type)) {
                 throw new IllegalArgumentException("Arguments named '" + name + "' share one node" + suffix()
                         + " but parse differently: " + describe(shared) + " and " + describe(type));
+            }
+        }
+
+        // Option tokens share the node of the commands and arguments, and the context skips such names as options.
+        private void rejectOptionName(String name) {
+            if (name.startsWith("-") || name.startsWith(CommandOption.INTERNAL_NAME_PREFIX)) {
+                throw new IllegalArgumentException("Name '" + name + "'" + suffix()
+                        + " starts with '-' or the option prefix, which is kept for options");
             }
         }
 
