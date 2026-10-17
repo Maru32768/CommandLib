@@ -242,16 +242,28 @@ public final class ArgumentTest extends TestBase {
         return List.of(buildCommand(command, name + " dark_red"));
     }
 
+    /**
+     * Vanilla's color argument has reset up to 26.1. From 26.2 it has none, so the server rejects reset while parsing.
+     */
     public List<String> chatColorArgumentReset() {
         String name = getMethodName();
         String key = getKey();
+        boolean rejected = !isLessThan(BukkitUtil.getMinecraftVersion(), "26.2");
 
-        putCommandNotExecutedResult(key);
+        if (rejected) {
+            putResult(new TestResult(key, TestStatus.SUCCEEDED, "reset was rejected while parsing"));
+        } else {
+            putCommandNotExecutedResult(key);
+        }
         command.addChildren(new Command(name) {{
             argument(new ChatColorArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
             })).execute((a, ctx) -> {
-                putResult(key, a.name(), "RESET");
+                if (rejected) {
+                    putResult(new TestResult(key, TestStatus.FAILED, "reset was parsed as " + a.name()));
+                } else {
+                    putResult(key, a.name(), "RESET");
+                }
             });
         }});
 

@@ -8,7 +8,8 @@ import org.bukkit.ChatColor;
 
 /**
  * A chat color in the vanilla {@code color} syntax, which the client validates and suggests: a color name such as
- * {@code dark_red}, or {@code reset}. Formats such as {@code bold} are rejected.
+ * {@code dark_red}, or {@code reset} up to 26.1, where vanilla's color argument still has it. Formats such as
+ * {@code bold} are rejected.
  */
 public class ChatColorArgument extends Argument<ChatColor, ChatColorArgument> {
     public ChatColorArgument(String name) {

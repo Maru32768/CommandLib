@@ -13,8 +13,9 @@ import java.util.Map;
 
 /**
  * A chat color in the vanilla {@code color} syntax, which the client validates and suggests: a color name such as
- * {@code dark_red}. Formats such as {@code bold} are rejected while parsing. {@code reset}, which the client accepts,
- * fails with {@code reset is not a color}, since {@link NamedTextColor} has no reset.
+ * {@code dark_red}. Formats such as {@code bold} are rejected while parsing. {@code reset} is rejected while parsing
+ * from 26.2, and up to 26.1, where the client accepts it, fails with {@code reset is not a color}, since
+ * {@link NamedTextColor} has no reset.
  */
 public class ChatColorArgument extends Argument<NamedTextColor, ChatColorArgument> {
     public ChatColorArgument(String name) {

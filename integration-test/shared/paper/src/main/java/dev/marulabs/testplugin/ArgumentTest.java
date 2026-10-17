@@ -249,12 +249,18 @@ public final class ArgumentTest extends TestBase {
 
     /**
      * NamedTextColor has no reset, so reset is an argument error, not the NullPointerException of Paper's namedColor().
+     * From 26.2 vanilla's color argument has no reset either, so the server rejects it while parsing.
      */
     public List<String> chatColorArgumentReset() {
         String name = getMethodName();
         String key = getKey();
+        boolean rejected = !isLessThan(BukkitUtil.getMinecraftVersion(), "26.2");
 
-        putCommandNotExecutedResult(key);
+        if (rejected) {
+            putResult(new TestResult(key, TestStatus.SUCCEEDED, "reset was rejected while parsing"));
+        } else {
+            putCommandNotExecutedResult(key);
+        }
         command.addChildren(new Command(name) {{
             argument(new ChatColorArgument("a")).execute((a, ctx) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, "reset was parsed as " + a));
@@ -262,7 +268,7 @@ public final class ArgumentTest extends TestBase {
             errorFormatter((ctx, error) -> putResult(key,
                                                      error.kind()
                                                           .name(),
-                                                     "ARGUMENT"));
+                                                     rejected ? "no error formatter call" : "ARGUMENT"));
         }});
 
         return List.of(buildCommand(command, name + " reset"));
