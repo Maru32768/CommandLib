@@ -266,10 +266,6 @@ public final class CommandTester implements AutoCloseable {
         return this;
     }
 
-    public String permissionPrefix() {
-        return permissionPrefix;
-    }
-
     /**
      * Does nothing. Mocks only live while a command, or a task it handed to the scheduler, runs; this exists so tests
      * can use try-with-resources like the other CommandLib testing artifacts.

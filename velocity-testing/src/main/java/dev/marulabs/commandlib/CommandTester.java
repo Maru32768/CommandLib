@@ -175,10 +175,6 @@ public final class CommandTester implements AutoCloseable {
         Snapshots.assertMatches(snapshotName, commandTree());
     }
 
-    public String permissionPrefix() {
-        return permissionPrefix;
-    }
-
     /**
      * The Mockito proxy that commands see, for additional stubbing.
      */
