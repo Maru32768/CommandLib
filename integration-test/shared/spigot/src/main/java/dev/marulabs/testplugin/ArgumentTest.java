@@ -610,11 +610,12 @@ public final class ArgumentTest extends TestBase {
             argument(new MessageArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
             })).execute((a, ctx) -> {
-                putResult(key, a.toPlainText(), "hello, world!");
+                putResult(key, a.toPlainText(), "hello, " + playerName + "!");
             });
         }});
 
-        return List.of(buildCommand(command, name + " hello, world!"));
+        // The console may use selectors, and @p selects the only player.
+        return List.of(buildCommand(command, name + " hello, @p!"));
     }
 
     public List<String> nbtCompoundArgument() {
