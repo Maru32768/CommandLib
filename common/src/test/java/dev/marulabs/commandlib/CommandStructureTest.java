@@ -135,6 +135,58 @@ class CommandStructureTest {
         }};
     }
 
+    // Vanilla 1.21.5+ ItemPredicateArgument holds a parser record built anew per instance.
+    @Test
+    void arguments_sharing_a_node_with_types_holding_per_instance_records_share_it() {
+        new TestCommand("x") {{
+            argument(new ParserHolderArg("v"), new StrArg("more")).execute((v, more, ctx) -> {
+            });
+            argument(new ParserHolderArg("v")).execute((v, ctx) -> {
+            });
+        }};
+    }
+
+    // Like a record, equals compares its collaborator by identity.
+    private static final class Parser {
+        private final Object rules = new Object();
+
+        @Override
+        public boolean equals(Object o) {
+            return o instanceof Parser && ((Parser) o).rules == rules;
+        }
+
+        @Override
+        public int hashCode() {
+            return System.identityHashCode(rules);
+        }
+    }
+
+    private static final class ParserHolderType implements ArgumentType<String> {
+        @SuppressWarnings("unused")
+        private final Parser parser = new Parser();
+
+        @Override
+        public String parse(StringReader reader) {
+            return reader.readUnquotedString();
+        }
+    }
+
+    private static final class ParserHolderArg extends CommonArgument<String, TestCommandContext, ParserHolderArg> {
+        ParserHolderArg(String name) {
+            super(name, new ParserHolderType());
+        }
+
+        @Override
+        public String cast(Object parsedArgument) {
+            return (String) parsedArgument;
+        }
+
+        @Override
+        protected String parseImpl(TestCommandContext ctx) {
+            return ctx.getInput(name());
+        }
+    }
+
     private static final class MaxLengthType implements ArgumentType<String> {
         private final int max;
 

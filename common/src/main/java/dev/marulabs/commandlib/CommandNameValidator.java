@@ -128,8 +128,8 @@ final class CommandNameValidator {
 
         /**
          * Whether two instances of a type without equals, such as a vanilla one, have the same settings: the values of
-         * their fields that are plain values, such as EntityArgument's single and playersOnly or TimeArgument's
-         * minimum, and the types they wrap. Other fields hold collaborators, such as the registry lookup a ResourceArgument gets from the build
+         * their fields that are plain values (boxed primitives, strings, enums and classes), such as EntityArgument's
+         * single and playersOnly or TimeArgument's minimum, and the types they wrap. Other fields hold collaborators, such as the registry lookup a ResourceArgument gets from the build
          * context, which differ between instances that parse alike.
          */
         // shortcut: a setting held in an object without equals, such as ResourceArgument's registry key, is not compared;
@@ -162,10 +162,22 @@ final class CommandNameValidator {
             return true;
         }
 
-        // Boxed primitives, strings, enums and records among others.
+        // Records and other objects with equals are left out: vanilla 1.21.5+ ItemPredicateArgument holds a parser record
+        // built anew per instance, whose equals compares its collaborators by identity.
         private static boolean isValue(@Nullable Object value) {
-            return value != null && overridesEquals(value.getClass());
+            return (value != null && PLAIN_VALUES.contains(value.getClass())) || value instanceof Enum
+                    || value instanceof Class;
         }
+
+        private static final Set<Class<?>> PLAIN_VALUES = Set.of(Boolean.class,
+                                                                 Character.class,
+                                                                 Byte.class,
+                                                                 Short.class,
+                                                                 Integer.class,
+                                                                 Long.class,
+                                                                 Float.class,
+                                                                 Double.class,
+                                                                 String.class);
 
         private static boolean overridesEquals(Class<?> type) {
             try {
