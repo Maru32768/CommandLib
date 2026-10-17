@@ -107,8 +107,8 @@ class LightweightArgumentExecutionTest {
 
         tester.execute("args Steve @a Zombie @a", sender);
 
-        // @a selects the players only, also for an entities argument.
-        assertThat(sender.getSentMessageTexts()).containsExactly("Steve:1:Zombie:1");
+        // @a selects the players only, Steve and the sender, also for an entities argument.
+        assertThat(sender.getSentMessageTexts()).containsExactly("Steve:2:Zombie:2");
     }
 
     @Test

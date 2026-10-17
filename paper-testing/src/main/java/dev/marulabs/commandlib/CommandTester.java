@@ -68,6 +68,7 @@ public final class CommandTester implements AutoCloseable {
     private static final ThreadLocal<CommandTester> current = new ThreadLocal<>();
 
     private final CommandDispatcher<CommandSourceStack> dispatcher = new CommandDispatcher<>();
+    // Both keyed by lower-case name: a server looks players up by name ignoring case.
     private final Map<String, Entity> fakeEntities = new LinkedHashMap<>();
     private final Map<String, Player> fakePlayers = new LinkedHashMap<>();
     private final Map<String, World> fakeWorlds = new LinkedHashMap<>();
@@ -111,7 +112,7 @@ public final class CommandTester implements AutoCloseable {
     }
 
     boolean hasFakePlayer(String name) {
-        return fakePlayers.containsKey(name);
+        return fakePlayers.containsKey(name.toLowerCase(Locale.ROOT));
     }
 
     /**
@@ -205,13 +206,15 @@ public final class CommandTester implements AutoCloseable {
     }
 
     public CommandTester withFakePlayer(@NotNull Player player) {
-        fakePlayers.put(player.getName(), player);
-        fakeEntities.put(player.getName(), player);
+        String key = player.getName()
+                           .toLowerCase(Locale.ROOT);
+        fakePlayers.put(key, player);
+        fakeEntities.put(key, player);
         return this;
     }
 
     public CommandTester withFakeEntity(@NotNull String name, @NotNull Entity entity) {
-        fakeEntities.put(name, entity);
+        fakeEntities.put(name.toLowerCase(Locale.ROOT), entity);
         return this;
     }
 
@@ -480,28 +483,45 @@ public final class CommandTester implements AutoCloseable {
     }
 
     /**
-     * Resolves a name, {@code @s} (the executing entity), {@code @p} and {@code @r} (the first registered player),
-     * {@code @a} (the registered players) or {@code @e} (the registered entities). A name that was never registered
-     * throws, since in a test it almost always means a missing fixture.
+     * Resolves a name, {@code @s} (the executing entity), {@code @p} (the sender when it is a player, otherwise the
+     * first registered player), {@code @r} (the first registered player), {@code @a} (the registered players) or
+     * {@code @e} (the registered entities). As on a server, an executing player is online, so {@code @a}, {@code @e},
+     * {@code @r} and its name find it even when it is not registered. A name that was never registered throws, since in
+     * a test it almost always means a missing fixture.
      */
     private static List<Entity> select(String token, CommandSourceStack source) {
         CommandTester tester = requireCurrent();
+        CommandSender sender = source.getSender();
+        List<Entity> players = new ArrayList<>(tester.fakePlayers.values());
+        List<Entity> entities = new ArrayList<>(tester.fakeEntities.values());
+        if (sender instanceof Player && !entities.contains(sender)) {
+            players.add((Player) sender);
+            entities.add((Player) sender);
+        }
         switch (token) {
             case "@s":
                 Entity executor = source.getExecutor();
                 return executor == null ? List.of() : List.of(executor);
             case "@p":
+                // Nearest to the source, which is the executing player itself.
+                if (sender instanceof Player) {
+                    return List.of((Player) sender);
+                }
+                // fall through
             case "@r":
-                return tester.fakePlayers.values()
-                                         .stream()
-                                         .limit(1)
-                                         .collect(Collectors.toList());
+                return players.stream()
+                              .limit(1)
+                              .collect(Collectors.toList());
             case "@a":
-                return new ArrayList<>(tester.fakePlayers.values());
+                return players;
             case "@e":
-                return new ArrayList<>(tester.fakeEntities.values());
+                return entities;
             default:
-                Entity entity = tester.fakeEntities.get(token);
+                Entity entity = tester.fakeEntities.get(token.toLowerCase(Locale.ROOT));
+                if (entity == null && sender instanceof Player && sender.getName()
+                                                                        .equalsIgnoreCase(token)) {
+                    entity = (Player) sender;
+                }
                 if (entity == null) {
                     throw new IllegalArgumentException("No fake entity registered with name: " + token
                             + ". Call withFakePlayer() or withFakeEntity() before execute().");

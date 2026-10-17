@@ -14,8 +14,10 @@ import java.util.stream.Collectors;
 /**
  * Resolves entity arguments against the fake entities registered on {@link CommandTester}.
  *
- * <p>Supported input: a registered name, {@code @s} (the sender when it is an entity), {@code @p} and {@code @r}
- * (the first registered player), {@code @a} (all registered players) and {@code @e} (all registered entities).
+ * <p>Supported input: a registered name, {@code @s} (the sender when it is an entity), {@code @p} (the sender when it
+ * is a player, otherwise the first registered player), {@code @r} (the first registered player), {@code @a} (all
+ * registered players) and {@code @e} (all registered entities). As on a server, an executing player is online, so
+ * {@code @a}, {@code @e}, {@code @r} and its name find it even when it is not registered.
  * Selector arguments such as {@code @e[type=zombie]} are not supported. Selectors matching nothing send the messages a
  * server sends, while a name that was never registered throws {@link IllegalArgumentException}.
  */
@@ -55,27 +57,39 @@ final class MockEntitySelector {
     }
 
     static List<Entity> select(String input) {
-        List<Entity> registered = new ArrayList<>(CommandTester.getFakeEntities());
+        CommandSender sender = CommandTester.getCurrentCommandSender();
+        List<Entity> entities = new ArrayList<>(CommandTester.getFakeEntities());
+        if (sender instanceof Player && !entities.contains(sender)) {
+            entities.add((Player) sender);
+        }
         switch (input) {
             case "@s":
-                CommandSender sender = CommandTester.getCurrentCommandSender();
                 return sender instanceof Entity ? List.of((Entity) sender) : List.of();
             case "@p":
+                // Nearest to the source, which is the executing player itself.
+                if (sender instanceof Player) {
+                    return List.of((Player) sender);
+                }
+                // fall through
             case "@r":
-                return players(registered).stream()
-                                          .map(Entity.class::cast)
-                                          .limit(1)
-                                          .collect(Collectors.toList());
+                return players(entities).stream()
+                                        .map(Entity.class::cast)
+                                        .limit(1)
+                                        .collect(Collectors.toList());
             case "@a":
-                return new ArrayList<>(players(registered));
+                return new ArrayList<>(players(entities));
             case "@e":
-                return registered;
+                return entities;
             default:
                 // A server would report an unknown name as "No entity was found", but in a test it almost always means
                 // a missing fixture, so fail loudly with a hint instead of silently not running the executor.
                 Entity entity = CommandTester.getFakeEntity(input);
+                if (entity == null && sender instanceof Player && sender.getName()
+                                                                        .equalsIgnoreCase(input)) {
+                    entity = (Player) sender;
+                }
                 if (entity == null) {
-                    throw new IllegalArgumentException("No fake entity registered with name: " + input
+                    throw new IllegalArgumentException("No fake entity entities with name: " + input
                             + ". Call withFakePlayer() or withFakeEntity() before execute().");
                 }
                 return List.of(entity);

@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -49,6 +50,7 @@ public class CommandTester implements AutoCloseable {
     private static final ThreadLocal<CommandTester> current = new ThreadLocal<>();
 
     private final CommandDispatcher<Object> dispatcher = new CommandDispatcher<>();
+    // Keyed by lower-case name: a server looks players up by name ignoring case.
     private final Map<String, Entity> fakeEntities = new LinkedHashMap<>();
     private final Map<String, World> fakeWorlds = new LinkedHashMap<>();
     // Per tester on purpose: each tester tracks the sender of the command it is executing.
@@ -60,7 +62,7 @@ public class CommandTester implements AutoCloseable {
      */
     @Nullable
     public static Entity getFakeEntity(String name) {
-        return requireCurrent().fakeEntities.get(name);
+        return requireCurrent().fakeEntities.get(name.toLowerCase(Locale.ROOT));
     }
 
     /**
@@ -162,7 +164,9 @@ public class CommandTester implements AutoCloseable {
      * Registers a fake player, looked up by name when resolving
      */
     public CommandTester withFakePlayer(Player player) {
-        fakeEntities.put(player.getName(), player);
+        fakeEntities.put(player.getName()
+                               .toLowerCase(Locale.ROOT),
+                         player);
         return this;
     }
 
@@ -170,7 +174,7 @@ public class CommandTester implements AutoCloseable {
      * Registers a fake entity by name, looked up when resolving
      */
     public CommandTester withFakeEntity(String name, Entity entity) {
-        fakeEntities.put(name, entity);
+        fakeEntities.put(name.toLowerCase(Locale.ROOT), entity);
         return this;
     }
 
@@ -184,7 +188,7 @@ public class CommandTester implements AutoCloseable {
     }
 
     boolean hasFakePlayer(String name) {
-        return fakeEntities.containsKey(name);
+        return fakeEntities.containsKey(name.toLowerCase(Locale.ROOT));
     }
 
     /**

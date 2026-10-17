@@ -45,7 +45,7 @@ class EntitySelectorArgumentTest {
     }
 
     @Test
-    void all_players_selector_resolves_every_registered_player() {
+    void all_selectors_resolve_the_registered_players_and_the_executing_player() {
         FakeSender admin = FakeSender.player("Admin");
         FakeSender alex = FakeSender.player("Alex");
         FakeSender steve = FakeSender.player("Steve");
@@ -58,22 +58,39 @@ class EntitySelectorArgumentTest {
             tester.execute("entities @e", admin);
         }
 
-        assertThat(admin.getSentMessageTexts()).containsExactly("players=[Alex, Steve]",
-                                                                "entities=[Alex, Steve, zombie]");
+        assertThat(admin.getSentMessageTexts()).containsExactly("players=[Alex, Steve, Admin]",
+                                                                "entities=[Alex, Steve, zombie, Admin]");
     }
 
     @Test
-    void nearest_player_selector_resolves_one_player() {
+    void nearest_player_selector_is_the_executing_player_or_else_a_registered_one() {
         FakeSender admin = FakeSender.player("Admin");
         FakeSender alex = FakeSender.player("Alex");
+        FakeSender console = FakeSender.console();
 
         try (CommandTester tester = tester()) {
             tester.withFakeEntity("zombie", namedEntity("zombie"))
                   .withFakePlayer((Player) alex.asSender());
             tester.execute("player @p", admin);
+            tester.execute("player @p", console);
         }
 
-        assertThat(admin.getSentMessageTexts()).containsExactly("player=Alex");
+        assertThat(admin.getSentMessageTexts()).containsExactly("player=Admin");
+        assertThat(console.getSentMessageTexts()).containsExactly("player=Alex");
+    }
+
+    @Test
+    void player_names_resolve_ignoring_case() {
+        FakeSender admin = FakeSender.player("Admin");
+        FakeSender alex = FakeSender.player("Alex");
+
+        try (CommandTester tester = tester()) {
+            tester.withFakePlayer((Player) alex.asSender());
+            tester.execute("player alex", admin);
+            tester.execute("player ADMIN", admin);
+        }
+
+        assertThat(admin.getSentMessageTexts()).containsExactly("player=Alex", "player=Admin");
     }
 
     @Test
@@ -93,15 +110,15 @@ class EntitySelectorArgumentTest {
 
     @Test
     void selectors_without_targets_send_failure_messages() {
-        FakeSender admin = FakeSender.player("Admin");
+        FakeSender console = FakeSender.console();
 
         try (CommandTester tester = tester()) {
-            tester.execute("entities @e", admin);
-            tester.execute("players @a", admin);
+            tester.execute("entities @e", console);
+            tester.execute("players @a", console);
         }
 
-        assertThat(admin.getSentMessageTexts()).containsExactly("argument.entity.notfound.entity",
-                                                                "argument.entity.notfound.player");
+        assertThat(console.getSentMessageTexts()).containsExactly("argument.entity.notfound.entity",
+                                                                  "argument.entity.notfound.player");
     }
 
     @Test

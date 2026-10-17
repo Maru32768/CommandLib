@@ -130,7 +130,8 @@ class ArgumentFailureTest {
 
     @Test
     void selector_matching_nothing_sends_vanilla_not_found_error() {
-        FakeSender sender = FakeSender.player("Alice");
+        // The console, since an executing player is one of the players a selector finds.
+        FakeSender sender = FakeSender.console();
         AtomicInteger executed = new AtomicInteger();
 
         try (CommandTester tester = CommandTester.builder()
