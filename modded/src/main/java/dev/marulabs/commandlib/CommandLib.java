@@ -287,7 +287,7 @@ public final class CommandLib {
         if (server != null) {
             // The current dispatcher has already been built, so add the commands to it directly.
             // Nodes that miss PermissionGatherEvent.Nodes are resolved by their default resolver.
-            permissionNodes().forEach(node -> PERMISSIONS.putIfAbsent(node.getNodeName(), node));
+            Command.permissionEntries(commands, permissionPrefix).forEach(node -> PERMISSIONS.putIfAbsent(node.getNodeName(), node));
             register(server.getCommands()
                            .getDispatcher()
                            .getRoot());
@@ -307,20 +307,13 @@ public final class CommandLib {
                                   .stream()
                                   .map(PermissionNode::getNodeName)
                                   .collect(Collectors.toSet());
-        for (PermissionNode<Boolean> node : permissionNodes()) {
+        for (PermissionNode<Boolean> node : Command.permissionEntries(commands, permissionPrefix)) {
             // The same node name may be declared by several commands; Forge rejects duplicates.
             if (registered.add(node.getNodeName())) {
                 e.addNodes(node);
                 PERMISSIONS.put(node.getNodeName(), node);
             }
         }
-    }
-
-    private List<PermissionNode<Boolean>> permissionNodes() {
-        return commands.stream()
-                       .flatMap(x -> x.permissionEntries(permissionPrefix)
-                                      .stream())
-                       .collect(Collectors.toList());
     }
 
     private void register(RootCommandNode<CommandSourceStack> root) {
@@ -372,10 +365,8 @@ public final class CommandLib {
     }
 
     private void registerPermissionNodes() {
-        commands.stream()
-                .flatMap(x -> x.permissionEntries(permissionPrefix)
-                               .stream())
-                .forEach(e -> PermissionAPI.registerNode(e.getKey(), e.getValue(), ""));
+        Command.permissionEntries(commands, permissionPrefix)
+               .forEach(e -> PermissionAPI.registerNode(e.getKey(), e.getValue(), ""));
     }
 
     private void register(RootCommandNode<CommandSourceStack> root) {

@@ -7,6 +7,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 //? if >=1.18 && !fabric
@@ -74,8 +75,10 @@ public class Command extends CommonCommand<CommandContext, Command> {
 
     //? if >=1.18 {
     //? if !fabric {
-    final List<PermissionNode<Boolean>> permissionEntries(@NotNull String prefix) {
-        return CommandTree.permissionConfigs(List.of(this), prefix)
+    // All of a registration's commands at once, so a cooldown bypass node another command uses is left out.
+    static List<PermissionNode<Boolean>> permissionEntries(@NotNull Collection<? extends Command> commands,
+                                                           @NotNull String prefix) {
+        return CommandTree.permissionConfigs(commands, prefix)
                           .stream()
                           .map(c -> {
                               PermissionNode<Boolean> node = new PermissionNode<>("commandlib",
@@ -125,12 +128,13 @@ public class Command extends CommonCommand<CommandContext, Command> {
         permissionDescription(description);
     }
 
-    final List<Map.Entry<String, DefaultPermissionLevel>> permissionEntries(@NotNull String prefix) {
-        return CommandTree.permissionConfigs(List.of(this), prefix)
+    // All of a registration's commands at once, so a cooldown bypass node another command uses is left out.
+    static List<Map.Entry<String, DefaultPermissionLevel>> permissionEntries(@NotNull Collection<? extends Command> commands,
+                                                                             @NotNull String prefix) {
+        return CommandTree.permissionConfigs(commands, prefix)
                           .stream()
-                                        .map(c -> new AbstractMap.SimpleEntry<>(c.node(),
-                                                                                toForgeDefault(c.defaultPermission())))
-                                        .collect(Collectors.toList());
+                          .map(c -> new AbstractMap.SimpleEntry<>(c.node(), toForgeDefault(c.defaultPermission())))
+                          .collect(Collectors.toList());
     }
 
     private static DefaultPermission toDefaultPermission(@NotNull DefaultPermissionLevel forge) {

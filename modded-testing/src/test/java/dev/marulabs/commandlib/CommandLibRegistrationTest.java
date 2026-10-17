@@ -123,5 +123,24 @@ class CommandLibRegistrationTest {
         assertThat(CommandLib.hasPermission(guestSource, op, "cooldowntest.kit.bypass")).isTrue();
         assertThat(CommandLib.hasPermission(opSource, guest, "cooldowntest.kit.bypass")).isFalse();
     }
+
+    @Test
+    void a_cooldown_bypass_node_another_command_uses_keeps_that_commands_default() {
+        ServerPlayer guest = Mockito.mock(ServerPlayer.class);
+        CommandSourceStack guestSource = Mockito.mock(CommandSourceStack.class);
+
+        try (MockedStatic<CurrentServer> currentServer = Mockito.mockStatic(CurrentServer.class)) {
+            currentServer.when(CurrentServer::get)
+                         .thenReturn(server);
+            CommandLib.register("bypasstest", new Command("kit") {{
+                cooldown(Cooldown.of(Duration.ofMinutes(1))
+                                 .bypassPermission("bypasstest.vip"));
+            }}, new Command("vip") {{
+                permission(DefaultPermission.ALL);
+            }});
+        }
+
+        assertThat(CommandLib.hasPermission(guestSource, guest, "bypasstest.vip")).isTrue();
+    }
 }
 //?}
