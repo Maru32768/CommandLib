@@ -425,6 +425,23 @@ class AnnotationParserTest {
         assertThat(command.permissionName("test.command")).isEqualTo("base.node");
     }
 
+    @Command("x")
+    static final class WildcardList {
+        @Execute
+        void run(TestCommandContext ctx, @Name("names") List<? extends String> names) {
+            ctx.sendMessage("names " + names);
+        }
+    }
+
+    // Kotlin compiles a List<Player> parameter to List<? extends Player>.
+    @Test
+    void a_list_of_a_wildcard_takes_its_upper_bound() throws Exception {
+        TestCommandRunner runner = new TestCommandRunner(parser().parse(new WildcardList()));
+
+        assertThat(runner.execute("x a b")
+                         .messages()).containsExactly("names [a, b]");
+    }
+
     interface Pingable {
         @Subcommand("ping")
         default void ping(TestCommandContext ctx) {

@@ -1368,6 +1368,10 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
             Type type = parameter.getParameterizedType();
             if (type instanceof ParameterizedType) {
                 Type element = ((ParameterizedType) type).getActualTypeArguments()[0];
+                // Kotlin declares a List<Player> parameter as List<? extends Player>.
+                if (element instanceof WildcardType && ((WildcardType) element).getLowerBounds().length == 0) {
+                    element = ((WildcardType) element).getUpperBounds()[0];
+                }
                 // A generic element such as Holder<Enchantment> resolves by its raw class; the factory reads the
                 // full type from AnnotatedParameter.parameter().
                 if (element instanceof ParameterizedType) {
