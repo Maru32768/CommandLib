@@ -16,7 +16,7 @@ class CommonCommandPermissionTest {
             argument(new CommonStringArgument<>("key")).description("Config key");
         }};
 
-        List<PermissionConfig> configs = command.permissionConfigs("test.command");
+        List<PermissionConfig> configs = CommandTree.permissionConfigs(List.of(command), "test.command");
 
         assertThat(configs).extracting(PermissionConfig::node)
                            .containsExactly("test.command.config", "test.command.config.key");
@@ -31,7 +31,7 @@ class CommonCommandPermissionTest {
             argument(new CommonStringArgument<>("key")).permission(DefaultPermission.ALL, "Config key");
         }};
 
-        List<PermissionConfig> configs = command.permissionConfigs("test.command");
+        List<PermissionConfig> configs = CommandTree.permissionConfigs(List.of(command), "test.command");
 
         assertThat(configs).extracting(PermissionConfig::node)
                            .containsExactly("test.command.config", "test.command.config.key");
@@ -46,7 +46,7 @@ class CommonCommandPermissionTest {
             argument(new CommonStringArgument<>("key")).permission("custom.config.key", DefaultPermission.NONE);
         }};
 
-        List<PermissionConfig> configs = command.permissionConfigs("test.command");
+        List<PermissionConfig> configs = CommandTree.permissionConfigs(List.of(command), "test.command");
 
         assertThat(configs).extracting(PermissionConfig::node)
                            .contains("custom.config.key");
@@ -62,7 +62,7 @@ class CommonCommandPermissionTest {
             }});
         }};
 
-        List<PermissionConfig> configs = command.permissionConfigs("test.command");
+        List<PermissionConfig> configs = CommandTree.permissionConfigs(List.of(command), "test.command");
 
         assertThat(configs).extracting(PermissionConfig::node)
                            .containsExactly("test.command.game", "test.command.game.start");
@@ -79,7 +79,7 @@ class CommonCommandPermissionTest {
             }});
         }};
 
-        List<PermissionConfig> configs = command.permissionConfigs("test.command");
+        List<PermissionConfig> configs = CommandTree.permissionConfigs(List.of(command), "test.command");
 
         assertThat(configs).extracting(PermissionConfig::defaultPermission)
                            .containsExactly(DefaultPermission.ALL, DefaultPermission.NONE);
@@ -92,7 +92,7 @@ class CommonCommandPermissionTest {
             argument(new CommonStringArgument<>("key"));
         }};
 
-        List<PermissionConfig> configs = command.permissionConfigs("test.command");
+        List<PermissionConfig> configs = CommandTree.permissionConfigs(List.of(command), "test.command");
 
         assertThat(configs).extracting(PermissionConfig::node)
                            .containsExactly("test.command.config", "test.command.config.key");
@@ -107,7 +107,7 @@ class CommonCommandPermissionTest {
             argument(new CommonStringArgument<>("key")).permission("custom.config.key");
         }};
 
-        List<PermissionConfig> configs = command.permissionConfigs("test.command");
+        List<PermissionConfig> configs = CommandTree.permissionConfigs(List.of(command), "test.command");
 
         assertThat(configs.get(1)
                           .node()).isEqualTo("custom.config.key");
@@ -123,7 +123,7 @@ class CommonCommandPermissionTest {
                                                        }});
         }};
 
-        List<PermissionConfig> configs = command.permissionConfigs("test.command");
+        List<PermissionConfig> configs = CommandTree.permissionConfigs(List.of(command), "test.command");
 
         assertThat(configs).extracting(PermissionConfig::node)
                            .containsExactly("test.command.config",
@@ -288,10 +288,10 @@ class CommonCommandPermissionTest {
             }});
         }};
 
-        assertThat(command.permissionConfigs("test.command")).extracting(PermissionConfig::node)
-                                                             .containsExactly("test.command.game",
-                                                                              "test.command.game.team",
-                                                                              "test.command.game.team.join");
+        assertThat(CommandTree.permissionConfigs(List.of(command), "test.command")).extracting(PermissionConfig::node)
+                                                                                   .containsExactly("test.command.game",
+                                                                                                    "test.command.game.team",
+                                                                                                    "test.command.game.team.join");
     }
 
     @Test

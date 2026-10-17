@@ -71,11 +71,10 @@ public class Command extends CommonCommand<CommandContext, Command> {
     }
 
     final List<Permission> permissions(@NotNull String prefix) {
-        return permissionConfigs(prefix).stream()
-                                        .map(c -> new Permission(c.node(),
-                                                                 c.description(),
-                                                                 toBukkitDefault(c.defaultPermission())))
-                                        .collect(Collectors.toList());
+        return CommandTree.permissionConfigs(List.of(this), prefix)
+                          .stream()
+                          .map(c -> new Permission(c.node(), c.description(), toBukkitDefault(c.defaultPermission())))
+                          .collect(Collectors.toList());
     }
 
     private static DefaultPermission toDefaultPermission(@NotNull PermissionDefault bukkit) {

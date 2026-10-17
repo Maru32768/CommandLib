@@ -86,8 +86,8 @@ public final class CommandLib {
                                       @NotNull CommandDefaults<CommandContext> defaults,
                                       @NotNull Collection<? extends Command> commands) {
         defaults.applyTo(commands);
-        commands.forEach(command -> command.permissionConfigs(permissionPrefix)
-                                           .forEach(c -> DEFAULTS.putIfAbsent(c.node(), c.defaultPermission())));
+        CommandTree.permissionConfigs(commands, permissionPrefix)
+                   .forEach(c -> DEFAULTS.putIfAbsent(c.node(), c.defaultPermission()));
         CommandLib registration = new CommandLib(commands, permissionPrefix);
         REGISTRATIONS.add(registration);
         return registration;

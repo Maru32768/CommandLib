@@ -722,15 +722,6 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
         return List.copyOf(children);
     }
 
-    @SuppressWarnings("unchecked")
-    final List<T> argumentChildren() {
-        return argumentsList.stream()
-                            .flatMap(x -> x.children()
-                                           .stream())
-                            .map(x -> (T) x)
-                            .collect(java.util.stream.Collectors.toList());
-    }
-
     final Prerequisite<C> prerequisite() {
         if (!inheritParentPrerequisite || parent == null) {
             return prerequisite;
@@ -919,23 +910,8 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
         return prefix + "." + permissionNameWithoutPrefix();
     }
 
-    public final PermissionConfig permissionConfig(@NotNull String prefix) {
+    final PermissionConfig permissionConfig(@NotNull String prefix) {
         return new PermissionConfig(permissionName(prefix), effectiveDefaultPermission(), permissionDescription);
-    }
-
-    final List<PermissionConfig> permissionConfigs(@NotNull String prefix) {
-        List<PermissionConfig> configs = new ArrayList<>();
-        configs.add(permissionConfig(prefix));
-        options.stream()
-               .map(x -> x.permissionConfig(this, prefix))
-               .filter(Objects::nonNull)
-               .forEach(configs::add);
-        argumentsList.stream()
-                     .map(x -> x.permissionConfig(prefix))
-                     .forEach(configs::add);
-        children().forEach(x -> configs.addAll(x.permissionConfigs(prefix)));
-        argumentChildren().forEach(x -> configs.addAll(x.permissionConfigs(prefix)));
-        return configs;
     }
 
     String permissionNameWithoutPrefix() {

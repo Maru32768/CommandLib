@@ -114,6 +114,18 @@ final class CommandTree {
         return permissions;
     }
 
+    /**
+     * The nodes of {@link #permissions(List)} for {@code commands}, which every platform registers.
+     */
+    static List<PermissionConfig> permissionConfigs(Collection<? extends CommonCommand<?, ?>> commands,
+                                                    String permissionPrefix) {
+        return permissions(of(commands, permissionPrefix)).stream()
+                                                          .map(x -> new PermissionConfig(x.node,
+                                                                                         x.defaultPermission,
+                                                                                         x.description))
+                                                          .collect(Collectors.toList());
+    }
+
     private static void addPermissions(List<PermissionEntry> permissions, CommandEntry command) {
         permissions.add(command.permission);
         for (OptionEntry option : command.options) {

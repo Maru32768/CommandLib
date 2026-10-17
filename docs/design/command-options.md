@@ -341,9 +341,9 @@ copies only the nodes the player can use and resolves a redirect to the copy of
 its target, always finds the hub of a redirect it copies. The runner checks the
 node of each given option again before it parses the arguments, as it checks the
 command and branch nodes. The node is `<command path>.option.<name>` unless the
-option names an exact node; `CommonCommand#permissionConfigs` lists it after the
-command's own node, so the platforms register it, and `CommandTree` gives it to
-the exports with the kind `option` and the route `/<command> --<name>`.
+option names an exact node; `CommandTree` lists it after the command's own node,
+so the platforms register it and the exports show it with the kind `option` and
+the route `/<command> --<name>`.
 
 #### States and redirects
 

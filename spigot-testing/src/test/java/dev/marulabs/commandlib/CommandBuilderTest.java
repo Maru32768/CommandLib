@@ -74,8 +74,7 @@ class CommandBuilderTest {
         List<String> observed = new ArrayList<>();
         try (CommandTester tester = new CommandTester(capture(factory, built), PREFIX)) {
             observed.add(tester.commandTree());
-            for (PermissionConfig permission : built.get(0)
-                                                    .permissionConfigs(PREFIX)) {
+            for (PermissionConfig permission : CommandTree.permissionConfigs(built, PREFIX)) {
                 observed.add(permission.node() + " " + permission.defaultPermission() + " " + permission.description());
             }
             for (String input : INPUTS) {

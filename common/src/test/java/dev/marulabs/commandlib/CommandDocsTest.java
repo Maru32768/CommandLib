@@ -36,19 +36,6 @@ class CommandDocsTest {
     }
 
     @Test
-    void permissions_list_every_node_that_registration_registers() {
-        List<TestCommand> commands = commands();
-        String permissions = CommandDocs.of("myplugin.command", commands)
-                                        .permissionsMarkdown();
-
-        for (TestCommand command : commands) {
-            for (PermissionConfig config : command.permissionConfigs("myplugin.command")) {
-                assertThat(permissions).contains("`" + config.node() + "` | `" + config.defaultPermission() + "`");
-            }
-        }
-    }
-
-    @Test
     void sender_dependent_descriptions_are_left_out() {
         TestCommand command = new TestCommand("motd") {{
             description(ctx -> "Hello " + ctx.getActor());

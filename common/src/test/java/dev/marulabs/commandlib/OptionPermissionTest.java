@@ -164,18 +164,18 @@ class OptionPermissionTest {
     void the_nodes_are_registered_and_exported_with_the_command() {
         TestCommand ban = ban();
 
-        assertThat(ban.permissionConfigs("test.command")).extracting(PermissionConfig::node)
-                                                         .containsExactly(COMMAND,
-                                                                          SILENT,
-                                                                          "myplugin.ban.reason",
-                                                                          BRANCH);
-        assertThat(ban.permissionConfigs("test.command")
-                      .get(1)
-                      .defaultPermission()).isEqualTo(DefaultPermission.OP);
+        assertThat(CommandTree.permissionConfigs(List.of(ban), "test.command")).extracting(PermissionConfig::node)
+                                                                               .containsExactly(COMMAND,
+                                                                                                SILENT,
+                                                                                                "myplugin.ban.reason",
+                                                                                                BRANCH);
+        assertThat(CommandTree.permissionConfigs(List.of(ban), "test.command")
+                              .get(1)
+                              .defaultPermission()).isEqualTo(DefaultPermission.OP);
         // The exact node takes the default of the command.
-        assertThat(ban.permissionConfigs("test.command")
-                      .get(2)
-                      .defaultPermission()).isEqualTo(DefaultPermission.ALL);
+        assertThat(CommandTree.permissionConfigs(List.of(ban), "test.command")
+                              .get(2)
+                              .defaultPermission()).isEqualTo(DefaultPermission.ALL);
 
         CommandDocs docs = CommandDocs.of("test.command", List.of(ban));
         assertThat(docs.permissionsMarkdown()).contains("| `" + SILENT + "` | `OP` | `/ban --silent` |");
@@ -195,7 +195,7 @@ class OptionPermissionTest {
             });
         }};
 
-        assertThat(command.permissionConfigs("p")).extracting(PermissionConfig::node)
-                                                  .contains("p.tag.option.tag");
+        assertThat(CommandTree.permissionConfigs(List.of(command), "p")).extracting(PermissionConfig::node)
+                                                                        .contains("p.tag.option.tag");
     }
 }

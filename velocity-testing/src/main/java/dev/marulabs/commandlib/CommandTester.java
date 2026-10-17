@@ -84,8 +84,8 @@ public final class CommandTester implements AutoCloseable {
                                                                                   builder.scheduler).build()
                                                                                                     .forEach(dispatcher.getRoot()::addChild);
         // The defaults CommandLib.register gives the proxy, applied to a permission no permission plugin sets.
-        commands.forEach(c -> c.permissionConfigs(permissionPrefix)
-                               .forEach(x -> permissionDefaults.putIfAbsent(x.node(), x.defaultPermission())));
+        CommandTree.permissionConfigs(commands, permissionPrefix)
+                   .forEach(x -> permissionDefaults.putIfAbsent(x.node(), x.defaultPermission()));
 
         Mockito.when(proxy.getVersion())
                .thenReturn(new ProxyVersion("Velocity", "CommandLib", "test"));

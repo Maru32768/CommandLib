@@ -75,20 +75,21 @@ public class Command extends CommonCommand<CommandContext, Command> {
     //? if >=1.18 {
     //? if !fabric {
     final List<PermissionNode<Boolean>> permissionEntries(@NotNull String prefix) {
-        return permissionConfigs(prefix).stream()
-                                        .map(c -> {
-                                            PermissionNode<Boolean> node = new PermissionNode<>("commandlib",
-                                                                                                c.node(),
-                                                                                                PermissionTypes.BOOLEAN,
-                                                                                                (player,
-                                                                                                 playerId,
-                                                                                                 context) -> resolveDefault(c.defaultPermission(),
-                                                                                                                            player));
-                                            node.setInformation(Component.nullToEmpty(c.node()),
-                                                                Component.nullToEmpty(c.description()));
-                                            return node;
-                                        })
-                                        .collect(Collectors.toList());
+        return CommandTree.permissionConfigs(List.of(this), prefix)
+                          .stream()
+                          .map(c -> {
+                              PermissionNode<Boolean> node = new PermissionNode<>("commandlib",
+                                                                                  c.node(),
+                                                                                  PermissionTypes.BOOLEAN,
+                                                                                  (player,
+                                                                                   playerId,
+                                                                                   context) -> resolveDefault(c.defaultPermission(),
+                                                                                                              player));
+                              node.setInformation(Component.nullToEmpty(c.node()),
+                                                  Component.nullToEmpty(c.description()));
+                              return node;
+                          })
+                          .collect(Collectors.toList());
     }
     //?}
 
@@ -125,7 +126,8 @@ public class Command extends CommonCommand<CommandContext, Command> {
     }
 
     final List<Map.Entry<String, DefaultPermissionLevel>> permissionEntries(@NotNull String prefix) {
-        return permissionConfigs(prefix).stream()
+        return CommandTree.permissionConfigs(List.of(this), prefix)
+                          .stream()
                                         .map(c -> new AbstractMap.SimpleEntry<>(c.node(),
                                                                                 toForgeDefault(c.defaultPermission())))
                                         .collect(Collectors.toList());

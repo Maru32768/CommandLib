@@ -20,7 +20,6 @@ class CommandBuilderTest {
                                                             "name()",
                                                             "description(CommonCommandContext)",
                                                             "permissionName(String)",
-                                                            "permissionConfig(String)",
                                                             // A callback cannot follow varargs; the List form covers
                                                             // it.
                                                             "argument(CommonArgument[])");

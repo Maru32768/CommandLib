@@ -146,7 +146,7 @@ public final class CommandLib {
                                                                                                                                   new VelocityCommandScheduler(plugin,
                                                                                                                                                                proxy)).build();
         CommandContext.proxy = proxy;
-        list.forEach(c -> VelocityPermissions.addDefaults(c.permissionConfigs(permissionPrefix)));
+        VelocityPermissions.addDefaults(CommandTree.permissionConfigs(list, permissionPrefix));
 
         CommandManager commandManager = proxy.getCommandManager();
         List<CommandMeta> registered = new ArrayList<>();
