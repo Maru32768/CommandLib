@@ -348,11 +348,11 @@ depends on the artifact:
 | `TimeArgument` | mock: vanilla syntax, minimum and unit suggestions | mock: vanilla syntax, minimum and unit suggestions | real |
 | `GameModeArgument` | real | mock: vanilla names | real |
 | `ChatColorArgument`, `ScoreboardDisplaySlotArgument` | mock: vanilla names of a 1.20.2+ server, with suggestions | mock: vanilla names | real |
-| `PlayerArgument`, `PlayersArgument` | mock: names, `@s`, `@p`, `@r`, `@a` (`withFakePlayer`) | mock: names, `@a` for the list variant (`withFakePlayer`) | real selectors over the fake players (`withPlayer`) |
-| `EntityArgument`, `EntitiesArgument` | mock: names, `@s`, `@p`, `@r`, `@a`, `@e` (`withFakeEntity`) | mock: names, `@a` (`withFakeEntity`) | real selectors; only players exist |
+| `PlayerArgument`, `PlayersArgument` | mock: names, `@s`, `@p`, `@r`, `@a` (`withFakePlayer`) | mock: names, `@s`, `@p`, `@r`, `@a` (`withFakePlayer`) | real selectors over the fake players (`withPlayer`) |
+| `EntityArgument`, `EntitiesArgument` | mock: names, `@s`, `@p`, `@r`, `@a`, `@e` (`withFakeEntity`) | mock: names, `@s`, `@p`, `@r`, `@a`, `@e` (`withFakeEntity`) | real selectors; only players exist |
 | `OfflinePlayerArgument`, `OfflinePlayersArgument`, `UUIDArgument`, `UUIDsArgument` | static | static | `UUIDArgument`, `UUIDsArgument`, `GameProfileArgument`: online fake players only |
-| `LocationArgument` | mock: `x y z` numbers | mock: `x y z` numbers, world `null` | real |
-| `BlockPositionArgument` | mock: integer `x y z` | mock: integer `x y z`, world `null` | real |
+| `LocationArgument` | mock: `x y z` numbers | mock: `x y z` numbers, world of an entity sender (`null` for others) | real |
+| `BlockPositionArgument` | mock: integer `x y z` | mock: integer `x y z`, world of an entity sender (`null` for others) | real |
 | `ItemPredicateArgument`, `BlockPredicateArgument` | mock: an item or block id, matched by material; suggests ids | mock: a material id, matched by material; suggests ids (the block predicate needs the Paper 1.21.8 API on the test classpath) | real; tags are not loaded |
 | `WorldArgument` | mock (`withFakeWorld("minecraft:overworld", world)`) | mock (`withFakeWorld("minecraft:overworld", world)`) | real over the levels added with `withLevel(level)` |
 | `BlockDataArgument` / `BlockStateArgument` | mock | mock (`withFakeBlockData`) | real |

@@ -152,10 +152,11 @@ class ArgumentFailureTest {
                                                  }})
                                                  .permissionPrefix("test.command")
                                                  .build()) {
-            assertThat(tester.execute("player Nobody", sender)).isZero();
+            // No player or entity is registered.
+            assertThat(tester.execute("player @p", sender)).isZero();
             assertThat(tester.execute("players @a", sender)).isZero();
-            assertThat(tester.execute("entity Nobody", sender)).isZero();
-            assertThat(tester.execute("entities @a", sender)).isZero();
+            assertThat(tester.execute("entity @p", sender)).isZero();
+            assertThat(tester.execute("entities @e", sender)).isZero();
         }
 
         assertThat(executed).hasValue(0);

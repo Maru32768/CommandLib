@@ -285,13 +285,23 @@ public final class CommandTester implements AutoCloseable {
                          return key == null ? null : requireCurrent().fakeWorlds.get(key.toString());
                      }));
         argumentTypes.when(ArgumentTypes::entity)
-                     .thenReturn(word(token -> entityResolver(token, false)));
+                     .thenReturn(selector(true,
+                                          false,
+                                          token -> (EntitySelectorArgumentResolver) source -> select(token, source)));
         argumentTypes.when(ArgumentTypes::entities)
-                     .thenReturn(word(token -> entityResolver(token, true)));
+                     .thenReturn(selector(false,
+                                          false,
+                                          token -> (EntitySelectorArgumentResolver) source -> select(token, source)));
         argumentTypes.when(ArgumentTypes::player)
-                     .thenReturn(word(token -> playerResolver(token, false)));
+                     .thenReturn(selector(true,
+                                          true,
+                                          token -> (PlayerSelectorArgumentResolver) source -> players(select(token,
+                                                                                                             source))));
         argumentTypes.when(ArgumentTypes::players)
-                     .thenReturn(word(token -> playerResolver(token, true)));
+                     .thenReturn(selector(false,
+                                          true,
+                                          token -> (PlayerSelectorArgumentResolver) source -> players(select(token,
+                                                                                                             source))));
         argumentTypes.when(ArgumentTypes::blockState)
                      .thenReturn(word(token -> {
                          BlockState blockState = Mockito.mock(BlockState.class);
@@ -442,27 +452,69 @@ public final class CommandTester implements AutoCloseable {
         return new SimpleCommandExceptionType(new LiteralMessage(message)).createWithContext(reader);
     }
 
-    private EntitySelectorArgumentResolver entityResolver(String token, boolean multiple) {
-        return source -> {
-            CommandTester tester = requireCurrent();
-            if (multiple && "@a".equals(token)) {
-                // @a selects players only.
-                return new ArrayList<>(tester.fakePlayers.values());
+    /**
+     * Reads a name or a selector without arguments, rejecting while parsing the selectors that cannot match the
+     * argument, as a server does: {@code @a} and {@code @e} for a single target, and {@code @e} for players.
+     */
+    private static <R> ArgumentType<R> selector(boolean single, boolean playersOnly, Function<String, R> resolver) {
+        return reader -> {
+            int start = reader.getCursor();
+            String token = readUntilWhitespace(reader);
+            if (token.startsWith("@") && token.contains("[")) {
+                throw new UnsupportedOperationException("Selector arguments are not supported by CommandTester: "
+                        + token);
             }
-            Entity entity = tester.fakeEntities.get(token);
-            return entity == null ? List.of() : List.of(entity);
+            String error = null;
+            if (single && (token.equals("@a") || token.equals("@e"))) {
+                error = playersOnly ? "Only one player is allowed, but the provided selector allows more than one"
+                        : "Only one entity is allowed, but the provided selector allows more than one";
+            } else if (playersOnly && token.equals("@e")) {
+                error = "Only players may be affected by this command, but the provided selector includes entities";
+            }
+            if (error != null) {
+                reader.setCursor(start);
+                throw syntaxError(error, reader);
+            }
+            return resolver.apply(token);
         };
     }
 
-    private PlayerSelectorArgumentResolver playerResolver(String token, boolean multiple) {
-        return source -> {
-            CommandTester tester = requireCurrent();
-            if (multiple && "@a".equals(token)) {
+    /**
+     * Resolves a name, {@code @s} (the executing entity), {@code @p} and {@code @r} (the first registered player),
+     * {@code @a} (the registered players) or {@code @e} (the registered entities). A name that was never registered
+     * throws, since in a test it almost always means a missing fixture.
+     */
+    private static List<Entity> select(String token, CommandSourceStack source) {
+        CommandTester tester = requireCurrent();
+        switch (token) {
+            case "@s":
+                Entity executor = source.getExecutor();
+                return executor == null ? List.of() : List.of(executor);
+            case "@p":
+            case "@r":
+                return tester.fakePlayers.values()
+                                         .stream()
+                                         .limit(1)
+                                         .collect(Collectors.toList());
+            case "@a":
                 return new ArrayList<>(tester.fakePlayers.values());
-            }
-            Player player = tester.fakePlayers.get(token);
-            return player == null ? List.of() : List.of(player);
-        };
+            case "@e":
+                return new ArrayList<>(tester.fakeEntities.values());
+            default:
+                Entity entity = tester.fakeEntities.get(token);
+                if (entity == null) {
+                    throw new IllegalArgumentException("No fake entity registered with name: " + token
+                            + ". Call withFakePlayer() or withFakeEntity() before execute().");
+                }
+                return List.of(entity);
+        }
+    }
+
+    private static List<Player> players(List<Entity> entities) {
+        return entities.stream()
+                       .filter(Player.class::isInstance)
+                       .map(Player.class::cast)
+                       .collect(Collectors.toList());
     }
 
     @Nullable
