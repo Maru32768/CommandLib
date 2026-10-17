@@ -119,7 +119,7 @@ final class HelpMessageAction<S, T, C extends CommonCommandContext<S, T>, U exte
 
     // The sender has the command's permission and the command is visible to the sender.
     private boolean isUsable(U child, C ctx) {
-        return platformAdapter.hasPermission(child, ctx, permissionPrefix)
+        return platformAdapter.hasPermission(ctx, child.permissionName(permissionPrefix))
                 && (!child.hasVisibility() || child.isVisibleTo(sourceContext(ctx)));
     }
 

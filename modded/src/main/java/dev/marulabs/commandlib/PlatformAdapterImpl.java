@@ -13,11 +13,6 @@ public final class PlatformAdapterImpl implements PlatformAdapter<CommandSourceS
     }
 
     @Override
-    public boolean hasPermission(Command command, CommandContext ctx, String permissionPrefix) {
-        return hasPermission(ctx.getSender(), command.permissionName(permissionPrefix));
-    }
-
-    @Override
     public boolean hasPermission(CommandSourceStack commandSource, String permissionNode) {
         return new ForgeCommandActor(commandSource).hasPermission(permissionNode);
     }

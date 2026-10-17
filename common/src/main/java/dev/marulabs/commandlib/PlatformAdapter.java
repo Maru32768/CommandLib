@@ -35,8 +35,6 @@ public interface PlatformAdapter<S, T, C extends CommonCommandContext<S, T>, U e
                                                                                       false));
     }
 
-    boolean hasPermission(U command, C ctx, String permissionPrefix);
-
     boolean hasPermission(S commandSource, String permissionNode);
 
     default boolean hasPermission(C ctx, String permissionNode) {
