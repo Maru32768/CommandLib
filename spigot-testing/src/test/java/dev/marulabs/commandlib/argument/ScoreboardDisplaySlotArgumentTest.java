@@ -37,6 +37,11 @@ class ScoreboardDisplaySlotArgumentTest {
     }
 
     @Test
+    void unknown_slot_constants_get_no_vanilla_name() {
+        assertThat(ScoreboardDisplaySlotArgument.vanillaName("FUTURE_SLOT")).isNull();
+    }
+
+    @Test
     void bukkit_enum_name_is_a_syntax_error() {
         FakeSender sender = FakeSender.player("Alice");
 

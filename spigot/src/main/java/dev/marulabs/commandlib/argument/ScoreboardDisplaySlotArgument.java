@@ -7,6 +7,7 @@ import dev.marulabs.commandlib.CommandContext;
 import dev.marulabs.commandlib.exception.ArgumentParseException;
 import dev.marulabs.commandlib.util.nms.argument.NMSArgumentScoreboardSlot;
 import org.bukkit.scoreboard.DisplaySlot;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -46,7 +47,10 @@ public class ScoreboardDisplaySlotArgument extends Argument<DisplaySlot, Scorebo
     private static Map<String, DisplaySlot> slots() {
         Map<String, DisplaySlot> slots = new LinkedHashMap<>();
         for (DisplaySlot slot : DisplaySlot.values()) {
-            slots.put(vanillaName(slot.name()), slot);
+            String name = vanillaName(slot.name());
+            if (name != null) {
+                slots.put(name, slot);
+            }
             if (slot == DisplaySlot.BELOW_NAME) {
                 slots.put("belowName", slot);
             }
@@ -54,7 +58,8 @@ public class ScoreboardDisplaySlotArgument extends Argument<DisplaySlot, Scorebo
         return Collections.unmodifiableMap(slots);
     }
 
-    static String vanillaName(String enumName) {
+    // Null for a constant outside the known pattern, which a newer Bukkit or a fork may add.
+    static @Nullable String vanillaName(String enumName) {
         String name = enumName.toLowerCase(Locale.ROOT);
         switch (name) {
             case "player_list":
@@ -64,6 +69,9 @@ public class ScoreboardDisplaySlotArgument extends Argument<DisplaySlot, Scorebo
                 return name;
             default:
                 // Team slots are SIDEBAR_<COLOR> in Spigot and SIDEBAR_TEAM_<COLOR> in Paper.
+                if (!name.startsWith("sidebar_")) {
+                    return null;
+                }
                 String color = name.substring("sidebar_".length());
                 return "sidebar.team." + (color.startsWith("team_") ? color.substring("team_".length()) : color);
         }
