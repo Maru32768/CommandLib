@@ -184,6 +184,26 @@ class CommandTesterTest {
     }
 
     @Test
+    void execute_and_get_context_returns_help_context_with_visibility_checks() {
+        CommandTester tester = new CommandTester(new TestCommand("game") {{
+            addChildren(new TestCommand("start") {{
+                visibleWhen(ctx -> true);
+                execute(ctx -> {
+                });
+            }});
+        }});
+        FakeSender sender = FakeSender.console();
+
+        TestCommandContext ctx = tester.executeAndGetContext("game", sender);
+
+        assertThat(ctx.getHandle()
+                      .getInput()).isEqualTo("game");
+        assertThat(ctx.messages()).isNotEmpty()
+                                  .isEqualTo(sender.getSentMessageLegacyTexts());
+        assertThat(TestCommandContext.latest()).isSameAs(ctx);
+    }
+
+    @Test
     void builder_registers_multiple_commands_with_prefix() {
         CommandTester tester = CommandTester.builder()
                                             .command(new TestCommand("one") {{

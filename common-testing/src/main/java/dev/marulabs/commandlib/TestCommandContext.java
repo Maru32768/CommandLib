@@ -24,8 +24,12 @@ public final class TestCommandContext extends CommonCommandContext<FakeSender, S
 
     TestCommandContext(com.mojang.brigadier.context.CommandContext<FakeSender> ctx) {
         super(ctx);
-        LATEST_ON_THREAD.set(this);
-        latest = this;
+        // A source context, which the help creates for the visibility predicates, has no input and is no execution.
+        if (!ctx.getInput()
+                .isEmpty()) {
+            LATEST_ON_THREAD.set(this);
+            latest = this;
+        }
     }
 
     @Nullable
