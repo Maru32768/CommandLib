@@ -72,14 +72,14 @@ class FakeSenderTest {
     }
 
     @Test
-    void operator_grants_unlisted_permissions_but_not_denied_ones() {
-        FakeSender sender = FakeSender.unknown()
+    void an_explicit_permission_list_wins_over_operator_as_on_spigot_and_paper() {
+        FakeSender sender = FakeSender.player("Alex")
                                       .op(true)
-                                      .denyPermissions("a.b");
+                                      .permissions("a.b");
 
         assertThat(sender.isOperator()).isTrue();
-        assertThat(sender.hasPermission("c.d")).isTrue();
-        assertThat(sender.hasPermission("a.b")).isFalse();
+        assertThat(sender.hasPermission("a.b")).isTrue();
+        assertThat(sender.hasPermission("c.d")).isFalse();
     }
 
     @Test

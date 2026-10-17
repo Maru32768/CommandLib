@@ -150,7 +150,7 @@ The factory is any `Supplier<CommandTester>`, so it can use `CommandTester.build
 |---|---|---|
 | `value` | `"Player"` | The player's name |
 | `console` | `false` | Injects the console, an operator, instead of a player |
-| `op` | `false` | Makes a player an operator (not in `velocity-testing`, since Velocity has no operators) |
+| `op` | `false` | Makes a player an operator (not in `velocity-testing`, since Velocity has no operators). It grants no permission: `permissions` decides, for operators too |
 | `permissions` | `{}` (every permission) | Grants only these nodes |
 | `denyPermissions` | `{}` | Denies these nodes, even to operators |
 

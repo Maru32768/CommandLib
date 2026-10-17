@@ -115,8 +115,7 @@ public final class FakeSender implements CommandActor {
 
     @Override
     public boolean hasPermission(@NotNull String permission) {
-        return !deniedPermissions.contains(permission)
-                && (operator || allowAllPermissions || permissions.contains(permission));
+        return !deniedPermissions.contains(permission) && (allowAllPermissions || permissions.contains(permission));
     }
 
     void sendMessage(String message) {
