@@ -106,12 +106,15 @@ public abstract class TestBase {
         hooks.forEach(hook -> hook.onCommandDispatchError(commandLine, dispatchResult));
     }
 
+    // The word after the test command, also in "execute ... run commandlibtest <sub command>".
     private String extractSubCommand(String commandLine) {
         String[] parts = commandLine.trim()
-                                    .split("\\s+", 3);
-        if (parts.length < 2) {
-            return null;
+                                    .split("\\s+");
+        for (int i = 0; i < parts.length - 1; i++) {
+            if (parts[i].equals(MainCommand.NAME)) {
+                return parts[i + 1];
+            }
         }
-        return parts[1];
+        return null;
     }
 }
