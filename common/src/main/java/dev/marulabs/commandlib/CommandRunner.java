@@ -363,8 +363,8 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
 
     private static int fail(CommandFailure failure) throws CommandFailure {
         // The platform would send an empty line for a failure without a message, so such a failure only returns 0,
-        // unless it carries an AssertionError the testers must rethrow.
-        if (!failure.hasMessages() && !failure.hasAssertionError()) {
+        // unless it carries an AssertionError that a tester dispatching it must rethrow.
+        if (!failure.hasMessages() && !(failure.hasAssertionError() && CommandFailure.isReplayed())) {
             return 0;
         }
         throw failure;

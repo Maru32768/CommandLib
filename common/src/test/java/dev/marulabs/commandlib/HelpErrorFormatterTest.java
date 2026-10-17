@@ -227,6 +227,20 @@ class HelpErrorFormatterTest {
                                               .messages()).containsExactly("/game [options] <key>");
     }
 
+    // A tester rethrows the AssertionError; a server would show a failure without messages as an empty line.
+    @Test
+    void a_silent_failure_of_an_assertion_error_only_returns_zero_on_a_server() throws Exception {
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("x") {{
+            errorFormatter((ctx, error) -> {
+            });
+            execute(ctx -> {
+                throw new AssertionError("expected");
+            });
+        }});
+
+        assertThat(runner.dispatch("x")).isZero();
+    }
+
     // As /execute ... run game reaches the command through a redirect, whose input starts with execute.
     @Test
     void help_and_syntax_advice_name_the_command_when_it_runs_through_a_redirect() throws Exception {

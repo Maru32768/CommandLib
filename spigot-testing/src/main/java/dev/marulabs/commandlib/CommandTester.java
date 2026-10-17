@@ -205,7 +205,7 @@ public class CommandTester implements AutoCloseable {
         currentCommandSender.set(sender);
         try {
             // The sender is the source, so a follow-up of an async command still finds it after execute returns.
-            return dispatcher.execute(input, sender);
+            return CommandFailure.replayed(() -> dispatcher.execute(input, sender));
         } catch (CommandFailure e) {
             e.sendMessages();
             e.rethrowAssertionError();

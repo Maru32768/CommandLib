@@ -177,7 +177,7 @@ public final class CommandTester implements AutoCloseable {
     public int execute(@NotNull String input, @NotNull FakeSender sender) {
         try (Scope scope = new Scope(sender)) {
             try {
-                return dispatcher.execute(input, sender.createSource(scope.server));
+                return CommandFailure.replayed(() -> dispatcher.execute(input, sender.createSource(scope.server)));
             } catch (CommandFailure e) {
                 // Sent inside the scope, which the source's messages may need.
                 e.sendMessages();

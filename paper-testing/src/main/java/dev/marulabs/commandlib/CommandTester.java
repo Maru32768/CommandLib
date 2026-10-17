@@ -136,7 +136,7 @@ public final class CommandTester implements AutoCloseable {
         CommandTester previous = current.get();
         current.set(this);
         try {
-            return dispatcher.execute(input, commandSource(sender));
+            return CommandFailure.replayed(() -> dispatcher.execute(input, commandSource(sender)));
         } catch (CommandFailure e) {
             e.sendMessages();
             e.rethrowAssertionError();

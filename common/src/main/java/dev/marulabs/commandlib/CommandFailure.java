@@ -15,6 +15,8 @@ import java.util.function.Supplier;
  */
 final class CommandFailure extends CommandSyntaxException {
     private static final SimpleCommandExceptionType TYPE = new SimpleCommandExceptionType(new LiteralMessage("Command failed"));
+    // Whether a tester dispatches on this thread.
+    private static final ThreadLocal<Boolean> REPLAYED = ThreadLocal.withInitial(() -> false);
     private final transient Supplier<Message> message;
     private final transient List<Runnable> sends;
     private transient @Nullable Message resolved;
@@ -70,6 +72,35 @@ final class CommandFailure extends CommandSyntaxException {
     CommandFailure unexpected(Throwable e) {
         this.unexpected = e;
         return this;
+    }
+
+    /**
+     * A tester's dispatch.
+     */
+    @FunctionalInterface
+    interface Dispatch {
+        int run() throws CommandSyntaxException;
+    }
+
+    /**
+     * Runs a tester's dispatch, whose failures the tester replays. Only there a failure without messages is thrown for
+     * its AssertionError, which the tester rethrows; a server would show it as an empty error line.
+     */
+    static int replayed(Dispatch dispatch) throws CommandSyntaxException {
+        boolean outer = REPLAYED.get();
+        REPLAYED.set(true);
+        try {
+            return dispatch.run();
+        } finally {
+            REPLAYED.set(outer);
+        }
+    }
+
+    /**
+     * Whether a tester replays the failures of the current dispatch.
+     */
+    static boolean isReplayed() {
+        return REPLAYED.get();
     }
 
     boolean hasAssertionError() {
