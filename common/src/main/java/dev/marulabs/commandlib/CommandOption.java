@@ -9,9 +9,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
 
@@ -175,6 +177,26 @@ public final class CommandOption<T, C extends CommonCommandContext<?, ?>> {
         names.add(name);
         names.addAll(aliases);
         return names;
+    }
+
+    /**
+     * Checks that no two of the options of command {@code commandName} share a long name or a short name.
+     */
+    static void checkDistinctNames(List<? extends CommandOption<?, ?>> options, String commandName) {
+        Set<String> names = new HashSet<>();
+        Set<Character> shortNames = new HashSet<>();
+        for (CommandOption<?, ?> option : options) {
+            for (String name : option.names()) {
+                if (!names.add(name)) {
+                    throw new IllegalArgumentException("Duplicate option name --" + name + " in command '" + commandName
+                            + "'");
+                }
+            }
+            if (option.shortName != null && !shortNames.add(option.shortName)) {
+                throw new IllegalArgumentException("Duplicate option short name -" + option.shortName + " in command '"
+                        + commandName + "'");
+            }
+        }
     }
 
     public CommandOption<T, C> description(@NotNull String description) {

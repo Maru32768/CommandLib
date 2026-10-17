@@ -398,6 +398,19 @@ class CommandOptionTest {
     }
 
     @Test
+    void alias_added_after_registration_that_duplicates_another_option_is_rejected() {
+        TestCommand command = new TestCommand("scan") {{
+            option(Options.flag("all", 'a'));
+            option(Options.flag("brief", 'b')).aliases("all");
+            execute(ctx -> {
+            });
+        }};
+
+        assertThatThrownBy(() -> new TestCommandRunner(command)).isInstanceOf(IllegalArgumentException.class)
+                                                                .hasMessageContaining("Duplicate option name --all");
+    }
+
+    @Test
     void option_requirement_with_predicate_reports_description() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("scan") {{
             CommandOption<Integer, TestCommandContext> depth = option(Options.integer("depth", 'd', 1));

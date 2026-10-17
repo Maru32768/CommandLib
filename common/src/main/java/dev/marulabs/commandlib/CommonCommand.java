@@ -217,8 +217,8 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
     }
 
     /**
-     * Registers {@code option} on this command and returns it typed for this command's context. Configure the
-     * option, including its aliases, before registering it.
+     * Registers {@code option} on this command and returns it typed for this command's context. Aliases added to the
+     * option afterwards are checked against the other options when the command is registered.
      *
      * @throws IllegalArgumentException if a long name or the short name of {@code option} is already used by
      *                                  another option of this command
@@ -226,27 +226,10 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
     @SuppressWarnings("unchecked")
     public final <E> CommandOption<E, C> option(@NotNull CommandOption<E, ? super C> option) {
         Objects.requireNonNull(option);
-        for (String name : option.names()) {
-            boolean duplicatedName = options.stream()
-                                            .anyMatch(x -> x.names()
-                                                            .contains(name));
-            if (duplicatedName) {
-                throw new IllegalArgumentException("Duplicate option name: " + name);
-            }
-        }
-
-        Character shortName = option.shortName();
-        if (shortName != null) {
-            boolean duplicatedShortName = options.stream()
-                                                 .map(CommandOption::shortName)
-                                                 .filter(Objects::nonNull)
-                                                 .anyMatch(x -> x.equals(shortName));
-            if (duplicatedShortName) {
-                throw new IllegalArgumentException("Duplicate option short name: " + shortName);
-            }
-        }
-
         CommandOption<E, C> typedOption = (CommandOption<E, C>) option;
+        List<CommandOption<?, C>> all = new ArrayList<>(options);
+        all.add(typedOption);
+        CommandOption.checkDistinctNames(all, name);
         options.add(typedOption);
         return typedOption;
     }

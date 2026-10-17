@@ -102,6 +102,8 @@ final class OptionGraph<S, C extends CommonCommandContext<S, ?>> {
                                                                           List<Arguments<C>> inheritedArguments,
                                                                           String permissionPrefix) {
         List<CommandOption<?, C>> options = command.options();
+        // Aliases can be added after an option is registered, which option(...) could not check.
+        CommandOption.checkDistinctNames(options, command.name());
         for (CommandOption<?, C> option : options) {
             for (CommandOption<?, ?> required : option.requiredOptions()) {
                 if (!options.contains(required)) {
