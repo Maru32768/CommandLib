@@ -385,12 +385,17 @@ class CommandLibLifecycleTest {
         CommandLib.register(plugin, "test", helloCommand());
         CommandNode<CommandSourceStack> taken = dispatcher.getRoot()
                                                           .getChild("hello");
+        CommandNode<CommandSourceStack> namespacedTaken = dispatcher.getRoot()
+                                                                    .getChild("testplugin:hello");
 
         first.unregister();
 
         assertThat(dispatcher.getRoot()
                              .getChild("hello")).isNotNull()
                                                 .isSameAs(taken);
+        assertThat(dispatcher.getRoot()
+                             .getChild("testplugin:hello")).isNotNull()
+                                                           .isSameAs(namespacedTaken);
     }
 
     @Test

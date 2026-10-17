@@ -51,6 +51,8 @@ public final class CommandLib implements Listener {
     private final List<CommandNode<?>> registeredCommands = new ArrayList<>();
     private final List<Permission> registeredPermissions = new ArrayList<>();
     private final List<HelpTopic> registeredHelpTopics = new ArrayList<>();
+    // On Paper 1.20.6+, the node this registration last put under each of its labels.
+    private final Map<String, CommandNode<?>> paperLabelNodes = new HashMap<>();
     // Whether a COMMANDS lifecycle handler adds the commands again to Paper's dispatcher after a reload.
     private boolean commandsHandler;
     // Main thread only: the instances not unregistered yet, so a plugin disable removes them at once.
@@ -325,6 +327,7 @@ public final class CommandLib implements Listener {
                 unwrappedCached.set(apiNode, labelNode);
                 labels.add(labelNode.getName());
                 labelNodes.add(labelNode);
+                paperLabelNodes.put(labelNode.getName(), labelNode);
             }
         }
         CommandNodeChildren.replace(root, labels, labelNodes);
@@ -804,6 +807,7 @@ public final class CommandLib implements Listener {
             registeredHelpTopics.forEach(topic -> removeHelpTopic(Bukkit.getHelpMap(), topic, plugin.getName()));
             registeredHelpTopics.clear();
             registeredCommands.clear();
+            paperLabelNodes.clear();
             registeredPermissions.clear();
 
             if (updatePlayerCommands) {
@@ -880,12 +884,12 @@ public final class CommandLib implements Listener {
                                                                                       .getRoot();
 
             for (CommandNode<?> node : registeredCommands) {
-                // Another registration may have taken the label since, and keeps it. The namespaced label names this
-                // plugin, so it is this registration's.
-                if (ownsLabel(root, knownCommands, node)) {
-                    removeRegisteredCommand(root, knownCommands, node.getName());
+                // Another registration, also of this plugin, may have taken a label since, and keeps it.
+                for (String label : Arrays.asList(node.getName(), namespace(plugin) + ":" + node.getName())) {
+                    if (ownsLabel(root, knownCommands, node, label)) {
+                        removeRegisteredCommand(root, knownCommands, label);
+                    }
                 }
-                removeRegisteredCommand(root, knownCommands, namespace(plugin) + ":" + node.getName());
 
                 // Only the Spigot dispatcher has a vanilla root of its own.
                 if (vanillaRoot != null) {
@@ -975,14 +979,15 @@ public final class CommandLib implements Listener {
     }
 
     // On Paper 1.20.6+ the command map makes a wrapper on each lookup, so the dispatcher's node tells the owner; on the
-    // vanilla dispatcher the command map's wrapper does.
-    private static boolean ownsLabel(RootCommandNode<?> root,
-                                     Map<String, org.bukkit.command.Command> knownCommands,
-                                     CommandNode<?> node) throws IllegalAccessException {
+    // vanilla dispatcher the command map's wrapper does, which wraps the node under both labels.
+    private boolean ownsLabel(RootCommandNode<?> root,
+                              Map<String, org.bukkit.command.Command> knownCommands,
+                              CommandNode<?> node,
+                              String label) throws IllegalAccessException {
         if (usesPaperCommandDispatcher()) {
-            return root.getChild(node.getName()) == node;
+            return root.getChild(label) == paperLabelNodes.get(label);
         }
-        org.bukkit.command.Command command = knownCommands.get(node.getName());
+        org.bukkit.command.Command command = knownCommands.get(label);
         return command == null || wrappedVanillaCommand(command) == node;
     }
 
