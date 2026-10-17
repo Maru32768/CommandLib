@@ -68,6 +68,22 @@ class CommandTesterTest {
     }
 
     @Test
+    void a_failed_assertion_fails_execute_when_the_error_formatter_sends_nothing() {
+        CommandTester tester = new CommandTester(new Command("check") {{
+            errorFormatter((ctx, error) -> {
+            });
+            execute(ctx -> {
+                throw new AssertionError("expected");
+            });
+        }}, "proxy.command");
+        FakeSender sender = FakeSender.player("Steve");
+
+        assertThatThrownBy(() -> tester.execute("check", sender)).isInstanceOf(AssertionError.class)
+                                                                 .hasMessage("expected");
+        assertThat(sender.getSentMessageTexts()).isEmpty();
+    }
+
+    @Test
     void player_argument_finds_online_players_ignoring_case_and_suggests_them() {
         List<Player> targets = new ArrayList<>();
         CommandTester tester = new CommandTester(new Command("find") {{

@@ -208,6 +208,23 @@ class CommandTesterTest {
         }
 
         @Test
+        void a_failed_assertion_fails_execute_when_the_error_formatter_sends_nothing() {
+            try (CommandTester tester = new CommandTester(new Command("check") {{
+                errorFormatter((ctx, error) -> {
+                });
+                execute(ctx -> {
+                    throw new AssertionError("expected");
+                });
+            }}, "test.command")) {
+                FakeSender sender = FakeSender.player("Steve");
+
+                assertThatThrownBy(() -> tester.execute("check", sender)).isInstanceOf(AssertionError.class)
+                                                                         .hasMessage("expected");
+                assertThat(sender.getSentMessageTexts()).isEmpty();
+            }
+        }
+
+        @Test
         void failure_returns_zero_and_sends_its_messages() {
             CommandTester tester = new CommandTester(new Command("count") {{
                 execute(ctx -> {
