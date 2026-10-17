@@ -1459,13 +1459,22 @@ To pin the skill to the CommandLib version your project uses, add the marketplac
 
 To switch versions, run `/plugin marketplace remove commandlib` and add it again with another tag.
 
-2. Download sources via Gradle so the skill has something to read:
+2. Download the CommandLib sources jars into the Gradle cache so the skill has something to read. In IntelliJ:
+   **View > Tool Windows > Gradle > Download Sources**. Or with Gradle, add a task that resolves them and run
+   `./gradlew downloadCommandLibSources`:
 
-```bash
-./gradlew dependencies --configuration compileClasspath
+```kotlin
+val commandlibSources by configurations.creating { isTransitive = false }
+dependencies {
+    // Your platform artifact and common, at the version you depend on.
+    commandlibSources("com.github.Maru32768.CommandLib:spigot:<version>:sources")
+    commandlibSources("com.github.Maru32768.CommandLib:common:<version>:sources")
+}
+tasks.register("downloadCommandLibSources") {
+    val files: FileCollection = commandlibSources
+    doLast { files.files }
+}
 ```
-
-Or in IntelliJ: **View > Tool Windows > Gradle > Download Sources**.
 
 ### Usage
 
