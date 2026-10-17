@@ -130,8 +130,13 @@ public final class CommandLib implements Listener {
         }
         this.commandsByLabel = commandsByLabel(commands);
 
+        // Added first, so the rollback below passes the guard of unregister.
+        INSTANCES.add(this);
         try {
             enable();
+            Bukkit.getPluginManager()
+                  .registerEvents(this, plugin);
+            registerResourcesReloadListener();
         } catch (RuntimeException e) {
             // The disable listener is not registered yet, so nothing else would remove what was added so far.
             try {
@@ -141,10 +146,6 @@ public final class CommandLib implements Listener {
             }
             throw e;
         }
-        Bukkit.getPluginManager()
-              .registerEvents(this, plugin);
-        registerResourcesReloadListener();
-        INSTANCES.add(this);
     }
 
     private static boolean isFolia() {
