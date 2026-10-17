@@ -144,11 +144,17 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
                 try {
                     arguments.parse(ctx);
                 } catch (ArgumentParseException e) {
+                    // The owner is a parent of this command for an inherited branch.
+                    boolean options = !HelpMessageAction.usableOptions(platformAdapter,
+                                                                       arguments.owner(),
+                                                                       permissionPrefix,
+                                                                       ctx)
+                                                        .isEmpty();
                     return fail(ctx,
                                 e instanceof ArgumentValidationException ? CommandError.Kind.VALIDATION
                                         : CommandError.Kind.ARGUMENT,
                                 e,
-                                HelpMessageAction.branchUsage(arguments, ctx, hasUsableOption(arguments.owner(), ctx)),
+                                HelpMessageAction.branchUsage(arguments, ctx, options),
                                 () -> e.sendMessage(ctx));
                 } catch (CommandPrerequisiteException e) {
                     // The default value of an omitted optional argument can need a prerequisite.
@@ -298,17 +304,6 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
             ctx.sendFailure(Caption.UNEXPECTED_ERROR);
             ctx.sendFailure(Caption.SEE_CONSOLE);
         }).unexpected(e);
-    }
-
-    // The options of the branch's owner, which is a parent of this command for an inherited branch.
-    private boolean hasUsableOption(CommonCommand<C, ?> owner, C ctx) {
-        for (CommandOption<?, C> option : owner.options()) {
-            String permission = option.permissionName(owner, permissionPrefix);
-            if (permission == null || platformAdapter.hasPermission(ctx, permission)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private int denied(C ctx) throws CommandFailure {

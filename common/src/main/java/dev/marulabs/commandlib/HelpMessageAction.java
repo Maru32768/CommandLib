@@ -33,13 +33,7 @@ final class HelpMessageAction<S, T, C extends CommonCommandContext<S, T>> implem
     CommandHelp help(C ctx) {
         List<Token> path = path(command, ctx);
         UsageFormatter formatter = command.usageFormatter();
-        List<CommandOption<?, C>> options = new ArrayList<>();
-        for (CommandOption<?, C> option : command.options()) {
-            String permission = option.permissionName(command, permissionPrefix);
-            if (permission == null || platformAdapter.hasPermission(ctx, permission)) {
-                options.add(option);
-            }
-        }
+        List<CommandOption<?, C>> options = usableOptions(platformAdapter, command, permissionPrefix, ctx);
         List<Token> prefix = options.isEmpty() ? List.of() : List.of(Token.options());
 
         List<Usage> usages = new ArrayList<>();
@@ -128,6 +122,24 @@ final class HelpMessageAction<S, T, C extends CommonCommandContext<S, T>> implem
     private C sourceContext(C ctx) {
         return platformAdapter.createSourceContext(ctx.getHandle()
                                                       .getSource());
+    }
+
+    /**
+     * The options of {@code owner} the sender has the permission of. The help and the usage of an argument error both
+     * show an {@code [options]} tag for them.
+     */
+    static <S, C extends CommonCommandContext<S, ?>> List<CommandOption<?, C>> usableOptions(PlatformAdapter<S, ?, C> platformAdapter,
+                                                                                             CommonCommand<C, ?> owner,
+                                                                                             String permissionPrefix,
+                                                                                             C ctx) {
+        List<CommandOption<?, C>> options = new ArrayList<>();
+        for (CommandOption<?, C> option : owner.options()) {
+            String permission = option.permissionName(owner, permissionPrefix);
+            if (permission == null || platformAdapter.hasPermission(ctx, permission)) {
+                options.add(option);
+            }
+        }
+        return options;
     }
 
     /**
