@@ -31,6 +31,8 @@ import static org.assertj.core.api.Assertions.fail;
 class VelocityIntegrationTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(VelocityIntegrationTest.class);
     private static final String SERVER_DIR = "/workspace/server";
+    // Set on the wait strategy: waitingFor replaces the strategy, and with it a timeout set on the container before.
+    private static final Duration STARTUP_TIMEOUT = Duration.ofMinutes(8);
 
     @Test
     void commandlib_commands_on_a_velocity_proxy_reach_a_player_through_the_proxy() throws Exception {
@@ -57,7 +59,8 @@ class VelocityIntegrationTest {
                                                                                                                    + System.getProperty("commandlib.serverLaunchArgs")
                                                                                                                    + " nogui")
                                                                                               .waitingFor(Wait.forLogMessage(".*Done \\(.*\\)! For help, type \"help\".*",
-                                                                                                                             1));
+                                                                                                                             1)
+                                                                                                              .withStartupTimeout(STARTUP_TIMEOUT));
              GenericContainer<?> proxy = container(image, targetName + "-proxy", cpuLimit).withNetwork(network)
                                                                                           .withExposedPorts(25565)
                                                                                           .withCopyFileToContainer(MountableFile.forHostPath(testPluginJar),
@@ -72,7 +75,8 @@ class VelocityIntegrationTest {
                                                                                                        "-jar",
                                                                                                        "velocity.jar")
                                                                                           .waitingFor(Wait.forLogMessage(".*Done \\(.*\\)!.*",
-                                                                                                                         1))) {
+                                                                                                                         1)
+                                                                                                          .withStartupTimeout(STARTUP_TIMEOUT))) {
             backend.start();
             proxy.start();
 
@@ -152,8 +156,7 @@ class VelocityIntegrationTest {
             HostConfig hostConfig = cmd.getHostConfig() == null ? HostConfig.newHostConfig() : cmd.getHostConfig();
             cmd.withHostConfig(hostConfig.withNanoCPUs(Math.round(cpuLimit * 1_000_000_000L)));
         })
-                                                                   .withLogConsumer(new Slf4jLogConsumer(LOGGER).withPrefix(logPrefix))
-                                                                   .withStartupTimeout(Duration.ofMinutes(8));
+                                                                   .withLogConsumer(new Slf4jLogConsumer(LOGGER).withPrefix(logPrefix));
     }
 
     // The names of the children of the root literal `literal` in the last command tree the bot received.
