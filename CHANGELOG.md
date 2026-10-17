@@ -60,7 +60,9 @@ This file lists the changes in each CommandLib release that affect plugin and mo
 - `TextComponentBuilder`, `TranslatableComponentBuilder`, `ComponentBuilder`, `sendMessageWithOption` and
   `MessageOption` are removed. Build a `RichText` (`TextRichText` or `TranslatableRichText`) and pass it to
   `sendMessage`, `sendSuccess`, `sendWarn` or `sendFailure`.
-- `sendComponent` is removed. Pass the native component to `sendMessage`.
+- `sendComponent` is removed. On a platform `CommandContext`, pass the native component to `sendMessage`. In code
+  generic over `CommonCommandContext`, build a `RichText` instead: there the component resolves to
+  `sendMessage(Object)`, which sends its `toString()`.
 - Forge / NeoForge / Fabric: the `boolean allowLogging` overloads of `sendMessage` (with a `String` or a component),
   `sendWarn` and `sendFailure` are removed. Drop the flag; to broadcast a message to operators, call
   `sendSuccess(message, true)`.
