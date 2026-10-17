@@ -54,15 +54,13 @@ public final class CommandOption<T, C extends CommonCommandContext<?, ?>> {
     // Null to take the default of the command.
     private @Nullable DefaultPermission defaultPermission;
 
-    /**
-     * An option that takes a value of {@code type}, which {@code parser} reads from the context by the option's
-     * internal argument name.
-     */
-    public CommandOption(@NotNull String name,
-                         @Nullable Character shortName,
-                         @NotNull T defaultValue,
-                         @NotNull ArgumentType<?> type,
-                         @NotNull BiFunction<C, String, T> parser) {
+    // An option that takes a value of type, which parser reads from the context by the option's internal argument
+    // name. Users make options with Options, which keeps that name internal.
+    CommandOption(String name,
+                  @Nullable Character shortName,
+                  T defaultValue,
+                  ArgumentType<?> type,
+                  BiFunction<C, String, T> parser) {
         this(name,
              shortName,
              Objects.requireNonNull(defaultValue),
