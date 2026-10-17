@@ -465,6 +465,18 @@ class CommandTesterTest {
             assertThat(sender.getSentMessageTexts()).containsExactly("No player was found", "No entity was found");
         }
 
+        // One node would parse both branches with the vanilla EntityArgument of one of them.
+        @Test
+        void player_and_entities_arguments_cannot_share_a_node() {
+            assertThatThrownBy(() -> new CommandTester(new Command("x") {{
+                argument(new PlayerArgument("target")).execute((target, ctx) -> {
+                });
+                argument(new EntitiesArgument("target"),
+                         new StringArgument("reason")).execute((target, reason, ctx) -> {
+                         });
+            }}, "test")).hasMessageContaining("parse differently");
+        }
+
         @Test
         void syntax_exception_with_input_sends_the_context_line() {
             FakeSender sender = FakeSender.console();
