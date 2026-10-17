@@ -59,7 +59,7 @@ below are of the snippets on this page, which are written compactly and not form
 magnitude only.
 
 Every CommandLib variant is registered the same way, `CommandLib.register(plugin, command)` in `onEnable`, and tested
-the same way, `new CommandTester(() -> command, "myplugin.command")`. The annotated variants are parsed first with
+the same way, `new CommandTester(() -> command, "example.command")`. The annotated variants are parsed first with
 `AnnotatedCommands.parse(new AnnotatedBanCommand())` and need `-parameters`, or `@Name` on each argument.
 
 ## 1. Admin command with options
@@ -96,7 +96,7 @@ public final class AnnotatedBanCommand {
 ```
 
 The generated help lists the options with their descriptions, `/ban -s -r griefing Steve` and
-`/ban --silent --reason "being rude" Alex` work, and the permission node `myplugin.command.ban` is registered with
+`/ban --silent --reason "being rude" Alex` work, and the permission node `example.command.ban` is registered with
 `OP` as its default ([snapshot](../examples/src/test/resources/snapshots/ban.snap)).
 
 ```java
@@ -259,7 +259,7 @@ argument(ObjectArgument<MutableSet<String>>("team") { teams.byName() }) { team -
 
 Fluent: `argument(new ObjectArgument<>("team", teams::byName)).child(team -> new Command("add") {{ ... }}).child(...)`.
 Each child reads the team through its `ArgRef`, `team.get()`, and gets its own permission node
-(`myplugin.command.team.add`) and help line ([snapshot](../examples/src/test/resources/snapshots/team.snap)).
+(`example.command.team.add`) and help line ([snapshot](../examples/src/test/resources/snapshots/team.snap)).
 With annotations, a placeholder in the path is the argument the child follows, and each method takes its value as the
 parameter of the same name
 ([`AnnotatedTeamCommand`](../examples/src/main/java/dev/marulabs/commandlib/examples/team/AnnotatedTeamCommand.java),
