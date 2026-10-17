@@ -89,9 +89,9 @@ route, so `/config <key>` also needs `myplugin.command.config`.
 ## Permission export
 
 `permissionsMarkdown()` and `permissionsJson()` list every node CommandLib registers and checks for the commands, built
-by the [node rules](permissions.md#node-names): one per command and child command and one per argument branch, in the
-order of the command tree, with the default after [inheritance](permissions.md#defaults). Options have no permission
-nodes of their own. A node set with `permission("...")` is listed as set, once for each route that uses it.
+by the [node rules](permissions.md#node-names): one per command and child command, one per option that calls
+`permission(...)`, and one per argument branch, in the order of the command tree, with the default after
+[inheritance](permissions.md#defaults). A node set with `permission("...")` is listed as set, once for each route that uses it.
 
 ```markdown
 | Permission | Default | Route | Description |
