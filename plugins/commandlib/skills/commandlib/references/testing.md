@@ -145,8 +145,9 @@ class InfoCommandTest {
 }
 ```
 
-Arguments backed by non-Bukkit static registries, such as `EnchantmentArgument`
-or `PotionEffectArgument`, need `MockedStatic` for their respective classes.
+In spigot-testing, arguments that read the Bukkit `Registry`, such as
+`SoundArgument`, `BiomeArgument`, `AttributeArgument` and `EntityTypeArgument`,
+need `Mockito.mockStatic(Bukkit.class)` declared before the `CommandTester`.
 
 ## Paper ArgumentTypes
 

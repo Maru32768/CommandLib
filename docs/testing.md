@@ -78,7 +78,7 @@ an unexpected error and then rethrown by `execute`, so the test fails.
 |---|---|---|
 | `spigot-testing` | `withFakePlayer(Player)`, `withFakeEntity(name, Entity)`, `withFakeWorld(key, World)` | Values for player / entity selectors (names, `@s`, `@p`, `@r`, `@a`, `@e`) and `WorldArgument` |
 | `paper-testing` | `withFakePlayer`, `withFakeEntity`, `withFakeWorld(key, World)`, `withFakeBlockData`, `withFakeItemStack`, `withFakeRegistryValue(registryKey, key, value)` | Values for player / entity selectors (names, `@s`, `@p`, `@r`, `@a`, `@e`) and the value each other stubbed Paper argument returns; see [registry values on Paper](#registry-values-on-paper) |
-| `forge-testing` / `neoforge-testing` / `fabric-testing` | `withPlayer(FakeSender)`, `withLevel(ServerLevel)`, `withServer(Consumer<MinecraftServer>)` | Online players for selectors, `GameProfileArgument`, `UUIDArgument`; levels for `WorldArgument`; any other stub of the server mock, such as `getScoreboard()`, `getAdvancements()`, `getRecipeManager()` or the loot tables |
+| `forge-testing` / `neoforge-testing` / `fabric-testing` | `withPlayer(FakeSender)`, `withLevel(ServerLevel)`, `withServer(Consumer<MinecraftServer>)` | Online players for selectors, `GameProfileArgument`, `UUIDArgument`; levels for `WorldArgument` (a mock overworld, the level of every source, unless one is added); any other stub of the server mock, such as `getScoreboard()`, `getAdvancements()`, `getRecipeManager()` or the loot tables |
 | `velocity-testing` | `withFakePlayer(FakeSender)`, `withFakeServer(name)`, `proxy()` | Players and servers of the fake `ProxyServer` for `PlayerArgument` and `ServerArgument` |
 
 ### Registry values on Paper
@@ -173,15 +173,15 @@ The factory is any `Supplier<CommandTester>`, so it can use `CommandTester.build
 | `permissions` | `{}` (every permission) | Grants only these nodes |
 | `denyPermissions` | `{}` | Denies these nodes, even to operators |
 
-A `FakeSender` parameter without `@Sender` is a non-operator player named `Player` with every permission. In
-`modded-testing`, two injected players with the same name fail, so give them distinct `@Sender` names. In
-`spigot-testing`, `paper-testing` and `velocity-testing`, every injected player is also registered with `withFakePlayer`
-(`withPlayer` in the Forge / NeoForge / Fabric artifacts), so player and entity arguments resolve it by name. Build senders that need more, such as a UUID or a locale, with
-`FakeSender.playerBuilder(name)` (`FakeSender.player(name, uuid)` in `velocity-testing`) in the test.
+A `FakeSender` parameter without `@Sender` is a non-operator player named `Player` with every permission. In every
+artifact except `common-testing`, every injected player is also registered with `withFakePlayer` (`withPlayer` in the
+Forge / NeoForge / Fabric artifacts), so player and entity arguments resolve it by name, and the extension refuses a
+second injected player of the same name, so give each player parameter its own `@Sender` name. Build senders that need
+more, such as a UUID or a locale, with `FakeSender.playerBuilder(name)` (`FakeSender.player(name, uuid)` in
+`velocity-testing`) in the test.
 
-In `spigot-testing`, `paper-testing` and `velocity-testing`, the extension refuses a second injected player with a
-name already registered, so give each player parameter its own `@Sender` name. It also refuses parameters of
-`@BeforeAll` methods and constructors, since every test of the class would share their tester.
+Every artifact's extension refuses parameters of `@BeforeAll` methods and constructors, since every test of the class
+would share their tester.
 
 ## `FakeSender`
 
@@ -192,8 +192,9 @@ name already registered, so give each player parameter its own `@Sender` name. I
 | `FakeSender.playerBuilder(name)`, `consoleBuilder()` | Builders for the same senders |
 | `FakeSender.unknown()` (`common-testing` only) | A sender of unknown type without permissions |
 
-Adjust a sender with `op(boolean)`, `permissions(nodes...)` (only these nodes), `denyPermissions(nodes...)` (all but
-these), `uniqueId(uuid)`, `locale(tag)` (a `Locale` in `velocity-testing`), and `name(name)` (not in
+Adjust a sender with `op(boolean)`, `permissions(nodes...)` (grants only these nodes, replacing an earlier list),
+`denyPermissions(nodes...)` (denies these nodes; calls add up, and a denied node wins over a granted one),
+`uniqueId(uuid)`, `locale(tag)` (a `Locale` in `velocity-testing`), and `name(name)` (not in
 `common-testing`). The builders have the same methods. `velocity-testing` has no builders and only `permissions`,
 `denyPermissions` and `locale`. In `modded-testing` the console passes every permission check, as on a server, so
 `permissions` and `denyPermissions` throw for it. A player's locale decides the language of CommandLib's messages
@@ -241,10 +242,13 @@ Other helpers: `asSender()` returns the Mockito `CommandSender` mock (`spigot-te
 ```java
 @Test
 void key_branch_needs_its_own_node() {
-    FakeSender sender = FakeSender.player("Alice")
+    FakeSender denied = FakeSender.player("Alice")
                                   .denyPermissions("myplugin.command.config.key");
+    FakeSender allowed = FakeSender.player("Bob");
     try (CommandTester tester = new CommandTester(ConfigCommand::new, "myplugin.command")) {
-        assertThatThrownBy(() -> tester.execute("config difficulty", sender)).isInstanceOf(RuntimeException.class);
+        assertThatThrownBy(() -> tester.execute("config difficulty", denied)).hasCauseInstanceOf(CommandSyntaxException.class);
+        // The control: the same input runs with the node, so the denial is what rejected it.
+        tester.execute("config difficulty", allowed);
     }
 }
 ```

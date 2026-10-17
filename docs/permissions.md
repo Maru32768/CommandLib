@@ -297,5 +297,6 @@ FakeSender denied = FakeSender.player("Bob")
                               .denyPermissions("myplugin.command.config.key");
 ```
 
-The testing artifacts do not apply `DefaultPermission` defaults: grant or deny nodes explicitly. See
+The testing artifacts do not apply `DefaultPermission` defaults, except `velocity-testing`, where a node the sender
+leaves unset is granted only if its default is `ALL`, as on a proxy: grant or deny nodes explicitly. See
 [testing](testing.md).
