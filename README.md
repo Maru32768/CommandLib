@@ -509,6 +509,7 @@ CommandLib provides command-level test utilities for downstream plugins.
 
 ```kotlin
 dependencies {
+    // Pick the one line that matches your platform artifact.
     testImplementation("com.github.Maru32768.CommandLib:common-testing:latest.release")
     testImplementation("com.github.Maru32768.CommandLib:spigot-testing:latest.release")
     testImplementation("com.github.Maru32768.CommandLib:paper-testing:latest.release")
