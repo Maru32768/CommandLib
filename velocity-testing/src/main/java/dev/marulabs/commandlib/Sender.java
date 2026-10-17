@@ -8,8 +8,8 @@ import java.lang.annotation.Target;
 
 /**
  * Configures a {@link FakeSender} parameter that {@link CommandLibExtension} injects. Without it, the parameter is a
- * player named {@code Player} that has every permission. Velocity has no operators, so unlike the other testing
- * artifacts there is no {@code op}.
+ * player named {@code Player} that has every permission; injected players need distinct names, so a test gets only one
+ * such parameter. Velocity has no operators, so unlike the other testing artifacts there is no {@code op}.
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
