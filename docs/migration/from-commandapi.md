@@ -310,8 +310,9 @@ class ScanCommand extends Command {
 
 See [testing](../testing.md).
 
-## Not available yet
+## Not available
 
-Tracked in the roadmap: per-sender executor variants, and the arguments listed as missing in the [catalog](../arguments.md). Requirement-based visibility is `visibleWhen`, see [permissions and requirements](#permissions-and-requirements).
+Per-sender executor variants. The arguments listed as missing in the [catalog](../arguments.md) are tracked in the
+roadmap. Requirement-based visibility is `visibleWhen`, see [permissions and requirements](#permissions-and-requirements).
 
 See also: the [comparison of seven use cases](../comparison.md), [Migrating from Cloud](from-cloud.md), [Lamp](from-lamp.md), [ACF](from-acf.md).

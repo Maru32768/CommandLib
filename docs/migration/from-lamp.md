@@ -381,10 +381,8 @@ providers are `addSuggestionProviderSuspend { sb -> }`. Functions with default p
 `new CommandTester(GiveCommand::new, "myplugin.command")`, then `tester.execute("give Steve 3", sender)`. See
 [testing](../testing.md).
 
-## Not available yet
+## Not available
 
-Tracked in the roadmap: registration
-hooks, response handlers, and global parameter types and suggestion
-providers.
+Registration hooks, response handlers, and global parameter types and suggestion providers.
 
 See also: the [comparison of seven use cases](../comparison.md), [Migrating from CommandAPI](from-commandapi.md), [Cloud](from-cloud.md), [ACF](from-acf.md).

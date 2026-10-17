@@ -319,11 +319,11 @@ fields of `JoinCommand` annotated `@Dependency` (from `dev.marulabs.commandlib.a
 `new CommandTester(ResidenceCommand::new, "myplugin.command")`, then `tester.execute("res list Steve", sender)`. See
 [testing](../testing.md).
 
-## Not available yet
+## Not available
 
-Tracked in the roadmap: reusable named conditions for fluent commands (annotated commands have `@Condition`, see
-[conditions](#conditions)), catch-unknown handlers, hidden commands, root aliases for subcommands, and global contexts
-and completions by type. Asynchronous execution is `executeAsync(...)`, see
+Catch-unknown handlers, hidden commands, root aliases for subcommands, and global contexts and completions by type.
+Reusable named conditions for fluent commands are tracked in the roadmap (annotated commands have `@Condition`, see
+[conditions](#conditions)). Asynchronous execution is `executeAsync(...)`, see
 [execution](../execution.md#async-executors).
 
 See also: the [comparison of seven use cases](../comparison.md), [Migrating from CommandAPI](from-commandapi.md), [Cloud](from-cloud.md), [Lamp](from-lamp.md).
