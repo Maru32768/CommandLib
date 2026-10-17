@@ -21,6 +21,11 @@ dependencies {
     compileOnly("com.mojang:brigadier:1.0.18")
 }
 
+// The fixture classes the Spigot and Paper suites share.
+sourceSets.main {
+    java.srcDir("../bukkit/src/main/java")
+}
+
 configure<JavaPluginExtension> {
     toolchain.languageVersion.set(JavaLanguageVersion.of(11))
 }

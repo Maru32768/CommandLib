@@ -64,6 +64,7 @@ Shared fixture code is split by responsibility:
 
 ```text
 integration-test/shared/core
+integration-test/shared/bukkit
 integration-test/shared/spigot
 integration-test/shared/paper
 integration-test/shared/folia
@@ -71,8 +72,9 @@ integration-test/shared/modded
 ```
 
 `shared/core` is limited to platform-neutral result and report helpers so the Forge test mod can reuse it
-without inheriting Bukkit lifecycle or command-dispatch assumptions. Spigot and Paper cases are intentionally separate
-even when they currently look similar.
+without inheriting Bukkit lifecycle or command-dispatch assumptions. `shared/bukkit` holds the fixtures the Spigot and
+Paper suites share; `shared/spigot` and `shared/paper` hold the cases that differ by platform. The Folia suite uses
+only `shared/core` and `shared/folia`.
 
 The shared Gradle script for current Bukkit-compatible plugin fixtures is:
 

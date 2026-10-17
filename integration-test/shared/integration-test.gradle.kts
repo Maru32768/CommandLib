@@ -190,6 +190,10 @@ configure<JavaPluginExtension> {
             "../../../shared/core/src/main/java",
             "../../../shared/$testPluginSuite/src/main/java"
         )
+        // Fixtures the Spigot and Paper suites share; Folia's smoke suite does not use the Bukkit scheduler they need.
+        if (testPluginSuite != "folia") {
+            java.srcDir("../../../shared/bukkit/src/main/java")
+        }
         resources.srcDirs("../../../../$commandlibModule/src/main/resources", "../../../../common/src/main/resources")
     }
 }
