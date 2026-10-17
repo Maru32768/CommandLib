@@ -158,6 +158,19 @@ class LightweightArgumentExecutionTest {
     }
 
     @Test
+    void colorArgumentRejectsResetAndFormats() {
+        CommandTester tester = new CommandTester(() -> new Command("color") {{
+            argument(new ChatColorArgument("color")).execute((color, ctx) -> ctx.sendMessage(color.toString()));
+        }}, "test.command");
+        FakeSender sender = FakeSender.player("Steve");
+
+        assertThatThrownBy(() -> tester.execute("color bold", sender)).hasMessageContaining("Invalid color 'bold'");
+        tester.execute("color reset", sender);
+
+        assertThat(sender.getSentMessageTexts()).containsExactly("reset is not a color");
+    }
+
+    @Test
     void paperLocationArgumentExecutes() {
         CommandTester tester = new CommandTester(() -> new Command("args") {{
             argument(new LocationArgument("location")).execute((location, ctx) -> {

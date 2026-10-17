@@ -26,8 +26,8 @@ import io.papermc.paper.math.Position;
 import io.papermc.paper.registry.RegistryKey;
 import net.kyori.adventure.chat.SignedMessage;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
+import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -55,6 +55,7 @@ import org.mockito.Mockito;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -325,8 +326,6 @@ public final class CommandTester implements AutoCloseable {
                      .thenReturn(word(CommandTester::gameMode));
         argumentTypes.when(ArgumentTypes::scoreboardDisplaySlot)
                      .thenReturn(word(DisplaySlot.NAMES::value));
-        argumentTypes.when(ArgumentTypes::namedColor)
-                     .thenReturn(word(NamedTextColor.NAMES::value));
         argumentTypes.when(ArgumentTypes::namespacedKey)
                      .thenReturn(word(NamespacedKey::fromString));
         argumentTypes.when(ArgumentTypes::world)
@@ -390,6 +389,24 @@ public final class CommandTester implements AutoCloseable {
         };
         vanillaArgumentTypes.when(VanillaArgumentTypes::compoundTag)
                             .thenReturn(compoundTag);
+        // An enum with vanilla ChatFormatting's names, like the value of the vanilla color argument.
+        ArgumentType<ChatColor> color = reader -> {
+            int start = reader.getCursor();
+            String token = readUntilWhitespace(reader);
+            ChatColor format = Arrays.stream(ChatColor.values())
+                                     .filter(x -> x.isColor() || x == ChatColor.RESET)
+                                     .filter(x -> x.name()
+                                                   .equalsIgnoreCase(token))
+                                     .findFirst()
+                                     .orElse(null);
+            if (format == null) {
+                reader.setCursor(start);
+                throw syntaxError("Invalid color '" + token + "'", reader);
+            }
+            return format;
+        };
+        vanillaArgumentTypes.when(VanillaArgumentTypes::color)
+                            .thenReturn(color);
         return vanillaArgumentTypes;
     }
 

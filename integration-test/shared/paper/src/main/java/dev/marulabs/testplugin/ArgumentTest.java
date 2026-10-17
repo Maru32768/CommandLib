@@ -44,6 +44,7 @@ public final class ArgumentTest extends TestBase {
         commands.addAll(biomeArgument());
         commands.addAll(booleanArgument());
         commands.addAll(chatColorArgument());
+        commands.addAll(chatColorArgumentReset());
         commands.addAll(componentArgument());
         commands.addAll(doubleArgument());
         commands.addAll(doubleRangeArgument());
@@ -244,6 +245,27 @@ public final class ArgumentTest extends TestBase {
         }});
 
         return List.of(buildCommand(command, name + " dark_red"));
+    }
+
+    /**
+     * NamedTextColor has no reset, so reset is an argument error, not the NullPointerException of Paper's namedColor().
+     */
+    public List<String> chatColorArgumentReset() {
+        String name = getMethodName();
+        String key = getKey();
+
+        putCommandNotExecutedResult(key);
+        command.addChildren(new Command(name) {{
+            argument(new ChatColorArgument("a")).execute((a, ctx) -> {
+                putResult(new TestResult(key, TestStatus.FAILED, "reset was parsed as " + a));
+            });
+            errorFormatter((ctx, error) -> putResult(key,
+                                                     error.kind()
+                                                          .name(),
+                                                     "ARGUMENT"));
+        }});
+
+        return List.of(buildCommand(command, name + " reset"));
     }
 
     public List<String> componentArgument() {

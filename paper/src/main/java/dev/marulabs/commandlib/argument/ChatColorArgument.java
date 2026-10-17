@@ -2,18 +2,24 @@ package dev.marulabs.commandlib.argument;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.marulabs.commandlib.Argument;
+import dev.marulabs.commandlib.Caption;
 import dev.marulabs.commandlib.CommandContext;
 import dev.marulabs.commandlib.exception.ArgumentParseException;
-import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
+import dev.marulabs.commandlib.util.brigadier.VanillaArgumentTypes;
 import net.kyori.adventure.text.format.NamedTextColor;
 
+import java.util.Locale;
+import java.util.Map;
+
 /**
- * A chat color by its vanilla name, such as {@code dark_red}, read by Paper's {@link ArgumentTypes#namedColor()}.
+ * A chat color in the vanilla {@code color} syntax, which the client validates and suggests: a color name such as
+ * {@code dark_red}. Formats such as {@code bold} are rejected while parsing. {@code reset}, which the client accepts,
+ * fails with {@code reset is not a color}, since {@link NamedTextColor} has no reset.
  */
-@SuppressWarnings("UnstableApiUsage")
 public class ChatColorArgument extends Argument<NamedTextColor, ChatColorArgument> {
     public ChatColorArgument(String name) {
-        super(name, ArgumentTypes.namedColor());
+        // Not Paper's namedColor(), which throws a NullPointerException while parsing reset.
+        super(name, VanillaArgumentTypes.color());
     }
 
     @Override
@@ -23,7 +29,13 @@ public class ChatColorArgument extends Argument<NamedTextColor, ChatColorArgumen
 
     @Override
     protected NamedTextColor parseImpl(CommandContext ctx) throws ArgumentParseException, CommandSyntaxException {
-        return ctx.getHandle()
-                  .getArgument(name(), NamedTextColor.class);
+        String format = ((Enum<?>) ctx.getHandle()
+                                      .getArgument(name(), Object.class)).name()
+                                                                         .toLowerCase(Locale.ROOT);
+        NamedTextColor color = NamedTextColor.NAMES.value(format);
+        if (color == null) {
+            throw new ArgumentParseException(Caption.NOT_A_COLOR, Map.of("value", format));
+        }
+        return color;
     }
 }

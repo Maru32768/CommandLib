@@ -19,6 +19,14 @@ public final class VanillaArgumentTypes {
         return create("net.minecraft.commands.arguments.CompoundTagArgument", "compoundTag");
     }
 
+    /**
+     * The vanilla {@code color} argument. Its parsed value is a vanilla {@code ChatFormatting}, an enum whose constant
+     * names are the color names in upper case, and {@code RESET}.
+     */
+    public static ArgumentType<?> color() {
+        return create("net.minecraft.commands.arguments.ColorArgument", "color");
+    }
+
     private static ArgumentType<?> create(String className, String factory) {
         try {
             return (ArgumentType<?>) Class.forName(className)

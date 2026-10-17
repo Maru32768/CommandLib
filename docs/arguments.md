@@ -208,7 +208,7 @@ Notes:
 | `ObjectiveArgument` | Bukkit `Objective` / vanilla `Objective` | objective name; `scoreboard(Supplier)` selects another scoreboard | `ObjectiveArgument` | — | equivalent | equivalent | equivalent |
 | `ScoreboardDisplaySlotArgument` | Bukkit `DisplaySlot` / vanilla `DisplaySlot` (the `int` slot before 1.20.2) | vanilla `scoreboard_slot`: `list`, `sidebar`, `below_name` (`belowName` before 1.20.2), `sidebar.team.red`; validated and suggested by the client | `ScoreboardSlotArgument` | `scoreboardDisplaySlot()` | partial | equivalent | equivalent |
 | `GameModeArgument` | Bukkit `GameMode` / vanilla `GameType` | `survival`, `creative`, `adventure`, `spectator` | — | `gameMode()` | equivalent | equivalent | equivalent |
-| `ChatColorArgument` | Spigot: legacy `ChatColor`; Paper: `NamedTextColor`; Forge / NeoForge: `ChatFormatting` | vanilla `color`: names such as `dark_red`, and `reset`; validated and suggested by the client | `ChatColorArgument` | `namedColor()` | equivalent | equivalent | equivalent |
+| `ChatColorArgument` | Spigot: legacy `ChatColor`; Paper: `NamedTextColor`; Forge / NeoForge: `ChatFormatting` | vanilla `color`: names such as `dark_red`, and `reset` (not on Paper); validated and suggested by the client | `ChatColorArgument` | `namedColor()` | equivalent | equivalent | equivalent |
 | objective criteria | — | — | `ObjectiveCriteriaArgument` | `objectiveCriteria()` | missing | missing | missing |
 | math operation | — | — | `MathOperationArgument` | — | missing | missing | missing |
 
@@ -218,13 +218,14 @@ Notes:
   suggestions and `Unknown team` error). Paper's and the custom-scoreboard variants are a word argument with
   CommandLib's suggestions and the "Incorrect argument for command" error.
 - `ScoreboardDisplaySlotArgument` and `ChatColorArgument` use vanilla's `scoreboard_slot` and `color` argument types,
-  through NMS on Spigot and Paper's `scoreboardDisplaySlot()` and `namedColor()` on Paper. The client validates and
+  through NMS on Spigot, and Paper's `scoreboardDisplaySlot()` and vanilla's `color` on Paper. The client validates and
   suggests them, and an unknown name is vanilla's `Unknown display slot` / `Invalid color` error while parsing.
 - The slot names are the server's: `belowName` before 1.20.2, `below_name` from then. Bukkit's `DisplaySlot` has no
   team slots on Spigot 1.16.5–1.18.2, so there the client accepts `sidebar.team.<color>` but the command fails with
   `<slot> is not a display slot of this server`, hence `partial`.
 - `ChatColorArgument` rejects formats such as `bold`, like vanilla's color argument. Spigot returns `ChatColor.RESET`
-  for `reset`; `NamedTextColor` has no reset, and what Paper's `namedColor()` does with `reset` has not been checked.
+  for `reset`. `NamedTextColor` has no reset, so on Paper `reset` fails with `reset is not a color` when the command
+  runs. Paper's `namedColor()` is not used, because it throws a `NullPointerException` while parsing `reset`.
 - On Forge / NeoForge, `ObjectiveArgument` is vanilla's `objective` argument, like `TeamArgument`: without
   `scoreboard(...)` it reads the server scoreboard with vanilla's suggestions and `Unknown scoreboard objective`
   error. `ScoreboardDisplaySlotArgument` and `ChatColorArgument` are vanilla's `scoreboard_slot` and `color`, and

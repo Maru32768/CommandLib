@@ -166,6 +166,7 @@ message is not translatable either) and the option errors, so they are captions.
 | `UNKNOWN_SOUND` | `commandlib.argument.unknown_sound` | {value} is not a known sound |
 | `UNKNOWN_REGISTRY_ENTRY` | `commandlib.argument.unknown_registry_entry` | {value} is not a known registry entry |
 | `UNKNOWN_DISPLAY_SLOT` | `commandlib.argument.unknown_display_slot` | {value} is not a display slot of this server |
+| `NOT_A_COLOR` | `commandlib.argument.not_a_color` | {value} is not a color |
 | `TICK_COUNT_TOO_LOW` | `commandlib.argument.tick_count_too_low` | Tick count must not be less than {minimum}, found {ticks} |
 | `OPTION_MISSING` | `commandlib.option.missing` | Missing required option {option}. |
 | `OPTION_REQUIRES` | `commandlib.option.requires` | {option} requires {required}. |

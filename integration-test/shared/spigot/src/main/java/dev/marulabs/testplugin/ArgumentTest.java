@@ -40,6 +40,7 @@ public final class ArgumentTest extends TestBase {
         commands.addAll(biomeArgument());
         commands.addAll(booleanArgument());
         commands.addAll(chatColorArgument());
+        commands.addAll(chatColorArgumentReset());
         commands.addAll(componentArgument());
         commands.addAll(doubleArgument());
         commands.addAll(doubleRangeArgument());
@@ -239,6 +240,22 @@ public final class ArgumentTest extends TestBase {
         }});
 
         return List.of(buildCommand(command, name + " dark_red"));
+    }
+
+    public List<String> chatColorArgumentReset() {
+        String name = getMethodName();
+        String key = getKey();
+
+        putCommandNotExecutedResult(key);
+        command.addChildren(new Command(name) {{
+            argument(new ChatColorArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
+                putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
+            })).execute((a, ctx) -> {
+                putResult(key, a.name(), "RESET");
+            });
+        }});
+
+        return List.of(buildCommand(command, name + " reset"));
     }
 
     public List<String> componentArgument() {

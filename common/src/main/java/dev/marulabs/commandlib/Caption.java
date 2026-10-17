@@ -55,6 +55,8 @@ public final class Caption {
     public static final Caption UNKNOWN_REGISTRY_ENTRY = builtIn("commandlib.argument.unknown_registry_entry");
     /** {@code {value} is not a display slot of this server} */
     public static final Caption UNKNOWN_DISPLAY_SLOT = builtIn("commandlib.argument.unknown_display_slot");
+    /** {@code {value} is not a color} */
+    public static final Caption NOT_A_COLOR = builtIn("commandlib.argument.not_a_color");
     /** {@code Tick count must not be less than {minimum}, found {ticks}} */
     public static final Caption TICK_COUNT_TOO_LOW = builtIn("commandlib.argument.tick_count_too_low");
     /** {@code Missing required option {option}.} */
