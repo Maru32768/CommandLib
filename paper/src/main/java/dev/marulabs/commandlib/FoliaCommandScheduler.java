@@ -11,6 +11,7 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.lang.reflect.Method;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.function.BooleanSupplier;
@@ -34,6 +35,9 @@ final class FoliaCommandScheduler implements CommandScheduler {
      * Whether the server is Folia.
      */
     static final boolean ON_FOLIA = IS_GLOBAL_TICK_THREAD != null;
+    // Folia's TickRegionScheduler#getCurrentRegion: the region the calling thread ticks, null on the global region thread
+    // and outside the tick loop, such as while plugins are enabled.
+    private static final @Nullable Method GET_CURRENT_REGION = findGetCurrentRegion();
 
     private final Supplier<Plugin> plugin;
     private final BooleanSupplier globalTickThread;
@@ -114,8 +118,34 @@ final class FoliaCommandScheduler implements CommandScheduler {
                              .runNow(plugin(), ignored -> task.run());
     }
 
+    /**
+     * Whether the calling thread ticks a region other than the global region. Always false on Paper.
+     */
+    static boolean onRegionThread() {
+        if (GET_CURRENT_REGION == null) {
+            return false;
+        }
+        try {
+            return GET_CURRENT_REGION.invoke(null) != null;
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
     private Plugin plugin() {
         return Objects.requireNonNull(plugin.get());
+    }
+
+    @Nullable
+    private static Method findGetCurrentRegion() {
+        try {
+            return Class.forName("io.papermc.paper.threadedregions.TickRegionScheduler",
+                                 false,
+                                 FoliaCommandScheduler.class.getClassLoader())
+                        .getMethod("getCurrentRegion");
+        } catch (ReflectiveOperationException e) {
+            return null;
+        }
     }
 
     @Nullable

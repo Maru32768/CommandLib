@@ -180,7 +180,9 @@ instead would leave the hooks unrun with nothing reported.
 Elsewhere in the paper module: the command tree update and the function work were already scheduled on the global
 region scheduler; Folia's `Commands#sendCommands` sends the tree through the player's own scheduler, so
 `updateCommands()` from the global region or another region thread is safe, and `refresh` accepts any tick thread
-(`Bukkit.isPrimaryThread()` is true on each of them on Folia). Folia runs no data pack functions and has no data reload,
+(`Bukkit.isPrimaryThread()` is true on each of them on Folia). `register` and `unregister` change state every region shares, so they also refuse a thread
+that ticks a region (`TickRegionScheduler#getCurrentRegion` is not null); the global region and the server thread that
+enables and disables plugins pass, since `RegionizedServer#isGlobalTickThread` is false outside the tick loop. Folia runs no data pack functions and has no data reload,
 so `ServerFunctions` does not compile them again there, and a registration that missed the `COMMANDS` event logs a
 warning instead of calling `Bukkit.reloadData()`. The spigot module throws `UnsupportedOperationException` from
 `CommandLib.register` on Folia.

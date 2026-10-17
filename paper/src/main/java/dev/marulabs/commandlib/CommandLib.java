@@ -140,7 +140,7 @@ public final class CommandLib implements Listener {
                                       @NotNull CommandDefaults<CommandContext> defaults,
                                       @NotNull Collection<? extends Command> commands) {
         Objects.requireNonNull(plugin);
-        requirePrimaryThread("Commands must be registered");
+        requireGlobalThread("Commands must be registered");
         defaults.applyTo(commands);
         CommandSet commandSet = CommandSet.of(permissionPrefix,
                                               commands,
@@ -385,12 +385,20 @@ public final class CommandLib implements Listener {
         }
     }
 
+    // On Folia register and unregister change state shared by every region, so a region thread is refused too. The
+    // server's own thread, which enables and disables plugins, is not a region thread.
+    private static void requireGlobalThread(String action) {
+        if (!Bukkit.isPrimaryThread() || FoliaCommandScheduler.onRegionThread()) {
+            throw new IllegalStateException(action + " on the main server thread (on Folia, the global region thread)");
+        }
+    }
+
     /**
      * Removes all commands and permissions registered by this instance.
      * Must be called on the main server thread, on Folia the global region thread.
      */
     public void unregister() {
-        requirePrimaryThread("Commands must be unregistered");
+        requireGlobalThread("Commands must be unregistered");
         unregister(true);
     }
 
