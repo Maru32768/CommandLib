@@ -228,7 +228,8 @@ CommandLib does not filter what a provider adds; filter by `sb.getLatestInput()`
 ## Flags
 
 Cloud flags become CommandLib options. They are typed keys instead of string lookups, and they are written **before**
-the positional arguments, not after them.
+the positional arguments, not after them, unless the command calls `optionsAnywhere()` (see
+[options](../options.md#options-after-the-arguments)).
 
 ```java
 // Cloud: /scan <target> [--force] [--limit <n>]

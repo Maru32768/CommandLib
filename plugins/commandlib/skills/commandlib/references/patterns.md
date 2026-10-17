@@ -219,7 +219,8 @@ Supported forms:
 Important constraints:
 
 - Options must appear immediately after the command or subcommand name, before
-  regular arguments.
+  regular arguments, unless the command calls `optionsAnywhere()`, which lets
+  them follow each argument as well.
 - For child commands, options belong to the most specific child command:
   `/game start -f arena`, not `/game -f start arena`.
 - Value options use separated values only: `--limit 20` and `-n 20`; do not
