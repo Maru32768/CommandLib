@@ -21,7 +21,6 @@ sourceSets.test {
 dependencies {
     api(project(":common-kotlin"))
     api(project(":velocity"))
-    compileOnly("com.velocitypowered:velocity-api:3.4.0")
 
     testImplementation(project(":velocity-testing"))
     testImplementation("com.velocitypowered:velocity-api:3.4.0")
