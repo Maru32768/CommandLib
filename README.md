@@ -119,7 +119,7 @@ argument-by-argument comparison and [compatibility](docs/compatibility.md) for t
 
 ## Installation
 
-To ensure stability, we recommend replacing `latest.release` with a specific version such as `0.17.2`.  
+To ensure stability, we recommend replacing `latest.release` with a specific version such as `0.18.0`.  
 You can find the latest version on the [releases page](https://github.com/Maru32768/CommandLib/releases).
 
 Shade CommandLib into your plugin or mod and relocate `dev.marulabs.commandlib` on every platform, as below. See
