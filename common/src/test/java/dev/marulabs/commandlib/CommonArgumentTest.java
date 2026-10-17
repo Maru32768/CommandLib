@@ -7,6 +7,7 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import dev.marulabs.commandlib.argument.*;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
 import java.util.List;
 import java.util.Map;
@@ -192,6 +193,20 @@ class CommonArgumentTest {
         }});
 
         assertThat(runner.suggest("search ")).containsExactlyInAnyOrder("alpha", "beta", "help");
+    }
+
+    @Test
+    // The suggestions future is joined, which an interrupt does not stop.
+    @Timeout(value = 10, threadMode = Timeout.ThreadMode.SEPARATE_THREAD)
+    void a_failed_async_suggestion_stage_still_completes_the_suggestions() {
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("search") {{
+            argument(new StrArg("word").addSuggestionProvider(sb -> sb.suggest("alpha")
+                                                                      .await(CompletableFuture.failedFuture(new IllegalStateException("broken"))))).execute((word,
+                                                                                                                                                             ctx) -> {
+                                                                      });
+        }});
+
+        assertThat(runner.suggest("search ")).containsExactlyInAnyOrder("alpha", "help");
     }
 
     @Test

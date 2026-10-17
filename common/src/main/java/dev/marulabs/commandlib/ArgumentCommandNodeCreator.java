@@ -15,6 +15,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -124,18 +125,29 @@ final class ArgumentCommandNodeCreator<S, T, C extends CommonCommandContext<S, T
                         if (action == null) {
                             defaultFutures.add(argument.type()
                                                        .listSuggestions(context, sb)
-                                                       .toCompletableFuture());
+                                                       .toCompletableFuture()
+                                                       .exceptionally(e -> {
+                                                           reportSuggestionFailure(e);
+                                                           return Suggestions.empty()
+                                                                             .join();
+                                                       }));
                         } else {
                             action.accept(suggestionBuilder);
                         }
                     }
                 });
 
+                // Brigadier's getCompletionSuggestions never completes when one node's future fails, so a failed
+                // stage keeps the suggestions added so far.
                 CompletableFuture<Void> customFuture = suggestionBuilder.awaitAll()
                                                                         .toCompletableFuture()
-                                                                        .thenRun(() -> {
+                                                                        .handle((ignored, e) -> {
+                                                                            if (e != null) {
+                                                                                reportSuggestionFailure(e);
+                                                                            }
                                                                             suggestionBuilder.build()
                                                                                              .forEach(s -> s.suggest(sb));
+                                                                            return null;
                                                                         });
                 CompletableFuture<Void> defaultFuture = CompletableFuture.allOf(defaultFutures.toArray(CompletableFuture[]::new));
 
@@ -152,6 +164,12 @@ final class ArgumentCommandNodeCreator<S, T, C extends CommonCommandContext<S, T
                 throw e;
             }
         };
+    }
+
+    // common has no logger, so a stack trace on the console is how it reports, as CommandRunner does.
+    @SuppressWarnings("CatchAndPrintStackTrace")
+    private static void reportSuggestionFailure(Throwable e) {
+        (e instanceof CompletionException && e.getCause() != null ? e.getCause() : e).printStackTrace();
     }
 
     /**
