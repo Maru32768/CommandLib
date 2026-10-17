@@ -166,8 +166,13 @@ class LightweightArgumentExecutionTest {
         FakeSender sender = FakeSender.player("Steve");
 
         tester.execute("args sidebar.team.red dark_red", sender);
+        // Vanilla's color names ignore case and characters other than letters.
+        tester.execute("args sidebar.team.red DARK_RED", sender);
+        tester.execute("args sidebar.team.red darkred", sender);
 
-        assertThat(sender.getSentMessageTexts()).containsExactly("SIDEBAR_TEAM_RED:dark_red");
+        assertThat(sender.getSentMessageTexts()).containsExactly("SIDEBAR_TEAM_RED:dark_red",
+                                                                 "SIDEBAR_TEAM_RED:dark_red",
+                                                                 "SIDEBAR_TEAM_RED:dark_red");
     }
 
     @Test

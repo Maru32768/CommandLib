@@ -1,17 +1,23 @@
 package dev.marulabs.commandlib.nms.argument;
 
+import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.suggestion.Suggestions;
+import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import dev.marulabs.commandlib.util.nms.argument.NMSArgumentChatFormat;
 import org.bukkit.ChatColor;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * Reads the colors and {@code reset}, as vanilla's color argument does.
+ * Reads the colors and {@code reset}, as vanilla's color argument does. Like vanilla's {@code ChatFormatting.getByName},
+ * it ignores case and characters other than letters, so {@code DARK_RED} and {@code darkred} read as {@code dark_red}.
  */
 public class MockNMSArgumentChatFormat extends NMSArgumentChatFormat {
     private static final List<String> COLORS = Stream.of(ChatColor.values())
@@ -26,7 +32,33 @@ public class MockNMSArgumentChatFormat extends NMSArgumentChatFormat {
 
     @Override
     public ArgumentType<?> argument() {
-        return MockArgumentTypes.names("Invalid color", COLORS);
+        ArgumentType<String> names = MockArgumentTypes.names("Invalid color", COLORS);
+        return new ArgumentType<String>() {
+            @Override
+            public String parse(StringReader reader) throws CommandSyntaxException {
+                int start = reader.getCursor();
+                String input = reader.readUnquotedString();
+                String key = clean(input);
+                for (String color : COLORS) {
+                    if (clean(color).equals(key)) {
+                        return color;
+                    }
+                }
+                reader.setCursor(start);
+                throw MockArgumentTypes.syntaxError("Invalid color '" + input + "'", reader);
+            }
+
+            @Override
+            public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context,
+                                                                      SuggestionsBuilder builder) {
+                return names.listSuggestions(context, builder);
+            }
+        };
+    }
+
+    private static String clean(String name) {
+        return name.toLowerCase(Locale.ROOT)
+                   .replaceAll("[^a-z]", "");
     }
 
     @Override

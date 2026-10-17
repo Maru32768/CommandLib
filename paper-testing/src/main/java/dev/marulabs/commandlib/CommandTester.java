@@ -354,10 +354,10 @@ public final class CommandTester implements AutoCloseable {
         ArgumentType<ChatColor> color = reader -> {
             int start = reader.getCursor();
             String token = readUntilWhitespace(reader);
+            String key = colorKey(token);
             ChatColor format = Arrays.stream(ChatColor.values())
                                      .filter(x -> x.isColor() || x == ChatColor.RESET)
-                                     .filter(x -> x.name()
-                                                   .equalsIgnoreCase(token))
+                                     .filter(x -> colorKey(x.name()).equals(key))
                                      .findFirst()
                                      .orElse(null);
             if (format == null) {
@@ -553,6 +553,12 @@ public final class CommandTester implements AutoCloseable {
             }
         }
         return null;
+    }
+
+    // Vanilla's ChatFormatting.getByName ignores case and characters other than letters.
+    private static String colorKey(String name) {
+        return name.toLowerCase(Locale.ROOT)
+                   .replaceAll("[^a-z]", "");
     }
 
     private static <T> ArgumentType<T> word(Function<String, T> parser) {

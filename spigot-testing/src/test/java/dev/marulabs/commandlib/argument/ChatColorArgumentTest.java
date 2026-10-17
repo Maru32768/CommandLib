@@ -23,9 +23,12 @@ class ChatColorArgumentTest {
         try (CommandTester tester = new CommandTester(ChatColorArgumentTest::command, "test.command")) {
             tester.execute("color dark_red", sender);
             tester.execute("color reset", sender);
+            // Vanilla ignores case and characters other than letters.
+            tester.execute("color DARK_RED", sender);
+            tester.execute("color darkred", sender);
         }
 
-        assertThat(sender.getSentMessageTexts()).containsExactly("DARK_RED", "RESET");
+        assertThat(sender.getSentMessageTexts()).containsExactly("DARK_RED", "RESET", "DARK_RED", "DARK_RED");
     }
 
     @Test
