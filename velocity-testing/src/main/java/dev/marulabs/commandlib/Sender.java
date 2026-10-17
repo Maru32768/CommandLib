@@ -26,7 +26,8 @@ public @interface Sender {
     boolean console() default false;
 
     /**
-     * Grants only these permission nodes. Empty grants every permission.
+     * Grants only these permission nodes and leaves the others unset, so only those whose default is
+     * {@link DefaultPermission#ALL} are granted. Empty grants every permission.
      */
     String[] permissions() default {};
 

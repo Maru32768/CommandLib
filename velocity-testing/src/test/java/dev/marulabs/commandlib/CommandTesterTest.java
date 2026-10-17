@@ -1,5 +1,6 @@
 package dev.marulabs.commandlib;
 
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import dev.marulabs.commandlib.argument.IntegerArgument;
@@ -9,6 +10,7 @@ import dev.marulabs.commandlib.argument.ServerArgument;
 import dev.marulabs.commandlib.argument.StringArgument;
 import dev.marulabs.commandlib.util.text.RichText;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -90,8 +92,8 @@ class CommandTesterTest {
         FakeSender sender = FakeSender.console();
 
         assertThat(tester.execute("find nobody", sender)).isZero();
-        assertThat(sender.getSentMessageTexts()).isNotEmpty()
-                                                .doesNotContain("found");
+        assertThat(sender.getSentMessageTexts()).containsExactly("command.unknown.argument",
+                                                                 "find nobodycommand.context.here");
     }
 
     @Test
@@ -159,8 +161,60 @@ class CommandTesterTest {
 
         FakeSender denied = FakeSender.player("Bob")
                                       .denyPermissions("proxy.command.config.key");
-        assertThatThrownBy(() -> tester.execute("config motd", denied)).isInstanceOf(RuntimeException.class);
+        assertThatThrownBy(() -> tester.execute("config motd",
+                                                denied)).hasCauseInstanceOf(CommandSyntaxException.class);
         assertThat(tester.suggest("con", denied)).containsExactly("config");
+    }
+
+    @Test
+    void unset_permissions_fall_back_to_the_command_defaults() {
+        CommandTester tester = new CommandTester(new Command("vote") {{
+            permission(DefaultPermission.ALL);
+            execute(ctx -> ctx.sendMessage("voted"));
+            addChildren(new Command("close") {{
+                permission(DefaultPermission.OP);
+                execute(ctx -> ctx.sendMessage("closed"));
+            }});
+        }}, "proxy.command");
+        // No permission plugin: every node is unset.
+        FakeSender player = FakeSender.player("Alice")
+                                      .permissions();
+
+        tester.execute("vote", player);
+        assertThatThrownBy(() -> tester.execute("vote close", player)).hasCauseInstanceOf(CommandSyntaxException.class);
+        player.permissions("proxy.command.vote.close", "proxy.command.vote.close");
+        tester.execute("vote close", player);
+
+        assertThat(player.getSentMessageTexts()).containsExactly("voted", "closed");
+    }
+
+    @Test
+    void each_tester_applies_its_own_defaults() {
+        CommandTester open = new CommandTester(new Command("vote") {{
+            permission(DefaultPermission.ALL);
+            execute(ctx -> ctx.sendMessage("voted"));
+        }}, "proxy.command");
+        CommandTester closed = new CommandTester(new Command("vote") {{
+            execute(ctx -> ctx.sendMessage("voted"));
+        }}, "proxy.command");
+        FakeSender player = FakeSender.player("Alice")
+                                      .permissions();
+
+        open.execute("vote", player);
+        assertThatThrownBy(() -> closed.execute("vote", player)).hasCauseInstanceOf(CommandSyntaxException.class);
+
+        assertThat(player.getSentMessageTexts()).containsExactly("voted");
+    }
+
+    @Test
+    void duplicate_permission_nodes_are_accepted() {
+        CommandTester tester = new CommandTester(new Command("hub") {{
+            execute(ctx -> ctx.sendMessage("hub"));
+        }}, "proxy.command");
+        FakeSender denied = FakeSender.player("Alice")
+                                      .denyPermissions("proxy.command.hub", "proxy.command.hub");
+
+        assertThatThrownBy(() -> tester.execute("hub", denied)).hasCauseInstanceOf(CommandSyntaxException.class);
     }
 
     @Test
@@ -187,5 +241,8 @@ class CommandTesterTest {
         tester.execute("lang", sender);
 
         assertThat(sender.getSentMessageTexts()).containsExactly("ja_jp");
+        assertThat(sender.getSentMessages()
+                         .get(0)
+                         .hasDecoration(TextDecoration.BOLD)).isTrue();
     }
 }

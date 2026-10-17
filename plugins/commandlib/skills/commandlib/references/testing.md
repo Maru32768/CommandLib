@@ -30,7 +30,9 @@ class MyCommandTest {
 }
 ```
 
-`FakeSender.player(...)` and `FakeSender.console()` grant every permission. Use
+`FakeSender.player(...)` and `FakeSender.console()` grant every permission. In
+`velocity-testing`, `permissions(...)` leaves the other nodes unset, so a node is then
+granted only if its `DefaultPermission` is `ALL`, as on a real proxy. Use
 `FakeSender.playerBuilder(name)` or `FakeSender.consoleBuilder()` to set several
 attributes at once:
 

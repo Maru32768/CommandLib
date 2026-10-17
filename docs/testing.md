@@ -186,7 +186,10 @@ FakeSender guest = FakeSender.playerBuilder("Bob")
 ```
 
 The artifacts do not apply `DefaultPermission` defaults: a fake sender has the nodes you give it, whatever the
-command's default is. Test defaults on a server.
+command's default is. Test defaults on a server. `velocity-testing` is the exception, since on Velocity CommandLib
+applies the defaults itself: as on a real proxy, a node the sender leaves unset is granted only if its default is
+`ALL`. There `permissions(nodes...)` grants these nodes and leaves the others unset, and `permissions()` with no nodes
+is a player on a proxy without a permission plugin.
 
 Reading messages:
 
@@ -296,7 +299,7 @@ COMMANDLIB_UPDATE_SNAPSHOTS=true ./gradlew test
 ## What the artifacts do not cover
 
 - Platform registration: Bukkit's command map, Paper's lifecycle events and bootstrap, Forge's events, reloads.
-- `DefaultPermission` defaults, permission plugin behavior, client command trees.
+- `DefaultPermission` defaults (except in `velocity-testing`), permission plugin behavior, client command trees.
 - Real registries and tags (Spigot, Paper), worlds, scoreboards (except through `scoreboard(Supplier)`), selector
   filters such as `@e[type=zombie]` (Spigot, Paper).
 - `/execute`, command blocks, and functions. `execute` returns the result, but gamerules, silent sources, and the

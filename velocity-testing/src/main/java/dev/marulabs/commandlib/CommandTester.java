@@ -19,6 +19,7 @@ import org.mockito.Mockito;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -37,6 +38,10 @@ import java.util.stream.Collectors;
  * tester that last ran a command until that tester is closed, so async work a command queues can use it after
  * {@code execute} returns. The proxy is shared by the JVM, so testers running commands on parallel threads see each
  * other's proxy.
+ * <p>
+ * As on a real proxy, a permission node the sender leaves {@code UNDEFINED} is granted only if its command's
+ * {@link DefaultPermission} is {@link DefaultPermission#ALL}. These defaults follow the proxy: the tester that last ran a
+ * command applies its own until it is closed.
  */
 public final class CommandTester implements AutoCloseable {
     private final CommandDispatcher<CommandSource> dispatcher = new CommandDispatcher<>();
@@ -45,6 +50,7 @@ public final class CommandTester implements AutoCloseable {
     private final Map<String, RegisteredServer> servers = new LinkedHashMap<>();
     private final ProxyServer proxy = Mockito.mock(ProxyServer.class);
     private final List<Command> commands = new ArrayList<>();
+    private final Map<String, DefaultPermission> permissionDefaults = new HashMap<>();
     private final String permissionPrefix;
 
     public static Builder builder() {
@@ -77,6 +83,9 @@ public final class CommandTester implements AutoCloseable {
                                                                                   permissionPrefix,
                                                                                   builder.scheduler).build()
                                                                                                     .forEach(dispatcher.getRoot()::addChild);
+        // The defaults CommandLib.register gives the proxy, applied to a permission no permission plugin sets.
+        commands.forEach(c -> c.permissionConfigs(permissionPrefix)
+                               .forEach(x -> permissionDefaults.putIfAbsent(x.node(), x.defaultPermission())));
 
         Mockito.when(proxy.getVersion())
                .thenReturn(new ProxyVersion("Velocity", "CommandLib", "test"));
@@ -115,7 +124,7 @@ public final class CommandTester implements AutoCloseable {
      * @throws RuntimeException if the input does not match any registered command
      */
     public int execute(@NotNull String input, @NotNull CommandSource sender) {
-        CommandContext.proxy = proxy;
+        activate();
         try {
             return dispatcher.execute(input, sender);
         } catch (CommandFailure e) {
@@ -138,7 +147,7 @@ public final class CommandTester implements AutoCloseable {
      * Returns the texts of the suggestions for the given partial input, waiting for them to complete.
      */
     public List<String> suggest(@NotNull String input, @NotNull CommandSource sender) {
-        CommandContext.proxy = proxy;
+        activate();
         ParseResults<CommandSource> parseResults = dispatcher.parse(input, sender);
         CompletableFuture<Suggestions> suggestions = dispatcher.getCompletionSuggestions(parseResults);
         return suggestions.join()
@@ -227,6 +236,14 @@ public final class CommandTester implements AutoCloseable {
         if (CommandContext.proxy == proxy) {
             CommandContext.proxy = null;
         }
+        if (VelocityPermissions.testerDefaults == permissionDefaults) {
+            VelocityPermissions.testerDefaults = Map.of();
+        }
+    }
+
+    private void activate() {
+        CommandContext.proxy = proxy;
+        VelocityPermissions.testerDefaults = permissionDefaults;
     }
 
     private static String key(String name) {

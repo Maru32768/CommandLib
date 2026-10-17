@@ -13,6 +13,8 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 final class VelocityPermissions {
     private static final Map<String, DefaultPermission> DEFAULTS = new ConcurrentHashMap<>();
+    // Set by the tester from its first command until it closes, so testers in one JVM do not share defaults.
+    static volatile Map<String, DefaultPermission> testerDefaults = Map.of();
 
     private VelocityPermissions() {
     }
@@ -34,6 +36,6 @@ final class VelocityPermissions {
         if (value != Tristate.UNDEFINED) {
             return value.asBoolean();
         }
-        return DEFAULTS.get(node) == DefaultPermission.ALL;
+        return testerDefaults.getOrDefault(node, DEFAULTS.get(node)) == DefaultPermission.ALL;
     }
 }

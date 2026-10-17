@@ -5,8 +5,6 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolver;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
 
@@ -73,12 +71,8 @@ public final class CommandLibExtension implements ParameterResolver {
             return FakeSender.player("Player");
         }
         FakeSender result = sender.console() ? FakeSender.console() : FakeSender.player(sender.value());
-        List<String> denied = Arrays.asList(sender.denyPermissions());
         if (sender.permissions().length > 0) {
-            // FakeSender's permissions(...) and denyPermissions(...) replace each other, so grant the difference.
-            return result.permissions(Arrays.stream(sender.permissions())
-                                            .filter(node -> !denied.contains(node))
-                                            .toArray(String[]::new));
+            return result.permissions(sender.permissions(), sender.denyPermissions());
         }
         return result.denyPermissions(sender.denyPermissions());
     }

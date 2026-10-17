@@ -1,5 +1,6 @@
 package dev.marulabs.commandlib;
 
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.marulabs.commandlib.argument.IntegerArgument;
 import dev.marulabs.commandlib.argument.PlayerArgument;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,9 +40,18 @@ class CommandLibExtensionTest {
     @Test
     void annotation_configures_permissions(CommandTester tester,
                                            @Sender(value = "Guest", permissions = "proxy.command.heal") FakeSender guest,
-                                           @Sender(value = "Denied", denyPermissions = "proxy.command.heal.target.amount") FakeSender denied) {
-        assertThatThrownBy(() -> tester.execute("heal Guest 5", guest)).isInstanceOf(RuntimeException.class);
-        assertThatThrownBy(() -> tester.execute("heal Guest 5", denied)).isInstanceOf(RuntimeException.class);
+                                           @Sender(value = "Denied", denyPermissions = "proxy.command.heal.target.amount") FakeSender denied,
+                                           @Sender(value = "Medic", permissions = {"proxy.command.heal", "proxy.command.heal.target.amount"}) FakeSender medic,
+                                           @Sender(value = "Both", permissions = {"proxy.command.heal", "proxy.command.heal.target.amount"}, denyPermissions = "proxy.command.heal.target.amount") FakeSender both) {
+        assertThatThrownBy(() -> tester.execute("heal Guest 5",
+                                                guest)).hasCauseInstanceOf(CommandSyntaxException.class);
+        assertThatThrownBy(() -> tester.execute("heal Guest 5",
+                                                denied)).hasCauseInstanceOf(CommandSyntaxException.class);
+        assertThatThrownBy(() -> tester.execute("heal Guest 5", both)).hasCauseInstanceOf(CommandSyntaxException.class);
+
+        tester.execute("heal Guest 5", medic);
+
+        assertThat(medic.getSentMessageTexts()).containsExactly("Healed Guest by 5");
     }
 
     @Test

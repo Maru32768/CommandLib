@@ -591,7 +591,8 @@ object, but it is not on Maven Central yet.
 | Paper | None; MockBukkit's Brigadier support is partial | — |
 
 Every snapshot of the `examples` module is made by the testing artifacts alone. What they do not cover is the
-platform: registration in Bukkit's command map or Paper's lifecycle, `DefaultPermission` defaults, `/execute` itself and
+platform: registration in Bukkit's command map or Paper's lifecycle, `DefaultPermission` defaults (except Velocity's,
+which CommandLib applies itself), `/execute` itself and
 real registries; the repository's integration tests run those on real servers. CommandAPI's toolkit runs on MockBukkit,
 which models more of the server (players, worlds) than CommandLib's testers do, and can assert the parsed argument
 values directly.

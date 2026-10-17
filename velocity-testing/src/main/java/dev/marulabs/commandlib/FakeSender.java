@@ -10,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import org.mockito.Mockito;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -20,7 +21,8 @@ import java.util.function.Function;
 
 /**
  * A Mockito {@link Player} or {@link ConsoleCommandSource} that records the messages sent to it. It has every
- * permission unless restricted with {@link #permissions} or {@link #denyPermissions}.
+ * permission, as if a permission plugin granted them, unless restricted with {@link #permissions} or
+ * {@link #denyPermissions}.
  */
 public final class FakeSender {
     private final CommandSource source;
@@ -87,18 +89,29 @@ public final class FakeSender {
     }
 
     /**
-     * Grants only the given permission nodes and denies every other one, replacing any earlier call.
+     * Grants only the given permission nodes and leaves every other one {@code UNDEFINED}, replacing any earlier call.
+     * Like a real proxy, the tester then grants an unset node only if its default is {@link DefaultPermission#ALL}.
+     * Without nodes, the sender is a player on a proxy without a permission plugin.
      */
     public FakeSender permissions(@NotNull String... permissions) {
-        Set<String> granted = Set.of(permissions);
-        return answerPermissions(node -> Tristate.fromBoolean(granted.contains(node)));
+        return permissions(permissions, new String[0]);
+    }
+
+    /**
+     * Grants {@code granted}, denies {@code denied}, which wins, and leaves every other node {@code UNDEFINED}.
+     */
+    FakeSender permissions(String[] granted, String[] denied) {
+        Set<String> grantedSet = Set.copyOf(Arrays.asList(granted));
+        Set<String> deniedSet = Set.copyOf(Arrays.asList(denied));
+        return answerPermissions(node -> deniedSet.contains(node) ? Tristate.FALSE
+                : grantedSet.contains(node) ? Tristate.TRUE : Tristate.UNDEFINED);
     }
 
     /**
      * Denies the given permission nodes and grants every other one, replacing any earlier call.
      */
     public FakeSender denyPermissions(@NotNull String... permissions) {
-        Set<String> denied = Set.of(permissions);
+        Set<String> denied = Set.copyOf(Arrays.asList(permissions));
         return answerPermissions(node -> Tristate.fromBoolean(!denied.contains(node)));
     }
 
