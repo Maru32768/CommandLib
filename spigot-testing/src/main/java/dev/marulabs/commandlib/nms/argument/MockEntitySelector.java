@@ -89,7 +89,7 @@ final class MockEntitySelector {
                     entity = (Player) sender;
                 }
                 if (entity == null) {
-                    throw new IllegalArgumentException("No fake entity entities with name: " + input
+                    throw new IllegalArgumentException("No fake entity registered with name: " + input
                             + ". Call withFakePlayer() or withFakeEntity() before execute().");
                 }
                 return List.of(entity);
