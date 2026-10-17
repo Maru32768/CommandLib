@@ -132,12 +132,12 @@ final class HelpMessageAction<S, T, C extends CommonCommandContext<S, T>, U exte
 
     /**
      * The usage of {@code arguments} for the error of one of its arguments: the path of the branch's command, its
-     * {@code [options]} tag and the branch's arguments.
+     * {@code [options]} tag when the sender may use one of its options, as in the help, and the branch's arguments.
      */
-    static <C extends CommonCommandContext<?, ?>> Usage branchUsage(Arguments<C> arguments, C ctx) {
+    static <C extends CommonCommandContext<?, ?>> Usage branchUsage(Arguments<C> arguments, C ctx, boolean options) {
         CommonCommand<C, ?> owner = arguments.owner();
         return new Usage(path(owner, ctx),
-                         appendTags(optionTokens(owner), arguments),
+                         appendTags(options ? List.of(Token.options()) : List.of(), arguments),
                          arguments.description(ctx)).format(ctx, owner.usageFormatter());
     }
 
@@ -192,11 +192,6 @@ final class HelpMessageAction<S, T, C extends CommonCommandContext<S, T>, U exte
             path.add(reversed.get(i));
         }
         return path;
-    }
-
-    private static List<Token> optionTokens(CommonCommand<?, ?> command) {
-        return command.options()
-                      .isEmpty() ? List.of() : List.of(Token.options());
     }
 
     private static List<Token> appendTags(List<Token> tokens, Arguments<?> arguments) {

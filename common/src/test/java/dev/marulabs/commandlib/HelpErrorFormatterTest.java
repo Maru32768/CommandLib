@@ -176,6 +176,29 @@ class HelpErrorFormatterTest {
                                                                 "/config <key> mode <value> reset");
     }
 
+    @Test
+    void the_usage_of_an_argument_error_shows_options_only_to_a_sender_who_may_give_one() throws Exception {
+        TestCommand scan = new TestCommand("scan") {{
+            permission(DefaultPermission.ALL);
+            option(Options.flag("silent", 's')
+                          .permission(DefaultPermission.OP));
+            errorFormatter((ctx, error) -> ctx.sendFailure(error.usage()
+                                                                .plainText()));
+            argument(new IntArg("count").validator(x -> x > 0)).execute((target, ctx) -> {
+            });
+        }};
+        String silent = "test.command.scan.option.silent";
+
+        assertThat(new TestCommandRunner(scan,
+                                         new TestCommandSource("test.command.scan", "test.command.scan.count"))
+                                                                                                               .execute("scan 0")
+                                                                                                               .messages()).containsExactly("/scan <count>");
+        assertThat(new TestCommandRunner(scan,
+                                         new TestCommandSource("test.command.scan", "test.command.scan.count", silent))
+                                                                                                                       .execute("scan 0")
+                                                                                                                       .messages()).containsExactly("/scan [options] <count>");
+    }
+
     // As /execute ... run game reaches the command through a redirect, whose input starts with execute.
     @Test
     void help_and_syntax_advice_name_the_command_when_it_runs_through_a_redirect() throws Exception {

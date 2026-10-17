@@ -160,7 +160,7 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
                                 e instanceof ArgumentValidationException ? CommandError.Kind.VALIDATION
                                         : CommandError.Kind.ARGUMENT,
                                 e,
-                                HelpMessageAction.branchUsage(arguments, ctx),
+                                HelpMessageAction.branchUsage(arguments, ctx, hasUsableOption(ctx)),
                                 () -> e.sendMessage(ctx));
                 } catch (CommandPrerequisiteException e) {
                     // The default value of an omitted optional argument can need a prerequisite.
@@ -310,6 +310,16 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
             ctx.sendFailure(Caption.UNEXPECTED_ERROR);
             ctx.sendFailure(Caption.SEE_CONSOLE);
         }).unexpected(e);
+    }
+
+    private boolean hasUsableOption(C ctx) {
+        for (CommandOption<?, C> option : optionGraph.options()) {
+            String permission = optionGraph.permissionName(option);
+            if (permission == null || platformAdapter.hasPermission(ctx, permission)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private int fail(C ctx,
