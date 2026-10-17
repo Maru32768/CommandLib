@@ -289,7 +289,9 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
     /**
      * Applies {@code handler} to every argument parameter annotated with {@code annotationType} whose value type is a
      * {@code valueType}. Handlers apply in registration order, after the factory and {@link Suggest}, and before the
-     * argument is made variadic or optional, so a handler of a {@code List} parameter configures each value.
+     * argument is made variadic or optional, so a handler of a {@code List} parameter configures each value. Parsing
+     * fails for the annotation on a parameter that is no argument: the context, a {@link Sender} or context value, a
+     * {@link Flag}, or an {@link Option} of a type that needs no argument factory.
      */
     public <A extends Annotation, V> AnnotationParser<C, T> registerAnnotation(@NotNull Class<A> annotationType,
                                                                                @NotNull Class<V> valueType,
@@ -342,17 +344,36 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
             commands.put("", root);
             configure(root, type, "class " + type.getSimpleName(), new String[0]);
 
-            List<Method> methods = Arrays.stream(type.getDeclaredMethods())
-                                         .filter(x -> !x.isSynthetic())
-                                         .filter(this::isCommandMethod)
-                                         .sorted(Comparator.comparing((Method x) -> pathOf(x))
-                                                           .thenComparing(Method::getName)
-                                                           .thenComparingInt(Method::getParameterCount)
-                                                           .thenComparing(Method::toGenericString))
-                                         .collect(Collectors.toList());
+            List<Method> methods = methods(this::isCommandMethod).stream()
+                                                                 .sorted(Comparator.comparing((Method x) -> pathOf(x))
+                                                                                   .thenComparing(Method::getName)
+                                                                                   .thenComparingInt(Method::getParameterCount)
+                                                                                   .thenComparing(Method::toGenericString))
+                                                                 .collect(Collectors.toList());
             methods.forEach(this::addMethod);
             deferred.forEach(Runnable::run);
             return root;
+        }
+
+        /**
+         * The methods of the class and its superclasses that pass {@code filter}, an overridden method once: its most
+         * derived declaration that passes, whose annotations apply. A call runs the override in any case.
+         */
+        private List<Method> methods(Predicate<Method> filter) {
+            Map<List<Object>, Method> methods = new LinkedHashMap<>();
+            for (Class<?> x = type; x != null && x != Object.class; x = x.getSuperclass()) {
+                for (Method method : x.getDeclaredMethods()) {
+                    if (method.isSynthetic() || !filter.test(method)) {
+                        continue;
+                    }
+                    int modifiers = method.getModifiers();
+                    // A private or static method does not override, and nothing overrides it.
+                    List<Object> key = Modifier.isPrivate(modifiers) || Modifier.isStatic(modifiers) ? List.of(method)
+                            : List.of(method.getName(), Arrays.asList(method.getParameterTypes()));
+                    methods.putIfAbsent(key, method);
+                }
+            }
+            return new ArrayList<>(methods.values());
         }
 
         private void injectDependencies() {
@@ -495,7 +516,7 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
             }
             Permission permission = method.getAnnotation(Permission.class);
             if (permission != null) {
-                applyPermission(method,
+                applyPermission(describe(method),
                                 permission,
                                 branch::permission,
                                 branch::permission,
@@ -520,6 +541,13 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
             List<String> segments = segments(subcommand);
             if (segments.isEmpty()) {
                 throw error(method, "has an empty @Subcommand; use @Execute for the command itself");
+            }
+            for (String segment : segments) {
+                if (!isPlaceholder(segment) && (segment.contains("<") || segment.contains(">"))) {
+                    throw error(method,
+                                "has '" + segment + "' in its @Subcommand path; a placeholder is one name in angle "
+                                        + "brackets, such as <team>");
+                }
             }
             T current = root;
             PathBranch branch = null;
@@ -675,7 +703,7 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
                 deferred.add(() -> mutuallyExclusive(command, source, group.value()));
             }
             if (permission != null) {
-                applyPermission(element,
+                applyPermission(source,
                                 permission,
                                 command::permission,
                                 command::permission,
@@ -739,7 +767,7 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
             command.mutuallyExclusive(group.toArray(new CommandOption[0]));
         }
 
-        private void applyPermission(AnnotatedElement element,
+        private void applyPermission(String source,
                                      Permission permission,
                                      Consumer<String> node,
                                      Consumer<DefaultPermission> defaultPermission,
@@ -750,7 +778,7 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
             }
             DefaultPermission[] defaults = permission.defaultPermission();
             if (defaults.length > 1) {
-                throw new IllegalArgumentException(element + " gives more than one defaultPermission");
+                throw new IllegalArgumentException(source + " gives more than one defaultPermission");
             }
             if (defaults.length == 1) {
                 defaultPermission.accept(defaults[0]);
@@ -768,6 +796,7 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
             Class<?> rawType = parameter.getType();
             if (CommonCommandContext.class.isAssignableFrom(rawType) && rawType.isAssignableFrom(contextType)) {
                 reject(method, parameter, "the context", PARAMETER_ANNOTATIONS);
+                rejectRegisteredAnnotations(method, parameter, "the context");
                 return ctx -> ctx;
             }
             if (parameter.isAnnotationPresent(Sender.class)) {
@@ -775,6 +804,7 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
                        parameter,
                        "a @Sender parameter",
                        PARAMETER_ANNOTATIONS.subList(0, PARAMETER_ANNOTATIONS.size() - 1));
+                rejectRegisteredAnnotations(method, parameter, "a @Sender parameter");
                 if (!contextTypes.contains(box(rawType))) {
                     throw error(method,
                                 parameter,
@@ -799,6 +829,7 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
                                         + "; register one with registerArgument");
                 }
                 reject(method, parameter, "a context value", PARAMETER_ANNOTATIONS);
+                rejectRegisteredAnnotations(method, parameter, "a context value");
                 return contextValue(valueType);
             }
             CommonArgument<?, C, ?> argument = argument(method, parameter, factory, valueType, variadic);
@@ -833,6 +864,7 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
             if (parameter.isAnnotationPresent(Range.class) && !Number.class.isAssignableFrom(valueType)) {
                 throw error(method, parameter, "has @Range, but " + valueType.getName() + " is not a number");
             }
+            checkRange(method, parameter, valueType);
             if (parameter.isAnnotationPresent(Greedy.class) && valueType != String.class) {
                 throw error(method, parameter, "has @Greedy, but " + valueType.getName() + " is not a String");
             }
@@ -897,6 +929,25 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
             return argument;
         }
 
+        // Integral types would truncate a fractional bound, so @Range(min = 1.5) int would accept 1.
+        private void checkRange(Method method, Parameter parameter, Class<?> valueType) {
+            Range range = parameter.getAnnotation(Range.class);
+            if (range == null) {
+                return;
+            }
+            if (range.min() > range.max()) {
+                throw error(method, parameter, "has @Range with min " + range.min() + " above max " + range.max());
+            }
+            boolean integral = valueType == Integer.class || valueType == Long.class || valueType == Short.class
+                    || valueType == Byte.class;
+            if (integral && (range.min() != Math.rint(range.min()) || range.max() != Math.rint(range.max()))) {
+                throw error(method,
+                            parameter,
+                            "has @Range with a fractional bound, but " + valueType.getSimpleName()
+                                    + " takes whole numbers");
+            }
+        }
+
         private SuggestionProvider<C> suggestions(Method method, Parameter parameter, Suggest suggest) {
             List<String> values = List.of(suggest.value());
             if (suggest.method()
@@ -906,11 +957,9 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
                 }
                 return builder -> values.forEach(builder::suggest);
             }
-            List<Method> candidates = Arrays.stream(type.getDeclaredMethods())
-                                            .filter(x -> x.getName()
-                                                          .equals(suggest.method()))
-                                            .filter(x -> isSuggestionMethod(x))
-                                            .collect(Collectors.toList());
+            List<Method> candidates = methods(x -> x.getName()
+                                                    .equals(suggest.method())
+                    && isSuggestionMethod(x));
             if (candidates.size() != 1) {
                 throw error(method,
                             parameter,
@@ -1044,6 +1093,7 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
                    parameter,
                    "a @Flag parameter",
                    List.of(Default.class, Range.class, Optional.class, Suggest.class, Greedy.class));
+            rejectRegisteredAnnotations(method, parameter, "a @Flag parameter");
             Class<?> valueType = box(parameter.getType());
             char shortName = flag.shortName();
             CommandOption<?, C> option;
@@ -1065,6 +1115,10 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
         }
 
         private CommandOption<?, C> valueOption(Method method, Parameter parameter, String name, Option annotation) {
+            if (annotation.required() && (parameter.isAnnotationPresent(Default.class)
+                    || parameter.isAnnotationPresent(Optional.class))) {
+                throw error(method, parameter, "is a required option and cannot take @Default or @Optional");
+            }
             boolean repeatable = parameter.getType() == List.class;
             if (repeatable != (annotation.repeatable() > 0)) {
                 throw error(method,
@@ -1097,10 +1151,12 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
                        parameter,
                        "an option of " + valueType.getSimpleName(),
                        List.of(Optional.class, Suggest.class, Greedy.class));
+                rejectRegisteredAnnotations(method, parameter, "an option of " + valueType.getSimpleName());
                 Range range = parameter.getAnnotation(Range.class);
                 if (range != null && valueType != Integer.class) {
                     throw error(method, parameter, "has @Range, which applies to int options only");
                 }
+                checkRange(method, parameter, valueType);
                 Object value = defaultValue == null ? empty
                         : parseDefault(method, parameter, valueType, defaultValue.value());
                 created = createValueOption(name, annotation.shortName(), valueType, value, range);
@@ -1311,19 +1367,27 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
             }
         }
 
+        // The handlers of registerAnnotation apply to arguments only, so elsewhere they would be ignored silently.
+        private void rejectRegisteredAnnotations(Method method, Parameter parameter, String kind) {
+            reject(method, parameter, kind, new ArrayList<>(annotationHandlers.keySet()));
+        }
+
         private IllegalArgumentException error(Method method, String message) {
             return new IllegalArgumentException(describe(method) + " " + message);
         }
 
         private IllegalArgumentException error(Method method, Parameter parameter, String message) {
-            return new IllegalArgumentException(describe(method) + ": parameter " + parameter.getName() + " "
-                    + message);
+            Name name = parameter.getAnnotation(Name.class);
+            return new IllegalArgumentException(describe(method) + ": parameter "
+                    + (name != null ? name.value() : parameter.getName()) + " " + message);
         }
 
         private String describe(Method method) {
-            return type.getSimpleName() + "#" + method.getName() + Arrays.stream(method.getParameterTypes())
-                                                                         .map(Class::getSimpleName)
-                                                                         .collect(Collectors.joining(", ", "(", ")"));
+            return method.getDeclaringClass()
+                         .getSimpleName()
+                    + "#" + method.getName() + Arrays.stream(method.getParameterTypes())
+                                                     .map(Class::getSimpleName)
+                                                     .collect(Collectors.joining(", ", "(", ")"));
         }
     }
 

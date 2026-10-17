@@ -311,6 +311,112 @@ class AnnotationParserTest {
                                          .parse(new UpperCommand())).hasMessageContaining("@Upper, which applies to java.lang.Integer");
     }
 
+    @Command("x")
+    static final class UpperFlag {
+        @Execute
+        void run(@Flag("loud") @Upper boolean loud) {
+        }
+    }
+
+    @Command("x")
+    static final class UpperSender {
+        @Execute
+        void run(@Sender @Upper CommandActor actor) {
+        }
+    }
+
+    @Test
+    void custom_annotation_on_a_parameter_that_is_no_argument_is_rejected() {
+        AnnotationParser<TestCommandContext, TestCommand> parser = parser().registerAnnotation(Upper.class,
+                                                                                               Object.class,
+                                                                                               (upper,
+                                                                                                argument) -> argument);
+
+        assertThatThrownBy(() -> parser.parse(new UpperFlag())).hasMessageContaining("has @Upper, which does not apply to a @Flag parameter");
+        assertThatThrownBy(() -> parser.parse(new UpperSender())).hasMessageContaining("has @Upper, which does not apply to a @Sender parameter");
+    }
+
+    abstract static class BaseCommand {
+        @Execute
+        void run(TestCommandContext ctx, @Name("name") @Suggest(method = "names") String name) {
+            ctx.sendMessage("base " + name);
+        }
+
+        @Subcommand("stop")
+        void stop(TestCommandContext ctx) {
+            ctx.sendMessage("base stop");
+        }
+
+        List<String> names() {
+            return List.of("alex", "steve");
+        }
+    }
+
+    @Command("x")
+    static final class DerivedCommand extends BaseCommand {
+        @Override
+        void stop(TestCommandContext ctx) {
+            ctx.sendMessage("derived stop");
+        }
+    }
+
+    @Test
+    void annotated_methods_of_superclasses_are_read_and_an_override_runs_once() throws Exception {
+        TestCommandRunner runner = new TestCommandRunner(parser().parse(new DerivedCommand()));
+
+        assertThat(runner.execute("x alex")
+                         .messages()).containsExactly("base alex");
+        assertThat(runner.execute("x stop")
+                         .messages()).containsExactly("derived stop");
+        assertThat(runner.suggest("x ")).contains("alex", "steve", "stop");
+    }
+
+    @Command("x")
+    static final class FractionalRange {
+        @Execute
+        void run(@Name("count") @Range(min = 1.5) int count) {
+        }
+    }
+
+    @Command("x")
+    static final class InvertedRange {
+        @Execute
+        void run(@Name("ratio") @Range(min = 2, max = 1) int ratio) {
+        }
+    }
+
+    @Command("x")
+    static final class SpacedPlaceholder {
+        @Subcommand("<a b> c")
+        void run(@Name("a") String a) {
+        }
+    }
+
+    @Command("x")
+    static final class EmptyPlaceholder {
+        @Subcommand("<> c")
+        void run() {
+        }
+    }
+
+    @Command("x")
+    static final class RequiredOptionWithDefault {
+        @Execute
+        void run(@Option(value = "n", required = true) @Default("1") int n) {
+        }
+    }
+
+    @Test
+    void contradictory_or_malformed_annotations_are_rejected() {
+        AnnotationParser<TestCommandContext, TestCommand> parser = parser();
+
+        assertThatThrownBy(() -> parser.parse(new FractionalRange())).hasMessageContaining("parameter count has @Range with a fractional bound");
+        assertThatThrownBy(() -> parser.parse(new InvertedRange())).hasMessageContaining("parameter ratio has @Range with min 2.0 above max 1.0");
+        assertThatThrownBy(() -> parser.parse(new SpacedPlaceholder())).hasMessageContaining("has '<a' in its @Subcommand path");
+        assertThatThrownBy(() -> parser.parse(new EmptyPlaceholder())).hasMessageContaining("has '<>' in its @Subcommand path");
+        assertThatThrownBy(() -> parser.parse(new RequiredOptionWithDefault())).hasMessageContaining("is a required option and cannot take @Default or @Optional");
+    }
+
     static final class NotACommand {
     }
 

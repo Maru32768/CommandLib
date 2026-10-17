@@ -147,7 +147,8 @@ Without it, name each argument with `@Name("target")`, and give `@Flag` and `@Op
   the class.
 - Methods are added in the order of their path and then their name, because reflection does not give the order of the
   source. Help lists subcommands and branches in that order.
-- Methods may be private and static. Methods of superclasses are not read.
+- Methods may be private and static. Methods of superclasses are read too; for a method a subclass overrides, the
+  annotations of its most derived declaration that has any apply, and the call runs the override.
 
 ### Argument-first paths
 
@@ -238,7 +239,7 @@ Context values: `CommandSender`, `ConsoleCommandSender` and `Player` on Spigot a
 | `@Name("target")` | The argument name, used in help and in the branch's permission node |
 | `@Default("16")` | Makes the argument optional with this value: a string, a number, `true` / `false`, or an enum constant name |
 | `@Optional` | Makes the argument optional; an omitted value is the context value of the type (a `Player` defaults to the sender, as `optional(playerRequirer())`), or else `0`, `false`, `""`, or an empty list for a `List` |
-| `@Range(min, max)` | Bounds of a numeric argument |
+| `@Range(min, max)` | Bounds of a numeric argument; whole numbers for an integer type, and `min` not above `max` |
 | `@Suggest({"a", "b"})`, `@Suggest(method = "names")` | Replaces the suggestions with fixed values and / or the values of a method of the class, which returns an `Iterable<String>` or takes the `SuggestionBuilder` |
 | `@Greedy` | A string argument that takes the rest of the input |
 | `@Variadic(max = 5)` | A `List` argument that accepts up to 5 values, `variadic(5)` |
@@ -268,7 +269,8 @@ A `boolean`, `int`, `long`, `float`, `double` or `String` parameter is a value o
 `@Default` its default is `false`, `0` or `""`. A parameter of any other type takes the argument registered for the
 type as the option's value, with `@Suggest` and the registered annotations, as `Options.of` does
 ([options](options.md#kinds)): it is required unless `@Default` or `@Optional` makes the argument optional. Both take
-`aliases`, and `@Description` on the parameter describes the option.
+`aliases`, and `@Description` on the parameter describes the option. `required = true` cannot be combined with
+`@Default` or `@Optional`.
 
 - `@Permission` on an option gives it its own node: `value` as the exact node, or the generated
   `<command node>.option.<name>` with `defaultPermission`; at least one of them, and no description.
@@ -319,7 +321,8 @@ Command command = AnnotatedCommands.parser()
   own factory.
 - `registerAnnotation(annotation, valueType, handler)` applies after the factory and `@Suggest`, in registration order,
   and before the argument is made variadic or optional, so on a `List` parameter it configures each value. It returns
-  the argument to use, which keeps the parameter's name.
+  the argument to use, which keeps the parameter's name. Parsing fails for the annotation on a parameter that is not
+  an argument: the context, a `@Sender` or context value, a `@Flag`, or an `@Option` of a built-in value type.
 - `registerCondition(name, prerequisite)` names a `Prerequisite` for `@Condition`. Parsing fails for a name nobody
   registered. Fluent commands add the same constant with `addPrerequisite`, see
   [errors](errors.md#reusable-conditions).
