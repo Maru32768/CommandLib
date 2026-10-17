@@ -367,7 +367,7 @@ depends on the artifact:
 | `TeamArgument` | mock vanilla type plus static scoreboard; real with `scoreboard(Supplier)` | static, or real with `scoreboard(Supplier)` | real with `scoreboard(Supplier)`; the server has no scoreboard unless `withServer(...)` stubs `getScoreboard()` |
 | `ObjectiveArgument` | static, or real with `scoreboard(Supplier)` | static, or real with `scoreboard(Supplier)` | as `TeamArgument` |
 | `ComponentArgument` | mock: JSON read by Bungee | mock: JSON read by Adventure | real |
-| `MessageArgument` | mock: the text as written, selectors not resolved | mock: the text as written, selectors not resolved | real; selectors are resolved only with a level, which the fake sources lack |
+| `MessageArgument` | mock: the text as written, selectors not resolved | mock: the text as written, selectors not resolved | real; the selectors of a sender with level 2, such as an operator, resolve over the online fake players |
 | `NBTCompoundArgument` | mock: the compound as written, not checked | mock: the compound as written, not checked | real |
 
 `paper-testing`'s registry mocks know only the values added with `withFakeRegistryValue` and reject other keys while

@@ -33,6 +33,19 @@ class MessageArgumentTest {
     }
 
     @Test
+    void an_operator_gets_the_selectors_resolved_over_the_online_players() {
+        FakeSender sender = FakeSender.player("Alice")
+                                      .op(true);
+
+        try (CommandTester tester = new CommandTester(MessageArgumentTest::command,
+                                                      "test.command").withPlayer(FakeSender.player("Bob"))) {
+            tester.execute("shout 2 hello @a!", sender);
+        }
+
+        assertThat(sender.getSentMessageTexts()).containsExactly("2: hello Bob, Alice!");
+    }
+
+    @Test
     void missing_message_is_a_syntax_error() {
         try (CommandTester tester = new CommandTester(MessageArgumentTest::command, "test.command")) {
             assertThatThrownBy(() -> tester.execute("shout 2 ",

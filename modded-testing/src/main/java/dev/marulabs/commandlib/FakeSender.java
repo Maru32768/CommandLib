@@ -6,6 +6,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
@@ -263,6 +264,9 @@ public final class FakeSender {
         //?}
         Mockito.when(player.isAlive())
                .thenReturn(true);
+        // Selectors check the entity type, for example whether its feature flags are enabled.
+        Mockito.when(player.getType())
+               .thenAnswer(invocation -> EntityType.PLAYER);
         Mockito.when(player.hasPermissions(Mockito.anyInt()))
                .thenAnswer(invocation -> op || (int) invocation.getArgument(0) <= 0);
         //? if >=1.21.2 {
