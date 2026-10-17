@@ -258,7 +258,8 @@ public class TestMain {
         CommandDispatchResult dispatchResult = dispatchProbe.dispatch(Bukkit.getConsoleSender(), probe);
         tests.forEach(test -> test.hookCommandDispatchError(probe, dispatchResult));
         List<String> afterReload = new ArrayList<>(List.of(MainCommand.NAME + " " + HelpTopicTest.AFTER_RELOAD,
-                                                           "function " + DataPackFunctionTest.FUNCTION));
+                                                           "function " + DataPackFunctionTest.FUNCTION,
+                                                           ScenarioTest.LATE_COMMAND));
         tests.forEach(test -> afterReload.addAll(test.afterReload()));
         for (String command : afterReload) {
             CommandDispatchResult result = dispatchProbe.dispatch(Bukkit.getConsoleSender(), command);
