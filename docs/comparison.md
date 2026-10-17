@@ -466,10 +466,15 @@ platform's.
 the generated help.
 
 ```java
-// CommandLib, fluent (examples/.../home/FluentHomeCommand.java)
+// CommandLib (examples/.../home/HomeCaptions.java)
 public static final Caption SET = Caption.of("example.home.set", "Home {name} set.");
 
-captions(Captions.create().bundle("lang/homes", HomeCaptions.class.getClassLoader()));    // lang/homes_ja.properties
+public static Captions create() {
+    return Captions.create().bundle("lang/homes", HomeCaptions.class.getClassLoader());    // lang/homes_ja.properties
+}
+
+// CommandLib, fluent (examples/.../home/FluentHomeCommand.java)
+captions(HomeCaptions.create());
 description(ctx -> ctx.caption(HomeCaptions.DESCRIPTION));
 argument(new StringArgument("name")).execute((name, ctx) -> ctx.sendSuccess(HomeCaptions.SET, Map.of("name", name)));
 ```
