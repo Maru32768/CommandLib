@@ -22,6 +22,8 @@ import java.util.UUID;
 public final class FakeSender {
     private final CommandSender commandSender;
     private final List<Component> sentMessages = new ArrayList<>();
+    private @Nullable Set<String> grantedPermissions;
+    private final Set<String> deniedPermissions = new HashSet<>();
 
     public static FakeSender player(@NotNull String name) {
         Player player = Mockito.mock(Player.class);
@@ -80,7 +82,11 @@ public final class FakeSender {
     private FakeSender(CommandSender commandSender) {
         this.commandSender = commandSender;
         Mockito.when(commandSender.hasPermission(Mockito.anyString()))
-               .thenReturn(true);
+               .thenAnswer(invocation -> {
+                   String permission = invocation.getArgument(0);
+                   return !deniedPermissions.contains(permission)
+                           && (grantedPermissions == null || grantedPermissions.contains(permission));
+               });
     }
 
     /**
@@ -139,17 +145,19 @@ public final class FakeSender {
         return this;
     }
 
+    /**
+     * Grants only the given permission nodes, replacing any earlier call. Denied nodes still win.
+     */
     public FakeSender permissions(@NotNull String... permissions) {
-        Set<String> permissionSet = Set.of(permissions);
-        Mockito.when(commandSender.hasPermission(Mockito.anyString()))
-               .thenAnswer(invocation -> permissionSet.contains(invocation.getArgument(0)));
+        grantedPermissions = Set.of(permissions);
         return this;
     }
 
+    /**
+     * Denies the given permission nodes. Calls accumulate, and denied nodes win over {@link #permissions}.
+     */
     public FakeSender denyPermissions(@NotNull String... permissions) {
-        Set<String> deniedPermissions = Set.of(permissions);
-        Mockito.when(commandSender.hasPermission(Mockito.anyString()))
-               .thenAnswer(invocation -> !deniedPermissions.contains(invocation.getArgument(0)));
+        deniedPermissions.addAll(Arrays.asList(permissions));
         return this;
     }
 
@@ -241,15 +249,8 @@ public final class FakeSender {
             if (locale != null) {
                 sender.locale(locale);
             }
-            if (permissions != null || !deniedPermissions.isEmpty()) {
-                Set<String> granted = permissions;
-                Set<String> denied = Set.copyOf(deniedPermissions);
-                Mockito.when(sender.commandSender.hasPermission(Mockito.anyString()))
-                       .thenAnswer(invocation -> {
-                           String permission = invocation.getArgument(0);
-                           return !denied.contains(permission) && (granted == null || granted.contains(permission));
-                       });
-            }
+            sender.grantedPermissions = permissions;
+            sender.deniedPermissions.addAll(deniedPermissions);
             return sender;
         }
     }

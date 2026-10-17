@@ -74,6 +74,29 @@ class CommandTesterTest {
         }
 
         @Test
+        void granted_and_denied_permissions_combine_and_a_new_grant_list_keeps_the_denied_nodes() {
+            FakeSender sender = FakeSender.player("Steve")
+                                          .permissions("a.b", "c.d")
+                                          .denyPermissions("c.d");
+
+            assertThat(sender.asSender()
+                             .hasPermission("a.b")).isTrue();
+            assertThat(sender.asSender()
+                             .hasPermission("c.d")).isFalse();
+            assertThat(sender.asSender()
+                             .hasPermission("e.f")).isFalse();
+
+            sender.permissions("c.d", "e.f");
+
+            assertThat(sender.asSender()
+                             .hasPermission("e.f")).isTrue();
+            assertThat(sender.asSender()
+                             .hasPermission("c.d")).isFalse();
+            assertThat(sender.asSender()
+                             .hasPermission("a.b")).isFalse();
+        }
+
+        @Test
         void console_builder_denies_listed_permissions_only() {
             FakeSender sender = FakeSender.consoleBuilder()
                                           .denyPermissions("a.b")
