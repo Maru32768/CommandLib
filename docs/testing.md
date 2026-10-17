@@ -155,6 +155,7 @@ The factory is any `Supplier<CommandTester>`, so it can use `CommandTester.build
 | `denyPermissions` | `{}` | Denies these nodes, even to operators |
 
 A `FakeSender` parameter without `@Sender` is a non-operator player named `Player` with every permission. In
+`modded-testing`, two injected players with the same name fail, so give them distinct `@Sender` names. In
 `spigot-testing`, `paper-testing` and `velocity-testing`, every injected player is also registered with `withFakePlayer`
 (`withPlayer` in the Forge / NeoForge / Fabric artifacts), so player and entity arguments resolve it by name. Build senders that need more, such as a UUID or a locale, with
 `FakeSender.playerBuilder(name)` (`FakeSender.player(name, uuid)` in `velocity-testing`) in the test.
@@ -175,7 +176,8 @@ of the class would share their tester.
 Adjust a sender with `op(boolean)`, `permissions(nodes...)` (only these nodes), `denyPermissions(nodes...)` (all but
 these), `uniqueId(uuid)`, `locale(tag)` (a `Locale` in `velocity-testing`), and `name(name)` (not in
 `common-testing`). The builders have the same methods. `velocity-testing` has no builders and only `permissions`,
-`denyPermissions` and `locale`. A player's locale decides the language of CommandLib's messages
+`denyPermissions` and `locale`. In `modded-testing` the console passes every permission check, as on a server, so
+`permissions` and `denyPermissions` throw for it. A player's locale decides the language of CommandLib's messages
 and of your [captions](localization.md); the console uses the JVM's default locale.
 
 Keep the returned sender: in `common-testing` these methods return a new `FakeSender`, in the other artifacts they

@@ -30,12 +30,13 @@ public @interface Sender {
     boolean op() default false;
 
     /**
-     * Grants only these permission nodes. Empty grants every permission.
+     * Grants only these permission nodes. Empty grants every permission. Not allowed for the console, which passes every
+     * check.
      */
     String[] permissions() default {};
 
     /**
-     * Denies these permission nodes, even to operators.
+     * Denies these permission nodes, even to operators. Not allowed for the console, which passes every check.
      */
     String[] denyPermissions() default {};
 }

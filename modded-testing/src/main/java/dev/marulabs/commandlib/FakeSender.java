@@ -28,9 +28,10 @@ import java.util.function.Predicate;
  * A command sender for {@link CommandTester}: either a fake player backed by a {@link ServerPlayer} mock, or the
  * server console. Messages sent to the sender are recorded.
  *
- * <p>Like the other CommandLib testing artifacts, a sender has every permission node until
- * {@link #permissions(String...)} or {@link #denyPermissions(String...)} restricts it. {@link #op(boolean)} controls
- * the vanilla permission level used by vanilla checks such as entity selectors.</p>
+ * <p>Like the other CommandLib testing artifacts, a player has every permission node until
+ * {@link #permissions(String...)} or {@link #denyPermissions(String...)} restricts it. The console passes every check,
+ * as on a server. {@link #op(boolean)} controls the vanilla permission level used by vanilla checks such as entity
+ * selectors.</p>
  */
 public final class FakeSender {
     private static final String CONSOLE_NAME = "Server";
@@ -165,20 +166,33 @@ public final class FakeSender {
 
     /**
      * Grants only the given permission nodes.
+     *
+     * @throws IllegalStateException for the console, which passes every check
      */
     public FakeSender permissions(@NotNull String... permissions) {
-        Set<String> permissionSet = Set.of(permissions);
+        requirePlayerForPermissions();
+        Set<String> permissionSet = Set.copyOf(Arrays.asList(permissions));
         permissionCheck = permissionSet::contains;
         return this;
     }
 
     /**
      * Grants every permission node except the given ones.
+     *
+     * @throws IllegalStateException for the console, which passes every check
      */
     public FakeSender denyPermissions(@NotNull String... permissions) {
-        Set<String> deniedPermissions = Set.of(permissions);
+        requirePlayerForPermissions();
+        Set<String> deniedPermissions = Set.copyOf(Arrays.asList(permissions));
         permissionCheck = permission -> !deniedPermissions.contains(permission);
         return this;
+    }
+
+    // CommandLib asks only a player's permission handler; the console passes every check.
+    private void requirePlayerForPermissions() {
+        if (player == null) {
+            throw new IllegalStateException("the console passes every permission check");
+        }
     }
 
     public boolean hasPermission(@NotNull String permission) {
@@ -329,15 +343,17 @@ public final class FakeSender {
         }
 
         /**
-         * Grants only the given permission nodes, replacing any earlier call.
+         * Grants only the given permission nodes, replacing any earlier call. {@link #build()} throws for the console,
+         * like {@link FakeSender#permissions(String...)}.
          */
         public Builder permissions(@NotNull String... permissions) {
-            this.permissions = Set.of(permissions);
+            this.permissions = Set.copyOf(Arrays.asList(permissions));
             return this;
         }
 
         /**
          * Denies the given permission nodes. Calls accumulate, and denied nodes win over {@link #permissions}.
+         * {@link #build()} throws for the console, like {@link FakeSender#denyPermissions(String...)}.
          */
         public Builder denyPermissions(@NotNull String... permissions) {
             deniedPermissions.addAll(Arrays.asList(permissions));
@@ -354,6 +370,10 @@ public final class FakeSender {
             if (locale != null) {
                 sender.locale(locale);
             }
+            if (permissions == null && deniedPermissions.isEmpty()) {
+                return sender;
+            }
+            sender.requirePlayerForPermissions();
             Set<String> granted = permissions;
             Set<String> denied = Set.copyOf(deniedPermissions);
             sender.permissionCheck = permission -> !denied.contains(permission)

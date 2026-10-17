@@ -275,16 +275,42 @@ class CommandTesterTest {
         }
 
         @Test
-        void console_builder_denies_listed_permissions_only() {
+        void console_builder_builds_an_operator_console_that_passes_every_check() {
             FakeSender sender = FakeSender.consoleBuilder()
-                                          .denyPermissions("a.b")
                                           .build();
 
             assertThat(sender.getName()).isEqualTo("Server");
             assertThat(sender.isPlayer()).isFalse();
             assertThat(sender.isOp()).isTrue();
-            assertThat(sender.hasPermission("a.b")).isFalse();
             assertThat(sender.hasPermission("c.d")).isTrue();
+        }
+
+        @Test
+        void console_permissions_are_refused_since_the_console_passes_every_check() {
+            assertThatThrownBy(() -> FakeSender.consoleBuilder()
+                                               .denyPermissions("a.b")
+                                               .build()).isInstanceOf(IllegalStateException.class);
+            assertThatThrownBy(() -> FakeSender.consoleBuilder()
+                                               .permissions("a.b")
+                                               .build()).isInstanceOf(IllegalStateException.class);
+            assertThatThrownBy(() -> FakeSender.console()
+                                               .permissions("a.b")).isInstanceOf(IllegalStateException.class);
+            assertThatThrownBy(() -> FakeSender.console()
+                                               .denyPermissions("a.b")).isInstanceOf(IllegalStateException.class);
+        }
+
+        @Test
+        void duplicate_permission_nodes_are_accepted() {
+            assertThat(FakeSender.player("Steve")
+                                 .permissions("a.b", "a.b")
+                                 .hasPermission("a.b")).isTrue();
+            assertThat(FakeSender.player("Alex")
+                                 .denyPermissions("a.b", "a.b")
+                                 .hasPermission("a.b")).isFalse();
+            assertThat(FakeSender.playerBuilder("Bob")
+                                 .permissions("a.b", "a.b")
+                                 .build()
+                                 .hasPermission("a.b")).isTrue();
         }
     }
 
