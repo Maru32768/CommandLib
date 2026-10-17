@@ -6,6 +6,8 @@ import dev.marulabs.commandlib.CommandTester;
 import dev.marulabs.commandlib.FakeSender;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -46,6 +48,10 @@ class DoubleRangeArgumentTest {
                                                     sender)).hasMessageContaining("Min cannot be bigger than max");
             assertThatThrownBy(() -> tester.execute("range ..",
                                                     sender)).hasMessageContaining("Expected value or range of values");
+            // Java reads these as doubles, vanilla does not.
+            List.of("1d", "1e3", "NaN", "Infinity", "+5", "1..2e1")
+                .forEach(bound -> assertThatThrownBy(() -> tester.execute("range " + bound, sender)).as(bound)
+                                                                                                    .hasMessageContaining("Invalid number"));
         }
 
         assertThat(sender.getSentMessageTexts()).isEmpty();

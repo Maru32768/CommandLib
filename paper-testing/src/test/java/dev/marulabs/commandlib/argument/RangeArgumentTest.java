@@ -7,6 +7,8 @@ import dev.marulabs.commandlib.CommandTester;
 import dev.marulabs.commandlib.FakeSender;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -57,6 +59,10 @@ class RangeArgumentTest {
                                                     sender)).hasCauseInstanceOf(CommandSyntaxException.class);
             assertThatThrownBy(() -> tester.execute("doubles ..",
                                                     sender)).hasCauseInstanceOf(CommandSyntaxException.class);
+            // Java reads these as numbers, vanilla does not.
+            List.of("doubles 1e3", "doubles NaN", "doubles +5", "ints +5")
+                .forEach(input -> assertThatThrownBy(() -> tester.execute(input, sender)).as(input)
+                                                                                         .hasMessageContaining("Invalid number"));
         }
     }
 }

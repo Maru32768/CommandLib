@@ -585,6 +585,10 @@ public final class CommandTester implements AutoCloseable {
             String max = separator < 0 ? token : token.substring(separator + 2);
             String error;
             try {
+                // Vanilla's MinMaxBounds reads only these characters into a bound, so 1e3, NaN or +5 are not numbers.
+                if (!min.matches("[0-9.-]*") || !max.matches("[0-9.-]*")) {
+                    throw new NumberFormatException();
+                }
                 T lower = min.isEmpty() ? null : parseNumber.apply(min);
                 T upper = max.isEmpty() ? null : parseNumber.apply(max);
                 if (lower == null && upper == null) {

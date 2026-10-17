@@ -25,6 +25,8 @@ import java.util.regex.Pattern;
  * production input such as {@code minecraft:stone} or {@code @s}.
  */
 public final class MockArgumentTypes {
+    // Vanilla's MinMaxBounds reads only these characters into a bound, so 1e3, NaN or +5 are not numbers to it.
+    private static final Pattern BOUND = Pattern.compile("[0-9.-]*");
     private static final Pattern RESOURCE_LOCATION = Pattern.compile("[a-z0-9_.-]+:[a-z0-9_./-]+");
     // No unit means ticks.
     private static final Map<String, Integer> TIME_UNITS = Map.of("d", 24000, "s", 20, "t", 1, "", 1);
@@ -104,6 +106,12 @@ public final class MockArgumentTypes {
             String min = separator < 0 ? token : token.substring(0, separator);
             String max = separator < 0 ? token : token.substring(separator + 2);
             try {
+                if (!BOUND.matcher(min)
+                          .matches()
+                        || !BOUND.matcher(max)
+                                 .matches()) {
+                    throw new NumberFormatException();
+                }
                 T lower = min.isEmpty() ? null : parseNumber.apply(min);
                 T upper = max.isEmpty() ? null : parseNumber.apply(max);
                 if (lower == null && upper == null) {

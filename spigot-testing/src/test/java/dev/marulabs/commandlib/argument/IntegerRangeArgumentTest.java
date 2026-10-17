@@ -50,6 +50,7 @@ class IntegerRangeArgumentTest {
             assertThatThrownBy(() -> tester.execute("range ..",
                                                     sender)).hasMessageContaining("Expected value or range of values");
             assertThatThrownBy(() -> tester.execute("range 1.5", sender)).hasMessageContaining("Invalid number");
+            assertThatThrownBy(() -> tester.execute("range +5", sender)).hasMessageContaining("Invalid number");
         }
 
         assertThat(sender.getSentMessageTexts()).isEmpty();
