@@ -28,10 +28,10 @@ The tables below compare the server platforms. Velocity, a proxy, has its own sm
 | — | The platform has no such concept, or the argument is CommandLib-specific. |
 
 The status was checked by reading CommandLib's source and tests, CommandAPI's documentation, and the Paper Javadoc.
-Every built-in Spigot, Paper, Forge, and NeoForge argument also runs on a real server in the integration tests
-(`integration-test/shared/*/ArgumentTest.java`), which check that a valid input parses; they do not compare error texts
-or suggestions with the references. Fabric has no integration target yet, so its arguments are checked only by
-`fabric-testing`.
+Every built-in Spigot, Paper, Forge, NeoForge, and Fabric (1.20.1 and 1.21.1) argument also runs on a real server in
+the integration tests (`integration-test/shared/*/ArgumentTest.java`), which check that a valid input parses; they do
+not compare error texts or suggestions with the references. Fabric 1.21.4 has no integration target, so its arguments
+are checked only by `fabric-testing`.
 
 ## Primitive and string arguments
 
