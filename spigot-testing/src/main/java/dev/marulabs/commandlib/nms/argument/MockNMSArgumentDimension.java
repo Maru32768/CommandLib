@@ -13,14 +13,8 @@ public class MockNMSArgumentDimension extends NMSArgumentDimension {
 
     @Override
     public ArgumentType<?> argument() {
-        return reader -> {
-            int start = reader.getCursor();
-            while (reader.canRead() && !Character.isWhitespace(reader.peek())) {
-                reader.skip();
-            }
-            return reader.getString()
-                         .substring(start, reader.getCursor());
-        };
+        // A server reads any resource location here and resolves the dimension later.
+        return MockArgumentTypes.resourceKey("dimension", key -> true);
     }
 
     @Override

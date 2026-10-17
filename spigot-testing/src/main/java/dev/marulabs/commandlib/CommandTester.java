@@ -74,7 +74,7 @@ public class CommandTester implements AutoCloseable {
      */
     @Nullable
     public static World getFakeWorld(String key) {
-        return requireCurrent().fakeWorlds.get(key);
+        return requireCurrent().fakeWorlds.get(MockArgumentTypes.normalizeKey(key));
     }
 
     /**
@@ -163,11 +163,16 @@ public class CommandTester implements AutoCloseable {
     }
 
     /**
-     * Registers a fake world by dimension key, e.g. {@code minecraft:overworld}.
+     * Registers a fake world by dimension key, e.g. {@code minecraft:overworld}. A key without a namespace is in
+     * {@code minecraft}, as on a server.
      */
     public CommandTester withFakeWorld(String key, World world) {
-        fakeWorlds.put(key, world);
+        fakeWorlds.put(MockArgumentTypes.normalizeKey(key), world);
         return this;
+    }
+
+    boolean hasFakePlayer(String name) {
+        return fakeEntities.containsKey(name);
     }
 
     /**

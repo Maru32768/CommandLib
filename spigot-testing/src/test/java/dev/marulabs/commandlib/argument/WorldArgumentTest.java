@@ -19,11 +19,19 @@ class WorldArgumentTest {
 
         try (CommandTester tester = new CommandTester(() -> new Command("tp") {{
             argument(new WorldArgument("world")).execute((world, ctx) -> ctx.sendMessage(world.getName()));
-        }}, "test.command").withFakeWorld("minecraft:overworld", mockWorld)) {
+        }}, "test.command").withFakeWorld("minecraft:overworld", mockWorld)
+                           .withFakeWorld("the_nether", mockWorld)) {
             tester.execute("tp minecraft:overworld", sender);
+            // A key without a namespace is in minecraft, on either side, and the world's name is not its key.
+            tester.execute("tp overworld", sender);
+            tester.execute("tp minecraft:the_nether", sender);
+            tester.execute("tp world", sender);
         }
 
-        assertThat(sender.getSentMessageTexts()).containsExactly("world");
+        assertThat(sender.getSentMessageTexts()).containsExactly("world",
+                                                                 "world",
+                                                                 "world",
+                                                                 "Unknown dimension 'minecraft:world'");
     }
 
     @Test
