@@ -6,8 +6,8 @@ function tags. This page describes what a command sees in each case and where th
 
 The integration fixtures check these cases on real servers (`VanillaExecutionTest` and `DataPackFunctionTest` in
 `integration-test/shared/spigot` and `integration-test/shared/paper`, `ActorTest` in `integration-test/shared/modded`).
-[Compatibility](compatibility.md) lists the targets; on 2026-10-16 every case passed on a Spigot, Paper, Mohist,
-Forge or NeoForge target of each minor version from 1.16 to 26.3.
+[Compatibility](compatibility.md) lists the targets. On 2026-10-17 (commit `89b9503f`) every case passed on all 78
+integration targets, which cover each minor version from 1.16 to 26.3.
 
 On every platform a command's executor runs during the dispatch when it is called on the server thread, so a command
 that `/execute`, a function or another command runs has finished before the next one, also while the server handles a
@@ -59,6 +59,10 @@ A command block runs its command with a source at the center of the block:
   calls `ctx.setResult(42)` leaves `SuccessCount` at 1, and one that fails leaves 0. Run the command through
   `/execute store result ...` to keep the result. This is vanilla behavior: the block adds one for each successful
   result callback.
+- Spigot 1.20.3 stores 0 from `/execute store result` and leaves `SuccessCount` at 0 for every command, vanilla commands
+  included. CommandLib commands behave the same there.
+- Paper 1.20.5 does not tick the spawn chunks (its `spawnChunkRadius` is 0), so a command block there runs only in a
+  chunk a player keeps loaded or one added with `/forceload`.
 - A failure's messages become the block's `LastOutput`, like a vanilla command's error.
 - Up to 1.21.8 the server runs command blocks only with `enable-command-block=true` in `server.properties`. Later
   servers (checked on 1.21.11 and 26.3) read a game rule instead, `command_blocks_work` on 26.x, which is true by
