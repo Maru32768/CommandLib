@@ -85,10 +85,16 @@ public final class CommandLib {
     public static CommandLib register(@NotNull String permissionPrefix,
                                       @NotNull CommandDefaults<CommandContext> defaults,
                                       @NotNull Collection<? extends Command> commands) {
-        defaults.applyTo(commands);
-        CommandTree.permissionConfigs(commands, permissionPrefix)
+        Objects.requireNonNull(permissionPrefix);
+        Objects.requireNonNull(commands);
+        if (permissionPrefix.isEmpty()) {
+            throw new IllegalArgumentException("permissionPrefix must not be empty");
+        }
+        List<Command> list = List.copyOf(commands);
+        defaults.applyTo(list);
+        CommandTree.permissionConfigs(list, permissionPrefix)
                    .forEach(c -> DEFAULTS.putIfAbsent(c.node(), c.defaultPermission()));
-        CommandLib registration = new CommandLib(commands, permissionPrefix);
+        CommandLib registration = new CommandLib(list, permissionPrefix);
         REGISTRATIONS.add(registration);
         return registration;
     }
@@ -255,11 +261,6 @@ public final class CommandLib {
         }
     }
 
-    private void register(RootCommandNode<CommandSourceStack> root) {
-        new CommandNodeCreator<>(commands, permissionPrefix, ServerCommandScheduler.INSTANCE).build()
-                                                                                             .forEach(root::addChild);
-    }
-
     static boolean hasPermission(CommandSourceStack source, ServerPlayer player, String node) {
         DefaultPermission defaultPermission = DEFAULTS.get(node);
         boolean fallback = defaultPermission == null ? source.hasPermission(4)
@@ -287,18 +288,13 @@ public final class CommandLib {
         if (server != null) {
             // The current dispatcher has already been built, so add the commands to it directly.
             // Nodes that miss PermissionGatherEvent.Nodes are resolved by their default resolver.
-            Command.permissionEntries(commands, permissionPrefix).forEach(node -> PERMISSIONS.putIfAbsent(node.getNodeName(), node));
+            Command.permissionEntries(commands, permissionPrefix)
+                   .forEach(node -> PERMISSIONS.putIfAbsent(node.getNodeName(), node));
             register(server.getCommands()
                            .getDispatcher()
                            .getRoot());
             refreshAll();
         }
-    }
-
-    @SubscribeEvent
-    public void onRegisterCommands(RegisterCommandsEvent e) {
-        register(e.getDispatcher()
-                  .getRoot());
     }
 
     @SubscribeEvent
@@ -314,11 +310,6 @@ public final class CommandLib {
                 PERMISSIONS.put(node.getNodeName(), node);
             }
         }
-    }
-
-    private void register(RootCommandNode<CommandSourceStack> root) {
-        new CommandNodeCreator<>(commands, permissionPrefix, ServerCommandScheduler.INSTANCE).build()
-                                                                                             .forEach(root::addChild);
     }
 
     static boolean hasPermission(CommandSourceStack source, ServerPlayer player, String node) {
@@ -352,12 +343,6 @@ public final class CommandLib {
         }
     }
 
-    @SubscribeEvent
-    public void onRegisterCommands(RegisterCommandsEvent e) {
-        register(e.getDispatcher()
-                  .getRoot());
-    }
-
     // The nodes are registered once the server has started, after a permission mod has installed its handler.
     @SubscribeEvent
     public void onServerStarted(FMLServerStartedEvent e) {
@@ -368,10 +353,18 @@ public final class CommandLib {
         Command.permissionEntries(commands, permissionPrefix)
                .forEach(e -> PermissionAPI.registerNode(e.getKey(), e.getValue(), ""));
     }
+    *///?}
+
+    //? if !fabric {
+    @SubscribeEvent
+    public void onRegisterCommands(RegisterCommandsEvent e) {
+        register(e.getDispatcher()
+                  .getRoot());
+    }
+    //?}
 
     private void register(RootCommandNode<CommandSourceStack> root) {
         new CommandNodeCreator<>(commands, permissionPrefix, ServerCommandScheduler.INSTANCE).build()
                                                                                              .forEach(root::addChild);
     }
-    *///?}
 }
