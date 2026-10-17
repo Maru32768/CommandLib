@@ -160,9 +160,9 @@ A `FakeSender` parameter without `@Sender` is a non-operator player named `Playe
 (`withPlayer` in the Forge / NeoForge / Fabric artifacts), so player and entity arguments resolve it by name. Build senders that need more, such as a UUID or a locale, with
 `FakeSender.playerBuilder(name)` (`FakeSender.player(name, uuid)` in `velocity-testing`) in the test.
 
-In `velocity-testing`, the extension refuses a second injected player with a name already online, so give each player
-parameter its own `@Sender` name. It also refuses parameters of `@BeforeAll` methods and constructors, since every test
-of the class would share their tester.
+In `spigot-testing`, `paper-testing` and `velocity-testing`, the extension refuses a second injected player with a
+name already registered, so give each player parameter its own `@Sender` name. It also refuses parameters of
+`@BeforeAll` methods and constructors, since every test of the class would share their tester.
 
 ## `FakeSender`
 

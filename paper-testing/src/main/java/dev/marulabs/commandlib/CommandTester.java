@@ -127,6 +127,10 @@ public final class CommandTester implements AutoCloseable {
         }
     }
 
+    boolean hasFakePlayer(String name) {
+        return fakePlayers.containsKey(name);
+    }
+
     /**
      * Executes the given command input as the specified fake sender and returns the command's result, which
      * {@code /execute store result} would store. A command that fails sends its failure messages to the sender, as the

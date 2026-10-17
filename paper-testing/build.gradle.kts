@@ -23,11 +23,16 @@ dependencies {
     testImplementation("com.mojang:brigadier:1.0.18")
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    // Runs fixture classes to see how CommandLibExtension refuses parameters.
+    testImplementation("org.junit.platform:junit-platform-testkit")
     testImplementation("org.assertj:assertj-core:3.25.3")
 }
 
 tasks.test {
-    useJUnitPlatform()
+    useJUnitPlatform {
+        // Run only by the tests that select them.
+        excludeTags("fixture")
+    }
 }
 
 // The annotated example commands take their argument names from their parameters.

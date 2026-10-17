@@ -8,7 +8,8 @@ import java.lang.annotation.Target;
 
 /**
  * Configures a {@link FakeSender} parameter that {@link CommandLibExtension} injects. Without it, the parameter is a
- * non-operator player named {@code Player} that has every permission.
+ * non-operator player named {@code Player} that has every permission; injected players need distinct names, so a test
+ * gets only one such parameter.
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
