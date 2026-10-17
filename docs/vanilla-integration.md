@@ -61,8 +61,8 @@ A command block runs its command with a source at the center of the block:
   result callback.
 - Spigot 1.20.3 stores 0 from `/execute store result` and leaves `SuccessCount` at 0 for every command, vanilla commands
   included. CommandLib commands behave the same there.
-- Paper 1.20.5 does not tick the spawn chunks (its `spawnChunkRadius` is 0), so a command block there runs only in a
-  chunk a player keeps loaded or one added with `/forceload`.
+- Paper 1.20.5 does not tick the spawn chunks (its `spawnChunkRadius` is 0), and in the fixture a command block over the
+  spawn ran only after its chunk was added with `/forceload`; the bot standing next to it was not enough.
 - A failure's messages become the block's `LastOutput`, like a vanilla command's error.
 - Up to 1.21.8 the server runs command blocks only with `enable-command-block=true` in `server.properties`. Later
   servers (checked on 1.21.11 and 26.3) read a game rule instead, `command_blocks_work` on 26.x, which is true by
