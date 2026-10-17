@@ -207,8 +207,8 @@ raised with `ctx.fail(...)`. The message is sent in red and the command [fails](
 | `new CommandPrerequisiteException(caption[, placeholders])` | the [caption](localization.md) in the sender's locale, in red |
 | `new CommandPrerequisiteException(ctx -> ...)` | whatever the consumer sends |
 | `ctx.fail("message", "more lines"...)`, `ctx.fail(caption[, placeholders])` | the same as the constructor with those arguments |
-| `requirePlayer()`, `Command.playerRequirer()` (Spigot, Paper) | `This command can only be executed by a player.` |
-| `requireConsole()`, `Command.consoleRequirer()` (Spigot, Paper) | `This command can only be executed from the console.` |
+| `requirePlayer()`, `Command.playerRequirer()` | `This command can only be executed by a player.` |
+| `requireConsole()`, `Command.consoleRequirer()` | `This command can only be executed from the console.` |
 
 Prerequisites of a parent command apply to its children unless the child calls `disableParentPrerequisite()`.
 

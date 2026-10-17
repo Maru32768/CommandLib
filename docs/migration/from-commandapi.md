@@ -155,7 +155,7 @@ class HomeCommand extends Command {
 }
 ```
 
-`Command.playerRequirer()` and `consoleRequirer()` exist in the `spigot` and `paper` artifacts. Forge / NeoForge have neither, nor `requirePlayer()`.
+`Command.playerRequirer()`, `consoleRequirer()`, `requirePlayer()` and `requireConsole()` exist on every platform. On Forge, NeoForge and Fabric, `playerRequirer()` gives a `ServerPlayer`.
 
 ## Subcommands
 

@@ -167,8 +167,6 @@ class HomeCommand extends Command {
 }
 ```
 
-Forge / NeoForge have no `requirePlayer()` or `playerRequirer()`.
-
 ## Subcommands
 
 | Lamp | CommandLib |

@@ -167,7 +167,6 @@ class CoinsCommand extends Command {
 `Profiles.of` stands for your own code; it may throw `CommandPrerequisiteException("...")` to refuse the sender, which
 fails the command with that message wherever the value is read. Unlike Cloud, the command's type stays the platform's:
 the mapped sender is a value of the execution, not a type parameter of the command.
-Forge / NeoForge have no `requirePlayer()` or `playerRequirer()`.
 
 ## Subcommands
 

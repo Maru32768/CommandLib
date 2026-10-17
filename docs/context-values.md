@@ -72,8 +72,8 @@ provide(GamePlayer.class, ctx -> games.of(playerRequirer().extract(ctx)));
   require(ctx -> ctx.get(GamePlayer.class)).execute((player, ctx) -> player.leave());
   ```
 
-- Forge, NeoForge and Fabric have no `playerRequirer()`; read the player from `ctx.getHandle().getSource()` and throw
-  `CommandPrerequisiteException` for other sources.
+- `playerRequirer()` exists on every platform. It gives a `Player` on Spigot, Paper and Velocity, and a
+  `ServerPlayer` on Forge, NeoForge and Fabric.
 
 ## Values from middlewares
 
