@@ -161,12 +161,19 @@ public abstract class CommonArgument<T, C extends CommonCommandContext<?, ?>, SE
      * command tree holds one node per accepted value.
      *
      * @throws IllegalArgumentException if {@code maxCount} is less than 1
-     * @throws IllegalStateException    if this argument is already variadic
+     * @throws IllegalStateException    if this argument is already variadic, or is optional, has an executor or has
+     *                                  uncaught exception handlers, which apply to the returned argument instead
      */
     @NotNull
     public final VariadicArgument<T, C> variadic(int maxCount) {
         if (this instanceof VariadicArgument) {
             throw new IllegalStateException("Argument '" + name + "' is already variadic");
+        }
+        // The branch reads these from the variadic argument, so they would be dropped silently.
+        if (isOptional() || executor != null || !uncaughtExceptionHandlers.isEmpty()) {
+            throw new IllegalStateException("Argument '" + name
+                    + "' is optional, has an executor or has uncaught exception handlers; set them on the argument "
+                    + "variadic() returns");
         }
         return new VariadicArgument<>(this, maxCount);
     }

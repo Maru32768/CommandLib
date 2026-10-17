@@ -239,6 +239,18 @@ class OptionalVariadicArgumentTest {
     }
 
     @Test
+    void variadic_of_an_optional_or_executing_element_is_rejected() {
+        assertThatThrownBy(() -> new IntArg("n").optional(1)
+                                                .variadic()).isInstanceOf(IllegalStateException.class);
+        assertThatThrownBy(() -> new IntArg("n").execute(ctx -> {
+        })
+                                                .variadic()).isInstanceOf(IllegalStateException.class);
+        assertThatThrownBy(() -> new IntArg("n").addUncaughtExceptionHandler((e, ctx) -> {
+        })
+                                                .variadic()).isInstanceOf(IllegalStateException.class);
+    }
+
+    @Test
     void variadic_of_variadic_and_zero_max_count_are_rejected() {
         assertThatThrownBy(() -> new WordArg("a").variadic()
                                                  .variadic()).isInstanceOf(IllegalStateException.class);
