@@ -1107,8 +1107,11 @@ public final class AdminCommand extends Command {
 }
 ```
 
-`CommandDefaults` applies middlewares and context value providers to every command of a registration, passed as
-`CommandLib.register(this, defaults, commands)` on every platform and as `defaults(...)` to the testers' builder.
+`CommandDefaults` applies middlewares and context value providers to every command of a registration. Pass it to
+`CommandLib.register(this, defaults, commands)` on Spigot and Paper, `register(this, proxy, defaults, commands)` on
+Velocity and `register(permissionPrefix, defaults, commands)` on Forge, NeoForge and Fabric, where `commands` is a
+`Collection`, and to the testers' builder as `defaults(...)`. See
+[execution](docs/execution.md#registration-wide-middlewares-and-providers).
 
 `executeAsync` takes an executor that returns a `CompletionStage`. `ctx.supplyAsync(...)` runs the work off the server
 thread and completes back on it, so the follow-up may send messages and use the platform API:
