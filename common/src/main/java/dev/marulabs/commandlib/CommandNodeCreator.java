@@ -177,10 +177,7 @@ final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U ext
                                                    appendArgument(inheritedArguments, allOptional.get(0)),
                                                    optionGraph,
                                                    permissionPrefix,
-                                                   scheduler).runner(allOptional.get(0)
-                                                                                .first(),
-                                                                     helpAction,
-                                                                     command);
+                                                   scheduler).bareRunner(helpAction, command);
         builder.executes(bareRunner);
         LiteralCommandNode<S> node = builder.build();
 

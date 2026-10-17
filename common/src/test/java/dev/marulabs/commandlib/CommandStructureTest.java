@@ -52,6 +52,21 @@ class CommandStructureTest {
         }
     }
 
+    // The bare input reaches no argument node, so it must not run a branch whose argument is required.
+    @Test
+    void bare_input_does_not_borrow_the_executor_of_a_branch_sharing_the_optional_argument() throws Exception {
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("x") {{
+            helpFormatter((ctx, help) -> ctx.sendMessage("help"));
+            argument(new StrArg("a").optional("dflt"));
+            argument(new StrArg("a")).execute((a, ctx) -> ctx.sendMessage("exec " + a));
+        }});
+
+        assertThat(runner.execute("x")
+                         .messages()).containsExactly("help");
+        assertThat(runner.execute("x q")
+                         .messages()).containsExactly("exec q");
+    }
+
     @Test
     void two_branches_executing_at_the_same_argument_are_rejected() {
         TestCommand command = new TestCommand("x") {{

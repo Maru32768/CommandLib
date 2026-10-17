@@ -202,6 +202,21 @@ final class ArgumentCommandNodeCreator<S, T, C extends CommonCommandContext<S, T
                 }
             }
         }
+        return runner(branch, branchArgument, helpAction, parent);
+    }
+
+    /**
+     * The runner for input that stops before the branch's arguments, when they are all optional. The input reaches no
+     * argument node, so it runs this branch's own executor or help, never that of a branch sharing the first node.
+     */
+    CommandRunner<S, C> bareRunner(CommandExecutor<C> helpAction, CommonCommand<C, ?> parent) {
+        return runner(arguments, arguments.first(), helpAction, parent);
+    }
+
+    private CommandRunner<S, C> runner(Arguments<C> branch,
+                                       CommonArgument<?, C, ?> branchArgument,
+                                       CommandExecutor<C> helpAction,
+                                       CommonCommand<C, ?> parent) {
         List<Arguments<C>> branchArguments = new ArrayList<>(executorArguments.subList(0,
                                                                                        executorArguments.size() - 1));
         branchArguments.add(branch);
