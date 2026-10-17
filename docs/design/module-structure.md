@@ -28,8 +28,10 @@ This document describes CommandLib's module / artifact layout and the rules that
 | `modded-testing` | Yes | Serverless testing utilities for downstream Forge / NeoForge / Fabric mods, built per node. |
 | `common-kotlin` | Yes | The platform-neutral Kotlin DSL: argument blocks, delegated options, coroutine executors and suggestions. |
 | `spigot-kotlin` / `paper-kotlin` / `velocity-kotlin` | Yes | The DSL's `command` / `subcommand` factories, compiled against each platform's `Command`. |
-| `integration-test` | No | Multi-platform real-server integration aggregator (Spigot, Paper, Mohist, Forge, NeoForge targets). |
-| `samples` | No | Sample plugins / mods for Spigot, Paper, and Forge. |
+| `benchmark` | No | JMH benchmarks of `common` through the `common-testing` `CommandTester` (`docs/benchmarks.md`). |
+| `examples` | No | The use cases of `docs/comparison.md` written in each style, with snapshot tests. |
+| `integration-test` | No | Multi-platform real-server integration aggregator (Spigot, Paper, Mohist, Forge, NeoForge, Fabric, Folia, Velocity targets). |
+| `samples` | No | Sample plugins / mods for Spigot, Paper (Java and Kotlin), Velocity, Forge, and Fabric; separate Gradle builds, not in `settings.gradle.kts`. |
 
 What stays in `common`:
 
@@ -174,12 +176,9 @@ class, so the rest of the DSL loads without it.
 
 `modded` exposes the same command model where practical, using platform-native registration, permission, message, and registry APIs. Public API exposes each Minecraft version's native types. See `forge-version-support.md`.
 
-## Not Yet Implemented
+## Platforms Without a Module
 
-These platforms have no module. Adding one should follow the rules above (platform module depends on `common`, no code moved into `common`).
-
-| Platform | Notes |
-|---|---|
+A new platform module should follow the rules above (platform module depends on `common`, no code moved into `common`).
 
 Mohist has no module of its own. It is handled through `spigot` compatibility and the Mohist integration targets.
 

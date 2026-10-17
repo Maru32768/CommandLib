@@ -267,7 +267,7 @@ API is known to change in, between two built nodes.
 | Boundary | Change | Verified by |
 |---|---|---|
 | `>=1.17` | `GameProfileCache#get` returning `Optional`, `Entity#getYRot`, `Style#withUnderlined`, Forge's `net.minecraftforge.server.ServerLifecycleHooks` | 1.16.5 / 1.18.2 |
-| `>=1.18` | Forge's permission node API (`PermissionNode`, `PermissionGatherEvent`), `RegisterCommandsEvent` registration, `SharedConstants.tryDetectVersion()` | 1.16.5 / 1.18.2 |
+| `>=1.18` | Forge's permission node API (`PermissionNode`, `PermissionGatherEvent`), `SharedConstants.tryDetectVersion()` | 1.16.5 / 1.18.2 |
 | `>=1.19` | `Component.literal`, `sendSystemMessage`, `CommandBuildContext` for item and block arguments, Forge making `CommandSourceStack.source` public, `ForgeHooks.canUseEntitySelectors` | 1.18.2 / 1.19.2 |
 | `>=1.19.3` | `Registries` / `BuiltInRegistries`, `CommandBuildContext` as an interface, `ResourceArgument`, feature flags, particle arguments taking a context | 1.19.2 / 1.20.1 |
 | `>=1.19.4` | `BlockPos.containing`, vanilla `GameModeArgument`, `TimeArgument.time(int)` | 1.19.2 / 1.20.1 |
