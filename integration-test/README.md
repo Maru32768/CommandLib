@@ -204,7 +204,8 @@ The Bukkit-family fixtures (`VanillaExecutionTest`, `DataPackFunctionTest`) run 
 does: through `/execute as|at|positioned|rotated ... run`, from two command blocks placed over the world spawn and
 powered by redstone blocks (`server.properties` enables command blocks), from a data pack function, from a function tag
 and from `#minecraft:load`. Command blocks and `#minecraft:load` run on a later tick, so their checks are dispatched after
-`/minecraft:reload`, through `TestBase#afterReload`, a few ticks after the reload is applied. The Forge and NeoForge
+`/minecraft:reload`, through `TestBase#afterReload`, once every test reports through `TestBase#readyAfterReload` that
+what it checks has run, or after 30 seconds. The Forge and NeoForge
 fixture checks `/execute as` and `/execute positioned ... rotated` in `ActorTest`. The verified behavior is described in
 [`docs/vanilla-integration.md`](../docs/vanilla-integration.md).
 

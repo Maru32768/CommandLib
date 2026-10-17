@@ -67,6 +67,11 @@ public final class VanillaExecutionTest extends TestBase {
                        buildCommand(command, SUCCESS_COUNT));
     }
 
+    @Override
+    public boolean readyAfterReload() {
+        return failureBlockRan.get();
+    }
+
     public List<String> executeAsKeepsSenderAndSetsEntity() {
         String name = getMethodName();
         String key = getKey();

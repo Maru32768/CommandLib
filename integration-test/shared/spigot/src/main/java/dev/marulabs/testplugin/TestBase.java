@@ -30,6 +30,14 @@ public abstract class TestBase {
         return Collections.emptyList();
     }
 
+    /**
+     * Whether what {@link #afterReload()} checks has happened, such as a function the server runs on a tick after the
+     * reload. The checks are dispatched once every test is ready, or after a timeout, when they report what is missing.
+     */
+    public boolean readyAfterReload() {
+        return true;
+    }
+
     protected final void putResult(TestResult result) {
         resultMap.put(result.key(), result);
     }

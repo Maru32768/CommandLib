@@ -31,7 +31,7 @@ public class TestMain {
     private static final String TEST_PLAYER_NAME = "Maru32768";
     private static final long RELOAD_POLL_TICKS = 5L;
     private static final long RELOAD_TIMEOUT_TICKS = 20L * 120;
-    private static final long AFTER_RELOAD_DELAY_TICKS = 5L;
+    private static final long AFTER_RELOAD_TIMEOUT_TICKS = 20L * 30;
     private final Plugin plugin;
     private final Logger logger;
     private boolean errorOccurredOnRegister = false;
@@ -211,15 +211,26 @@ public class TestMain {
                                                       return;
                                                   }
                                                   // The server runs #minecraft:load in the tick after the reload,
-                                                  // after the Bukkit tasks such as this one, so the checks wait.
-                                                  Bukkit.getScheduler()
-                                                        .runTaskLater(plugin, () -> {
-                                                            try {
-                                                                dispatchAfterReload(tests, dispatchProbe);
-                                                            } finally {
-                                                                finish.run();
-                                                            }
-                                                        }, AFTER_RELOAD_DELAY_TICKS);
+                                                  // after the Bukkit tasks such as this one, so the checks wait
+                                                  // until the tests have seen what runs later.
+                                                  long[] readyWaitedTicks = {0};
+                                                  BukkitTask[] readyPoll = new BukkitTask[1];
+                                                  readyPoll[0] = Bukkit.getScheduler()
+                                                                       .runTaskTimer(plugin, () -> {
+                                                                           readyWaitedTicks[0] += RELOAD_POLL_TICKS;
+                                                                           if (readyWaitedTicks[0] < AFTER_RELOAD_TIMEOUT_TICKS
+                                                                                   && !tests.stream()
+                                                                                            .allMatch(TestBase::readyAfterReload)) {
+                                                                               return;
+                                                                           }
+                                                                           readyPoll[0].cancel();
+                                                                           try {
+                                                                               dispatchAfterReload(tests,
+                                                                                                   dispatchProbe);
+                                                                           } finally {
+                                                                               finish.run();
+                                                                           }
+                                                                       }, RELOAD_POLL_TICKS, RELOAD_POLL_TICKS);
                                               }, RELOAD_POLL_TICKS, RELOAD_POLL_TICKS);
                           } finally {
                               if (!waitingForReload) {

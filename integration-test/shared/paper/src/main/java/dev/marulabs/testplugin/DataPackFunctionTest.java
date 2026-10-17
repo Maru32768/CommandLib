@@ -60,6 +60,11 @@ public final class DataPackFunctionTest extends TestBase {
         return List.of("function " + TAG, command.name() + " " + LOAD_COUNT);
     }
 
+    @Override
+    public boolean readyAfterReload() {
+        return loadRuns.get() > 0;
+    }
+
     private void functionTagProbe() {
         String key = getClass().getSimpleName() + "." + TAG_PROBE;
 

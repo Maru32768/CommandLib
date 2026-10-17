@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -49,13 +50,14 @@ public class TestMain {
     private static final String PLAYER_ASYNC_THREAD = "FoliaSmokeTest.playerAsyncThread";
     private static final String CONSOLE_ASYNC_THREAD = "FoliaSmokeTest.consoleAsyncThread";
     private static final String SUGGESTION = "FoliaSmokeTest.suggestion";
-    private static final long REPORT_DELAY_TICKS = 40L;
+    private static final long CONSOLE_CHECK_TIMEOUT_SECONDS = 30L;
 
     private final Plugin plugin;
     private final Logger logger;
     private final Map<String, TestResult> results = new ConcurrentHashMap<>();
     private final AtomicReference<String> capturedLatestInput = new AtomicReference<>();
     private final AtomicReference<List<String>> sentSuggestions = new AtomicReference<>();
+    private final CompletableFuture<Void> consoleChecked = new CompletableFuture<>();
 
     public TestMain(Plugin plugin) {
         this.plugin = plugin;
@@ -153,14 +155,21 @@ public class TestMain {
                                     } else {
                                         results.put(key, new TestResult(key, TestStatus.SUCCEEDED, message));
                                     }
-                                }, ctx.syncExecutor());
+                                }, ctx.syncExecutor())
+                                .whenComplete((ignored, e) -> {
+                                    if (key.equals(CONSOLE_ASYNC_THREAD)) {
+                                        consoleChecked.complete(null);
+                                    }
+                                });
     }
 
-    // Runs on the global region thread, the only thread Folia runs console commands on.
+    // Runs on the global region thread, the only thread Folia runs console commands on. The report is written when
+    // the console's check completes, or after a timeout with the check's failure.
     private void checkConsoleAndReport() {
         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), NAME + " asyncThread");
-        Bukkit.getGlobalRegionScheduler()
-              .runDelayed(plugin, task -> writeReport(), REPORT_DELAY_TICKS);
+        consoleChecked.completeOnTimeout(null, CONSOLE_CHECK_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+                      .thenRun(() -> Bukkit.getGlobalRegionScheduler()
+                                           .execute(plugin, this::writeReport));
     }
 
     private static String describeThread(CommandSender sender) {
