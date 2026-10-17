@@ -104,32 +104,43 @@ class HealCommandTest {
 }
 ```
 
-## Bukkit Static APIs
-
-Arguments that call Bukkit static APIs at parse time, such as `WorldArgument`,
-`OfflinePlayerArgument`, and `TeamArgument`, need `mockito-inline`
-`MockedStatic` in the same try-with-resources block as `CommandTester`.
+`WorldArgument` is NMS-backed too. The mock reads the world from
+`withFakeWorld(dimensionKey, world)`, not from `Bukkit.getWorld`:
 
 ```java
-class TpCommandTest {
-    @Test
-    void tpTest() {
-        FakeSender sender = FakeSender.player("Alice");
-        World mockWorld = Mockito.mock(World.class);
-        Mockito.when(mockWorld.getName())
-               .thenReturn("nether");
+try (CommandTester tester = new CommandTester(() -> new Command("tp") {{
+    argument(new WorldArgument("world")).execute((world, ctx) -> ctx.sendMessage(world.getName()));
+}}, "myplugin.command").withFakeWorld("minecraft:the_nether", netherWorld)) {
+    tester.execute("tp minecraft:the_nether", sender);
+}
+```
 
-        try (MockedStatic<Bukkit> bukkit = Mockito.mockStatic(Bukkit.class); CommandTester tester = new CommandTester(
-                new Command("tp") {{
-                    argument(new WorldArgument("world")).execute((world, ctx) -> ctx.sendMessage(world.getName()));
-                }},
-                "myplugin.command")) {
-            bukkit.when(() -> Bukkit.getWorld("nether"))
-                  .thenReturn(mockWorld);
-            tester.execute("tp nether", sender);
+## Bukkit Static APIs
+
+Arguments that call Bukkit static APIs at parse time, such as
+`OfflinePlayerArgument` and `UUIDArgument`, need `mockito-inline`
+`MockedStatic`. Declare it before `CommandTester` in the same
+try-with-resources block, so the tester closes first.
+
+```java
+class InfoCommandTest {
+    @Test
+    void findsOfflinePlayer() {
+        FakeSender sender = FakeSender.player("Alice");
+        OfflinePlayer steve = Mockito.mock(OfflinePlayer.class);
+        Mockito.when(steve.getName())
+               .thenReturn("Steve");
+
+        try (MockedStatic<Bukkit> bukkit = Mockito.mockStatic(Bukkit.class);
+             CommandTester tester = new CommandTester(() -> new Command("info") {{
+                 argument(new OfflinePlayerArgument("player")).execute((player, ctx) -> ctx.sendMessage(player.getName()));
+             }}, "myplugin.command")) {
+            bukkit.when(Bukkit::getOfflinePlayers)
+                  .thenReturn(new OfflinePlayer[]{steve});
+            tester.execute("info steve", sender);
         }
 
-        assertThat(sender.getSentMessageTexts()).containsExactly("nether");
+        assertThat(sender.getSentMessageTexts()).containsExactly("Steve");
     }
 }
 ```
