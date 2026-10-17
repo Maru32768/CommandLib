@@ -143,8 +143,9 @@ public interface CommandScheduler {
 - **Spigot / Paper**: `BukkitCommandScheduler` (one copy per module, as the modules share no Bukkit code). Sync runs
   inline when `Bukkit.isPrimaryThread()`, else `runTask(plugin, task)`; async is `runTaskAsynchronously`. Paper's
   bootstrap registration has no plugin yet, so the Paper scheduler looks the plugin up by name when it schedules.
-- **Forge / NeoForge**: `ServerCommandScheduler`. Sync is the source's `MinecraftServer`, whose `execute` runs inline on
-  the server thread and queues otherwise. Async is a cached pool of daemon threads, since command work such as file or
+- **Forge / NeoForge / Fabric**: `ServerCommandScheduler`. Sync runs inline when the source's
+  `MinecraftServer#isSameThread()`, else `server.execute(task)`; `execute` alone would also queue a task while the
+  server runs one, such as the packet of a command a player typed. Async is a cached pool of daemon threads, since command work such as file or
   database access usually blocks and vanilla's worker pool is sized for CPU-bound world work.
 - **Velocity**: `VelocityCommandScheduler`. The proxy has no main thread, so sync runs on the calling thread; async
   is the proxy scheduler's `buildTask(plugin, task)`.
