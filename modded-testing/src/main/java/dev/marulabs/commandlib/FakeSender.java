@@ -205,9 +205,9 @@ public final class FakeSender {
 
     CommandSourceStack createSource(MinecraftServer server) {
         //? if >=1.21.2 {
-        /*CommandSource source = player != null ? player.commandSource() : new ConsoleSource();
+        /*CommandSource source = player != null ? player.commandSource() : consoleSource(server);
         *///?} else
-        CommandSource source = player != null ? player : new ConsoleSource();
+        CommandSource source = player != null ? player : consoleSource(server);
         return new CommandSourceStack(source,
                                       Vec3.ZERO,
                                       Vec2.ZERO,
@@ -392,32 +392,23 @@ public final class FakeSender {
     }
     *///?}
 
-    private final class ConsoleSource implements CommandSource {
+    // The console's source is the server, as in vanilla, so CommandLib sees it as the console.
+    private CommandSource consoleSource(MinecraftServer server) {
         //? if >=1.19 {
-        @Override
-        public void sendSystemMessage(Component component) {
-            sentMessages.add(component);
-        }
+        Mockito.doAnswer(invocation -> sentMessages.add(invocation.getArgument(0)))
+               .when(server)
+               .sendSystemMessage(Mockito.any(Component.class));
         //?} else {
-        /*@Override
-        public void sendMessage(Component component, UUID senderUuid) {
-            sentMessages.add(component);
-        }
+        /*Mockito.doAnswer(invocation -> sentMessages.add(invocation.getArgument(0)))
+               .when(server)
+               .sendMessage(Mockito.any(Component.class), Mockito.any(UUID.class));
         *///?}
-
-        @Override
-        public boolean acceptsSuccess() {
-            return true;
-        }
-
-        @Override
-        public boolean acceptsFailure() {
-            return true;
-        }
-
-        @Override
-        public boolean shouldInformAdmins() {
-            return false;
-        }
+        Mockito.when(server.acceptsSuccess())
+               .thenReturn(true);
+        Mockito.when(server.acceptsFailure())
+               .thenReturn(true);
+        Mockito.when(server.shouldInformAdmins())
+               .thenReturn(false);
+        return server;
     }
 }

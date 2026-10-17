@@ -1,6 +1,7 @@
 package dev.marulabs.commandlib;
 
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.rcon.RconConsoleSource;
 import net.minecraft.world.level.BaseCommandBlock;
 import net.minecraft.world.entity.Entity;
@@ -57,7 +58,12 @@ final class ForgeCommandActor implements CommandActor {
         if (rawSource instanceof RconConsoleSource) {
             return CommandActorType.REMOTE_CONSOLE;
         }
-        return CommandActorType.CONSOLE;
+        // The console and data pack functions run as the server. Other sources, such as another mod's or one the
+        // field lookup misses, are not trusted as the console.
+        if (rawSource instanceof MinecraftServer) {
+            return CommandActorType.CONSOLE;
+        }
+        return CommandActorType.UNKNOWN;
     }
 
     @Override
@@ -77,17 +83,22 @@ final class ForgeCommandActor implements CommandActor {
 
     @Override
     public boolean hasPermission(@NotNull String permission) {
+        Objects.requireNonNull(permission);
         Entity entity = source.getEntity();
         //? if >=1.18 {
         if (entity instanceof ServerPlayer) {
-            return CommandLib.hasPermission(source, (ServerPlayer) entity, Objects.requireNonNull(permission));
+            return CommandLib.hasPermission(source, (ServerPlayer) entity, permission);
         }
         //?} else {
         /*if (entity instanceof Player) {
-            return PermissionAPI.hasPermission((Player) entity, Objects.requireNonNull(permission));
+            return PermissionAPI.hasPermission((Player) entity, permission);
         }
         *///?}
-        return false;
+           // The console, RCON and data pack functions, which run as the server, may run every command.
+        if (isConsole()) {
+            return true;
+        }
+        return CommandLib.hasDefaultPermission(source, permission);
     }
 
     @Override
