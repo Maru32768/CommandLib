@@ -589,6 +589,26 @@ class CommandOptionTest {
         assertThatThrownBy(() -> runner.execute("tag -t a -t b -t c -t d Alex")).isInstanceOf(CommandSyntaxException.class);
     }
 
+    // The command keeps the registered option, so a repeatable copy of it would read nothing.
+    @Test
+    void repeatable_fails_after_registration_and_get_option_fails_for_an_undeclared_option() throws Exception {
+        CommandOption<List<String>, TestCommandContext> other = Options.<TestCommandContext>string("tag", "")
+                                                                       .repeatable(3);
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("x") {{
+            CommandOption<String, TestCommandContext> tag = option(Options.string("tag", ""));
+            assertThatThrownBy(() -> tag.repeatable(3)).isInstanceOf(IllegalStateException.class)
+                                                       .hasMessageContaining("already registered");
+            errorFormatter((ctx, error) -> ctx.sendFailure(error.exception()
+                                                                .getMessage()));
+            execute(ctx -> ctx.getOption(other));
+        }});
+
+        assertThat(runner.execute("x --tag a")
+                         .messages()).singleElement()
+                                     .asString()
+                                     .endsWith("is not an option of this command");
+    }
+
     @Test
     void repeatable_needs_a_value_option() {
         assertThatThrownBy(() -> Options.flag("force")

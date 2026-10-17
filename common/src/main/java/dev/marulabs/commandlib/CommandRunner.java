@@ -15,9 +15,11 @@ import dev.marulabs.commandlib.exception.OptionParseException;
 import dev.marulabs.commandlib.util.UncaughtExceptionHandler;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
@@ -40,6 +42,9 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
     private final @Nullable AsyncCommandExecutor<C> executor;
     private final List<UncaughtExceptionHandler<C>> uncaughtExceptionHandlers;
     private final Map<ContextKey<?>, Extractor<? super C, ?>> providers;
+    // The options the command's code can read: its own, and those of the parents whose middlewares and prerequisites
+    // it runs.
+    private final Set<CommandOption<?, ?>> declaredOptions = new HashSet<>();
 
     CommandRunner(PlatformAdapter<S, ?, C, ?> platformAdapter,
                   CommandScheduler scheduler,
@@ -64,6 +69,9 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
         this.executor = executor;
         this.uncaughtExceptionHandlers = uncaughtExceptionHandlers;
         this.providers = command.providers();
+        for (CommonCommand<C, ?> current = command; current != null; current = current.parent()) {
+            declaredOptions.addAll(current.options());
+        }
     }
 
     @Override
@@ -77,6 +85,7 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
             ctx.scheduler(scheduler);
             ctx.captions(command.captions());
             ctx.providers(providers);
+            ctx.declaredOptions(declaredOptions);
             checkVisible(ctx);
         } catch (CommandSyntaxException e) {
             throw e;

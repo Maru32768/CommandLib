@@ -225,6 +225,7 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
         all.add(typedOption);
         CommandOption.checkDistinctNames(all, name);
         options.add(typedOption);
+        typedOption.registered = true;
         return typedOption;
     }
 
