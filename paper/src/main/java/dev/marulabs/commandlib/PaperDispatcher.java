@@ -159,8 +159,8 @@ final class PaperDispatcher {
                                           unwrapNode,
                                           findPluginCommandNode());
             } catch (ReflectiveOperationException | RuntimeException e) {
-                // Not a Paper server, as in tests, or Paper changed these internals: the root's own methods then
-                // change it.
+                // Not a Paper server, as in paper-testing, or Paper changed these internals: the root's own methods
+                // then change it.
                 return null;
             }
         }
