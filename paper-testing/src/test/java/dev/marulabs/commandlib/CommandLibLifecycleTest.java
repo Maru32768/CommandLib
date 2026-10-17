@@ -325,9 +325,6 @@ class CommandLibLifecycleTest {
         when(plugin.isEnabled()).thenReturn(true);
         CommandLib lib = CommandLib.register(plugin, "test", helloCommand());
         CommandDispatcher<CommandSourceStack> dispatcher = fireCommandsEvent();
-        dispatcher.getRoot()
-                  .addChild(Commands.literal("testplugin:hello")
-                                    .build());
 
         lib.unregister();
         lib.unregister();
@@ -378,6 +375,22 @@ class CommandLibLifecycleTest {
         lib.unregister();
 
         assertThat(root.removed).containsExactly("testplugin:hello");
+    }
+
+    @Test
+    void unregister_leaves_a_label_that_a_later_registration_took() {
+        when(plugin.isEnabled()).thenReturn(true);
+        CommandLib first = CommandLib.register(plugin, "test", helloCommand());
+        CommandDispatcher<CommandSourceStack> dispatcher = fireCommandsEvent();
+        CommandLib.register(plugin, "test", helloCommand());
+        CommandNode<CommandSourceStack> taken = dispatcher.getRoot()
+                                                          .getChild("hello");
+
+        first.unregister();
+
+        assertThat(dispatcher.getRoot()
+                             .getChild("hello")).isNotNull()
+                                                .isSameAs(taken);
     }
 
     @Test
@@ -546,6 +559,8 @@ class CommandLibLifecycleTest {
             LiteralCommandNode<CommandSourceStack> node = invocation.getArgument(0);
             dispatcher.getRoot()
                       .addChild(node);
+            dispatcher.getRoot()
+                      .addChild(PaperDispatcher.renamed(node, "testplugin:" + node.getLiteral()));
             // Like Paper, report the plain and namespaced labels unless the plain one belongs to another plugin.
             if (foreignLabels.contains(node.getLiteral())) {
                 return Set.of("testplugin:" + node.getLiteral());

@@ -71,6 +71,25 @@ final class PaperDispatcher {
         }
     }
 
+    /**
+     * The node under {@code name} in the root. On Paper it is the vanilla dispatcher's node, which the mirror root holds
+     * for it.
+     */
+    @Nullable
+    static Object child(RootCommandNode<CommandSourceStack> root, String name) {
+        if (PAPER == null || !PAPER.mirrorRoot()
+                                   .isInstance(root)) {
+            return root.getChild(name);
+        }
+        try {
+            return ((CommandDispatcher<?>) PAPER.mirroredDispatcher()
+                                                .invoke(root)).getRoot()
+                                                              .getChild(name);
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
     private static void removeFromNode(RootCommandNode<CommandSourceStack> root, String name) {
         // Paper's dispatcher root mirrors the vanilla dispatcher and overrides its own removeCommand(String) to
         // remove the node there as well. Editing the root's maps directly would leave the command executable.

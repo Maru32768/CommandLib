@@ -76,8 +76,19 @@ public final class CommandLib implements Listener {
 
         /**
          * @param labels the labels the commands got there, which unregister() removes, leaving those of others alone
+         * @param nodes  the node that held each label then, which tells whether another registration took it since
          */
-        record Live(CommandDispatcher<CommandSourceStack> dispatcher, List<String> labels) implements State {
+        record Live(CommandDispatcher<CommandSourceStack> dispatcher, List<String> labels,
+                Map<String, Object> nodes) implements State {
+            static Live of(CommandDispatcher<CommandSourceStack> dispatcher, List<String> labels) {
+                Map<String, Object> nodes = new HashMap<>();
+                labels.forEach(x -> nodes.put(x, PaperDispatcher.child(dispatcher.getRoot(), x)));
+                return new Live(dispatcher, List.copyOf(labels), nodes);
+            }
+
+            boolean owns(String label) {
+                return PaperDispatcher.child(dispatcher.getRoot(), label) == nodes.get(label);
+            }
         }
 
         record Unregistered() implements State {
@@ -539,10 +550,16 @@ public final class CommandLib implements Listener {
 
         try {
             if (previous instanceof State.Live live) {
+                List<String> removed = new ArrayList<>();
                 for (String label : live.labels()) {
                     // Keep going so that one failure does not leave the remaining commands and the permissions
                     // registered, since unregister() cannot be retried.
                     try {
+                        // A later registration of the same label took it, and keeps it.
+                        if (!live.owns(label)) {
+                            continue;
+                        }
+                        removed.add(label);
                         PaperDispatcher.replaceChildren(live.dispatcher()
                                                             .getRoot(),
                                                         List.of(label),
@@ -552,7 +569,7 @@ public final class CommandLib implements Listener {
                               .log(Level.WARNING, "Failed to remove command " + label, e);
                     }
                 }
-                HelpTopics.remove(plugin, live.labels());
+                HelpTopics.remove(plugin, removed);
                 registrationState.updateCommandTrees(plugin, runtime);
                 if (runtime) {
                     registrationState.recompileFunctionsLater(plugin);
@@ -647,7 +664,7 @@ public final class CommandLib implements Listener {
             }
         } finally {
             // Also when a node fails, so unregister() removes the labels registered before it.
-            state = new State.Live(dispatcher, List.copyOf(labels));
+            state = State.Live.of(dispatcher, labels);
         }
     }
 
@@ -683,7 +700,7 @@ public final class CommandLib implements Listener {
         }
         PaperDispatcher.replaceChildren(dispatcher.getRoot(), labels, labelNodes);
         List<String> added = List.copyOf(labels);
-        state = new State.Live(dispatcher, added);
+        state = State.Live.of(dispatcher, added);
         return added;
     }
 }
