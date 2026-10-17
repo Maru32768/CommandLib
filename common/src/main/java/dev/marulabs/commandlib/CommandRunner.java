@@ -108,11 +108,7 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
     private int runInContext(C ctx) throws CommandFailure {
         try {
             if (!platformAdapter.hasPermission(ctx, command.permissionName(permissionPrefix))) {
-                return fail(ctx,
-                            CommandError.Kind.PERMISSION_DENIED,
-                            null,
-                            null,
-                            () -> ctx.sendFailure(Caption.PERMISSION_DENIED));
+                return denied(ctx);
             }
 
             try {
@@ -121,11 +117,7 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
                     String permission = optionGraph.permissionName(option);
                     if (permission != null && ctx.hasOption(option)
                             && !platformAdapter.hasPermission(ctx, permission)) {
-                        return fail(ctx,
-                                    CommandError.Kind.PERMISSION_DENIED,
-                                    null,
-                                    null,
-                                    () -> ctx.sendFailure(Caption.PERMISSION_DENIED));
+                        return denied(ctx);
                     }
                 }
                 validateOptions(ctx);
@@ -146,11 +138,7 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
 
             for (Arguments<C> arguments : argumentsList) {
                 if (!platformAdapter.hasPermission(ctx, arguments.permissionName(permissionPrefix))) {
-                    return fail(ctx,
-                                CommandError.Kind.PERMISSION_DENIED,
-                                null,
-                                null,
-                                () -> ctx.sendFailure(Caption.PERMISSION_DENIED));
+                    return denied(ctx);
                 }
 
                 try {
@@ -321,6 +309,14 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
             }
         }
         return false;
+    }
+
+    private int denied(C ctx) throws CommandFailure {
+        return fail(ctx,
+                    CommandError.Kind.PERMISSION_DENIED,
+                    null,
+                    null,
+                    () -> ctx.sendFailure(Caption.PERMISSION_DENIED));
     }
 
     private int fail(C ctx,
