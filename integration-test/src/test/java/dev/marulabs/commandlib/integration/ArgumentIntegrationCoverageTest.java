@@ -39,6 +39,14 @@ class ArgumentIntegrationCoverageTest {
     }
 
     @Test
+    void velocity_public_arguments_have_integration_cases() throws IOException {
+        Path rootDir = Path.of(System.getProperty("commandlib.rootDir", "."));
+        assertIntegrationCases(rootDir,
+                               "velocity",
+                               "integration-test/targets/velocity-3.4.0/src/testPlugin/java/dev/marulabs/testplugin/TestPlugin.java");
+    }
+
+    @Test
     void paper_has_every_spigot_argument() throws IOException {
         // Switching platform must not take arguments away; Paper-only arguments are allowed on top.
         Path rootDir = Path.of(System.getProperty("commandlib.rootDir", "."));

@@ -20,6 +20,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
@@ -31,6 +32,7 @@ import static org.assertj.core.api.Assertions.fail;
 class VelocityIntegrationTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(VelocityIntegrationTest.class);
     private static final String SERVER_DIR = "/workspace/server";
+    private static final String TEST_PLAYER_NAME = "Maru32768";
     // Set on the wait strategy: waitingFor replaces the strategy, and with it a timeout set on the container before.
     private static final Duration STARTUP_TIMEOUT = Duration.ofMinutes(8);
 
@@ -87,7 +89,7 @@ class VelocityIntegrationTest {
                           .until(() -> {
                               client.assertNotDisconnected();
                               return backend.getLogs()
-                                            .contains("Maru32768 joined the game");
+                                            .contains(TEST_PLAYER_NAME + " joined the game");
                           });
                 IntegrationTest.waitForCommandTree(client);
 
@@ -96,7 +98,7 @@ class VelocityIntegrationTest {
                 List<String> children = commandTreeChildren(client, "commandlibtest");
                 LOGGER.info("Children of /commandlibtest in the bot's command tree: {}", children);
                 assertThat(children).as("children of /commandlibtest in the command tree the bot received")
-                                    .contains("echo", "server", "consoleOnly", "async")
+                                    .contains("echo", "server", "find", "value", "consoleOnly", "async")
                                     .doesNotContain("denied");
 
                 client.clearReceivedPackets();
@@ -105,6 +107,10 @@ class VelocityIntegrationTest {
                 LOGGER.info("Suggestions the bot received for /commandlibtest server: {}", suggestions);
                 assertThat(suggestions).as("suggestions of ServerArgument sent to the bot")
                                        .contains("lobby");
+                client.clearReceivedPackets();
+                client.sendTabCompleteRequest(2, "/commandlibtest find ");
+                assertThat(awaitSuggestions(client)).as("suggestions of PlayerArgument sent to the bot")
+                                                    .contains(TEST_PLAYER_NAME);
 
                 receives(client,
                          "commandlibtest echo hello",
@@ -114,6 +120,20 @@ class VelocityIntegrationTest {
                          "commandlibtest server lobby",
                          "the message of a command with a ServerArgument",
                          m -> m.contains("server lobby"));
+                receives(client,
+                         "commandlibtest find " + TEST_PLAYER_NAME.toLowerCase(Locale.ROOT),
+                         "the message of a command with a PlayerArgument",
+                         m -> m.contains("find " + TEST_PLAYER_NAME));
+                receivesValue(client, "boolean", "true", "true");
+                receivesValue(client, "double", "1.5", "1.5");
+                receivesValue(client, "duration", "1m30s", "PT1M30S");
+                receivesValue(client, "enum", "seconds", "SECONDS");
+                receivesValue(client, "float", "2.5", "2.5");
+                receivesValue(client, "integer", "42", "42");
+                receivesValue(client, "long", "12345678901", "12345678901");
+                receivesValue(client, "nameable", "apple", "Fruit[tabCompleteName=apple]");
+                receivesValue(client, "object", "one", "1");
+                receivesValue(client, "string", "word", "word");
                 receives(client,
                          "commandlibtest server nowhere",
                          "the incorrect argument message of an unknown server",
@@ -129,10 +149,16 @@ class VelocityIntegrationTest {
                                                "the refusal of a command with DefaultPermission.OP",
                                                m -> m.contains("Incorrect argument for command"));
                 assertThat(denied).noneMatch(m -> m.contains("denied executed"));
+                // The plugin runs it as the console at startup, so the refusal is not a node that never registered.
+                assertThat(proxy.getLogs()).as("proxy log")
+                                           .contains("denied executed");
                 receives(client,
                          "commandlibtest async",
                          "the message of an executeAsync command",
                          m -> m.contains("async done, work off the calling thread: true"));
+                // CommandLib logs the unexpected errors of executors and suggestion providers with their stack trace.
+                assertThat(proxy.getLogs()).as("proxy log")
+                                           .doesNotContain("Exception");
             } finally {
                 client.disconnect("Test completed");
             }
@@ -146,6 +172,14 @@ class VelocityIntegrationTest {
         List<String> messages = IntegrationTest.assertBotReceives(client, command, description, expected);
         LOGGER.info("/{} sent the bot {}", command, messages);
         return messages;
+    }
+
+    // /commandlibtest value <type> sends the value its argument parsed.
+    private static void receivesValue(BotSession client, String type, String input, String expected) {
+        receives(client,
+                 "commandlibtest value " + type + " " + input,
+                 "the value of a " + type + " argument",
+                 m -> m.contains("value " + type + "=" + expected));
     }
 
     private static GenericContainer<?> container(String image, String logPrefix, double cpuLimit) {
