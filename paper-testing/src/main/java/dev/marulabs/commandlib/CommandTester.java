@@ -221,10 +221,6 @@ public final class CommandTester implements AutoCloseable {
         Snapshots.assertMatches(snapshotName, commandTree());
     }
 
-    public String permissionPrefix() {
-        return permissionPrefix;
-    }
-
     public CommandTester withFakePlayer(@NotNull Player player) {
         fakePlayers.put(player.getName(), player);
         fakeEntities.put(player.getName(), player);
