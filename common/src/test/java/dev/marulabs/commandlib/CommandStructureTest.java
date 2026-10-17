@@ -1,5 +1,7 @@
 package dev.marulabs.commandlib;
 
+import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.marulabs.commandlib.argument.*;
 import dev.marulabs.commandlib.command.CommandExecutor;
@@ -88,6 +90,59 @@ class CommandStructureTest {
             });
         }}).isInstanceOf(IllegalArgumentException.class)
            .hasMessageContaining("parse differently: QUOTABLE_PHRASE and GREEDY_PHRASE");
+    }
+
+    // Vanilla types such as EntityArgument keep their settings in fields and have no equals.
+    @Test
+    void arguments_sharing_a_node_with_types_of_other_settings_are_rejected() {
+        assertThatThrownBy(() -> new TestCommand("x") {{
+            argument(new MaxLengthArg("v", 2), new StrArg("more")).execute((v, more, ctx) -> {
+            });
+            argument(new MaxLengthArg("v", 10)).execute((v, ctx) -> {
+            });
+        }}).isInstanceOf(IllegalArgumentException.class)
+           .hasMessageContaining("parse differently");
+        // Separate instances of one setting still share the node.
+        new TestCommand("x") {{
+            argument(new MaxLengthArg("v", 2), new StrArg("more")).execute((v, more, ctx) -> {
+            });
+            argument(new MaxLengthArg("v", 2)).execute((v, ctx) -> {
+            });
+        }};
+    }
+
+    private static final class MaxLengthType implements ArgumentType<String> {
+        private final int max;
+
+        MaxLengthType(int max) {
+            this.max = max;
+        }
+
+        @Override
+        public String parse(StringReader reader) throws CommandSyntaxException {
+            String value = reader.readUnquotedString();
+            if (value.length() > max) {
+                throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerInvalidInt()
+                                                                .create(value);
+            }
+            return value;
+        }
+    }
+
+    private static final class MaxLengthArg extends CommonArgument<String, TestCommandContext, MaxLengthArg> {
+        MaxLengthArg(String name, int max) {
+            super(name, new MaxLengthType(max));
+        }
+
+        @Override
+        public String cast(Object parsedArgument) {
+            return (String) parsedArgument;
+        }
+
+        @Override
+        protected String parseImpl(TestCommandContext ctx) {
+            return ctx.getInput(name());
+        }
     }
 
     @Test

@@ -4,6 +4,8 @@ import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.*;
 
 /**
@@ -110,19 +112,65 @@ final class CommandNameValidator {
             return type instanceof StringArgumentType ? ((StringArgumentType) type).getType() : type;
         }
 
-        // A type without its own equals, such as a vanilla one, has no settings that change what it accepts, except
-        // StringArgumentType, whose word, phrase and greedy forms are one class without equals.
+        // StringArgumentType's word, phrase and greedy forms are one class without equals.
         private static boolean sameType(ArgumentType<?> a, ArgumentType<?> b) {
+            if (a == b) {
+                return true;
+            }
             if (a.getClass() != b.getClass()) {
                 return false;
             }
             if (a instanceof StringArgumentType) {
                 return ((StringArgumentType) a).getType() == ((StringArgumentType) b).getType();
             }
+            return overridesEquals(a.getClass()) ? a.equals(b) : sameSettings(a, b);
+        }
+
+        /**
+         * Whether two instances of a type without equals, such as a vanilla one, have the same settings: the values of
+         * their fields that are plain values, such as EntityArgument's single and playersOnly or TimeArgument's
+         * minimum, and the types they wrap. Other fields hold collaborators, such as the registry lookup a ResourceArgument gets from the build
+         * context, which differ between instances that parse alike.
+         */
+        // shortcut: a setting held in an object without equals, such as ResourceArgument's registry key, is not compared;
+        // compare such values when a merged node of that kind turns up.
+        private static boolean sameSettings(Object a, Object b) {
+            for (Class<?> type = a.getClass(); type != Object.class; type = type.getSuperclass()) {
+                for (Field field : type.getDeclaredFields()) {
+                    // A module that does not open the type keeps its fields unread, as before they were compared.
+                    if (Modifier.isStatic(field.getModifiers()) || !field.trySetAccessible()) {
+                        continue;
+                    }
+                    Object x;
+                    Object y;
+                    try {
+                        x = field.get(a);
+                        y = field.get(b);
+                    } catch (IllegalAccessException e) {
+                        continue;
+                    }
+                    // Paper's argument types wrap the vanilla one.
+                    if (x instanceof ArgumentType && y instanceof ArgumentType) {
+                        if (!sameType((ArgumentType<?>) x, (ArgumentType<?>) y)) {
+                            return false;
+                        }
+                    } else if ((isValue(x) || isValue(y)) && !Objects.equals(x, y)) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        // Boxed primitives, strings, enums and records among others.
+        private static boolean isValue(@Nullable Object value) {
+            return value != null && overridesEquals(value.getClass());
+        }
+
+        private static boolean overridesEquals(Class<?> type) {
             try {
-                return a.getClass()
-                        .getMethod("equals", Object.class)
-                        .getDeclaringClass() == Object.class || a.equals(b);
+                return type.getMethod("equals", Object.class)
+                           .getDeclaringClass() != Object.class;
             } catch (NoSuchMethodException e) {
                 throw new AssertionError(e);
             }

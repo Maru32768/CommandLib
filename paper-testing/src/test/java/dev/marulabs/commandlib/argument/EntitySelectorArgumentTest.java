@@ -156,6 +156,21 @@ class EntitySelectorArgumentTest {
         }
     }
 
+    // One node would parse both branches with the type of one of them.
+    @Test
+    void player_and_entities_arguments_cannot_share_a_node() {
+        assertThatThrownBy(() -> CommandTester.builder()
+                                              .command(() -> new Command("x") {{
+                                                  argument(new PlayerArgument("target")).execute((target, ctx) -> {
+                                                  });
+                                                  argument(new EntitiesArgument("target"),
+                                                           new StringArgument("reason")).execute((target, reason, ctx) -> {
+                                                           });
+                                              }})
+                                              .permissionPrefix("test.command")
+                                              .build()).hasMessageContaining("parse differently");
+    }
+
     private static void assertSyntaxError(CommandTester tester, String input) {
         assertThatThrownBy(() -> tester.execute(input, FakeSender.player("Admin"))).as(input)
                                                                                    .hasCauseInstanceOf(CommandSyntaxException.class);
