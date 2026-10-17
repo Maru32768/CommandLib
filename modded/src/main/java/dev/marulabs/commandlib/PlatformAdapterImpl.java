@@ -6,7 +6,7 @@ import dev.marulabs.commandlib.exception.ArgumentParseException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
 
-public final class PlatformAdapterImpl implements PlatformAdapter<CommandSourceStack, Component, CommandContext, Command> {
+public final class PlatformAdapterImpl implements PlatformAdapter<CommandSourceStack, Component, CommandContext> {
     @Override
     public CommandContext createCommandContext(com.mojang.brigadier.context.CommandContext<CommandSourceStack> ctx) {
         return new CommandContext(ctx);

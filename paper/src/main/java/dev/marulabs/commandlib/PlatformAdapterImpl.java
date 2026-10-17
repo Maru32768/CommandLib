@@ -9,7 +9,7 @@ import io.papermc.paper.command.brigadier.MessageComponentSerializer;
 import net.kyori.adventure.text.Component;
 
 @SuppressWarnings("UnstableApiUsage")
-public final class PlatformAdapterImpl implements PlatformAdapter<CommandSourceStack, Component, CommandContext, Command> {
+public final class PlatformAdapterImpl implements PlatformAdapter<CommandSourceStack, Component, CommandContext> {
     @Override
     public CommandContext createCommandContext(com.mojang.brigadier.context.CommandContext<CommandSourceStack> ctx) {
         return new CommandContext(ctx);

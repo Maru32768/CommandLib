@@ -8,13 +8,13 @@ import dev.marulabs.commandlib.exception.ArgumentParseException;
 import java.util.List;
 import java.util.Map;
 
-public interface PlatformAdapter<S, T, C extends CommonCommandContext<S, T>, U extends CommonCommand<C, U>> {
+public interface PlatformAdapter<S, T, C extends CommonCommandContext<S, T>> {
     /**
      * The platform's adapter. Its class is looked up once.
      */
     @SuppressWarnings("unchecked")
-    static <S, T, C extends CommonCommandContext<S, T>, U extends CommonCommand<C, U>> PlatformAdapter<S, T, C, U> get() {
-        return (PlatformAdapter<S, T, C, U>) PlatformAdapterHolder.get();
+    static <S, T, C extends CommonCommandContext<S, T>> PlatformAdapter<S, T, C> get() {
+        return (PlatformAdapter<S, T, C>) PlatformAdapterHolder.get();
     }
 
     C createCommandContext(com.mojang.brigadier.context.CommandContext<S> ctx);

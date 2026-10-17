@@ -3,7 +3,7 @@ package dev.marulabs.commandlib;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.marulabs.commandlib.exception.ArgumentParseException;
 
-public final class PlatformAdapterImpl implements PlatformAdapter<FakeSender, String, TestCommandContext, TestCommand> {
+public final class PlatformAdapterImpl implements PlatformAdapter<FakeSender, String, TestCommandContext> {
     @Override
     public TestCommandContext createCommandContext(com.mojang.brigadier.context.CommandContext<FakeSender> ctx) {
         return new TestCommandContext(ctx);

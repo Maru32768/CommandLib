@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 final class ArgumentCommandNodeCreator<S, T, C extends CommonCommandContext<S, T>> {
-    private final PlatformAdapter<S, T, C, ?> platformAdapter = PlatformAdapter.get();
+    private final PlatformAdapter<S, T, C> platformAdapter = PlatformAdapter.get();
     private final Arguments<C> arguments;
     // The branches of the command. One shares the node of an argument with this branch when the names of the arguments
     // up to it are the same.
@@ -159,7 +159,7 @@ final class ArgumentCommandNodeCreator<S, T, C extends CommonCommandContext<S, T
      * The suggestions of an argument node: the argument's suggestion providers, with the arguments parsed before it.
      * They are empty for a source that fails {@code requirement}.
      */
-    static <S, C extends CommonCommandContext<S, ?>> com.mojang.brigadier.suggestion.SuggestionProvider<S> suggestions(PlatformAdapter<S, ?, C, ?> platformAdapter,
+    static <S, C extends CommonCommandContext<S, ?>> com.mojang.brigadier.suggestion.SuggestionProvider<S> suggestions(PlatformAdapter<S, ?, C> platformAdapter,
                                                                                                                        CommonArgument<?, C, ?> argument,
                                                                                                                        Predicate<S> requirement,
                                                                                                                        Map<ContextKey<?>, ? extends Extractor<?, ?>> providers,

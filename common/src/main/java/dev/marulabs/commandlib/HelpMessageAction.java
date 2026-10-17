@@ -12,12 +12,12 @@ import java.util.Set;
 /**
  * Builds the {@link CommandHelp} of a command for the sender and sends it with the command's {@link HelpFormatter}.
  */
-final class HelpMessageAction<S, T, C extends CommonCommandContext<S, T>, U extends CommonCommand<C, U>> implements CommandExecutor<C> {
-    private final PlatformAdapter<S, T, C, U> platformAdapter;
-    private final U command;
+final class HelpMessageAction<S, T, C extends CommonCommandContext<S, T>> implements CommandExecutor<C> {
+    private final PlatformAdapter<S, T, C> platformAdapter;
+    private final CommonCommand<C, ?> command;
     private final String permissionPrefix;
 
-    HelpMessageAction(PlatformAdapter<S, T, C, U> platformAdapter, U command, String permissionPrefix) {
+    HelpMessageAction(PlatformAdapter<S, T, C> platformAdapter, CommonCommand<C, ?> command, String permissionPrefix) {
         this.platformAdapter = platformAdapter;
         this.command = command;
         this.permissionPrefix = permissionPrefix;
@@ -55,7 +55,7 @@ final class HelpMessageAction<S, T, C extends CommonCommandContext<S, T>, U exte
                 continue;
             }
             for (CommonCommand<C, ?> child : arguments.children()) {
-                if (isUsable(castCommand(child), ctx)) {
+                if (isUsable(child, ctx)) {
                     addArgumentChildUsages(usages,
                                            path,
                                            append(appendTags(prefix, arguments), Token.literal(child.name())),
@@ -101,7 +101,7 @@ final class HelpMessageAction<S, T, C extends CommonCommandContext<S, T>, U exte
                 usages.add(new Usage(path, argumentTokens, arguments.description(ctx)));
             }
             for (CommonCommand<C, ?> child : arguments.children()) {
-                if (isUsable(castCommand(child), ctx)) {
+                if (isUsable(child, ctx)) {
                     addArgumentChildUsages(usages,
                                            path,
                                            append(argumentTokens, Token.literal(child.name())),
@@ -118,7 +118,7 @@ final class HelpMessageAction<S, T, C extends CommonCommandContext<S, T>, U exte
     }
 
     // The sender has the command's permission and the command is visible to the sender.
-    private boolean isUsable(U child, C ctx) {
+    private boolean isUsable(CommonCommand<C, ?> child, C ctx) {
         return platformAdapter.hasPermission(ctx, child.permissionName(permissionPrefix))
                 && (!child.hasVisibility() || child.isVisibleTo(sourceContext(ctx)));
     }
@@ -205,10 +205,5 @@ final class HelpMessageAction<S, T, C extends CommonCommandContext<S, T>, U exte
         List<Token> result = new ArrayList<>(tokens);
         result.add(token);
         return result;
-    }
-
-    @SuppressWarnings("unchecked")
-    private U castCommand(CommonCommand<C, ?> command) {
-        return (U) command;
     }
 }

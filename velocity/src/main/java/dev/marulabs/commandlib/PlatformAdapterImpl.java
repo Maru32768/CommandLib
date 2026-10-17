@@ -7,7 +7,7 @@ import dev.marulabs.commandlib.exception.ArgumentParseException;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 
-public final class PlatformAdapterImpl implements PlatformAdapter<CommandSource, Component, CommandContext, Command> {
+public final class PlatformAdapterImpl implements PlatformAdapter<CommandSource, Component, CommandContext> {
     @Override
     public CommandContext createCommandContext(com.mojang.brigadier.context.CommandContext<CommandSource> ctx) {
         return new CommandContext(ctx);

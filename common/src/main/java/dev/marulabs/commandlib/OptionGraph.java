@@ -97,7 +97,7 @@ final class OptionGraph<S, C extends CommonCommandContext<S, ?>> {
      * The graph of the command's options. {@code inheritedArguments} are the arguments parsed before the command, which
      * an argument child has.
      */
-    static <S, C extends CommonCommandContext<S, ?>> OptionGraph<S, C> of(PlatformAdapter<S, ?, C, ?> platformAdapter,
+    static <S, C extends CommonCommandContext<S, ?>> OptionGraph<S, C> of(PlatformAdapter<S, ?, C> platformAdapter,
                                                                           CommonCommand<C, ?> command,
                                                                           List<Arguments<C>> inheritedArguments,
                                                                           String permissionPrefix) {

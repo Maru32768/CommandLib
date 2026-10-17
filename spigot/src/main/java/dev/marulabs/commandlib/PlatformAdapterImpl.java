@@ -14,7 +14,7 @@ import org.bukkit.command.CommandSender;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public final class PlatformAdapterImpl implements PlatformAdapter<Object, BaseComponent, CommandContext, Command> {
+public final class PlatformAdapterImpl implements PlatformAdapter<Object, BaseComponent, CommandContext> {
     private static final Logger LOGGER = Logger.getLogger(PlatformAdapterImpl.class.getName());
 
     @Override

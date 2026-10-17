@@ -9,13 +9,13 @@ import java.lang.reflect.InvocationTargetException;
  */
 final class PlatformAdapterHolder {
     // A race only creates another adapter, which works as the first one does: adapters keep no state.
-    private static volatile @Nullable PlatformAdapter<?, ?, ?, ?> instance;
+    private static volatile @Nullable PlatformAdapter<?, ?, ?> instance;
 
     private PlatformAdapterHolder() {
     }
 
-    static PlatformAdapter<?, ?, ?, ?> get() {
-        PlatformAdapter<?, ?, ?, ?> adapter = instance;
+    static PlatformAdapter<?, ?, ?> get() {
+        PlatformAdapter<?, ?, ?> adapter = instance;
         if (adapter == null) {
             adapter = load();
             instance = adapter;
@@ -23,7 +23,7 @@ final class PlatformAdapterHolder {
         return adapter;
     }
 
-    private static PlatformAdapter<?, ?, ?, ?> load() {
+    private static PlatformAdapter<?, ?, ?> load() {
         try {
             return Class.forName("dev.marulabs.commandlib.PlatformAdapterImpl")
                         .asSubclass(PlatformAdapter.class)

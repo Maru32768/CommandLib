@@ -8,7 +8,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U extends CommonCommand<C, U>> {
-    private final PlatformAdapter<S, T, C, U> platformAdapter = PlatformAdapter.get();
+    private final PlatformAdapter<S, T, C> platformAdapter = PlatformAdapter.get();
     private final Collection<? extends U> commands;
     private final String permissionPrefix;
     private final CommandScheduler scheduler;
@@ -28,7 +28,7 @@ final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U ext
     }
 
     private List<LiteralCommandNode<S>> toCommandNodes(U command, List<Arguments<C>> inheritedArguments) {
-        HelpMessageAction<S, T, C, U> helpAction = new HelpMessageAction<>(platformAdapter, command, permissionPrefix);
+        HelpMessageAction<S, T, C> helpAction = new HelpMessageAction<>(platformAdapter, command, permissionPrefix);
         List<LiteralCommandNode<S>> nodes = new ArrayList<>();
         LiteralCommandNode<S> node = toCommandNode(command, inheritedArguments, helpAction);
         nodes.add(node);
@@ -78,7 +78,7 @@ final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U ext
     // A runner without an executor sends the help after the same checks as the command, and reports its failures.
     private LiteralCommandNode<S> createHelpNode(U command,
                                                  List<Arguments<C>> inheritedArguments,
-                                                 HelpMessageAction<S, T, C, U> helpAction) {
+                                                 HelpMessageAction<S, T, C> helpAction) {
         String permission = command.permissionName(permissionPrefix);
         CommandRunner<S, C> runner = new CommandRunner<>(platformAdapter,
                                                          scheduler,
@@ -102,7 +102,7 @@ final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U ext
 
     private LiteralCommandNode<S> toCommandNode(U command,
                                                 List<Arguments<C>> inheritedArguments,
-                                                HelpMessageAction<S, T, C, U> helpAction) {
+                                                HelpMessageAction<S, T, C> helpAction) {
         LiteralArgumentBuilder<S> builder = LiteralArgumentBuilder.literal(command.name());
         builder.requires(requirement(command));
 

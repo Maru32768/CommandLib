@@ -92,7 +92,7 @@ public class CommandSyntaxExceptionTest extends TestBase {
          * throws or logs a warning about falling back to plain text.
          */
         private static String checkConversion(CommandSyntaxException e) {
-            PlatformAdapter<?, ?, ?, ?> adapter = PlatformAdapter.get();
+            PlatformAdapter<?, ?, ?> adapter = PlatformAdapter.get();
             Logger logger = Logger.getLogger(adapter.getClass()
                                                     .getName());
             List<LogRecord> warnings = new ArrayList<>();

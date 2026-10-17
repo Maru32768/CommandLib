@@ -27,7 +27,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 
 final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Command<S> {
-    private final PlatformAdapter<S, ?, C, ?> platformAdapter;
+    private final PlatformAdapter<S, ?, C> platformAdapter;
     private final CommandScheduler scheduler;
     private final CommonCommand<C, ?> command;
     private final String permissionPrefix;
@@ -41,7 +41,7 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
     private final List<UncaughtExceptionHandler<C>> uncaughtExceptionHandlers;
     private final Map<ContextKey<?>, Extractor<? super C, ?>> providers;
 
-    CommandRunner(PlatformAdapter<S, ?, C, ?> platformAdapter,
+    CommandRunner(PlatformAdapter<S, ?, C> platformAdapter,
                   CommandScheduler scheduler,
                   CommonCommand<C, ?> command,
                   String permissionPrefix,
