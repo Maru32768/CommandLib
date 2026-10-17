@@ -102,16 +102,21 @@ captions.sender((ctx, caption, message, send) -> send.accept(RichText.text("[Hom
                                                                      .color(0xFFAA00)
                                                                      .append(message)));
 
-// MiniMessage texts on Paper, except the confirmation, which carries a button.
+// MiniMessage texts on Paper, except a translatable message (a caption sent as a vanilla translation key) and the
+// confirmation, which carries a button.
 captions.sender((ctx, caption, message, send) -> {
-    if (caption.equals(Caption.CONFIRMATION_REQUEST)) {
+    if (message instanceof TranslatableRichText || caption.equals(Caption.CONFIRMATION_REQUEST)) {
         send.accept(message);
         return;
     }
-    ((CommandContext) ctx).sendFailure(MiniMessage.miniMessage()
+    ((CommandContext) ctx).sendMessage(MiniMessage.miniMessage()
                                                   .deserialize(message.plainText()));
 });
 ```
+
+The `CaptionSender` does not say whether a caption is a success or a failure, so this one sends every MiniMessage text
+with `sendMessage` and leaves the colors to the text. The `plainText()` of a translatable message is its key, which is
+why it goes to `send` unchanged.
 
 What the sender sends while a command fails is part of the failure, as with `ctx.sendFailure`: a silent source does not
 get it and `/execute store success` stores 0.
