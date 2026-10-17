@@ -28,6 +28,8 @@ dependencies {
     testImplementation("org.assertj:assertj-core:3.25.1")
     testImplementation("org.mockito:mockito-core:4.8.1")
     testImplementation("org.mockito:mockito-inline:4.8.1")
+    // Mockito's own dependency, for an instance of CommandLib without its constructor, which Mockito cannot mock.
+    testImplementation("org.objenesis:objenesis:3.3")
 }
 
 tasks.test {
