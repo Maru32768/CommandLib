@@ -151,7 +151,7 @@ public class CommandTester implements AutoCloseable {
                 }
             };
             new CommandNodeCreator<>(commands, permissionPrefix, onAnyThread).build()
-                                                                                   .forEach(dispatcher.getRoot()::addChild);
+                                                                             .forEach(dispatcher.getRoot()::addChild);
         } catch (Exception e) {
             close();
             throw new RuntimeException("Unexpected exception", e);
@@ -297,6 +297,9 @@ public class CommandTester implements AutoCloseable {
         registryMock.when(() -> NMSClassRegistry.findClass(Mockito.any()))
                     .thenThrow(new UnsupportedOperationException("This NMS class is not supported in CommandTester."));
         nmsMocks.forEach((lookUpClass, mockClass) -> registerNmsMock(registryMock, lookUpClass, mockClass));
+        // The mocks stand in for the typed NMS modules, so diagnostics report that none is in use.
+        registryMock.when(NMSClassRegistry::moduleStatus)
+                    .thenReturn(List.of());
         return registryMock;
     }
 

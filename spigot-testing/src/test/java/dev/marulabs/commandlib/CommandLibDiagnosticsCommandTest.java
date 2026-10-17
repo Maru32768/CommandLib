@@ -21,6 +21,7 @@ class CommandLibDiagnosticsCommandTest {
                                                 .contains("  Server: CraftBukkit git-Spigot (MC: 1.13.2)",
                                                           "  Minecraft: 1.13.2",
                                                           "  Command dispatcher: vanilla Brigadier dispatcher through NMS",
+                                                          // CommandTester stubs the module status to no module.
                                                           "  Typed NMS module: none supports Minecraft 1.13.2",
                                                           "Registrations: 0");
     }
