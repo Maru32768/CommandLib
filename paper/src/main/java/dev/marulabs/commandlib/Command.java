@@ -8,6 +8,7 @@ import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -71,7 +72,11 @@ public class Command extends CommonCommand<CommandContext, Command> {
     }
 
     final List<Permission> permissions(@NotNull String prefix) {
-        return CommandTree.permissionConfigs(List.of(this), prefix)
+        return permissions(List.of(this), prefix);
+    }
+
+    static List<Permission> permissions(@NotNull Collection<? extends Command> commands, @NotNull String prefix) {
+        return CommandTree.permissionConfigs(commands, prefix)
                           .stream()
                           .map(c -> new Permission(c.node(), c.description(), toBukkitDefault(c.defaultPermission())))
                           .collect(Collectors.toList());

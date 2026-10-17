@@ -127,27 +127,41 @@ final class CommandTree {
     }
 
     /**
-     * The nodes of {@link #permissions(List)} for {@code commands}, which every platform registers.
+     * The nodes of {@link #permissions(List)} for {@code commands}, which every platform registers. A cooldown bypass
+     * node that a command, option or argument of {@code commands} also uses is left out, so that entry's default and
+     * description apply whatever the command order.
      */
     static List<PermissionConfig> permissionConfigs(Collection<? extends CommonCommand<?, ?>> commands,
                                                     String permissionPrefix) {
-        return permissions(of(commands, permissionPrefix)).stream()
-                                                          .map(x -> new PermissionConfig(x.node,
-                                                                                         x.defaultPermission,
-                                                                                         x.description))
-                                                          .collect(Collectors.toList());
+        List<PermissionEntry> permissions = permissions(of(commands, permissionPrefix));
+        Set<String> otherNodes = nonBypassNodes(permissions);
+        return permissions.stream()
+                          .filter(x -> !x.kind.equals(PermissionEntry.COOLDOWN_BYPASS) || !otherNodes.contains(x.node))
+                          .map(x -> new PermissionConfig(x.node, x.defaultPermission, x.description))
+                          .collect(Collectors.toList());
+    }
+
+    private static Set<String> nonBypassNodes(List<PermissionEntry> permissions) {
+        return permissions.stream()
+                          .filter(x -> !x.kind.equals(PermissionEntry.COOLDOWN_BYPASS))
+                          .map(x -> x.node)
+                          .collect(Collectors.toSet());
     }
 
     /**
      * The cooldown bypass nodes of {@code commands}. Unlike the other nodes, which follow the commands, a bypass node can
-     * be any node, so a platform leaves one that already exists as is.
+     * be any node, so a platform leaves one that already exists as is. A node that a command, option or argument of
+     * {@code commands} also uses is left out, as {@link #permissionConfigs} registers it as that entry.
      */
     static Set<String> cooldownBypassNodes(Collection<? extends CommonCommand<?, ?>> commands,
                                            String permissionPrefix) {
-        return permissions(of(commands, permissionPrefix)).stream()
-                                                          .filter(x -> x.kind.equals(PermissionEntry.COOLDOWN_BYPASS))
-                                                          .map(x -> x.node)
-                                                          .collect(Collectors.toSet());
+        List<PermissionEntry> permissions = permissions(of(commands, permissionPrefix));
+        Set<String> otherNodes = nonBypassNodes(permissions);
+        return permissions.stream()
+                          .filter(x -> x.kind.equals(PermissionEntry.COOLDOWN_BYPASS))
+                          .map(x -> x.node)
+                          .filter(x -> !otherNodes.contains(x))
+                          .collect(Collectors.toSet());
     }
 
     private static void addPermissions(List<PermissionEntry> permissions, CommandEntry command) {

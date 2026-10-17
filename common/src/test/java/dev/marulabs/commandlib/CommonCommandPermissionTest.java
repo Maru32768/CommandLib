@@ -306,6 +306,28 @@ class CommonCommandPermissionTest {
     }
 
     @Test
+    void a_bypass_node_that_another_command_uses_takes_that_command_s_default_in_either_order() {
+        TestCommand kit = new TestCommand("kit") {{
+            cooldown(Cooldown.of(Duration.ofMinutes(1))
+                             .bypassPermission("test.command.vip"));
+        }};
+        TestCommand vip = new TestCommand("vip") {{
+            permission(DefaultPermission.ALL, "VIP perks");
+        }};
+
+        for (List<TestCommand> commands : List.of(List.of(kit, vip), List.of(vip, kit))) {
+            assertThat(CommandTree.permissionConfigs(commands, "test.command")).filteredOn(x -> x.node()
+                                                                                                 .equals("test.command.vip"))
+                                                                               .singleElement()
+                                                                               .satisfies(x -> {
+                                                                                   assertThat(x.defaultPermission()).isEqualTo(DefaultPermission.ALL);
+                                                                                   assertThat(x.description()).isEqualTo("VIP perks");
+                                                                               });
+            assertThat(CommandTree.cooldownBypassNodes(commands, "test.command")).isEmpty();
+        }
+    }
+
+    @Test
     void grandchild_permission_node_includes_every_ancestor() {
         TestCommand command = new TestCommand("game") {{
             addChildren(new TestCommand("team") {{

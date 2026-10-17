@@ -7,7 +7,6 @@ import org.bukkit.permissions.Permission;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * The commands of one registration and the prefix of their permissions.
@@ -58,9 +57,6 @@ record CommandSet(List<Command> commands, String permissionPrefix, Map<String, C
     }
 
     List<Permission> permissions() {
-        return commands.stream()
-                       .flatMap(c -> c.permissions(permissionPrefix)
-                                      .stream())
-                       .collect(Collectors.toList());
+        return Command.permissions(commands, permissionPrefix);
     }
 }
