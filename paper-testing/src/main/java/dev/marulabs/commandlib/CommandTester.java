@@ -771,17 +771,13 @@ public final class CommandTester implements AutoCloseable {
 
     private static ArgumentType<FinePositionResolver> finePosition() {
         return reader -> {
-            double x = readDouble(reader);
+            double x = reader.readDouble();
             reader.skipWhitespace();
-            double y = readDouble(reader);
+            double y = reader.readDouble();
             reader.skipWhitespace();
-            double z = readDouble(reader);
+            double z = reader.readDouble();
             return source -> Position.fine(x, y, z);
         };
-    }
-
-    private static double readDouble(StringReader reader) throws CommandSyntaxException {
-        return reader.readDouble();
     }
 
     public static final class Builder {
