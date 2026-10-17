@@ -61,6 +61,9 @@ This file lists the changes in each CommandLib release that affect plugin and mo
   `MessageOption` are removed. Build a `RichText` (`TextRichText` or `TranslatableRichText`) and pass it to
   `sendMessage`, `sendSuccess`, `sendWarn` or `sendFailure`.
 - `sendComponent` is removed. Pass the native component to `sendMessage`.
+- Forge / NeoForge / Fabric: the `boolean allowLogging` overloads of `sendMessage` (with a `String` or a component),
+  `sendWarn` and `sendFailure` are removed. Drop the flag; to broadcast a message to operators, call
+  `sendSuccess(message, true)`.
 - CommandLib's own messages are now captions in the sender's locale, with English and Japanese built in. Several
   English texts are reworded. For example, the prerequisite failure says "You do not have permission". Where vanilla
   has a message with the same meaning, such as "No player was found", CommandLib sends vanilla's translatable message.
@@ -79,6 +82,10 @@ This file lists the changes in each CommandLib release that affect plugin and mo
 - Forge / NeoForge / Fabric: a command block or a non-player entity that `/execute as` runs as no longer passes every
   check. It gets a node by its default and its own permission level, so a command block cannot run an `OP` or `NONE`
   command. The console, RCON and data pack functions still pass every check ([permissions](docs/permissions.md)).
+- Forge / NeoForge / Fabric: `ctx.getActor().getType()` is `UNKNOWN`, not `CONSOLE`, for a source that is not a
+  player, an entity, the server, RCON or a command block, such as another mod's, and such a source fails
+  `requireConsole()`. `ctx.getActor().hasPermission(...)` is now `true` for the console and RCON; it was `false` for
+  every non-player.
 - Forge: `CommandLib.register(commands...)` is now `CommandLib.register(permissionPrefix, commands...)`, and
   `permissionLevel(int)` is replaced by `permission(DefaultPermission)` (or `permission(DefaultPermissionLevel)` on
   1.16.5).
