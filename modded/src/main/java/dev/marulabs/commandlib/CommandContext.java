@@ -83,27 +83,23 @@ public final class CommandContext extends CommonCommandContext<CommandSourceStac
 
     @Override
     public void sendMessage(@Nullable String message) {
-        sendMessage(message, false);
-    }
-
-    public void sendMessage(@Nullable String message, boolean allowLogging) {
-        sendMessage(literal(message), allowLogging);
-    }
-
-    public void sendMessage(@NotNull Component component) {
-        sendMessage(component, false);
+        sendMessage(literal(message));
     }
 
     /**
      * Sends {@code component} through {@link CommandSourceStack#sendSuccess}, which respects the
-     * {@code sendCommandFeedback} gamerule and, with {@code allowLogging}, broadcasts it to operators.
+     * {@code sendCommandFeedback} gamerule.
      */
-    public void sendMessage(@NotNull Component component, boolean allowLogging) {
+    public void sendMessage(@NotNull Component component) {
+        sendFeedback(component, false);
+    }
+
+    private void sendFeedback(@NotNull Component component, boolean broadcastToOps) {
         Objects.requireNonNull(component);
         //? if >=1.20 {
-        deliver(component, () -> getSender().sendSuccess(() -> component, allowLogging));
+        deliver(component, () -> getSender().sendSuccess(() -> component, broadcastToOps));
         //?} else
-        /*deliver(component, () -> getSender().sendSuccess(component, allowLogging));*/
+        /*deliver(component, () -> getSender().sendSuccess(component, broadcastToOps));*/
     }
 
     @Override
@@ -124,7 +120,7 @@ public final class CommandContext extends CommonCommandContext<CommandSourceStac
      * {@link #sendSuccess(String, boolean)}.
      */
     public void sendSuccess(@NotNull Component component, boolean broadcastToOps) {
-        sendMessage(withDefaultColor(component, ChatFormatting.GREEN), broadcastToOps);
+        sendFeedback(withDefaultColor(component, ChatFormatting.GREEN), broadcastToOps);
     }
 
     @Override
@@ -134,48 +130,27 @@ public final class CommandContext extends CommonCommandContext<CommandSourceStac
 
     @Override
     public void sendWarn(@Nullable String message) {
-        sendWarn(message, false);
-    }
-
-    public void sendWarn(@Nullable String message, boolean allowLogging) {
-        sendWarn(literal(message), allowLogging);
+        sendWarn(literal(message));
     }
 
     /**
      * Sends {@code component} in yellow unless it has its own color.
      */
     public void sendWarn(@NotNull Component component) {
-        sendWarn(component, false);
-    }
-
-    public void sendWarn(@NotNull Component component, boolean allowLogging) {
-        sendMessage(withDefaultColor(component, ChatFormatting.YELLOW), allowLogging);
+        sendMessage(withDefaultColor(component, ChatFormatting.YELLOW));
     }
 
     @Override
     public void sendFailure(@Nullable String message) {
-        sendFailure(message, false);
-    }
-
-    public void sendFailure(@Nullable String message, boolean allowLogging) {
-        sendFailure(literal(message), allowLogging);
+        sendFailure(literal(message));
     }
 
     /**
      * Sends {@code component} in red unless it has its own color, through {@link CommandSourceStack#sendFailure}.
      */
     public void sendFailure(@NotNull Component component) {
-        sendFailure(component, false);
-    }
-
-    public void sendFailure(@NotNull Component component, boolean allowLogging) {
         Component colored = withDefaultColor(component, ChatFormatting.RED);
-        if (allowLogging) {
-            // CommandSourceStack#sendFailure never broadcasts to ops, so route through sendSuccess.
-            sendMessage(colored, true);
-        } else {
-            deliver(colored, () -> getSender().sendFailure(colored));
-        }
+        deliver(colored, () -> getSender().sendFailure(colored));
     }
 
     @Override

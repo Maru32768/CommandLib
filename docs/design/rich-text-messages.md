@@ -179,7 +179,7 @@ it has none:
 |---|---|
 | spigot | `sendMessage/sendSuccess/sendWarn/sendFailure(BaseComponent)` (existed; no longer overwrite or mutate the color) |
 | paper | `sendMessage/sendSuccess/sendWarn/sendFailure(Component)` (new, Adventure) |
-| modded | `sendMessage/sendSuccess/sendWarn/sendFailure(Component[, boolean allowLogging])` (new except `sendMessage`, vanilla) |
+| modded | `sendMessage/sendSuccess/sendWarn/sendFailure(Component)`, `sendSuccess(Component, boolean broadcastToOps)` (new except `sendMessage`, vanilla) |
 
 Example (ConfigLib's list):
 
