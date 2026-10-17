@@ -41,9 +41,8 @@ class ObjectiveArgumentTest {
             messages = sender.getSentMessageTexts();
         }
 
-        assertThat(messages).containsExactly("kills",
-                                             "Incorrect argument for command",
-                                             "§7objective §c§nkills§r<--[HERE]");
+        // The same message as the server scoreboard's and the other platforms'.
+        assertThat(messages).containsExactly("kills", "Unknown scoreboard objective 'kills'");
     }
 
     @Test
@@ -67,9 +66,7 @@ class ObjectiveArgumentTest {
             messages = sender.getSentMessageTexts();
         }
 
-        assertThat(messages).hasSize(2)
-                            .startsWith("kills");
-        assertThat(messages.get(1)).contains("deaths");
+        assertThat(messages).containsExactly("kills", "Unknown scoreboard objective 'deaths'");
     }
 
     private static Objective addObjective(Scoreboard scoreboard, String name) {
