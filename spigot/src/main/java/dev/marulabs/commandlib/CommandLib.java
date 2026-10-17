@@ -736,8 +736,11 @@ public final class CommandLib implements Listener {
      * registration's commands and permissions. A plugin that shades and relocates CommandLib reports only its own
      * registrations. Must be called on the main server thread. {@link CommandLibDiagnosticsCommand} sends it to a
      * sender.
+     *
+     * @throws IllegalStateException if called from another thread
      */
     public static CommandLibDiagnostics diagnostics() {
+        requirePrimaryThread("Diagnostics must be read");
         String minecraftVersion = BukkitUtil.getMinecraftVersion();
         List<String> platform = new ArrayList<>();
         platform.add("Artifact: spigot");

@@ -55,6 +55,8 @@ class CommandLibDiagnosticsCommandTest {
               .thenReturn("git-Spigot (MC: 1.13.2)");
         bukkit.when(Bukkit::getBukkitVersion)
               .thenReturn("1.13.2-R0.1-SNAPSHOT");
+        bukkit.when(Bukkit::isPrimaryThread)
+              .thenReturn(true);
         return bukkit;
     }
 }
