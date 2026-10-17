@@ -356,24 +356,93 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
         }
 
         /**
-         * The methods of the class and its superclasses that pass {@code filter}, an overridden method once: its most
-         * derived declaration that passes, whose annotations apply. A call runs the override in any case.
+         * The methods of the class, its superclasses and its interfaces that pass {@code filter}, an overridden method
+         * once: its most derived declaration that passes, whose annotations apply. A call runs the override in any
+         * case.
          */
         private List<Method> methods(Predicate<Method> filter) {
             Map<List<Object>, Method> methods = new LinkedHashMap<>();
-            for (Class<?> x = type; x != null && x != Object.class; x = x.getSuperclass()) {
-                for (Method method : x.getDeclaredMethods()) {
+            // The erasures of the generic methods a class overrides with other parameter types, by the override.
+            Map<List<Object>, Method> overrides = new HashMap<>();
+            for (Class<?> x : hierarchy()) {
+                Method[] declared = x.getDeclaredMethods();
+                for (Method method : declared) {
+                    Method override = method.isBridge() ? overrideOf(method, declared) : null;
+                    if (override != null) {
+                        overrides.putIfAbsent(key(method), override);
+                    }
+                }
+                for (Method method : declared) {
                     if (method.isSynthetic() || !filter.test(method)) {
                         continue;
                     }
-                    int modifiers = method.getModifiers();
-                    // A private or static method does not override, and nothing overrides it.
-                    List<Object> key = Modifier.isPrivate(modifiers) || Modifier.isStatic(modifiers) ? List.of(method)
-                            : List.of(method.getName(), Arrays.asList(method.getParameterTypes()));
+                    List<Object> key = key(method);
+                    Method override = overrides.get(key);
+                    if (override != null && override != method) {
+                        if (!methods.containsKey(key(override))) {
+                            throw error(method,
+                                        "is overridden by " + describe(override) + ", which changes its parameter "
+                                                + "types, so the override must repeat its annotations");
+                        }
+                        continue;
+                    }
                     methods.putIfAbsent(key, method);
                 }
             }
             return new ArrayList<>(methods.values());
+        }
+
+        // The classes from the most derived, then their interfaces, since a class method wins over a default method.
+        private List<Class<?>> hierarchy() {
+            List<Class<?>> classes = new ArrayList<>();
+            for (Class<?> x = type; x != null && x != Object.class; x = x.getSuperclass()) {
+                classes.add(x);
+            }
+            Set<Class<?>> interfaces = new LinkedHashSet<>();
+            classes.forEach(x -> addInterfaces(x, interfaces));
+            classes.addAll(interfaces);
+            return classes;
+        }
+
+        private void addInterfaces(Class<?> owner, Set<Class<?>> interfaces) {
+            for (Class<?> x : owner.getInterfaces()) {
+                if (interfaces.add(x)) {
+                    addInterfaces(x, interfaces);
+                }
+            }
+        }
+
+        // A private or static method does not override, and nothing overrides it.
+        private List<Object> key(Method method) {
+            int modifiers = method.getModifiers();
+            return Modifier.isPrivate(modifiers) || Modifier.isStatic(modifiers) ? List.of(method)
+                    : List.of(method.getName(), Arrays.asList(method.getParameterTypes()));
+        }
+
+        /**
+         * The method of its class that {@code bridge} calls, or null for a bridge that only makes an inherited method
+         * public, which overrides nothing.
+         */
+        @Nullable
+        private Method overrideOf(Method bridge, Method[] declared) {
+            Class<?>[] erased = bridge.getParameterTypes();
+            for (Method method : declared) {
+                if (method.isBridge() || Modifier.isStatic(method.getModifiers()) || !method.getName()
+                                                                                            .equals(bridge.getName())
+                        || method.getParameterCount() != erased.length || !bridge.getReturnType()
+                                                                                 .isAssignableFrom(method.getReturnType())) {
+                    continue;
+                }
+                Class<?>[] types = method.getParameterTypes();
+                boolean matches = true;
+                for (int i = 0; i < types.length; i++) {
+                    matches &= erased[i].isAssignableFrom(types[i]);
+                }
+                if (matches) {
+                    return method;
+                }
+            }
+            return null;
         }
 
         private void injectDependencies() {

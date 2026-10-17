@@ -371,6 +371,67 @@ class AnnotationParserTest {
         assertThat(runner.suggest("x ")).contains("alex", "steve", "stop");
     }
 
+    abstract static class GenericBase<P> {
+        @Execute
+        void run(TestCommandContext ctx, @Name("p") P p) {
+            ctx.sendMessage("base " + p);
+        }
+    }
+
+    @Command("x")
+    static final class GenericOverride extends GenericBase<String> {
+        @Override
+        @Execute
+        void run(TestCommandContext ctx, @Name("p") String p) {
+            ctx.sendMessage("override " + p);
+        }
+    }
+
+    @Command("x")
+    static final class UnannotatedGenericOverride extends GenericBase<String> {
+        @Override
+        void run(TestCommandContext ctx, String p) {
+        }
+    }
+
+    // The bridge javac adds to the subclass stands for the superclass declaration of the erased parameter types.
+    @Test
+    void an_override_of_a_generic_method_is_read_once() throws Exception {
+        TestCommandRunner runner = new TestCommandRunner(parser().parse(new GenericOverride()));
+
+        assertThat(runner.execute("x a")
+                         .messages()).containsExactly("override a");
+        assertThatThrownBy(() -> parser().parse(new UnannotatedGenericOverride())).hasMessageContaining("GenericBase#run(TestCommandContext, Object) is overridden by UnannotatedGenericOverride#run(TestCommandContext, String)");
+    }
+
+    interface Pingable {
+        @Subcommand("ping")
+        default void ping(TestCommandContext ctx) {
+            ctx.sendMessage("pong");
+        }
+
+        @Execute
+        void run(TestCommandContext ctx);
+    }
+
+    @Command("x")
+    static final class PingCommand implements Pingable {
+        @Override
+        public void run(TestCommandContext ctx) {
+            ctx.sendMessage("run");
+        }
+    }
+
+    @Test
+    void annotated_methods_of_interfaces_are_read() throws Exception {
+        TestCommandRunner runner = new TestCommandRunner(parser().parse(new PingCommand()));
+
+        assertThat(runner.execute("x ping")
+                         .messages()).containsExactly("pong");
+        assertThat(runner.execute("x")
+                         .messages()).containsExactly("run");
+    }
+
     @Command("x")
     static final class FractionalRange {
         @Execute

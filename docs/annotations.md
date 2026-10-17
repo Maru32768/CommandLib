@@ -147,8 +147,10 @@ Without it, name each argument with `@Name("target")`, and give `@Flag` and `@Op
   the class.
 - Methods are added in the order of their path and then their name, because reflection does not give the order of the
   source. Help lists subcommands and branches in that order.
-- Methods may be private and static. Methods of superclasses are read too; for a method a subclass overrides, the
-  annotations of its most derived declaration that has any apply, and the call runs the override.
+- Methods may be private and static. Methods of superclasses and interfaces, default or abstract, are read too; for a
+  method a subclass overrides, the annotations of its most derived declaration that has any apply, and the call runs
+  the override. An override that narrows the parameter types of a generic method, such as `run(String)` for
+  `run(P)`, must repeat the annotations.
 
 ### Argument-first paths
 
