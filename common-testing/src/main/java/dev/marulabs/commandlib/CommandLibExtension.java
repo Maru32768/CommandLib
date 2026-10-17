@@ -3,6 +3,7 @@ package dev.marulabs.commandlib;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ParameterContext;
+import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.ParameterResolver;
 
 import java.util.Objects;
@@ -10,8 +11,9 @@ import java.util.function.Supplier;
 
 /**
  * JUnit 5 extension that creates a {@link CommandTester} for each test, closes it after the test, and injects it and
- * {@link FakeSender} parameters, configured with {@link Sender}, into test and lifecycle methods. A
- * {@code @BeforeEach} method and the test it precedes get the same tester.
+ * {@link FakeSender} parameters, configured with {@link Sender}, into test methods and their {@code @BeforeEach} and
+ * {@code @AfterEach} methods, which get the same tester. It refuses {@code @BeforeAll} methods and constructors, since
+ * every test of the class would share their tester.
  *
  * <pre>
  * class HelloCommandTest {
@@ -48,6 +50,10 @@ public final class CommandLibExtension implements ParameterResolver {
 
     @Override
     public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) {
+        if (extensionContext.getTestMethod()
+                            .isEmpty()) {
+            throw new ParameterResolutionException("CommandLibExtension injects only into test methods and their @BeforeEach and @AfterEach methods");
+        }
         CommandTester tester = extensionContext.getStore(NAMESPACE)
                                                .getOrComputeIfAbsent(this,
                                                                      key -> new TesterResource(testerFactory.get()),
