@@ -1,6 +1,8 @@
 package dev.marulabs.commandlib;
 
 import com.mojang.brigadier.LiteralMessage;
+import com.mojang.brigadier.suggestion.Suggestion;
+import com.mojang.brigadier.suggestion.Suggestions;
 import dev.marulabs.commandlib.argument.PlayerArgument;
 import dev.marulabs.commandlib.argument.StringArgument;
 import dev.marulabs.commandlib.exception.CommandPrerequisiteException;
@@ -425,6 +427,26 @@ class CommandTesterTest {
                                       .getString()).isEqualTo("alpha tooltip");
                 assertThat(suggestions.get(1)
                                       .getTooltip()).isNull();
+            }
+        }
+
+        @Test
+        void a_suggestion_completed_after_suggestions_returns_still_reads_the_sender() throws Exception {
+            CompletableFuture<Void> later = new CompletableFuture<>();
+            try (CommandTester tester = new CommandTester(new Command("cmd") {{
+                argument(new StringArgument("value").addSuggestionProvider(sb -> sb.await(later.thenRun(() -> sb.suggest(sb.getContext()
+                                                                                                                           .getSender()
+                                                                                                                           .getName()))))).execute((v,
+                                                                                                                                                    ctx) -> {
+                                                                                                                           });
+            }}, "test.command")) {
+                CompletableFuture<Suggestions> suggestions = tester.suggestions("cmd ", FakeSender.player("Steve"));
+                later.complete(null);
+
+                // Brigadier never completes the suggestions when a provider fails, so wait with a timeout.
+                assertThat(suggestions.get(5, TimeUnit.SECONDS)
+                                      .getList()).extracting(Suggestion::getText)
+                                                 .contains("Steve");
             }
         }
     }

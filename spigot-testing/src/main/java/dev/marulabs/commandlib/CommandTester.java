@@ -227,7 +227,8 @@ public class CommandTester implements AutoCloseable {
         current.set(this);
         currentCommandSender.set(sender);
         try {
-            ParseResults<Object> parseResults = dispatcher.parse(input, new Object());
+            // The sender is the source, as in execute, so a suggestion that completes later still finds it.
+            ParseResults<Object> parseResults = dispatcher.parse(input, sender);
             return dispatcher.getCompletionSuggestions(parseResults);
         } finally {
             currentCommandSender.remove();
