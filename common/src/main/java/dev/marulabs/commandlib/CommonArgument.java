@@ -1,6 +1,7 @@
 package dev.marulabs.commandlib;
 
 import com.mojang.brigadier.arguments.ArgumentType;
+import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.context.ParsedArgument;
 import com.mojang.brigadier.context.ParsedCommandNode;
@@ -317,7 +318,8 @@ public abstract class CommonArgument<T, C extends CommonCommandContext<?, ?>, SE
         }
         StringRange range = node.getRange();
         Object value = handle.getArgument(nodeName, Object.class);
-        // The argument reads its value from the handle by its own name, so it gets a handle with only this value.
+        // The argument reads its value from the handle by its own name, so it gets a handle with only this value, on
+        // a node of that name, which an error message looks up to point at the value.
         CommandContext<S> valueHandle = new CommandContext<>(handle.getSource(),
                                                              handle.getInput(),
                                                              Map.of(name,
@@ -326,7 +328,8 @@ public abstract class CommonArgument<T, C extends CommonCommandContext<?, ?>, SE
                                                                                          value)),
                                                              handle.getCommand(),
                                                              handle.getRootNode(),
-                                                             List.of(node),
+                                                             List.of(new ParsedCommandNode<>(argumentNode(name, type()),
+                                                                                             range)),
                                                              range,
                                                              null,
                                                              handle.getRedirectModifier(),
@@ -339,6 +342,11 @@ public abstract class CommonArgument<T, C extends CommonCommandContext<?, ?>, SE
         } finally {
             sameCtx.replaceHandle(handle, name, input);
         }
+    }
+
+    private static <S, V> ArgumentCommandNode<S, V> argumentNode(String name, ArgumentType<V> type) {
+        return RequiredArgumentBuilder.<S, V>argument(name, type)
+                                      .build();
     }
 
     protected abstract T parseImpl(C ctx) throws CommandSyntaxException, ArgumentParseException;

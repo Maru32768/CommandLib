@@ -100,6 +100,12 @@ class ArgumentErrorMessageTest {
         }
     }
 
+    private static final class StrArg extends CommonStringArgument<TestCommandContext, StrArg> {
+        StrArg(String name) {
+            super(name);
+        }
+    }
+
     @Test
     void incorrect_input_message_uses_argument_node_when_command_has_same_name() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("dir") {{
@@ -125,6 +131,20 @@ class ArgumentErrorMessageTest {
         TestCommandContext ctx = runner.execute("go bad");
 
         assertThat(ctx.messages()).containsExactly("command.unknown.argument", "§7go §c§nbad§r" + HERE);
+    }
+
+    @Test
+    void rejected_option_value_message_points_at_the_value_not_a_later_token_with_the_same_text() throws Exception {
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("go") {{
+            option(Options.of("n", new StrArg("n").validator(x -> !x.equals("bad"))));
+            argument(new CommonStringArgument<>("label")).execute((label, ctx) -> {
+                ctx.sendMessage("unreachable");
+            });
+        }});
+
+        TestCommandContext ctx = runner.execute("go --n bad bad");
+
+        assertThat(ctx.messages()).containsExactly("command.unknown.argument", "§7go --n §c§nbad§r" + HERE);
     }
 
     @Test
