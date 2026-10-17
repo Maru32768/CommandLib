@@ -295,7 +295,8 @@ printed, passed to the uncaught exception handlers, and rethrown to Brigadier. T
 own generic error (vanilla: `An unexpected error occurred trying to execute that command`, with the exception message
 on hover for operators).
 
-An exception thrown by a suggestion provider is printed and rethrown; the client gets no suggestions for that request.
+An exception thrown by a suggestion provider, or by a stage it awaits, is printed. The client still gets the suggestions
+of the other providers.
 
 ## Languages
 

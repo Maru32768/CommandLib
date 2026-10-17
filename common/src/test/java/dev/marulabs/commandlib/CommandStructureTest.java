@@ -94,6 +94,53 @@ class CommandStructureTest {
     }
 
     @Test
+    void a_shared_argument_instance_suggests_to_the_senders_of_each_branch() {
+        for (String permission : new String[]{"perm.a", "perm.b"}) {
+            StrArg team = new StrArg("team").setSuggestionProvider(b -> b.suggest("alpha"));
+            TestCommandRunner runner = new TestCommandRunner(new TestCommand("x") {{
+                argument(team).permission("perm.a")
+                              .execute((t, ctx) -> {
+                              });
+                argument(team, new StrArg("member")).permission("perm.b")
+                                                    .execute((t, m, ctx) -> {
+                                                    });
+            }}, new TestCommandSource("test.command.x", permission));
+
+            assertThat(runner.suggest("x ")).as(permission)
+                                            .contains("alpha");
+        }
+    }
+
+    @Test
+    void a_throwing_suggestion_provider_keeps_the_suggestions_of_the_other_branches() {
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("x") {{
+            argument(new StrArg("team").setSuggestionProvider(b -> {
+                throw new IllegalStateException("broken suggestion");
+            })).execute((team, ctx) -> {
+            });
+            argument(new StrArg("team").setSuggestionProvider(b -> b.suggest("bravo")),
+                     new StrArg("member")).execute((team, member, ctx) -> {
+                     });
+        }});
+
+        assertThat(runner.suggest("x ")).containsExactlyInAnyOrder("bravo", "help");
+    }
+
+    @Test
+    void a_shared_argument_node_lists_a_suggestion_with_a_tooltip_once() {
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("x") {{
+            argument(new StrArg("team").setSuggestionProvider(b -> b.suggest("alpha", "tip"))).execute((team,
+                                                                                                        ctx) -> {
+            });
+            argument(new StrArg("team").setSuggestionProvider(b -> b.suggest("alpha", "tip")),
+                     new StrArg("member")).execute((team, member, ctx) -> {
+                     });
+        }});
+
+        assertThat(runner.suggest("x ")).containsExactlyInAnyOrder("alpha", "help");
+    }
+
+    @Test
     void two_branches_executing_at_the_same_argument_are_rejected() {
         TestCommand command = new TestCommand("x") {{
             argument(new StrArg("team")).execute((team, ctx) -> ctx.sendMessage("a"));

@@ -1,6 +1,7 @@
 package dev.marulabs.commandlib;
 
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
+import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.mojang.brigadier.tree.ArgumentCommandNode;
@@ -15,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.IdentityHashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -60,37 +62,36 @@ final class ArgumentCommandNodeCreator<S, T, C extends CommonCommandContext<S, T
         List<String> names = names(arguments);
         int index = names.indexOf(argument.name());
         List<String> prefix = names.subList(0, index + 1);
-        Predicate<S> requirement = branchRequirement(arguments);
-        List<com.mojang.brigadier.suggestion.SuggestionProvider<S>> suggestions = new ArrayList<>();
-        suggestions.add(suggestions(platformAdapter,
-                                    argument,
-                                    branchRequirement(arguments),
-                                    parent.providers(),
-                                    executorArguments));
-        Set<CommonArgument<?, C, ?>> suggesting = Collections.newSetFromMap(new IdentityHashMap<>());
-        suggesting.add(argument);
+        List<Arguments<C>> sharing = new ArrayList<>();
+        sharing.add(arguments);
         for (Arguments<C> branch : branches) {
             List<String> branchNames = names(branch);
             if (branch != arguments && branchNames.size() >= prefix.size() && branchNames.subList(0, prefix.size())
                                                                                          .equals(prefix)) {
-                requirement = requirement.or(branchRequirement(branch));
-                CommonArgument<?, C, ?> other = branch.stream()
-                                                      .skip(index)
-                                                      .findFirst()
-                                                      .orElseThrow();
-                if (suggesting.add(other)) {
-                    List<Arguments<C>> otherArguments = new ArrayList<>(executorArguments.subList(0,
-                                                                                                  executorArguments.size()
-                                                                                                          - 1));
-                    otherArguments.add(branch);
-                    suggestions.add(suggestions(platformAdapter,
-                                                other,
-                                                branchRequirement(branch),
-                                                parent.providers(),
-                                                otherArguments));
-                }
+                sharing.add(branch);
             }
         }
+        List<com.mojang.brigadier.suggestion.SuggestionProvider<S>> suggestions = new ArrayList<>();
+        Set<CommonArgument<?, C, ?>> suggesting = Collections.newSetFromMap(new IdentityHashMap<>());
+        for (Arguments<C> branch : sharing) {
+            CommonArgument<?, C, ?> other = argumentAt(branch, index);
+            if (suggesting.add(other)) {
+                // Branches may reuse one argument instance, which then suggests to the senders of each of them.
+                List<Arguments<C>> reusing = sharing.stream()
+                                                    .filter(b -> argumentAt(b, index) == other)
+                                                    .collect(Collectors.toList());
+                List<Arguments<C>> otherArguments = new ArrayList<>(executorArguments.subList(0,
+                                                                                              executorArguments.size()
+                                                                                                      - 1));
+                otherArguments.add(branch);
+                suggestions.add(suggestions(platformAdapter,
+                                            other,
+                                            anyRequirement(reusing),
+                                            parent.providers(),
+                                            otherArguments));
+            }
+        }
+        Predicate<S> requirement = anyRequirement(sharing);
         builder.requires(requirement);
 
         builder.suggests(suggestions.size() == 1 ? suggestions.get(0) : merged(suggestions));
@@ -108,11 +109,35 @@ final class ArgumentCommandNodeCreator<S, T, C extends CommonCommandContext<S, T
                                     .toCompletableFuture());
             }
             return CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new))
-                                    .thenApply(x -> Suggestions.merge(sb.getInput(),
-                                                                      futures.stream()
-                                                                             .map(CompletableFuture::join)
-                                                                             .collect(Collectors.toList())));
+                                    .thenApply(x -> {
+                                        // Suggestions.merge compares tooltips too, and a String tooltip becomes a
+                                        // LiteralMessage without equals, so identical branches would list it twice.
+                                        Map<List<Object>, Suggestion> unique = new LinkedHashMap<>();
+                                        for (CompletableFuture<Suggestions> future : futures) {
+                                            for (Suggestion suggestion : future.join()
+                                                                               .getList()) {
+                                                unique.putIfAbsent(List.of(suggestion.getRange(), suggestion.getText()),
+                                                                   suggestion);
+                                            }
+                                        }
+                                        return Suggestions.create(sb.getInput(), unique.values());
+                                    });
         };
+    }
+
+    private static <C extends CommonCommandContext<?, ?>> CommonArgument<?, C, ?> argumentAt(Arguments<C> branch,
+                                                                                             int index) {
+        return branch.stream()
+                     .skip(index)
+                     .findFirst()
+                     .orElseThrow();
+    }
+
+    private Predicate<S> anyRequirement(List<Arguments<C>> branches) {
+        return branches.stream()
+                       .map(this::branchRequirement)
+                       .reduce(Predicate::or)
+                       .orElseThrow();
     }
 
     // The sender has the branch's permission and the branch is visible to the sender.
@@ -167,17 +192,22 @@ final class ArgumentCommandNodeCreator<S, T, C extends CommonCommandContext<S, T
 
                     for (ArgumentSuggestionProvider<C> suggestionProvider : argument.suggestionProviders()) {
                         SuggestionProvider<C> action = suggestionProvider.action();
-                        if (action == null) {
-                            defaultFutures.add(argument.type()
-                                                       .listSuggestions(context, sb)
-                                                       .toCompletableFuture()
-                                                       .exceptionally(e -> {
-                                                           reportSuggestionFailure(e);
-                                                           return Suggestions.empty()
-                                                                             .join();
-                                                       }));
-                        } else {
-                            action.accept(suggestionBuilder);
+                        // A failing provider leaves out its own suggestions only, as when its stage fails below.
+                        try {
+                            if (action == null) {
+                                defaultFutures.add(argument.type()
+                                                           .listSuggestions(context, sb)
+                                                           .toCompletableFuture()
+                                                           .exceptionally(e -> {
+                                                               reportSuggestionFailure(e);
+                                                               return Suggestions.empty()
+                                                                                 .join();
+                                                           }));
+                            } else {
+                                action.accept(suggestionBuilder);
+                            }
+                        } catch (Exception e) {
+                            reportSuggestionFailure(e);
                         }
                     }
                 });
@@ -204,9 +234,10 @@ final class ArgumentCommandNodeCreator<S, T, C extends CommonCommandContext<S, T
                     defaultFutures.forEach(future -> all.add(future.join()));
                     return Suggestions.merge(sb.getInput(), all);
                 });
-            } catch (Throwable e) {
-                e.printStackTrace();
-                throw e;
+            } catch (Exception e) {
+                // Brigadier would drop the suggestions of every other node.
+                reportSuggestionFailure(e);
+                return Suggestions.empty();
             }
         };
     }

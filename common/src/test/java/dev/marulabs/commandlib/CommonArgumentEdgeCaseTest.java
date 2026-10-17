@@ -316,16 +316,16 @@ class CommonArgumentEdgeCaseTest {
     }
 
     @Test
-    void failing_suggestion_action_propagates_exception() {
+    void failing_suggestion_action_keeps_the_other_suggestions() {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("pick") {{
             argument(new StrArg("value").addSuggestionProvider(sb -> {
                 throw new IllegalStateException("broken suggestion");
-            })).execute((value, ctx) -> {
-            });
+            })
+                                        .addSuggestionProvider(sb -> sb.suggest("alpha"))).execute((value, ctx) -> {
+                                        });
         }});
 
-        assertThatThrownBy(() -> runner.suggest("pick ")).isInstanceOf(IllegalStateException.class)
-                                                         .hasMessage("broken suggestion");
+        assertThat(runner.suggest("pick ")).containsExactlyInAnyOrder("alpha", "help");
     }
 
     @Test
