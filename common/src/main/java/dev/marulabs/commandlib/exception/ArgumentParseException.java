@@ -122,7 +122,7 @@ public class ArgumentParseException extends Exception {
     }
 
     public ArgumentParseException(String message, String... messages) {
-        this(ctx -> {
+        this(message, ctx -> {
             ctx.sendFailure(message);
             for (String s : messages) {
                 ctx.sendFailure(s);
@@ -135,10 +135,16 @@ public class ArgumentParseException extends Exception {
      * {@link CommonCommandContext#sendFailure(Caption, Map)}.
      */
     public ArgumentParseException(Caption caption, Map<String, ?> placeholders) {
-        this(ctx -> ctx.sendFailure(caption, placeholders));
+        this(caption.key() + " " + placeholders, ctx -> ctx.sendFailure(caption, placeholders));
     }
 
     public ArgumentParseException(Consumer<CommonCommandContext<?, ?>> sendMessages) {
+        this.sendMessages = sendMessages;
+    }
+
+    // Gives getMessage() a text for logs and handlers; the sender sees what sendMessages sends.
+    private ArgumentParseException(String message, Consumer<CommonCommandContext<?, ?>> sendMessages) {
+        super(message);
         this.sendMessages = sendMessages;
     }
 
