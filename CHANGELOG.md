@@ -80,6 +80,17 @@ This file lists the changes in each CommandLib release that affect plugin and mo
 - Forge: `CommandLib.register(commands...)` is now `CommandLib.register(permissionPrefix, commands...)`, and
   `permissionLevel(int)` is replaced by `permission(DefaultPermission)` (or `permission(DefaultPermissionLevel)` on
   1.16.5).
+- Spigot: `Command#permissionName()` is now `permissionName(String prefix)`.
+
+#### Registration
+
+- Spigot and Paper: `CommandLib.register` and `unregister` throw `IllegalStateException` off the main thread (on Folia,
+  off a region or the global region thread).
+- Registration rejects trees it used to accept:
+  - two argument branches that both run for the same input (`IllegalStateException`)
+  - same-named first arguments of different types, which share one node (`IllegalArgumentException`)
+  - a command added under a second parent (`addChildren` throws `IllegalArgumentException`)
+  - a greedy string argument that does not end its branch (`IllegalStateException`)
 
 ### Added
 
