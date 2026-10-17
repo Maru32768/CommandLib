@@ -2,6 +2,7 @@ package dev.marulabs.commandlib;
 
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.suggestion.Suggestions;
+import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.mojang.brigadier.tree.ArgumentCommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import dev.marulabs.commandlib.command.CommandExecutor;
@@ -12,8 +13,11 @@ import dev.marulabs.commandlib.util.UncaughtExceptionHandler;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.function.Predicate;
@@ -51,23 +55,64 @@ final class ArgumentCommandNodeCreator<S, T, C extends CommonCommandContext<S, T
         RequiredArgumentBuilder<S, ?> builder = RequiredArgumentBuilder.argument(argument.name(), argument.type());
         // Brigadier merges the nodes of the branches that share the argument and keeps one requirement, so it lets
         // through the sender of any of them; the runner checks the branch it executes.
+        // Brigadier also keeps the suggestions of one node, so the node suggests what each branch's argument does, to
+        // the senders of that branch.
         List<String> names = names(arguments);
-        List<String> prefix = names.subList(0, names.indexOf(argument.name()) + 1);
+        int index = names.indexOf(argument.name());
+        List<String> prefix = names.subList(0, index + 1);
         Predicate<S> requirement = branchRequirement(arguments);
+        List<com.mojang.brigadier.suggestion.SuggestionProvider<S>> suggestions = new ArrayList<>();
+        suggestions.add(suggestions(platformAdapter,
+                                    argument,
+                                    branchRequirement(arguments),
+                                    parent.providers(),
+                                    executorArguments));
+        Set<CommonArgument<?, C, ?>> suggesting = Collections.newSetFromMap(new IdentityHashMap<>());
+        suggesting.add(argument);
         for (Arguments<C> branch : branches) {
             List<String> branchNames = names(branch);
             if (branch != arguments && branchNames.size() >= prefix.size() && branchNames.subList(0, prefix.size())
                                                                                          .equals(prefix)) {
                 requirement = requirement.or(branchRequirement(branch));
+                CommonArgument<?, C, ?> other = branch.stream()
+                                                      .skip(index)
+                                                      .findFirst()
+                                                      .orElseThrow();
+                if (suggesting.add(other)) {
+                    List<Arguments<C>> otherArguments = new ArrayList<>(executorArguments.subList(0,
+                                                                                                  executorArguments.size()
+                                                                                                          - 1));
+                    otherArguments.add(branch);
+                    suggestions.add(suggestions(platformAdapter,
+                                                other,
+                                                branchRequirement(branch),
+                                                parent.providers(),
+                                                otherArguments));
+                }
             }
         }
         builder.requires(requirement);
 
-        builder.suggests(suggestions(platformAdapter, argument, requirement, parent.providers(), executorArguments));
+        builder.suggests(suggestions.size() == 1 ? suggestions.get(0) : merged(suggestions));
 
         builder.executes(runner(argument, helpAction, parent));
 
         return builder;
+    }
+
+    private static <S> com.mojang.brigadier.suggestion.SuggestionProvider<S> merged(List<com.mojang.brigadier.suggestion.SuggestionProvider<S>> providers) {
+        return (context, sb) -> {
+            List<CompletableFuture<Suggestions>> futures = new ArrayList<>();
+            for (com.mojang.brigadier.suggestion.SuggestionProvider<S> provider : providers) {
+                futures.add(provider.getSuggestions(context, new SuggestionsBuilder(sb.getInput(), sb.getStart()))
+                                    .toCompletableFuture());
+            }
+            return CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new))
+                                    .thenApply(x -> Suggestions.merge(sb.getInput(),
+                                                                      futures.stream()
+                                                                             .map(CompletableFuture::join)
+                                                                             .collect(Collectors.toList())));
+        };
     }
 
     // The sender has the branch's permission and the branch is visible to the sender.

@@ -70,6 +70,30 @@ class CommandStructureTest {
     }
 
     @Test
+    void a_shared_argument_node_suggests_what_each_branch_suggests() throws Exception {
+        for (boolean alphaFirst : new boolean[]{true, false}) {
+            TestCommandRunner runner = new TestCommandRunner(new TestCommand("x") {{
+                if (alphaFirst) {
+                    argument(new StrArg("team").setSuggestionProvider(b -> b.suggest("alpha"))).execute((team,
+                                                                                                         ctx) -> {
+                    });
+                }
+                argument(new StrArg("team").setSuggestionProvider(b -> b.suggest("bravo"))).child(team -> new TestCommand("add") {{
+                    execute(ctx -> {
+                    });
+                }});
+                if (!alphaFirst) {
+                    argument(new StrArg("team").setSuggestionProvider(b -> b.suggest("alpha"))).execute((team,
+                                                                                                         ctx) -> {
+                    });
+                }
+            }});
+
+            assertThat(runner.suggest("x ")).contains("alpha", "bravo");
+        }
+    }
+
+    @Test
     void two_branches_executing_at_the_same_argument_are_rejected() {
         TestCommand command = new TestCommand("x") {{
             argument(new StrArg("team")).execute((team, ctx) -> ctx.sendMessage("a"));
