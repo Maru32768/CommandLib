@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+// Each test registers its own labels: the permission defaults of CommandLib.register are global and first-wins.
 class CommandLibTest {
     private final Object plugin = new Object();
     private final ProxyServer proxy = Mockito.mock(ProxyServer.class);
@@ -96,9 +97,9 @@ class CommandLibTest {
                                                                       return next.proceed();
                                                                   })
                                                                   .provide(String.class, ctx -> "default");
-        CommandLib.register(plugin, proxy, defaults, List.of(new Command("hub") {{
+        CommandLib.register(plugin, proxy, defaults, List.of(new Command("spawn") {{
             permission(DefaultPermission.ALL);
-            execute(ctx -> log.add("hub " + ctx.get(String.class)));
+            execute(ctx -> log.add("spawn " + ctx.get(String.class)));
         }}));
         Mockito.verify(commandManager)
                .register(Mockito.any(CommandMeta.class), registered.capture());
@@ -110,16 +111,16 @@ class CommandLibTest {
         Mockito.when(player.getPermissionValue(Mockito.anyString()))
                .thenReturn(Tristate.UNDEFINED);
 
-        dispatcher.execute("hub", player);
+        dispatcher.execute("spawn", player);
 
-        assertThat(log).containsExactly("audit", "hub default");
+        assertThat(log).containsExactly("audit", "spawn default");
     }
 
     @Test
     void permission_defaults_apply_when_the_permission_is_unset() throws CommandSyntaxException {
-        CommandLib.register(plugin, proxy, new Command("hub") {{
+        CommandLib.register(plugin, proxy, new Command("warp") {{
             permission(DefaultPermission.ALL);
-            execute(ctx -> ctx.sendMessage("hub"));
+            execute(ctx -> ctx.sendMessage("warp"));
         }}, new Command("kick") {{
             execute(ctx -> ctx.sendMessage("kick"));
         }});
@@ -133,15 +134,15 @@ class CommandLibTest {
         Mockito.when(player.getPermissionValue(Mockito.anyString()))
                .thenReturn(Tristate.UNDEFINED);
 
-        dispatcher.execute("hub", player);
+        dispatcher.execute("warp", player);
         assertThatThrownBy(() -> dispatcher.execute("kick", player)).isInstanceOf(CommandSyntaxException.class);
 
         Mockito.when(player.getPermissionValue("myplugin.command.kick"))
                .thenReturn(Tristate.TRUE);
-        Mockito.when(player.getPermissionValue("myplugin.command.hub"))
+        Mockito.when(player.getPermissionValue("myplugin.command.warp"))
                .thenReturn(Tristate.FALSE);
         dispatcher.execute("kick", player);
-        assertThatThrownBy(() -> dispatcher.execute("hub", player)).isInstanceOf(CommandSyntaxException.class);
+        assertThatThrownBy(() -> dispatcher.execute("warp", player)).isInstanceOf(CommandSyntaxException.class);
     }
 
     @Test
