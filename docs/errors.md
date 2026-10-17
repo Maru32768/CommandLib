@@ -193,7 +193,7 @@ Non-player sources:
 |---|---|---|---|
 | Spigot | `CommandSender#hasPermission` of the console | `hasPermission` of the Bukkit sender | Always allowed while functions are compiled; the function permission level guards them |
 | Paper | `CommandSender#hasPermission` | `hasPermission` of the Bukkit sender | Always allowed while functions are compiled |
-| Forge / NeoForge / Fabric | Always allowed | The node's default with the source's permission level: `ALL` allowed, `NONE` refused, `OP` needs level 4 (a command block has 2) | Always allowed |
+| Forge / NeoForge / Fabric | Always allowed | The node's default with the source's permission level: `ALL` allowed, `NONE` refused, `OP` needs level 4 (a command block has 2) | Always allowed while functions are compiled |
 
 ### Prerequisite failed (`CommandPrerequisiteException`)
 

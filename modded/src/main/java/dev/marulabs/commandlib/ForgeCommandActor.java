@@ -1,5 +1,6 @@
 package dev.marulabs.commandlib;
 
+import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.rcon.RconConsoleSource;
@@ -12,11 +13,8 @@ import org.jetbrains.annotations.Nullable;
 import net.minecraft.server.level.ServerPlayer;
 //? if <1.18
 /*import net.minecraftforge.server.permission.PermissionAPI;*/
-//? if fabric || <1.19 {
-/*import net.minecraft.commands.CommandSource;
-
-import java.lang.reflect.Field;
-*///?}
+//? if fabric || <1.19
+/*import java.lang.reflect.Field;*/
 
 import java.util.Objects;
 import java.util.Optional;
@@ -59,7 +57,8 @@ final class ForgeCommandActor implements CommandActor {
             return CommandActorType.REMOTE_CONSOLE;
         }
         // The console and data pack functions run as the server. Other sources, such as another mod's or one the
-        // field lookup misses, are not trusted as the console.
+        // field lookup misses, are not trusted as the console. The source that compiles functions is not either: only
+        // its permission checks pass (see hasPermission).
         if (rawSource instanceof MinecraftServer) {
             return CommandActorType.CONSOLE;
         }
@@ -94,11 +93,18 @@ final class ForgeCommandActor implements CommandActor {
             return PermissionAPI.hasPermission((Player) entity, permission);
         }
         *///?}
-           // The console, RCON and data pack functions, which run as the server, may run every command.
-        if (isConsole()) {
+           // The console, RCON and data pack functions, which run as the server, may run every command. While functions
+           // are compiled, the function permission level guards them, as it does vanilla's commands.
+        if (isConsole() || isFunctionCompilation()) {
             return true;
         }
         return CommandLib.hasDefaultPermission(source, permission);
+    }
+
+    // Vanilla compiles data pack functions with CommandSource.NULL and no server. A source that executes a command has
+    // a server, so another mod's source that runs commands as CommandSource.NULL is still judged by its level.
+    private boolean isFunctionCompilation() {
+        return source.getServer() == null && findRawSource() == CommandSource.NULL;
     }
 
     @Override

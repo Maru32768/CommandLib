@@ -128,9 +128,10 @@ Platform overloads exist as well: `permission(PermissionDefault)` on Spigot and 
 
 Velocity has no operators, so `OP` behaves like `NONE` there: players need the node from a permission plugin. The
 proxy console has every permission. On Forge / NeoForge / Fabric the console, RCON and data pack functions, which run as
-the server, pass every check. Other non-player sources, such as command blocks and an entity that `/execute as` runs
-as, get a node by its default and their own permission level: `ALL` passes, `NONE` fails, and `OP` needs level 4, so a
-command block (level 2) cannot run an `OP` command. On Spigot and Paper
+the server, pass every check, and so does the source that compiles data pack functions, which the function permission
+level guards as it does vanilla's commands. Other non-player sources, such as command blocks and an entity that
+`/execute as` runs as, get a node by its default and their own permission level: `ALL` passes, `NONE` fails, and `OP`
+needs level 4, so a command block (level 2) cannot run an `OP` command. On Spigot and Paper
 the Bukkit sender is asked, except while the server compiles data pack functions, when the check passes and the
 function permission level applies.
 

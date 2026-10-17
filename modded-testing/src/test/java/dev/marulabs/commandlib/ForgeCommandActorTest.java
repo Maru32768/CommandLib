@@ -1,5 +1,7 @@
 package dev.marulabs.commandlib;
 
+import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.ParseResults;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
@@ -9,12 +11,13 @@ import net.minecraft.world.phys.Vec3;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class ForgeCommandActorTest {
-    private static CommandSourceStack source(CommandSource raw, int permissionLevel) {
+    private static CommandSourceStack source(CommandSource raw, int permissionLevel, MinecraftServer server) {
         return new CommandSourceStack(raw,
                                       Vec3.ZERO,
                                       Vec2.ZERO,
@@ -22,14 +25,14 @@ class ForgeCommandActorTest {
                                       permissionLevel,
                                       "Source",
                                       Component.nullToEmpty("Source"),
-                                      null,
+                                      server,
                                       null);
     }
 
     @Test
     void the_server_is_the_console_and_passes_every_check() {
         CommandTester.MinecraftBootstrap.ensureBootstrapped();
-        ForgeCommandActor actor = new ForgeCommandActor(source(Mockito.mock(MinecraftServer.class), 0));
+        ForgeCommandActor actor = new ForgeCommandActor(source(Mockito.mock(MinecraftServer.class), 0, null));
 
         assertThat(actor.getType()).isEqualTo(CommandActorType.CONSOLE);
         assertThat(actor.hasPermission("actortest.undeclared")).isTrue();
@@ -37,15 +40,40 @@ class ForgeCommandActorTest {
 
     @Test
     void another_source_is_unknown_and_judged_by_its_permission_level() {
-        ForgeCommandActor guest = new ForgeCommandActor(source(CommandSource.NULL, 0));
-        ForgeCommandActor admin = new ForgeCommandActor(source(CommandSource.NULL, 4));
+        CommandTester.MinecraftBootstrap.ensureBootstrapped();
+        MinecraftServer server = Mockito.mock(MinecraftServer.class);
+        ForgeCommandActor guest = new ForgeCommandActor(source(CommandSource.NULL, 0, server));
+        ForgeCommandActor admin = new ForgeCommandActor(source(CommandSource.NULL, 4, server));
 
         assertThat(guest.getType()).isEqualTo(CommandActorType.UNKNOWN);
         assertThat(guest.isConsole()).isFalse();
         assertThat(guest.hasPermission("actortest.undeclared")).isFalse();
         assertThat(admin.hasPermission("actortest.undeclared")).isTrue();
-        assertThat(new PlatformAdapterImpl().hasPermission(source(CommandSource.NULL, 0),
+        assertThat(new PlatformAdapterImpl().hasPermission(source(CommandSource.NULL, 0, server),
                                                            "actortest.undeclared")).isFalse();
+    }
+
+    @Test
+    void data_pack_functions_compile_commands_of_every_default() {
+        // Vanilla's ServerFunctionLibrary compiles functions with this source: no server, function-permission-level.
+        CommandSourceStack compiler = source(CommandSource.NULL, 2, null);
+        CommandDispatcher<CommandSourceStack> dispatcher = new CommandDispatcher<>();
+        new CommandNodeCreator<>(List.of(new Command("fn") {{
+            addChildren(new Command("hidden") {{
+                permission(DefaultPermission.NONE);
+                execute(ctx -> {
+                });
+            }});
+        }}), "actortest", ServerCommandScheduler.INSTANCE).build()
+                                                          .forEach(dispatcher.getRoot()::addChild);
+
+        ParseResults<CommandSourceStack> parse = dispatcher.parse("fn hidden", compiler);
+
+        assertThat(parse.getReader()
+                        .canRead()).isFalse();
+        assertThat(parse.getContext()
+                        .getCommand()).isNotNull();
+        assertThat(new ForgeCommandActor(compiler).getType()).isEqualTo(CommandActorType.UNKNOWN);
     }
 
     @Test
