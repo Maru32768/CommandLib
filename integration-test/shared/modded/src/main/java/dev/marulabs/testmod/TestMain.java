@@ -32,8 +32,8 @@ public final class TestMain {
     static final String TEST_OBJECTIVE_NAME = "test";
     private static final Logger LOGGER = LogManager.getLogger(TestMain.class);
     private static final String REPORT_COMMAND = MainCommand.NAME + " reportTests";
-    private static final long REPORT_DELAY_SECONDS = 2;
-    private static final long RELOAD_POLL_MILLIS = 250;
+    private static final long POLL_MILLIS = 250;
+    private static final long PENDING_TIMEOUT_SECONDS = 30;
     private static final long RELOAD_TIMEOUT_SECONDS = 120;
 
     public void register() {
@@ -88,7 +88,6 @@ public final class TestMain {
                         LOGGER.info("No CommandLib test run to report.");
                         return;
                     }
-                    // Asynchronous commands complete on a later tick, so the report waits for them.
                     MinecraftServer server = ctx.getSender()
                                                 .getServer();
                     Runnable report = () -> {
@@ -99,8 +98,8 @@ public final class TestMain {
                             running.set(false);
                         }
                     };
-                    CompletableFuture.delayedExecutor(REPORT_DELAY_SECONDS, TimeUnit.SECONDS, server)
-                                     .execute(() -> reloadThenReport(server, reloadTest, report));
+                    long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(PENDING_TIMEOUT_SECONDS);
+                    awaitPending(server, tests, deadline, () -> reloadThenReport(server, reloadTest, report));
                 });
             }});
 
@@ -151,6 +150,19 @@ public final class TestMain {
         }
     }
 
+    // Asynchronous commands and command blocks run on later ticks, so the report waits for them. A command that never
+    // runs keeps its "not executed" result and is reported after the timeout.
+    private static void awaitPending(MinecraftServer server, List<TestBase> tests, long deadline, Runnable then) {
+        if (tests.stream()
+                 .anyMatch(TestBase::pending)
+                && System.nanoTime() < deadline) {
+            CompletableFuture.delayedExecutor(POLL_MILLIS, TimeUnit.MILLISECONDS, server)
+                             .execute(() -> awaitPending(server, tests, deadline, then));
+            return;
+        }
+        then.run();
+    }
+
     // /reload builds a new command dispatcher. It runs last, and the probe waits until the server has swapped in the
     // reloaded resources; probing earlier would reach the old dispatcher and pass without checking.
     private static void reloadThenReport(MinecraftServer server, ReloadTest reloadTest, Runnable report) {
@@ -174,7 +186,7 @@ public final class TestMain {
         try {
             if (server.getCommands() == before) {
                 if (System.nanoTime() < deadline) {
-                    CompletableFuture.delayedExecutor(RELOAD_POLL_MILLIS, TimeUnit.MILLISECONDS, server)
+                    CompletableFuture.delayedExecutor(POLL_MILLIS, TimeUnit.MILLISECONDS, server)
                                      .execute(() -> probeAfterReload(server, before, deadline, reloadTest, report));
                     return;
                 }

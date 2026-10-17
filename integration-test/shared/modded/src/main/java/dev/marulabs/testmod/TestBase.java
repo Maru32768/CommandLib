@@ -56,6 +56,15 @@ public abstract class TestBase {
         return getClass().getSimpleName() + "." + methodName;
     }
 
+    /**
+     * Whether a command of this test has not run yet, such as an asynchronous one or a command block's.
+     */
+    public final boolean pending() {
+        return resultMap.values()
+                        .stream()
+                        .anyMatch(x -> COMMAND_NOT_EXECUTED_MESSAGE.equals(x.message()));
+    }
+
     public final List<TestResult> results() {
         return new ArrayList<>(resultMap.values());
     }
