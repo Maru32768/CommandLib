@@ -12,11 +12,11 @@ CommandLib's original code is licensed under the [MIT License](LICENSE). This do
 | [Bukkit](https://github.com/Bukkit/Bukkit/blob/master/LICENCE.txt) / [Spigot](https://hub.spigotmc.org/stash/projects/SPIGOT/repos/bukkit/browse/LICENCE.txt) | API 1.16.5-R0.1-SNAPSHOT; typed NMS targets in nms/ | GPL-3.0 family; check the exact upstream revision and notices | Compile-time platform; server/API classes are not bundled. |
 | [Paper](https://github.com/PaperMC/Paper/blob/main/LICENSE.md) | API 1.21-R0.1-SNAPSHOT; dev bundles 1.20.6 and 1.21.1 | Inherited GPL terms, with some contributions additionally MIT | Compile-time platform; API/server/dev bundles are not bundled. |
 | [Velocity](https://github.com/PaperMC/Velocity) | API 3.4.0 (with Velocity's Brigadier fork) | GPL-3.0 for the proxy, MIT for the API; check the exact upstream revision | Compile-time platform for velocity and velocity-testing; not bundled. |
-| [Minecraft Forge](https://github.com/MinecraftForge/MinecraftForge/blob/1.20.x/LICENSE.txt) | 1.16.5-36.2.42; 1.20.1-47.4.10 | LGPL-2.1, with upstream exceptions and separate third-party terms | External platform for modded and modded-testing; not bundled. |
-| [NeoForge](https://github.com/neoforged/NeoForge/blob/1.21.1/LICENSE.txt) | 21.1.256 for Minecraft 1.21.1 | LGPL-2.1, plus upstream third-party terms | External platform; not bundled. |
-| [Fabric Loader](https://github.com/FabricMC/fabric-loader/blob/master/LICENSE) / [Fabric API](https://github.com/FabricMC/fabric-api/blob/1.21.1/LICENSE) | Loader 0.16.14; API 0.92.12+1.20.1 and 0.116.17+1.21.1 | Apache-2.0 | External platform for the Fabric nodes of modded and modded-testing; not bundled. |
+| [Minecraft Forge](https://github.com/MinecraftForge/MinecraftForge/blob/1.20.x/LICENSE.txt) | 1.16.5-36.2.42; 1.18.2-40.3.0; 1.19.2-43.5.0; 1.20.1-47.4.10 | LGPL-2.1, with upstream exceptions and separate third-party terms | External platform for modded and modded-testing; not bundled. |
+| [NeoForge](https://github.com/neoforged/NeoForge/blob/1.21.1/LICENSE.txt) | 21.1.256 for Minecraft 1.21.1; 21.4.161 for 1.21.4 | LGPL-2.1, plus upstream third-party terms | External platform; not bundled. |
+| [Fabric Loader](https://github.com/FabricMC/fabric-loader/blob/master/LICENSE) / [Fabric API](https://github.com/FabricMC/fabric-api/blob/1.21.1/LICENSE) | Loader 0.16.14; API 0.92.12+1.20.1, 0.116.17+1.21.1 and 0.119.4+1.21.4 | Apache-2.0 | External platform for the Fabric nodes of modded and modded-testing; not bundled. |
 | [fabric-permissions-api](https://github.com/lucko/fabric-permissions-api/blob/master/LICENSE.txt) | 0.3.1 | MIT | compileOnly for the Fabric nodes of modded; used at runtime only when a mod ships it; not bundled. |
-| [Minecraft and official mappings](https://www.minecraft.net/en-us/eula) | 1.16.5, 1.20.1, 1.21.1 for modded; additional NMS targets | Minecraft EULA and the terms supplied with the exact mappings | Build/runtime platform; game classes, assets and mapping files are not distribution inputs. |
+| [Minecraft and official mappings](https://www.minecraft.net/en-us/eula) | 1.16.5, 1.18.2, 1.19.2, 1.20.1, 1.21.1, 1.21.4 for modded; additional NMS targets | Minecraft EULA and the terms supplied with the exact mappings | Build/runtime platform; game classes, assets and mapping files are not distribution inputs. |
 | [Kotlin standard library](https://github.com/JetBrains/kotlin/blob/master/license/LICENSE.txt) | 2.1.21 (compiled with Kotlin 2.3.20) | Apache-2.0 | External dependency of the `*-kotlin` modules; not bundled. |
 | [kotlinx.coroutines](https://github.com/Kotlin/kotlinx.coroutines/blob/master/LICENSE.txt) | 1.8.0 | Apache-2.0 | compileOnly for the `*-kotlin` modules; supplied by the plugin that uses the coroutine functions. |
 | [Mockito](https://github.com/mockito/mockito/blob/main/LICENSE) | inline/core 4.8.1 for spigot-testing; core 5.11.0 for paper-testing, velocity-testing and modded-testing | MIT | External `api` dependencies of published testing modules; not embedded. |
@@ -34,6 +34,9 @@ These are not runtime dependencies of the published library solely because they 
 - JUnit Jupiter 5.8.1 / 5.10.2 and JUnit Platform: EPL-2.0.
 - AssertJ 3.25.1 / 3.25.3, Awaitility 4.2.1, Error Prone 2.50.0 and NullAway 0.14.2: Apache-2.0.
 - Testcontainers 1.21.4 and Adventure serializers 4.15.0: MIT; SLF4J Simple 2.0.17: MIT.
+- JMH 1.37 (`benchmark`): GPL-2.0 with the Classpath Exception.
+- MCProtocolLib (`com.github.steveice10:mcprotocollib` and `org.geysermc.mcprotocollib:protocol`, the integration-test
+  bots; versions per target): MIT.
 - Gradle, Kotlin, Spotless, the Eclipse formatter, japicmp, Stonecutter, Architectury Loom, paperweight, SpecialSource, BuildTools and the sample Shadow/ForgeGradle plugins are build tooling. This inventory does not certify all tooling transitives. Inspect each tool's own license before redistributing the tool, its caches or a development image.
 - Sample and integration-test artifacts are separate applications; their resolved/shaded dependencies require a separate distribution review.
 
