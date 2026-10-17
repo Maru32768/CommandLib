@@ -22,7 +22,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Predicate;
 
 /**
  * A command sender for {@link CommandTester}: either a fake player backed by a {@link ServerPlayer} mock, or the
@@ -46,7 +45,10 @@ public final class FakeSender {
     private boolean op;
     @Nullable
     private String locale;
-    private Predicate<String> permissionCheck = permission -> true;
+    // null grants every permission node.
+    @Nullable
+    private Set<String> grantedPermissions;
+    private final Set<String> deniedPermissions = new HashSet<>();
 
     /**
      * Creates a non-operator fake player with the offline-mode UUID for the name.
@@ -165,26 +167,24 @@ public final class FakeSender {
     }
 
     /**
-     * Grants only the given permission nodes.
+     * Grants only the given permission nodes, replacing any earlier call. Denied nodes still win.
      *
      * @throws IllegalStateException for the console, which passes every check
      */
     public FakeSender permissions(@NotNull String... permissions) {
         requirePlayerForPermissions();
-        Set<String> permissionSet = Set.copyOf(Arrays.asList(permissions));
-        permissionCheck = permissionSet::contains;
+        grantedPermissions = Set.copyOf(Arrays.asList(permissions));
         return this;
     }
 
     /**
-     * Grants every permission node except the given ones.
+     * Denies the given permission nodes. Calls accumulate, and denied nodes win over {@link #permissions}.
      *
      * @throws IllegalStateException for the console, which passes every check
      */
     public FakeSender denyPermissions(@NotNull String... permissions) {
         requirePlayerForPermissions();
-        Set<String> deniedPermissions = Set.copyOf(Arrays.asList(permissions));
-        permissionCheck = permission -> !deniedPermissions.contains(permission);
+        deniedPermissions.addAll(Arrays.asList(permissions));
         return this;
     }
 
@@ -196,7 +196,8 @@ public final class FakeSender {
     }
 
     public boolean hasPermission(@NotNull String permission) {
-        return permissionCheck.test(permission);
+        return !deniedPermissions.contains(permission)
+                && (grantedPermissions == null || grantedPermissions.contains(permission));
     }
 
     /**
@@ -370,14 +371,12 @@ public final class FakeSender {
             if (locale != null) {
                 sender.locale(locale);
             }
-            if (permissions == null && deniedPermissions.isEmpty()) {
-                return sender;
+            if (permissions != null) {
+                sender.permissions(permissions.toArray(new String[0]));
             }
-            sender.requirePlayerForPermissions();
-            Set<String> granted = permissions;
-            Set<String> denied = Set.copyOf(deniedPermissions);
-            sender.permissionCheck = permission -> !denied.contains(permission)
-                    && (granted == null || granted.contains(permission));
+            if (!deniedPermissions.isEmpty()) {
+                sender.denyPermissions(deniedPermissions.toArray(new String[0]));
+            }
             return sender;
         }
     }

@@ -1,6 +1,7 @@
 package dev.marulabs.commandlib;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.velocitypowered.api.permission.Tristate;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import dev.marulabs.commandlib.argument.IntegerArgument;
@@ -204,6 +205,29 @@ class CommandTesterTest {
         assertThatThrownBy(() -> closed.execute("vote", player)).hasCauseInstanceOf(CommandSyntaxException.class);
 
         assertThat(player.getSentMessageTexts()).containsExactly("voted");
+    }
+
+    @Test
+    void granted_and_denied_permissions_combine_and_a_new_grant_list_keeps_the_denied_nodes() {
+        FakeSender sender = FakeSender.player("Alice")
+                                      .permissions("a.b", "c.d")
+                                      .denyPermissions("c.d");
+
+        assertThat(sender.asSender()
+                         .getPermissionValue("a.b")).isEqualTo(Tristate.TRUE);
+        assertThat(sender.asSender()
+                         .getPermissionValue("c.d")).isEqualTo(Tristate.FALSE);
+        assertThat(sender.asSender()
+                         .getPermissionValue("e.f")).isEqualTo(Tristate.UNDEFINED);
+
+        sender.permissions("c.d", "e.f");
+
+        assertThat(sender.asSender()
+                         .getPermissionValue("e.f")).isEqualTo(Tristate.TRUE);
+        assertThat(sender.asSender()
+                         .getPermissionValue("c.d")).isEqualTo(Tristate.FALSE);
+        assertThat(sender.asSender()
+                         .getPermissionValue("a.b")).isEqualTo(Tristate.UNDEFINED);
     }
 
     @Test

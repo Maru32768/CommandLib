@@ -85,7 +85,7 @@ public final class CommandLibExtension implements ParameterResolver {
         }
         FakeSender result = sender.console() ? FakeSender.console() : FakeSender.player(sender.value());
         if (sender.permissions().length > 0) {
-            return result.permissions(sender.permissions(), sender.denyPermissions());
+            result.permissions(sender.permissions());
         }
         return result.denyPermissions(sender.denyPermissions());
     }

@@ -300,6 +300,23 @@ class CommandTesterTest {
         }
 
         @Test
+        void granted_and_denied_permissions_combine_and_a_new_grant_list_keeps_the_denied_nodes() {
+            FakeSender sender = FakeSender.player("Steve")
+                                          .permissions("a.b", "c.d")
+                                          .denyPermissions("c.d");
+
+            assertThat(sender.hasPermission("a.b")).isTrue();
+            assertThat(sender.hasPermission("c.d")).isFalse();
+            assertThat(sender.hasPermission("e.f")).isFalse();
+
+            sender.permissions("c.d", "e.f");
+
+            assertThat(sender.hasPermission("e.f")).isTrue();
+            assertThat(sender.hasPermission("c.d")).isFalse();
+            assertThat(sender.hasPermission("a.b")).isFalse();
+        }
+
+        @Test
         void duplicate_permission_nodes_are_accepted() {
             assertThat(FakeSender.player("Steve")
                                  .permissions("a.b", "a.b")

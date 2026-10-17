@@ -7,17 +7,18 @@ import com.velocitypowered.api.proxy.Player;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.mockito.Mockito;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Function;
 
 /**
  * A Mockito {@link Player} or {@link ConsoleCommandSource} that records the messages sent to it. It has every
@@ -27,6 +28,8 @@ import java.util.function.Function;
 public final class FakeSender {
     private final CommandSource source;
     private final List<Component> sentMessages = new ArrayList<>();
+    private @Nullable Set<String> grantedPermissions;
+    private final Set<String> deniedPermissions = new HashSet<>();
 
     public static FakeSender player(@NotNull String name) {
         return player(name, UUID.randomUUID());
@@ -53,7 +56,10 @@ public final class FakeSender {
         })
                .when(source)
                .sendMessage(Mockito.any(Component.class));
-        answerPermissions(node -> Tristate.TRUE);
+        Mockito.when(source.getPermissionValue(Mockito.anyString()))
+               .thenAnswer(invocation -> permissionValue(invocation.getArgument(0)));
+        Mockito.when(source.hasPermission(Mockito.anyString()))
+               .thenAnswer(invocation -> permissionValue(invocation.getArgument(0)).asBoolean());
     }
 
     /**
@@ -90,38 +96,30 @@ public final class FakeSender {
 
     /**
      * Grants only the given permission nodes and leaves every other one {@code UNDEFINED}, replacing any earlier call.
-     * Like a real proxy, the tester then grants an unset node only if its default is {@link DefaultPermission#ALL}.
-     * Without nodes, the sender is a player on a proxy without a permission plugin.
+     * Denied nodes still win. Like a real proxy, the tester then grants an unset node only if its default is
+     * {@link DefaultPermission#ALL}. Without nodes, the sender is a player on a proxy without a permission plugin.
      */
     public FakeSender permissions(@NotNull String... permissions) {
-        return permissions(permissions, new String[0]);
+        grantedPermissions = Set.copyOf(Arrays.asList(permissions));
+        return this;
     }
 
     /**
-     * Grants {@code granted}, denies {@code denied}, which wins, and leaves every other node {@code UNDEFINED}.
-     */
-    FakeSender permissions(String[] granted, String[] denied) {
-        Set<String> grantedSet = Set.copyOf(Arrays.asList(granted));
-        Set<String> deniedSet = Set.copyOf(Arrays.asList(denied));
-        return answerPermissions(node -> deniedSet.contains(node) ? Tristate.FALSE
-                : grantedSet.contains(node) ? Tristate.TRUE : Tristate.UNDEFINED);
-    }
-
-    /**
-     * Denies the given permission nodes and grants every other one, replacing any earlier call.
+     * Denies the given permission nodes. Calls accumulate, and denied nodes win over {@link #permissions}.
      */
     public FakeSender denyPermissions(@NotNull String... permissions) {
-        Set<String> denied = Set.copyOf(Arrays.asList(permissions));
-        return answerPermissions(node -> Tristate.fromBoolean(!denied.contains(node)));
+        deniedPermissions.addAll(Arrays.asList(permissions));
+        return this;
     }
 
-    private FakeSender answerPermissions(Function<String, Tristate> permissions) {
-        Mockito.when(source.getPermissionValue(Mockito.anyString()))
-               .thenAnswer(invocation -> permissions.apply(invocation.getArgument(0)));
-        Mockito.when(source.hasPermission(Mockito.anyString()))
-               .thenAnswer(invocation -> permissions.apply(invocation.getArgument(0))
-                                                    .asBoolean());
-        return this;
+    private Tristate permissionValue(String node) {
+        if (deniedPermissions.contains(node)) {
+            return Tristate.FALSE;
+        }
+        if (grantedPermissions == null || grantedPermissions.contains(node)) {
+            return Tristate.TRUE;
+        }
+        return Tristate.UNDEFINED;
     }
 
     /**
