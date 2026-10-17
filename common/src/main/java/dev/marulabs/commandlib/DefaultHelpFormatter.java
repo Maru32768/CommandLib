@@ -73,17 +73,11 @@ final class DefaultHelpFormatter {
             sb.append(token.kind() == Token.Kind.LITERAL ? token.name() : format(token, ctx));
             previous = token;
         }
-        boolean hasArgument = false;
-        boolean hasLiteral = false;
         for (Token token : usage.tokens()) {
             sb.append(' ')
               .append(format(token, ctx));
-            hasArgument |= token.kind() == Token.Kind.ARGUMENT;
-            hasLiteral |= token.kind() == Token.Kind.LITERAL;
         }
-        // The lines of the command's own argument branches have always been indented inside the color.
-        String line = hasArgument && !hasLiteral ? PADDING + ChatColorUtil.AQUA + sb
-                : ChatColorUtil.AQUA + PADDING + sb;
+        String line = ChatColorUtil.AQUA + PADDING + sb;
         if (usage.description()
                  .isEmpty()) {
             return line;

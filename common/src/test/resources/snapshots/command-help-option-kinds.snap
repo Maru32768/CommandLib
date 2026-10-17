@@ -1,7 +1,7 @@
 §7--------------------------------------------------
 Tag command
 §cUsage:
-  §b/tag §7[§eoptions§7] §7<§etarget§7>
+§b  /tag §7[§eoptions§7] §7<§etarget§7>
 
 §cOptions:
 §e  -f§7, §e--force§7, §e--yes§7: Skip confirmation

@@ -1,7 +1,7 @@
 §7--------------------------------------------------
 Scan command
 §cUsage:
-  §b/scan §7[§eoptions§7] §7<§etarget§7>§7: Target name
+§b  /scan §7[§eoptions§7] §7<§etarget§7>§7: Target name
 
 §cOptions:
 §e  -f§7, §e--force§7: Force execution
