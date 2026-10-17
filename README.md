@@ -1,11 +1,11 @@
-# CommandLib - A Feature-Rich Minecraft Command API for Spigot / Paper
+# CommandLib - A Feature-Rich Minecraft Command API for Spigot, Paper, Velocity, Forge, NeoForge and Fabric
 
 [![](https://jitpack.io/v/Maru32768/CommandLib.svg)](https://jitpack.io/#Maru32768/CommandLib)
 
-CommandLib is an advanced, type-safe Command API for Spigot and Paper developers. It abstracts and enhances the
-Minecraft 1.13+ command APIs, simplifying command implementation. With features like customizable argument suggestions,
-seamless validation, improved usability, and extensibility, CommandLib empowers developers to build better commands
-with ease.
+CommandLib is an advanced, type-safe Command API for Spigot, Paper, Velocity, Forge, NeoForge and Fabric developers.
+It abstracts and enhances the Minecraft 1.16.5+ command APIs, simplifying command implementation. With features like
+customizable argument suggestions, seamless validation, improved usability, and extensibility, CommandLib empowers
+developers to build better commands with ease.
 
 #### Supported Versions
 
@@ -59,9 +59,10 @@ with ease.
 
 ## Why CommandLib
 
-- **One command model for Spigot, Paper, Forge, NeoForge, and Fabric.** The same `Command` / `argument(...)` code compiles
-  against each platform artifact: Spigot from Minecraft 1.16.5 to 26.3, Paper from 1.21, and Forge, NeoForge and
-  Fabric from 1.16.5 to 1.21.4 (see [Supported Versions](#supported-versions)).
+- **One command model for Spigot, Paper, Velocity, Forge, NeoForge, and Fabric.** The same `Command` / `argument(...)`
+  code compiles against each platform artifact: Spigot from Minecraft 1.16.5 to 26.3, Paper from 1.21, Velocity 3.4+,
+  Forge 1.16.5, 1.18.2, 1.19.2 and 1.20.1, NeoForge 1.21.1 and 1.21.4, and Fabric 1.20.1, 1.21.1 and 1.21.4 (see
+  [Supported Versions](#supported-versions)).
 - **Typed values in the executor.** `argument(new PlayerArgument("target"), new IntegerArgument("amount"))` hands a
   `Player` and an `Integer` to the lambda: no lookup by name, no casts.
 - **Brigadier-native.** Commands are real Brigadier nodes, so they get client-side validation, vanilla selectors,
