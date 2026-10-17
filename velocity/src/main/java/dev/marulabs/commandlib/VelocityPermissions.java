@@ -17,8 +17,12 @@ final class VelocityPermissions {
     private VelocityPermissions() {
     }
 
+    /**
+     * The first registration of a node keeps its default, as on modded servers, so a later one cannot open an
+     * {@code OP} node to everyone.
+     */
     static void addDefaults(Collection<PermissionConfig> configs) {
-        configs.forEach(c -> DEFAULTS.put(c.node(), c.defaultPermission()));
+        configs.forEach(c -> DEFAULTS.putIfAbsent(c.node(), c.defaultPermission()));
     }
 
     /**

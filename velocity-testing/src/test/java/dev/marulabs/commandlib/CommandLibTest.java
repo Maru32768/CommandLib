@@ -145,6 +145,29 @@ class CommandLibTest {
     }
 
     @Test
+    void the_first_registration_of_a_node_keeps_its_default() {
+        CommandLib.register(plugin, proxy, new Command("vote") {{
+            execute(ctx -> ctx.sendMessage("vote"));
+        }});
+        CommandLib.register(plugin, proxy, new Command("vote") {{
+            permission(DefaultPermission.ALL);
+            execute(ctx -> ctx.sendMessage("vote"));
+        }});
+        Mockito.verify(commandManager, Mockito.times(2))
+               .register(Mockito.any(CommandMeta.class), registered.capture());
+        CommandDispatcher<CommandSource> dispatcher = new CommandDispatcher<>();
+        dispatcher.getRoot()
+                  .addChild(registered.getAllValues()
+                                      .get(1)
+                                      .getNode());
+        Player player = Mockito.mock(Player.class);
+        Mockito.when(player.getPermissionValue(Mockito.anyString()))
+               .thenReturn(Tristate.UNDEFINED);
+
+        assertThatThrownBy(() -> dispatcher.execute("vote", player)).isInstanceOf(CommandSyntaxException.class);
+    }
+
+    @Test
     void rejects_an_object_that_is_not_a_plugin() {
         assertThatThrownBy(() -> CommandLib.register(new Object(),
                                                      proxy,
