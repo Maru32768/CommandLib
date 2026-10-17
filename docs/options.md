@@ -83,8 +83,8 @@ fails like a positional argument. A variadic argument is rejected; use `repeatab
 - Flags and counts with short names can be combined in one token: `-fv`, `-vf`. A count can repeat its short name:
   `-vvv`. Value options always stand alone.
 - `repeatable(max)` turns a value option into one that can be given up to `max` times. The values come in input
-  order. It returns a new option, so call it inside `option(...)`; it fails on an option that is already registered.
-  `getOption` fails for an option that neither the command nor a parent of it has.
+  order. It returns a new option, so call it inside `option(...)`. `getOption` fails for an option that no command
+  registers, such as `option(tag).repeatable(3)`, whose copy is not registered.
 - `Options.count` and `repeatable` take a maximum because the command tree has a branch for each further occurrence
   (see [Limits](#limits)).
 

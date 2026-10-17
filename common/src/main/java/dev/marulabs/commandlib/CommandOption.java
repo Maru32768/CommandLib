@@ -52,7 +52,7 @@ public final class CommandOption<T, C extends CommonCommandContext<?, ?>> {
     private boolean requiredByCall;
     // Whether the option needs a permission; the node is generated unless permissionNode is set.
     private boolean restricted;
-    // Set when a command registers the option, after which repeatable would return an option no command has.
+    // Set when a command registers the option; getOption rejects an option no command has, such as a repeatable copy.
     boolean registered;
     private @Nullable String permissionNode;
     // Null to take the default of the command.
@@ -289,17 +289,12 @@ public final class CommandOption<T, C extends CommonCommandContext<?, ?>> {
      * The returned option keeps the aliases, the description, the permission, {@link #required()} and the
      * {@code requires(...)} dependencies; after {@link #required()} it needs at least one occurrence. An option of a
      * required argument ({@link Options#of}) becomes optional and gives an empty list.
+     * <p>
+     * The returned option is a new one, so register it: {@code option(Options.string("tag", "").repeatable(3))}.
      *
-     * @throws IllegalStateException if this option is a flag, or is already registered with {@code option(...)}, since
-     *                               the command would keep the single option; call it inside:
-     *                               {@code option(Options.string("tag", "").repeatable(3))}
+     * @throws IllegalStateException if this option is a flag
      */
     public CommandOption<List<T>, C> repeatable(int maxCount) {
-        if (registered) {
-            throw new IllegalStateException(formatName()
-                    + " is already registered, and its repeatable copy would not be; "
-                    + "register the repeatable option instead, such as option(Options.string(\"tag\", \"\").repeatable(3))");
-        }
         ArgumentType<?> valueType = type();
         Reader<C, T> single = reader;
         CommandOption<List<T>, C> option = new CommandOption<>(name,

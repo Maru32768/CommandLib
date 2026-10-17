@@ -31,8 +31,6 @@ public abstract class CommonCommandContext<S, C> {
     private final LinkedHashMap<String, Object> parsedArgMap = new LinkedHashMap<>();
     private final Map<CommandOption<?, ?>, Object> optionValues = new LinkedHashMap<>();
     private final Set<CommandOption<?, ?>> presentOptions = new LinkedHashSet<>();
-    // Set by CommandRunner to the options of the command and its parents; null where there is no command to check.
-    private @Nullable Set<CommandOption<?, ?>> declaredOptions;
     private int result = 1;
     // Non-null while CommandRunner collects the messages of a failure.
     private @Nullable List<C> failureMessages;
@@ -172,16 +170,16 @@ public abstract class CommonCommandContext<S, C> {
     /**
      * Returns the value of {@code option}: the given value, or its default when it is not given.
      *
-     * @throws IllegalArgumentException if neither the running command nor a parent of it has the option, such as the
-     *                                  copy {@link CommandOption#repeatable(int)} returns instead of the registered
-     *                                  option
+     * @throws IllegalArgumentException if no command registers the option, such as a copy
+     *                                  {@link CommandOption#repeatable(int)} returns of a registered option
      * @throws IllegalStateException    if the option was not given and has no default here
      */
     @NotNull
     public final <T> T getOption(@NotNull CommandOption<T, ?> option) {
         Objects.requireNonNull(option);
-        if (declaredOptions != null && !declaredOptions.contains(option)) {
-            throw new IllegalArgumentException(option.formatName() + " is not an option of this command");
+        if (!option.registered) {
+            throw new IllegalArgumentException(option.formatName()
+                    + " is not registered with any command; read the option that option(...) returned");
         }
         Object value = optionValues.containsKey(option) ? optionValues.get(option) : option.defaultValue();
         if (value == null) {
@@ -699,10 +697,6 @@ public abstract class CommonCommandContext<S, C> {
         } else {
             argumentNameToInputArgMap.put(name, input);
         }
-    }
-
-    final void declaredOptions(Set<CommandOption<?, ?>> options) {
-        this.declaredOptions = options;
     }
 
     final void setOptionValue(CommandOption<?, ?> option, Object value) {

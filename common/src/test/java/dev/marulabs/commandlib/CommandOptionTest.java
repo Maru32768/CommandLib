@@ -589,24 +589,66 @@ class CommandOptionTest {
         assertThatThrownBy(() -> runner.execute("tag -t a -t b -t c -t d Alex")).isInstanceOf(CommandSyntaxException.class);
     }
 
-    // The command keeps the registered option, so a repeatable copy of it would read nothing.
+    // The command keeps the registered option, so its repeatable copy would read nothing.
     @Test
-    void repeatable_fails_after_registration_and_get_option_fails_for_an_undeclared_option() throws Exception {
-        CommandOption<List<String>, TestCommandContext> other = Options.<TestCommandContext>string("tag", "")
-                                                                       .repeatable(3);
+    void get_option_fails_for_the_unregistered_repeatable_copy_of_a_registered_option() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("x") {{
-            CommandOption<String, TestCommandContext> tag = option(Options.string("tag", ""));
-            assertThatThrownBy(() -> tag.repeatable(3)).isInstanceOf(IllegalStateException.class)
-                                                       .hasMessageContaining("already registered");
+            CommandOption<List<String>, TestCommandContext> copy = option(Options.<TestCommandContext>string("tag",
+                                                                                                             "")).repeatable(3);
             errorFormatter((ctx, error) -> ctx.sendFailure(error.exception()
                                                                 .getMessage()));
-            execute(ctx -> ctx.getOption(other));
+            execute(ctx -> ctx.getOption(copy));
         }});
 
         assertThat(runner.execute("x --tag a")
                          .messages()).singleElement()
                                      .asString()
-                                     .endsWith("is not an option of this command");
+                                     .contains("is not registered with any command");
+    }
+
+    // A shared option constant can be registered as is by one command and repeatable by another, in either order.
+    @Test
+    void a_registered_option_can_still_be_made_repeatable_for_another_command() throws Exception {
+        CommandOption<String, TestCommandContext> tag = Options.string("tag", "");
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("x") {{
+            addChildren(new TestCommand("a") {{
+                option(tag);
+                execute(ctx -> ctx.sendMessage(ctx.getOption(tag)));
+            }}, new TestCommand("b") {{
+                CommandOption<List<String>, TestCommandContext> tags = option(tag.repeatable(3));
+                execute(ctx -> ctx.sendMessage(ctx.getOption(tags)));
+            }});
+        }});
+
+        assertThat(runner.execute("x a --tag p")
+                         .messages()).containsExactly("p");
+        assertThat(runner.execute("x b --tag p --tag q")
+                         .messages()).containsExactly("[p, q]");
+    }
+
+    // A parent's middleware runs for every child, including those without the option.
+    @Test
+    void a_parent_middleware_reads_the_default_of_an_option_the_running_child_does_not_have() throws Exception {
+        CommandOption<Boolean, TestCommandContext> verbose = Options.flag("verbose");
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("x") {{
+            addMiddleware((ctx, next) -> {
+                ctx.sendMessage("verbose " + ctx.getOption(verbose));
+                return next.proceed();
+            });
+            addChildren(new TestCommand("a") {{
+                option(verbose);
+                execute(ctx -> {
+                });
+            }}, new TestCommand("b") {{
+                execute(ctx -> {
+                });
+            }});
+        }});
+
+        assertThat(runner.execute("x a --verbose")
+                         .messages()).containsExactly("verbose true");
+        assertThat(runner.execute("x b")
+                         .messages()).containsExactly("verbose false");
     }
 
     @Test
