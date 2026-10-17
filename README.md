@@ -1057,8 +1057,8 @@ The first execution sends "Run the command again within 10s to confirm. [Confirm
 [caption](docs/localization.md), in the sender's language), where `[Confirm]` runs the same
 command when clicked. Each sender has one pending confirmation: another input, or the same one after the timeout, asks
 again. A sender on cooldown gets "You must wait 4m 59s before using this command again." Both are checked after the
-permissions, the arguments and the prerequisites, in this order: the cooldown, the confirmation, the other middlewares
-and preprocesses. The cooldown starts only when all of them pass, so a sender on cooldown is not asked to confirm and an unconfirmed
+permissions, the arguments and the prerequisites, in this order: the registration's `CommandDefaults` middlewares, the
+cooldown, the confirmation, the other middlewares and preprocesses. The cooldown starts only when all of them pass, so a sender on cooldown is not asked to confirm and an unconfirmed
 execution does not start the cooldown. Both messages make the command fail like an error, see
 [errors](docs/errors.md#cooldown-and-confirmation).
 

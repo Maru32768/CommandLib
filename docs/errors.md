@@ -25,7 +25,7 @@ The runner works in this order and stops at the first failure:
 | 3 | For each argument branch on the path: branch permission, then each argument's parse → `validator` → `transformer`, or the default of an omitted optional argument | The permission message, the argument's `ArgumentParseException`, or the `CommandPrerequisiteException` of an `optional(extractor)` default |
 | 4 | Prerequisites (`addPrerequisite`, `require(...)`, `requirePlayer()`, `requireConsole()`) | The `CommandPrerequisiteException` message |
 | 5 | No executor on this node: the generated help is sent instead | (help text, not an error) |
-| 6 | The middlewares: `cooldown(...)`, then `confirm(...)`, then the middlewares and preprocesses (`addMiddleware`, `addPreprocess`) in the order they were added | The cooldown message, the confirmation request, the messages a preprocess sent before returning `false`, a middleware's `CommandPrerequisiteException` message, or the generic unexpected-error message |
+| 6 | The middlewares: those of the registration (`CommandDefaults`), then `cooldown(...)`, then `confirm(...)`, then the middlewares and preprocesses (`addMiddleware`, `addPreprocess`) in the order they were added | The cooldown message, the confirmation request, the messages a preprocess sent before returning `false`, a middleware's `CommandPrerequisiteException` message, or the generic unexpected-error message |
 | 7 | The executor (`execute` or `executeAsync`) | A `CommandPrerequisiteException` message, `The command timed out.` for a `TimeoutException`, or the generic unexpected-error message |
 
 A middleware can map the failure of the steps after it, see [execution](execution.md#middleware). An
@@ -257,7 +257,7 @@ when it returns. Preprocesses run only when the node has an executor; the genera
 
 ### Cooldown and confirmation
 
-`cooldown(...)` and `confirm(...)` are the first middlewares, so they too run only when the node has an executor. A sender on cooldown gets `You must wait 1m 30s before using this command again.`, and a first execution
+`cooldown(...)` and `confirm(...)` are middlewares that run right after the registration's `CommandDefaults` middlewares, so they too run only when the node has an executor. A sender on cooldown gets `You must wait 1m 30s before using this command again.`, and a first execution
 of a command with a confirmation gets `Run the command again within 10s to confirm. [Confirm]` in yellow, where
 `[Confirm]` runs the command again when clicked. Both make the command [fail](#results-and-failures), so a function or
 each target of a forked `/execute as @a ... run` does not get them. `Cooldown#message` and `Confirmation#message`

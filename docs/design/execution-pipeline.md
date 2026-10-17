@@ -29,9 +29,12 @@ executor, async executors, and the thread abstraction they share. User documenta
    `require(...)`) rather than becoming middlewares: a middleware wraps only an executor, and a sender who may not run
    a command should not get its help either. Their failures are reported as before.
 2. **Middleware chain**, only when the node has an executor:
-   `[cooldown check] [confirmation] [inherited and own middlewares, in order] [cooldown start]`.
-   `CommonCommand#middlewares()` builds the list for the command that owns the node; a child inherits the parent's list
-   (outer first) unless it calls `disableParentMiddleware()`. The cooldown and the confirmation keep their replace
+   `[registration (CommandDefaults) middlewares] [cooldown reserve] [confirmation] [inherited and own middlewares, in
+   order] [cooldown start]`. `CommonCommand#middlewares()` builds the list for the command that owns the node; a child
+   inherits the parent's list (outer first) unless it calls `disableParentMiddleware()`. The registration's middlewares
+   belong to the top-level command's `CommandDefaults` and run even under `disableParentMiddleware()`. The cooldown
+   check reserves the cooldown for the execution, so another execution of the same sender is refused until this one
+   starts the cooldown or ends; the reservation is released when the rest of the chain completes. The cooldown and the confirmation keep their replace
    semantics (a child's own `confirm(...)` replaces the inherited one) and their fixed positions, so a sender on
    cooldown is not asked to confirm and the cooldown starts only when everything before the executor passed.
 3. **Executor**: every executor is stored as an `AsyncCommandExecutor`. `execute(CommandExecutor)` adapts the
