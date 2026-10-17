@@ -220,6 +220,19 @@ class IntegrationTest {
                                       "commandlibtest captionProbe",
                                       "caption text for the player's locale",
                                       commandError.apply(m -> m.contains("captionProbe English text")));
+                    // The diagnostics command, whose nodes default to OP, sends each section to the bot.
+                    assertBotReceives(client,
+                                      "commandlibdiagnostics",
+                                      "the diagnostics summary with the labels of /commandlibtest",
+                                      m -> m.contains("labels: ") && m.contains("commandlibtest"));
+                    assertBotReceives(client,
+                                      "commandlibdiagnostics commands",
+                                      "the diagnostics command tree",
+                                      m -> m.contains("runTests ["));
+                    assertBotReceives(client,
+                                      "commandlibdiagnostics permissions",
+                                      "the diagnostics permission nodes",
+                                      m -> m.contains("commandlibtest runTests"));
                     // The fixture unregisters its commands in onDisable, after CommandLib did on the disable event,
                     // as a plugin may. The bot is an operator, so it can stop the server.
                     client.sendCommand("stop");

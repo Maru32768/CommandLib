@@ -76,10 +76,12 @@ public final class RuntimeFeatureTest extends TestBase {
         return List.of(buildCommand(command, name));
     }
 
+    /**
+     * The report names the test commands. The bot runs the diagnostics command and checks the lines it receives.
+     */
     public List<String> diagnostics() {
         String name = getMethodName();
         String key = getKey();
-        String diagnosticsCommand = "commandlibdiagnostics";
 
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name) {{
@@ -93,11 +95,6 @@ public final class RuntimeFeatureTest extends TestBase {
                     }
                     if (report.contains("NMS problem")) {
                         problems.add("the report names an NMS problem");
-                    }
-                    for (String section : List.of("", " commands", " permissions")) {
-                        if (!Bukkit.dispatchCommand(Bukkit.getConsoleSender(), diagnosticsCommand + section)) {
-                            problems.add("/" + diagnosticsCommand + section + " failed");
-                        }
                     }
                     putResult(problems.isEmpty() ? new TestResult(key, TestStatus.SUCCEEDED, "Diagnostics work.")
                             : new TestResult(key, TestStatus.FAILED, problems + "\n" + report));
