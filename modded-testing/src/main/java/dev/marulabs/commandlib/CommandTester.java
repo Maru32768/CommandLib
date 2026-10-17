@@ -43,6 +43,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -233,18 +234,18 @@ public final class CommandTester implements AutoCloseable {
 
     /**
      * Adds a fake player to the server's player list, so player and entity arguments can find it by name. It replaces
-     * an added player with the same name.
+     * an added player with the same name, ignoring case.
      */
     public CommandTester withPlayer(@NotNull FakeSender player) {
         if (!player.isPlayer()) {
             throw new IllegalArgumentException("sender is not a player");
         }
-        players.put(player.getName(), player);
+        players.put(key(player.getName()), player);
         return this;
     }
 
     boolean hasPlayer(String name) {
-        return players.containsKey(name);
+        return players.containsKey(key(name));
     }
 
     /**
@@ -286,7 +287,7 @@ public final class CommandTester implements AutoCloseable {
             onlinePlayers = new LinkedHashMap<>(players);
             if (sender.isPlayer()) {
                 // The executing player is online, even when an added player has its name.
-                onlinePlayers.put(sender.getName(), sender);
+                onlinePlayers.put(key(sender.getName()), sender);
             }
             server = createServer(onlinePlayers, serverLevels(), dispatcher);
             serverSetups.forEach(setup -> setup.accept(server));
@@ -419,8 +420,10 @@ public final class CommandTester implements AutoCloseable {
                                                                            .equals(invocation.getArgument(0)))
                                                    .findFirst()
                                                    .orElse(null));
-        String[] playerNames = onlinePlayers.keySet()
-                                            .toArray(new String[0]);
+        String[] playerNames = onlinePlayers.values()
+                                            .stream()
+                                            .map(FakeSender::getName)
+                                            .toArray(String[]::new);
         Mockito.when(players.getPlayerNamesArray())
                .thenReturn(playerNames);
 
@@ -481,11 +484,12 @@ public final class CommandTester implements AutoCloseable {
     }
 
     private static Optional<FakeSender> findPlayer(Map<String, FakeSender> onlinePlayers, String name) {
-        return onlinePlayers.values()
-                            .stream()
-                            .filter(sender -> sender.getName()
-                                                    .equalsIgnoreCase(name))
-                            .findFirst();
+        return Optional.ofNullable(onlinePlayers.get(key(name)));
+    }
+
+    // Player names are unique ignoring case, as the server looks them up.
+    private static String key(String name) {
+        return name.toLowerCase(Locale.ROOT);
     }
 
     public static final class Builder {

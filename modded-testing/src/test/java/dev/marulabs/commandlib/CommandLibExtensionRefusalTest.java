@@ -24,6 +24,13 @@ class CommandLibExtensionRefusalTest {
     }
 
     @Test
+    void refuses_two_players_whose_names_differ_only_in_case() {
+        assertThat(failures(TwoPlayersOfOneNameIgnoringCase.class)).singleElement(InstanceOfAssertFactories.THROWABLE)
+                                                                   .isInstanceOf(ParameterResolutionException.class)
+                                                                   .hasMessageContaining("another injected player is named Alex");
+    }
+
+    @Test
     void refuses_a_before_all_method() {
         assertThat(failures(BeforeAllTester.class)).singleElement(InstanceOfAssertFactories.THROWABLE)
                                                    .isInstanceOf(ParameterResolutionException.class)
@@ -54,6 +61,16 @@ class CommandLibExtensionRefusalTest {
 
         @Test
         void test(FakeSender first, FakeSender second) {
+        }
+    }
+
+    @Tag("fixture")
+    static class TwoPlayersOfOneNameIgnoringCase {
+        @RegisterExtension
+        final CommandLibExtension commandLib = new CommandLibExtension(CommandLibExtensionRefusalTest::tester);
+
+        @Test
+        void test(@Sender("alex") FakeSender first, @Sender("Alex") FakeSender second) {
         }
     }
 
