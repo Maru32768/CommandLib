@@ -87,7 +87,7 @@ This file lists the changes in each CommandLib release that affect plugin and mo
 #### Registration
 
 - Spigot and Paper: `CommandLib.register` and `unregister` throw `IllegalStateException` off the main thread (on Folia,
-  off a region or the global region thread).
+  off the global region thread; region threads are refused too).
 - Registration rejects trees it used to accept:
   - two argument branches that both run for the same input (`IllegalStateException`)
   - same-named first arguments of different types, which share one node (`IllegalArgumentException`)
@@ -114,8 +114,8 @@ and 1.21.1 run the Forge / NeoForge integration suite on a real Fabric server (`
 `fabric-1.21.4` and fabric-permissions-api are not verified there. Velocity 3.4.0 has a smoke
 integration target (`velocity-3.4.0`): a bot joins a Paper backend through a real proxy and receives CommandLib's
 command tree, the messages and failure messages of its commands, the refusal of a command whose default is not `ALL`,
-`ServerArgument` suggestions and an `executeAsync` message. Options, `PlayerArgument`, permission plugins and Velocity
-4.x are not verified there.
+`ServerArgument` suggestions, an `executeAsync` message, `PlayerArgument` (the proxy's player lookup and its
+suggestions) and a command for each argument type. Options, permission plugins and Velocity 4.x are not verified there.
 
 #### Ways to define commands
 
