@@ -563,7 +563,7 @@ a failure throws a `CommandSyntaxException`.
   `PaperBrigadierManager.java`, verified).
 
 **Compared.** CommandLib, CommandAPI and Paper give a real result; CommandAPI's and Paper's are a plain `return`, and
-CommandLib's needs `setResult` or the untyped executor in Java.
+CommandLib's needs `ctx.setResult(n)`, or an annotated method returning `int`.
 
 ## Setup
 
