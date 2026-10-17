@@ -505,6 +505,27 @@ class AnnotationParserTest {
         }
     }
 
+    @Command("x")
+    static final class DefaultOutsideRange {
+        @Execute
+        void run(@Name("n") @Range(min = 1, max = 10) @Default("0") int n) {
+        }
+    }
+
+    @Command("x")
+    static final class OptionalOutsideRange {
+        @Execute
+        void run(@Name("n") @Range(min = 1, max = 10) @Optional int n) {
+        }
+    }
+
+    @Command("x")
+    static final class OptionOutsideRange {
+        @Execute
+        void run(@Option("n") @Range(min = 1, max = 10) int n) {
+        }
+    }
+
     @Test
     void contradictory_or_malformed_annotations_are_rejected() {
         AnnotationParser<TestCommandContext, TestCommand> parser = parser();
@@ -514,6 +535,9 @@ class AnnotationParserTest {
         assertThatThrownBy(() -> parser.parse(new SpacedPlaceholder())).hasMessageContaining("has '<a' in its @Subcommand path");
         assertThatThrownBy(() -> parser.parse(new EmptyPlaceholder())).hasMessageContaining("has '<>' in its @Subcommand path");
         assertThatThrownBy(() -> parser.parse(new RequiredOptionWithDefault())).hasMessageContaining("is a required option and cannot take @Default or @Optional");
+        assertThatThrownBy(() -> parser.parse(new DefaultOutsideRange())).hasMessageContaining("parameter n defaults to 0, outside its @Range");
+        assertThatThrownBy(() -> parser.parse(new OptionalOutsideRange())).hasMessageContaining("parameter n defaults to 0, outside its @Range");
+        assertThatThrownBy(() -> parser.parse(new OptionOutsideRange())).hasMessageContaining("parameter n defaults to 0, outside its @Range");
     }
 
     static final class NotACommand {

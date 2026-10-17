@@ -12,6 +12,12 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class CommandOptionTest {
     @Test
+    void a_bounded_integer_option_rejects_a_default_outside_its_bounds() {
+        assertThatThrownBy(() -> Options.integer("n", 0, 1, 10)).isInstanceOf(IllegalArgumentException.class)
+                                                                .hasMessage("default 0 is not within [1, 10]");
+    }
+
+    @Test
     void value_option_requires_type_and_parser() {
         assertThatThrownBy(() -> new CommandOption<String, TestCommandContext>("mode",
                                                                                null,

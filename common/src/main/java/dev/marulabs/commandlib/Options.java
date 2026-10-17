@@ -92,6 +92,7 @@ public final class Options {
                                                                                            int defaultValue,
                                                                                            int min,
                                                                                            int max) {
+        checkBounds(defaultValue, min, max);
         return new CommandOption<>(name,
                                    null,
                                    defaultValue,
@@ -104,6 +105,7 @@ public final class Options {
                                                                                            int defaultValue,
                                                                                            int min,
                                                                                            int max) {
+        checkBounds(defaultValue, min, max);
         return new CommandOption<>(name,
                                    shortName,
                                    defaultValue,
@@ -185,5 +187,12 @@ public final class Options {
                                    defaultValue,
                                    StringArgumentType.string(),
                                    (ctx, optionName) -> StringArgumentType.getString(ctx.getHandle(), optionName));
+    }
+
+    // The default applies without parsing, so the bounds would not reject it.
+    private static void checkBounds(int defaultValue, int min, int max) {
+        if (min > max || defaultValue < min || defaultValue > max) {
+            throw new IllegalArgumentException("default " + defaultValue + " is not within [" + min + ", " + max + "]");
+        }
     }
 }

@@ -979,6 +979,7 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
                                 "is variadic and cannot take @Default; @Optional gives an empty list");
                 }
                 Object value = parseDefault(method, parameter, valueType, defaultValue.value());
+                checkDefault(method, parameter, value);
                 makeOptional(argument, ctx -> value);
             } else if (parameter.isAnnotationPresent(Optional.class)) {
                 Extractor<C, ?> fromContext = !variadic && contextTypes.contains(valueType) ? contextValue(valueType)
@@ -987,6 +988,7 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
                 if (fromContext != null) {
                     makeOptional(argument, fromContext);
                 } else if (empty != null) {
+                    checkDefault(method, parameter, empty);
                     makeOptional(argument, ctx -> empty);
                 } else {
                     throw error(method,
@@ -1014,6 +1016,20 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
                             parameter,
                             "has @Range with a fractional bound, but " + valueType.getSimpleName()
                                     + " takes whole numbers");
+            }
+        }
+
+        // The value of an omitted argument or option skips the argument's bounds, so it must be within @Range.
+        private void checkDefault(Method method, Parameter parameter, Object value) {
+            Range range = parameter.getAnnotation(Range.class);
+            if (range == null || !(value instanceof Number)) {
+                return;
+            }
+            double number = ((Number) value).doubleValue();
+            if (number < range.min() || number > range.max()) {
+                throw error(method,
+                            parameter,
+                            "defaults to " + value + ", outside its @Range; give @Default a value within it");
             }
         }
 
@@ -1228,6 +1244,7 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
                 checkRange(method, parameter, valueType);
                 Object value = defaultValue == null ? empty
                         : parseDefault(method, parameter, valueType, defaultValue.value());
+                checkDefault(method, parameter, value);
                 created = createValueOption(name, annotation.shortName(), valueType, value, range);
             }
 
