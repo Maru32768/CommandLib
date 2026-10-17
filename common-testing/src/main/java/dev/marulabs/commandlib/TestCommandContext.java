@@ -91,17 +91,6 @@ public final class TestCommandContext extends CommonCommandContext<FakeSender, S
         });
     }
 
-    /**
-     * Sends {@code component}, a legacy {@code §} string on this test platform, unchanged.
-     */
-    @Override
-    public void sendComponent(String component) {
-        deliver(component, () -> {
-            richMessages.add(RichText.text(String.valueOf(component)));
-            send(component);
-        });
-    }
-
     @Override
     Message toFailureMessage(List<String> messages) {
         return new LiteralMessage(String.join("\n", messages));

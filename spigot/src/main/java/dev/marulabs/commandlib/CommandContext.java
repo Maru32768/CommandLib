@@ -155,11 +155,6 @@ public final class CommandContext extends CommonCommandContext<Object, BaseCompo
     }
 
     @Override
-    public void sendComponent(BaseComponent component) {
-        sendMessage(component);
-    }
-
-    @Override
     Message toFailureMessage(List<BaseComponent> messages) {
         TextComponent joined = new TextComponent();
         for (int i = 0; i < messages.size(); i++) {

@@ -68,7 +68,7 @@ MiniMessage.
 ## Non-goals
 
 - **No Adventure re-implementation.** Paper-only plugins should use Adventure / MiniMessage directly and send with
-  `sendComponent(Component)` or the native `sendMessage/sendSuccess/...(Component)` overloads; the README says so.
+  the native `sendMessage/sendSuccess/...(Component)` overloads; the README says so.
   `RichText` is for code that spans platforms (CommandLib itself, the common layer of libraries such as ConfigLib).
 - Adventure is not shaded into Spigot / modded (it would need `adventure-platform-*` and conflict with relocation).
 - No MiniMessage or legacy `§` parser / serializer. Existing strings with `§` codes are sent as text (rendered by the
@@ -244,8 +244,8 @@ API breaks were accepted, so the replaced APIs were removed instead of deprecate
 | `TestTextComponentBuilder` / `TestTranslatableComponentBuilder` (common-testing, common/src/test) | `TestCommandContext#sendMessage(RichText)` |
 | `CommonCommandContext#sendMessageWithOption(String / Object, Consumer<MessageOption>)`, `MessageOption` | `sendMessage(RichText.text(msg).color(rgb).hover(RichText.text(hover)))` |
 
-Kept: `sendComponent(C)`, Spigot's `send*(BaseComponent)`, modded's `sendMessage(Component[, boolean])`, as the escape
-hatch for native features (item hover, MiniMessage, ...). `String` `send*` methods and the `§` strings of help and
+Kept: Spigot's `send*(BaseComponent)`, Paper's and Velocity's `send*(Component)`, modded's
+`sendMessage(Component[, boolean])`, as the escape hatch for native features (item hover, MiniMessage, ...). `String` `send*` methods and the `§` strings of help and
 errors are unchanged; rich help belongs to the formatter API (Pillar 6).
 
 `ArgumentParseException` is rewritten on `RichText` without raw types. Its output is the same: two translatables

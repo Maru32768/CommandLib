@@ -59,11 +59,6 @@ final class TestCommandContext extends CommonCommandContext<TestCommandSource, S
     }
 
     @Override
-    public void sendComponent(String component) {
-        add(component);
-    }
-
-    @Override
     Message toFailureMessage(List<String> messages) {
         return new LiteralMessage(String.join("\n", messages));
     }

@@ -284,8 +284,6 @@ public abstract class CommonCommandContext<S, C> {
         return text.color() != null ? text : text.color(Objects.requireNonNull(color.getRGB()));
     }
 
-    public abstract void sendComponent(C component);
-
     /**
      * Returns the text of {@code caption} for the sender's {@link #getLocale() locale}, from the {@link Captions} of
      * the command.

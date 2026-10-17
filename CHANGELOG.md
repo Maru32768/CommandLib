@@ -60,6 +60,7 @@ This file lists the changes in each CommandLib release that affect plugin and mo
 - `TextComponentBuilder`, `TranslatableComponentBuilder`, `ComponentBuilder`, `sendMessageWithOption` and
   `MessageOption` are removed. Build a `RichText` (`TextRichText` or `TranslatableRichText`) and pass it to
   `sendMessage`, `sendSuccess`, `sendWarn` or `sendFailure`.
+- `sendComponent` is removed. Pass the native component to `sendMessage`.
 - CommandLib's own messages are now captions in the sender's locale, with English and Japanese built in. Several
   English texts are reworded. For example, the prerequisite failure says "You do not have permission". Where vanilla
   has a message with the same meaning, such as "No player was found", CommandLib sends vanilla's translatable message.

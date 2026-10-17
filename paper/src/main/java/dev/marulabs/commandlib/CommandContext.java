@@ -194,11 +194,6 @@ public final class CommandContext extends CommonCommandContext<CommandSourceStac
     }
 
     @Override
-    public void sendComponent(@NotNull Component component) {
-        sendMessage(component);
-    }
-
-    @Override
     Message toFailureMessage(List<Component> messages) {
         return PaperMessages.toMessage(Component.join(JoinConfiguration.newlines(), messages));
     }

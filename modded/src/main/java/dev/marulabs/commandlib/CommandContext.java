@@ -164,11 +164,6 @@ public final class CommandContext extends CommonCommandContext<CommandSourceStac
     }
 
     @Override
-    public void sendComponent(Component component) {
-        sendMessage(component);
-    }
-
-    @Override
     Message toFailureMessage(List<Component> messages) {
         MutableComponent joined = literal("");
         for (int i = 0; i < messages.size(); i++) {

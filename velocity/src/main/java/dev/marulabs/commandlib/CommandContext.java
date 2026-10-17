@@ -147,11 +147,6 @@ public final class CommandContext extends CommonCommandContext<CommandSource, Co
     }
 
     @Override
-    public void sendComponent(@NotNull Component component) {
-        sendMessage(component);
-    }
-
-    @Override
     Message toFailureMessage(List<Component> messages) {
         // Velocity sends the component of a command's syntax error in red unless it has its own color.
         return VelocityBrigadierMessage.tooltip(Component.join(JoinConfiguration.newlines(), messages));

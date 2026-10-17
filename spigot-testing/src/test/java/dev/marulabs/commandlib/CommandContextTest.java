@@ -166,7 +166,7 @@ class CommandContextTest {
         component.setBold(true);
 
         try (CommandTester tester = new CommandTester(new Command("say") {{
-            execute(ctx -> ctx.sendComponent(component));
+            execute(ctx -> ctx.sendMessage(component));
         }}, "test.command")) {
             tester.execute("say", sender);
         }
