@@ -137,6 +137,9 @@
   実行することも検討する（その spigot jar は NMS 実装を持たないので配布しない）。integration test の CI matrix もここで扱う。
   CI では `check`（Spotless、compile 時の Error Prone / NullAway、doclint）と japicmp を実行する。jev-lint を CI で
   使う場合は、verdict cache（`.jev-lint/baseline.json`）を commit して key なしで lint する運用に切り替える。
+  生成済み typed NMS source の手編集や再生成漏れを検出するため、`tools/nms-codegen` で `uv run generate.py --all` を実行し、
+  `git status --porcelain -- nms spigot/src/main/java/dev/marulabs/commandlib/util/nms/TypedNmsModules.java` が空でなければ
+  失敗させる step も入れる（`git diff --exit-code` は新規の未追跡ファイルを検出しないため）。
 - `[ ]` 0.18.0 を release する。`AbstractCommandContext` の削除や `net.kunmc.lab` から `dev.marulabs` への package 移動など、
   0.17.x と binary 互換でない変更を含む。
 - `[ ]` JitPack から Maven Central に移行する。javadoc jar と doclint は Bukkit 側の module と modded / modded-testing の
