@@ -177,7 +177,7 @@ delegated property whose value is read from the running callback:
 ```kotlin
 command("scan") {
     val force by flag("force", 'f', "Run even if safety checks fail.")
-    val limitOption = option(Options.integer("limit", 'n', 10, 1, 100).description("Maximum number of targets."))
+    val limitOption = option(Options.integer<CommandContext>("limit", 'n', 10, 1, 100).description("Maximum number of targets."))
     val limit by limitOption
 
     argument(PlayerArgument("target")) { target ->
