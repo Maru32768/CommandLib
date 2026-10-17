@@ -1,6 +1,7 @@
 package dev.marulabs.commandlib;
 
 import com.mojang.brigadier.arguments.ArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -100,14 +101,23 @@ final class CommandNameValidator {
             ArgumentType<?> shared = arguments.putIfAbsent(name, type);
             if (shared != null && !sameType(shared, type)) {
                 throw new IllegalArgumentException("Arguments named '" + name + "' share one node" + suffix()
-                        + " but parse differently: " + shared + " and " + type);
+                        + " but parse differently: " + describe(shared) + " and " + describe(type));
             }
         }
 
-        // A type without its own equals, such as a vanilla one, has no settings that change what it accepts.
+        // The toString of StringArgumentType does not tell its forms apart.
+        private static Object describe(ArgumentType<?> type) {
+            return type instanceof StringArgumentType ? ((StringArgumentType) type).getType() : type;
+        }
+
+        // A type without its own equals, such as a vanilla one, has no settings that change what it accepts, except
+        // StringArgumentType, whose word, phrase and greedy forms are one class without equals.
         private static boolean sameType(ArgumentType<?> a, ArgumentType<?> b) {
             if (a.getClass() != b.getClass()) {
                 return false;
+            }
+            if (a instanceof StringArgumentType) {
+                return ((StringArgumentType) a).getType() == ((StringArgumentType) b).getType();
             }
             try {
                 return a.getClass()

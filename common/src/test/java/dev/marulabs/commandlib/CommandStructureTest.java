@@ -64,6 +64,18 @@ class CommandStructureTest {
     }
 
     @Test
+    void quotable_and_greedy_arguments_sharing_a_node_are_rejected() {
+        assertThatThrownBy(() -> new TestCommand("say") {{
+            argument(new CommonStringArgument<>("text"),
+                     new CommonStringArgument<>("to")).execute((text, to, ctx) -> {
+                     });
+            argument(new CommonStringArgument<>("text", CommonStringArgument.Type.PHRASE)).execute((text, ctx) -> {
+            });
+        }}).isInstanceOf(IllegalArgumentException.class)
+           .hasMessageContaining("parse differently: QUOTABLE_PHRASE and GREEDY_PHRASE");
+    }
+
+    @Test
     void execute_rejects_null() {
         assertThatThrownBy(() -> new TestCommand("set") {{
             argument(new IntArg("value")).execute((CommandExecutor<TestCommandContext>) null);
