@@ -827,6 +827,48 @@ class AnnotationParserTest {
         assertThatThrownBy(() -> parser.parse(new ConfirmedPlaceholder())).hasMessageContaining("has @Confirm; its path ends in a placeholder");
     }
 
+    @Command("x")
+    static final class ExecuteAndPlaceholderChild {
+        @Execute
+        void show(TestCommandContext ctx, @Name("team") String team) {
+            ctx.sendMessage("show " + team);
+        }
+
+        @Subcommand("<team> add")
+        void add(TestCommandContext ctx, @Name("team") String team) {
+            ctx.sendMessage("add " + team);
+        }
+    }
+
+    @Command("x")
+    static final class ExecuteAndPlaceholder {
+        @Execute
+        void show(@Name("team") String team) {
+        }
+
+        @Subcommand("<team>")
+        void other(@Name("team") String team) {
+        }
+    }
+
+    @Test
+    void execute_keeps_running_beside_a_subcommand_below_its_argument() throws Exception {
+        TestCommandRunner runner = new TestCommandRunner(parser().parse(new ExecuteAndPlaceholderChild()));
+
+        assertThat(runner.execute("x red")
+                         .messages()).containsExactly("show red");
+        assertThat(runner.execute("x red add")
+                         .messages()).containsExactly("add red");
+    }
+
+    @Test
+    void execute_and_subcommand_running_at_the_same_argument_are_rejected() {
+        TestCommand command = parser().parse(new ExecuteAndPlaceholder());
+
+        assertThatThrownBy(() -> new TestCommandRunner(command)).isInstanceOf(IllegalStateException.class)
+                                                                .hasMessageContaining("more than one argument branch that runs for input ending at <team>");
+    }
+
     private static void assertSameCommand(TestCommand annotated, TestCommand fluent) {
         assertThat(CommandTreeRenderer.render(List.of(annotated),
                                               "test.command")).isEqualTo(CommandTreeRenderer.render(List.of(fluent),

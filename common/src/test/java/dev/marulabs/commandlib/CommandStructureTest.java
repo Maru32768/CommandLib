@@ -31,6 +31,39 @@ class CommandStructureTest {
     }
 
     @Test
+    void branch_leading_to_a_child_keeps_the_executor_of_a_branch_sharing_its_argument() throws Exception {
+        for (boolean executorFirst : new boolean[]{true, false}) {
+            TestCommandRunner runner = new TestCommandRunner(new TestCommand("x") {{
+                if (executorFirst) {
+                    argument(new StrArg("team")).execute((team, ctx) -> ctx.sendMessage("exec " + team));
+                }
+                argument(new StrArg("team")).child(team -> new TestCommand("add") {{
+                    execute(ctx -> ctx.sendMessage("add " + team.get(ctx)));
+                }});
+                if (!executorFirst) {
+                    argument(new StrArg("team")).execute((team, ctx) -> ctx.sendMessage("exec " + team));
+                }
+            }});
+
+            assertThat(runner.execute("x red")
+                             .messages()).containsExactly("exec red");
+            assertThat(runner.execute("x red add")
+                             .messages()).containsExactly("add red");
+        }
+    }
+
+    @Test
+    void two_branches_executing_at_the_same_argument_are_rejected() {
+        TestCommand command = new TestCommand("x") {{
+            argument(new StrArg("team")).execute((team, ctx) -> ctx.sendMessage("a"));
+            argument(new StrArg("team")).execute((team, ctx) -> ctx.sendMessage("b"));
+        }};
+
+        assertThatThrownBy(() -> new TestCommandRunner(command)).isInstanceOf(IllegalStateException.class)
+                                                                .hasMessageContaining("more than one argument branch");
+    }
+
+    @Test
     void execute_rejects_null() {
         assertThatThrownBy(() -> new TestCommand("set") {{
             argument(new IntArg("value")).execute((CommandExecutor<TestCommandContext>) null);

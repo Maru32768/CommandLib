@@ -173,17 +173,44 @@ final class ArgumentCommandNodeCreator<S, T, C extends CommonCommandContext<S, T
     CommandRunner<S, C> runner(CommonArgument<?, C, ?> argument,
                                CommandExecutor<C> helpAction,
                                CommonCommand<C, ?> parent) {
+        // Brigadier merges the nodes of the branches that share the argument and keeps the command of the node added
+        // last, so every branch gives the node the runner of the branch that executes there, if any.
+        Arguments<C> branch = arguments;
+        CommonArgument<?, C, ?> branchArgument = argument;
+        if (arguments.executorFor(argument) == null) {
+            List<String> names = names(arguments);
+            int index = names.indexOf(argument.name());
+            List<String> prefix = names.subList(0, index + 1);
+            for (Arguments<C> other : branches) {
+                List<String> otherNames = names(other);
+                if (otherNames.size() > index && otherNames.subList(0, index + 1)
+                                                           .equals(prefix)) {
+                    CommonArgument<?, C, ?> otherArgument = other.stream()
+                                                                 .skip(index)
+                                                                 .findFirst()
+                                                                 .orElseThrow();
+                    if (other.executorFor(otherArgument) != null) {
+                        branch = other;
+                        branchArgument = otherArgument;
+                        break;
+                    }
+                }
+            }
+        }
+        List<Arguments<C>> branchArguments = new ArrayList<>(executorArguments.subList(0,
+                                                                                       executorArguments.size() - 1));
+        branchArguments.add(branch);
         return new CommandRunner<>(platformAdapter,
                                    scheduler,
                                    parent,
                                    permissionPrefix,
-                                   executorArguments,
+                                   branchArguments,
                                    optionGraph,
                                    parent.prerequisite(),
                                    helpAction,
                                    parent.middlewares(),
-                                   arguments.executorFor(argument),
-                                   uncaughtExceptionHandlers(parent, argument));
+                                   branch.executorFor(branchArgument),
+                                   uncaughtExceptionHandlers(parent, branchArgument));
     }
 
     private List<UncaughtExceptionHandler<C>> uncaughtExceptionHandlers(CommonCommand<C, ?> parent,
