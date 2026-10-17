@@ -157,6 +157,11 @@ On 1.18+ the nodes are `PermissionNode<Boolean>` objects in the `commandlib` nam
 permission handlers see is **`commandlib.<node>`**, for example `commandlib.mymod.command.spawn`. They are added in
 `PermissionGatherEvent.Nodes`. A registration after that event uses the node's default resolver.
 
+Forge's permission API answers only the nodes registered in that event, so a player's check of any other node, such
+as a `Cooldown.bypassPermission(...)` node or a node your code checks with `ctx.getActor().hasPermission(...)`, never
+reaches the permission handler: it passes only for players with permission level 4, and LuckPerms cannot grant it.
+On 1.16.5, Fabric, Spigot, Paper and Velocity the handler answers any node.
+
 On 1.16.5 the nodes are registered with `PermissionAPI.registerNode(node, level, "")` under their own name, without the
 `commandlib.` part, when the server has started.
 

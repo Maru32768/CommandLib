@@ -316,6 +316,10 @@ class ResetCommand extends Command {
 }
 ```
 
+On Forge / NeoForge 1.18+ a permission handler cannot grant the bypass
+permission (or any node CommandLib did not register): only permission level 4
+skips the cooldown there.
+
 Argument chains can also have child commands. Prefer this only for vanilla-like
 or compatibility syntax where the target comes before the action.
 

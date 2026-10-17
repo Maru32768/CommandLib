@@ -1084,6 +1084,8 @@ cooldown(Cooldown.of(Duration.ofSeconds(30))
   `cooldown.remaining(player.getUniqueId())` is the time left (zero when not on cooldown), `cooldown.remaining(ctx)` the
   time left for the sender of a context, `reset(uuid)` ends one sender's cooldown and `resetAll()` every one.
 - The state lives in memory and is lost when the server restarts.
+- On Forge / NeoForge 1.18+ a permission handler cannot grant the bypass permission: only players with permission
+  level 4 skip the cooldown there ([permissions](docs/permissions.md#registration-and-reload)).
 - In tests, pass a `Clock` with `clock(...)` instead of waiting for the time to pass.
 
 ## Middleware and Async Execution
