@@ -36,6 +36,9 @@ class OptionTreeSizeTest {
         assertThatThrownBy(() -> build(flags(8))).isInstanceOf(IllegalStateException.class)
                                                  .hasMessageContaining("'flags'")
                                                  .hasMessageContaining("options.md");
+        // The orders of 12 short flags alone are hundreds of millions of tokens; generating them all ran out of memory.
+        assertThatThrownBy(() -> build(flags(12))).isInstanceOf(IllegalStateException.class)
+                                                  .hasMessageContaining("options.md");
     }
 
     @Test

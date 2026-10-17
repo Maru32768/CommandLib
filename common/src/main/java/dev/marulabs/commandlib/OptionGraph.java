@@ -214,7 +214,7 @@ final class OptionGraph<S, C extends CommonCommandContext<S, ?>> {
             // Input that ends after the options runs what input ending at the position runs.
             Command<S> command = position == null ? executor : position.getCommand();
             Map<String, Transition> stateTransitions = new HashMap<>();
-            List<OptionToken<C>> tokens = tokens(state.counts);
+            List<OptionToken<C>> tokens = tokens(state.counts, MAX_NODES - tokenCount);
             tokenCount += tokens.size();
             if (tokenCount > MAX_NODES) {
                 throw new IllegalStateException("The options of '" + String.join(" ",
@@ -356,8 +356,9 @@ final class OptionGraph<S, C extends CommonCommandContext<S, ?>> {
     }
 
     // The tokens of a state. An option is available while it was given fewer times than its maximum and no option of
-    // one of its mutually exclusive groups was given.
-    private List<OptionToken<C>> tokens(Map<CommandOption<?, C>, Integer> used) {
+    // one of its mutually exclusive groups was given. Generation stops once the tokens exceed the budget, as the orders
+    // of many short flags grow factorially.
+    private List<OptionToken<C>> tokens(Map<CommandOption<?, C>, Integer> used, int budget) {
         List<OptionToken<C>> tokens = new ArrayList<>();
         List<CommandOption<?, C>> remaining = options.stream()
                                                      .filter(x -> used.getOrDefault(x, 0) < x.maxOccurrences())
@@ -392,7 +393,7 @@ final class OptionGraph<S, C extends CommonCommandContext<S, ?>> {
                                                         .filter(x -> x.shortName() != null && !x.hasValue())
                                                         .collect(Collectors.toList());
         for (int size = 2; size <= shortFlags.size(); size++) {
-            permutations(shortFlags, size, new ArrayList<>(), tokens);
+            permutations(shortFlags, size, new ArrayList<>(), tokens, budget);
         }
         return tokens;
     }
@@ -400,7 +401,11 @@ final class OptionGraph<S, C extends CommonCommandContext<S, ?>> {
     private void permutations(List<CommandOption<?, C>> flags,
                               int size,
                               List<CommandOption<?, C>> current,
-                              List<OptionToken<C>> dest) {
+                              List<OptionToken<C>> dest,
+                              int budget) {
+        if (dest.size() > budget) {
+            return;
+        }
         if (current.size() == size) {
             dest.add(new OptionToken<>("-" + current.stream()
                                                     .map(x -> String.valueOf(x.shortName()))
@@ -414,7 +419,7 @@ final class OptionGraph<S, C extends CommonCommandContext<S, ?>> {
                 continue;
             }
             current.add(flag);
-            permutations(flags, size, current, dest);
+            permutations(flags, size, current, dest, budget);
             current.remove(current.size() - 1);
         }
     }
