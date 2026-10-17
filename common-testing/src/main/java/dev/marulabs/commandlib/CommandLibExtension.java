@@ -10,7 +10,7 @@ import java.util.Objects;
 import java.util.function.Supplier;
 
 /**
- * JUnit 5 extension that creates a {@link CommandTester} for each test, closes it after the test, and injects it and
+ * JUnit 5 extension that creates a {@link CommandTester} for each test and injects it and
  * {@link FakeSender} parameters, configured with {@link Sender}, into test methods and their {@code @BeforeEach} and
  * {@code @AfterEach} methods, which get the same tester. It refuses {@code @BeforeAll} methods and constructors, since
  * every test of the class would share their tester.
@@ -54,10 +54,11 @@ public final class CommandLibExtension implements ParameterResolver {
                             .isEmpty()) {
             throw new ParameterResolutionException("CommandLibExtension injects only into test methods and their @BeforeEach and @AfterEach methods");
         }
+        // close() does nothing, so the store need not close the tester.
         CommandTester tester = extensionContext.getStore(NAMESPACE)
                                                .getOrComputeIfAbsent(this,
-                                                                     key -> new TesterResource(testerFactory.get()),
-                                                                     TesterResource.class).tester;
+                                                                     key -> testerFactory.get(),
+                                                                     CommandTester.class);
         if (parameterContext.getParameter()
                             .getType() == CommandTester.class) {
             return tester;
@@ -81,18 +82,5 @@ public final class CommandLibExtension implements ParameterResolver {
         }
         return builder.denyPermissions(sender.denyPermissions())
                       .build();
-    }
-
-    private static final class TesterResource implements ExtensionContext.Store.CloseableResource {
-        private final CommandTester tester;
-
-        private TesterResource(CommandTester tester) {
-            this.tester = tester;
-        }
-
-        @Override
-        public void close() {
-            tester.close();
-        }
     }
 }
