@@ -23,21 +23,26 @@ Read the relevant references before generating code:
 ## Step 2 - Extract CommandLib sources when needed
 
 Run the extraction script, passing the CommandLib artifact the user's project
-depends on (`spigot`, `paper`, `forge-1.20.1`, ...; defaults to `spigot`):
+depends on (`spigot`, `paper`, `velocity`, `forge-1.20.1`, ...; defaults to
+`spigot`) and, when the build file names one, its CommandLib version (defaults
+to the newest in the Gradle cache):
 
 ```bash
-bash "${CLAUDE_SKILL_DIR}/scripts/extract-sources.sh" spigot
+bash "${CLAUDE_SKILL_DIR}/scripts/extract-sources.sh" spigot 0.18.0
 ```
 
 The script prints one of:
 
 - A JAR path: sources were extracted to `/tmp/commandlib-sources/`
-- `LOCAL_BUILD`: CommandLib source tree is available locally at the project root
+- `NOT_FOUND`: no CommandLib sources JAR is in the Gradle cache
 
 ## Step 3 - Read key source files if API detail is needed
 
 If extracted JAR, use `/tmp/commandlib-sources/` as the base path. If
-`LOCAL_BUILD`, use the project root as the base path.
+`NOT_FOUND`, use the project root only when it is a CommandLib checkout
+(`common/src/main/java/dev/marulabs/commandlib` exists there); otherwise rely on
+the references above and ask the user to download the sources (see the
+CommandLib README, "Claude Code Skill").
 
 Read the files relevant to the user's request. Common public API files include:
 
