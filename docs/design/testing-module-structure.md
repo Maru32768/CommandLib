@@ -182,9 +182,8 @@ Split later when:
 ## Remaining Work
 
 - Decide whether the platform metadata should become a typed model instead of the current per-script `platform` property.
-- Add a Fabric testing target when that platform is added, a real Folia server target (it needs a fixture that uses
-  Folia's schedulers instead of the Bukkit scheduler), and a real Velocity proxy target. Folia's scheduling is tested in
-  `paper-testing` with mocked schedulers (`FoliaCommandSchedulerTest`).
+- Add a `fabric-1.21.4` integration target. `fabric-1.20.1`, `fabric-1.21.1`, `folia-26.3` and `velocity-3.4.0`
+  exist; `folia-26.3` and `velocity-3.4.0` are smoke targets.
 - Split `paper-integration-test` or `modded-integration-test` out of the aggregator when the "Split later when" conditions above hold.
 
 ## Roadmap Checklist

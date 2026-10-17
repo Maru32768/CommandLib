@@ -224,15 +224,17 @@ Integration tests (Layer 3) guarantee real NMS behavior, so this division of wor
 
 ## Downstream Test Helpers
 
-`common-testing`, `spigot-testing` and `paper-testing` add three helpers on top of `CommandTester` / `FakeSender`.
+`common-testing`, `spigot-testing`, `paper-testing`, `modded-testing` (`forge-testing-<version>`,
+`neoforge-testing-<version>`, `fabric-testing-<version>`) and `velocity-testing` add three helpers on top of
+`CommandTester` / `FakeSender`.
 `docs/testing.md` documents their use.
 
 - **`CommandLibExtension`**: a JUnit 5 `ParameterResolver` registered with `@RegisterExtension` and a
   `Supplier<CommandTester>`. It creates the tester lazily in the store of the method's `ExtensionContext`, so a
   `@BeforeEach` method and its test share one tester and the store closes it after the test. `@Sender` configures
-  injected `FakeSender`s; on Spigot and Paper an injected player is registered with `withFakePlayer`. A field with a
-  factory was chosen over `@ExtendWith` plus a `@RegisterCommand` annotation, because commands often take
-  constructor arguments and the Spigot tester must build them while its NMS mocks are active. The artifacts declare
+  injected `FakeSender`s; outside `common-testing` an injected player is registered with the tester
+  (`withFakePlayer`, or `withPlayer` on modded). A field with a factory was chosen over `@ExtendWith` plus a
+  `@RegisterCommand` annotation, because commands often take constructor arguments and the Spigot tester must build them while its NMS mocks are active. The artifacts declare
   `junit-jupiter-api` as `compileOnly`, so they add no test framework to downstream classpaths.
 - **`CommandTester#suggest`**: returns the suggestion texts, so tests assert on a `List<String>` with their own
   assertion library. No CommandLib assertion classes are provided; AssertJ (or any list assertion) already covers
@@ -245,6 +247,5 @@ Integration tests (Layer 3) guarantee real NMS behavior, so this division of wor
   testing artifacts reach them from the same package, as they do `CommandNodeCreator`. The help snapshot tests of
   `common` use the same `Snapshots`.
 
-The three testing artifacts each have their own copy of `CommandLibExtension` and `@Sender`, because each has its
-own `CommandTester` and `FakeSender` with the same names, and one test classpath holds only one of them.
-`modded-testing` does not have these helpers yet.
+The testing artifacts each have their own copy of `CommandLibExtension` and `@Sender`, because each has its own
+`CommandTester` and `FakeSender` with the same names, and one test classpath holds only one of them.
