@@ -56,7 +56,11 @@ public final class VanillaExecutionTest extends TestBase {
 
     @Override
     public List<String> afterReload() {
-        return List.of(storeSuccessCount("#success", blockX),
+        // A store that fails leaves -1, so it cannot pass as a count of 0.
+        return List.of("scoreboard players set #success " + OBJECTIVE + " -1",
+                       "scoreboard players set #failure " + OBJECTIVE + " -1",
+                       "scoreboard players set #vanilla " + OBJECTIVE + " -1",
+                       storeSuccessCount("#success", blockX),
                        storeSuccessCount("#failure", blockX + 2),
                        storeSuccessCount("#vanilla", blockX + 4),
                        buildCommand(command, SUCCESS_COUNT));
@@ -172,8 +176,7 @@ public final class VanillaExecutionTest extends TestBase {
 
     /**
      * SuccessCount counts the successful runs of the command block's command, not the result the command sets, as it
-     * does for the vanilla command of a third block: Spigot 1.20.3 counts none. It is dispatched after the reload, by
-     * when the blocks have run.
+     * does for the vanilla command of a third block. It is dispatched after the reload, by when the blocks have run.
      */
     private void commandBlockSuccessCount() {
         String key = getClass().getSimpleName() + "." + SUCCESS_COUNT;
@@ -192,11 +195,9 @@ public final class VanillaExecutionTest extends TestBase {
                                       .getScore()
                         + "," + scores.getScore("#failure")
                                       .getScore()
-                        + "," + failureBlockRan.get();
-                putResult(key,
-                          actual,
-                          scores.getScore("#vanilla")
-                                .getScore() + ",0,true");
+                        + "," + failureBlockRan.get() + "," + scores.getScore("#vanilla")
+                                                                    .getScore();
+                putResult(key, actual, "1,0,true,1");
             });
         }});
     }
