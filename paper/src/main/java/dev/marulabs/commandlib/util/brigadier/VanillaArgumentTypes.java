@@ -20,11 +20,17 @@ public final class VanillaArgumentTypes {
     }
 
     /**
-     * The vanilla {@code color} argument. Its parsed value is a vanilla {@code ChatFormatting}, an enum whose constant
-     * names are the color names in upper case, and {@code RESET}.
+     * The vanilla {@code color} argument: {@code TeamColorArgument} from 26.2, which renamed {@code ColorArgument}. Its
+     * parsed value is an enum whose constant names are the color names in upper case: a {@code TeamColor}, or up to
+     * 26.1 a {@code ChatFormatting}, which also has {@code RESET}.
      */
     public static ArgumentType<?> color() {
-        return create("net.minecraft.commands.arguments.ColorArgument", "color");
+        try {
+            Class.forName("net.minecraft.commands.arguments.TeamColorArgument");
+        } catch (ClassNotFoundException e) {
+            return create("net.minecraft.commands.arguments.ColorArgument", "color");
+        }
+        return create("net.minecraft.commands.arguments.TeamColorArgument", "teamColor");
     }
 
     private static ArgumentType<?> create(String className, String factory) {
