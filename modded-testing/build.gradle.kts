@@ -31,6 +31,8 @@ dependencies {
 
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    // Runs fixture classes to see how CommandLibExtension refuses parameters.
+    testImplementation("org.junit.platform:junit-platform-testkit")
     testImplementation("org.assertj:assertj-core:3.25.3")
     if (loader == "fabric") {
         // FabricPermissionTest stubs CommandLib's optional fabric-permissions-api lookup.
@@ -44,7 +46,10 @@ tasks.compileTestJava {
 }
 
 tasks.test {
-    useJUnitPlatform()
+    useJUnitPlatform {
+        // Run only by the tests that select them.
+        excludeTags("fixture")
+    }
     // Minecraft writes logs relative to the working directory while bootstrapping.
     workingDir = layout.buildDirectory.dir("test-run").get().asFile.also { it.mkdirs() }
 }

@@ -49,12 +49,13 @@ class FabricPermissionTest {
              MockedStatic<Permissions> permissions = Mockito.mockStatic(Permissions.class)) {
             fabricLoader.when(FabricLoader::getInstance)
                         .thenReturn(loader);
+            // Only the right fallback is stubbed to true; any other call answers the mock's false.
             permissions.when(() -> Permissions.check(player, "fabricapitest.open", true))
-                       .thenReturn(false);
+                       .thenReturn(true);
             permissions.when(() -> Permissions.check(player, "fabricapitest.undeclared", false))
                        .thenReturn(true);
 
-            assertThat(CommandLib.hasPermission(source, player, "fabricapitest.open")).isFalse();
+            assertThat(CommandLib.hasPermission(source, player, "fabricapitest.open")).isTrue();
             // An undeclared node falls back to level 4, which the source lacks.
             assertThat(CommandLib.hasPermission(source, player, "fabricapitest.undeclared")).isTrue();
         }

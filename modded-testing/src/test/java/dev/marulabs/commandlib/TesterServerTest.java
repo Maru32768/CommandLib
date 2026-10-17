@@ -4,6 +4,7 @@ import dev.marulabs.commandlib.argument.PlayerArgument;
 import dev.marulabs.commandlib.util.CurrentServer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 //? if neoforge {
@@ -49,16 +50,29 @@ class TesterServerTest {
 
     @Test
     void the_nearest_player_resolves_among_several() {
-        AtomicReference<String> nearest = new AtomicReference<>();
+        List<String> nearest = new ArrayList<>();
         try (CommandTester tester = new CommandTester(new Command("nearest") {{
-            argument(new PlayerArgument("p")).execute((p, ctx) -> nearest.set(p.getScoreboardName()));
-        }}, "test").withPlayer(FakeSender.player("Alex"))
-                   .withPlayer(FakeSender.player("Bob"))) {
+            argument(new PlayerArgument("p")).execute((p, ctx) -> nearest.add(p.getScoreboardName()));
+        }}, "test").withPlayer(at("Alex", 25))
+                   .withPlayer(at("Bob", 1))
+                   .withPlayer(at("Carl", 9))) {
+            tester.execute("nearest @p", FakeSender.console());
+            // A player is nearest to itself.
             tester.execute("nearest @p",
                            FakeSender.player("Steve")
                                      .op(true));
         }
-        assertThat(nearest.get()).isIn("Alex", "Bob", "Steve");
+        assertThat(nearest).containsExactly("Bob", "Steve");
+    }
+
+    // A player at the given squared distance from the console's source, which stands at the origin.
+    private static FakeSender at(String name, double distanceSqr) {
+        FakeSender player = FakeSender.player(name);
+        Mockito.when(player.asPlayer()
+                           .orElseThrow()
+                           .distanceToSqr(Mockito.any(Vec3.class)))
+               .thenReturn(distanceSqr);
+        return player;
     }
 
     @Test
