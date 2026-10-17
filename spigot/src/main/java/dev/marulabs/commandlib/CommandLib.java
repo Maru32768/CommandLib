@@ -66,7 +66,7 @@ public final class CommandLib implements Listener {
         return register(plugin, list);
     }
 
-    public static CommandLib register(@NotNull Plugin plugin, @NotNull Collection<Command> commands) {
+    public static CommandLib register(@NotNull Plugin plugin, @NotNull Collection<? extends Command> commands) {
         return register(plugin, CommandDefaults.of(CommandContext.class), commands);
     }
 
