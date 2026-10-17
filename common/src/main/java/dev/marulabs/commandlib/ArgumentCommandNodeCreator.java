@@ -52,12 +52,12 @@ final class ArgumentCommandNodeCreator<S, T, C extends CommonCommandContext<S, T
         // through the sender of any of them; the runner checks the branch it executes.
         List<String> names = names(arguments);
         List<String> prefix = names.subList(0, names.indexOf(argument.name()) + 1);
-        Predicate<S> requirement = branchRequirement(arguments, parent);
+        Predicate<S> requirement = branchRequirement(arguments);
         for (Arguments<C> branch : branches) {
             List<String> branchNames = names(branch);
             if (branch != arguments && branchNames.size() >= prefix.size() && branchNames.subList(0, prefix.size())
                                                                                          .equals(prefix)) {
-                requirement = requirement.or(branchRequirement(branch, parent));
+                requirement = requirement.or(branchRequirement(branch));
             }
         }
         builder.requires(requirement);
@@ -70,25 +70,12 @@ final class ArgumentCommandNodeCreator<S, T, C extends CommonCommandContext<S, T
     }
 
     // The sender has the branch's permission and the branch is visible to the sender.
-    private Predicate<S> branchRequirement(Arguments<C> branch, CommonCommand<C, ?> parent) {
+    private Predicate<S> branchRequirement(Arguments<C> branch) {
         String permission = branch.permissionName(permissionPrefix);
         return branch.hasVisibility()
                 ? source -> platformAdapter.hasPermission(source, permission)
-                        && isVisibleTo(branch, parent, platformAdapter.createSourceContext(source))
+                        && branch.isVisibleTo(platformAdapter.createSourceContext(source))
                 : source -> platformAdapter.hasPermission(source, permission);
-    }
-
-    // As CommonCommand#isVisibleTo, for a branch of the command.
-    private static <C extends CommonCommandContext<?, ?>> boolean isVisibleTo(Arguments<C> branch,
-                                                                              CommonCommand<C, ?> parent,
-                                                                              C ctx) {
-        ctx.providers(parent.providers());
-        try {
-            return branch.isVisible(ctx);
-        } catch (RuntimeException e) {
-            e.printStackTrace();
-            return false;
-        }
     }
 
     private static List<String> names(Arguments<?> branch) {

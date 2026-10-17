@@ -156,17 +156,12 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
     }
 
     /**
-     * Whether a source sees this command, for a predicate that has no execution: the context has the command's
-     * providers, and a predicate that throws hides the command, after printing the exception.
+     * Whether a source sees this command, for a predicate that has no execution: the context gets the command's
+     * providers.
      */
     final boolean isVisibleTo(C ctx) {
         ctx.providers(providers());
-        try {
-            return isVisible(ctx);
-        } catch (RuntimeException e) {
-            e.printStackTrace();
-            return false;
-        }
+        return isVisible(ctx);
     }
 
     private void validateChildren(@NotNull Collection<? extends T> children) {
@@ -892,7 +887,22 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
      * Whether the command is shown to the sender of {@code ctx}.
      */
     final boolean isVisible(C ctx) {
-        return visibility == null || visibility.test(ctx);
+        return isVisible(visibility, ctx);
+    }
+
+    /**
+     * Whether {@code visibility} of a command or branch shows it; a predicate that throws hides it, after printing the
+     * exception, so that the tree, the help and the execution agree.
+     */
+    // common has no logger, so a stack trace on the console is how it reports, as CommandRunner does.
+    @SuppressWarnings("CatchAndPrintStackTrace")
+    static <C> boolean isVisible(@Nullable Predicate<? super C> visibility, C ctx) {
+        try {
+            return visibility == null || visibility.test(ctx);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     /**

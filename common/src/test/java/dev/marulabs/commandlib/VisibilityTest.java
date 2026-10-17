@@ -107,7 +107,7 @@ class VisibilityTest {
                          .messages()).anyMatch(x -> x.contains("start"))
                                      .noneMatch(x -> x.contains("stop"));
         assertThat(runner.execute("game kick help")
-                         .messages()).noneMatch(x -> x.contains("<player>"));
+                         .messages()).noneMatch(x -> x.contains("player"));
     }
 
     @Test
@@ -150,5 +150,58 @@ class VisibilityTest {
                                                           .hasMessageContaining("Incorrect argument");
         assertThatThrownBy(() -> dispatcher.execute(reset)).isInstanceOf(CommandSyntaxException.class)
                                                            .hasMessageContaining("Unknown command");
+    }
+
+    @Test
+    void the_runner_rejects_a_command_whose_predicate_throws_after_the_input_was_parsed() {
+        AtomicBoolean broken = new AtomicBoolean();
+        TestCommand game = new TestCommand("game") {{
+            addChildren(new TestCommand("start") {{
+                visibleWhen(ctx -> {
+                    if (broken.get()) {
+                        throw new IllegalStateException("broken predicate");
+                    }
+                    return true;
+                });
+                execute(ctx -> running.set(true));
+            }});
+        }};
+        TestCommandSource source = player(false);
+        TestCommandRunner runner = new TestCommandRunner(game, source);
+        CommandDispatcher<TestCommandSource> dispatcher = new CommandDispatcher<>(runner.root());
+        ParseResults<TestCommandSource> parsed = dispatcher.parse("game start", source);
+        broken.set(true);
+
+        assertThatThrownBy(() -> dispatcher.execute(parsed)).isInstanceOf(CommandSyntaxException.class)
+                                                            .hasMessageContaining("Unknown command");
+        assertThat(running).isFalse();
+    }
+
+    @Test
+    void help_skips_a_child_whose_predicate_throws_and_gives_each_child_its_provided_values() throws Exception {
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("game") {{
+            addChildren(new TestCommand("broken") {{
+                visibleWhen(ctx -> {
+                    throw new IllegalStateException("broken predicate");
+                });
+                execute(ctx -> ctx.sendMessage("broken ran"));
+            }}, new TestCommand("host") {{
+                provide(String.class, ctx -> "host");
+                visibleWhen(ctx -> ctx.get(String.class)
+                                      .equals("host"));
+                execute(ctx -> ctx.sendMessage("hosted"));
+            }}, new TestCommand("kick") {{
+                provide(Integer.class, ctx -> 1);
+                argument(new CommonStringArgument<>("player")).visibleWhen(ctx -> ctx.get(Integer.class) == 1)
+                                                              .execute((player,
+                                                                        ctx) -> ctx.sendMessage(player));
+            }});
+        }}, player(false));
+
+        assertThat(runner.execute("game")
+                         .messages()).anyMatch(x -> x.contains("host"))
+                                     .noneMatch(x -> x.contains("broken"));
+        assertThat(runner.execute("game kick")
+                         .messages()).anyMatch(x -> x.contains("player"));
     }
 }

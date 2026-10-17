@@ -205,7 +205,15 @@ final class Arguments<C extends CommonCommandContext<?, ?>> {
      * Whether the branch is shown to the sender of {@code ctx}.
      */
     boolean isVisible(C ctx) {
-        return visibility == null || visibility.test(ctx);
+        return CommonCommand.isVisible(visibility, ctx);
+    }
+
+    /**
+     * As {@link CommonCommand#isVisibleTo}, for this branch.
+     */
+    boolean isVisibleTo(C ctx) {
+        ctx.providers(owner.providers());
+        return isVisible(ctx);
     }
 
     boolean hasVisibility() {

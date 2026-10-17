@@ -13,7 +13,11 @@ final class TestCommandContext extends CommonCommandContext<TestCommandSource, S
 
     TestCommandContext(com.mojang.brigadier.context.CommandContext<TestCommandSource> ctx) {
         super(ctx);
-        latest = this;
+        // A source context, which the help creates for the visibility predicates, has no input and is no execution.
+        if (!ctx.getInput()
+                .isEmpty()) {
+            latest = this;
+        }
     }
 
     static TestCommandContext latest() {

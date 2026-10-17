@@ -114,12 +114,20 @@ final class HelpMessageAction<S, T, C extends CommonCommandContext<S, T>, U exte
 
     private boolean hasArgumentPermission(Arguments<C> arguments, C ctx) {
         return platformAdapter.hasPermission(ctx, arguments.permissionName(permissionPrefix))
-                && arguments.isVisible(ctx);
+                && (!arguments.hasVisibility() || arguments.isVisibleTo(sourceContext(ctx)));
     }
 
     // The sender has the command's permission and the command is visible to the sender.
     private boolean isUsable(U child, C ctx) {
-        return platformAdapter.hasPermission(child, ctx, permissionPrefix) && child.isVisible(ctx);
+        return platformAdapter.hasPermission(child, ctx, permissionPrefix)
+                && (!child.hasVisibility() || child.isVisibleTo(sourceContext(ctx)));
+    }
+
+    // The predicates get the context the command tree gives them, which has the providers of the command or branch
+    // they belong to, without changing the providers of the help's own context.
+    private C sourceContext(C ctx) {
+        return platformAdapter.createSourceContext(ctx.getHandle()
+                                                      .getSource());
     }
 
     /**
