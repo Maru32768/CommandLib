@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 import org.mockito.MockedStatic;
 
+import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 
@@ -64,5 +65,41 @@ class CommandRegistrationRollbackTest {
                .removePermission("test.command.spawn");
         assertThat(CommandLib.diagnostics()
                              .registrations()).isEmpty();
+    }
+
+    @Test
+    void a_declared_cooldown_bypass_node_is_neither_replaced_nor_removed() {
+        Permission declared = new Permission("myplugin.admin");
+        when(pluginManager.getPermission("myplugin.admin")).thenReturn(declared);
+
+        assertThatThrownBy(() -> CommandLib.register(plugin,
+                                                     cooldownCommand("myplugin.admin"))).isInstanceOf(RuntimeException.class);
+
+        verify(pluginManager, never()).addPermission(argThat((Permission x) -> x.getName()
+                                                                                .equals("myplugin.admin")));
+        verify(pluginManager, never()).removePermission("myplugin.admin");
+        assertThat(declared.getDefault()).isEqualTo(org.bukkit.permissions.PermissionDefault.OP);
+    }
+
+    @Test
+    void an_undeclared_cooldown_bypass_node_is_added_and_removed() {
+        assertThatThrownBy(() -> CommandLib.register(plugin,
+                                                     cooldownCommand("myplugin.bypass"))).isInstanceOf(RuntimeException.class);
+
+        InOrder inOrder = inOrder(pluginManager);
+        inOrder.verify(pluginManager)
+               .addPermission(argThat((Permission x) -> x.getName()
+                                                         .equals("myplugin.bypass")));
+        inOrder.verify(pluginManager)
+               .removePermission("myplugin.bypass");
+    }
+
+    private static Command cooldownCommand(String bypassNode) {
+        return new Command("spawn") {{
+            cooldown(Cooldown.of(Duration.ofSeconds(5))
+                             .bypassPermission(bypassNode));
+            execute(ctx -> {
+            });
+        }};
     }
 }

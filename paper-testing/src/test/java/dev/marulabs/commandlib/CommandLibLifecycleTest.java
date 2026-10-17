@@ -35,6 +35,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
+import java.time.Duration;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -269,6 +270,27 @@ class CommandLibLifecycleTest {
                              .getChild("hello")).isNull();
         verify(pluginManager, times(1)).removePermission(any(Permission.class));
         assertThat(disableListeners()).isEmpty();
+    }
+
+    @Test
+    void a_cooldown_bypass_node_that_exists_is_neither_replaced_nor_removed() {
+        when(plugin.isEnabled()).thenReturn(true);
+        Permission declared = new Permission("myplugin.admin");
+        when(pluginManager.getPermission("myplugin.admin")).thenReturn(declared);
+        Command command = new Command("hello") {{
+            cooldown(Cooldown.of(Duration.ofSeconds(5))
+                             .bypassPermission("myplugin.admin"));
+            execute(ctx -> {
+            });
+        }};
+
+        CommandLib.register(plugin, "test", command)
+                  .unregister();
+
+        verify(pluginManager, never()).addPermission(argThat((Permission x) -> x.getName()
+                                                                                .equals("myplugin.admin")));
+        verify(pluginManager, never()).removePermission(declared);
+        verify(pluginManager, times(1)).removePermission(any(Permission.class));
     }
 
     @Test

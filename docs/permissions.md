@@ -86,7 +86,9 @@ route it is on.
 `Cooldown.bypassPermission("myplugin.cooldown.bypass")` names an exact node, without the prefix. It is registered,
 removed and exported with the command that sets the cooldown, with the default `OP` and the kind `cooldown-bypass` in
 `permissionsJson()`. Child commands that inherit the cooldown do not list it again. Set the bypass permission before
-registering the command.
+registering the command. On Spigot and Paper a bypass node that already exists, because `plugin.yml` declares it or
+another registration added it, is left as is: it keeps its default, children and description, and the registration
+does not remove it.
 
 ## Defaults
 
@@ -147,7 +149,8 @@ function permission level applies.
 ### Spigot
 
 `CommandLib.register(...)` registers every node in Bukkit's `PluginManager` with its default and description,
-replacing a permission of the same name. `unregister()` and the plugin's disable remove them again, take their
+replacing a permission of the same name (except a cooldown bypass node, see [Cooldown bypass](#cooldown-bypass)).
+`unregister()` and the plugin's disable remove them again, take their
 defaults away from players, and recalculate online players' permissions. Plugin reloads therefore start from a clean
 state. `/minecraft:reload` keeps the permissions.
 

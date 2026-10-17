@@ -327,7 +327,14 @@ public final class CommandLib implements Listener {
     }
 
     private void doRegister() {
+        Set<String> bypassNodes = CommandTree.cooldownBypassNodes(commands.commands(), commands.permissionPrefix());
         for (Permission permission : commands.permissions()) {
+            // A bypass node declared in plugin.yml or added by another registration keeps its default, children and
+            // description, and stays when this registration is removed.
+            if (bypassNodes.contains(permission.getName()) && Bukkit.getPluginManager()
+                                                                    .getPermission(permission.getName()) != null) {
+                continue;
+            }
             CommandPermissions.add(permission);
             registeredPermissions.add(permission);
         }

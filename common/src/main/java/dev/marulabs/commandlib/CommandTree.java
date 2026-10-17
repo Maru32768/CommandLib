@@ -5,6 +5,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -135,6 +136,18 @@ final class CommandTree {
                                                                                          x.defaultPermission,
                                                                                          x.description))
                                                           .collect(Collectors.toList());
+    }
+
+    /**
+     * The cooldown bypass nodes of {@code commands}. Unlike the other nodes, which follow the commands, a bypass node can
+     * be any node, so a platform leaves one that already exists as is.
+     */
+    static Set<String> cooldownBypassNodes(Collection<? extends CommonCommand<?, ?>> commands,
+                                           String permissionPrefix) {
+        return permissions(of(commands, permissionPrefix)).stream()
+                                                          .filter(x -> x.kind.equals(PermissionEntry.COOLDOWN_BYPASS))
+                                                          .map(x -> x.node)
+                                                          .collect(Collectors.toSet());
     }
 
     private static void addPermissions(List<PermissionEntry> permissions, CommandEntry command) {

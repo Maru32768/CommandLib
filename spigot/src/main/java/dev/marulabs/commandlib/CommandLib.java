@@ -822,10 +822,17 @@ public final class CommandLib implements Listener {
         // removePermissionCompletely guards against leftover permissions if the previous
         // disable cycle's cleanup was incomplete. addPermission(TRUE) automatically calls
         // dirtyPermissibles internally, so no explicit recalculatePermissions is needed here.
+        Set<String> bypassNodes = CommandTree.cooldownBypassNodes(commands, permissionPrefix);
         commands.stream()
                 .flatMap(x -> x.permissions(permissionPrefix)
                                .stream())
                 .forEach(permission -> {
+                    // A bypass node declared in plugin.yml or added by another registration keeps its default,
+                    // children and description, and stays when this registration is removed.
+                    if (bypassNodes.contains(permission.getName()) && Bukkit.getPluginManager()
+                                                                            .getPermission(permission.getName()) != null) {
+                        return;
+                    }
                     removePermissionCompletely(permission.getName());
                     Bukkit.getPluginManager()
                           .addPermission(permission);
