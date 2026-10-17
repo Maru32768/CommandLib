@@ -1,12 +1,16 @@
 package dev.marulabs.commandlib;
 
 import com.mojang.brigadier.Command;
+import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
+import io.papermc.paper.command.brigadier.ApiMirrorRootNode;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import org.junit.jupiter.api.Test;
 
+import java.util.Iterator;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -29,6 +33,35 @@ class ReplaceChildTest {
 
         assertThat(root.getChild("give")).isSameAs(node);
         assertThat(node.getChild("vanillaChild")).isNull();
+    }
+
+    @Test
+    void replacesTheMirroredRootsMapsInsteadOfChangingThem() {
+        CommandDispatcher<CommandSourceStack> vanilla = new CommandDispatcher<>();
+        vanilla.getRoot()
+               .addChild(LiteralArgumentBuilder.<CommandSourceStack>literal("old")
+                                               .build());
+        ApiMirrorRootNode mirror = new ApiMirrorRootNode() {
+            @Override
+            public CommandDispatcher<CommandSourceStack> getDispatcher() {
+                return vanilla;
+            }
+        };
+        // A player's tree that Paper is building on its pool meanwhile.
+        Iterator<CommandNode<CommandSourceStack>> building = vanilla.getRoot()
+                                                                    .getChildren()
+                                                                    .iterator();
+
+        PaperDispatcher.replaceChildren(mirror,
+                                        List.of("old"),
+                                        List.of(LiteralArgumentBuilder.<CommandSourceStack>literal("new")
+                                                                      .build()));
+
+        assertThat(building.next()
+                           .getName()).isEqualTo("old");
+        assertThat(vanilla.getRoot()
+                          .getChildren()).extracting(CommandNode::getName)
+                                         .containsExactly("new");
     }
 
     @Test

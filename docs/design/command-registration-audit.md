@@ -159,10 +159,12 @@ plugin state's lock. The live dispatcher changes are in `PaperDispatcher`, the
 - After initialization it adds the nodes to the cached dispatcher directly,
   under their labels and `<plugin>:<label>` (`addNodes`), so they work at once,
   and re-adds them from another plugin's handler after a reload (line 310).
-  Without any cached dispatcher it throws (line 155). Each label is a
-  `PluginCommandNode`, made reflectively as Paper's registrar makes it, so the
-  command map shows a plugin-attributed `PluginVanillaCommandWrapper` instead of
-  a Mojang command. The label topics are added to the help map, which Paper
+  Without any cached dispatcher it throws (line 155). Before Paper 1.21.4 each
+  label is a `PluginCommandNode`, made reflectively as Paper's registrar makes
+  it, so the command map shows a plugin-attributed `PluginVanillaCommandWrapper`
+  instead of a Mojang command. Paper 1.21.4 removed `PluginCommandNode` (it
+  keeps that data in a field of the node instead), so there the label is a
+  plain node. The label topics are added to the help map, which Paper
   builds only at startup and on a data reload (`HelpTopics#show`), and players
   get their trees once on the next tick for all the changes of that tick.
 - Changes of the live dispatcher do not touch the maps of its root: Paper reads
@@ -172,6 +174,12 @@ plugin state's lock. The live dispatcher changes are in `PaperDispatcher`, the
   iterating the old maps. The nodes are converted for the vanilla dispatcher
   with Paper's `ApiMirrorRootNode#unwrapNode`, as the mirror's `addChild` does.
   If Paper's internals are not found, the root's own methods change it in place.
+  Until the map copy stopped depending on `PluginCommandNode`, Paper 1.21.4+
+  took that in-place path. Paper's tree builder keys the nodes it converted by
+  their content hash, so a change of the tree during a build makes it treat
+  `execute run` as a dead redirect and iterate the live root's children, which
+  then threw `ConcurrentModificationException` in "Paper Async Command Builder
+  Thread Pool" (seen once each on the paper-1.21.11 and paper-26.2 runs).
 - Unregister removes the recorded labels and their help topics the same way and
   updates players' trees on the next tick, or at once when the plugin is being
   disabled, since its tasks are cancelled then (not while the server stops).

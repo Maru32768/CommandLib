@@ -107,24 +107,25 @@ final class PaperDispatcher {
     }
 
     /**
-     * The node of a label. On Paper each label is a PluginCommandNode, as Paper's registrar makes them, so the command
-     * map shows a PluginVanillaCommandWrapper, which names the plugin and has no minecraft.command.&lt;label&gt;
-     * permission, instead of a Mojang command.
+     * The node of a label. On Paper before 1.21.4 each label is a PluginCommandNode, as Paper's registrar makes them,
+     * so the command map shows a PluginVanillaCommandWrapper, which names the plugin and has no
+     * minecraft.command.&lt;label&gt; permission, instead of a Mojang command. Later Paper has no PluginCommandNode, and
+     * the label is a plain node.
      */
     @SuppressWarnings("unchecked")
     static LiteralCommandNode<CommandSourceStack> labelNode(Plugin plugin,
                                                             LiteralCommandNode<CommandSourceStack> node,
                                                             String label,
                                                             String description) {
-        if (PAPER == null) {
+        Constructor<?> pluginCommandNode = PAPER == null ? null : PAPER.pluginCommandNode();
+        if (pluginCommandNode == null) {
             return label.equals(node.getLiteral()) ? node : renamed(node, label);
         }
         try {
-            return (LiteralCommandNode<CommandSourceStack>) PAPER.pluginCommandNode()
-                                                                 .newInstance(label,
-                                                                              plugin.getPluginMeta(),
-                                                                              node,
-                                                                              description);
+            return (LiteralCommandNode<CommandSourceStack>) pluginCommandNode.newInstance(label,
+                                                                                          plugin.getPluginMeta(),
+                                                                                          node,
+                                                                                          description);
         } catch (ReflectiveOperationException e) {
             throw new IllegalStateException(e);
         }
@@ -146,7 +147,7 @@ final class PaperDispatcher {
      * Paper's internal classes for changing its live dispatcher as its registrar does.
      */
     private record PaperInternals(Class<?> mirrorRoot, Method mirroredDispatcher, Method unwrapNode,
-            Constructor<?> pluginCommandNode) {
+            @Nullable Constructor<?> pluginCommandNode) {
         @Nullable
         static PaperInternals find() {
             try {
@@ -156,14 +157,23 @@ final class PaperDispatcher {
                 return new PaperInternals(mirrorRoot,
                                           mirrorRoot.getMethod("getDispatcher"),
                                           unwrapNode,
-                                          Class.forName("io.papermc.paper.command.brigadier.PluginCommandNode")
-                                               .getConstructor(String.class,
-                                                               PluginMeta.class,
-                                                               LiteralCommandNode.class,
-                                                               String.class));
+                                          findPluginCommandNode());
             } catch (ReflectiveOperationException | RuntimeException e) {
-                // Not a Paper server, as in tests, or Paper changed these internals: nodes are then added as plain
-                // nodes and the root's own methods change it.
+                // Not a Paper server, as in tests, or Paper changed these internals: the root's own methods then
+                // change it.
+                return null;
+            }
+        }
+
+        // Paper 1.21.4 dropped PluginCommandNode. Its absence must not also drop the copy of the root's maps: Paper
+        // 1.21.4+ still builds the players' trees on its pool, and reads the root's live map when a redirect such as
+        // "execute run" seems dead to it.
+        @Nullable
+        private static Constructor<?> findPluginCommandNode() {
+            try {
+                return Class.forName("io.papermc.paper.command.brigadier.PluginCommandNode")
+                            .getConstructor(String.class, PluginMeta.class, LiteralCommandNode.class, String.class);
+            } catch (ReflectiveOperationException | RuntimeException e) {
                 return null;
             }
         }
