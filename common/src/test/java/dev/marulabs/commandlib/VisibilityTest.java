@@ -107,7 +107,10 @@ class VisibilityTest {
                          .messages()).anyMatch(x -> x.contains("start"))
                                      .noneMatch(x -> x.contains("stop"));
         assertThat(runner.execute("game kick help")
-                         .messages()).noneMatch(x -> x.contains("player"));
+                         .messages()).isNotEmpty()
+                                     .noneMatch(x -> x.contains("player"));
+        assertThat(new TestCommandRunner(game(), player(true)).execute("game kick help")
+                                                              .messages()).anyMatch(x -> x.contains("player"));
     }
 
     @Test
@@ -203,5 +206,24 @@ class VisibilityTest {
                                      .noneMatch(x -> x.contains("broken"));
         assertThat(runner.execute("game kick")
                          .messages()).anyMatch(x -> x.contains("player"));
+    }
+
+    @Test
+    void help_gives_the_branch_of_a_child_under_an_argument_the_values_that_child_provides() throws Exception {
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("config") {{
+            argument(new CommonStringArgument<>("key")).child(new TestCommand("set") {{
+                provide(Integer.class, ctx -> 1);
+                argument(new CommonStringArgument<>("value")).visibleWhen(ctx -> ctx.get(Integer.class) == 1)
+                                                             .execute((value, ctx) -> ctx.sendMessage(value));
+            }}, new TestCommand("unset") {{
+                provide(Integer.class, ctx -> 2);
+                argument(new CommonStringArgument<>("old")).visibleWhen(ctx -> ctx.get(Integer.class) == 1)
+                                                           .execute((old, ctx) -> ctx.sendMessage(old));
+            }});
+        }}, player(false));
+
+        assertThat(runner.execute("config")
+                         .messages()).anyMatch(x -> x.contains("value"))
+                                     .noneMatch(x -> x.contains("unset"));
     }
 }
