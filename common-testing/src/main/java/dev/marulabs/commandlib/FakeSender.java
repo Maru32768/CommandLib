@@ -99,7 +99,14 @@ public final class FakeSender implements CommandActor {
     }
 
     public FakeSender permissions(String... permissions) {
-        return new FakeSender(name, uniqueId, type, operator, false, Set.of(permissions), deniedPermissions, locale);
+        return new FakeSender(name,
+                              uniqueId,
+                              type,
+                              operator,
+                              false,
+                              Set.copyOf(Arrays.asList(permissions)),
+                              deniedPermissions,
+                              locale);
     }
 
     public FakeSender denyPermissions(String... permissions) {
@@ -220,7 +227,7 @@ public final class FakeSender implements CommandActor {
          */
         public Builder permissions(String... permissions) {
             this.allowAllPermissions = false;
-            this.permissions = Set.of(permissions);
+            this.permissions = Set.copyOf(Arrays.asList(permissions));
             return this;
         }
 

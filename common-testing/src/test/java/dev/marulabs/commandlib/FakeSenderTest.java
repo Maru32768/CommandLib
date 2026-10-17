@@ -31,6 +31,17 @@ class FakeSenderTest {
     }
 
     @Test
+    void duplicate_permission_nodes_are_accepted() {
+        assertThat(FakeSender.player("Steve")
+                             .permissions("a.b", "a.b")
+                             .hasPermission("a.b")).isTrue();
+        assertThat(FakeSender.playerBuilder("Alex")
+                             .permissions("a.b", "a.b")
+                             .build()
+                             .hasPermission("a.b")).isTrue();
+    }
+
+    @Test
     void unknown_sender_has_no_permissions() {
         FakeSender unknown = FakeSender.unknown();
 

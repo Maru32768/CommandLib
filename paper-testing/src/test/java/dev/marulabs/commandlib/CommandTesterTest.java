@@ -75,6 +75,19 @@ class CommandTesterTest {
         }
 
         @Test
+        void duplicate_permission_nodes_are_accepted() {
+            assertThat(FakeSender.player("Steve")
+                                 .permissions("a.b", "a.b")
+                                 .asSender()
+                                 .hasPermission("a.b")).isTrue();
+            assertThat(FakeSender.playerBuilder("Alex")
+                                 .permissions("a.b", "a.b")
+                                 .build()
+                                 .asSender()
+                                 .hasPermission("a.b")).isTrue();
+        }
+
+        @Test
         void granted_and_denied_permissions_combine_and_a_new_grant_list_keeps_the_denied_nodes() {
             FakeSender sender = FakeSender.player("Steve")
                                           .permissions("a.b", "c.d")

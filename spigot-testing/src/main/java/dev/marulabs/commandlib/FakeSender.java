@@ -155,7 +155,7 @@ public class FakeSender {
      * Grants only the given permission nodes, replacing any earlier call. Denied nodes still win.
      */
     public FakeSender permissions(String... permissions) {
-        grantedPermissions = Set.of(permissions);
+        grantedPermissions = Set.copyOf(Arrays.asList(permissions));
         return this;
     }
 
@@ -245,7 +245,7 @@ public class FakeSender {
          * Grants only the given permission nodes, replacing any earlier call.
          */
         public Builder permissions(String... permissions) {
-            this.permissions = Set.of(permissions);
+            this.permissions = Set.copyOf(Arrays.asList(permissions));
             return this;
         }
 
