@@ -86,7 +86,7 @@ breaks your code.
 
 | Artifact | Platform |
 |---|---|
-| `spigot` | Spigot 1.16.5+, and Paper up to 1.20.6 (also Mohist) |
+| `spigot` | Spigot 1.16.5+, and Paper up to 1.21.1 (also Mohist); newer Paper needs `paper` |
 | `paper` | Paper 1.21+ and Folia |
 | `velocity` | Velocity 3.4+ |
 | `spigot-kotlin`, `paper-kotlin`, `velocity-kotlin` | Kotlin DSL; brings the platform artifact and `common-kotlin` |

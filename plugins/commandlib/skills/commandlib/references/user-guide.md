@@ -7,12 +7,12 @@ on CommandLib. It is not repository-maintenance guidance for CommandLib itself.
 
 | Artifact | Target platform | Java |
 |---|---|---|
-| `spigot` | Spigot, Bukkit-compatible Paper, Mohist | 11+ |
+| `spigot` | Spigot, Paper up to 1.21.1, Mohist | 11+ |
 | `paper` | Paper 1.21.0+ (official command/lifecycle API) | 21+ |
 
 Use the `paper` artifact to take advantage of Paper's official command
 registration API and Adventure component messages. Use `spigot` for Spigot,
-older Paper versions (up to 1.20.6), or Mohist.
+Paper up to 1.21.1, or Mohist. Newer Paper needs `paper`.
 
 ## Registration
 
