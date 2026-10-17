@@ -934,6 +934,219 @@ class AnnotationParserTest {
     }
 
     @Command("x")
+    static final class ExecuteAndSubcommand {
+        @Execute
+        @Subcommand("a")
+        void run() {
+        }
+    }
+
+    @Command("x")
+    static final class TwoExecutors {
+        @Execute
+        void one() {
+        }
+
+        @Execute
+        void two() {
+        }
+    }
+
+    @Command("x")
+    static final class TwoPlaceholderExecutors {
+        @Subcommand("<team>")
+        void one(@Name("team") String team) {
+        }
+
+        @Subcommand("<team>")
+        void two(@Name("team") String team) {
+        }
+    }
+
+    @Command("x")
+    static final class EmptySubcommand {
+        @Subcommand(" ")
+        void run() {
+        }
+    }
+
+    @Command("x")
+    static final class PlaceholderAliases {
+        @Subcommand(value = "<team>", aliases = "t")
+        void show(@Name("team") String team) {
+        }
+    }
+
+    @Command("x")
+    @Permission(defaultPermission = {DefaultPermission.OP, DefaultPermission.ALL})
+    static final class TwoDefaultPermissions {
+        @Execute
+        void run() {
+        }
+    }
+
+    @Command("x")
+    static final class GreedyInteger {
+        @Execute
+        void run(@Name("n") @Greedy int n) {
+        }
+    }
+
+    @Command("x")
+    static final class VariadicDefault {
+        @Execute
+        void run(@Name("names") @Default("a") List<String> names) {
+        }
+    }
+
+    @Command("x")
+    static final class OptionalWithoutValue {
+        @Execute
+        void run(@Name("mode") @Optional Mode mode) {
+        }
+    }
+
+    @Command("x")
+    static final class EmptySuggest {
+        @Execute
+        void run(@Name("name") @Suggest String name) {
+        }
+    }
+
+    @Command("x")
+    static final class MissingSuggestMethod {
+        @Execute
+        void run(@Name("name") @Suggest(method = "names") String name) {
+        }
+    }
+
+    @Command("x")
+    static final class FlagAndOption {
+        @Execute
+        void run(@Flag("a") @Option("a") boolean a) {
+        }
+    }
+
+    @Command("x")
+    static final class BooleanFlagWithMax {
+        @Execute
+        void run(@Flag(value = "v", max = 3) boolean v) {
+        }
+    }
+
+    @Command("x")
+    static final class CountedFlagWithoutMax {
+        @Execute
+        void run(@Flag("v") int v) {
+        }
+    }
+
+    @Command("x")
+    static final class StringFlag {
+        @Execute
+        void run(@Flag("v") String v) {
+        }
+    }
+
+    @Command("x")
+    static final class TwoEqualToValues {
+        @Execute
+        void run(@Option("mode") String mode,
+                 @Flag("force") @Requires(value = "mode", equalTo = {"a", "b"}) boolean force) {
+        }
+    }
+
+    @Command("x")
+    static final class EqualToRepeatable {
+        @Execute
+        void run(@Option(value = "tag", repeatable = 2) List<String> tag,
+                 @Flag("force") @Requires(value = "tag", equalTo = "a") boolean force) {
+        }
+    }
+
+    @Command("x")
+    static final class ListOptionWithoutRepeatable {
+        @Execute
+        void run(@Option("tag") List<String> tag) {
+        }
+    }
+
+    @Command("x")
+    static final class RepeatableWithoutList {
+        @Execute
+        void run(@Option(value = "tag", repeatable = 2) String tag) {
+        }
+    }
+
+    @Command("x")
+    static final class RepeatableWithDefault {
+        @Execute
+        void run(@Option(value = "tag", repeatable = 2) @Default("a") List<String> tag) {
+        }
+    }
+
+    @Command("x")
+    static final class RangeOnLongOption {
+        @Execute
+        void run(@Option("n") @Range(max = 3) long n) {
+        }
+    }
+
+    @Command("x")
+    static final class OptionPermissionWithoutNode {
+        @Execute
+        void run(@Option("n") @Permission int n) {
+        }
+    }
+
+    @Command("x")
+    static final class RawList {
+        @Execute
+        @SuppressWarnings("rawtypes")
+        void run(@Name("names") List names) {
+        }
+    }
+
+    @Command("x")
+    static final class BadEnumDefault {
+        @Execute
+        void run(@Name("mode") @Default("adventure") Mode mode) {
+        }
+    }
+
+    @Test
+    void conflicting_methods_and_misused_parameters_fail_with_the_method() {
+        AnnotationParser<TestCommandContext, TestCommand> parser = parser();
+
+        assertThatThrownBy(() -> parser.parse(new ExecuteAndSubcommand())).hasMessageContaining("ExecuteAndSubcommand#run() has both @Execute and @Subcommand");
+        assertThatThrownBy(() -> parser.parse(new TwoExecutors())).hasMessageContaining("executes '' without arguments, as another method does");
+        assertThatThrownBy(() -> parser.parse(new TwoPlaceholderExecutors())).hasMessageContaining("executes '<team>', as another method does");
+        assertThatThrownBy(() -> parser.parse(new EmptySubcommand())).hasMessageContaining("has an empty @Subcommand; use @Execute for the command itself");
+        assertThatThrownBy(() -> parser.parse(new PlaceholderAliases())).hasMessageContaining("has aliases, but its path ends in a placeholder");
+        assertThatThrownBy(() -> parser.parse(new TwoDefaultPermissions())).hasMessageContaining("gives more than one defaultPermission");
+        assertThatThrownBy(() -> parser.parse(new GreedyInteger())).hasMessageContaining("parameter n has @Greedy, but java.lang.Integer is not a String");
+        assertThatThrownBy(() -> parser.parse(new VariadicDefault())).hasMessageContaining("parameter names is variadic and cannot take @Default");
+        assertThatThrownBy(() -> parser.parse(new OptionalWithoutValue())).hasMessageContaining("has no value for an omitted "
+                + Mode.class.getName());
+        assertThatThrownBy(() -> parser.parse(new EmptySuggest())).hasMessageContaining("has @Suggest without values or a method");
+        assertThatThrownBy(() -> parser.parse(new MissingSuggestMethod())).hasMessageContaining("names the suggestion method 'names', but MissingSuggestMethod has 0 methods");
+        assertThatThrownBy(() -> parser.parse(new FlagAndOption())).hasMessageContaining("has both @Flag and @Option");
+        assertThatThrownBy(() -> parser.parse(new BooleanFlagWithMax())).hasMessageContaining("is a boolean flag; max applies to an int flag");
+        assertThatThrownBy(() -> parser.parse(new CountedFlagWithoutMax())).hasMessageContaining("is a counted flag and needs max of at least 1");
+        assertThatThrownBy(() -> parser.parse(new StringFlag())).hasMessageContaining("has @Flag, which needs a boolean or int parameter");
+        assertThatThrownBy(() -> parser.parse(new TwoEqualToValues())).hasMessageContaining("has @Requires with more than one equalTo value");
+        assertThatThrownBy(() -> parser.parse(new EqualToRepeatable())).hasMessageContaining("has @Requires(\"tag\") with equalTo, but --tag is repeatable");
+        assertThatThrownBy(() -> parser.parse(new ListOptionWithoutRepeatable())).hasMessageContaining("is a List option and needs repeatable of at least 1");
+        assertThatThrownBy(() -> parser.parse(new RepeatableWithoutList())).hasMessageContaining("has repeatable, which needs a List parameter");
+        assertThatThrownBy(() -> parser.parse(new RepeatableWithDefault())).hasMessageContaining("is repeatable and cannot take @Default or @Optional");
+        assertThatThrownBy(() -> parser.parse(new RangeOnLongOption())).hasMessageContaining("has @Range, which applies to int options only");
+        assertThatThrownBy(() -> parser.parse(new OptionPermissionWithoutNode())).hasMessageContaining("has @Permission, which on an option needs a node or one defaultPermission");
+        assertThatThrownBy(() -> parser.parse(new RawList())).hasMessageContaining("parameter names needs a List of a class");
+        assertThatThrownBy(() -> parser.parse(new BadEnumDefault())).hasMessageContaining("has @Default(\"adventure\"), which is not a valid "
+                + Mode.class.getName() + "; it takes strings");
+    }
+
+    @Command("x")
     static final class ExecuteAndPlaceholderChild {
         @Execute
         void show(TestCommandContext ctx, @Name("team") String team) {
