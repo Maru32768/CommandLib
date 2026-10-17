@@ -17,6 +17,7 @@ import java.time.Duration;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 // CommandLib.register while a server runs, which the tester does not use.
 class CommandLibRegistrationTest {
@@ -73,6 +74,13 @@ class CommandLibRegistrationTest {
                              .getChild("starting")).isNotNull();
         Mockito.verify(commands, Mockito.never())
                .sendCommands(Mockito.any());
+    }
+
+    @Test
+    void colliding_top_level_names_throw_from_register_before_a_server_runs() {
+        assertThatThrownBy(() -> CommandLib.register("collisiontest",
+                                                     new Command("same"),
+                                                     new Command("same"))).isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test

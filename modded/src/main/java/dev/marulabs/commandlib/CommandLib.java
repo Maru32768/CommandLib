@@ -91,6 +91,7 @@ public final class CommandLib {
             throw new IllegalArgumentException("permissionPrefix must not be empty");
         }
         List<Command> list = List.copyOf(commands);
+        CommandNameValidator.validateTopLevel(list);
         defaults.applyTo(list);
         CommandTree.permissionConfigs(list, permissionPrefix)
                    .forEach(c -> DEFAULTS.putIfAbsent(c.node(), c.defaultPermission()));
