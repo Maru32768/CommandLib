@@ -24,7 +24,9 @@ about nine minutes. `--args` replaces these options, for example to run one benc
 prints the change of each metric, and fails when the allocation of a benchmark regressed beyond its tolerance. The time
 metrics beyond their tolerance are printed with `(time, not gated)`, because the baseline's time errors are as large as
 the scores; they gate once the baseline is recorded again on an idle machine. A benchmark without a baseline is printed
-with `no baseline`. To record a new baseline, run `:benchmark:jmhBaseline`, which writes the metrics `jmhCompare` reads
+with `no baseline`, and a baseline without a result, such as one a run of a single benchmark left out, with
+`no result`. The task fails when no result has a baseline, or when a result lacks the allocation its baseline has,
+which happens when `--args` leaves out `-prof gc`. To record a new baseline, run `:benchmark:jmhBaseline`, which writes the metrics `jmhCompare` reads
 from `results.json` to `baseline.json`, and update the results below.
 
 Compare only runs of the same machine, JDK and power settings; the baseline below is from one desktop, so a run on

@@ -97,6 +97,7 @@ tasks.register("jmhCompare") {
             ?.get("gc.alloc.rate.norm")?.get("score") as Number?)?.toDouble()
 
         val baseline = read(baselineFile)
+        val results = read(resultsFile)
         val regressions = mutableListOf<String>()
         fun check(key: String, metric: String, base: Double?, now: Double?, higherIsWorse: Boolean) {
             if (base == null || now == null || base == 0.0) return
@@ -111,7 +112,13 @@ tasks.register("jmhCompare") {
                 println("$line (time, not gated)")
             }
         }
-        for ((key, now) in read(resultsFile)) {
+        for (key in baseline.keys - results.keys) {
+            println("%-100s no result".format(key))
+        }
+        if (baseline.keys.none { it in results }) {
+            regressions += "No result has a baseline."
+        }
+        for ((key, now) in results) {
             val base = baseline[key]
             if (base == null) {
                 println("%-100s no baseline".format(key))
@@ -125,10 +132,14 @@ tasks.register("jmhCompare") {
                 "thrpt" -> check(key, "thrpt", score(base), score(now), false)
                 else -> check(key, "avgt", score(base), score(now), true)
             }
+            // The only gated metric, missing when --args left out -prof gc.
+            if (alloc(base) != null && alloc(now) == null) {
+                regressions += "%-100s no gc.alloc.rate.norm (run with -prof gc)".format(key)
+            }
             check(key, "alloc", alloc(base), alloc(now), true)
         }
         if (regressions.isNotEmpty()) {
-            throw GradleException("Benchmarks regressed beyond the tolerances:\n" + regressions.joinToString("\n"))
+            throw GradleException("Benchmarks regressed beyond the tolerances or were not compared:\n" + regressions.joinToString("\n"))
         }
     }
 }
