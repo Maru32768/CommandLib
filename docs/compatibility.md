@@ -121,7 +121,7 @@ Fabric は専用 module を持たず、`modded` の Stonecutter node で扱う�
   [vanilla-integration.md](vanilla-integration.md) に記載。Bukkit 系 fixture の `VanillaExecutionTest`（`execute as` /
   `positioned` / `rotated`、`@s` と `distance` selector、command block の sender と `SuccessCount`）と
   `DataPackFunctionTest`（function、function tag、`#minecraft:load` が reload 後に 1 回だけ実行されること）、
-  Forge / NeoForge fixture の `ActorTest`（`execute as` と `positioned ... rotated`）を追加済み。2026-10-17 に
+  Forge / NeoForge / Fabric fixture の `ActorTest`（`execute as`、`positioned ... rotated`、command block の実行者種別）と `PermissionTest`（command block と `/execute as` の armor stand の permission）を追加済み。2026-10-17 に
   commit `89b9503f` で全 78 integration target（Spigot 34、Paper 32、Mohist 2、Forge 4、NeoForge 2、Fabric 2、Folia 1、
   Velocity 1）を 1 つずつ実行し、全 case が通った。Spigot `1.20.3` は `/execute store result` が vanilla の command
   でも 0 を保存し、command block の `SuccessCount` も数えないため、その target の store と `SuccessCount` の check は
@@ -130,7 +130,7 @@ Fabric は専用 module を持たず、`modded` の Stonecutter node で扱う�
   （`paper.yml` など）を含めずに作る。option（flag、count、repeatable、argument を値にする
   option、`optionsAnywhere`、alias と排他、option permission）、`visibleWhen` と `CommandLib.refreshAll`（再送した tree
   を bot が decode する）、`executeAsync` と middleware、diagnostics、player の locale の caption（Bukkit 系のみ）を
-  含む。Forge / NeoForge の command block と function は未確認。
+  含む。Forge / NeoForge / Fabric の command block の `SuccessCount` と `LastOutput`、function は未確認。
 - Mohist の Forge/Bukkit 混在時の command registration を確認する。
 
 ### P2

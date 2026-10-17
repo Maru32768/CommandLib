@@ -68,8 +68,9 @@ A command block runs its command with a source at the center of the block:
   servers (checked on 1.21.11 and 26.3) read a game rule instead, `command_blocks_work` on 26.x, which is true by
   default.
 
-The Forge and NeoForge fixture does not check command blocks; the actor type is detected from the source there
-(`ForgeCommandActor`).
+The Forge, NeoForge and Fabric fixture checks that a command block's actor type is `COMMAND_BLOCK` and that a command
+block cannot run a command it lacks the permission for. It does not check `SuccessCount` or `LastOutput`. The actor
+type is detected from the source there (`ForgeCommandActor`).
 
 ## Data pack functions and tags
 
