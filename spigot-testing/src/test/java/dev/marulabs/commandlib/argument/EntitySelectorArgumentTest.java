@@ -62,6 +62,19 @@ class EntitySelectorArgumentTest {
     }
 
     @Test
+    void all_selectors_list_a_registered_executing_player_once() {
+        FakeSender admin = FakeSender.player("Admin");
+
+        try (CommandTester tester = tester()) {
+            tester.withFakePlayer((Player) admin.asSender());
+            tester.execute("players @a", admin);
+            tester.execute("entities @e", admin);
+        }
+
+        assertThat(admin.getSentMessageTexts()).containsExactly("players=[Admin]", "entities=[Admin]");
+    }
+
+    @Test
     void nearest_player_selector_is_the_executing_player_or_else_a_registered_one() {
         FakeSender admin = FakeSender.player("Admin");
         FakeSender alex = FakeSender.player("Alex");
