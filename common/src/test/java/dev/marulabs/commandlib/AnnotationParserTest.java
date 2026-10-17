@@ -613,6 +613,26 @@ class AnnotationParserTest {
         assertThatThrownBy(() -> parser.parse(new OptionOutsideRange())).hasMessageContaining("parameter n defaults to 0, outside its @Range");
     }
 
+    @Command("x")
+    static final class RequiredAndRepeatableInRange {
+        @Execute
+        void run(TestCommandContext ctx,
+                 @Option(value = "n", required = true) @Range(min = 1, max = 10) int n,
+                 @Option(value = "m", repeatable = 2) @Range(min = 1, max = 10) List<Integer> m) {
+            ctx.sendMessage(n + " " + m);
+        }
+    }
+
+    // Neither option can take @Default, and neither ever gives one, so the implicit 0 outside @Range is not an error.
+    @Test
+    void required_and_repeatable_options_take_a_range_without_zero() throws Exception {
+        TestCommandRunner runner = new TestCommandRunner(parser().parse(new RequiredAndRepeatableInRange()));
+
+        assertThat(runner.execute("x --n 3 --m 1 --m 10")
+                         .messages()).containsExactly("3 [1, 10]");
+        assertThatThrownBy(() -> runner.execute("x --n 0")).hasMessageContaining("Integer must not be less than 1");
+    }
+
     static final class NotACommand {
     }
 

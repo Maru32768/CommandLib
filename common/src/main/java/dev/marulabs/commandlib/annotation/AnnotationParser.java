@@ -1269,6 +1269,10 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
                 checkRange(method, parameter, valueType);
                 Object value = defaultValue == null ? empty
                         : parseDefault(method, parameter, valueType, defaultValue.value());
+                if (defaultValue == null && range != null && (annotation.required() || repeatable)) {
+                    // A required or repeatable option never gives its default, so any value within @Range will do.
+                    value = (int) Math.max(range.min(), Math.min(range.max(), 0));
+                }
                 checkDefault(method, parameter, value);
                 created = createValueOption(name, annotation.shortName(), valueType, value, range);
             }
