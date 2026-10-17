@@ -22,6 +22,17 @@ cd samples/paper
 ./gradlew build
 ```
 
+The spigot sample builds the included `:spigot` jar, which bundles every typed NMS module under `nms/`, and each of those
+needs BuildTools or a paperweight dev bundle. To build it without them, pass the repository's property; it reaches the
+included build:
+
+```bash
+cd samples/spigot
+./gradlew build -Pcommandlib.typedNms=false
+```
+
+That jar has no NMS implementations and throws `NMSClassNotFoundException` on a server, so use it to compile only.
+
 Copied outside the repository, they resolve `com.github.Maru32768.CommandLib:*:latest.release` from JitPack like a
 downstream project. Replace `latest.release` with a release tag in your own project.
 
