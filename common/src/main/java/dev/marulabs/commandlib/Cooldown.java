@@ -57,12 +57,18 @@ public final class Cooldown {
     }
 
     /**
-     * Lets senders with the given permission skip the cooldown.
+     * Lets senders with the given permission skip the cooldown. Registration registers the node with the default
+     * {@code OP} for the commands that use this cooldown, so set it before registering them.
      */
     @NotNull
     public Cooldown bypassPermission(@NotNull String permission) {
         this.bypassPermission = Objects.requireNonNull(permission);
         return this;
+    }
+
+    @Nullable
+    String bypassNode() {
+        return bypassPermission;
     }
 
     /**

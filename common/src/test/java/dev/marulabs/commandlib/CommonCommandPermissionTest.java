@@ -4,6 +4,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.marulabs.commandlib.argument.CommonStringArgument;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -277,6 +278,31 @@ class CommonCommandPermissionTest {
         assertThat(config.node()).isEqualTo("custom.game");
         assertThat(config.defaultPermission()).isEqualTo(DefaultPermission.ALL);
         assertThat(config.description()).isEqualTo("Play the game");
+    }
+
+    @Test
+    void cooldown_bypass_node_is_registered_with_op_default_on_the_command_that_sets_it() {
+        TestCommand command = new TestCommand("kit") {{
+            cooldown(Cooldown.of(Duration.ofMinutes(1))
+                             .bypassPermission("kits.cooldown.bypass"));
+            addChildren(new TestCommand("starter") {{
+            }}, new TestCommand("daily") {{
+                cooldown(Duration.ofDays(1));
+            }});
+        }};
+
+        List<PermissionConfig> configs = CommandTree.permissionConfigs(List.of(command), "test.command");
+
+        // The inheriting child does not list the node again, and a cooldown without a bypass adds none.
+        assertThat(configs).extracting(PermissionConfig::node)
+                           .containsExactly("test.command.kit",
+                                            "kits.cooldown.bypass",
+                                            "test.command.kit.starter",
+                                            "test.command.kit.daily");
+        assertThat(configs.get(1)
+                          .defaultPermission()).isEqualTo(DefaultPermission.OP);
+        assertThat(CommandDocs.of("test.command", command)
+                              .permissionsJson()).contains("\"kind\": \"cooldown-bypass\"");
     }
 
     @Test

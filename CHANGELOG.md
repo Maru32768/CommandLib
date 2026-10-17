@@ -143,7 +143,8 @@ suggestions) and a command for each argument type. Options, permission plugins a
 - `executeAsync`, `ctx.supplyAsync` and `ctx.runAsync`, which return to the server thread
   ([async executors](docs/execution.md#async-executors)).
 - Middlewares (`addMiddleware`), and middlewares and providers for a whole registration.
-- `confirm()` and `cooldown(Duration)`. `Cooldown` can report the remaining time and reset it.
+- `confirm()` and `cooldown(Duration)`. `Cooldown` can report the remaining time and reset it. Its bypass permission
+  is registered with the command, with the default `OP`, and listed in the permission export as `cooldown-bypass`.
 - Typed context values: `provide(...)` on commands, values that middlewares put, sender mapping, and dependencies
   ([context values](docs/context-values.md)).
 - `ctx.fail(...)` ends a command with an error from any executor.

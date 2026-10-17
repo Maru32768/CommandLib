@@ -47,11 +47,22 @@ final class CommandTree {
         for (CommonCommand<?, ?> child : command.children()) {
             children.add(command(child, route + " " + child.name(), prefix));
         }
+        // Listed on the command that sets the cooldown, not on the children that inherit it.
+        Cooldown cooldown = command.ownCooldown();
+        String bypassNode = cooldown == null ? null : cooldown.bypassNode();
         return new CommandEntry(command.name(),
                                 route,
                                 command.aliases(),
                                 command.staticDescription(),
                                 new PermissionEntry(command.permissionConfig(prefix), route, PermissionEntry.COMMAND),
+                                bypassNode == null
+                                        ? null : new PermissionEntry(
+                                                                     new PermissionConfig(bypassNode,
+                                                                                          DefaultPermission.OP,
+                                                                                          "Skips the cooldown of "
+                                                                                                  + route),
+                                                                     route,
+                                                                     PermissionEntry.COOLDOWN_BYPASS),
                                 command.executor() != null,
                                 options,
                                 branches,
@@ -105,8 +116,8 @@ final class CommandTree {
     }
 
     /**
-     * Every permission node of the commands, each command followed by its options that need a permission, its argument
-     * branches, the commands under each branch, and then its child commands.
+     * Every permission node of the commands, each command followed by its cooldown's bypass node, its options that need
+     * a permission, its argument branches, the commands under each branch, and then its child commands.
      */
     static List<PermissionEntry> permissions(List<CommandEntry> commands) {
         List<PermissionEntry> permissions = new ArrayList<>();
@@ -128,6 +139,9 @@ final class CommandTree {
 
     private static void addPermissions(List<PermissionEntry> permissions, CommandEntry command) {
         permissions.add(command.permission);
+        if (command.cooldownBypass != null) {
+            permissions.add(command.cooldownBypass);
+        }
         for (OptionEntry option : command.options) {
             if (option.permission != null) {
                 permissions.add(option.permission);
@@ -150,6 +164,8 @@ final class CommandTree {
         // Null when the description depends on the sender.
         final @Nullable String description;
         final PermissionEntry permission;
+        // Null when the command sets no cooldown with a bypass permission.
+        final @Nullable PermissionEntry cooldownBypass;
         /**
          * Whether the command runs by itself instead of showing its help.
          */
@@ -167,6 +183,7 @@ final class CommandTree {
                      List<String> aliases,
                      @Nullable String description,
                      PermissionEntry permission,
+                     @Nullable PermissionEntry cooldownBypass,
                      boolean executable,
                      List<OptionEntry> options,
                      List<BranchEntry> branches,
@@ -177,6 +194,7 @@ final class CommandTree {
             this.aliases = List.copyOf(aliases);
             this.description = description;
             this.permission = permission;
+            this.cooldownBypass = cooldownBypass;
             this.executable = executable;
             this.options = List.copyOf(options);
             this.branches = List.copyOf(branches);
@@ -326,17 +344,18 @@ final class CommandTree {
         static final String COMMAND = "command";
         static final String ARGUMENT = "argument";
         static final String OPTION = "option";
+        static final String COOLDOWN_BYPASS = "cooldown-bypass";
 
         final String node;
         final DefaultPermission defaultPermission;
         final String description;
         /**
          * The route the node guards: a command's, an argument branch's with its argument tags, or a command's with the
-         * option's long name.
+         * option's long name. For a cooldown bypass node, the route of the command that sets the cooldown.
          */
         final String route;
         /**
-         * {@link #COMMAND}, {@link #ARGUMENT} or {@link #OPTION}.
+         * {@link #COMMAND}, {@link #ARGUMENT}, {@link #OPTION} or {@link #COOLDOWN_BYPASS}.
          */
         final String kind;
 

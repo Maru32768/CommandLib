@@ -786,6 +786,11 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
     }
 
     @Nullable
+    final Cooldown ownCooldown() {
+        return cooldown;
+    }
+
+    @Nullable
     final Cooldown effectiveCooldown() {
         if (cooldown != null || !inheritParentMiddleware || parent == null) {
             return cooldown;

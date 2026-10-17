@@ -123,7 +123,7 @@ public final class CommandDocs {
     /**
      * Returns every permission node as a JSON object: {@code permissionPrefix} and a {@code permissions} array of
      * {@code node}, {@code default} ({@code ALL}, {@code OP} or {@code NONE}), {@code description}, {@code route} and
-     * {@code kind} ({@code command}, {@code argument} or {@code option}).
+     * {@code kind} ({@code command}, {@code argument}, {@code option} or {@code cooldown-bypass}).
      */
     public String permissionsJson() {
         Map<String, Object> root = new LinkedHashMap<>();

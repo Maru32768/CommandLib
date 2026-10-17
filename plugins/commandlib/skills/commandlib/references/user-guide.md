@@ -316,9 +316,11 @@ class ResetCommand extends Command {
 }
 ```
 
-On Forge / NeoForge 1.18+ a permission handler cannot grant the bypass
-permission (or any node CommandLib did not register): only permission level 4
-skips the cooldown there.
+The bypass permission is registered with the command (default `OP`), so
+permission plugins can grant it on every platform. On Forge / NeoForge 1.18+ a
+node CommandLib did not register, such as one checked only with
+`ctx.getActor().hasPermission(...)`, cannot be granted: only permission level 4
+passes it there.
 
 Argument chains can also have child commands. Prefer this only for vanilla-like
 or compatibility syntax where the target comes before the action.

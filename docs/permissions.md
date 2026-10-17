@@ -81,6 +81,13 @@ The generated node is the command's path (from names, as for children) followed 
 registered, removed and exported like the other nodes of the command. Giving the option still needs the nodes of the
 route it is on.
 
+### Cooldown bypass
+
+`Cooldown.bypassPermission("myplugin.cooldown.bypass")` names an exact node, without the prefix. It is registered,
+removed and exported with the command that sets the cooldown, with the default `OP` and the kind `cooldown-bypass` in
+`permissionsJson()`. Child commands that inherit the cooldown do not list it again. Set the bypass permission before
+registering the command.
+
 ## Defaults
 
 The default decides who has the node when no permission plugin says otherwise. It is CommandLib's
@@ -158,9 +165,9 @@ permission handlers see is **`commandlib.<node>`**, for example `commandlib.mymo
 `PermissionGatherEvent.Nodes`. A registration after that event uses the node's default resolver.
 
 Forge's permission API answers only the nodes registered in that event, so a player's check of any other node, such
-as a `Cooldown.bypassPermission(...)` node or a node your code checks with `ctx.getActor().hasPermission(...)`, never
-reaches the permission handler: it passes only for players with permission level 4, and LuckPerms cannot grant it.
-On 1.16.5, Fabric, Spigot, Paper and Velocity the handler answers any node.
+as one your code checks with `ctx.getActor().hasPermission(...)`, never reaches the permission handler: it passes only
+for players with permission level 4, and LuckPerms cannot grant it. The nodes CommandLib registers, cooldown bypass
+nodes included, are not affected. On 1.16.5, Fabric, Spigot, Paper and Velocity the handler answers any node.
 
 On 1.16.5 the nodes are registered with `PermissionAPI.registerNode(node, level, "")` under their own name, without the
 `commandlib.` part, when the server has started.

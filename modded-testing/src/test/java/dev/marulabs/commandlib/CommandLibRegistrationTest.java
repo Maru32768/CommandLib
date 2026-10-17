@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
+import java.time.Duration;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -96,6 +97,31 @@ class CommandLibRegistrationTest {
         assertThat(CommandLib.hasPermission(guestSource, guest, "defaulttest.ops")).isFalse();
         assertThat(CommandLib.hasPermission(opSource, guest, "defaulttest.undeclared")).isTrue();
         assertThat(CommandLib.hasPermission(guestSource, op, "defaulttest.undeclared")).isFalse();
+    }
+
+    @Test
+    void a_cooldown_bypass_node_is_registered_with_the_command() {
+        ServerPlayer op = Mockito.mock(ServerPlayer.class);
+        Mockito.when(op.hasPermissions(4))
+               .thenReturn(true);
+        ServerPlayer guest = Mockito.mock(ServerPlayer.class);
+        CommandSourceStack opSource = Mockito.mock(CommandSourceStack.class);
+        Mockito.when(opSource.hasPermission(4))
+               .thenReturn(true);
+        CommandSourceStack guestSource = Mockito.mock(CommandSourceStack.class);
+
+        try (MockedStatic<CurrentServer> currentServer = Mockito.mockStatic(CurrentServer.class)) {
+            currentServer.when(CurrentServer::get)
+                         .thenReturn(server);
+            CommandLib.register("cooldowntest", new Command("kit") {{
+                cooldown(Cooldown.of(Duration.ofMinutes(1))
+                                 .bypassPermission("cooldowntest.kit.bypass"));
+            }});
+        }
+
+        // Judged by the node's OP default for the player, not by the source's level as an undeclared node would be.
+        assertThat(CommandLib.hasPermission(guestSource, op, "cooldowntest.kit.bypass")).isTrue();
+        assertThat(CommandLib.hasPermission(opSource, guest, "cooldowntest.kit.bypass")).isFalse();
     }
 }
 //?}
