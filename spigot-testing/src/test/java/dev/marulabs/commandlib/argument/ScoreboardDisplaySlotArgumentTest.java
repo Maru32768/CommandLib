@@ -1,9 +1,13 @@
 package dev.marulabs.commandlib.argument;
 
+import com.mojang.brigadier.arguments.ArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.suggestion.Suggestion;
 import dev.marulabs.commandlib.Command;
 import dev.marulabs.commandlib.CommandTester;
 import dev.marulabs.commandlib.FakeSender;
+import dev.marulabs.commandlib.nms.argument.MockNMSArgumentScoreboardSlot;
+import dev.marulabs.commandlib.util.nms.argument.NMSArgumentScoreboardSlot;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -28,6 +32,30 @@ class ScoreboardDisplaySlotArgumentTest {
         }
 
         assertThat(sender.getSentMessageTexts()).containsExactly("SIDEBAR", "PLAYER_LIST", "BELOW_NAME");
+    }
+
+    // The type of servers before 1.20.2, which names the slot below the name belowName.
+    public static class MockNMSArgumentScoreboardSlotBefore1202 extends MockNMSArgumentScoreboardSlot {
+        @Override
+        public ArgumentType<?> argument() {
+            return StringArgumentType.word();
+        }
+    }
+
+    @Test
+    void below_name_of_servers_before_1_20_2_is_read() {
+        FakeSender sender = FakeSender.player("Alice");
+
+        try (CommandTester tester = CommandTester.builder()
+                                                 .mockNmsClass(NMSArgumentScoreboardSlot.class,
+                                                               MockNMSArgumentScoreboardSlotBefore1202.class)
+                                                 .command(ScoreboardDisplaySlotArgumentTest::command)
+                                                 .permissionPrefix("test.command")
+                                                 .build()) {
+            tester.execute("slot belowName", sender);
+        }
+
+        assertThat(sender.getSentMessageTexts()).containsExactly("BELOW_NAME");
     }
 
     @Test

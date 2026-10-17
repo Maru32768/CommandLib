@@ -1,9 +1,12 @@
 package dev.marulabs.commandlib.argument;
 
+import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.suggestion.Suggestion;
 import dev.marulabs.commandlib.Command;
 import dev.marulabs.commandlib.CommandTester;
 import dev.marulabs.commandlib.FakeSender;
+import dev.marulabs.commandlib.nms.argument.MockNMSArgumentTime;
+import dev.marulabs.commandlib.util.nms.argument.NMSArgumentTime;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -43,6 +46,31 @@ class TimeArgumentTest {
         }
 
         assertThat(sender.getSentMessageTexts()).containsExactly("20");
+    }
+
+    // The type of servers before 1.19.4, which takes no minimum.
+    public static class MockNMSArgumentTimeWithoutMinimum extends MockNMSArgumentTime {
+        @Override
+        public ArgumentType<?> argument(int minimum) {
+            return super.argument(0);
+        }
+    }
+
+    @Test
+    void too_few_ticks_fail_where_the_type_has_no_minimum() {
+        FakeSender sender = FakeSender.player("Alice");
+
+        try (CommandTester tester = CommandTester.builder()
+                                                 .mockNmsClass(NMSArgumentTime.class,
+                                                               MockNMSArgumentTimeWithoutMinimum.class)
+                                                 .command(() -> waitCommand(new TimeArgument("ticks", 20)))
+                                                 .permissionPrefix("test.command")
+                                                 .build()) {
+            tester.execute("wait 10", sender);
+            tester.execute("wait 1s", sender);
+        }
+
+        assertThat(sender.getSentMessageTexts()).containsExactly("Tick count must not be less than 20, found 10", "20");
     }
 
     @Test
