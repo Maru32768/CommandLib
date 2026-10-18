@@ -129,6 +129,16 @@
 
 ### P6: Ecosystem と tooling
 
+- `[ ]` Context の `sendSuccessFor(...)` を廃止する方向で整理する。target 数に応じた message の組み立てを
+  汎用 Context が担う必要性を見直し、CLI 対応とも整合する責務にする。利用箇所、代替の書き方、非推奨化から削除までの
+  互換性方針を確認し、関連する docs / tests / examples を更新する。
+- `[?]` `CommonCommandContext` の可変状態と変更経路を棚卸しし、責務を分割する。解析済みの入力・引数などの読み取り用データと、
+  実行結果・失敗・出力などの実行中の状態を分離し、初期化後の変更を減らす。option 復元時の handle 差し替え、遅延解決の cache、
+  非同期実行で共有される状態を含めて検討し、既存 API への影響と段階的な移行方法を設計する。
+- `[ ]` override したメソッドの戻り値・引数に `@NotNull` / `@Nullable` などの annotation が欠けていないか全 module を点検する。
+  親の契約と各 annotation の継承・tool による解釈を確認し、必要な明示を揃える。生成ソースは generator 側で対応する。
+- `[?]` override 時の annotation 欠落・契約の不一致を検出する linter を選定・設定する。既存の Error Prone / NullAway で
+  検出できる範囲と明示 annotation を要求する規則の差を確認し、対象 annotation、例外、Gradle / CI への組み込み方を決める。
 - `[~]` documentation site を作る。MkDocs Material の設定（`mkdocs.yml`、`mkdocs build --strict` が通る）はあるが、公開（GitHub Pages 等）は
   CI / 配布方針が決まるまで保留。JitPack の javadoc URL が実際に表示されるかは未確認。
 - `[ ]` CI を整備する。typed NMS module（`nms/*`）は初回 build で BuildTools を version ごとに実行し（1 version あたり
@@ -147,6 +157,17 @@
 - `[ ]` integration test 用 mod（`integration-test/shared/modded`）にも Error Prone / NullAway を広げる。
 - `[?]` （優先度低・候補）config-driven customization。server admin が YAML 等で command 名、alias、無効化、message を
   再コンパイルなしで上書きできるようにする。需要を見て採否を決める。
+
+### 将来検討: Minecraft 外の CLI 対応
+
+- `[?]` 通常の CLI 向け module の実現性と API を設計する。`main(String[] args)` による単発実行と対話式 console を区別し、
+  token 境界・空文字・引用符、stdout / stderr、終了コード、help、補完、非同期処理の完了待ちを検討する。
+  `CommonXXXArgument` は Brigadier の入力・context に結び付いた共通実装なので、その流用や追加の抽象化を前提にしない。
+  CLI 独自の argument model を含む小さな PoC で共有可能な範囲を判断する。Minecraft 対応を優先する既存方針は維持する。
+- `[?]` 一般的な Unix / Linux の command line 定義・慣習と CommandLib の差分を調査する。POSIX の規約と GNU の拡張・慣習を
+  区別し、短縮 option の結合、`--name=value`、`--`、option と operand の順序、負数、繰り返し・複数値、subcommand、
+  help / usage、終了コード・標準入出力などを比較表にする。shell が処理する引用符・展開・pipe とライブラリの責務も分け、
+  Minecraft 内でも改善できる項目と CLI 固有の項目、互換性への影響を整理する。
 
 ## 目標
 
