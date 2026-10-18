@@ -212,7 +212,7 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
 
     /**
      * Registers {@code option} on this command and returns it typed for this command's context. Aliases added to the
-     * option afterwards are checked against the other options when the command is registered.
+     * option afterward are checked against the other options when the command is registered.
      *
      * @throws IllegalArgumentException if a long name or the short name of {@code option} is already used by
      *                                  another option of this command

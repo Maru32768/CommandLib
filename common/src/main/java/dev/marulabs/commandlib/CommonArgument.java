@@ -281,7 +281,7 @@ public abstract class CommonArgument<T, C extends CommonCommandContext<?, ?>, SE
 
     @NotNull
     final T parse(C ctx) throws ArgumentParseException {
-        T t = null;
+        T t;
         try {
             t = Objects.requireNonNull(parseImpl(ctx));
         } catch (CommandSyntaxException e) {
@@ -305,8 +305,7 @@ public abstract class CommonArgument<T, C extends CommonCommandContext<?, ?>, SE
      * argument's own node.
      */
     final T parseNode(C ctx, String nodeName) throws ArgumentParseException {
-        CommonCommandContext<?, ?> sameCtx = ctx;
-        return parseNode(ctx, sameCtx, nodeName);
+        return parseNode(ctx, (CommonCommandContext<?, ?>) ctx, nodeName);
     }
 
     // sameCtx is ctx, typed to name its source type.

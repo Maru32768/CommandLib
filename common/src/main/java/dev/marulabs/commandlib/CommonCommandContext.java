@@ -597,7 +597,7 @@ public abstract class CommonCommandContext<S, C> {
         try {
             provided = extract(provider);
         } catch (CommandPrerequisiteException e) {
-            throw CommonCommandContext.<RuntimeException>sneakyThrow(e);
+            throw CommonCommandContext.sneakyThrow(e);
         } finally {
             resolving.remove(key);
         }

@@ -39,7 +39,7 @@ public final class ArgRef<T> {
     /**
      * Returns the parsed value from the command context currently being processed on this thread.
      *
-     * @throws IllegalStateException if called outside of a command callback
+     * @throws IllegalStateException if called outside a command callback
      */
     @NotNull
     public T get() {

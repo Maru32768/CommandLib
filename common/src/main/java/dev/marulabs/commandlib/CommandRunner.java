@@ -290,7 +290,7 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
                            () -> ((CommandPrerequisiteException) e).sendMessage(ctx));
         }
         if (e instanceof CancellationException) {
-            // Someone cancelled the work on purpose, so there is nothing to report.
+            // Someone canceled the work on purpose, so there is nothing to report.
             return ctx.captureFailure(() -> {
             });
         }

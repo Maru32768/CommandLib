@@ -51,7 +51,7 @@ import java.util.stream.Collectors;
  * Brigadier context, so the context of an execution after options has only the nodes after the last option.
  * {@link #recover} parses the options and arguments before it again from the input.
  * <p>
- * The re-parse needs a command whose path is literals only, as an argument child's inherited arguments would be lost
+ * The reparse needs a command whose path is literals only, as an argument child's inherited arguments would be lost
  * too. An argument child keeps a tree without redirects, in which the paths with the same state share their child
  * nodes. The options of the command it follows can still redirect into its path, so its runner recovers the input
  * with that command's graph.
