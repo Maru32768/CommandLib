@@ -1,0 +1,24 @@
+{
+    "id":  "2026-10-19-import-review-1",
+    "created_at":  null,
+    "imported_on":  "2026-10-19",
+    "directory_date_basis":  "import date; review start date unknown",
+    "repository":  "CommandLib",
+    "base_commit":  "2c8ffd7aa17181325ba6f4759586a2bfb94e86ed",
+    "reviewed_commit":  "1b8f17dc2b10b8ab7bd8707e6aa0eb5a522b8ec5",
+    "working_tree_patch":  null,
+    "working_tree_note":  "Scope reports two excluded comment-only changes; exact review-specific patch unavailable",
+    "untracked_inputs":  [
+
+                         ],
+    "reviewers":  [
+                      {
+                          "author":  "Multiple reviewers and verifiers",
+                          "model":  "Opus, as reported; exact version unknown",
+                          "source":  "inputs/scope.md and outcome.md"
+                      }
+                  ],
+    "request_origin":  "Reconstructed description, original user request unavailable",
+    "status":  "imported-historical",
+    "provenance_manifest":  "../../archive/2026-10-19-import/manifest.json"
+}

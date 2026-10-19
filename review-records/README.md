@@ -8,7 +8,7 @@ These records also provide source material for Agent Harness evaluation cases.
 | Path | Purpose |
 |---|---|
 | `runs/<YYYY-MM-DD>-<topic>/` | Review requests, original responses, triage, evidence, and outcomes |
-| `archive/<import-id>/` | Imported originals, provenance, and integrity manifests |
+| `archive/<import-id>/` | Import provenance, path mappings, and integrity manifests |
 | `cases/` | Evaluation cases with separate agent inputs and grading evidence |
 | `templates/run/` | Template for a review run |
 
@@ -39,7 +39,10 @@ records and document any redaction separately.
 Keep imported originals byte-for-byte unchanged. Use manifests and import notes to map previous paths to archived
 paths rather than rewriting historical links. Add corrections as separate notes.
 
-An archive manifest records source paths, archive paths, byte sizes, and SHA-256 hashes. Verify an archive from the
+Imported reviews use the same `runs/` layout as other reviews. Import manifests map the original paths and import
+snapshot paths to their locations in the review runs. Surrounding implementation records belong in `inputs/`.
+
+An archive manifest records source paths, import paths, record paths, byte sizes, and SHA-256 hashes. Verify originals from the
 repository root with:
 
 ```powershell

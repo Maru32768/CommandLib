@@ -1,0 +1,26 @@
+{
+    "id":  "2026-10-18-ga-audit",
+    "created_at":  null,
+    "review_date":  "2026-10-18",
+    "timezone":  "Asia/Tokyo",
+    "imported_on":  "2026-10-19",
+    "directory_date_basis":  "review date reported in original report",
+    "repository":  "CommandLib",
+    "base_commit":  null,
+    "reviewed_commit":  "3cb2008de5751d6a16e01fc848cfba1d103333ee",
+    "working_tree_patch":  null,
+    "working_tree_note":  "Report notes existing ArgRef.java and OptionGraph.java wording changes and an untracked .claude directory; exact patch unavailable",
+    "untracked_inputs":  [
+
+                         ],
+    "reviewers":  [
+                      {
+                          "author":  "Architecture/public API audit agent",
+                          "model":  null,
+                          "source":  "reviews/agents/architecture-api.md"
+                      }
+                  ],
+    "request_origin":  "Reconstructed description, original user request unavailable",
+    "status":  "imported-historical",
+    "provenance_manifest":  "../../archive/2026-10-19-import/manifest.json"
+}

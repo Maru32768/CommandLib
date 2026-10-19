@@ -11,9 +11,9 @@
   "source_finding": "GA-01",
   "source_archive": "archive/2026-10-19-import",
   "source_records": [
-    "raw/local/review-1/ga-opus/scope.md",
-    "raw/local/review-1/ga-opus/findings.md",
-    "raw/local/review-1/ga-opus/fixes.md"
+    "runs/2026-10-19-import-review-1/inputs/scope.md",
+    "runs/2026-10-19-import-review-1/triage/findings.md",
+    "runs/2026-10-19-import-review-1/triage/fixes.md"
   ],
   "probe_commit": "444fddcfd14f48c1b5a4fd4f9dc1835a36582032",
   "fix_commit": "441e0b4303d4e491d5b61d1cb51ae91dc00042a3",

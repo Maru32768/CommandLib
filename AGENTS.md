@@ -24,6 +24,6 @@ Store both user-authored and coding-agent reviews in `review-records/runs/<YYYY-
 Read `review-records/README.md` and copy `review-records/templates/run/` when starting a review.
 Preserve the original review text and author/source; append triage, evidence, and outcomes separately.
 Record the reviewed commit/range and any uncommitted diff. Keep unresolved findings linked from the roadmap.
-Do not use `.local` or `docs/audits` for new review records. Imported originals live under
-`review-records/archive/`; never rewrite them. Harness cases belong in `review-records/cases/`,
+Do not use `.local` or `docs/audits` for new review records. Imported originals follow the same run layout;
+`review-records/archive/` holds their provenance manifests. Never rewrite original review text. Harness cases belong in `review-records/cases/`,
 with agent inputs separated from grading evidence and historical judgments marked as such.

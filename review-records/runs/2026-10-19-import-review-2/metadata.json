@@ -1,0 +1,25 @@
+{
+    "id":  "2026-10-19-import-review-2",
+    "created_at":  null,
+    "imported_on":  "2026-10-19",
+    "directory_date_basis":  "import date; review start date unknown",
+    "repository":  "CommandLib",
+    "base_commit":  "2c8ffd7aa17181325ba6f4759586a2bfb94e86ed",
+    "reviewed_commit":  "6b8986378dbd4783e7560debe0e5a62f9d42694c",
+    "subsequent_rounds_end_commit":  "3cb2008de5751d6a16e01fc848cfba1d103333ee",
+    "working_tree_patch":  "inputs/working-tree.patch",
+    "working_tree_note":  "Original backup patch retained; per-round tree states are not all captured",
+    "untracked_inputs":  [
+
+                         ],
+    "reviewers":  [
+                      {
+                          "author":  "Multiple code-review, test, ponytail-review and jev-review agents",
+                          "model":  null,
+                          "source":  "outcome.md and inputs/prompts/"
+                      }
+                  ],
+    "request_origin":  "Reconstructed description; agent preambles preserved, original user request unavailable",
+    "status":  "imported-historical",
+    "provenance_manifest":  "../../archive/2026-10-19-import/manifest.json"
+}

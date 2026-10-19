@@ -5,11 +5,11 @@ Historical finding GA-01: Forge 1.16.5 registration only adds nodes at `FMLServe
 nodes. Data pack function loading also precedes server-started registration. Registration should participate in
 `RegisterCommandsEvent` on that version.
 
-Sources under `review-records/archive/2026-10-19-import/raw/local/review-1/ga-opus/`:
+Sources under `review-records/runs/2026-10-19-import-review-1/`:
 
-- `findings.md`, GA-01: trigger and code/bytecode tracing.
-- `fixes.md`, GA-01: historical report of real-server failure before and success after the fix.
-- `raw/A5-production-velocity-modded.md` and `raw/V1-verify-platform.md`: original analysis.
+- `triage/findings.md`, GA-01: trigger and code/bytecode tracing.
+- `triage/fixes.md`, GA-01: historical report of real-server failure before and success after the fix.
+- `reviews/agents/A5-production-velocity-modded.md` and `reviews/agents/V1-verify-platform.md`: original analysis.
 
 The original report recommends P1; its verifier considered P2 defensible. Do not grade an otherwise correct finding
 as wrong solely for choosing P2 with a reason.

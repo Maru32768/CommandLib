@@ -1,27 +1,31 @@
-# 既存レビューの取り込み（2026-10-19）
+# レビュー記録の取り込み・配置変更
 
-`.local` と `docs/audits` の既存ファイルを、内容を変更せず `raw/` 以下へ移動した。
-`manifest.json` は旧パス、新しい相対パス、サイズ、SHA-256 を全ファイルについて記録する。
-取り込み時の HEAD は manifest を参照。これは各レビューの対象 revision とは異なる。
+取り込み日: 2026-10-19。取り込み時の HEAD は manifest の `import_head` を参照。
+整理前の原本一式は commit `91a74d0f` に保存した。
 
-| 元の場所 | 移動先 | 主な入口 |
+| 記録 | 配置先 | 主な入口 |
 |---|---|---|
-| `.local/review-1/` | `raw/local/review-1/` | [scope](raw/local/review-1/ga-opus/scope.md)、[summary](raw/local/review-1/ga-opus/summary.md)、[findings](raw/local/review-1/ga-opus/findings.md)、[fixes](raw/local/review-1/ga-opus/fixes.md) |
-| `.local/review-2/` | `raw/local/review-2/` | [summary](raw/local/review-2/summary.md)、[triage](raw/local/review-2/triage.md)、各 round の生レポート |
-| `.local/ga-audit-2026-10-18/` | `raw/local/ga-audit-2026-10-18/` | 再現プログラム、classpath、出力、class ファイル |
-| `.local/work-summary.md`、`parts/`、`commits.txt` | `raw/local/` 内の同名パス | 実装過程の周辺資料として保持 |
-| `docs/audits/` | `raw/docs-audits/` | [監査レポート](raw/docs-audits/ga-architecture-api-audit-2026-10-18.md)、[再現資料](raw/docs-audits/ga-audit-evidence-2026-10-18.md) |
+| `.local/review-1/ga-opus/` | `runs/2026-10-19-import-review-1/` | [対象](../../runs/2026-10-19-import-review-1/inputs/scope.md)、[指摘・判断](../../runs/2026-10-19-import-review-1/triage.md)、[結果](../../runs/2026-10-19-import-review-1/outcome.md) |
+| `.local/review-2/` | `runs/2026-10-19-import-review-2/` | [依頼の記録](../../runs/2026-10-19-import-review-2/request.md)、[判断](../../runs/2026-10-19-import-review-2/triage.md)、[結果](../../runs/2026-10-19-import-review-2/outcome.md) |
+| `docs/audits/` と `.local/ga-audit-2026-10-18/` | `runs/2026-10-18-ga-audit/` | [監査原文](../../runs/2026-10-18-ga-audit/reviews/agents/architecture-api.md)、[再現資料](../../runs/2026-10-18-ga-audit/evidence/reproduction-notes.md) |
+| `.local/work-summary.md`、`parts/`、`commits.txt` | 最初の review run の `inputs/implementation-context/` | レビューに付随する実装過程の資料 |
 
-原本内の旧 `.local/...` 参照は `raw/local/...`、旧 `docs/audits/...` 参照は `raw/docs-audits/...` に読み替える。
-それ以外の repository 相対リンクは元の位置を基準に解釈する。原文のリンクを一括置換しない。
-再現資料が `.local` へのコード展開を指示する場合は、原本と別の作業用コピーで実行する。
+日付が特定できない review-1 / review-2 は、取り込み日を run 名に使った。
+metadata の日時や model 情報は原資料で確認できる範囲だけを記録した。
+新たな request / triage / outcome の案内は原文と区別して作成し、ユーザーの依頼原文を復元したとは扱わない。
 
-過去レポートの対象・未コミット変更・モデル・実行条件の記述には未確認のものもある。
-今回行ったのはファイルの保存・整合性検証であり、指摘や検証結果を再認定したものではない。
-未決事項は特に review-2 の triage / summary と GA 監査レポートを参照する。
+`manifest.json` schema 2 は全814ファイルについて次を記録する。
 
-`raw/` と manifest は Git 管理対象として保存する。
+- `source_path`: 整理前の `.local` / `docs/audits` 内のパス。
+- `import_path`: 整理前 snapshot の archive directory を基準にしたパス。
+- `record_path`: `review-records/` を基準にした現在の run 内のパス。
+- `bytes` / `sha256`: 内容を変更していないことを確認する値。
 
-整合性は repository root から
-`powershell -NoProfile -ExecutionPolicy Bypass -File review-records/verify-archive.ps1` で再確認できる。
-`-ExecutionPolicy` はこの子プロセスだけに適用され、システムの設定は変更しない。
+原文内の相対リンクや絶対パスは当時のまま。旧パスを manifest で検索して現在の配置を辿る。
+再現時は保存原本を直接編集せず作業用コピーを使う。個々の指摘や実行結果は今回再検証していない。
+
+整合性確認:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File review-records/verify-archive.ps1
+```

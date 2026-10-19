@@ -9,22 +9,26 @@ if (-not $archiveRoot.StartsWith($archiveParent + [IO.Path]::DirectorySeparatorC
     throw 'Archive must be inside review-records/archive.'
 }
 $manifest = Get-Content -LiteralPath (Join-Path $archiveRoot 'manifest.json') -Raw -Encoding UTF8 | ConvertFrom-Json
+$recordsRoot = [IO.Path]::GetFullPath($PSScriptRoot)
+$verifiedPaths = @{}
 $totalBytes = 0L
 foreach ($entry in $manifest.entries) {
-    $path = [IO.Path]::GetFullPath((Join-Path $archiveRoot $entry.archive_path))
-    $rawRoot = Join-Path $archiveRoot 'raw'
-    if (-not $path.StartsWith($rawRoot + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)) {
-        throw ('Manifest path outside raw: ' + $entry.archive_path)
+    if ($manifest.schema_version -ne 2) { throw 'Unsupported manifest schema.' }
+    $path = [IO.Path]::GetFullPath((Join-Path $recordsRoot $entry.record_path))
+    $runsRoot = Join-Path $recordsRoot 'runs'
+    if (-not $path.StartsWith($runsRoot + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)) {
+        throw ('Manifest path outside runs: ' + $entry.record_path)
     }
+    if ($verifiedPaths.ContainsKey($path)) { throw ('Duplicate original: ' + $entry.record_path) }
+    $verifiedPaths[$path] = $true
     $file = Get-Item -LiteralPath $path
     $hash = (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash.ToLowerInvariant()
     if ($file.Length -ne $entry.bytes -or $hash -ne $entry.sha256) {
-        throw ('Archive mismatch: ' + $entry.archive_path)
+        throw ('Original mismatch: ' + $entry.record_path)
     }
     $totalBytes += $file.Length
 }
-$files = @(Get-ChildItem -LiteralPath (Join-Path $archiveRoot 'raw') -Recurse -Force -File)
-if ($files.Count -ne $manifest.file_count -or $manifest.entries.Count -ne $manifest.file_count -or $totalBytes -ne $manifest.total_bytes) {
+if ($verifiedPaths.Count -ne $manifest.file_count -or $manifest.entries.Count -ne $manifest.file_count -or $totalBytes -ne $manifest.total_bytes) {
     throw 'Archive counts or total bytes do not match the manifest.'
 }
-Write-Output ('Verified {0} files, {1} bytes.' -f $files.Count, $totalBytes)
+Write-Output ('Verified {0} original files, {1} bytes.' -f $verifiedPaths.Count, $totalBytes)
