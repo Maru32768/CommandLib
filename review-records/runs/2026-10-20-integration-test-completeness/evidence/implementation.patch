@@ -1,0 +1,734 @@
+diff --git a/docs/roadmap-history.md b/docs/roadmap-history.md
+index 0568f025..23f39b5b 100644
+--- a/docs/roadmap-history.md
++++ b/docs/roadmap-history.md
+@@ -4,6 +4,11 @@
+ 
+ ## 完了済みバックログ
+ 
++- `[x]` integration test の期待ケース ID を実行結果と独立して管理し、全76 positive shared-runner target の
++  suite / builder 登録漏れ、ケースの重複・置き換わり、失敗・skip、集計値の不整合を検出する。バージョン除外も明示した。
++  回帰テスト8件と Paper 26.3 実サーバーの97ケースで確認（2026-10-20、
++  [IT-001 対応記録](../review-records/runs/2026-10-20-integration-test-completeness/implementation.md)）。
++
+ ### P0: 方針を固定する（完了）
+ 
+ - `[x]` `docs/compatibility.md` を追加し、supported / tested / best-effort / unsupported を分ける。
+diff --git a/integration-test/README.md b/integration-test/README.md
+index c5fa2a1b..e19ffbfb 100644
+--- a/integration-test/README.md
++++ b/integration-test/README.md
+@@ -23,7 +23,8 @@ Each `minecraftIntegrationTest*` task does the following:
+ 4. Connects a fake player named `Maru32768` through MCProtocolLib.
+ 5. Lets the fixture execute its command test suite in game.
+ 6. Waits for the fixture to write a complete JUnit XML report.
+-7. Fails the Gradle test if the JUnit XML report contains failures or errors.
++7. Checks the report's case IDs against the independent [expected inventories](expected-cases/README.md), including
++   version exclusions, and fails on missing, unexpected, duplicate, failed or skipped cases or inconsistent counters.
+ 
+ The report is written under:
+ 
+diff --git a/integration-test/build.gradle.kts b/integration-test/build.gradle.kts
+index 3863252c..15f4b8b5 100644
+--- a/integration-test/build.gradle.kts
++++ b/integration-test/build.gradle.kts
+@@ -21,6 +21,8 @@ dependencies {
+ 
+ tasks.test {
+     useJUnitPlatform()
++    inputs.dir("expected-cases")
++    inputs.files(fileTree("targets") { include("*/build.gradle.kts") })
+     filter {
+         excludeTestsMatching("dev.marulabs.commandlib.integration.IntegrationTest")
+     }
+diff --git a/integration-test/src/test/java/dev/marulabs/commandlib/integration/IntegrationTest.java b/integration-test/src/test/java/dev/marulabs/commandlib/integration/IntegrationTest.java
+index ec05c83d..fca7ce8c 100644
+--- a/integration-test/src/test/java/dev/marulabs/commandlib/integration/IntegrationTest.java
++++ b/integration-test/src/test/java/dev/marulabs/commandlib/integration/IntegrationTest.java
+@@ -14,7 +14,6 @@ import org.testcontainers.containers.wait.strategy.Wait;
+ import org.testcontainers.utility.DockerImageName;
+ import org.testcontainers.utility.MountableFile;
+ import org.w3c.dom.Document;
+-import org.w3c.dom.Element;
+ import org.xml.sax.SAXException;
+ 
+ import javax.xml.parsers.DocumentBuilderFactory;
+@@ -88,6 +87,8 @@ class IntegrationTest {
+             }
+             return;
+         }
++        List<String> expectedCases = JUnitReportAssertions.expectedCases(Path.of(System.getProperty("commandlib.integrationTestDir")),
++                                                                         targetName);
+         Files.deleteIfExists(reportFile);
+ 
+         try (GenericContainer<?> container = createContainer(targetName,
+@@ -141,7 +142,7 @@ class IntegrationTest {
+                           });
+                 client.assertNotDisconnected();
+ 
+-                assertJUnitReportSucceeded(reportFile, report.get());
++                JUnitReportAssertions.assertSucceeded(reportFile, report.get(), expectedCases);
+                 // Paper builds players' command trees on an asynchronous pool, which a change of the live dispatcher
+                 // must not break; the exception is only logged there.
+                 assertThat(container.getLogs()).as("server log")
+@@ -353,19 +354,6 @@ class IntegrationTest {
+         }
+     }
+ 
+-    private static void assertJUnitReportSucceeded(Path reportFile, Document report) {
+-        Element testSuite = report.getDocumentElement();
+-        int tests = Integer.parseInt(testSuite.getAttribute("tests"));
+-        int failures = Integer.parseInt(testSuite.getAttribute("failures"));
+-        int errors = Integer.parseInt(testSuite.getAttribute("errors"));
+-
+-        assertThat(tests).isPositive();
+-        assertThat(failures).as("JUnit XML failure count in " + reportFile)
+-                            .isZero();
+-        assertThat(errors).as("JUnit XML error count in " + reportFile)
+-                          .isZero();
+-    }
+-
+     private static void assertPluginEnabled(GenericContainer<?> container) {
+         boolean failed = container.getLogs()
+                                   .lines()
+diff --git a/integration-test/src/test/java/dev/marulabs/commandlib/integration/JUnitReportAssertions.java b/integration-test/src/test/java/dev/marulabs/commandlib/integration/JUnitReportAssertions.java
+new file mode 100644
+--- /dev/null
++++ b/integration-test/src/test/java/dev/marulabs/commandlib/integration/JUnitReportAssertions.java
+@@ -0,0 +1,77 @@
++package dev.marulabs.commandlib.integration;
++
++import org.w3c.dom.Document;
++import org.w3c.dom.Element;
++import org.w3c.dom.NodeList;
++
++import java.io.IOException;
++import java.io.Reader;
++import java.nio.file.Files;
++import java.nio.file.Path;
++import java.util.ArrayList;
++import java.util.List;
++import java.util.Properties;
++
++import static org.assertj.core.api.Assertions.assertThat;
++
++final class JUnitReportAssertions {
++    private JUnitReportAssertions() {
++    }
++
++    static List<String> expectedCases(Path integrationTestDir, String target) throws IOException {
++        Path directory = integrationTestDir.resolve("expected-cases");
++        Properties targets = properties(directory.resolve("targets.properties"));
++        String profile = targets.getProperty(target);
++        assertThat(profile).as("Expected case profile for target %s", target)
++                           .isNotNull();
++        List<String> expected = new ArrayList<>(Files.readAllLines(directory.resolve(profile + ".txt")));
++        assertThat(expected).as("Expected case inventory for %s", target)
++                            .isNotEmpty()
++                            .doesNotHaveDuplicates();
++        String excluded = properties(directory.resolve("exclusions.properties")).getProperty(target);
++        if (excluded != null) {
++            assertThat(expected).as("Documented exclusion for %s", target)
++                                .contains(excluded);
++            expected.remove(excluded);
++        }
++        return expected;
++    }
++
++    private static Properties properties(Path file) throws IOException {
++        Properties properties = new Properties();
++        try (Reader reader = Files.newBufferedReader(file)) {
++            properties.load(reader);
++        }
++        return properties;
++    }
++
++    static void assertSucceeded(Path reportFile, Document report, List<String> expected) {
++        Element suite = report.getDocumentElement();
++        assertThat(suite.getTagName()).as("JUnit XML root in %s", reportFile)
++                                      .isEqualTo("testsuite");
++        assertThat(expected).as("Expected case inventory")
++                            .isNotEmpty()
++                            .doesNotHaveDuplicates();
++        NodeList cases = suite.getElementsByTagName("testcase");
++        List<String> actual = new ArrayList<>();
++        for (int i = 0; i < cases.getLength(); i++) {
++            Element testCase = (Element) cases.item(i);
++            actual.add(testCase.getAttribute("classname") + "." + testCase.getAttribute("name"));
++        }
++        assertThat(actual).as("JUnit XML case IDs in %s", reportFile)
++                          .doesNotHaveDuplicates()
++                          .containsExactlyInAnyOrderElementsOf(expected);
++        assertThat(Integer.parseInt(suite.getAttribute("tests"))).as("JUnit XML test count in %s", reportFile)
++                                                                 .isEqualTo(expected.size());
++        for (String status : List.of("failures", "errors", "skipped")) {
++            assertThat(Integer.parseInt(suite.getAttribute(status))).as("JUnit XML %s count in %s", status, reportFile)
++                                                                    .isZero();
++        }
++        // Inspect the cases too: incorrect summary counters must not hide a failed or skipped case.
++        for (String status : List.of("failure", "error", "skipped")) {
++            assertThat(suite.getElementsByTagName(status)
++                            .getLength()).as("JUnit XML %s elements in %s", status, reportFile)
++                                         .isZero();
++        }
++    }
++}
+diff --git a/integration-test/src/test/java/dev/marulabs/commandlib/integration/JUnitReportAssertionsTest.java b/integration-test/src/test/java/dev/marulabs/commandlib/integration/JUnitReportAssertionsTest.java
+new file mode 100644
+--- /dev/null
++++ b/integration-test/src/test/java/dev/marulabs/commandlib/integration/JUnitReportAssertionsTest.java
+@@ -0,0 +1,139 @@
++package dev.marulabs.commandlib.integration;
++
++import org.junit.jupiter.api.Test;
++import org.w3c.dom.Document;
++import org.w3c.dom.Element;
++
++import javax.xml.parsers.DocumentBuilderFactory;
++import java.nio.file.Files;
++import java.nio.file.Path;
++import java.util.List;
++import java.util.stream.Stream;
++
++import static org.assertj.core.api.Assertions.assertThat;
++import static org.assertj.core.api.Assertions.assertThatThrownBy;
++
++class JUnitReportAssertionsTest {
++    private static final Path REPORT = Path.of("fixture-report.xml");
++    private static final List<String> EXPECTED = List.of("ArgumentTest.booleanArgument", "OptionTest.requiredOption");
++
++    @Test
++    void complete_report_succeeds_regardless_of_order() throws Exception {
++        JUnitReportAssertions.assertSucceeded(REPORT, report(List.of(EXPECTED.get(1), EXPECTED.get(0))), EXPECTED);
++    }
++
++    @Test
++    void missing_case_fails_even_with_positive_count_and_zero_failures() throws Exception {
++        assertRejected(report(List.of(EXPECTED.get(0))), EXPECTED.get(1));
++    }
++
++    @Test
++    void missing_suite_is_reported_by_its_case_ids() throws Exception {
++        List<String> expected = JUnitReportAssertions.expectedCases(integrationTestDir(), "paper-26.3");
++        List<String> actual = expected.stream()
++                                      .filter(id -> !id.startsWith("ScenarioTest."))
++                                      .toList();
++        assertThatThrownBy(() -> JUnitReportAssertions.assertSucceeded(REPORT,
++                                                                       report(actual),
++                                                                       expected)).isInstanceOf(AssertionError.class)
++                                                                                 .hasMessageContaining("ScenarioTest.lateRegisteredCommandSurvivesReload");
++    }
++
++    @Test
++    void replacement_and_duplicate_cases_fail_even_when_count_is_unchanged() throws Exception {
++        assertRejected(report(List.of(EXPECTED.get(0), "UnexpectedTest.case")), "UnexpectedTest.case");
++        assertRejected(report(List.of(EXPECTED.get(0), EXPECTED.get(0))), "Found duplicate");
++    }
++
++    @Test
++    void incorrect_summary_count_fails() throws Exception {
++        Document report = report(EXPECTED);
++        report.getDocumentElement()
++              .setAttribute("tests", "100");
++        assertRejected(report, "test count");
++    }
++
++    @Test
++    void failed_or_skipped_cases_cannot_hide_behind_zero_summary_counters() throws Exception {
++        for (String status : List.of("failure", "error", "skipped")) {
++            Document report = report(EXPECTED);
++            report.getElementsByTagName("testcase")
++                  .item(0)
++                  .appendChild(report.createElement(status));
++            assertRejected(report, status + " elements");
++        }
++        for (String status : List.of("failures", "errors", "skipped")) {
++            Document report = report(EXPECTED);
++            report.getDocumentElement()
++                  .setAttribute(status, "1");
++            assertRejected(report, status + " count");
++        }
++    }
++
++    @Test
++    void every_positive_shared_runner_target_has_an_inventory() throws Exception {
++        try (Stream<Path> targets = Files.list(integrationTestDir().resolve("targets"))) {
++            for (Path target : targets.filter(path -> Files.isRegularFile(path.resolve("build.gradle.kts")))
++                                      .toList()) {
++                String configuration = Files.readString(target.resolve("build.gradle.kts"));
++                if (configuration.contains("commandlib.integration.expectedEnableFailure")
++                        || configuration.contains("commandlib.integration.testClass")) {
++                    continue;
++                }
++                List<String> expected = JUnitReportAssertions.expectedCases(integrationTestDir(),
++                                                                            target.getFileName()
++                                                                                  .toString());
++                JUnitReportAssertions.assertSucceeded(REPORT, report(expected), expected);
++            }
++        }
++    }
++
++    @Test
++    void version_exclusions_and_unknown_targets_are_explicit() throws Exception {
++        assertThat(JUnitReportAssertions.expectedCases(integrationTestDir(),
++                                                       "spigot-1.16.5")).doesNotContain("ArgumentTest.longArgument");
++        assertThat(JUnitReportAssertions.expectedCases(integrationTestDir(),
++                                                       "spigot-1.17.1")).contains("ArgumentTest.longArgument");
++        assertThat(JUnitReportAssertions.expectedCases(integrationTestDir(),
++                                                       "paper-1.21.7")).doesNotContain("ArgumentTest.blockPredicateArgument");
++        assertThat(JUnitReportAssertions.expectedCases(integrationTestDir(),
++                                                       "paper-1.21.8")).contains("ArgumentTest.blockPredicateArgument");
++        assertThat(JUnitReportAssertions.expectedCases(integrationTestDir(),
++                                                       "paper-1.21.1")).contains("TypedNmsTest.everyTypedNmsClassLinks",
++                                                                                 "ArgumentTest.blockPredicateArgument");
++        assertThatThrownBy(() -> JUnitReportAssertions.expectedCases(integrationTestDir(),
++                                                                     "unknown-target")).isInstanceOf(AssertionError.class)
++                                                                                       .hasMessageContaining("unknown-target");
++    }
++
++    private static Path integrationTestDir() {
++        return Path.of(System.getProperty("commandlib.integrationTestDir", "integration-test"));
++    }
++
++    private static void assertRejected(Document report, String message) {
++        assertThatThrownBy(() -> JUnitReportAssertions.assertSucceeded(REPORT,
++                                                                       report,
++                                                                       EXPECTED)).isInstanceOf(AssertionError.class)
++                                                                                 .hasMessageContaining(message);
++    }
++
++    private static Document report(List<String> ids) throws Exception {
++        Document report = DocumentBuilderFactory.newInstance()
++                                                .newDocumentBuilder()
++                                                .newDocument();
++        Element suite = report.createElement("testsuite");
++        report.appendChild(suite);
++        suite.setAttribute("tests", Integer.toString(ids.size()));
++        for (String status : List.of("failures", "errors", "skipped")) {
++            suite.setAttribute(status, "0");
++        }
++        for (String id : ids) {
++            int separator = id.lastIndexOf('.');
++            Element testCase = report.createElement("testcase");
++            testCase.setAttribute("classname", id.substring(0, separator));
++            testCase.setAttribute("name", id.substring(separator + 1));
++            suite.appendChild(testCase);
++        }
++        return report;
++    }
++}
+diff --git a/integration-test/expected-cases/exclusions.properties b/integration-test/expected-cases/exclusions.properties
+new file mode 100644
+--- /dev/null
++++ b/integration-test/expected-cases/exclusions.properties
+@@ -0,0 +1,12 @@
++# MCProtocolLib 1.16.5 cannot decode brigadier:long.
++forge-1.16.5=ArgumentTest.longArgument
++mohist-1.16.5=ArgumentTest.longArgument
++paper-1.16.5=ArgumentTest.longArgument
++spigot-1.16.5=ArgumentTest.longArgument
++# Paper's blockInWorldPredicate() was added in 1.21.8.
++paper-1.21.0=ArgumentTest.blockPredicateArgument
++paper-1.21.3=ArgumentTest.blockPredicateArgument
++paper-1.21.4=ArgumentTest.blockPredicateArgument
++paper-1.21.5=ArgumentTest.blockPredicateArgument
++paper-1.21.6=ArgumentTest.blockPredicateArgument
++paper-1.21.7=ArgumentTest.blockPredicateArgument
+diff --git a/integration-test/expected-cases/folia.txt b/integration-test/expected-cases/folia.txt
+new file mode 100644
+--- /dev/null
++++ b/integration-test/expected-cases/folia.txt
+@@ -0,0 +1,4 @@
++FoliaSmokeTest.consoleAsyncThread
++FoliaSmokeTest.playerAsyncThread
++FoliaSmokeTest.runningOnFolia
++FoliaSmokeTest.suggestion
+diff --git a/integration-test/expected-cases/modded.txt b/integration-test/expected-cases/modded.txt
+new file mode 100644
+--- /dev/null
++++ b/integration-test/expected-cases/modded.txt
+@@ -0,0 +1,72 @@
++ActorTest.commandBlockActorType
++ActorTest.consoleActorType
++ActorTest.consoleActorUnwrapsServer
++ActorTest.executeAsPlayerChangesActor
++ActorTest.executePositionedSetsLocation
++ArgumentTest.advancementArgument
++ArgumentTest.attributeArgument
++ArgumentTest.biomeArgument
++ArgumentTest.blockPositionArgument
++ArgumentTest.blockPredicateArgument
++ArgumentTest.blockStateArgument
++ArgumentTest.booleanArgument
++ArgumentTest.chatColorArgument
++ArgumentTest.componentArgument
++ArgumentTest.doubleArgument
++ArgumentTest.doubleRangeArgument
++ArgumentTest.durationArgument
++ArgumentTest.effectArgument
++ArgumentTest.enchantmentArgument
++ArgumentTest.entitiesArgument
++ArgumentTest.entityArgument
++ArgumentTest.entityTypeArgument
++ArgumentTest.enumArgument
++ArgumentTest.floatArgument
++ArgumentTest.gameModeArgument
++ArgumentTest.gameProfileArgument
++ArgumentTest.integerArgument
++ArgumentTest.integerRangeArgument
++ArgumentTest.itemPredicateArgument
++ArgumentTest.itemStackArgument
++ArgumentTest.literalArgument
++ArgumentTest.locationArgument
++ArgumentTest.longArgument
++ArgumentTest.lootTableArgument
++ArgumentTest.messageArgument
++ArgumentTest.nameableObjectArgument
++ArgumentTest.nbtCompoundArgument
++ArgumentTest.objectArgument
++ArgumentTest.objectiveArgument
++ArgumentTest.particleArgument
++ArgumentTest.playerArgument
++ArgumentTest.playersArgument
++ArgumentTest.recipeArgument
++ArgumentTest.registryArgument
++ArgumentTest.resourceLocationArgument
++ArgumentTest.scoreboardDisplaySlotArgument
++ArgumentTest.soundArgument
++ArgumentTest.stringArgument
++ArgumentTest.teamArgument
++ArgumentTest.timeArgument
++ArgumentTest.uncenteredLocationArgument
++ArgumentTest.unparsedArgument
++ArgumentTest.uuidArgument
++ArgumentTest.uuidsArgument
++ArgumentTest.worldArgument
++CommandSyntaxExceptionTest.testConvertCommandSyntaxException
++OptionalVariadicArgumentTest.optionalExtractorOmitted
++OptionalVariadicArgumentTest.optionalGiven
++OptionalVariadicArgumentTest.optionalOmitted
++OptionalVariadicArgumentTest.optionalVariadicOmitted
++OptionalVariadicArgumentTest.variadicPlayers
++OptionalVariadicArgumentTest.variadicValues
++OptionTest.argumentOption
++OptionTest.countAndRepeatableOptions
++OptionTest.flagsAndValues
++OptionTest.optionsAnywhere
++OptionTest.visibleWhenRefresh
++PermissionTest.deniedProbe
++ReloadTest.reloadProbe
++RuntimeFeatureTest.diagnostics
++RuntimeFeatureTest.executeAsyncAndMiddleware
++SuggestionTest.latestInputFromClientTabComplete
+diff --git a/integration-test/expected-cases/paper.txt b/integration-test/expected-cases/paper.txt
+new file mode 100644
+--- /dev/null
++++ b/integration-test/expected-cases/paper.txt
+@@ -0,0 +1,97 @@
++ArgumentTest.advancementArgument
++ArgumentTest.attributeArgument
++ArgumentTest.biomeArgument
++ArgumentTest.blockDataArgument
++ArgumentTest.blockPositionArgument
++ArgumentTest.blockPredicateArgument
++ArgumentTest.booleanArgument
++ArgumentTest.chatColorArgument
++ArgumentTest.chatColorArgumentReset
++ArgumentTest.componentArgument
++ArgumentTest.doubleArgument
++ArgumentTest.doubleRangeArgument
++ArgumentTest.durationArgument
++ArgumentTest.dustParticleArgument
++ArgumentTest.enchantmentArgument
++ArgumentTest.entitiesArgument
++ArgumentTest.entityArgument
++ArgumentTest.entityTypeArgument
++ArgumentTest.enumArgument
++ArgumentTest.floatArgument
++ArgumentTest.gameModeArgument
++ArgumentTest.integerArgument
++ArgumentTest.integerRangeArgument
++ArgumentTest.itemPredicateArgument
++ArgumentTest.itemStackArgument
++ArgumentTest.literalArgument
++ArgumentTest.locationArgument
++ArgumentTest.longArgument
++ArgumentTest.lootTableArgument
++ArgumentTest.messageArgument
++ArgumentTest.nameableObjectArgument
++ArgumentTest.namespacedKeyArgument
++ArgumentTest.nbtCompoundArgument
++ArgumentTest.objectArgument
++ArgumentTest.objectiveArgument
++ArgumentTest.offlinePlayerArgument
++ArgumentTest.offlinePlayersArgument
++ArgumentTest.particleArgument
++ArgumentTest.playerArgument
++ArgumentTest.playersArgument
++ArgumentTest.potionEffectArgument
++ArgumentTest.recipeArgument
++ArgumentTest.registryArgument
++ArgumentTest.scoreboardDisplaySlotArgument
++ArgumentTest.soundArgument
++ArgumentTest.stringArgument
++ArgumentTest.teamArgument
++ArgumentTest.timeArgument
++ArgumentTest.uncenteredLocationArgument
++ArgumentTest.unparsedArgument
++ArgumentTest.uuidArgument
++ArgumentTest.uuidsArgument
++ArgumentTest.worldArgument
++CommandSyntaxExceptionTest.testConvertCommandSyntaxException
++DataPackFunctionTest.functionLoadCount
++DataPackFunctionTest.functionProbe
++DataPackFunctionTest.functionTagProbe
++HelpTopicTest.build
++HelpTopicTest.helpTopicAfterReload
++HelpTopicTest.namespacedLabel
++OptionalVariadicArgumentTest.optionalExtractorOmitted
++OptionalVariadicArgumentTest.optionalGiven
++OptionalVariadicArgumentTest.optionalOmitted
++OptionalVariadicArgumentTest.optionalVariadicOmitted
++OptionalVariadicArgumentTest.variadicPlayers
++OptionalVariadicArgumentTest.variadicValues
++OptionTest.aliasAndExclusiveOptions
++OptionTest.argumentOption
++OptionTest.combinedShortFlags
++OptionTest.countAndRepeatableOptions
++OptionTest.defaultOptionValues
++OptionTest.flagAndValueOptions
++OptionTest.optionAfterArgument
++OptionTest.optionPermission
++OptionTest.optionsAnywhere
++OptionTest.requiredOption
++OptionTest.requiredOptionValue
++OptionTest.requiredOptionValueInvalid
++OptionTest.valueOptionWithoutValue
++OptionTest.visibleWhenRefresh
++RuntimeFeatureTest.diagnostics
++RuntimeFeatureTest.executeAsyncAndMiddleware
++RuntimePermissionTest.runtimePermissionDefaultCleanup
++ScenarioTest.enableRegisteredCommandIsRemovedByUnregister
++ScenarioTest.executeRunAsPlayer
++ScenarioTest.executeRunWithArgument
++ScenarioTest.executeStoreReadsResultAndFailure
++ScenarioTest.lateRegisteredCommandSurvivesReload
++ScenarioTest.reloadProbe
++ScenarioTest.runtimeRegisteredCommandIsExecutableUntilUnregistered
++ScenarioTest.unregisteringKeepsALabelTakenSince
++SuggestionTest.suggestionLatestInput
++VanillaExecutionTest.commandBlockRunsAsBlockSender
++VanillaExecutionTest.commandBlockSuccessCount
++VanillaExecutionTest.executeAsKeepsSenderAndSetsEntity
++VanillaExecutionTest.executePositionedSetsLocation
++VanillaExecutionTest.selectorsResolveFromExecutor
+diff --git a/integration-test/expected-cases/README.md b/integration-test/expected-cases/README.md
+new file mode 100644
+--- /dev/null
++++ b/integration-test/expected-cases/README.md
+@@ -0,0 +1,21 @@
++# Expected integration cases
++
++These inventories are independent of fixture registration and of the XML being checked. The shared runner requires
++exactly these `classname.name` IDs, with no duplicates, failed cases or skipped cases. A missing suite or builder call
++therefore cannot silently reduce coverage. Summary counters must also agree with the expected count.
++
++`targets.properties` assigns every positive shared-runner target to a fixture profile. Unknown targets fail until they
++receive an explicit assignment. `exclusions.properties` lists supported version exceptions: MCProtocolLib 1.16.5 cannot
++read `brigadier:long`, and the Paper fixture needs Paper 1.21.8 for `blockInWorldPredicate()`.
++The Spigot fixture on Paper 1.21.1 intentionally uses the Spigot inventory. Folia has its own smoke inventory.
++The expected-enable-failure target checks logs instead of XML; Velocity uses a separate runner without this report.
++
++When adding, removing or renaming a fixture case, review and update its profile explicitly. When adding a target,
++assign its profile and document any version exclusion. Do not regenerate these files from the report under test or
++from the actual registrations: that would accept the missing registration this check is intended to catch.
++
++Initial inventories were cross-checked against fixture sources at `2236d1e721118e69b592ccb500fe1a752baa7720`, using local
++reports as a starting point for IDs, then adding the newer Bukkit cases `ArgumentTest.chatColorArgumentReset` and
++`ScenarioTest.{lateRegisteredCommandSurvivesReload,unregisteringKeepsALabelTakenSince,enableRegisteredCommandIsRemovedByUnregister}`.
++The profiles contain 98 Spigot, 97 Paper, 72 modded and 4 Folia cases before exclusions. The regression tests check
++missing cases/suites, replacements, duplicates, inconsistent counters, failures/skips, version exclusions and target coverage.
+diff --git a/integration-test/expected-cases/spigot.txt b/integration-test/expected-cases/spigot.txt
+new file mode 100644
+--- /dev/null
++++ b/integration-test/expected-cases/spigot.txt
+@@ -0,0 +1,98 @@
++ArgumentTest.advancementArgument
++ArgumentTest.attributeArgument
++ArgumentTest.biomeArgument
++ArgumentTest.blockDataArgument
++ArgumentTest.blockPositionArgument
++ArgumentTest.blockPredicateArgument
++ArgumentTest.booleanArgument
++ArgumentTest.chatColorArgument
++ArgumentTest.chatColorArgumentReset
++ArgumentTest.componentArgument
++ArgumentTest.doubleArgument
++ArgumentTest.doubleRangeArgument
++ArgumentTest.durationArgument
++ArgumentTest.dustParticleArgument
++ArgumentTest.enchantmentArgument
++ArgumentTest.entitiesArgument
++ArgumentTest.entityArgument
++ArgumentTest.entityTypeArgument
++ArgumentTest.enumArgument
++ArgumentTest.floatArgument
++ArgumentTest.gameModeArgument
++ArgumentTest.integerArgument
++ArgumentTest.integerRangeArgument
++ArgumentTest.itemPredicateArgument
++ArgumentTest.itemStackArgument
++ArgumentTest.literalArgument
++ArgumentTest.locationArgument
++ArgumentTest.longArgument
++ArgumentTest.lootTableArgument
++ArgumentTest.messageArgument
++ArgumentTest.nameableObjectArgument
++ArgumentTest.namespacedKeyArgument
++ArgumentTest.nbtCompoundArgument
++ArgumentTest.objectArgument
++ArgumentTest.objectiveArgument
++ArgumentTest.offlinePlayerArgument
++ArgumentTest.offlinePlayersArgument
++ArgumentTest.particleArgument
++ArgumentTest.playerArgument
++ArgumentTest.playersArgument
++ArgumentTest.potionEffectArgument
++ArgumentTest.recipeArgument
++ArgumentTest.registryArgument
++ArgumentTest.scoreboardDisplaySlotArgument
++ArgumentTest.soundArgument
++ArgumentTest.stringArgument
++ArgumentTest.teamArgument
++ArgumentTest.timeArgument
++ArgumentTest.uncenteredLocationArgument
++ArgumentTest.unparsedArgument
++ArgumentTest.uuidArgument
++ArgumentTest.uuidsArgument
++ArgumentTest.worldArgument
++CommandSyntaxExceptionTest.testConvertCommandSyntaxException
++DataPackFunctionTest.functionLoadCount
++DataPackFunctionTest.functionProbe
++DataPackFunctionTest.functionTagProbe
++HelpTopicTest.build
++HelpTopicTest.helpTopicAfterReload
++HelpTopicTest.namespacedLabel
++OptionalVariadicArgumentTest.optionalExtractorOmitted
++OptionalVariadicArgumentTest.optionalGiven
++OptionalVariadicArgumentTest.optionalOmitted
++OptionalVariadicArgumentTest.optionalVariadicOmitted
++OptionalVariadicArgumentTest.variadicPlayers
++OptionalVariadicArgumentTest.variadicValues
++OptionTest.aliasAndExclusiveOptions
++OptionTest.argumentOption
++OptionTest.combinedShortFlags
++OptionTest.countAndRepeatableOptions
++OptionTest.defaultOptionValues
++OptionTest.flagAndValueOptions
++OptionTest.optionAfterArgument
++OptionTest.optionPermission
++OptionTest.optionsAnywhere
++OptionTest.requiredOption
++OptionTest.requiredOptionValue
++OptionTest.requiredOptionValueInvalid
++OptionTest.valueOptionWithoutValue
++OptionTest.visibleWhenRefresh
++RuntimeFeatureTest.diagnostics
++RuntimeFeatureTest.executeAsyncAndMiddleware
++RuntimePermissionTest.runtimePermissionDefaultCleanup
++ScenarioTest.enableRegisteredCommandIsRemovedByUnregister
++ScenarioTest.executeRunAsPlayer
++ScenarioTest.executeRunWithArgument
++ScenarioTest.executeStoreReadsResultAndFailure
++ScenarioTest.lateRegisteredCommandSurvivesReload
++ScenarioTest.reloadProbe
++ScenarioTest.runtimeRegisteredCommandIsExecutableUntilUnregistered
++ScenarioTest.unregisteringKeepsALabelTakenSince
++SuggestionTest.suggestionLatestInput
++TypedNmsTest.everyTypedNmsClassLinks
++VanillaExecutionTest.commandBlockRunsAsBlockSender
++VanillaExecutionTest.commandBlockSuccessCount
++VanillaExecutionTest.executeAsKeepsSenderAndSetsEntity
++VanillaExecutionTest.executePositionedSetsLocation
++VanillaExecutionTest.selectorsResolveFromExecutor
+diff --git a/integration-test/expected-cases/targets.properties b/integration-test/expected-cases/targets.properties
+new file mode 100644
+--- /dev/null
++++ b/integration-test/expected-cases/targets.properties
+@@ -0,0 +1,76 @@
++fabric-1.20.1=modded
++fabric-1.21.1=modded
++folia-26.3=folia
++forge-1.16.5=modded
++forge-1.18.2=modded
++forge-1.19.2=modded
++forge-1.20.1=modded
++mohist-1.16.5=spigot
++mohist-1.20.1=spigot
++neoforge-1.21.1=modded
++neoforge-1.21.4=modded
++paper-1.16.5=spigot
++paper-1.17.1=spigot
++paper-1.18=spigot
++paper-1.18.1=spigot
++paper-1.18.2=spigot
++paper-1.19=spigot
++paper-1.19.1=spigot
++paper-1.19.2=spigot
++paper-1.19.3=spigot
++paper-1.19.4=spigot
++paper-1.20=spigot
++paper-1.20.1=spigot
++paper-1.20.2=spigot
++paper-1.20.4=spigot
++paper-1.20.5=spigot
++paper-1.20.6=spigot
++paper-1.21.0=paper
++paper-1.21.1=spigot
++paper-1.21.10=paper
++paper-1.21.11=paper
++paper-1.21.3=paper
++paper-1.21.4=paper
++paper-1.21.5=paper
++paper-1.21.6=paper
++paper-1.21.7=paper
++paper-1.21.8=paper
++paper-1.21.9=paper
++paper-26.1.1=paper
++paper-26.1.2=paper
++paper-26.2=paper
++paper-26.3=paper
++spigot-1.16.5=spigot
++spigot-1.17.1=spigot
++spigot-1.18=spigot
++spigot-1.18.1=spigot
++spigot-1.18.2=spigot
++spigot-1.19=spigot
++spigot-1.19.1=spigot
++spigot-1.19.2=spigot
++spigot-1.19.3=spigot
++spigot-1.19.4=spigot
++spigot-1.20=spigot
++spigot-1.20.1=spigot
++spigot-1.20.2=spigot
++spigot-1.20.3=spigot
++spigot-1.20.4=spigot
++spigot-1.20.5=spigot
++spigot-1.20.6=spigot
++spigot-1.21=spigot
++spigot-1.21.1=spigot
++spigot-1.21.10=spigot
++spigot-1.21.11=spigot
++spigot-1.21.2=spigot
++spigot-1.21.3=spigot
++spigot-1.21.4=spigot
++spigot-1.21.5=spigot
++spigot-1.21.6=spigot
++spigot-1.21.7=spigot
++spigot-1.21.8=spigot
++spigot-1.21.9=spigot
++spigot-26.1=spigot
++spigot-26.1.1=spigot
++spigot-26.1.2=spigot
++spigot-26.2=spigot
++spigot-26.3=spigot

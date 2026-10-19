@@ -4,6 +4,11 @@
 
 ## 完了済みバックログ
 
+- `[x]` integration test の期待ケース ID を実行結果と独立して管理し、全76 positive shared-runner target の
+  suite / builder 登録漏れ、ケースの重複・置き換わり、失敗・skip、集計値の不整合を検出する。バージョン除外も明示した。
+  回帰テスト8件と Paper 26.3 実サーバーの97ケースで確認（2026-10-20、
+  [IT-001 対応記録](../review-records/runs/2026-10-20-integration-test-completeness/implementation.md)）。
+
 ### P0: 方針を固定する（完了）
 
 - `[x]` `docs/compatibility.md` を追加し、supported / tested / best-effort / unsupported を分ける。

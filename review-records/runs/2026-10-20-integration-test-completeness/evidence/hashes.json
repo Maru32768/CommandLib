@@ -1,0 +1,32 @@
+[
+    {
+        "path":  "argument-coverage-tests.xml",
+        "bytes":  1170,
+        "sha256":  "d16cb2d8b79eb1ff828cfc19050451e595286ddd7b12e4515195048bae14af57"
+    },
+    {
+        "path":  "final-regression-tests.xml",
+        "bytes":  1660,
+        "sha256":  "c29fda895d31d5e52e0d607240a600c32403a324d610d3539923038767385566"
+    },
+    {
+        "path":  "implementation.patch",
+        "bytes":  31727,
+        "sha256":  "86111d6a9ab3d7d2226bb9e7be1dade3a500d8074d036cf392cf28c442598f8e"
+    },
+    {
+        "path":  "paper-26.3-fixture.xml",
+        "bytes":  6741,
+        "sha256":  "f88fd6d9623cc6d4dce26d965ff3b6db8c537ed25943d14ecb94b4144f597cb3"
+    },
+    {
+        "path":  "paper-26.3-runner.xml",
+        "bytes":  71681,
+        "sha256":  "648884d48c3b7b96dab6d46f3414ad9d2de60975ba5a328f4fd5ff174ad6f16e"
+    },
+    {
+        "path":  "regression-tests.xml",
+        "bytes":  1660,
+        "sha256":  "dea682614792010a00e961372fb2b72358270411557620f2d65535a5dccf4767"
+    }
+]

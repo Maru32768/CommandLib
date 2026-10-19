@@ -21,6 +21,8 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+    inputs.dir("expected-cases")
+    inputs.files(fileTree("targets") { include("*/build.gradle.kts") })
     filter {
         excludeTestsMatching("dev.marulabs.commandlib.integration.IntegrationTest")
     }

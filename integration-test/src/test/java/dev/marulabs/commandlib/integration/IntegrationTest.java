@@ -14,7 +14,6 @@ import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.DockerImageName;
 import org.testcontainers.utility.MountableFile;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -88,6 +87,8 @@ class IntegrationTest {
             }
             return;
         }
+        List<String> expectedCases = JUnitReportAssertions.expectedCases(Path.of(System.getProperty("commandlib.integrationTestDir")),
+                                                                         targetName);
         Files.deleteIfExists(reportFile);
 
         try (GenericContainer<?> container = createContainer(targetName,
@@ -141,7 +142,7 @@ class IntegrationTest {
                           });
                 client.assertNotDisconnected();
 
-                assertJUnitReportSucceeded(reportFile, report.get());
+                JUnitReportAssertions.assertSucceeded(reportFile, report.get(), expectedCases);
                 // Paper builds players' command trees on an asynchronous pool, which a change of the live dispatcher
                 // must not break; the exception is only logged there.
                 assertThat(container.getLogs()).as("server log")
@@ -351,19 +352,6 @@ class IntegrationTest {
         } catch (SAXException e) {
             return null;
         }
-    }
-
-    private static void assertJUnitReportSucceeded(Path reportFile, Document report) {
-        Element testSuite = report.getDocumentElement();
-        int tests = Integer.parseInt(testSuite.getAttribute("tests"));
-        int failures = Integer.parseInt(testSuite.getAttribute("failures"));
-        int errors = Integer.parseInt(testSuite.getAttribute("errors"));
-
-        assertThat(tests).isPositive();
-        assertThat(failures).as("JUnit XML failure count in " + reportFile)
-                            .isZero();
-        assertThat(errors).as("JUnit XML error count in " + reportFile)
-                          .isZero();
     }
 
     private static void assertPluginEnabled(GenericContainer<?> container) {

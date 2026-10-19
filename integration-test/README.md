@@ -23,7 +23,8 @@ Each `minecraftIntegrationTest*` task does the following:
 4. Connects a fake player named `Maru32768` through MCProtocolLib.
 5. Lets the fixture execute its command test suite in game.
 6. Waits for the fixture to write a complete JUnit XML report.
-7. Fails the Gradle test if the JUnit XML report contains failures or errors.
+7. Checks the report's case IDs against the independent [expected inventories](expected-cases/README.md), including
+   version exclusions, and fails on missing, unexpected, duplicate, failed or skipped cases or inconsistent counters.
 
 The report is written under:
 

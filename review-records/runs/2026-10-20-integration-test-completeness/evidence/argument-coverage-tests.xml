@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.marulabs.commandlib.integration.ArgumentIntegrationCoverageTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-19T16:25:16.976Z" hostname="DESKTOP-QPTG3LN" time="0.258">
+  <properties/>
+  <testcase name="paper_public_arguments_have_integration_cases()" classname="dev.marulabs.commandlib.integration.ArgumentIntegrationCoverageTest" time="0.136"/>
+  <testcase name="velocity_public_arguments_have_integration_cases()" classname="dev.marulabs.commandlib.integration.ArgumentIntegrationCoverageTest" time="0.008"/>
+  <testcase name="modded_public_arguments_have_integration_cases()" classname="dev.marulabs.commandlib.integration.ArgumentIntegrationCoverageTest" time="0.023"/>
+  <testcase name="paper_has_every_spigot_argument()" classname="dev.marulabs.commandlib.integration.ArgumentIntegrationCoverageTest" time="0.031"/>
+  <testcase name="spigot_public_arguments_have_integration_cases()" classname="dev.marulabs.commandlib.integration.ArgumentIntegrationCoverageTest" time="0.028"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

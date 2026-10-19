@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.marulabs.commandlib.integration.JUnitReportAssertionsTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-10-19T16:25:17.238Z" hostname="DESKTOP-QPTG3LN" time="0.377">
+  <properties/>
+  <testcase name="failed_or_skipped_cases_cannot_hide_behind_zero_summary_counters()" classname="dev.marulabs.commandlib.integration.JUnitReportAssertionsTest" time="0.063"/>
+  <testcase name="incorrect_summary_count_fails()" classname="dev.marulabs.commandlib.integration.JUnitReportAssertionsTest" time="0.002"/>
+  <testcase name="complete_report_succeeds_regardless_of_order()" classname="dev.marulabs.commandlib.integration.JUnitReportAssertionsTest" time="0.001"/>
+  <testcase name="every_positive_shared_runner_target_has_an_inventory()" classname="dev.marulabs.commandlib.integration.JUnitReportAssertionsTest" time="0.27"/>
+  <testcase name="replacement_and_duplicate_cases_fail_even_when_count_is_unchanged()" classname="dev.marulabs.commandlib.integration.JUnitReportAssertionsTest" time="0.016"/>
+  <testcase name="missing_suite_is_reported_by_its_case_ids()" classname="dev.marulabs.commandlib.integration.JUnitReportAssertionsTest" time="0.008"/>
+  <testcase name="missing_case_fails_even_with_positive_count_and_zero_failures()" classname="dev.marulabs.commandlib.integration.JUnitReportAssertionsTest" time="0.003"/>
+  <testcase name="version_exclusions_and_unknown_targets_are_explicit()" classname="dev.marulabs.commandlib.integration.JUnitReportAssertionsTest" time="0.008"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

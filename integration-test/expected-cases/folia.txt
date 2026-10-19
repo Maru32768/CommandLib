@@ -1,0 +1,4 @@
+FoliaSmokeTest.consoleAsyncThread
+FoliaSmokeTest.playerAsyncThread
+FoliaSmokeTest.runningOnFolia
+FoliaSmokeTest.suggestion
