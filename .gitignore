@@ -128,7 +128,8 @@ run/
 /site/
 __pycache__/
 
-# Claude Code agent worktrees
+# Claude Code local settings and agent worktrees
+.claude/settings.local.json
 .claude/worktrees/
 
 # Local mise settings, such as API keys
