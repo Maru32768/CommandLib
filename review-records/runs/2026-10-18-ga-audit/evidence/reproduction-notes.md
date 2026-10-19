@@ -1,40 +1,73 @@
 # GA 監査の再現資料
 
-[監査レポート](ga-architecture-api-audit-2026-10-18.md)の補足。対象は同レポートに記載した作業ツリー。以下は実際に実行した監査専用プログラムと採取した出力であり、製品コードや既存テストには追加していない。
+[監査レポート](../reviews/agents/architecture-api.md)の補足。
+このファイルのリンク・実行手順は保存先の整理に合わせて更新している。
+[監査時の原文](reproduction/original-notes.md)と、当時のプログラム・出力は `reproduction/` に保存している。
+以下のコードと採取結果は当時の資料であり、この手順の更新時に再実行したものではない。
 
 ## 実行環境と再現方法
 
-Windows / PowerShell / Java 21。既存 Gradle cache を使用。各プログラムは同じ package の既存 test fixture を利用する。platform の同名 class が衝突するため、各 probe は別 JVM で実行する。Mockito の実行に必要な JVM attachment は実行環境に依存する。
+対象は commit `3cb2008de5751d6a16e01fc848cfba1d103333ee` と、監査レポートに記載された作業ツリー。
+Windows / PowerShell / Java 21 を使用する。現行 HEAD では当時の test fixture が変更されている可能性があるため、
+対象 commit を checkout した別の作業用ディレクトリで実行する。既存の文言変更の正確な patch は保存資料から特定できていない。
+platform の同名 class が衝突するため各 probe は別 JVM に分ける。Mockito の JVM attachment は実行環境に依存する。
 
-下記の各 Java コードと init script をファイル名どおり `.local/ga-audit-2026-10-18` に保存する。ディレクトリは `New-Item -ItemType Directory -Force .local/ga-audit-2026-10-18` で作成できる。Gradle cache パスは環境に合わせて変更する。依存が cache にない環境では `--offline` を外して依存を解決する必要がある。
+まずレビュー記録がある repository root で次を実行する。
+`$targetDir` は対象 commit を checkout 済みの作業用ディレクトリに置き換える。
 
 ```powershell
-.\gradlew.bat -g C:/Users/maru3/.gradle '-Pcommandlib.typedNms=false' --offline -I .local/ga-audit-2026-10-18/classpaths.init.gradle :common:test :paper-testing:test :velocity-testing:test :spigot-testing:test :common-testing:test :common:gaAuditClasspath :paper-testing:gaAuditClasspath :velocity-testing:gaAuditClasspath :spigot-testing:gaAuditClasspath
-
-$auditDir = Join-Path (Get-Location) '.local/ga-audit-2026-10-18'
-New-Item -ItemType Directory -Force "$auditDir/common-classes", "$auditDir/paper-classes", "$auditDir/velocity-classes"
-
-$cp = Get-Content -LiteralPath "$auditDir/common-classpath.txt"
-javac -proc:none -cp $cp -d "$auditDir/common-classes" "$auditDir/AuditProbe.java"
-java -cp "$auditDir/common-classes;$cp" dev.marulabs.commandlib.AuditProbe
-
-$cp = Get-Content -LiteralPath "$auditDir/paper-testing-classpath.txt"
-javac -proc:none -cp $cp -d "$auditDir/paper-classes" "$auditDir/PaperAuditProbe.java" "$auditDir/PermissionAuditProbe.java"
-java '-XX:+EnableDynamicAgentLoading' -cp "$auditDir/paper-classes;$cp" dev.marulabs.commandlib.PaperAuditProbe
-
-$spigotCp = Get-Content -LiteralPath "$auditDir/spigot-testing-classpath.txt"
-java '-XX:+EnableDynamicAgentLoading' -cp "$auditDir/paper-classes;paper/build/classes/java/main;$spigotCp" dev.marulabs.commandlib.PermissionAuditProbe
-
-$cp = Get-Content -LiteralPath "$auditDir/velocity-testing-classpath.txt"
-javac -proc:none -cp $cp -d "$auditDir/velocity-classes" "$auditDir/VelocityAuditProbe.java"
-java '-XX:+EnableDynamicAgentLoading' -cp "$auditDir/velocity-classes;$cp" dev.marulabs.commandlib.VelocityAuditProbe
+$recordDir = (Resolve-Path 'review-records/runs/2026-10-18-ga-audit').Path
+$sourceDir = Join-Path $recordDir 'evidence/reproduction'
+$auditDir = Join-Path $recordDir 'scratch/reproduction'
+$targetDir = 'C:/path/to/historical-checkout'
+if ((git -C $targetDir rev-parse HEAD) -ne '3cb2008de5751d6a16e01fc848cfba1d103333ee') {
+    throw 'Check out the recorded audit revision in the working copy first.'
+}
+New-Item -ItemType Directory -Force $auditDir | Out-Null
+Copy-Item -Path "$sourceDir/*.java" -Destination $auditDir
 ```
 
-common の採取時は上記 Gradle 出力を利用する代わりに、common 本体全 Java ソースと TestCommand / TestCommandContext / TestCommandSource / TestCommandRunner / PlatformAdapterImpl を監査用ディレクトリへ fresh compile して実行した。上の手順は同じコードを Gradle test runtime classpath で実行できるようにまとめたもの。
+下記「classpaths.init.gradle」の内容を `$auditDir/classpaths.init.gradle` に保存し、続けて実行する。
+保存済みの classpath ファイルは環境固有の記録なので流用せず、対象 checkout から生成し直す。
+`--offline` は依存が cache に揃っている場合に限って追加できる。Gradle cache を指定する場合は自分の環境のパスを使う。
 
-PermissionAuditProbe は Paper の `CommandPermissions` helper と Spigot API の実 `SimplePluginManager` を同じ JVM に載せ、Bukkit の permission registry の名前による削除を検証している。実サーバーでの plugin lifecycle 全体を再現したものではない。PaperAuditProbe / VelocityAuditProbe も既存 mock fixture を使っており、この結果を実サーバー integration の成功として扱っていない。
+```powershell
+Push-Location $targetDir
+try {
+    .\gradlew.bat '-Pcommandlib.typedNms=false' "-PgaAuditOutputDir=$auditDir" -I "$auditDir/classpaths.init.gradle" :common:test :paper-testing:test :velocity-testing:test :spigot-testing:test :common-testing:test :common:gaAuditClasspath :paper-testing:gaAuditClasspath :velocity-testing:gaAuditClasspath :spigot-testing:gaAuditClasspath
+    if ($LASTEXITCODE -ne 0) { throw 'Gradle setup failed.' }
+    New-Item -ItemType Directory -Force "$auditDir/common-classes", "$auditDir/paper-classes", "$auditDir/velocity-classes" | Out-Null
 
-終了コードのみで判定しないこと。AuditProbe は例外と StackOverflowError を意図的に捕捉し、各シナリオを継続する。判定に使う行と期待値は監査レポートの各 F 項目に記載した。出力には JVM warning、時刻、オブジェクトの identity hash、標準出力と標準エラーの順序など環境依存の部分がある。
+    $cp = Get-Content -LiteralPath "$auditDir/common-classpath.txt" -Raw
+    javac -proc:none -cp $cp -d "$auditDir/common-classes" "$auditDir/AuditProbe.java"
+    if ($LASTEXITCODE -ne 0) { throw 'Common probe compilation failed.' }
+    java -cp "$auditDir/common-classes;$cp" dev.marulabs.commandlib.AuditProbe
+
+    $cp = Get-Content -LiteralPath "$auditDir/paper-testing-classpath.txt" -Raw
+    javac -proc:none -cp $cp -d "$auditDir/paper-classes" "$auditDir/PaperAuditProbe.java" "$auditDir/PermissionAuditProbe.java"
+    if ($LASTEXITCODE -ne 0) { throw 'Paper probe compilation failed.' }
+    java '-XX:+EnableDynamicAgentLoading' -cp "$auditDir/paper-classes;$cp" dev.marulabs.commandlib.PaperAuditProbe
+
+    $spigotCp = Get-Content -LiteralPath "$auditDir/spigot-testing-classpath.txt" -Raw
+    java '-XX:+EnableDynamicAgentLoading' -cp "$auditDir/paper-classes;paper/build/classes/java/main;$spigotCp" dev.marulabs.commandlib.PermissionAuditProbe
+
+    $cp = Get-Content -LiteralPath "$auditDir/velocity-testing-classpath.txt" -Raw
+    javac -proc:none -cp $cp -d "$auditDir/velocity-classes" "$auditDir/VelocityAuditProbe.java"
+    if ($LASTEXITCODE -ne 0) { throw 'Velocity probe compilation failed.' }
+    java '-XX:+EnableDynamicAgentLoading' -cp "$auditDir/velocity-classes;$cp" dev.marulabs.commandlib.VelocityAuditProbe
+} finally {
+    Pop-Location
+}
+```
+
+生成する class / classpath は `scratch/` に置き、保存済みの原本を上書きしない。
+監査時の common の採取では、Gradle 出力を使う代わりに common 本体と既存 test fixture を fresh compile している。
+上の手順は同じ probe を Gradle test runtime classpath で動かすための案内であり、当時の実行コマンドそのものではない。
+
+PermissionAuditProbe は Paper の `CommandPermissions` helper と Spigot API の実 `SimplePluginManager` を同じ JVM に載せる。
+他の platform probe も既存 mock fixture を利用しており、実サーバー integration の成功を示すものではない。
+終了コードだけで判定しないこと。AuditProbe は例外と StackOverflowError を意図的に捕捉して継続する。
+判定する行と期待値は監査レポートの各 F 項目を参照する。出力の時刻・identity hash・JVM warning・出力順は環境に依存する。
 
 ## classpaths.init.gradle
 
@@ -44,13 +77,18 @@ allprojects {
         if (project.path in [':paper-testing', ':velocity-testing', ':common', ':spigot-testing']) {
             tasks.register('gaAuditClasspath') {
                 doLast {
-                    rootProject.file('.local/ga-audit-2026-10-18/' + project.name + '-classpath.txt').text = sourceSets.test.runtimeClasspath.asPath
+                    def outputPath = rootProject.findProperty('gaAuditOutputDir')
+                    if (!outputPath) {
+                        throw new GradleException('Set -PgaAuditOutputDir to the scratch directory')
+                    }
+                    def outputDir = new File(outputPath.toString())
+                    outputDir.mkdirs()
+                    new File(outputDir, project.name + '-classpath.txt').text = sourceSets.test.runtimeClasspath.asPath
                 }
             }
         }
     }
 }
-
 ```
 
 ## AuditProbe.java

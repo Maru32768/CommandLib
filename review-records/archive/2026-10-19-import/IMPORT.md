@@ -25,6 +25,9 @@ metadata の日時や model 情報は原資料で確認できる範囲だけを�
 削除前のファイルとmanifestは commit `d7b6d5d8` に残る。
 再現用ソース、実行ログ、対象commitなどの記録は保持している。
 
+監査の再現手順は配置変更に合わせて `evidence/reproduction-notes.md` を更新した。
+監査時の原文は `evidence/reproduction/original-notes.md` に保持し、manifest はその原文を検証する。
+
 原文内の相対リンクや絶対パスは当時のまま。旧パスを manifest で検索して現在の配置を辿る。
 再現時は保存原本を直接編集せず作業用コピーを使う。個々の指摘や実行結果は今回再検証していない。
 
