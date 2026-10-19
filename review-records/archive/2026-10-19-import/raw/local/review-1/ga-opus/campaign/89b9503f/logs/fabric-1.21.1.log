@@ -1,0 +1,276 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.5.0/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+Running Stonecutter 0.9.8
+> Task :buildSrc:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :buildSrc:compileKotlin UP-TO-DATE
+> Task :buildSrc:compileJava NO-SOURCE
+> Task :buildSrc:compileGroovy NO-SOURCE
+> Task :buildSrc:pluginDescriptors UP-TO-DATE
+> Task :buildSrc:processResources UP-TO-DATE
+> Task :buildSrc:classes UP-TO-DATE
+> Task :buildSrc:jar UP-TO-DATE
+
+> Configure project :modded
+Stonecutter branch root :modded should not be a buildable project. Remove the `base` or `java` plugin to fix the issue.
+
+> Configure project :modded-testing
+Stonecutter branch root :modded-testing should not be a buildable project. Remove the `base` or `java` plugin to fix the issue.
+
+> Configure project :modded:fabric-1.20.1
+Architectury Loom: 1.17.493
+
+> Configure project :integration-test:shared:modded-fixture
+Stonecutter branch root :integration-test:shared:modded-fixture should not be a buildable project. Remove the `base` or `java` plugin to fix the issue.
+
+> Task :integration-test:targets:fabric-1.21.1:downloadForgeInstaller UP-TO-DATE
+> Task :integration-test:targets:fabric-1.21.1:installForgeServer SKIPPED
+> Task :integration-test:targets:fabric-1.21.1:compileJava NO-SOURCE
+> Task :integration-test:shared:modded-fixture:fabric-1.21.1:stonecutterPrepare UP-TO-DATE
+> Task :integration-test:targets:fabric-1.21.1:processResources NO-SOURCE
+> Task :modded:fabric-1.21.1:stonecutterPrepare UP-TO-DATE
+> Task :integration-test:targets:fabric-1.21.1:classes UP-TO-DATE
+> Task :integration-test:shared:modded-fixture:fabric-1.21.1:stonecutterGenerate UP-TO-DATE
+> Task :integration-test:shared:core:compileJava UP-TO-DATE
+> Task :integration-test:shared:core:processResources NO-SOURCE
+> Task :integration-test:shared:core:classes UP-TO-DATE
+> Task :integration-test:shared:modded-fixture:fabric-1.21.1:processResources UP-TO-DATE
+> Task :integration-test:shared:core:jar UP-TO-DATE
+> Task :modded:fabric-1.21.1:stonecutterGenerate UP-TO-DATE
+> Task :modded:fabric-1.21.1:processResources UP-TO-DATE
+> Task :modded:fabric-1.21.1:processIncludeJars UP-TO-DATE
+> Task :integration-test:targets:fabric-1.21.1:compileTestJava UP-TO-DATE
+> Task :integration-test:targets:fabric-1.21.1:processTestResources NO-SOURCE
+> Task :integration-test:targets:fabric-1.21.1:testClasses UP-TO-DATE
+> Task :common:compileJava UP-TO-DATE
+> Task :common:processResources UP-TO-DATE
+> Task :common:classes UP-TO-DATE
+> Task :common:jar UP-TO-DATE
+> Task :modded:fabric-1.21.1:compileJava UP-TO-DATE
+> Task :modded:fabric-1.21.1:classes UP-TO-DATE
+> Task :modded:fabric-1.21.1:jar UP-TO-DATE
+> Task :modded:fabric-1.21.1:remapJar UP-TO-DATE
+> Task :integration-test:shared:modded-fixture:fabric-1.21.1:compileJava UP-TO-DATE
+> Task :integration-test:shared:modded-fixture:fabric-1.21.1:classes UP-TO-DATE
+> Task :integration-test:shared:modded-fixture:fabric-1.21.1:jar UP-TO-DATE
+> Task :integration-test:shared:modded-fixture:fabric-1.21.1:processIncludeJars UP-TO-DATE
+> Task :integration-test:shared:modded-fixture:fabric-1.21.1:remapJar UP-TO-DATE
+> Task :integration-test:shared:modded-fixture:fabric-1.21.1:testModJar UP-TO-DATE
+> Task :integration-test:targets:fabric-1.21.1:prepareTestPlugin UP-TO-DATE
+> Task :integration-test:targets:fabric-1.21.1:writeDockerServerProperties
+> Task :integration-test:targets:fabric-1.21.1:stageDockerServerDirectory
+> Task :integration-test:targets:fabric-1.21.1:buildMinecraftServerImage SKIPPED
+
+> Task :integration-test:targets:fabric-1.21.1:minecraftIntegrationTest
+
+IntegrationTest > player_join_log_detection_accepts_and_mohist_formats() STARTED
+
+IntegrationTest > player_join_log_detection_accepts_and_mohist_formats() PASSED
+
+IntegrationTest > commandlib_test_plugin_succeeds_on_target_version_with_a_real_player() STARTED
+
+IntegrationTest > commandlib_test_plugin_succeeds_on_target_version_with_a_real_player() STANDARD_ERROR
+    [Test worker] INFO org.testcontainers.DockerClientFactory - Testcontainers version: 1.21.4
+    [Test worker] INFO org.testcontainers.dockerclient.DockerClientProviderStrategy - Loaded org.testcontainers.dockerclient.NpipeSocketClientProviderStrategy from ~/.testcontainers.properties, will try it first
+    [Test worker] INFO org.testcontainers.dockerclient.DockerClientProviderStrategy - Found Docker environment with local Npipe socket (npipe:////./pipe/docker_engine)
+    [Test worker] INFO org.testcontainers.DockerClientFactory - Docker host IP address is localhost
+    [Test worker] INFO org.testcontainers.DockerClientFactory - Connected to docker: 
+      Server Version: 29.8.2
+      API Version: 1.56
+      Operating System: Docker Desktop
+      Total Memory: 7943 MB
+      Labels: 
+        com.docker.desktop.address=npipe://\\.\pipe\docker_cli
+    [Test worker] INFO org.testcontainers.images.PullPolicy - Image pull policy will be performed by: DefaultPullPolicy()
+    [Test worker] INFO org.testcontainers.utility.ImageNameSubstitutor - Image name substitution will be performed by: DefaultImageNameSubstitutor (composite of 'ConfigurationFileImageNameSubstitutor' and 'PrefixingImageNameSubstitutor')
+    [Test worker] INFO tc.testcontainers/ryuk:0.12.0 - Creating container for image: testcontainers/ryuk:0.12.0
+    [Test worker] INFO org.testcontainers.utility.RegistryAuthLocator - Credential helper/store (docker-credential-desktop) does not have credentials for https://index.docker.io/v1/
+    [Test worker] INFO tc.testcontainers/ryuk:0.12.0 - Container testcontainers/ryuk:0.12.0 is starting: 2895c2bd78e9bc2c0a36329a5de1500c419a3cef4ebc58ffa9dc8b2d5cf073af
+    [Test worker] INFO tc.testcontainers/ryuk:0.12.0 - Container testcontainers/ryuk:0.12.0 started in PT0.6538965S
+    [Test worker] INFO org.testcontainers.utility.RyukResourceReaper - Ryuk started - will monitor and terminate Testcontainers containers on JVM exit
+    [Test worker] INFO org.testcontainers.DockerClientFactory - Checking the system...
+    [Test worker] INFO org.testcontainers.DockerClientFactory - ?? Docker server version should be at least 1.6.0
+    [Test worker] INFO tc.commandlib-it-fabric-1.21.1:b3a6973dc6cfb6ab - Creating container for image: commandlib-it-fabric-1.21.1:b3a6973dc6cfb6ab
+    [Test worker] INFO tc.commandlib-it-fabric-1.21.1:b3a6973dc6cfb6ab - Container commandlib-it-fabric-1.21.1:b3a6973dc6cfb6ab is starting: f2e710a2853ed3e8237bc65ede5a8ce50ba2e1cc4e0370b00ac190049b64b316
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: Starting net.fabricmc.loader.impl.game.minecraft.BundlerClassPathCapture
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:13] [main/INFO]: Loading Minecraft 1.21.1 with Fabric Loader 0.16.14
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:13] [main/INFO]: Loading 45 mods:
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: 	- commandlibtest 1.0.0
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: 	   |-- commandlib 0.17.2
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: 	   \-- dev_marulabs_common 0.17.2
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: 	- fabric-api 0.116.17+1.21.1
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: 	   |-- fabric-api-base 0.4.42+6573ed8c19
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: 	   |-- fabric-api-lookup-api-v1 1.6.72+7b3d111d19
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: 	   |-- fabric-biome-api-v1 13.0.31+d527f9fd19
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: 	   |-- fabric-block-api-v1 1.1.0+0bc3503219
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: 	   |-- fabric-block-view-api-v2 1.0.11+ebb2264e19
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: 	   |-- fabric-blockrenderlayer-v1 1.1.52+0af3f5a719
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: 	   |-- fabric-client-tags-api-v1 1.2.0+1eb36c0719
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: 	   |-- fabric-command-api-v1 1.2.49+f71b366f19
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: 	   |-- fabric-command-api-v2 2.2.28+6ced4dd919
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: 	   |-- fabric-commands-v0 0.2.66+df3654b319
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: 	   |-- fabric-content-registries-v0 8.0.19+b559734419
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: 	   |-- fabric-convention-tags-v1 2.1.7+7f945d5b19
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: 	   |-- fabric-convention-tags-v2 2.12.0+c3656daa19
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: 	   |-- fabric-crash-report-info-v1 0.2.29+0af3f5a719
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: 	   |-- fabric-data-attachment-api-v1 1.4.7+5b36e0f719
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: 	   |-- fabric-data-generation-api-v1 20.3.0+1eb36c0719
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: 	   |-- fabric-dimensions-v1 4.0.1+65213ef819
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: 	   |-- fabric-entity-events-v1 1.8.0+2b27e0a419
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: 	   |-- fabric-events-interaction-v0 0.7.14+ba9dae0619
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: 	   |-- fabric-game-rule-api-v1 1.0.53+6ced4dd919
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: 	   |-- fabric-item-api-v1 11.3.0+467044f319
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: 	   |-- fabric-item-group-api-v1 4.1.7+def88e3a19
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: 	   |-- fabric-key-binding-api-v1 1.0.47+0af3f5a719
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: 	   |-- fabric-keybindings-v0 0.2.45+df3654b319
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: 	   |-- fabric-lifecycle-events-v1 2.6.0+0865547519
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: 	   |-- fabric-loot-api-v2 3.0.15+3f89f5a519
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: 	   |-- fabric-loot-api-v3 1.0.3+3f89f5a519
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: 	   |-- fabric-message-api-v1 6.0.14+8aaf3aca19
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: 	   |-- fabric-model-loading-api-v1 2.1.0+b4d813fc19
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: 	   |-- fabric-networking-api-v1 4.3.1+d30f6a7919
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: 	   |-- fabric-object-builder-api-v1 15.2.1+40875a9319
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: 	   |-- fabric-particles-v1 4.0.2+6573ed8c19
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: 	   |-- fabric-recipe-api-v1 5.0.16+2475392c19
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: 	   |-- fabric-registry-sync-v0 5.3.2+e3eddc2119
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: 	   |-- fabric-renderer-api-v1 3.4.1+b4d813fc19
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: 	   |-- fabric-renderer-indigo 1.7.1+c705a49c19
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: 	   |-- fabric-renderer-registries-v1 3.2.71+df3654b319
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: 	   |-- fabric-rendering-data-attachment-v1 0.3.49+73761d2e19
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: 	   |-- fabric-rendering-fluids-v1 3.1.6+1daea21519
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: 	   |-- fabric-rendering-v0 1.1.74+df3654b319
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: 	   |-- fabric-rendering-v1 5.2.1+f44c2eea19
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: 	   |-- fabric-resource-conditions-api-v1 4.3.0+8dc279b119
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: 	   |-- fabric-resource-loader-v0 1.3.1+5b5275af19
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: 	   |-- fabric-screen-api-v1 2.0.26+639b4c0719
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: 	   |-- fabric-screen-handler-api-v1 1.3.91+b559734419
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: 	   |-- fabric-sound-api-v1 1.0.23+6573ed8c19
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: 	   |-- fabric-tag-api-v1 1.3.0+1eb36c0719
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: 	   |-- fabric-transfer-api-v1 5.4.4+7b3d111d19
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: 	   \-- fabric-transitive-access-wideners-v1 6.2.0+45b9699719
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: 	- fabricloader 0.16.14
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: 	   \-- mixinextras 0.4.1
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: 	- java 21
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: 	- minecraft 1.21.1
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:14] [main/INFO]: SpongePowered MIXIN Subsystem Version=0.8.7 Source=file:/workspace/server/libraries/net/fabricmc/sponge-mixin/0.15.5+mixin.0.8.7/sponge-mixin-0.15.5+mixin.0.8.7.jar Service=Knot/Fabric Env=SERVER
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:14] [main/INFO]: Compatibility level set to JAVA_17
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:14] [main/INFO]: Compatibility level set to JAVA_21
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:14] [main/INFO]: Initializing MixinExtras via com.llamalad7.mixinextras.service.MixinExtrasServiceImpl(version=0.4.1).
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:26] [main/INFO]: Environment: Environment[sessionHost=https://sessionserver.mojang.com, servicesHost=https://api.minecraftservices.com, name=PROD]
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:28] [main/INFO]: Loaded 1290 recipes
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:28] [main/INFO]: Loaded 1399 advancements
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:29] [main/INFO]: Applied 0 biome modifications to 0 of 64 new biomes in 1.457 ms
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:29] [Server thread/INFO]: Starting minecraft server version 1.21.1
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:29] [Server thread/INFO]: Loading properties
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:29] [Server thread/INFO]: Default game type: CREATIVE
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:29] [Server thread/INFO]: Generating keypair
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:29] [Server thread/INFO]: Starting Minecraft server on *:25565
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:29] [Server thread/INFO]: Using epoll channel type
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:29] [Server thread/WARN]: **** SERVER IS RUNNING IN OFFLINE/INSECURE MODE!
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:29] [Server thread/WARN]: The server will make no attempt to authenticate usernames. Beware.
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:29] [Server thread/WARN]: While this makes the game possible to play without internet access, it also opens up the ability for hackers to connect with any username they choose.
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:29] [Server thread/WARN]: To change this, set "online-mode" to "true" in the server.properties file.
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:29] [Server thread/INFO]: Preparing level "world"
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:29] [Server thread/INFO]: Preparing start region for dimension minecraft:overworld
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:30] [Worker-Main-1/INFO]: Preparing spawn area: 0%
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:30] [Worker-Main-1/INFO]: Preparing spawn area: 0%
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:30] [Server thread/INFO]: Time elapsed: 625 ms
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:30] [Server thread/INFO]: Done (0.841s)! For help, type "help"
+    [Test worker] INFO tc.commandlib-it-fabric-1.21.1:b3a6973dc6cfb6ab - Container commandlib-it-fabric-1.21.1:b3a6973dc6cfb6ab started in PT17.5317672S
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Maru32768[/172.17.0.1:58720] logged in with entity id 1 at (4.5, -60.0, -4.5)
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Maru32768 joined the game
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Received CommandLib test run request.
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Executing CommandLib test cases.
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest advancementArgument minecraft:story/mine_stone
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest attributeArgument minecraft:generic.max_health
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest biomeArgument minecraft:plains
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest blockPositionArgument 1 2 3
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest blockPredicateArgument minecraft:stone
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest blockStateArgument minecraft:stone
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest booleanArgument true
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest chatColorArgument dark_red
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest componentArgument {"text":"hello","color":"red"}
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest doubleArgument 1.5
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest doubleRangeArgument 0.5..10
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest durationArgument 1h30m
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest effectArgument minecraft:speed
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest enchantmentArgument minecraft:sharpness
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest entitiesArgument @a
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest entityArgument Maru32768
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest entityTypeArgument minecraft:zombie
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest enumArgument second
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest floatArgument 1.5
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest gameModeArgument creative
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest gameProfileArgument Maru32768
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest integerArgument 10
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest integerRangeArgument 1..10
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest itemPredicateArgument minecraft:diamond
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest itemStackArgument minecraft:diamond
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest literalArgument second
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest locationArgument 1.25 2.5 3.75
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest uncenteredLocationArgument 1 2 3
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest longArgument 100
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest lootTableArgument minecraft:chests/simple_dungeon
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest messageArgument hello, world!
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest nbtCompoundArgument {a:true}
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest nameableObjectArgument nameable
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest objectArgument one
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest objectiveArgument test
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest particleArgument minecraft:flame
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest playerArgument Maru32768
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest playersArgument @a
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest recipeArgument minecraft:oak_planks
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest resourceLocationArgument commandlib:example/path
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest registryArgument minecraft:diamond
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest scoreboardDisplaySlotArgument sidebar
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest soundArgument minecraft:entity.pig.ambient
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest stringArgument abc
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest teamArgument test
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest timeArgument 0.5d
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest unparsedArgument a
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest uuidArgument Maru32768
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest uuidsArgument @a
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest worldArgument minecraft:overworld
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest consoleActorType
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest consoleActorUnwrapsServer
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: execute as Maru32768 run commandlibtest executeAsPlayerChangesActor
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: execute positioned 10.25 70.5 -20.75 rotated 90 45 run commandlibtest executePositionedSetsLocation
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: setblock ~ ~3 ~ minecraft:command_block{auto:1b,Command:"commandlibtest commandBlockActorType"}
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest verifySuggestionCapture
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest testConvertCommandSyntaxException true
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest flagsAndValues -n 20 -vf alex
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest countAndRepeatableOptions -vv -t a --tag b -v alex
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest argumentOption -f --player Maru32768 alex
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest optionsAnywhere -s alex -d 3 spam
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest visibleWhenRefresh rejected
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Incorrect argument for command
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: ...ndlibtest visibleWhenRefresh rejected<--[HERE]
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest visibleWhenRefreshShow
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest executeAsyncAndMiddleware
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest diagnostics
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest deniedProbe
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: summon minecraft:armor_stand ~ ~ ~ {Tags:["commandlibprobe"],NoGravity:1b}
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: execute as @e[type=minecraft:armor_stand,tag=commandlibprobe,limit=1] run commandlibtest deniedProbe
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: setblock ~ ~5 ~ minecraft:command_block{auto:1b,Command:"commandlibtest deniedProbe"}
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest optionalOmitted 1
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest optionalGiven 1 3
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest optionalExtractorOmitted
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest variadicValues x 3 1 2
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest variadicPlayers Maru32768 @p
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Dispatching test command: commandlibtest optionalVariadicOmitted
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Changed the block at 0, -57, 0
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Integer must not be more than 2, found 1
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Summoned new Armor Stand
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:31] [Server thread/INFO]: Changed the block at 0, -55, 0
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:33] [Server thread/INFO]: Reloading data packs to verify registered commands survive.
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:33] [Server thread/INFO]: Reloading!
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:34] [Server thread/INFO]: Loaded 1290 recipes
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:34] [Server thread/INFO]: Loaded 1399 advancements
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:34] [Server thread/INFO]: SUCCEEDED: 72  FAILED: 0
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:36] [Server thread/INFO]: Maru32768 lost connection: Disconnected
+    [docker-java-stream-1891236111] INFO dev.marulabs.commandlib.integration.IntegrationTest - [fabric-1.21.1] STDOUT: [00:00:36] [Server thread/INFO]: Maru32768 left the game
+
+IntegrationTest > commandlib_test_plugin_succeeds_on_target_version_with_a_real_player() PASSED
+
+BUILD SUCCESSFUL in 59s
+30 actionable tasks: 3 executed, 27 up-to-date
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.5.0/userguide/configuration_cache_enabling.html

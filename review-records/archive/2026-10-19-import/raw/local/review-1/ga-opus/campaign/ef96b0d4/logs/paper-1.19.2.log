@@ -1,0 +1,1010 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.5.0/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+Running Stonecutter 0.9.8
+> Task :buildSrc:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :buildSrc:compileKotlin UP-TO-DATE
+> Task :buildSrc:compileJava NO-SOURCE
+> Task :buildSrc:compileGroovy NO-SOURCE
+> Task :buildSrc:pluginDescriptors UP-TO-DATE
+> Task :buildSrc:processResources UP-TO-DATE
+> Task :buildSrc:classes UP-TO-DATE
+> Task :buildSrc:jar UP-TO-DATE
+
+> Configure project :modded
+Stonecutter branch root :modded should not be a buildable project. Remove the `base` or `java` plugin to fix the issue.
+
+> Configure project :modded-testing
+Stonecutter branch root :modded-testing should not be a buildable project. Remove the `base` or `java` plugin to fix the issue.
+
+> Configure project :modded:fabric-1.20.1
+Architectury Loom: 1.17.493
+
+> Configure project :integration-test:shared:modded-fixture
+Stonecutter branch root :integration-test:shared:modded-fixture should not be a buildable project. Remove the `base` or `java` plugin to fix the issue.
+
+> Task :nms:spigot-1.19.1:processResources NO-SOURCE
+> Task :nms:spigot-1.18.1:processResources NO-SOURCE
+> Task :nms:spigot-1.19.3:processResources NO-SOURCE
+> Task :nms:spigot-1.19:processResources NO-SOURCE
+> Task :nms:spigot-1.18:processResources NO-SOURCE
+> Task :nms:spigot-1.17:processResources NO-SOURCE
+> Task :nms:spigot-1.17.1:processResources NO-SOURCE
+> Task :nms:spigot-1.18.2:processResources NO-SOURCE
+> Task :nms:spigot-1.19.2:processResources NO-SOURCE
+> Task :nms:spigot-1.20.3:processResources NO-SOURCE
+> Task :nms:spigot-1.19.4:processResources NO-SOURCE
+> Task :nms:spigot-1.20.4:processResources NO-SOURCE
+> Task :nms:spigot-1.20.2:processResources NO-SOURCE
+> Task :nms:spigot-1.20.1:processResources NO-SOURCE
+> Task :nms:spigot-1.20.6:processResources NO-SOURCE
+> Task :nms:spigot-1.21.10:processResources NO-SOURCE
+> Task :nms:spigot-1.21.1:processResources NO-SOURCE
+> Task :nms:spigot-1.21.3:processResources NO-SOURCE
+> Task :nms:spigot-1.21.4:processResources NO-SOURCE
+> Task :nms:spigot-1.21.5:processResources NO-SOURCE
+> Task :nms:spigot-1.21.11:processResources NO-SOURCE
+> Task :nms:spigot-1.21.6:processResources NO-SOURCE
+> Task :nms:spigot-26.1.2:processResources NO-SOURCE
+> Task :nms:spigot-1.21.8:processResources NO-SOURCE
+> Task :integration-test:targets:paper-1.19.2:compileJava NO-SOURCE
+> Task :integration-test:targets:paper-1.19.2:processResources NO-SOURCE
+> Task :integration-test:targets:paper-1.19.2:classes UP-TO-DATE
+> Task :nms:spigot-1.16.5:installSpigot UP-TO-DATE
+> Task :nms:spigot-1.17:installSpigot UP-TO-DATE
+> Task :nms:spigot-1.16.5:processResources NO-SOURCE
+> Task :nms:spigot-1.17.1:installSpigot UP-TO-DATE
+> Task :nms:spigot-1.18:installSpigot UP-TO-DATE
+> Task :nms:spigot-1.18.1:installSpigot UP-TO-DATE
+> Task :nms:spigot-1.18.2:installSpigot UP-TO-DATE
+> Task :nms:spigot-1.19:installSpigot UP-TO-DATE
+> Task :nms:spigot-1.19.1:installSpigot UP-TO-DATE
+> Task :nms:spigot-1.19.2:installSpigot UP-TO-DATE
+> Task :nms:spigot-1.19.3:installSpigot UP-TO-DATE
+> Task :nms:spigot-1.19.4:installSpigot UP-TO-DATE
+> Task :nms:spigot-1.20.1:installSpigot UP-TO-DATE
+> Task :nms:spigot-1.20.2:installSpigot UP-TO-DATE
+> Task :nms:spigot-1.20.3:installSpigot UP-TO-DATE
+> Task :nms:spigot-1.20.4:installSpigot UP-TO-DATE
+> Task :nms:spigot-1.20.6:installSpigot UP-TO-DATE
+> Task :nms:spigot-1.21.1:installSpigot UP-TO-DATE
+> Task :nms:paper-1.21.1:paperweightUserdevSetup UP-TO-DATE
+> Task :nms:paper-1.21.1:processResources NO-SOURCE
+> Task :nms:spigot-1.21.10:installSpigot UP-TO-DATE
+> Task :nms:paper-1.20.6:paperweightUserdevSetup UP-TO-DATE
+> Task :nms:paper-1.21.1:writeSpigotPackageMapping UP-TO-DATE
+> Task :nms:paper-1.20.6:processResources NO-SOURCE
+> Task :nms:paper-1.20.6:writeSpigotPackageMapping UP-TO-DATE
+> Task :nms:spigot-1.21.11:installSpigot UP-TO-DATE
+> Task :nms:spigot-1.21.3:installSpigot UP-TO-DATE
+> Task :nms:spigot-1.21.4:installSpigot UP-TO-DATE
+> Task :nms:spigot-1.21.5:installSpigot UP-TO-DATE
+> Task :nms:spigot-1.21.6:installSpigot UP-TO-DATE
+> Task :nms:spigot-1.21.8:installSpigot UP-TO-DATE
+> Task :nms:spigot-26.1.2:installSpigot UP-TO-DATE
+> Task :common:compileJava UP-TO-DATE
+> Task :spigot:compileJava UP-TO-DATE
+> Task :nms:spigot-1.16.5:compileJava UP-TO-DATE
+> Task :nms:spigot-1.17.1:compileJava UP-TO-DATE
+> Task :nms:spigot-1.17:compileJava UP-TO-DATE
+> Task :nms:spigot-1.16.5:classes UP-TO-DATE
+> Task :nms:spigot-1.17:classes UP-TO-DATE
+> Task :nms:spigot-1.17.1:classes UP-TO-DATE
+> Task :nms:spigot-1.17.1:jar UP-TO-DATE
+> Task :nms:spigot-1.16.5:jar UP-TO-DATE
+> Task :nms:spigot-1.17:jar UP-TO-DATE
+> Task :nms:spigot-1.18:compileJava UP-TO-DATE
+> Task :nms:spigot-1.18:classes UP-TO-DATE
+> Task :nms:spigot-1.17.1:remapMojangToObf UP-TO-DATE
+> Task :nms:spigot-1.19.1:compileJava UP-TO-DATE
+> Task :nms:spigot-1.19.1:classes UP-TO-DATE
+> Task :nms:spigot-1.18.1:compileJava UP-TO-DATE
+> Task :nms:spigot-1.18.2:compileJava UP-TO-DATE
+> Task :nms:spigot-1.18.1:classes UP-TO-DATE
+> Task :nms:spigot-1.18.2:classes UP-TO-DATE
+> Task :nms:spigot-1.17.1:remapObfToSpigot UP-TO-DATE
+> Task :nms:spigot-1.18:jar UP-TO-DATE
+> Task :nms:spigot-1.17:remapMojangToObf UP-TO-DATE
+> Task :nms:spigot-1.19.2:compileJava UP-TO-DATE
+> Task :nms:spigot-1.19.2:classes UP-TO-DATE
+> Task :nms:spigot-1.19.1:jar UP-TO-DATE
+> Task :nms:spigot-1.19:compileJava UP-TO-DATE
+> Task :nms:spigot-1.19:classes UP-TO-DATE
+> Task :nms:spigot-1.18.1:jar UP-TO-DATE
+> Task :nms:spigot-1.18:remapMojangToObf UP-TO-DATE
+> Task :nms:spigot-1.17:remapObfToSpigot UP-TO-DATE
+> Task :nms:spigot-1.17.1:remapSpigotMembers UP-TO-DATE
+> Task :nms:spigot-1.18.2:jar UP-TO-DATE
+> Task :nms:spigot-1.19.2:jar UP-TO-DATE
+> Task :nms:spigot-1.19.1:remapMojangToObf UP-TO-DATE
+> Task :nms:spigot-1.19:jar UP-TO-DATE
+> Task :nms:spigot-1.18.1:remapMojangToObf UP-TO-DATE
+> Task :nms:spigot-1.18:remapObfToSpigot UP-TO-DATE
+> Task :nms:spigot-1.19.1:remapObfToSpigot UP-TO-DATE
+> Task :nms:spigot-1.19.2:remapMojangToObf UP-TO-DATE
+> Task :nms:spigot-1.17:remapSpigotMembers UP-TO-DATE
+> Task :nms:spigot-1.19:remapMojangToObf UP-TO-DATE
+> Task :nms:spigot-1.18.1:remapObfToSpigot UP-TO-DATE
+> Task :nms:paper-1.21.1:compileJava UP-TO-DATE
+> Task :nms:paper-1.20.6:compileJava UP-TO-DATE
+> Task :nms:spigot-1.19.2:remapObfToSpigot UP-TO-DATE
+> Task :nms:paper-1.20.6:classes UP-TO-DATE
+> Task :nms:paper-1.21.1:classes UP-TO-DATE
+> Task :nms:spigot-1.19:remapObfToSpigot UP-TO-DATE
+> Task :nms:paper-1.21.1:jar UP-TO-DATE
+> Task :nms:spigot-1.18.2:remapMojangToObf UP-TO-DATE
+> Task :nms:spigot-1.18.2:remapObfToSpigot UP-TO-DATE
+> Task :nms:paper-1.21.1:reobfJar UP-TO-DATE
+> Task :nms:paper-1.21.1:relocateReobfJar UP-TO-DATE
+> Task :nms:paper-1.20.6:jar UP-TO-DATE
+> Task :nms:paper-1.20.6:reobfJar UP-TO-DATE
+> Task :nms:paper-1.20.6:relocateReobfJar UP-TO-DATE
+> Task :nms:spigot-1.19.4:compileJava UP-TO-DATE
+> Task :nms:spigot-1.19.3:compileJava UP-TO-DATE
+> Task :nms:spigot-1.19.4:classes UP-TO-DATE
+> Task :nms:spigot-1.19.3:classes UP-TO-DATE
+> Task :nms:spigot-1.20.1:compileJava UP-TO-DATE
+> Task :nms:spigot-1.20.1:classes UP-TO-DATE
+> Task :nms:spigot-1.19.3:jar UP-TO-DATE
+> Task :nms:spigot-1.20.1:jar UP-TO-DATE
+> Task :nms:spigot-1.19.4:jar UP-TO-DATE
+> Task :nms:spigot-1.19.3:remapMojangToObf UP-TO-DATE
+> Task :nms:spigot-1.20.1:remapMojangToObf UP-TO-DATE
+> Task :nms:spigot-1.19.4:remapMojangToObf UP-TO-DATE
+> Task :nms:spigot-1.19.3:remapObfToSpigot UP-TO-DATE
+> Task :nms:spigot-1.20.1:remapObfToSpigot UP-TO-DATE
+> Task :nms:spigot-1.19.4:remapObfToSpigot UP-TO-DATE
+> Task :nms:spigot-1.20.6:compileJava UP-TO-DATE
+> Task :nms:spigot-1.20.4:compileJava UP-TO-DATE
+> Task :nms:spigot-1.20.6:classes UP-TO-DATE
+> Task :nms:spigot-1.20.4:classes UP-TO-DATE
+> Task :nms:spigot-1.20.2:compileJava UP-TO-DATE
+> Task :nms:spigot-1.20.3:compileJava UP-TO-DATE
+> Task :nms:spigot-1.20.3:classes UP-TO-DATE
+> Task :nms:spigot-1.20.6:jar UP-TO-DATE
+> Task :nms:spigot-1.20.2:classes UP-TO-DATE
+> Task :nms:spigot-1.20.4:jar UP-TO-DATE
+> Task :nms:spigot-1.20.6:remapMojangToObf UP-TO-DATE
+> Task :nms:spigot-1.20.2:jar UP-TO-DATE
+> Task :nms:spigot-1.20.3:jar UP-TO-DATE
+> Task :nms:spigot-1.20.6:remapObfToSpigot UP-TO-DATE
+> Task :nms:spigot-1.20.4:remapMojangToObf UP-TO-DATE
+> Task :nms:spigot-1.20.2:remapMojangToObf UP-TO-DATE
+> Task :nms:spigot-1.21.1:compileJava UP-TO-DATE
+> Task :nms:spigot-1.21.3:compileJava UP-TO-DATE
+> Task :nms:spigot-1.21.1:classes UP-TO-DATE
+> Task :nms:spigot-1.21.3:classes UP-TO-DATE
+> Task :nms:spigot-1.20.2:remapObfToSpigot UP-TO-DATE
+> Task :nms:spigot-1.20.4:remapObfToSpigot UP-TO-DATE
+> Task :nms:spigot-1.21.1:jar UP-TO-DATE
+> Task :nms:spigot-1.20.3:remapMojangToObf UP-TO-DATE
+> Task :nms:spigot-1.21.1:remapMojangToObf UP-TO-DATE
+> Task :nms:spigot-1.21.3:jar UP-TO-DATE
+> Task :nms:spigot-1.20.3:remapObfToSpigot UP-TO-DATE
+> Task :nms:spigot-1.21.1:remapObfToSpigot UP-TO-DATE
+> Task :nms:spigot-1.21.3:remapMojangToObf UP-TO-DATE
+> Task :nms:spigot-1.21.3:remapObfToSpigot UP-TO-DATE
+> Task :nms:spigot-1.21.11:compileJava UP-TO-DATE
+> Task :nms:spigot-1.21.11:classes UP-TO-DATE
+> Task :nms:spigot-1.21.11:jar UP-TO-DATE
+> Task :nms:spigot-1.21.5:compileJava UP-TO-DATE
+> Task :nms:spigot-1.21.5:classes UP-TO-DATE
+> Task :nms:spigot-1.21.4:compileJava UP-TO-DATE
+> Task :nms:spigot-1.21.4:classes UP-TO-DATE
+> Task :nms:spigot-1.21.5:jar UP-TO-DATE
+> Task :nms:spigot-1.21.11:remapMojangToObf UP-TO-DATE
+> Task :nms:spigot-1.21.6:compileJava UP-TO-DATE
+> Task :nms:spigot-1.21.6:classes UP-TO-DATE
+> Task :nms:spigot-1.21.4:jar UP-TO-DATE
+> Task :nms:spigot-1.21.5:remapMojangToObf UP-TO-DATE
+> Task :nms:spigot-1.21.10:compileJava UP-TO-DATE
+> Task :nms:spigot-1.21.10:classes UP-TO-DATE
+> Task :nms:spigot-1.21.6:jar UP-TO-DATE
+> Task :nms:spigot-1.21.8:compileJava UP-TO-DATE
+> Task :nms:spigot-1.21.4:remapMojangToObf UP-TO-DATE
+> Task :nms:spigot-1.21.6:remapMojangToObf UP-TO-DATE
+> Task :nms:spigot-1.21.5:remapObfToSpigot UP-TO-DATE
+> Task :nms:spigot-1.21.8:classes UP-TO-DATE
+> Task :nms:spigot-1.21.10:jar UP-TO-DATE
+> Task :nms:spigot-1.21.11:remapObfToSpigot UP-TO-DATE
+> Task :nms:spigot-1.21.6:remapObfToSpigot UP-TO-DATE
+> Task :nms:spigot-1.21.4:remapObfToSpigot UP-TO-DATE
+> Task :nms:spigot-1.21.8:jar UP-TO-DATE
+> Task :nms:spigot-1.21.10:remapMojangToObf UP-TO-DATE
+> Task :nms:spigot-1.21.8:remapMojangToObf UP-TO-DATE
+> Task :nms:spigot-1.21.10:remapObfToSpigot UP-TO-DATE
+> Task :nms:spigot-1.21.8:remapObfToSpigot UP-TO-DATE
+> Task :nms:spigot-26.1.2:compileJava UP-TO-DATE
+> Task :nms:spigot-26.1.2:classes UP-TO-DATE
+> Task :nms:spigot-26.1.2:jar UP-TO-DATE
+> Task :spigot:collectTypedNms UP-TO-DATE
+> Task :integration-test:targets:paper-1.19.2:compileTestJava
+
+> Task :integration-test:targets:paper-1.19.2:prepareTestPlugin
+Note: Some input files use or override a deprecated API.
+
+> Task :compileJava
+Note: Recompile with -Xlint:deprecation for details.
+Note: Some input files use unchecked or unsafe operations.
+Note: Recompile with -Xlint:unchecked for details.
+
+> Task :processResources
+> Task :classes
+> Task :jar
+> Task :shadowJar
+> Task :assemble
+> Task :compileTestJava NO-SOURCE
+> Task :processTestResources NO-SOURCE
+> Task :testClasses UP-TO-DATE
+> Task :test NO-SOURCE
+> Task :check UP-TO-DATE
+> Task :build
+> Task :copyToServer
+> Task :downloadPluginJars
+> Task :buildAndCopy
+> Task :downloadServerJar
+
+[Incubating] Problems report is available at: file:///C:/Users/maru3/IdeaProjects/CommandLib_2/integration-test/targets/paper-1.19.2/test-plugin/build/reports/problems/problems-report.html
+
+BUILD SUCCESSFUL in 10s
+7 actionable tasks: 7 executed
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.4.1/userguide/configuration_cache_enabling.html
+
+> Task :integration-test:targets:paper-1.19.2:writeDockerServerProperties
+> Task :integration-test:targets:paper-1.19.2:stageDockerServerDirectory
+
+> Task :integration-test:targets:paper-1.19.2:buildMinecraftServerImage
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 144B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/eclipse-temurin:17-jre
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [1/4] FROM docker.io/library/eclipse-temurin:17-jre
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 39.84MB 1.7s done
+#5 DONE 1.8s
+
+#6 [2/4] WORKDIR /workspace/server
+#6 CACHED
+
+#7 [3/4] COPY . /workspace/server
+#7 DONE 0.2s
+
+#8 [4/4] RUN sh commandlib-warmup.sh
+#8 DONE 16.4s
+
+#9 exporting to image
+#9 exporting layers
+#9 exporting layers 0.6s done
+#9 writing image sha256:191f9cf963384820de0d48b2cd9210558a2df7fbf88cdce68f7a7f41d53cede8 done
+#9 naming to docker.io/library/commandlib-it-paper-1.19.2:5fb8201c5d9c7fdd 0.0s done
+#9 DONE 0.6s
+
+> Task :integration-test:targets:paper-1.19.2:processTestResources NO-SOURCE
+> Task :integration-test:targets:paper-1.19.2:testClasses
+
+> Task :integration-test:targets:paper-1.19.2:minecraftIntegrationTest
+
+IntegrationTest > player_join_log_detection_accepts_and_mohist_formats() STARTED
+
+IntegrationTest > player_join_log_detection_accepts_and_mohist_formats() PASSED
+
+IntegrationTest > commandlib_test_plugin_succeeds_on_target_version_with_a_real_player() STARTED
+
+IntegrationTest > commandlib_test_plugin_succeeds_on_target_version_with_a_real_player() STANDARD_ERROR
+    [Test worker] INFO org.testcontainers.DockerClientFactory - Testcontainers version: 1.21.4
+    [Test worker] INFO org.testcontainers.dockerclient.DockerClientProviderStrategy - Loaded org.testcontainers.dockerclient.NpipeSocketClientProviderStrategy from ~/.testcontainers.properties, will try it first
+    [Test worker] INFO org.testcontainers.dockerclient.DockerClientProviderStrategy - Found Docker environment with local Npipe socket (npipe:////./pipe/docker_engine)
+    [Test worker] INFO org.testcontainers.DockerClientFactory - Docker host IP address is localhost
+    [Test worker] INFO org.testcontainers.DockerClientFactory - Connected to docker: 
+      Server Version: 29.8.2
+      API Version: 1.56
+      Operating System: Docker Desktop
+      Total Memory: 7943 MB
+      Labels: 
+        com.docker.desktop.address=npipe://\\.\pipe\docker_cli
+    [Test worker] INFO org.testcontainers.images.PullPolicy - Image pull policy will be performed by: DefaultPullPolicy()
+    [Test worker] INFO org.testcontainers.utility.ImageNameSubstitutor - Image name substitution will be performed by: DefaultImageNameSubstitutor (composite of 'ConfigurationFileImageNameSubstitutor' and 'PrefixingImageNameSubstitutor')
+    [Test worker] INFO tc.testcontainers/ryuk:0.12.0 - Creating container for image: testcontainers/ryuk:0.12.0
+    [Test worker] INFO org.testcontainers.utility.RegistryAuthLocator - Credential helper/store (docker-credential-desktop) does not have credentials for https://index.docker.io/v1/
+    [Test worker] INFO tc.testcontainers/ryuk:0.12.0 - Container testcontainers/ryuk:0.12.0 is starting: 8b5d3f48fff40559fe27d8efdaaf396ed13b79f0867873a6e04c63bab4967e7f
+    [Test worker] INFO tc.testcontainers/ryuk:0.12.0 - Container testcontainers/ryuk:0.12.0 started in PT0.664758S
+    [Test worker] INFO org.testcontainers.utility.RyukResourceReaper - Ryuk started - will monitor and terminate Testcontainers containers on JVM exit
+    [Test worker] INFO org.testcontainers.DockerClientFactory - Checking the system...
+    [Test worker] INFO org.testcontainers.DockerClientFactory - ?? Docker server version should be at least 1.6.0
+    [Test worker] INFO tc.commandlib-it-paper-1.19.2:5fb8201c5d9c7fdd - Creating container for image: commandlib-it-paper-1.19.2:5fb8201c5d9c7fdd
+    [Test worker] INFO tc.commandlib-it-paper-1.19.2:5fb8201c5d9c7fdd - Container commandlib-it-paper-1.19.2:5fb8201c5d9c7fdd is starting: 730dafc7a2608ec9ec7f95c50f3a801188af46f92f7257d83556f84302ac2574
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: Starting org.bukkit.craftbukkit.Main
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDERR: *** Warning, you've not updated in a while! ***
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDERR: *** Please download a new build as per instructions from https://papermc.io/downloads ***
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: System Info: Java 17 (OpenJDK 64-Bit Server VM 17.0.18+8) Host: Linux 6.18.54.1-microsoft-standard-WSL2 (amd64)
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: Loading libraries, please wait...
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: 2026-10-16 18:30:51,981 ServerMain WARN Advanced terminal features are not available in this environment
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:30:55 INFO]: Building unoptimized datafixer
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:30:58 INFO]: Environment: authHost='https://authserver.mojang.com', accountsHost='https://api.mojang.com', sessionHost='https://sessionserver.mojang.com', servicesHost='https://api.minecraftservices.com', name='PROD'
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:00 INFO]: Loaded 7 recipes
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:02 INFO]: Starting minecraft server version 1.19.2
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:02 WARN]: ****************************
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:02 WARN]: YOU ARE RUNNING THIS SERVER AS AN ADMINISTRATIVE OR ROOT USER. THIS IS NOT ADVISED.
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:02 WARN]: YOU ARE OPENING YOURSELF UP TO POTENTIAL RISKS WHEN DOING THIS.
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:02 WARN]: FOR MORE INFORMATION, SEE https://madelinemiller.dev/blog/root-minecraft-server/
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:02 WARN]: ****************************
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:02 INFO]: Loading properties
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:02 INFO]: This server is running Paper version git-Paper-307 (MC: 1.19.2) (Implementing API version 1.19.2-R0.1-SNAPSHOT) (Git: 476ef25)
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:02 INFO]: Server Ping Player Sample Count: 12
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:02 INFO]: Using 4 threads for Netty based IO
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:02 INFO]: [ChunkTaskScheduler] Chunk system is using 1 I/O threads, 1 worker threads, and gen parallelism of 1 threads
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:02 INFO]: Default game type: CREATIVE
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:02 INFO]: Generating keypair
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:03 INFO]: Starting Minecraft server on *:25565
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:03 INFO]: Using epoll channel type
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:03 INFO]: Paper: Using libdeflate (Linux x86_64) compression from Velocity.
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:03 INFO]: Paper: Using OpenSSL 3.0.x (Linux x86_64) cipher from Velocity.
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:03 INFO]: [TestPlugin_1.19.2] Loading TestPlugin_1.19.2 v1.0.0
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:03 INFO]: [PlugManX] Loading PlugManX v2.3.3
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:03 INFO]: [AutoReloader] Loading AutoReloader v1.1.0
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:03 INFO]: Server permissions file permissions.yml is empty, ignoring it
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:03 INFO]: [PlugManX] Enabling PlugManX v2.3.3
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:03 WARN]: **** SERVER IS RUNNING IN OFFLINE/INSECURE MODE!
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:03 WARN]: The server will make no attempt to authenticate usernames. Beware.
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:03 WARN]: While this makes the game possible to play without internet access, it also opens up the ability for hackers to connect with any username they choose.
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:03 WARN]: To change this, set "online-mode" to "true" in the server.properties file.
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:03 INFO]: Preparing level "world"
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:03 INFO]: Preparing start region for dimension minecraft:overworld
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:03 INFO]: Time elapsed: 66 ms
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:03 INFO]: [TestPlugin_1.19.2] Enabling TestPlugin_1.19.2 v1.0.0
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:04 INFO]: [AutoReloader] Enabling AutoReloader v1.1.0
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:05 INFO]: Running delayed init tasks
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:05 INFO]: Done (2.782s)! For help, type "help"
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:05 INFO]: Timings Reset
+    [Test worker] INFO tc.commandlib-it-paper-1.19.2:5fb8201c5d9c7fdd - Container commandlib-it-paper-1.19.2:5fb8201c5d9c7fdd started in PT13.9746545S
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:05 INFO]: UUID of player Maru32768 is 1b13440a-c070-33ad-9860-42cb2c56963f
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:06 INFO]: Maru32768 joined the game
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:06 INFO]: Maru32768[/172.17.0.1:33880] logged in with entity id 1 at ([world]-4.5, -60.0, 7.5)
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:06 INFO]: Maru32768 issued server command: /commandlibtest runTests
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:06 INFO]: [TestPlugin_1.19.2] Received CommandLib test run request.
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:06 INFO]: [TestPlugin_1.19.2] Executing CommandLib test cases.
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:06 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest advancementArgument minecraft:story/mine_stone
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:06 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest attributeArgument generic.max_health
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:06 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest blockDataArgument minecraft:stone
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:06 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest blockPositionArgument 1 2 3
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:06 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest blockPredicateArgument minecraft:stone
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:06 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest biomeArgument plains
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:06 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest booleanArgument true
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:06 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest chatColorArgument dark_red
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:06 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest componentArgument {"text":"hello","color":"red"}
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:06 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest doubleArgument 1.0
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:06 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest doubleRangeArgument 0.5..10
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:06 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest durationArgument 1h30m
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:06 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest enchantmentArgument minecraft:flame
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:06 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest entitiesArgument @r
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:06 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest entityArgument @r
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:06 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest entityTypeArgument minecraft:zombie
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:06 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest enumArgument air
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:06 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest floatArgument 1.0
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:06 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest gameModeArgument creative
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:06 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest integerArgument 1
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:06 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest integerRangeArgument 1..10
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:06 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest itemPredicateArgument minecraft:diamond
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:06 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest itemStackArgument minecraft:dirt
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:06 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest literalArgument a
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:06 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest locationArgument 0 0 0
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:06 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest uncenteredLocationArgument 1 2 3
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:06 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest lootTableArgument minecraft:chests/simple_dungeon
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest messageArgument hello, world!
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest nbtCompoundArgument {a:true}
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest longArgument 1
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest namespacedKeyArgument commandlib:example/path
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest nameableObjectArgument a
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest objectArgument a
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest offlinePlayerArgument Maru32768
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest offlinePlayersArgument Maru32768
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest objectiveArgument commandlib_it
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest particleArgument minecraft:flame
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest dustParticleArgument minecraft:dust 1 0 0 1
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest playerArgument Maru32768
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest playersArgument Maru32768
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest potionEffectArgument minecraft:speed
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest recipeArgument minecraft:stick
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest registryArgument minecraft:zombie
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest scoreboardDisplaySlotArgument sidebar
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest soundArgument minecraft:block.anvil.land
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest stringArgument a
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest teamArgument test
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest timeArgument 0.5d
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest unparsedArgument a
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest uuidArgument 00000000-0000-0000-0000-000000000001
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest uuidsArgument 00000000-0000-0000-0000-000000000002
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest worldArgument minecraft:overworld
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest flagAndValueOptions -f -n 20 --format json alex
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest defaultOptionValues alex
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest combinedShortFlags -fv alex
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest requiredOption -f -r cleanup alex
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest requiredOptionValue -n 20 -m parallel alex
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest requiredOptionValueInvalid -m normal -n 20 rejected
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: --limit requires --mode to be parallel.
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest requiredOptionValueInvalid -m parallel -n 20 control
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest valueOptionWithoutValue --format
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: Unknown or incomplete command, see below for error
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: ...e --format<--[HERE]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest valueOptionWithoutValue --format json control
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest optionAfterArgument rejected -f
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: Incorrect argument for command
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: ... rejected -f<--[HERE]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest optionAfterArgument -f control
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest countAndRepeatableOptions -vv -t a --tag b -v alex
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest argumentOption -f --player Maru32768 alex
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest optionsAnywhere -s alex -d 3 spam
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest aliasAndExclusiveOptions -q -l rejected
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: Incorrect argument for command
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: ...ons -q -l rejected<--[HERE]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest aliasAndExclusiveOptions --silent control
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest optionPermission --admin alex
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest visibleWhenRefresh rejected
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: Incorrect argument for command
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: ...ndlibtest visibleWhenRefresh rejected<--[HERE]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest visibleWhenRefreshShow
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest visibleWhenRefresh control
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest testConvertCommandSyntaxException true
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: Integer must not be more than 2, found 1
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest runtimePermissionDefaultCleanup
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest verifySuggestionCapture
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: execute as Maru32768 run commandlibtest executeRunAsPlayer
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: execute as Maru32768 run commandlibtest executeRunWithArgument hello
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: scoreboard objectives add commandlibstore dummy
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: Created new objective [commandlibstore]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: scoreboard players set #success commandlibstore 7
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: Set [commandlibstore] for #success to 7
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: execute store result score #result commandlibstore run commandlibtest executeStoreReadsResultAndFailureResult
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: stored
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: execute store success score #success commandlibstore run commandlibtest executeStoreReadsResultAndFailureFailure
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: failure probe
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest executeStoreReadsResultAndFailure
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest runtimeRegisteredCommandIsExecutableUntilUnregisteredRegister
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: runtimeexec
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: testplugin_1.19.2:runtimeexec
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest runtimeRegisteredCommandIsExecutableUntilUnregisteredUnregister
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: runtimeexec
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: Unknown command. Type "/help" for help.
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: testplugin_1.19.2:runtimeexec
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: Unknown command. Type "/help" for help.
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest runtimeRegisteredCommandIsExecutableUntilUnregistered
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest lateRegisteredCommandSurvivesReload
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest unregisteringKeepsALabelTakenSinceRegister
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibowned
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: execute as Maru32768 run commandlibtest executeAsKeepsSenderAndSetsEntity
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: execute positioned 10.25 70.5 -20.75 rotated 90 45 run commandlibtest executePositionedSetsLocation
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: execute as Maru32768 run commandlibtest selectorsResolveFromExecutor @s
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: execute as Maru32768 at @s run commandlibtest selectorsResolveFromExecutor @e[type=player,distance=..0.01,limit=1]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: scoreboard objectives add commandlibblock dummy
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: Created new objective [commandlibblock]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: setblock 0 -57 0 minecraft:command_block{Command:"commandlibtest commandBlockRunsAsBlockSender"}
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: Changed the block at 0, -57, 0
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: setblock 0 -56 0 minecraft:redstone_block
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: Changed the block at 0, -56, 0
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: setblock 2 -57 0 minecraft:command_block{Command:"commandlibtest commandBlockRunsAsBlockSenderFailure"}
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: Changed the block at 2, -57, 0
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: setblock 2 -56 0 minecraft:redstone_block
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: Changed the block at 2, -56, 0
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest helpTopic
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: testplugin_1.19.2:commandlibtest namespacedLabel
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest functionLoadReset
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest executeAsyncAndMiddleware
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest diagnostics
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: CommandLib diagnostics
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: Platform:
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   Artifact: spigot
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   CommandLib package: dev.marulabs.testplugin_1.19.2.commandlib
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   Server: Paper git-Paper-307 (MC: 1.19.2)
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   Minecraft: 1.19.2
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   Java: 17.0.18
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   Command dispatcher: vanilla Brigadier dispatcher through NMS
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   Typed NMS module spigot_1_19_2: in use
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: Registrations: 3
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   TestPlugin_1.19.2: prefix testplugin_1.19.2.command, vanilla dispatcher and Bukkit command map
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     labels: commandlibtest, testplugin_1.19.2:commandlibtest, commandlibdiagnostics, testplugin_1.19.2:commandlibdiagnostics
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     permissions: 193
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   TestPlugin_1.19.2: prefix testplugin_1.19.2.command, vanilla dispatcher and Bukkit command map
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     labels: commandliblate, testplugin_1.19.2:commandliblate
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     permissions: 1
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   TestPlugin_1.19.2: prefix testplugin_1.19.2.command, vanilla dispatcher and Bukkit command map
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     labels: commandlibowned, testplugin_1.19.2:commandlibowned
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     permissions: 1
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: Commands of TestPlugin_1.19.2:
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   commandlibtest [testplugin_1.19.2.command.commandlibtest, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     helpMessageRoot [testplugin_1.19.2.command.commandlibtest.helpMessageRoot, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       helpMessageChild [testplugin_1.19.2.command.commandlibtest.helpMessageRoot.helpMessageChild, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     advancementArgument [testplugin_1.19.2.command.commandlibtest.advancementArgument, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <a: AdvancementArgument> [testplugin_1.19.2.command.commandlibtest.advancementArgument.a, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     attributeArgument [testplugin_1.19.2.command.commandlibtest.attributeArgument, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <a: AttributeArgument> [testplugin_1.19.2.command.commandlibtest.attributeArgument.a, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     blockDataArgument [testplugin_1.19.2.command.commandlibtest.blockDataArgument, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <a: BlockDataArgument> [testplugin_1.19.2.command.commandlibtest.blockDataArgument.a, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     blockPositionArgument [testplugin_1.19.2.command.commandlibtest.blockPositionArgument, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <a: BlockPositionArgument> [testplugin_1.19.2.command.commandlibtest.blockPositionArgument.a, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     blockPredicateArgument [testplugin_1.19.2.command.commandlibtest.blockPredicateArgument, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <a: BlockPredicateArgument> [testplugin_1.19.2.command.commandlibtest.blockPredicateArgument.a, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     biomeArgument [testplugin_1.19.2.command.commandlibtest.biomeArgument, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <a: BiomeArgument> [testplugin_1.19.2.command.commandlibtest.biomeArgument.a, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     booleanArgument [testplugin_1.19.2.command.commandlibtest.booleanArgument, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <a: BooleanArgument> [testplugin_1.19.2.command.commandlibtest.booleanArgument.a, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     chatColorArgument [testplugin_1.19.2.command.commandlibtest.chatColorArgument, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <a: ChatColorArgument> [testplugin_1.19.2.command.commandlibtest.chatColorArgument.a, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     componentArgument [testplugin_1.19.2.command.commandlibtest.componentArgument, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <a: ComponentArgument> [testplugin_1.19.2.command.commandlibtest.componentArgument.a, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     doubleArgument [testplugin_1.19.2.command.commandlibtest.doubleArgument, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <a: DoubleArgument> [testplugin_1.19.2.command.commandlibtest.doubleArgument.a, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     doubleRangeArgument [testplugin_1.19.2.command.commandlibtest.doubleRangeArgument, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <a: DoubleRangeArgument> [testplugin_1.19.2.command.commandlibtest.doubleRangeArgument.a, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     durationArgument [testplugin_1.19.2.command.commandlibtest.durationArgument, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <a: DurationArgument> [testplugin_1.19.2.command.commandlibtest.durationArgument.a, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     enchantmentArgument [testplugin_1.19.2.command.commandlibtest.enchantmentArgument, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <a: EnchantmentArgument> [testplugin_1.19.2.command.commandlibtest.enchantmentArgument.a, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     entitiesArgument [testplugin_1.19.2.command.commandlibtest.entitiesArgument, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <a: EntitiesArgument> [testplugin_1.19.2.command.commandlibtest.entitiesArgument.a, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     entityArgument [testplugin_1.19.2.command.commandlibtest.entityArgument, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <a: EntityArgument> [testplugin_1.19.2.command.commandlibtest.entityArgument.a, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     entityTypeArgument [testplugin_1.19.2.command.commandlibtest.entityTypeArgument, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <a: EntityTypeArgument> [testplugin_1.19.2.command.commandlibtest.entityTypeArgument.a, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     enumArgument [testplugin_1.19.2.command.commandlibtest.enumArgument, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <a: EnumArgument> [testplugin_1.19.2.command.commandlibtest.enumArgument.a, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     floatArgument [testplugin_1.19.2.command.commandlibtest.floatArgument, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <a: FloatArgument> [testplugin_1.19.2.command.commandlibtest.floatArgument.a, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     gameModeArgument [testplugin_1.19.2.command.commandlibtest.gameModeArgument, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <a: GameModeArgument> [testplugin_1.19.2.command.commandlibtest.gameModeArgument.a, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     integerArgument [testplugin_1.19.2.command.commandlibtest.integerArgument, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <a: IntegerArgument> [testplugin_1.19.2.command.commandlibtest.integerArgument.a, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     integerRangeArgument [testplugin_1.19.2.command.commandlibtest.integerRangeArgument, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <a: IntegerRangeArgument> [testplugin_1.19.2.command.commandlibtest.integerRangeArgument.a, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     itemPredicateArgument [testplugin_1.19.2.command.commandlibtest.itemPredicateArgument, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <a: ItemPredicateArgument> [testplugin_1.19.2.command.commandlibtest.itemPredicateArgument.a, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     itemStackArgument [testplugin_1.19.2.command.commandlibtest.itemStackArgument, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <a: ItemStackArgument> [testplugin_1.19.2.command.commandlibtest.itemStackArgument.a, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     literalArgument [testplugin_1.19.2.command.commandlibtest.literalArgument, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <a: LiteralArgument> [testplugin_1.19.2.command.commandlibtest.literalArgument.a, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     locationArgument [testplugin_1.19.2.command.commandlibtest.locationArgument, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <a: LocationArgument> [testplugin_1.19.2.command.commandlibtest.locationArgument.a, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     uncenteredLocationArgument [testplugin_1.19.2.command.commandlibtest.uncenteredLocationArgument, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <a: LocationArgument> [testplugin_1.19.2.command.commandlibtest.uncenteredLocationArgument.a, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     lootTableArgument [testplugin_1.19.2.command.commandlibtest.lootTableArgument, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <a: LootTableArgument> [testplugin_1.19.2.command.commandlibtest.lootTableArgument.a, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     messageArgument [testplugin_1.19.2.command.commandlibtest.messageArgument, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <a: MessageArgument> [testplugin_1.19.2.command.commandlibtest.messageArgument.a, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     nbtCompoundArgument [testplugin_1.19.2.command.commandlibtest.nbtCompoundArgument, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <a: NBTCompoundArgument> [testplugin_1.19.2.command.commandlibtest.nbtCompoundArgument.a, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     longArgument [testplugin_1.19.2.command.commandlibtest.longArgument, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <a: LongArgument> [testplugin_1.19.2.command.commandlibtest.longArgument.a, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     namespacedKeyArgument [testplugin_1.19.2.command.commandlibtest.namespacedKeyArgument, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <a: NamespacedKeyArgument> [testplugin_1.19.2.command.commandlibtest.namespacedKeyArgument.a, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     nameableObjectArgument [testplugin_1.19.2.command.commandlibtest.nameableObjectArgument, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <a: NameableObjectArgument> [testplugin_1.19.2.command.commandlibtest.nameableObjectArgument.a, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     objectArgument [testplugin_1.19.2.command.commandlibtest.objectArgument, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <a: ObjectArgument> [testplugin_1.19.2.command.commandlibtest.objectArgument.a, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     offlinePlayerArgument [testplugin_1.19.2.command.commandlibtest.offlinePlayerArgument, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <a: OfflinePlayerArgument> [testplugin_1.19.2.command.commandlibtest.offlinePlayerArgument.a, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     offlinePlayersArgument [testplugin_1.19.2.command.commandlibtest.offlinePlayersArgument, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <a: OfflinePlayersArgument> [testplugin_1.19.2.command.commandlibtest.offlinePlayersArgument.a, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     objectiveArgument [testplugin_1.19.2.command.commandlibtest.objectiveArgument, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <a: ObjectiveArgument> [testplugin_1.19.2.command.commandlibtest.objectiveArgument.a, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     particleArgument [testplugin_1.19.2.command.commandlibtest.particleArgument, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <a: ParticleArgument> [testplugin_1.19.2.command.commandlibtest.particleArgument.a, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     dustParticleArgument [testplugin_1.19.2.command.commandlibtest.dustParticleArgument, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <a: ParticleArgument> [testplugin_1.19.2.command.commandlibtest.dustParticleArgument.a, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     playerArgument [testplugin_1.19.2.command.commandlibtest.playerArgument, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <a: PlayerArgument> [testplugin_1.19.2.command.commandlibtest.playerArgument.a, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     playersArgument [testplugin_1.19.2.command.commandlibtest.playersArgument, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <a: PlayersArgument> [testplugin_1.19.2.command.commandlibtest.playersArgument.a, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     potionEffectArgument [testplugin_1.19.2.command.commandlibtest.potionEffectArgument, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <a: PotionEffectArgument> [testplugin_1.19.2.command.commandlibtest.potionEffectArgument.a, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     recipeArgument [testplugin_1.19.2.command.commandlibtest.recipeArgument, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <a: RecipeArgument> [testplugin_1.19.2.command.commandlibtest.recipeArgument.a, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     registryArgument [testplugin_1.19.2.command.commandlibtest.registryArgument, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <a: RegistryArgument> [testplugin_1.19.2.command.commandlibtest.registryArgument.a, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     scoreboardDisplaySlotArgument [testplugin_1.19.2.command.commandlibtest.scoreboardDisplaySlotArgument, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <a: ScoreboardDisplaySlotArgument> [testplugin_1.19.2.command.commandlibtest.scoreboardDisplaySlotArgument.a, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     soundArgument [testplugin_1.19.2.command.commandlibtest.soundArgument, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <a: SoundArgument> [testplugin_1.19.2.command.commandlibtest.soundArgument.a, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     stringArgument [testplugin_1.19.2.command.commandlibtest.stringArgument, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <a: StringArgument> [testplugin_1.19.2.command.commandlibtest.stringArgument.a, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     teamArgument [testplugin_1.19.2.command.commandlibtest.teamArgument, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <a: TeamArgument> [testplugin_1.19.2.command.commandlibtest.teamArgument.a, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     timeArgument [testplugin_1.19.2.command.commandlibtest.timeArgument, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <a: TimeArgument> [testplugin_1.19.2.command.commandlibtest.timeArgument.a, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     unparsedArgument [testplugin_1.19.2.command.commandlibtest.unparsedArgument, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <a: UnparsedArgument> [testplugin_1.19.2.command.commandlibtest.unparsedArgument.a, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     uuidArgument [testplugin_1.19.2.command.commandlibtest.uuidArgument, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <a: UUIDArgument> [testplugin_1.19.2.command.commandlibtest.uuidArgument.a, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     uuidsArgument [testplugin_1.19.2.command.commandlibtest.uuidsArgument, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <a: UUIDsArgument> [testplugin_1.19.2.command.commandlibtest.uuidsArgument.a, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     worldArgument [testplugin_1.19.2.command.commandlibtest.worldArgument, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <a: WorldArgument> [testplugin_1.19.2.command.commandlibtest.worldArgument.a, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     flagAndValueOptions [testplugin_1.19.2.command.commandlibtest.flagAndValueOptions, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       --force, -f
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       --limit, -n <limit>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       --format, -F <format>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <str: StringArgument> [testplugin_1.19.2.command.commandlibtest.flagAndValueOptions.str, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     defaultOptionValues [testplugin_1.19.2.command.commandlibtest.defaultOptionValues, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       --force, -f
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       --limit, -n <limit>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       --format, -F <format>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <target: StringArgument> [testplugin_1.19.2.command.commandlibtest.defaultOptionValues.target, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     combinedShortFlags [testplugin_1.19.2.command.commandlibtest.combinedShortFlags, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       --force, -f
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       --verbose, -v
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <target: StringArgument> [testplugin_1.19.2.command.commandlibtest.combinedShortFlags.target, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     requiredOption [testplugin_1.19.2.command.commandlibtest.requiredOption, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       --force, -f
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       --reason, -r <reason>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <target: StringArgument> [testplugin_1.19.2.command.commandlibtest.requiredOption.target, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     requiredOptionValue [testplugin_1.19.2.command.commandlibtest.requiredOptionValue, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       --mode, -m <mode>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       --limit, -n <limit>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <target: StringArgument> [testplugin_1.19.2.command.commandlibtest.requiredOptionValue.target, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     requiredOptionValueInvalid [testplugin_1.19.2.command.commandlibtest.requiredOptionValueInvalid, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       --mode, -m <mode>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       --limit, -n <limit>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <target: StringArgument> [testplugin_1.19.2.command.commandlibtest.requiredOptionValueInvalid.target, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     valueOptionWithoutValue [testplugin_1.19.2.command.commandlibtest.valueOptionWithoutValue, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       --format, -F <format>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <target: StringArgument> [testplugin_1.19.2.command.commandlibtest.valueOptionWithoutValue.target, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     optionAfterArgument [testplugin_1.19.2.command.commandlibtest.optionAfterArgument, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       --force, -f
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <target: StringArgument> [testplugin_1.19.2.command.commandlibtest.optionAfterArgument.target, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     countAndRepeatableOptions [testplugin_1.19.2.command.commandlibtest.countAndRepeatableOptions, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       --verbose, -v (up to 3 times)
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       --tag, -t <tag> (up to 3 times)
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <target: StringArgument> [testplugin_1.19.2.command.commandlibtest.countAndRepeatableOptions.target, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     argumentOption [testplugin_1.19.2.command.commandlibtest.argumentOption, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       --force, -f
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       --player, -p <player> (required)
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <target: StringArgument> [testplugin_1.19.2.command.commandlibtest.argumentOption.target, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     optionsAnywhere [testplugin_1.19.2.command.commandlibtest.optionsAnywhere, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       --silent, -s
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       --days, -d <days>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <target: StringArgument> <reason: StringArgument> [testplugin_1.19.2.command.commandlibtest.optionsAnywhere.target.reason, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     aliasAndExclusiveOptions [testplugin_1.19.2.command.commandlibtest.aliasAndExclusiveOptions, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       --quiet, --silent, -q
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       --loud, -l
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <target: StringArgument> [testplugin_1.19.2.command.commandlibtest.aliasAndExclusiveOptions.target, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     optionPermission [testplugin_1.19.2.command.commandlibtest.optionPermission, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       --admin, -a [testplugin_1.19.2.command.commandlibtest.optionPermission.option.admin, OP]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <target: StringArgument> [testplugin_1.19.2.command.commandlibtest.optionPermission.target, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     visibleWhenRefresh [testplugin_1.19.2.command.commandlibtest.visibleWhenRefresh, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <target: StringArgument> [testplugin_1.19.2.command.commandlibtest.visibleWhenRefresh.target, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     visibleWhenRefreshShow [testplugin_1.19.2.command.commandlibtest.visibleWhenRefreshShow, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     optionPermissionProbe [testplugin_1.19.2.command.commandlibtest.optionPermissionProbe, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       --secret [testplugin_1.19.2.command.commandlibtest.optionPermissionProbe.option.secret, NONE]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     testConvertCommandSyntaxException [testplugin_1.19.2.command.commandlibtest.testConvertCommandSyntaxException, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <a: ThrowingBoolArg> [testplugin_1.19.2.command.commandlibtest.testConvertCommandSyntaxException.a, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     runtimePermissionDefaultCleanup [testplugin_1.19.2.command.commandlibtest.runtimePermissionDefaultCleanup, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     suggestionCapture [testplugin_1.19.2.command.commandlibtest.suggestionCapture, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <a: StringArgument> [testplugin_1.19.2.command.commandlibtest.suggestionCapture.a, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     verifySuggestionCapture [testplugin_1.19.2.command.commandlibtest.verifySuggestionCapture, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     executeRunAsPlayer [testplugin_1.19.2.command.commandlibtest.executeRunAsPlayer, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     executeRunWithArgument [testplugin_1.19.2.command.commandlibtest.executeRunWithArgument, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <value: StringArgument> [testplugin_1.19.2.command.commandlibtest.executeRunWithArgument.value, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     executeStoreReadsResultAndFailureResult [testplugin_1.19.2.command.commandlibtest.executeStoreReadsResultAndFailureResult, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     executeStoreReadsResultAndFailureFailure [testplugin_1.19.2.command.commandlibtest.executeStoreReadsResultAndFailureFailure, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     executeStoreReadsResultAndFailure [testplugin_1.19.2.command.commandlibtest.executeStoreReadsResultAndFailure, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     runtimeRegisteredCommandIsExecutableUntilUnregisteredRegister [testplugin_1.19.2.command.commandlibtest.runtimeRegisteredCommandIsExecutableUntilUnregisteredRegister, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     runtimeRegisteredCommandIsExecutableUntilUnregisteredUnregister [testplugin_1.19.2.command.commandlibtest.runtimeRegisteredCommandIsExecutableUntilUnregisteredUnregister, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     runtimeRegisteredCommandIsExecutableUntilUnregistered [testplugin_1.19.2.command.commandlibtest.runtimeRegisteredCommandIsExecutableUntilUnregistered, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     lateRegisteredCommandSurvivesReload [testplugin_1.19.2.command.commandlibtest.lateRegisteredCommandSurvivesReload, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     unregisteringKeepsALabelTakenSinceRegister [testplugin_1.19.2.command.commandlibtest.unregisteringKeepsALabelTakenSinceRegister, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     deniedProbe [testplugin_1.19.2.command.commandlibtest.deniedProbe, NONE]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     reloadProbe [testplugin_1.19.2.command.commandlibtest.reloadProbe, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     executeAsKeepsSenderAndSetsEntity [testplugin_1.19.2.command.commandlibtest.executeAsKeepsSenderAndSetsEntity, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     executePositionedSetsLocation [testplugin_1.19.2.command.commandlibtest.executePositionedSetsLocation, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     selectorsResolveFromExecutor [testplugin_1.19.2.command.commandlibtest.selectorsResolveFromExecutor, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <target: EntityArgument> [testplugin_1.19.2.command.commandlibtest.selectorsResolveFromExecutor.target, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     commandBlockRunsAsBlockSender [testplugin_1.19.2.command.commandlibtest.commandBlockRunsAsBlockSender, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     commandBlockRunsAsBlockSenderFailure [testplugin_1.19.2.command.commandlibtest.commandBlockRunsAsBlockSenderFailure, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     commandBlockSuccessCount [testplugin_1.19.2.command.commandlibtest.commandBlockSuccessCount, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     helpTopic [testplugin_1.19.2.command.commandlibtest.helpTopic, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     helpTopicAfterReload [testplugin_1.19.2.command.commandlibtest.helpTopicAfterReload, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     namespacedLabel [testplugin_1.19.2.command.commandlibtest.namespacedLabel, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     functionProbe [testplugin_1.19.2.command.commandlibtest.functionProbe, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     functionTagProbe [testplugin_1.19.2.command.commandlibtest.functionTagProbe, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     functionLoadProbe [testplugin_1.19.2.command.commandlibtest.functionLoadProbe, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     functionLoadReset [testplugin_1.19.2.command.commandlibtest.functionLoadReset, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     functionLoadCount [testplugin_1.19.2.command.commandlibtest.functionLoadCount, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     executeAsyncAndMiddleware [testplugin_1.19.2.command.commandlibtest.executeAsyncAndMiddleware, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     diagnostics [testplugin_1.19.2.command.commandlibtest.diagnostics, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     captionProbe [testplugin_1.19.2.command.commandlibtest.captionProbe, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     optionalOmitted [testplugin_1.19.2.command.commandlibtest.optionalOmitted, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <a: IntegerArgument> [b: IntegerArgument] [testplugin_1.19.2.command.commandlibtest.optionalOmitted.a.b, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     optionalGiven [testplugin_1.19.2.command.commandlibtest.optionalGiven, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <a: IntegerArgument> [b: IntegerArgument] [testplugin_1.19.2.command.commandlibtest.optionalGiven.a.b, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     optionalExtractorOmitted [testplugin_1.19.2.command.commandlibtest.optionalExtractorOmitted, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       [a: StringArgument] [testplugin_1.19.2.command.commandlibtest.optionalExtractorOmitted.a, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     variadicValues [testplugin_1.19.2.command.commandlibtest.variadicValues, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <a: StringArgument> <b...: IntegerArgument> [testplugin_1.19.2.command.commandlibtest.variadicValues.a.b, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     variadicPlayers [testplugin_1.19.2.command.commandlibtest.variadicPlayers, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       <a...: PlayerArgument> [testplugin_1.19.2.command.commandlibtest.variadicPlayers.a, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     optionalVariadicOmitted [testplugin_1.19.2.command.commandlibtest.optionalVariadicOmitted, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:       [a...: IntegerArgument] [testplugin_1.19.2.command.commandlibtest.optionalVariadicOmitted.a, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     everyTypedNmsClassLinks [testplugin_1.19.2.command.commandlibtest.everyTypedNmsClassLinks, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     runTests [testplugin_1.19.2.command.commandlibtest.runTests, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   commandlibdiagnostics [testplugin_1.19.2.command.commandlibdiagnostics, OP]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     commands [testplugin_1.19.2.command.commandlibdiagnostics.commands, OP]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:     permissions [testplugin_1.19.2.command.commandlibdiagnostics.permissions, OP]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: Commands of TestPlugin_1.19.2:
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   commandliblate [testplugin_1.19.2.command.commandliblate, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: Commands of TestPlugin_1.19.2:
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   commandlibowned [testplugin_1.19.2.command.commandlibowned, ALL]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: Permissions of TestPlugin_1.19.2:
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest [ALL] /commandlibtest
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.helpMessageRoot [ALL] /commandlibtest helpMessageRoot
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.helpMessageRoot.helpMessageChild [ALL] /commandlibtest helpMessageRoot helpMessageChild
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.advancementArgument [ALL] /commandlibtest advancementArgument
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.advancementArgument.a [ALL] /commandlibtest advancementArgument <a>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.attributeArgument [ALL] /commandlibtest attributeArgument
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.attributeArgument.a [ALL] /commandlibtest attributeArgument <a>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.blockDataArgument [ALL] /commandlibtest blockDataArgument
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.blockDataArgument.a [ALL] /commandlibtest blockDataArgument <a>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.blockPositionArgument [ALL] /commandlibtest blockPositionArgument
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.blockPositionArgument.a [ALL] /commandlibtest blockPositionArgument <a>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.blockPredicateArgument [ALL] /commandlibtest blockPredicateArgument
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.blockPredicateArgument.a [ALL] /commandlibtest blockPredicateArgument <a>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.biomeArgument [ALL] /commandlibtest biomeArgument
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.biomeArgument.a [ALL] /commandlibtest biomeArgument <a>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.booleanArgument [ALL] /commandlibtest booleanArgument
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.booleanArgument.a [ALL] /commandlibtest booleanArgument <a>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.chatColorArgument [ALL] /commandlibtest chatColorArgument
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.chatColorArgument.a [ALL] /commandlibtest chatColorArgument <a>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.componentArgument [ALL] /commandlibtest componentArgument
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.componentArgument.a [ALL] /commandlibtest componentArgument <a>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.doubleArgument [ALL] /commandlibtest doubleArgument
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.doubleArgument.a [ALL] /commandlibtest doubleArgument <a>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.doubleRangeArgument [ALL] /commandlibtest doubleRangeArgument
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.doubleRangeArgument.a [ALL] /commandlibtest doubleRangeArgument <a>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.durationArgument [ALL] /commandlibtest durationArgument
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.durationArgument.a [ALL] /commandlibtest durationArgument <a>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.enchantmentArgument [ALL] /commandlibtest enchantmentArgument
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.enchantmentArgument.a [ALL] /commandlibtest enchantmentArgument <a>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.entitiesArgument [ALL] /commandlibtest entitiesArgument
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.entitiesArgument.a [ALL] /commandlibtest entitiesArgument <a>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.entityArgument [ALL] /commandlibtest entityArgument
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.entityArgument.a [ALL] /commandlibtest entityArgument <a>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.entityTypeArgument [ALL] /commandlibtest entityTypeArgument
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.entityTypeArgument.a [ALL] /commandlibtest entityTypeArgument <a>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.enumArgument [ALL] /commandlibtest enumArgument
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.enumArgument.a [ALL] /commandlibtest enumArgument <a>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.floatArgument [ALL] /commandlibtest floatArgument
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.floatArgument.a [ALL] /commandlibtest floatArgument <a>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.gameModeArgument [ALL] /commandlibtest gameModeArgument
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.gameModeArgument.a [ALL] /commandlibtest gameModeArgument <a>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.integerArgument [ALL] /commandlibtest integerArgument
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.integerArgument.a [ALL] /commandlibtest integerArgument <a>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.integerRangeArgument [ALL] /commandlibtest integerRangeArgument
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.integerRangeArgument.a [ALL] /commandlibtest integerRangeArgument <a>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.itemPredicateArgument [ALL] /commandlibtest itemPredicateArgument
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.itemPredicateArgument.a [ALL] /commandlibtest itemPredicateArgument <a>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.itemStackArgument [ALL] /commandlibtest itemStackArgument
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.itemStackArgument.a [ALL] /commandlibtest itemStackArgument <a>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.literalArgument [ALL] /commandlibtest literalArgument
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.literalArgument.a [ALL] /commandlibtest literalArgument <a>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.locationArgument [ALL] /commandlibtest locationArgument
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.locationArgument.a [ALL] /commandlibtest locationArgument <a>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.uncenteredLocationArgument [ALL] /commandlibtest uncenteredLocationArgument
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.uncenteredLocationArgument.a [ALL] /commandlibtest uncenteredLocationArgument <a>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.lootTableArgument [ALL] /commandlibtest lootTableArgument
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.lootTableArgument.a [ALL] /commandlibtest lootTableArgument <a>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.messageArgument [ALL] /commandlibtest messageArgument
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.messageArgument.a [ALL] /commandlibtest messageArgument <a>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.nbtCompoundArgument [ALL] /commandlibtest nbtCompoundArgument
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.nbtCompoundArgument.a [ALL] /commandlibtest nbtCompoundArgument <a>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.longArgument [ALL] /commandlibtest longArgument
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.longArgument.a [ALL] /commandlibtest longArgument <a>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.namespacedKeyArgument [ALL] /commandlibtest namespacedKeyArgument
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.namespacedKeyArgument.a [ALL] /commandlibtest namespacedKeyArgument <a>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.nameableObjectArgument [ALL] /commandlibtest nameableObjectArgument
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.nameableObjectArgument.a [ALL] /commandlibtest nameableObjectArgument <a>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.objectArgument [ALL] /commandlibtest objectArgument
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.objectArgument.a [ALL] /commandlibtest objectArgument <a>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.offlinePlayerArgument [ALL] /commandlibtest offlinePlayerArgument
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.offlinePlayerArgument.a [ALL] /commandlibtest offlinePlayerArgument <a>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.offlinePlayersArgument [ALL] /commandlibtest offlinePlayersArgument
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.offlinePlayersArgument.a [ALL] /commandlibtest offlinePlayersArgument <a>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.objectiveArgument [ALL] /commandlibtest objectiveArgument
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.objectiveArgument.a [ALL] /commandlibtest objectiveArgument <a>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.particleArgument [ALL] /commandlibtest particleArgument
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.particleArgument.a [ALL] /commandlibtest particleArgument <a>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.dustParticleArgument [ALL] /commandlibtest dustParticleArgument
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.dustParticleArgument.a [ALL] /commandlibtest dustParticleArgument <a>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.playerArgument [ALL] /commandlibtest playerArgument
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.playerArgument.a [ALL] /commandlibtest playerArgument <a>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.playersArgument [ALL] /commandlibtest playersArgument
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.playersArgument.a [ALL] /commandlibtest playersArgument <a>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.potionEffectArgument [ALL] /commandlibtest potionEffectArgument
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.potionEffectArgument.a [ALL] /commandlibtest potionEffectArgument <a>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.recipeArgument [ALL] /commandlibtest recipeArgument
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.recipeArgument.a [ALL] /commandlibtest recipeArgument <a>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.registryArgument [ALL] /commandlibtest registryArgument
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.registryArgument.a [ALL] /commandlibtest registryArgument <a>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.scoreboardDisplaySlotArgument [ALL] /commandlibtest scoreboardDisplaySlotArgument
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.scoreboardDisplaySlotArgument.a [ALL] /commandlibtest scoreboardDisplaySlotArgument <a>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.soundArgument [ALL] /commandlibtest soundArgument
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.soundArgument.a [ALL] /commandlibtest soundArgument <a>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.stringArgument [ALL] /commandlibtest stringArgument
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.stringArgument.a [ALL] /commandlibtest stringArgument <a>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.teamArgument [ALL] /commandlibtest teamArgument
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.teamArgument.a [ALL] /commandlibtest teamArgument <a>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.timeArgument [ALL] /commandlibtest timeArgument
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.timeArgument.a [ALL] /commandlibtest timeArgument <a>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.unparsedArgument [ALL] /commandlibtest unparsedArgument
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.unparsedArgument.a [ALL] /commandlibtest unparsedArgument <a>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.uuidArgument [ALL] /commandlibtest uuidArgument
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.uuidArgument.a [ALL] /commandlibtest uuidArgument <a>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.uuidsArgument [ALL] /commandlibtest uuidsArgument
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.uuidsArgument.a [ALL] /commandlibtest uuidsArgument <a>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.worldArgument [ALL] /commandlibtest worldArgument
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.worldArgument.a [ALL] /commandlibtest worldArgument <a>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.flagAndValueOptions [ALL] /commandlibtest flagAndValueOptions
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.flagAndValueOptions.str [ALL] /commandlibtest flagAndValueOptions <str>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.defaultOptionValues [ALL] /commandlibtest defaultOptionValues
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.defaultOptionValues.target [ALL] /commandlibtest defaultOptionValues <target>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.combinedShortFlags [ALL] /commandlibtest combinedShortFlags
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.combinedShortFlags.target [ALL] /commandlibtest combinedShortFlags <target>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.requiredOption [ALL] /commandlibtest requiredOption
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.requiredOption.target [ALL] /commandlibtest requiredOption <target>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.requiredOptionValue [ALL] /commandlibtest requiredOptionValue
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.requiredOptionValue.target [ALL] /commandlibtest requiredOptionValue <target>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.requiredOptionValueInvalid [ALL] /commandlibtest requiredOptionValueInvalid
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.requiredOptionValueInvalid.target [ALL] /commandlibtest requiredOptionValueInvalid <target>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.valueOptionWithoutValue [ALL] /commandlibtest valueOptionWithoutValue
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.valueOptionWithoutValue.target [ALL] /commandlibtest valueOptionWithoutValue <target>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.optionAfterArgument [ALL] /commandlibtest optionAfterArgument
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.optionAfterArgument.target [ALL] /commandlibtest optionAfterArgument <target>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.countAndRepeatableOptions [ALL] /commandlibtest countAndRepeatableOptions
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.countAndRepeatableOptions.target [ALL] /commandlibtest countAndRepeatableOptions <target>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.argumentOption [ALL] /commandlibtest argumentOption
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.argumentOption.target [ALL] /commandlibtest argumentOption <target>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.optionsAnywhere [ALL] /commandlibtest optionsAnywhere
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.optionsAnywhere.target.reason [ALL] /commandlibtest optionsAnywhere <target> <reason>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.aliasAndExclusiveOptions [ALL] /commandlibtest aliasAndExclusiveOptions
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.aliasAndExclusiveOptions.target [ALL] /commandlibtest aliasAndExclusiveOptions <target>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.optionPermission [ALL] /commandlibtest optionPermission
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.optionPermission.option.admin [OP] /commandlibtest optionPermission --admin
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.optionPermission.target [ALL] /commandlibtest optionPermission <target>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.visibleWhenRefresh [ALL] /commandlibtest visibleWhenRefresh
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.visibleWhenRefresh.target [ALL] /commandlibtest visibleWhenRefresh <target>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.visibleWhenRefreshShow [ALL] /commandlibtest visibleWhenRefreshShow
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.optionPermissionProbe [ALL] /commandlibtest optionPermissionProbe
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.optionPermissionProbe.option.secret [NONE] /commandlibtest optionPermissionProbe --secret
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.testConvertCommandSyntaxException [ALL] /commandlibtest testConvertCommandSyntaxException
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.testConvertCommandSyntaxException.a [ALL] /commandlibtest testConvertCommandSyntaxException <a>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.runtimePermissionDefaultCleanup [ALL] /commandlibtest runtimePermissionDefaultCleanup
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.suggestionCapture [ALL] /commandlibtest suggestionCapture
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.suggestionCapture.a [ALL] /commandlibtest suggestionCapture <a>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.verifySuggestionCapture [ALL] /commandlibtest verifySuggestionCapture
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.executeRunAsPlayer [ALL] /commandlibtest executeRunAsPlayer
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.executeRunWithArgument [ALL] /commandlibtest executeRunWithArgument
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.executeRunWithArgument.value [ALL] /commandlibtest executeRunWithArgument <value>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.executeStoreReadsResultAndFailureResult [ALL] /commandlibtest executeStoreReadsResultAndFailureResult
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.executeStoreReadsResultAndFailureFailure [ALL] /commandlibtest executeStoreReadsResultAndFailureFailure
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.executeStoreReadsResultAndFailure [ALL] /commandlibtest executeStoreReadsResultAndFailure
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.runtimeRegisteredCommandIsExecutableUntilUnregisteredRegister [ALL] /commandlibtest runtimeRegisteredCommandIsExecutableUntilUnregisteredRegister
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.runtimeRegisteredCommandIsExecutableUntilUnregisteredUnregister [ALL] /commandlibtest runtimeRegisteredCommandIsExecutableUntilUnregisteredUnregister
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.runtimeRegisteredCommandIsExecutableUntilUnregistered [ALL] /commandlibtest runtimeRegisteredCommandIsExecutableUntilUnregistered
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.lateRegisteredCommandSurvivesReload [ALL] /commandlibtest lateRegisteredCommandSurvivesReload
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.unregisteringKeepsALabelTakenSinceRegister [ALL] /commandlibtest unregisteringKeepsALabelTakenSinceRegister
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.deniedProbe [NONE] /commandlibtest deniedProbe
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.reloadProbe [ALL] /commandlibtest reloadProbe
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.executeAsKeepsSenderAndSetsEntity [ALL] /commandlibtest executeAsKeepsSenderAndSetsEntity
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.executePositionedSetsLocation [ALL] /commandlibtest executePositionedSetsLocation
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.selectorsResolveFromExecutor [ALL] /commandlibtest selectorsResolveFromExecutor
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.selectorsResolveFromExecutor.target [ALL] /commandlibtest selectorsResolveFromExecutor <target>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.commandBlockRunsAsBlockSender [ALL] /commandlibtest commandBlockRunsAsBlockSender
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.commandBlockRunsAsBlockSenderFailure [ALL] /commandlibtest commandBlockRunsAsBlockSenderFailure
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.commandBlockSuccessCount [ALL] /commandlibtest commandBlockSuccessCount
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.helpTopic [ALL] /commandlibtest helpTopic
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.helpTopicAfterReload [ALL] /commandlibtest helpTopicAfterReload
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.namespacedLabel [ALL] /commandlibtest namespacedLabel
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.functionProbe [ALL] /commandlibtest functionProbe
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.functionTagProbe [ALL] /commandlibtest functionTagProbe
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.functionLoadProbe [ALL] /commandlibtest functionLoadProbe
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.functionLoadReset [ALL] /commandlibtest functionLoadReset
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.functionLoadCount [ALL] /commandlibtest functionLoadCount
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.executeAsyncAndMiddleware [ALL] /commandlibtest executeAsyncAndMiddleware
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.diagnostics [ALL] /commandlibtest diagnostics
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.captionProbe [ALL] /commandlibtest captionProbe
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.optionalOmitted [ALL] /commandlibtest optionalOmitted
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.optionalOmitted.a.b [ALL] /commandlibtest optionalOmitted <a> [b]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.optionalGiven [ALL] /commandlibtest optionalGiven
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.optionalGiven.a.b [ALL] /commandlibtest optionalGiven <a> [b]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.optionalExtractorOmitted [ALL] /commandlibtest optionalExtractorOmitted
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.optionalExtractorOmitted.a [ALL] /commandlibtest optionalExtractorOmitted [a]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.variadicValues [ALL] /commandlibtest variadicValues
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.variadicValues.a.b [ALL] /commandlibtest variadicValues <a> <b...>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.variadicPlayers [ALL] /commandlibtest variadicPlayers
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.variadicPlayers.a [ALL] /commandlibtest variadicPlayers <a...>
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.optionalVariadicOmitted [ALL] /commandlibtest optionalVariadicOmitted
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.optionalVariadicOmitted.a [ALL] /commandlibtest optionalVariadicOmitted [a...]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.everyTypedNmsClassLinks [ALL] /commandlibtest everyTypedNmsClassLinks
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibtest.runTests [ALL] /commandlibtest runTests
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibdiagnostics [OP] /commandlibdiagnostics
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibdiagnostics.commands [OP] /commandlibdiagnostics commands
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibdiagnostics.permissions [OP] /commandlibdiagnostics permissions
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: Permissions of TestPlugin_1.19.2:
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandliblate [ALL] /commandliblate
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: Permissions of TestPlugin_1.19.2:
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]:   testplugin_1.19.2.command.commandlibowned [ALL] /commandlibowned
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest optionalOmitted 1
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest optionalGiven 1 3
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest optionalExtractorOmitted
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest variadicValues x 3 1 2
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest variadicPlayers Maru32768 @p
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest optionalVariadicOmitted
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Dispatching test command: commandlibtest everyTypedNmsClassLinks
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: [TestPlugin_1.19.2] Reloading data packs to verify registered commands survive.
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:07 INFO]: Reloading!
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:08 INFO]: Loaded 7 recipes
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:09 ERROR]: Failed to load function commandlibtest:broken
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: java.util.concurrent.CompletionException: java.lang.IllegalArgumentException: Whilst parsing command on line 1: Incorrect argument for command at position 15: ...ndlibtest <--[HERE]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: 	at java.util.concurrent.CompletableFuture.encodeThrowable(Unknown Source) ~[?:?]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: 	at java.util.concurrent.CompletableFuture.completeThrowable(Unknown Source) ~[?:?]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: 	at java.util.concurrent.CompletableFuture$AsyncSupply.run(Unknown Source) ~[?:?]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: 	at java.util.concurrent.CompletableFuture.asyncSupplyStage(Unknown Source) ~[?:?]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: 	at java.util.concurrent.CompletableFuture.supplyAsync(Unknown Source) ~[?:?]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: 	at net.minecraft.server.ServerFunctionLibrary.lambda$reload$5(ServerFunctionLibrary.java:82) ~[?:?]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: 	at java.util.concurrent.CompletableFuture.uniComposeStage(Unknown Source) ~[?:?]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: 	at java.util.concurrent.CompletableFuture.thenCompose(Unknown Source) ~[?:?]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: 	at net.minecraft.server.ServerFunctionLibrary.lambda$reload$2(ServerFunctionLibrary.java:70) ~[?:?]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: 	at dev.marulabs.testplugin_1.19.2.commandlib.nms.spigot_1_19_2.NMSDedicatedServer_spigot_1_19_2.recompileFunctions(NMSDedicatedServer_spigot_1_19_2.java:44) ~[TestPlugin_1.19.2-1.0.0.jar:?]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: 	at dev.marulabs.testplugin_1.19.2.commandlib.CommandLib.compileFunctionsIfStale(CommandLib.java:640) ~[TestPlugin_1.19.2-1.0.0.jar:?]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: 	at dev.marulabs.testplugin_1.19.2.commandlib.CommandLib.lambda$compileFunctionsWithCommands$6(CommandLib.java:610) ~[TestPlugin_1.19.2-1.0.0.jar:?]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: 	at org.bukkit.craftbukkit.v1_19_R1.scheduler.CraftTask.run(CraftTask.java:101) ~[paper-1.19.2.jar:git-Paper-307]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: 	at org.bukkit.craftbukkit.v1_19_R1.scheduler.CraftScheduler.mainThreadHeartbeat(CraftScheduler.java:483) ~[paper-1.19.2.jar:git-Paper-307]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: 	at net.minecraft.server.MinecraftServer.tickChildren(MinecraftServer.java:1473) ~[paper-1.19.2.jar:git-Paper-307]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: 	at net.minecraft.server.dedicated.DedicatedServer.tickChildren(DedicatedServer.java:446) ~[paper-1.19.2.jar:git-Paper-307]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: 	at net.minecraft.server.MinecraftServer.tickServer(MinecraftServer.java:1397) ~[paper-1.19.2.jar:git-Paper-307]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: 	at net.minecraft.server.MinecraftServer.runServer(MinecraftServer.java:1173) ~[paper-1.19.2.jar:git-Paper-307]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: 	at net.minecraft.server.MinecraftServer.lambda$spin$0(MinecraftServer.java:305) ~[paper-1.19.2.jar:git-Paper-307]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: 	at java.lang.Thread.run(Unknown Source) ~[?:?]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: Caused by: java.lang.IllegalArgumentException: Whilst parsing command on line 1: Incorrect argument for command at position 15: ...ndlibtest <--[HERE]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: 	at net.minecraft.commands.CommandFunction.fromLines(CommandFunction.java:68) ~[?:?]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: 	at net.minecraft.server.ServerFunctionLibrary.lambda$reload$3(ServerFunctionLibrary.java:84) ~[?:?]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: 	... 18 more
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:09 INFO]: Executed 1 commands from function 'commandlibtest:probe'
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:09 INFO]: 0, -57, 0 has the following block data: 1
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:09 INFO]: 2, -57, 0 has the following block data: 0
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:09 INFO]: Executed 1 commands from function 'commandlibtest:tagged'
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:09 INFO]: [TestPlugin_1.19.2] SUCCEEDED: 96  FAILED: 0
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:10 INFO]: Maru32768 issued server command: /commandlibtest helpMessageRoot
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:10 INFO]: Maru32768 issued server command: /commandlibtest enumArgument not_a_material
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:10 INFO]: Maru32768 issued server command: /commandlibtest testConvertCommandSyntaxException true
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:10 INFO]: Maru32768 issued server command: /commandlibtest deniedProbe
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:11 INFO]: Maru32768 issued server command: /commandlibtest optionPermissionProbe --secret
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:11 INFO]: Maru32768 issued server command: /commandlibtest optionPermissionProbe
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:11 INFO]: Maru32768 issued server command: /commandlibtest captionProbe
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:11 INFO]: Maru32768 issued server command: /stop
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:11 INFO]: [Maru32768: Stopping the server]
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:11 INFO]: Stopping server
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:11 INFO]: [AutoReloader] Disabling AutoReloader v1.1.0
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:11 INFO]: [PlugManX] Disabling PlugManX v2.3.3
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:11 INFO]: [TestPlugin_1.19.2] Disabling TestPlugin_1.19.2 v1.0.0
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:11 INFO]: [TestPlugin_1.19.2] COMMANDLIB_UNREGISTER_ON_DISABLE_SUCCEEDED
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:11 INFO]: Saving players
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:11 INFO]: Maru32768 lost connection: Server closed
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:11 INFO]: Maru32768 left the game
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:11 INFO]: Saving worlds
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:11 INFO]: Saving chunks for level 'ServerLevel[world]'/minecraft:overworld
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:11 INFO]: [ChunkHolderManager] Waiting 60s for chunk system to halt for world 'world'
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:11 INFO]: [ChunkHolderManager] Halted chunk system for world 'world'
+    [docker-java-stream--1005079999] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-1.19.2] STDOUT: [18:31:11 INFO]: [ChunkHolderManager] Saving all chunkholders for world 'world'
+
+IntegrationTest > commandlib_test_plugin_succeeds_on_target_version_with_a_real_player() PASSED
+
+BUILD SUCCESSFUL in 1m 32s
+148 actionable tasks: 6 executed, 142 up-to-date
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.5.0/userguide/configuration_cache_enabling.html

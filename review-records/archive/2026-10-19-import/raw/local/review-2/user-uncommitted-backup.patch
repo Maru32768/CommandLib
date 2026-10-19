@@ -1,0 +1,26 @@
+diff --git a/common/src/main/java/dev/marulabs/commandlib/ArgRef.java b/common/src/main/java/dev/marulabs/commandlib/ArgRef.java
+index c7949aa6..e18e3591 100644
+--- a/common/src/main/java/dev/marulabs/commandlib/ArgRef.java
++++ b/common/src/main/java/dev/marulabs/commandlib/ArgRef.java
+@@ -39,7 +39,7 @@ public final class ArgRef<T> {
+     /**
+      * Returns the parsed value from the command context currently being processed on this thread.
+      *
+-     * @throws IllegalStateException if called outside of a command callback
++     * @throws IllegalStateException if called outside a command callback
+      */
+     @NotNull
+     public T get() {
+diff --git a/common/src/main/java/dev/marulabs/commandlib/OptionGraph.java b/common/src/main/java/dev/marulabs/commandlib/OptionGraph.java
+index 9de933ab..844d155e 100644
+--- a/common/src/main/java/dev/marulabs/commandlib/OptionGraph.java
++++ b/common/src/main/java/dev/marulabs/commandlib/OptionGraph.java
+@@ -51,7 +51,7 @@ import java.util.stream.Collectors;
+  * Brigadier context, so the context of an execution after options has only the nodes after the last option.
+  * {@link #recover} parses the options and arguments before it again from the input.
+  * <p>
+- * The re-parse needs a command whose path is literals only, as an argument child's inherited arguments would be lost
++ * The reparse needs a command whose path is literals only, as an argument child's inherited arguments would be lost
+  * too. An argument child keeps a tree without redirects, in which the paths with the same state share their child
+  * nodes. The options of the command it follows can still redirect into its path, so its runner recovers the input
+  * with that command's graph.

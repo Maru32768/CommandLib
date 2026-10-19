@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "id": "forge-1165-reload",
+  "status": "candidate",
+  "validation": "historical-evidence-only",
+  "task_origin": "New prompt distilled from historical GA-01; not the original review request",
+  "repository": "CommandLib",
+  "reviewed_commit": "1b8f17dc2b10b8ab7bd8707e6aa0eb5a522b8ec5",
+  "historical_working_tree": "Review scope reports comment-only edits in ArgRef.java and OptionGraph.java; their lack of impact has not been revalidated",
+  "environment": "Forge 1.16.5 integration server; required artifacts and runtime setup not bundled",
+  "source_finding": "GA-01",
+  "source_archive": "archive/2026-10-19-import",
+  "source_records": [
+    "raw/local/review-1/ga-opus/scope.md",
+    "raw/local/review-1/ga-opus/findings.md",
+    "raw/local/review-1/ga-opus/fixes.md"
+  ],
+  "probe_commit": "444fddcfd14f48c1b5a4fd4f9dc1835a36582032",
+  "fix_commit": "441e0b4303d4e491d5b61d1cb51ae91dc00042a3",
+  "input": "input/task.md",
+  "oracle": "oracle/expected.md",
+  "extraction_checks": ["Referenced commits exist", "Source records inspected"],
+  "reproduced_during_extraction": false
+}

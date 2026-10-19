@@ -1,0 +1,6 @@
+# Preserve review evidence even when repository-wide rules ignore logs or binaries.
+!/archive/**
+!/runs/**
+
+# Disposable working copies belong here, not alongside preserved evidence.
+/runs/*/scratch/

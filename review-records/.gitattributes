@@ -1,0 +1,3 @@
+# Original evidence must retain its exact bytes across Git checkouts.
+archive/** -text
+runs/** -text

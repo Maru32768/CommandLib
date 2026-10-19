@@ -1,0 +1,173 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.5.0/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+Running Stonecutter 0.9.8
+> Task :buildSrc:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :buildSrc:compileKotlin UP-TO-DATE
+> Task :buildSrc:compileJava NO-SOURCE
+> Task :buildSrc:compileGroovy NO-SOURCE
+> Task :buildSrc:pluginDescriptors UP-TO-DATE
+> Task :buildSrc:processResources UP-TO-DATE
+> Task :buildSrc:classes UP-TO-DATE
+> Task :buildSrc:jar UP-TO-DATE
+
+> Configure project :modded
+Stonecutter branch root :modded should not be a buildable project. Remove the `base` or `java` plugin to fix the issue.
+
+> Configure project :modded-testing
+Stonecutter branch root :modded-testing should not be a buildable project. Remove the `base` or `java` plugin to fix the issue.
+
+> Configure project :modded:fabric-1.20.1
+Architectury Loom: 1.17.493
+
+> Configure project :integration-test:shared:modded-fixture
+Stonecutter branch root :integration-test:shared:modded-fixture should not be a buildable project. Remove the `base` or `java` plugin to fix the issue.
+
+> Task :velocity:processResources NO-SOURCE
+> Task :integration-test:targets:velocity-3.4.0:processTestPluginResources NO-SOURCE
+> Task :integration-test:targets:velocity-3.4.0:compileJava NO-SOURCE
+> Task :integration-test:targets:velocity-3.4.0:processResources NO-SOURCE
+> Task :integration-test:targets:velocity-3.4.0:classes UP-TO-DATE
+> Task :common:compileJava UP-TO-DATE
+> Task :common:processResources UP-TO-DATE
+> Task :common:classes UP-TO-DATE
+> Task :integration-test:targets:velocity-3.4.0:compileTestJava UP-TO-DATE
+> Task :integration-test:targets:velocity-3.4.0:processTestResources NO-SOURCE
+> Task :integration-test:targets:velocity-3.4.0:testClasses UP-TO-DATE
+> Task :common:jar UP-TO-DATE
+> Task :velocity:compileJava UP-TO-DATE
+> Task :velocity:classes UP-TO-DATE
+> Task :velocity:jar UP-TO-DATE
+> Task :integration-test:targets:velocity-3.4.0:compileTestPluginJava UP-TO-DATE
+> Task :integration-test:targets:velocity-3.4.0:testPluginClasses UP-TO-DATE
+> Task :integration-test:targets:velocity-3.4.0:testPluginJar
+> Task :integration-test:targets:velocity-3.4.0:prepareTestPlugin
+> Task :integration-test:targets:velocity-3.4.0:writeDockerServerProperties
+> Task :integration-test:targets:velocity-3.4.0:stageDockerServerDirectory UP-TO-DATE
+> Task :integration-test:targets:velocity-3.4.0:buildMinecraftServerImage SKIPPED
+
+> Task :integration-test:targets:velocity-3.4.0:minecraftIntegrationTest
+
+VelocityIntegrationTest > commandlib_commands_on_a_velocity_proxy_reach_a_player_through_the_proxy() STARTED
+
+VelocityIntegrationTest > commandlib_commands_on_a_velocity_proxy_reach_a_player_through_the_proxy() STANDARD_ERROR
+    [Test worker] INFO org.testcontainers.DockerClientFactory - Testcontainers version: 1.21.4
+    [Test worker] INFO org.testcontainers.dockerclient.DockerClientProviderStrategy - Loaded org.testcontainers.dockerclient.NpipeSocketClientProviderStrategy from ~/.testcontainers.properties, will try it first
+    [Test worker] INFO org.testcontainers.dockerclient.DockerClientProviderStrategy - Found Docker environment with local Npipe socket (npipe:////./pipe/docker_engine)
+    [Test worker] INFO org.testcontainers.DockerClientFactory - Docker host IP address is localhost
+    [Test worker] INFO org.testcontainers.DockerClientFactory - Connected to docker: 
+      Server Version: 29.8.2
+      API Version: 1.56
+      Operating System: Docker Desktop
+      Total Memory: 7943 MB
+      Labels: 
+        com.docker.desktop.address=npipe://\\.\pipe\docker_cli
+    [Test worker] INFO org.testcontainers.images.PullPolicy - Image pull policy will be performed by: DefaultPullPolicy()
+    [Test worker] INFO org.testcontainers.utility.ImageNameSubstitutor - Image name substitution will be performed by: DefaultImageNameSubstitutor (composite of 'ConfigurationFileImageNameSubstitutor' and 'PrefixingImageNameSubstitutor')
+    [Test worker] INFO tc.testcontainers/ryuk:0.12.0 - Creating container for image: testcontainers/ryuk:0.12.0
+    [Test worker] INFO org.testcontainers.utility.RegistryAuthLocator - Credential helper/store (docker-credential-desktop) does not have credentials for https://index.docker.io/v1/
+    [Test worker] INFO tc.testcontainers/ryuk:0.12.0 - Container testcontainers/ryuk:0.12.0 is starting: 591858b3d681a6777aa39ade3c005a8ad7344886cf69fea4b20c80594750ea9b
+    [Test worker] INFO tc.testcontainers/ryuk:0.12.0 - Container testcontainers/ryuk:0.12.0 started in PT0.9244489S
+    [Test worker] INFO org.testcontainers.utility.RyukResourceReaper - Ryuk started - will monitor and terminate Testcontainers containers on JVM exit
+    [Test worker] INFO org.testcontainers.DockerClientFactory - Checking the system...
+    [Test worker] INFO org.testcontainers.DockerClientFactory - ?? Docker server version should be at least 1.6.0
+    [Test worker] INFO tc.commandlib-it-velocity-3.4.0:5a651bb84edc9188 - Creating container for image: commandlib-it-velocity-3.4.0:5a651bb84edc9188
+    [Test worker] INFO tc.commandlib-it-velocity-3.4.0:5a651bb84edc9188 - Container commandlib-it-velocity-3.4.0:5a651bb84edc9188 is starting: 9ca0aca6e8c2282bfd0014ed4e33d75cc5f59857a88c49b39434fb2689f23c7f
+    [docker-java-stream-1787650762] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-backend] STDOUT: Starting org.bukkit.craftbukkit.Main
+    [docker-java-stream-1787650762] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-backend] STDERR: *** Warning, you've not updated in a while! ***
+    [docker-java-stream-1787650762] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-backend] STDERR: *** Please download a new build from https://papermc.io/downloads/paper ***
+    [docker-java-stream-1787650762] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-backend] STDOUT: 2026-10-16T20:12:31.530260491Z ServerMain WARN Advanced terminal features are not available in this environment
+    [docker-java-stream-1787650762] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-backend] STDOUT: [20:12:31 INFO]: [bootstrap] Running Java 21 (OpenJDK 64-Bit Server VM 21.0.10+7-LTS; Eclipse Adoptium Temurin-21.0.10+7) on Linux 6.18.54.1-microsoft-standard-WSL2 (amd64)
+    [docker-java-stream-1787650762] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-backend] STDOUT: [20:12:31 INFO]: [bootstrap] Loading Paper 1.21.4-232-ver/1.21.4@12d8fe0 (2025-06-09T10:15:42Z) for Minecraft 1.21.4
+    [docker-java-stream-1787650762] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-backend] STDOUT: [20:12:32 INFO]: [PluginInitializerManager] Initializing plugins...
+    [docker-java-stream-1787650762] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-backend] STDOUT: [20:12:32 INFO]: [PluginInitializerManager] Initialized 0 plugins
+    [docker-java-stream-1787650762] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-backend] STDOUT: [20:12:38 INFO]: Environment: Environment[sessionHost=https://sessionserver.mojang.com, servicesHost=https://api.minecraftservices.com, name=PROD]
+    [docker-java-stream-1787650762] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-backend] STDOUT: [20:12:40 INFO]: Loaded 1370 recipes
+    [docker-java-stream-1787650762] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-backend] STDOUT: [20:12:40 INFO]: Loaded 1481 advancements
+    [docker-java-stream-1787650762] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-backend] STDOUT: [20:12:40 INFO]: [MCTypeRegistry] Initialising converters for DataConverter...
+    [docker-java-stream-1787650762] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-backend] STDOUT: [20:12:41 INFO]: [MCTypeRegistry] Finished initialising converters for DataConverter in 349.1ms
+    [docker-java-stream-1787650762] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-backend] STDOUT: [20:12:41 INFO]: Starting minecraft server version 1.21.4
+    [docker-java-stream-1787650762] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-backend] STDOUT: [20:12:41 WARN]: ****************************
+    [docker-java-stream-1787650762] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-backend] STDOUT: [20:12:41 WARN]: YOU ARE RUNNING THIS SERVER AS AN ADMINISTRATIVE OR ROOT USER. THIS IS NOT ADVISED.
+    [docker-java-stream-1787650762] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-backend] STDOUT: [20:12:41 WARN]: YOU ARE OPENING YOURSELF UP TO POTENTIAL RISKS WHEN DOING THIS.
+    [docker-java-stream-1787650762] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-backend] STDOUT: [20:12:41 WARN]: FOR MORE INFORMATION, SEE https://madelinemiller.dev/blog/root-minecraft-server/
+    [docker-java-stream-1787650762] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-backend] STDOUT: [20:12:41 WARN]: ****************************
+    [docker-java-stream-1787650762] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-backend] STDOUT: [20:12:41 INFO]: Loading properties
+    [docker-java-stream-1787650762] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-backend] STDOUT: [20:12:41 INFO]: This server is running Paper version 1.21.4-232-ver/1.21.4@12d8fe0 (2025-06-09T10:15:42Z) (Implementing API version 1.21.4-R0.1-SNAPSHOT)
+    [docker-java-stream-1787650762] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-backend] STDOUT: [20:12:41 INFO]: [spark] This server bundles the spark profiler. For more information please visit https://docs.papermc.io/paper/profiling
+    [docker-java-stream-1787650762] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-backend] STDOUT: [20:12:41 INFO]: Server Ping Player Sample Count: 12
+    [docker-java-stream-1787650762] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-backend] STDOUT: [20:12:41 INFO]: Using 4 threads for Netty based IO
+    [docker-java-stream-1787650762] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-backend] STDOUT: [20:12:42 INFO]: [MoonriseCommon] Paper is using 1 worker threads, 1 I/O threads
+    [docker-java-stream-1787650762] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-backend] STDOUT: [20:12:42 INFO]: [ChunkTaskScheduler] Chunk system is using population gen parallelism: true
+    [docker-java-stream-1787650762] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-backend] STDOUT: [20:12:43 INFO]: Default game type: CREATIVE
+    [docker-java-stream-1787650762] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-backend] STDOUT: [20:12:43 INFO]: Generating keypair
+    [docker-java-stream-1787650762] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-backend] STDOUT: [20:12:43 INFO]: Starting Minecraft server on *:25565
+    [docker-java-stream-1787650762] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-backend] STDOUT: [20:12:43 INFO]: Using epoll channel type
+    [docker-java-stream-1787650762] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-backend] STDOUT: [20:12:43 INFO]: Paper: Using libdeflate (Linux x86_64) compression from Velocity.
+    [docker-java-stream-1787650762] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-backend] STDOUT: [20:12:43 INFO]: Paper: Using OpenSSL 3.x.x (Linux x86_64) cipher from Velocity.
+    [docker-java-stream-1787650762] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-backend] STDOUT: [20:12:43 INFO]: Server permissions file permissions.yml is empty, ignoring it
+    [docker-java-stream-1787650762] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-backend] STDOUT: [20:12:43 WARN]: **** SERVER IS RUNNING IN OFFLINE/INSECURE MODE!
+    [docker-java-stream-1787650762] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-backend] STDOUT: [20:12:43 WARN]: The server will make no attempt to authenticate usernames. Beware.
+    [docker-java-stream-1787650762] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-backend] STDOUT: [20:12:43 WARN]: While this makes the game possible to play without internet access, it also opens up the ability for hackers to connect with any username they choose.
+    [docker-java-stream-1787650762] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-backend] STDOUT: [20:12:43 WARN]: To change this, set "online-mode" to "true" in the server.properties file.
+    [docker-java-stream-1787650762] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-backend] STDOUT: [20:12:43 INFO]: Preparing level "world"
+    [docker-java-stream-1787650762] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-backend] STDOUT: [20:12:43 INFO]: Preparing start region for dimension minecraft:overworld
+    [docker-java-stream-1787650762] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-backend] STDOUT: [20:12:43 INFO]: Preparing spawn area: 0%
+    [docker-java-stream-1787650762] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-backend] STDOUT: [20:12:44 INFO]: Time elapsed: 361 ms
+    [docker-java-stream-1787650762] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-backend] STDOUT: [20:12:44 INFO]: Preparing start region for dimension minecraft:the_end
+    [docker-java-stream-1787650762] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-backend] STDOUT: [20:12:44 INFO]: Preparing spawn area: 0%
+    [docker-java-stream-1787650762] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-backend] STDOUT: [20:12:44 INFO]: Preparing spawn area: 18%
+    [docker-java-stream-1787650762] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-backend] STDOUT: [20:12:44 INFO]: Time elapsed: 583 ms
+    [docker-java-stream-1787650762] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-backend] STDOUT: [20:12:44 INFO]: [spark] Starting background profiler...
+    [docker-java-stream-1787650762] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-backend] STDOUT: [20:12:45 INFO]: Done preparing level "world" (1.623s)
+    [docker-java-stream-1787650762] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-backend] STDOUT: [20:12:45 INFO]: Running delayed init tasks
+    [docker-java-stream-1787650762] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-backend] STDOUT: [20:12:45 INFO]: Done (14.205s)! For help, type "help"
+    [Test worker] INFO tc.commandlib-it-velocity-3.4.0:5a651bb84edc9188 - Container commandlib-it-velocity-3.4.0:5a651bb84edc9188 started in PT17.2845894S
+    [Test worker] INFO tc.commandlib-it-velocity-3.4.0:5a651bb84edc9188 - Creating container for image: commandlib-it-velocity-3.4.0:5a651bb84edc9188
+    [Test worker] INFO tc.commandlib-it-velocity-3.4.0:5a651bb84edc9188 - Container commandlib-it-velocity-3.4.0:5a651bb84edc9188 is starting: 96ae3cbce762752659e59d80a03d88e95d457dd03b8e820355124f9ec7fd0ece
+    [docker-java-stream--255684721] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-proxy] STDOUT: 2026-10-16T20:12:47.414708473Z main WARN Advanced terminal features are not available in this environment
+    [docker-java-stream--255684721] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-proxy] STDOUT: [20:12:49 INFO]: Booting up Velocity 3.4.0...
+    [docker-java-stream--255684721] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-proxy] STDOUT: [20:12:49 INFO]: Loading localizations...
+    [docker-java-stream--255684721] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-proxy] STDOUT: [20:12:49 INFO]: Connections will use epoll channels, libdeflate (Linux x86_64) compression, OpenSSL 3.x.x (Linux x86_64) ciphers
+    [docker-java-stream--255684721] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-proxy] STDOUT: [20:12:49 INFO]: The forwarding-secret-file does not exist. A new file has been created at forwarding.secret
+    [docker-java-stream--255684721] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-proxy] STDOUT: [20:12:49 WARN]: The proxy is running in offline mode! This is a security risk and you will NOT receive any support!
+    [docker-java-stream--255684721] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-proxy] STDOUT: [20:12:49 WARN]: Player info forwarding is disabled! All players will appear to be connecting from the proxy and will have offline-mode UUIDs.
+    [docker-java-stream--255684721] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-proxy] STDOUT: [20:12:49 INFO]: Loading plugins...
+    [docker-java-stream--255684721] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-proxy] STDOUT: [20:12:49 INFO]: Loaded plugin commandlibtest 1.0.0 by 
+    [docker-java-stream--255684721] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-proxy] STDOUT: [20:12:49 INFO]: Loaded 2 plugins
+    [docker-java-stream--255684721] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-proxy] STDOUT: [20:12:49 INFO]: Listening on /[0:0:0:0:0:0:0:0]:25565
+    [docker-java-stream--255684721] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-proxy] STDOUT: [20:12:49 INFO]: Velocity and some of its plugins collect metrics and send them to bStats (https://bStats.org).
+    [docker-java-stream--255684721] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-proxy] STDOUT: [20:12:49 INFO]: bStats collects some basic information for plugin authors, like how many people use
+    [docker-java-stream--255684721] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-proxy] STDOUT: [20:12:49 INFO]: their plugin and their total player count. It's recommended to keep bStats enabled, but
+    [docker-java-stream--255684721] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-proxy] STDOUT: [20:12:49 INFO]: if you're not comfortable with this, you can opt-out by editing the config.txt file in
+    [docker-java-stream--255684721] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-proxy] STDOUT: [20:12:49 INFO]: the '/plugins/bStats/' folder and setting enabled to false.
+    [docker-java-stream--255684721] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-proxy] STDOUT: [20:12:49 INFO]: Done (1.06s)!
+    [Test worker] INFO tc.commandlib-it-velocity-3.4.0:5a651bb84edc9188 - Container commandlib-it-velocity-3.4.0:5a651bb84edc9188 started in PT2.6418034S
+    [docker-java-stream--255684721] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-proxy] STDOUT: [20:12:50 INFO]: [connected player] Maru32768 (/172.22.0.1:56408) has connected
+    [docker-java-stream--255684721] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-proxy] STDOUT: [20:12:50 INFO]: [server connection] Maru32768 -> lobby has connected
+    [docker-java-stream-1787650762] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-backend] STDOUT: [20:12:50 INFO]: UUID of player Maru32768 is 1b13440a-c070-33ad-9860-42cb2c56963f
+    [docker-java-stream-1787650762] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-backend] STDOUT: [20:12:51 INFO]: Maru32768 joined the game
+    [docker-java-stream-1787650762] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-backend] STDOUT: [20:12:51 INFO]: Maru32768[/172.22.0.3:39336] logged in with entity id 11 at ([world]-9.5, -60.0, 8.5)
+    [Test worker] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - Children of /commandlibtest in the bot's command tree: [echo, server, consoleOnly, async, help]
+    [Test worker] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - Suggestions the bot received for /commandlibtest server: [help, lobby]
+    [docker-java-stream--255684721] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-proxy] STDOUT: [20:12:51 INFO]: [connected player] Maru32768 (/172.22.0.1:56408) -> executed command /commandlibtest echo hello
+    [Test worker] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - /commandlibtest echo hello sent the bot [{"color":"green","text":"echo hello"}]
+    [docker-java-stream--255684721] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-proxy] STDOUT: [20:12:51 INFO]: [connected player] Maru32768 (/172.22.0.1:56408) -> executed command /commandlibtest server lobby
+    [Test worker] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - /commandlibtest server lobby sent the bot [{"color":"green","text":"server lobby"}]
+    [docker-java-stream--255684721] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-proxy] STDOUT: [20:12:52 INFO]: [connected player] Maru32768 (/172.22.0.1:56408) -> executed command /commandlibtest server nowhere
+    [Test worker] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - /commandlibtest server nowhere sent the bot [{"color":"red","extra":[{"color":"red","translate":"command.unknown.argument"},"\n",{"extra":[{"italic":true,"color":"red","translate":"command.context.here"}],"text":"˜7...st server ˜c˜nnowhere˜r"}],"text":""}]
+    [docker-java-stream--255684721] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-proxy] STDOUT: [20:12:52 INFO]: [connected player] Maru32768 (/172.22.0.1:56408) -> executed command /commandlibtest consoleOnly
+    [Test worker] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - /commandlibtest consoleOnly sent the bot [{"color":"red","text":"This command can only be executed from the console."}]
+    [docker-java-stream--255684721] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-proxy] STDOUT: [20:12:52 INFO]: [connected player] Maru32768 (/172.22.0.1:56408) -> executed command /commandlibtest denied
+    [Test worker] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - /commandlibtest denied sent the bot [{"color":"red","text":"Incorrect argument for command at position 15: ...ndlibtest <--[HERE]"}]
+    [docker-java-stream--255684721] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-proxy] STDOUT: [20:12:52 INFO]: [connected player] Maru32768 (/172.22.0.1:56408) -> executed command /commandlibtest async
+    [Test worker] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - /commandlibtest async sent the bot [{"color":"green","text":"async done, work off the calling thread: true"}]
+    [docker-java-stream--255684721] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-proxy] STDOUT: [20:12:52 INFO]: [connected player] Maru32768 (/172.22.0.1:56408) has disconnected
+    [docker-java-stream--255684721] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-proxy] STDOUT: [20:12:52 INFO]: [server connection] Maru32768 -> lobby has disconnected
+    [docker-java-stream-1787650762] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-backend] STDOUT: [20:12:52 INFO]: Maru32768 lost connection: Disconnected
+    [docker-java-stream-1787650762] INFO dev.marulabs.commandlib.integration.VelocityIntegrationTest - [velocity-3.4.0-backend] STDOUT: [20:12:52 INFO]: Maru32768 left the game
+
+VelocityIntegrationTest > commandlib_commands_on_a_velocity_proxy_reach_a_player_through_the_proxy() PASSED
+
+BUILD SUCCESSFUL in 58s
+16 actionable tasks: 4 executed, 12 up-to-date
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.5.0/userguide/configuration_cache_enabling.html

@@ -17,3 +17,13 @@ CommandLib usage code.
 
 Prefer focused Gradle verification for touched modules. Do not rewrite unrelated
 code, generated files, or user changes.
+
+## Review records
+
+Store both user-authored and coding-agent reviews in `review-records/runs/<YYYY-MM-DD>-<topic>/`.
+Read `review-records/README.md` and copy `review-records/templates/run/` when starting a review.
+Preserve the original review text and author/source; append triage, evidence, and outcomes separately.
+Record the reviewed commit/range and any uncommitted diff. Keep unresolved findings linked from the roadmap.
+Do not use `.local` or `docs/audits` for new review records. Imported originals live under
+`review-records/archive/`; never rewrite them. Harness cases belong in `review-records/cases/`,
+with agent inputs separated from grading evidence and historical judgments marked as such.

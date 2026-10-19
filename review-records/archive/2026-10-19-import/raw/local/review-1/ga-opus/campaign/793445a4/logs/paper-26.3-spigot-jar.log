@@ -1,0 +1,421 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.5.0/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+Running Stonecutter 0.9.8
+> Task :buildSrc:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :buildSrc:compileKotlin UP-TO-DATE
+> Task :buildSrc:compileJava NO-SOURCE
+> Task :buildSrc:compileGroovy NO-SOURCE
+> Task :buildSrc:pluginDescriptors UP-TO-DATE
+> Task :buildSrc:processResources UP-TO-DATE
+> Task :buildSrc:classes UP-TO-DATE
+> Task :buildSrc:jar UP-TO-DATE
+
+> Configure project :modded
+Stonecutter branch root :modded should not be a buildable project. Remove the `base` or `java` plugin to fix the issue.
+
+> Configure project :modded-testing
+Stonecutter branch root :modded-testing should not be a buildable project. Remove the `base` or `java` plugin to fix the issue.
+
+> Configure project :modded:fabric-1.20.1
+Architectury Loom: 1.17.493
+
+> Configure project :integration-test:shared:modded-fixture
+Stonecutter branch root :integration-test:shared:modded-fixture should not be a buildable project. Remove the `base` or `java` plugin to fix the issue.
+
+> Task :nms:spigot-1.19:processResources NO-SOURCE
+> Task :nms:spigot-1.19.3:processResources NO-SOURCE
+> Task :nms:spigot-1.18.2:processResources NO-SOURCE
+> Task :nms:spigot-1.17.1:processResources NO-SOURCE
+> Task :nms:spigot-1.19.2:processResources NO-SOURCE
+> Task :nms:spigot-1.18.1:processResources NO-SOURCE
+> Task :nms:spigot-1.19.1:processResources NO-SOURCE
+> Task :nms:spigot-1.18:processResources NO-SOURCE
+> Task :nms:spigot-1.17:processResources NO-SOURCE
+> Task :nms:spigot-1.19.4:processResources NO-SOURCE
+> Task :nms:spigot-1.21.1:processResources NO-SOURCE
+> Task :nms:spigot-1.20.2:processResources NO-SOURCE
+> Task :nms:spigot-1.20.6:processResources NO-SOURCE
+> Task :nms:spigot-1.20.3:processResources NO-SOURCE
+> Task :nms:spigot-1.20.4:processResources NO-SOURCE
+> Task :nms:spigot-1.20.1:processResources NO-SOURCE
+> Task :nms:spigot-1.21.3:processResources NO-SOURCE
+> Task :nms:spigot-1.21.11:processResources NO-SOURCE
+> Task :nms:spigot-1.21.10:processResources NO-SOURCE
+> Task :nms:spigot-1.21.4:processResources NO-SOURCE
+> Task :nms:spigot-1.21.8:processResources NO-SOURCE
+> Task :nms:spigot-1.21.5:processResources NO-SOURCE
+> Task :nms:spigot-1.21.6:processResources NO-SOURCE
+> Task :nms:spigot-26.1.2:processResources NO-SOURCE
+> Task :integration-test:targets:paper-26.3-spigot-jar:compileJava NO-SOURCE
+> Task :nms:spigot-1.16.5:installSpigot UP-TO-DATE
+> Task :nms:spigot-1.17:installSpigot UP-TO-DATE
+> Task :integration-test:targets:paper-26.3-spigot-jar:processResources NO-SOURCE
+> Task :nms:spigot-1.16.5:processResources NO-SOURCE
+> Task :integration-test:targets:paper-26.3-spigot-jar:classes UP-TO-DATE
+> Task :nms:spigot-1.17.1:installSpigot UP-TO-DATE
+> Task :nms:spigot-1.18:installSpigot UP-TO-DATE
+> Task :nms:spigot-1.18.1:installSpigot UP-TO-DATE
+> Task :nms:spigot-1.18.2:installSpigot UP-TO-DATE
+> Task :nms:spigot-1.19:installSpigot UP-TO-DATE
+> Task :nms:spigot-1.19.1:installSpigot UP-TO-DATE
+> Task :nms:spigot-1.19.2:installSpigot UP-TO-DATE
+> Task :nms:spigot-1.19.3:installSpigot UP-TO-DATE
+> Task :nms:paper-1.21.1:paperweightUserdevSetup UP-TO-DATE
+> Task :nms:spigot-1.19.4:installSpigot UP-TO-DATE
+> Task :nms:spigot-1.20.1:installSpigot UP-TO-DATE
+> Task :nms:paper-1.21.1:processResources NO-SOURCE
+> Task :nms:paper-1.21.1:writeSpigotPackageMapping UP-TO-DATE
+> Task :nms:spigot-1.20.2:installSpigot UP-TO-DATE
+> Task :nms:spigot-1.20.3:installSpigot UP-TO-DATE
+> Task :nms:spigot-1.20.4:installSpigot UP-TO-DATE
+> Task :nms:spigot-1.20.6:installSpigot UP-TO-DATE
+> Task :nms:spigot-1.21.1:installSpigot UP-TO-DATE
+> Task :nms:paper-1.20.6:paperweightUserdevSetup UP-TO-DATE
+> Task :nms:spigot-1.21.10:installSpigot UP-TO-DATE
+> Task :nms:paper-1.20.6:processResources NO-SOURCE
+> Task :nms:spigot-1.21.11:installSpigot UP-TO-DATE
+> Task :nms:paper-1.20.6:writeSpigotPackageMapping UP-TO-DATE
+> Task :nms:spigot-1.21.3:installSpigot UP-TO-DATE
+> Task :nms:spigot-1.21.4:installSpigot UP-TO-DATE
+> Task :nms:spigot-1.21.5:installSpigot UP-TO-DATE
+> Task :nms:spigot-1.21.6:installSpigot UP-TO-DATE
+> Task :nms:spigot-1.21.8:installSpigot UP-TO-DATE
+> Task :nms:spigot-26.1.2:installSpigot UP-TO-DATE
+> Task :common:compileJava UP-TO-DATE
+> Task :integration-test:targets:paper-26.3-spigot-jar:compileTestJava UP-TO-DATE
+> Task :integration-test:targets:paper-26.3-spigot-jar:processTestResources NO-SOURCE
+> Task :integration-test:targets:paper-26.3-spigot-jar:testClasses UP-TO-DATE
+> Task :spigot:compileJava UP-TO-DATE
+> Task :nms:spigot-1.18:compileJava UP-TO-DATE
+> Task :nms:spigot-1.19.1:compileJava UP-TO-DATE
+> Task :nms:spigot-1.16.5:compileJava UP-TO-DATE
+> Task :nms:spigot-1.19.1:classes UP-TO-DATE
+> Task :nms:spigot-1.18:classes UP-TO-DATE
+> Task :nms:spigot-1.19:compileJava UP-TO-DATE
+> Task :nms:spigot-1.17.1:compileJava UP-TO-DATE
+> Task :nms:spigot-1.18.2:compileJava UP-TO-DATE
+> Task :nms:spigot-1.17:compileJava UP-TO-DATE
+> Task :nms:spigot-1.17.1:classes UP-TO-DATE
+> Task :nms:spigot-1.17:classes UP-TO-DATE
+> Task :nms:spigot-1.18.2:classes UP-TO-DATE
+> Task :nms:spigot-1.16.5:classes UP-TO-DATE
+> Task :nms:spigot-1.19:classes UP-TO-DATE
+> Task :nms:spigot-1.19.1:jar UP-TO-DATE
+> Task :nms:spigot-1.18:jar UP-TO-DATE
+> Task :nms:spigot-1.19.2:compileJava UP-TO-DATE
+> Task :nms:spigot-1.17.1:jar UP-TO-DATE
+> Task :nms:spigot-1.19.2:classes UP-TO-DATE
+> Task :nms:spigot-1.18.1:compileJava UP-TO-DATE
+> Task :nms:spigot-1.18.1:classes UP-TO-DATE
+> Task :nms:spigot-1.19:jar UP-TO-DATE
+> Task :nms:spigot-1.16.5:jar UP-TO-DATE
+> Task :nms:spigot-1.19.3:compileJava UP-TO-DATE
+> Task :nms:spigot-1.18.2:jar UP-TO-DATE
+> Task :nms:spigot-1.19.3:classes UP-TO-DATE
+> Task :nms:spigot-1.17.1:remapMojangToObf UP-TO-DATE
+> Task :nms:spigot-1.18:remapMojangToObf UP-TO-DATE
+> Task :nms:spigot-1.17:jar UP-TO-DATE
+> Task :nms:spigot-1.19.1:remapMojangToObf UP-TO-DATE
+> Task :nms:spigot-1.18.1:jar UP-TO-DATE
+> Task :nms:spigot-1.17.1:remapObfToSpigot UP-TO-DATE
+> Task :nms:spigot-1.18:remapObfToSpigot UP-TO-DATE
+> Task :nms:spigot-1.19.1:remapObfToSpigot UP-TO-DATE
+> Task :nms:spigot-1.19.3:jar UP-TO-DATE
+> Task :nms:spigot-1.19:remapMojangToObf UP-TO-DATE
+> Task :nms:spigot-1.18.2:remapMojangToObf UP-TO-DATE
+> Task :nms:spigot-1.17:remapMojangToObf UP-TO-DATE
+> Task :nms:spigot-1.19.2:jar UP-TO-DATE
+> Task :nms:spigot-1.18.2:remapObfToSpigot UP-TO-DATE
+> Task :nms:spigot-1.17.1:remapSpigotMembers UP-TO-DATE
+> Task :nms:spigot-1.19:remapObfToSpigot UP-TO-DATE
+> Task :nms:spigot-1.19.3:remapMojangToObf UP-TO-DATE
+> Task :nms:spigot-1.18.1:remapMojangToObf UP-TO-DATE
+> Task :nms:spigot-1.19.2:remapMojangToObf UP-TO-DATE
+> Task :nms:spigot-1.18.1:remapObfToSpigot UP-TO-DATE
+> Task :nms:spigot-1.19.2:remapObfToSpigot UP-TO-DATE
+> Task :nms:spigot-1.17:remapObfToSpigot UP-TO-DATE
+> Task :nms:spigot-1.17:remapSpigotMembers UP-TO-DATE
+> Task :nms:spigot-1.19.3:remapObfToSpigot UP-TO-DATE
+> Task :nms:spigot-1.19.4:compileJava UP-TO-DATE
+> Task :nms:spigot-1.19.4:classes UP-TO-DATE
+> Task :nms:spigot-1.19.4:jar UP-TO-DATE
+> Task :nms:spigot-1.20.1:compileJava UP-TO-DATE
+> Task :nms:spigot-1.20.1:classes UP-TO-DATE
+> Task :nms:spigot-1.19.4:remapMojangToObf UP-TO-DATE
+> Task :nms:spigot-1.20.1:jar UP-TO-DATE
+> Task :nms:spigot-1.19.4:remapObfToSpigot UP-TO-DATE
+> Task :nms:spigot-1.20.1:remapMojangToObf UP-TO-DATE
+> Task :nms:spigot-1.20.1:remapObfToSpigot UP-TO-DATE
+> Task :nms:spigot-1.20.3:compileJava UP-TO-DATE
+> Task :nms:spigot-1.20.4:compileJava UP-TO-DATE
+> Task :nms:spigot-1.20.3:classes UP-TO-DATE
+> Task :nms:spigot-1.20.4:classes UP-TO-DATE
+> Task :nms:spigot-1.20.4:jar UP-TO-DATE
+> Task :nms:spigot-1.20.3:jar UP-TO-DATE
+> Task :nms:spigot-1.20.4:remapMojangToObf UP-TO-DATE
+> Task :nms:spigot-1.20.3:remapMojangToObf UP-TO-DATE
+> Task :nms:spigot-1.20.6:compileJava UP-TO-DATE
+> Task :nms:spigot-1.20.6:classes UP-TO-DATE
+> Task :nms:spigot-1.20.4:remapObfToSpigot UP-TO-DATE
+> Task :nms:spigot-1.20.6:jar UP-TO-DATE
+> Task :nms:spigot-1.20.6:remapMojangToObf UP-TO-DATE
+> Task :nms:spigot-1.20.3:remapObfToSpigot UP-TO-DATE
+> Task :nms:spigot-1.20.6:remapObfToSpigot UP-TO-DATE
+> Task :nms:spigot-1.21.1:compileJava UP-TO-DATE
+> Task :nms:spigot-1.21.1:classes UP-TO-DATE
+> Task :nms:spigot-1.20.2:compileJava UP-TO-DATE
+> Task :nms:spigot-1.20.2:classes UP-TO-DATE
+> Task :nms:spigot-1.21.1:jar UP-TO-DATE
+> Task :nms:spigot-1.20.2:jar UP-TO-DATE
+> Task :nms:spigot-1.20.2:remapMojangToObf UP-TO-DATE
+> Task :nms:spigot-1.21.1:remapMojangToObf UP-TO-DATE
+> Task :nms:spigot-1.20.2:remapObfToSpigot UP-TO-DATE
+> Task :nms:spigot-1.21.1:remapObfToSpigot UP-TO-DATE
+> Task :nms:paper-1.20.6:compileJava UP-TO-DATE
+> Task :nms:paper-1.21.1:compileJava UP-TO-DATE
+> Task :nms:paper-1.20.6:classes UP-TO-DATE
+> Task :nms:paper-1.21.1:classes UP-TO-DATE
+> Task :nms:paper-1.20.6:jar UP-TO-DATE
+> Task :nms:spigot-1.21.3:compileJava UP-TO-DATE
+> Task :nms:paper-1.21.1:jar UP-TO-DATE
+> Task :nms:spigot-1.21.3:classes UP-TO-DATE
+> Task :nms:spigot-1.21.3:jar UP-TO-DATE
+> Task :nms:paper-1.20.6:reobfJar UP-TO-DATE
+> Task :nms:paper-1.21.1:reobfJar UP-TO-DATE
+> Task :nms:spigot-1.21.3:remapMojangToObf UP-TO-DATE
+> Task :nms:paper-1.20.6:relocateReobfJar UP-TO-DATE
+> Task :nms:spigot-1.21.3:remapObfToSpigot UP-TO-DATE
+> Task :nms:paper-1.21.1:relocateReobfJar UP-TO-DATE
+> Task :nms:spigot-1.21.5:compileJava UP-TO-DATE
+> Task :nms:spigot-1.21.6:compileJava UP-TO-DATE
+> Task :nms:spigot-1.21.4:compileJava UP-TO-DATE
+> Task :nms:spigot-1.21.5:classes UP-TO-DATE
+> Task :nms:spigot-1.21.6:classes UP-TO-DATE
+> Task :nms:spigot-1.21.4:classes UP-TO-DATE
+> Task :nms:spigot-1.21.8:compileJava UP-TO-DATE
+> Task :nms:spigot-1.21.8:classes UP-TO-DATE
+> Task :nms:spigot-1.21.4:jar UP-TO-DATE
+> Task :nms:spigot-1.21.5:jar UP-TO-DATE
+> Task :nms:spigot-1.21.8:jar UP-TO-DATE
+> Task :nms:spigot-1.21.5:remapMojangToObf UP-TO-DATE
+> Task :nms:spigot-1.21.6:jar UP-TO-DATE
+> Task :nms:spigot-1.21.4:remapMojangToObf UP-TO-DATE
+> Task :nms:spigot-1.21.8:remapMojangToObf UP-TO-DATE
+> Task :nms:spigot-1.21.5:remapObfToSpigot UP-TO-DATE
+> Task :nms:spigot-1.21.4:remapObfToSpigot UP-TO-DATE
+> Task :nms:spigot-1.21.8:remapObfToSpigot UP-TO-DATE
+> Task :nms:spigot-1.21.6:remapMojangToObf UP-TO-DATE
+> Task :nms:spigot-1.21.10:compileJava UP-TO-DATE
+> Task :nms:spigot-1.21.6:remapObfToSpigot UP-TO-DATE
+> Task :nms:spigot-1.21.10:classes UP-TO-DATE
+> Task :nms:spigot-26.1.2:compileJava UP-TO-DATE
+> Task :nms:spigot-1.21.11:compileJava UP-TO-DATE
+> Task :nms:spigot-26.1.2:classes UP-TO-DATE
+> Task :nms:spigot-1.21.11:classes UP-TO-DATE
+> Task :nms:spigot-1.21.10:jar UP-TO-DATE
+> Task :nms:spigot-1.21.11:jar UP-TO-DATE
+> Task :nms:spigot-26.1.2:jar UP-TO-DATE
+> Task :nms:spigot-1.21.10:remapMojangToObf UP-TO-DATE
+> Task :nms:spigot-1.21.10:remapObfToSpigot UP-TO-DATE
+> Task :nms:spigot-1.21.11:remapMojangToObf UP-TO-DATE
+> Task :nms:spigot-1.21.11:remapObfToSpigot UP-TO-DATE
+> Task :spigot:collectTypedNms UP-TO-DATE
+
+> Task :integration-test:targets:paper-26.3-spigot-jar:prepareTestPlugin
+> Task :compileJava
+> Task :processResources UP-TO-DATE
+> Task :classes
+> Task :jar
+> Task :shadowJar
+> Task :assemble
+> Task :compileTestJava NO-SOURCE
+> Task :processTestResources NO-SOURCE
+> Task :testClasses UP-TO-DATE
+> Task :test NO-SOURCE
+> Task :check UP-TO-DATE
+> Task :build
+> Task :copyToServer
+> Task :downloadPluginJars
+> Task :buildAndCopy
+> Task :downloadServerJar
+
+BUILD SUCCESSFUL in 8s
+7 actionable tasks: 6 executed, 1 up-to-date
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.4.1/userguide/configuration_cache_enabling.html
+
+> Task :integration-test:targets:paper-26.3-spigot-jar:writeDockerServerProperties
+> Task :integration-test:targets:paper-26.3-spigot-jar:stageDockerServerDirectory
+> Task :integration-test:targets:paper-26.3-spigot-jar:buildMinecraftServerImage SKIPPED
+
+> Task :integration-test:targets:paper-26.3-spigot-jar:minecraftIntegrationTest
+
+IntegrationTest > player_join_log_detection_accepts_and_mohist_formats() STARTED
+
+IntegrationTest > player_join_log_detection_accepts_and_mohist_formats() PASSED
+
+IntegrationTest > commandlib_test_plugin_succeeds_on_target_version_with_a_real_player() STARTED
+
+IntegrationTest > commandlib_test_plugin_succeeds_on_target_version_with_a_real_player() STANDARD_ERROR
+    [Test worker] INFO org.testcontainers.DockerClientFactory - Testcontainers version: 1.21.4
+    [Test worker] INFO org.testcontainers.dockerclient.DockerClientProviderStrategy - Loaded org.testcontainers.dockerclient.NpipeSocketClientProviderStrategy from ~/.testcontainers.properties, will try it first
+    [Test worker] INFO org.testcontainers.dockerclient.DockerClientProviderStrategy - Found Docker environment with local Npipe socket (npipe:////./pipe/docker_engine)
+    [Test worker] INFO org.testcontainers.DockerClientFactory - Docker host IP address is localhost
+    [Test worker] INFO org.testcontainers.DockerClientFactory - Connected to docker: 
+      Server Version: 29.8.2
+      API Version: 1.56
+      Operating System: Docker Desktop
+      Total Memory: 7943 MB
+      Labels: 
+        com.docker.desktop.address=npipe://\\.\pipe\docker_cli
+    [Test worker] INFO org.testcontainers.images.PullPolicy - Image pull policy will be performed by: DefaultPullPolicy()
+    [Test worker] INFO org.testcontainers.utility.ImageNameSubstitutor - Image name substitution will be performed by: DefaultImageNameSubstitutor (composite of 'ConfigurationFileImageNameSubstitutor' and 'PrefixingImageNameSubstitutor')
+    [Test worker] INFO tc.testcontainers/ryuk:0.12.0 - Creating container for image: testcontainers/ryuk:0.12.0
+    [Test worker] INFO org.testcontainers.utility.RegistryAuthLocator - Credential helper/store (docker-credential-desktop) does not have credentials for https://index.docker.io/v1/
+    [Test worker] INFO tc.testcontainers/ryuk:0.12.0 - Container testcontainers/ryuk:0.12.0 is starting: 84aa827c772355ada5872979d7ea91cc7b555169aba6eb9529aabc24ab05cf7b
+    [Test worker] INFO tc.testcontainers/ryuk:0.12.0 - Container testcontainers/ryuk:0.12.0 started in PT0.706851S
+    [Test worker] INFO org.testcontainers.utility.RyukResourceReaper - Ryuk started - will monitor and terminate Testcontainers containers on JVM exit
+    [Test worker] INFO org.testcontainers.DockerClientFactory - Checking the system...
+    [Test worker] INFO org.testcontainers.DockerClientFactory - ?? Docker server version should be at least 1.6.0
+    [Test worker] INFO tc.commandlib-it-paper-26.3-spigot-jar:8223e6900ba28ad7 - Creating container for image: commandlib-it-paper-26.3-spigot-jar:8223e6900ba28ad7
+    [Test worker] INFO tc.commandlib-it-paper-26.3-spigot-jar:8223e6900ba28ad7 - Container commandlib-it-paper-26.3-spigot-jar:8223e6900ba28ad7 is starting: f6c1ca40a91e28edfd7bc5ad8d28bac71a161f2df1d43ac201be3964382b7b8d
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: Starting org.bukkit.craftbukkit.Main
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDERR: 2026-10-16T22:18:13.003737032Z ServerMain WARN Advanced terminal features are not available in this environment
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: [22:18:13 INFO]: [bootstrap] Running Java 25 (OpenJDK 64-Bit Server VM 25.0.4.1+1-LTS; Eclipse Adoptium Temurin-25.0.4.1+1) on Linux 6.18.54.1-microsoft-standard-WSL2 (amd64)
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: [22:18:13 INFO]: [bootstrap] Loading Paper 26.3-180-main@a2d844f (2026-10-13T13:02:41Z) for Minecraft 26.3
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: [22:18:13 INFO]: [PluginInitializerManager] Initializing plugins...
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: [22:18:14 INFO]: [PluginInitializerManager] Initialized 3 plugins
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: [22:18:14 INFO]: [PluginInitializerManager] Paper plugins (1):
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT:  - PlugManX (3.0.2)
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: [22:18:14 INFO]: [PluginInitializerManager] Bukkit plugins (2):
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT:  - AutoReloader (1.1.0), TestPlugin_26.3_SpigotJar (1.0.0)
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: [22:18:21 INFO]: [ca.spottedleaf.dataconverter.minecraft.datatypes.MCTypeRegistry] Initialising converters for DataConverter...
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: [22:18:22 INFO]: [com.destroystokyo.paper.profile.PaperServicesDiscoveryService] Environment: Environment[discoveryUrl=https://discovery.minecraftservices.com/minecraft/client, name=PROD]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: [22:18:23 INFO]: [ca.spottedleaf.dataconverter.minecraft.datatypes.MCTypeRegistry] Finished initialising converters for DataConverter in 1,466.5ms
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: [22:18:26 INFO]: Loaded 1866 advancements
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: [22:18:26 INFO]: Starting minecraft server version 26.3
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: [22:18:26 WARN]: ****************************
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: [22:18:26 WARN]: YOU ARE RUNNING THIS SERVER AS AN ADMINISTRATIVE OR ROOT USER. THIS IS NOT ADVISED.
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: [22:18:26 WARN]: YOU ARE OPENING YOURSELF UP TO POTENTIAL RISKS WHEN DOING THIS.
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: [22:18:26 WARN]: FOR MORE INFORMATION, SEE https://madelinemiller.dev/blog/root-minecraft-server/
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: [22:18:26 WARN]: ****************************
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: [22:18:26 INFO]: Loading properties
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: [22:18:26 INFO]: This server is running Paper version 26.3-180-main@a2d844f (2026-10-13T13:02:41Z) (Implementing API version 26.3.build.180-stable)
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: [22:18:26 INFO]: [spark] This server bundles the spark profiler. For more information please visit https://docs.papermc.io/paper/profiling
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: [22:18:26 INFO]: Server Ping Player Sample Count: 12
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: [22:18:26 INFO]: Using 4 threads for Netty based IO
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: [22:18:26 INFO]: [MoonriseCommon] Paper is using 1 worker threads, 1 I/O threads
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: [22:18:27 INFO]: Default game type: CREATIVE
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: [22:18:27 INFO]: Generating keypair
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: [22:18:27 INFO]: Starting Minecraft server on *:25565
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: [22:18:27 INFO]: Paper: Using libdeflate (Linux x86_64) compression from Velocity.
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: [22:18:27 INFO]: Paper: Using OpenSSL 3.x.x (Linux x86_64) cipher from Velocity.
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: [22:18:27 INFO]: [PlugManX] Loading server plugin PlugManX v3.0.2
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: [22:18:27 INFO]: [TestPlugin_26.3_SpigotJar] Loading server plugin TestPlugin_26.3_SpigotJar v1.0.0
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: [22:18:27 INFO]: [AutoReloader] Loading server plugin AutoReloader v1.1.0
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: [22:18:27 INFO]: [PlugManX] Enabling PlugManX v3.0.2
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: [22:18:27 ERROR]: Error occurred while enabling PlugManX v3.0.2 (Is it up to date?)
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: java.lang.NumberFormatException: For input string: "build"
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at java.base/java.lang.NumberFormatException.forInputString(Unknown Source) ~[?:?]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at java.base/java.lang.Integer.parseInt(Unknown Source) ~[?:?]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at java.base/java.lang.Integer.parseInt(Unknown Source) ~[?:?]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at PlugManX.jar//paper.com.rylinaux.plugman.PaperInitializer.initializePaperPluginManager(PaperInitializer.java:61) ~[?:?]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at PlugManX.jar//paper.com.rylinaux.plugman.PaperPlugManBootstrapper.lambda$createPlugin$0(PaperPlugManBootstrapper.java:45) ~[?:?]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at PlugManX.jar//bukkit.com.rylinaux.plugman.PlugManBukkit.onEnable(PlugManBukkit.java:90) ~[?:?]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at org.bukkit.plugin.java.JavaPlugin.setEnabled(JavaPlugin.java:280) ~[paper-api-26.3.build.180-stable.jar:?]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at io.papermc.paper.plugin.manager.PaperPluginInstanceManager.enablePlugin(PaperPluginInstanceManager.java:201) ~[paper-26.3.jar:26.3-180-a2d844f]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at io.papermc.paper.plugin.manager.PaperPluginManagerImpl.enablePlugin(PaperPluginManagerImpl.java:109) ~[paper-26.3.jar:26.3-180-a2d844f]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at org.bukkit.plugin.SimplePluginManager.enablePlugin(SimplePluginManager.java:519) ~[paper-api-26.3.build.180-stable.jar:?]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at org.bukkit.craftbukkit.CraftServer.enablePlugin(CraftServer.java:614) ~[paper-26.3.jar:26.3-180-a2d844f]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at org.bukkit.craftbukkit.CraftServer.enablePlugins(CraftServer.java:571) ~[paper-26.3.jar:26.3-180-a2d844f]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at net.minecraft.server.dedicated.DedicatedServer.initServer(DedicatedServer.java:298) ~[paper-26.3.jar:26.3-180-a2d844f]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at net.minecraft.server.MinecraftServer.runServer(MinecraftServer.java:1248) ~[paper-26.3.jar:26.3-180-a2d844f]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at net.minecraft.server.MinecraftServer.lambda$spin$0(MinecraftServer.java:298) ~[paper-26.3.jar:26.3-180-a2d844f]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at java.base/java.lang.Thread.run(Unknown Source) ~[?:?]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: [22:18:27 INFO]: [PlugManX] Disabling PlugManX v3.0.2
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: [22:18:27 WARN]: **** SERVER IS RUNNING IN OFFLINE/INSECURE MODE!
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: [22:18:27 WARN]: The server will make no attempt to authenticate usernames. Beware.
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: [22:18:27 WARN]: While this makes the game possible to play without internet access, it also opens up the ability for hackers to connect with any username they choose.
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: [22:18:27 WARN]: To change this, set "online-mode" to "true" in the server.properties file.
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: [22:18:27 INFO]: Preparing level "world"
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: [22:18:28 INFO]: Loading 0 persistent chunks for level 'minecraft:overworld'...
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: [22:18:28 INFO]: Prepared spawn area in 0 ms
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: [22:18:28 INFO]: Loading 0 persistent chunks for level 'minecraft:the_nether'...
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: [22:18:28 INFO]: Prepared spawn area in 0 ms
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: [22:18:28 INFO]: Done preparing level "world" (0.344s)
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: [22:18:28 INFO]: [TestPlugin_26.3_SpigotJar] Enabling TestPlugin_26.3_SpigotJar v1.0.0
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: [22:18:28 ERROR]: [TestPlugin_26.3_SpigotJar] COMMANDLIB_TEST_PLUGIN_ENABLE_FAILED
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: dev.marulabs.testplugin_26.3_spigotjar.commandlib.util.nms.exception.NMSClassNotFoundException: NMSArgumentNamespacedKey has no implementation for Minecraft 26.3 (spigot_26_1_2: its mappings do not match the plugin). The spigot artifact of CommandLib supports Paper up to 1.21.1; use the paper artifact on Paper 26.3
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at TestPlugin_26.3_SpigotJar-1.0.0.jar//dev.marulabs.testplugin_26.3_spigotjar.commandlib.util.nms.NMSClassRegistry.resolve(NMSClassRegistry.java:189) ~[?:?]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at TestPlugin_26.3_SpigotJar-1.0.0.jar//dev.marulabs.testplugin_26.3_spigotjar.commandlib.util.nms.NMSClassRegistry.resolution(NMSClassRegistry.java:152) ~[?:?]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at TestPlugin_26.3_SpigotJar-1.0.0.jar//dev.marulabs.testplugin_26.3_spigotjar.commandlib.util.nms.NMSClassRegistry.find(NMSClassRegistry.java:116) ~[?:?]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at TestPlugin_26.3_SpigotJar-1.0.0.jar//dev.marulabs.testplugin_26.3_spigotjar.commandlib.util.nms.NMSClassRegistry.findClass(NMSClassRegistry.java:66) ~[?:?]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at TestPlugin_26.3_SpigotJar-1.0.0.jar//dev.marulabs.testplugin_26.3_spigotjar.commandlib.util.nms.argument.NMSArgumentNamespacedKey.create(NMSArgumentNamespacedKey.java:9) ~[?:?]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at TestPlugin_26.3_SpigotJar-1.0.0.jar//dev.marulabs.testplugin_26.3_spigotjar.commandlib.argument.AdvancementArgument.<init>(AdvancementArgument.java:16) ~[?:?]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at TestPlugin_26.3_SpigotJar-1.0.0.jar//dev.marulabs.testplugin.ArgumentTest$1.<init>(ArgumentTest.java:99) ~[?:?]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at TestPlugin_26.3_SpigotJar-1.0.0.jar//dev.marulabs.testplugin.ArgumentTest.advancementArgument(ArgumentTest.java:98) ~[?:?]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at TestPlugin_26.3_SpigotJar-1.0.0.jar//dev.marulabs.testplugin.ArgumentTest.build(ArgumentTest.java:35) ~[?:?]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at TestPlugin_26.3_SpigotJar-1.0.0.jar//dev.marulabs.testplugin.TestMain.lambda$register$2(TestMain.java:123) ~[?:?]
+    [Test worker] INFO tc.commandlib-it-paper-26.3-spigot-jar:8223e6900ba28ad7 - Container commandlib-it-paper-26.3-spigot-jar:8223e6900ba28ad7 started in PT16.6172092S
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(Unknown Source) ~[?:?]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at java.base/java.util.AbstractList$RandomAccessSpliterator.forEachRemaining(Unknown Source) ~[?:?]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at java.base/java.util.stream.AbstractPipeline.copyInto(Unknown Source) ~[?:?]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(Unknown Source) ~[?:?]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at java.base/java.util.stream.ReduceOps$ReduceOp.evaluateSequential(Unknown Source) ~[?:?]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at java.base/java.util.stream.AbstractPipeline.evaluate(Unknown Source) ~[?:?]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at java.base/java.util.stream.ReferencePipeline.collect(Unknown Source) ~[?:?]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at TestPlugin_26.3_SpigotJar-1.0.0.jar//dev.marulabs.testplugin.TestMain.register(TestMain.java:125) ~[?:?]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at TestPlugin_26.3_SpigotJar-1.0.0.jar//dev.marulabs.testplugin.TestMain.register(TestMain.java:84) ~[?:?]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at TestPlugin_26.3_SpigotJar-1.0.0.jar//dev.marulabs.testplugin.TestMain.register(TestMain.java:48) ~[?:?]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at TestPlugin_26.3_SpigotJar-1.0.0.jar//dev.marulabs.testplugin.TestPlugin.onEnable(TestPlugin.java:14) ~[?:?]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at org.bukkit.plugin.java.JavaPlugin.setEnabled(JavaPlugin.java:280) ~[paper-api-26.3.build.180-stable.jar:?]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at io.papermc.paper.plugin.manager.PaperPluginInstanceManager.enablePlugin(PaperPluginInstanceManager.java:201) ~[paper-26.3.jar:26.3-180-a2d844f]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at io.papermc.paper.plugin.manager.PaperPluginManagerImpl.enablePlugin(PaperPluginManagerImpl.java:109) ~[paper-26.3.jar:26.3-180-a2d844f]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at org.bukkit.plugin.SimplePluginManager.enablePlugin(SimplePluginManager.java:519) ~[paper-api-26.3.build.180-stable.jar:?]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at org.bukkit.craftbukkit.CraftServer.enablePlugin(CraftServer.java:614) ~[paper-26.3.jar:26.3-180-a2d844f]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at org.bukkit.craftbukkit.CraftServer.enablePlugins(CraftServer.java:571) ~[paper-26.3.jar:26.3-180-a2d844f]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at net.minecraft.server.MinecraftServer.initPostWorld(MinecraftServer.java:641) ~[paper-26.3.jar:26.3-180-a2d844f]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at net.minecraft.server.dedicated.DedicatedServer.initServer(DedicatedServer.java:343) ~[paper-26.3.jar:26.3-180-a2d844f]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at net.minecraft.server.MinecraftServer.runServer(MinecraftServer.java:1248) ~[paper-26.3.jar:26.3-180-a2d844f]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at net.minecraft.server.MinecraftServer.lambda$spin$0(MinecraftServer.java:298) ~[paper-26.3.jar:26.3-180-a2d844f]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at java.base/java.lang.Thread.run(Unknown Source) ~[?:?]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: [22:18:28 ERROR]: Error occurred while enabling TestPlugin_26.3_SpigotJar v1.0.0 (Is it up to date?)
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: dev.marulabs.testplugin_26.3_spigotjar.commandlib.util.nms.exception.NMSClassNotFoundException: NMSArgumentNamespacedKey has no implementation for Minecraft 26.3 (spigot_26_1_2: its mappings do not match the plugin). The spigot artifact of CommandLib supports Paper up to 1.21.1; use the paper artifact on Paper 26.3
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at TestPlugin_26.3_SpigotJar-1.0.0.jar//dev.marulabs.testplugin_26.3_spigotjar.commandlib.util.nms.NMSClassRegistry.resolve(NMSClassRegistry.java:189) ~[?:?]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at TestPlugin_26.3_SpigotJar-1.0.0.jar//dev.marulabs.testplugin_26.3_spigotjar.commandlib.util.nms.NMSClassRegistry.resolution(NMSClassRegistry.java:152) ~[?:?]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at TestPlugin_26.3_SpigotJar-1.0.0.jar//dev.marulabs.testplugin_26.3_spigotjar.commandlib.util.nms.NMSClassRegistry.find(NMSClassRegistry.java:116) ~[?:?]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at TestPlugin_26.3_SpigotJar-1.0.0.jar//dev.marulabs.testplugin_26.3_spigotjar.commandlib.util.nms.NMSClassRegistry.findClass(NMSClassRegistry.java:66) ~[?:?]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at TestPlugin_26.3_SpigotJar-1.0.0.jar//dev.marulabs.testplugin_26.3_spigotjar.commandlib.util.nms.argument.NMSArgumentNamespacedKey.create(NMSArgumentNamespacedKey.java:9) ~[?:?]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at TestPlugin_26.3_SpigotJar-1.0.0.jar//dev.marulabs.testplugin_26.3_spigotjar.commandlib.argument.AdvancementArgument.<init>(AdvancementArgument.java:16) ~[?:?]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at TestPlugin_26.3_SpigotJar-1.0.0.jar//dev.marulabs.testplugin.ArgumentTest$1.<init>(ArgumentTest.java:99) ~[?:?]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at TestPlugin_26.3_SpigotJar-1.0.0.jar//dev.marulabs.testplugin.ArgumentTest.advancementArgument(ArgumentTest.java:98) ~[?:?]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at TestPlugin_26.3_SpigotJar-1.0.0.jar//dev.marulabs.testplugin.ArgumentTest.build(ArgumentTest.java:35) ~[?:?]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at TestPlugin_26.3_SpigotJar-1.0.0.jar//dev.marulabs.testplugin.TestMain.lambda$register$2(TestMain.java:123) ~[?:?]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(Unknown Source) ~[?:?]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at java.base/java.util.AbstractList$RandomAccessSpliterator.forEachRemaining(Unknown Source) ~[?:?]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at java.base/java.util.stream.AbstractPipeline.copyInto(Unknown Source) ~[?:?]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(Unknown Source) ~[?:?]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at java.base/java.util.stream.ReduceOps$ReduceOp.evaluateSequential(Unknown Source) ~[?:?]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at java.base/java.util.stream.AbstractPipeline.evaluate(Unknown Source) ~[?:?]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at java.base/java.util.stream.ReferencePipeline.collect(Unknown Source) ~[?:?]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at TestPlugin_26.3_SpigotJar-1.0.0.jar//dev.marulabs.testplugin.TestMain.register(TestMain.java:125) ~[?:?]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at TestPlugin_26.3_SpigotJar-1.0.0.jar//dev.marulabs.testplugin.TestMain.register(TestMain.java:84) ~[?:?]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at TestPlugin_26.3_SpigotJar-1.0.0.jar//dev.marulabs.testplugin.TestMain.register(TestMain.java:48) ~[?:?]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at TestPlugin_26.3_SpigotJar-1.0.0.jar//dev.marulabs.testplugin.TestPlugin.onEnable(TestPlugin.java:14) ~[?:?]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at org.bukkit.plugin.java.JavaPlugin.setEnabled(JavaPlugin.java:280) ~[paper-api-26.3.build.180-stable.jar:?]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at io.papermc.paper.plugin.manager.PaperPluginInstanceManager.enablePlugin(PaperPluginInstanceManager.java:201) ~[paper-26.3.jar:26.3-180-a2d844f]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at io.papermc.paper.plugin.manager.PaperPluginManagerImpl.enablePlugin(PaperPluginManagerImpl.java:109) ~[paper-26.3.jar:26.3-180-a2d844f]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at org.bukkit.plugin.SimplePluginManager.enablePlugin(SimplePluginManager.java:519) ~[paper-api-26.3.build.180-stable.jar:?]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at org.bukkit.craftbukkit.CraftServer.enablePlugin(CraftServer.java:614) ~[paper-26.3.jar:26.3-180-a2d844f]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at org.bukkit.craftbukkit.CraftServer.enablePlugins(CraftServer.java:571) ~[paper-26.3.jar:26.3-180-a2d844f]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at net.minecraft.server.MinecraftServer.initPostWorld(MinecraftServer.java:641) ~[paper-26.3.jar:26.3-180-a2d844f]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at net.minecraft.server.dedicated.DedicatedServer.initServer(DedicatedServer.java:343) ~[paper-26.3.jar:26.3-180-a2d844f]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at net.minecraft.server.MinecraftServer.runServer(MinecraftServer.java:1248) ~[paper-26.3.jar:26.3-180-a2d844f]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at net.minecraft.server.MinecraftServer.lambda$spin$0(MinecraftServer.java:298) ~[paper-26.3.jar:26.3-180-a2d844f]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: 	at java.base/java.lang.Thread.run(Unknown Source) ~[?:?]
+    [docker-java-stream--653445838] INFO dev.marulabs.commandlib.integration.IntegrationTest - [paper-26.3-spigot-jar] STDOUT: [22:18:28 INFO]: [TestPlugin_26.3_SpigotJar] Disabling TestPlugin_26.3_SpigotJar v1.0.0
+
+IntegrationTest > commandlib_test_plugin_succeeds_on_target_version_with_a_real_player() PASSED
+
+BUILD SUCCESSFUL in 1m 1s
+147 actionable tasks: 4 executed, 143 up-to-date
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.5.0/userguide/configuration_cache_enabling.html

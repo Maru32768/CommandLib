@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.marulabs.commandlib.integration.IntegrationTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-10-16T18:07:52.828Z" hostname="DESKTOP-QPTG3LN" time="26.876">
+  <properties/>
+  <testcase name="player_join_log_detection_accepts_and_mohist_formats()" classname="dev.marulabs.commandlib.integration.IntegrationTest" time="0.057"/>
+  <testcase name="commandlib_test_plugin_succeeds_on_target_version_with_a_real_player()" classname="dev.marulabs.commandlib.integration.IntegrationTest" time="26.79"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[[Test worker] INFO org.testcontainers.DockerClientFactory - Testcontainers version: 1.21.4
+[Test worker] INFO org.testcontainers.dockerclient.DockerClientProviderStrategy - Loaded org.testcontainers.dockerclient.NpipeSocketClientProviderStrategy from ~/.testcontainers.properties, will try it first
+[Test worker] INFO org.testcontainers.dockerclient.DockerClientProviderStrategy - Found Docker environment with local Npipe socket (npipe:////./pipe/docker_engine)
+[Test worker] INFO org.testcontainers.DockerClientFactory - Docker host IP address is localhost
+[Test worker] INFO org.testcontainers.DockerClientFactory - Connected to docker: 
+  Server Version: 29.8.2
+  API Version: 1.56
+  Operating System: Docker Desktop
+  Total Memory: 7943 MB
+  Labels: 
+    com.docker.desktop.address=npipe://\\.\pipe\docker_cli
+[Test worker] INFO org.testcontainers.images.PullPolicy - Image pull policy will be performed by: DefaultPullPolicy()
+[Test worker] INFO org.testcontainers.utility.ImageNameSubstitutor - Image name substitution will be performed by: DefaultImageNameSubstitutor (composite of 'ConfigurationFileImageNameSubstitutor' and 'PrefixingImageNameSubstitutor')
+[Test worker] INFO tc.testcontainers/ryuk:0.12.0 - Creating container for image: testcontainers/ryuk:0.12.0
+[Test worker] INFO org.testcontainers.utility.RegistryAuthLocator - Credential helper/store (docker-credential-desktop) does not have credentials for https://index.docker.io/v1/
+[Test worker] INFO tc.testcontainers/ryuk:0.12.0 - Container testcontainers/ryuk:0.12.0 is starting: e727337f61087721f6179d6f2982a239fc69a6def75bc12e411d4087940afe90
+[Test worker] INFO tc.testcontainers/ryuk:0.12.0 - Container testcontainers/ryuk:0.12.0 started in PT0.6707108S
+[Test worker] INFO org.testcontainers.utility.RyukResourceReaper - Ryuk started - will monitor and terminate Testcontainers containers on JVM exit
+[Test worker] INFO org.testcontainers.DockerClientFactory - Checking the system...
+[Test worker] INFO org.testcontainers.DockerClientFactory - ✔︎ Docker server version should be at least 1.6.0
+[Test worker] INFO tc.commandlib-it-folia-26.3:6df6af57b45b31e6 - Creating container for image: commandlib-it-folia-26.3:6df6af57b45b31e6
+[Test worker] INFO tc.commandlib-it-folia-26.3:6df6af57b45b31e6 - Container commandlib-it-folia-26.3:6df6af57b45b31e6 is starting: 6a38442dac9692fa8bb1f64c579184381300a75cc03cbc665f14c22d0c92c5cf
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: Starting org.bukkit.craftbukkit.Main
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDERR: 2026-10-16T18:07:58.315002112Z ServerMain WARN Advanced terminal features are not available in this environment
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:07:58 INFO]: [bootstrap] Running Java 25 (OpenJDK 64-Bit Server VM 25.0.4.1+1-LTS; Eclipse Adoptium Temurin-25.0.4.1+1) on Linux 6.18.54.1-microsoft-standard-WSL2 (amd64)
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:07:58 INFO]: [bootstrap] Loading Folia 26.3-3-ver/26.3.x@597e413 (2026-10-14T20:19:41Z) for Minecraft 26.3
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:07:58 INFO]: [PluginInitializerManager] Initializing plugins...
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:07:59 ERROR]: [DirectoryProviderSource] Error loading plugin: Could not load plugin 'AutoReloader v1.1.0' as it is not marked as supporting Folia!
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: java.lang.RuntimeException: Could not load plugin 'AutoReloader v1.1.0' as it is not marked as supporting Folia!
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: 	at io.papermc.paper.plugin.provider.type.spigot.SpigotPluginProviderFactory.build(SpigotPluginProviderFactory.java:31) ~[folia-26.3.jar:26.3-3-597e413]
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: 	at io.papermc.paper.plugin.provider.type.spigot.SpigotPluginProviderFactory.build(SpigotPluginProviderFactory.java:25) ~[folia-26.3.jar:26.3-3-597e413]
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: 	at io.papermc.paper.plugin.provider.type.PluginFileType.register(PluginFileType.java:72) ~[folia-26.3.jar:26.3-3-597e413]
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: 	at io.papermc.paper.plugin.provider.source.FileProviderSource.registerProviders(FileProviderSource.java:84) ~[folia-26.3.jar:26.3-3-597e413]
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: 	at io.papermc.paper.plugin.provider.source.DirectoryProviderSource.registerProviders(DirectoryProviderSource.java:58) ~[folia-26.3.jar:26.3-3-597e413]
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: 	at io.papermc.paper.plugin.provider.source.DirectoryProviderSource.registerProviders(DirectoryProviderSource.java:17) ~[folia-26.3.jar:26.3-3-597e413]
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: 	at io.papermc.paper.plugin.util.EntrypointUtil.registerProvidersFromSource(EntrypointUtil.java:15) ~[folia-26.3.jar:26.3-3-597e413]
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: 	at io.papermc.paper.plugin.PluginInitializerManager.load(PluginInitializerManager.java:104) ~[folia-26.3.jar:26.3-3-597e413]
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: 	at net.minecraft.server.Main.main(Main.java:113) ~[folia-26.3.jar:26.3-3-597e413]
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: 	at io.papermc.paper.PaperBootstrap.boot(PaperBootstrap.java:25) ~[folia-26.3.jar:26.3-3-597e413]
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: 	at org.bukkit.craftbukkit.Main.main(Main.java:209) ~[folia-26.3.jar:26.3-3-597e413]
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: 	at io.papermc.paperclip.Paperclip.lambda$main$0(Paperclip.java:42) ~[?:?]
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: 	at java.base/java.lang.Thread.run(Unknown Source) ~[?:?]
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:07:59 INFO]: [PluginInitializerManager] Initialized 2 plugins
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:07:59 INFO]: [PluginInitializerManager] Paper plugins (1):
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT:  - PlugManX (3.0.2)
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:07:59 INFO]: [PluginInitializerManager] Bukkit plugins (1):
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT:  - TestPlugin_Folia_26.3 (1.0.0)
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:08:04 INFO]: [ca.spottedleaf.dataconverter.minecraft.datatypes.MCTypeRegistry] Initialising converters for DataConverter...
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:08:04 INFO]: [com.destroystokyo.paper.profile.PaperServicesDiscoveryService] Environment: Environment[discoveryUrl=https://discovery.minecraftservices.com/minecraft/client, name=PROD]
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:08:06 INFO]: [ca.spottedleaf.dataconverter.minecraft.datatypes.MCTypeRegistry] Finished initialising converters for DataConverter in 1,408.9ms
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:08:08 INFO]: Loaded 1866 advancements
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:08:08 INFO]: Starting minecraft server version 26.3
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:08:08 WARN]: ****************************
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:08:08 WARN]: YOU ARE RUNNING THIS SERVER AS AN ADMINISTRATIVE OR ROOT USER. THIS IS NOT ADVISED.
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:08:08 WARN]: YOU ARE OPENING YOURSELF UP TO POTENTIAL RISKS WHEN DOING THIS.
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:08:08 WARN]: FOR MORE INFORMATION, SEE https://madelinemiller.dev/blog/root-minecraft-server/
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:08:08 WARN]: ****************************
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:08:08 INFO]: Loading properties
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:08:08 INFO]: This server is running Folia version 26.3-3-ver/26.3.x@597e413 (2026-10-14T20:19:41Z) (Implementing API version 26.3.build.3-alpha)
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:08:09 INFO]: [spark] This server bundles the spark profiler. For more information please visit https://docs.papermc.io/paper/profiling
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:08:09 INFO]: Server Ping Player Sample Count: 12
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:08:09 INFO]: Using 4 threads for Netty based IO
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:08:09 INFO]: [MoonriseCommon] Paper is using 1 worker threads, 1 I/O threads
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:08:09 INFO]: [io.papermc.paper.threadedregions.TickRegions] Initialised EDF Folia scheduler with initial 1 target thread(s)
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:08:09 INFO]: Default game type: CREATIVE
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:08:09 INFO]: Generating keypair
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:08:09 INFO]: Starting Minecraft server on *:25565
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:08:09 INFO]: Paper: Using libdeflate (Linux x86_64) compression from Velocity.
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:08:09 INFO]: Paper: Using OpenSSL 3.x.x (Linux x86_64) cipher from Velocity.
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:08:10 INFO]: [PlugManX] Loading server plugin PlugManX v3.0.2
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:08:10 INFO]: [TestPlugin_Folia_26.3] Loading server plugin TestPlugin_Folia_26.3 v1.0.0
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:08:10 INFO]: [PlugManX] Enabling PlugManX v3.0.2
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:08:10 ERROR]: Error occurred while enabling PlugManX v3.0.2 (Is it up to date?)
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: java.lang.NumberFormatException: For input string: "build"
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: 	at java.base/java.lang.NumberFormatException.forInputString(Unknown Source) ~[?:?]
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: 	at java.base/java.lang.Integer.parseInt(Unknown Source) ~[?:?]
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: 	at java.base/java.lang.Integer.parseInt(Unknown Source) ~[?:?]
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: 	at PlugManX.jar//paper.com.rylinaux.plugman.PaperInitializer.initializePaperPluginManager(PaperInitializer.java:61) ~[?:?]
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: 	at PlugManX.jar//paper.com.rylinaux.plugman.PaperPlugManBootstrapper.lambda$createPlugin$0(PaperPlugManBootstrapper.java:45) ~[?:?]
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: 	at PlugManX.jar//bukkit.com.rylinaux.plugman.PlugManBukkit.onEnable(PlugManBukkit.java:90) ~[?:?]
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: 	at org.bukkit.plugin.java.JavaPlugin.setEnabled(JavaPlugin.java:280) ~[folia-api-26.3.build.3-alpha.jar:?]
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: 	at io.papermc.paper.plugin.manager.PaperPluginInstanceManager.enablePlugin(PaperPluginInstanceManager.java:201) ~[folia-26.3.jar:26.3-3-597e413]
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: 	at io.papermc.paper.plugin.manager.PaperPluginManagerImpl.enablePlugin(PaperPluginManagerImpl.java:109) ~[folia-26.3.jar:26.3-3-597e413]
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: 	at org.bukkit.plugin.SimplePluginManager.enablePlugin(SimplePluginManager.java:519) ~[folia-api-26.3.build.3-alpha.jar:?]
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: 	at org.bukkit.craftbukkit.CraftServer.enablePlugin(CraftServer.java:614) ~[folia-26.3.jar:26.3-3-597e413]
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: 	at org.bukkit.craftbukkit.CraftServer.enablePlugins(CraftServer.java:571) ~[folia-26.3.jar:26.3-3-597e413]
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: 	at net.minecraft.server.dedicated.DedicatedServer.initServer(DedicatedServer.java:298) ~[folia-26.3.jar:26.3-3-597e413]
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: 	at net.minecraft.server.MinecraftServer.runServer(MinecraftServer.java:1324) ~[folia-26.3.jar:26.3-3-597e413]
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: 	at net.minecraft.server.MinecraftServer.lambda$spin$0(MinecraftServer.java:297) ~[folia-26.3.jar:26.3-3-597e413]
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: 	at java.base/java.lang.Thread.run(Unknown Source) ~[?:?]
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:08:10 INFO]: [PlugManX] Disabling PlugManX v3.0.2
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:08:10 WARN]: **** SERVER IS RUNNING IN OFFLINE/INSECURE MODE!
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:08:10 WARN]: The server will make no attempt to authenticate usernames. Beware.
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:08:10 WARN]: While this makes the game possible to play without internet access, it also opens up the ability for hackers to connect with any username they choose.
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:08:10 WARN]: To change this, set "online-mode" to "true" in the server.properties file.
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:08:10 INFO]: Preparing level "world"
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:08:10 INFO]: Loading 0 persistent chunks for level 'minecraft:overworld'...
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:08:10 INFO]: Preparing spawn area: 100%
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:08:10 INFO]: Prepared spawn area in 1 ms
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:08:10 INFO]: Loading 0 persistent chunks for level 'minecraft:the_nether'...
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:08:10 INFO]: Prepared spawn area in 0 ms
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:08:10 INFO]: Loading 0 persistent chunks for level 'minecraft:the_end'...
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:08:10 INFO]: Prepared spawn area in 0 ms
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:08:10 INFO]: Done preparing level "world" (0.413s)
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:08:10 INFO]: [TestPlugin_Folia_26.3] Enabling TestPlugin_Folia_26.3 v1.0.0
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:08:10 INFO]: [spark] The spark plugin has been preferred but was not loaded. The bundled spark profiler will enabled instead.
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:08:10 INFO]: [spark] The spark profiler will not be enabled because it is currently disabled in the configuration.
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:08:11 INFO]: Saving chunks for level 'ServerLevel[world]'/minecraft:overworld
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:08:11 INFO]: Saving chunks for level 'ServerLevel[world]'/minecraft:the_nether
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:08:11 INFO]: Saving chunks for level 'ServerLevel[world]'/minecraft:the_end
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:08:11 INFO]: Done (13.695s)! For help, type "help"
+[Test worker] INFO tc.commandlib-it-folia-26.3:6df6af57b45b31e6 - Container commandlib-it-folia-26.3:6df6af57b45b31e6 started in PT17.177063S
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:08:11 INFO]: UUID of player Maru32768 is 1b13440a-c070-33ad-9860-42cb2c56963f
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:08:14 INFO]: System chat: Maru32768 joined the game
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:08:14 INFO]: Maru32768[/172.17.0.1:39282] logged in with entity id 1 at ([minecraft:overworld]-6.5, -60.0, -0.5)
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:08:14 INFO]: Maru32768 issued server command: /commandlibtest runTests
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:08:16 INFO]: [TestPlugin_Folia_26.3] FoliaSmokeTest.playerAsyncThread: work does not own Maru32768 on Folia Async Scheduler Thread #0, continuation owns Maru32768 on Folia Region Scheduler Thread #0
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:08:16 INFO]: [TestPlugin_Folia_26.3] FoliaSmokeTest.suggestion: Sent [result]
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:08:16 INFO]: [TestPlugin_Folia_26.3] FoliaSmokeTest.runningOnFolia: Folia
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:08:16 INFO]: [TestPlugin_Folia_26.3] FoliaSmokeTest.consoleAsyncThread: work does not own CONSOLE on Folia Async Scheduler Thread #1, continuation owns CONSOLE on Folia Region Scheduler Thread #0
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:08:16 INFO]: [TestPlugin_Folia_26.3] SUCCEEDED: 4  FAILED: 0
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:08:17 INFO]: Maru32768 issued server command: /commandlibtest helpMessageRoot
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:08:17 INFO]: Maru32768 issued server command: /commandlibtest enumArgument not_a_material
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:08:17 INFO]: Maru32768 issued server command: /commandlibtest testConvertCommandSyntaxException true
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:08:18 INFO]: Maru32768 issued server command: /commandlibtest deniedProbe
+[docker-java-stream--202800956] INFO dev.marulabs.commandlib.integration.IntegrationTest - [folia-26.3] STDOUT: [18:08:18 INFO]: Maru32768 lost connection: Disconnected
+]]></system-err>
+</testsuite>

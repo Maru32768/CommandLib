@@ -1,0 +1,190 @@
+4848c3d8 feat!: add repeatable, required, aliased and mutually exclusive options
+5d191180 style: format the files the last spigot and integration-test commits left unformatted
+0926dd52 fix(modded): send converted vanilla argument errors as failures
+189ca4ce fix(common): word the default prerequisite failure like the permission check
+3832e2f1 docs: add the argument catalog compared with CommandAPI and Paper
+dc564766 docs: specify errors, suggestions, permissions and downstream testing
+f4b35e54 docs: add the CommandAPI migration guide and link the docs from the README
+dfba1c85 feat(paper): add playerRequirer and consoleRequirer like the spigot module
+badcf457 test(spigot-testing): check the error behavior the docs describe
+7cdcc801 docs: list the Paper requirers in the errors and migration docs
+01197beb docs: record the options and docs work in the roadmap and drop the old argument catalog
+6f508cd3 feat: add optional and variadic trailing arguments
+bfe96343 docs: record optional and variadic arguments in the roadmap
+e6b1a4a1 feat(spigot)!: read EntityTypeArgument by registry key like Paper
+2bbc4dbd feat!: read display slots and colors by their vanilla names
+5bae7f83 docs: record the registry key arguments in the roadmap
+a972b06b build: include license notices in published archives
+6d113014 feat: resend command trees with CommandLib.refresh and refreshAll
+94c6cc32 docs: record the command tree refresh in the roadmap
+2f8d4d37 feat: store command results in /execute and send vanilla-style feedback
+0898306f docs: describe command results, failures and feedback in the errors and testing docs
+fa7beda5 docs: record command results and feedback in the roadmap
+a8077449 chore(nms): regenerate the typed NMS sources so their imports match the generator
+0367aee5 feat: add IntegerRangeArgument, DoubleRangeArgument and DurationArgument
+951cb7ee docs: list the range and duration arguments in the catalog and the CommandAPI guide
+d66d3aed fix(common): keep the input of an argument named like the literal before it
+5c9946f6 style(modded-testing): format the range argument test
+e72746fe docs: record the range and duration arguments in the roadmap
+10c922b3 feat(testing): add a JUnit extension, suggest() and command tree snapshots
+d16a5652 docs: describe the JUnit extension, suggest() and command tree snapshots
+5e6ebfa6 docs: record the testing helpers in the roadmap
+eca17e02 fix(modded): clone a Location that has no world
+b0224d77 build: run Error Prone and NullAway on the modded and typed NMS modules
+a633eac7 docs: record the wider Error Prone coverage in the roadmap
+8ad3be8d feat(common): show vanilla's context line under an argument's resolve error
+a3f8ae9b fix(paper)!: send resolve errors and empty selectors as vanilla's translatable errors
+a39c3c67 docs: record the unified errors in the roadmap
+5dba1116 feat(common): add confirm() and cooldown(Duration) to commands
+0fd9b306 docs: record confirm and cooldown in the roadmap
+f7b5e27c docs: add Cloud, Lamp and ACF migration guides
+758c0d85 docs: map confirmation and cooldowns in the migration guides
+c802e3e3 docs: record the migration guides in the roadmap
+5e81f3f9 feat(paper): read the executing entity and location from the command context
+ee4cd09e fix(modded): give the context location the source's rotation
+c60d2345 fix: stop logging function tag errors that CommandLib's recompilation fixes
+21e84f4d fix(integration-test): check the function log lines only on Bukkit targets
+664b77f7 test(integration): run commands through /execute, command blocks, function tags and #load
+9a72281c docs: describe how commands behave under /execute, command blocks and functions
+325c81ff docs: record the vanilla integration tests and the actor difference in the roadmap
+dd4fc90a feat(common): export commands and permission nodes as Markdown and JSON
+3aa4dc07 feat: add runtime diagnostics and an opt-in diagnostics command
+7cf4eebb docs: describe the documentation exports and runtime diagnostics
+cc9869ae test(modded-testing): run the diagnostics command on every node
+291dd8c4 docs: record the exports and diagnostics in the roadmap
+9452fbda fix(paper): build click events with factories that link against Adventure 5
+a11ef94c feat(velocity): add the velocity and velocity-testing modules
+8898351a docs(velocity): record the runs on Velocity 3.4.0 and 4.2.0 proxies
+2d0380b0 feat(velocity): add docs(), diagnostics() and the diagnostics command
+b2927278 docs: record Velocity support in the roadmap
+d5867cbd feat(spigot): add BlockPositionArgument, ItemPredicateArgument and BlockPredicateArgument
+4ff649e6 feat(paper): add BlockPositionArgument, ItemPredicateArgument and BlockPredicateArgument
+4b43c2ec fix(common): keep the default suggestions of vanilla argument types
+dfe862dc feat(modded)!: add ItemPredicateArgument and BlockPredicateArgument, rename BlockPosArgument
+9818ea38 test(integration): run the block position, predicate and uncentered location arguments
+f83e7821 docs: list the block position and predicate arguments
+2e0fa6a3 docs: record the block position and predicate arguments in the roadmap
+fecaf526 feat!: run executions through middlewares and add executeAsync
+4c3d7524 docs: describe middlewares, async execution and their threads
+64840063 docs: record middlewares and async execution in the roadmap
+35263cb9 feat(paper): run async commands on Folia's entity, region and global schedulers
+b8c86169 feat(spigot): refuse Folia with a pointer to the paper artifact
+4cc0a9a0 docs: describe Folia support in the paper artifact
+bcc020d0 docs: record Folia support in the roadmap
+3cc3df60 docs: keep the P5 history list contiguous
+3008dd28 feat(kotlin): add a Kotlin DSL for Spigot, Paper and Velocity
+bf7888bd test(kotlin): run the Bukkit types through the DSL on Spigot
+db340d2a docs: describe the Kotlin DSL and point the migration guides to it
+5ee732fb docs: record the Kotlin DSL in the roadmap
+4eb6b3dc feat(common): add an annotation API that builds fluent commands
+9413279b feat: register the platform argument and sender types for annotated commands
+5bf6fe66 test: prove the annotated arena command matches the fluent one
+253f85a7 fix(common): word the invalid @Default error for every type
+4ac94727 docs: describe the annotation API and its design
+90e25da4 docs: record the annotation API in the roadmap
+5197348d feat(modded): build Fabric 1.20.1 and 1.21.1 from the shared modded tree
+5a58d591 docs: document Fabric support
+99368682 docs: record Fabric support in the roadmap
+bb99da2d fix(common): read an argument's input when vanilla ends its range past the input
+735e644b fix(modded-testing): bootstrap Minecraft before creating a fake player
+fb2c3c92 feat: add ComponentArgument, MessageArgument and NBTCompoundArgument
+6a332db9 docs: list the component, message and NBT compound arguments in the catalog and the CommandAPI guide
+0b1ed217 docs: record the component, message and NBT arguments in the roadmap
+99a6aa7e fix(nms): read the range bounds without naming MinMaxBounds on 26.x
+0c3a262c fix(integration-test): give the distance selector of a single-entity argument limit=1
+ccc14672 fix(spigot): run #minecraft:load once after a data reload that a plugin task runs
+417dbe2c docs: record the vanilla integration runs on Spigot 1.16.5 and 26.3 and Paper 1.20.4 and 26.3
+21a6d8f6 docs: record the first vanilla integration runs in the roadmap
+10dd80ea feat(common): take a branch of any number of arguments without the argument builder
+608e14f1 feat: add a Java builder for commands
+647ca7c4 docs: record the Java builder and 8+ argument branches in the roadmap
+26cefce1 refactor(modded): read the player's language through ServerPlayer#getLanguage
+1458ede5 feat!: send CommandLib's messages as captions in the sender's locale
+84d5337e docs: describe captions and localization
+03c2c57e feat(common): set the captions from the command builder
+020eda43 build(spigot-kotlin): put the caption bundles of :common on the test classpath
+5024a775 docs: record captions in the roadmap
+9cf955f2 build: add JMH benchmarks for registration, execution and suggestions
+1b928a3d perf: record the first benchmark baseline
+0be1ba11 docs: record the benchmarks and the option tree size in the roadmap
+1fc68806 fix(modded): read the player's language on Fabric
+816bc2cd feat: add TimeArgument and RegistryArgument, read Spigot's slot and color through vanilla types
+59e9293a docs: list the registry and time argument failures among argument errors
+594eda87 feat: send the registry, display slot and tick count failures as captions
+59bae642 docs: record the registry and time arguments in the roadmap
+56fb3076 chore: ignore Kotlin's .kotlin directories and drop a stray ignore pattern
+40d106ba feat(samples): show the main features in the Spigot and Paper samples
+a4715551 feat(samples): add Velocity and Paper Kotlin DSL samples
+723987b7 feat(samples): add a Fabric sample that shades and relocates CommandLib
+f1aa6ad1 fix: make the Gradle wrappers executable
+4e080cc6 feat(samples): show optional and variadic arguments, confirmation and diagnostics in the Forge sample
+6fc802e9 docs: add a packaging guide and link it and the samples from the README
+6b98de50 docs: record the packaging guide and the samples in the roadmap
+d98d2c97 feat(common): add typed context values that commands provide and middlewares put
+ae3fce04 feat(common): resolve annotated context values from the context and inject dependencies
+01077436 feat(kotlin): read and provide context values by reified type
+4e2ac97b test: map the sender to a plugin type in fluent and annotated commands
+6a05b8bb docs: describe sender mapping, context values and dependencies
+28465b3f feat(common): provide context values from the Java builder
+c10025a6 docs: record context values in the roadmap and drop caption gaps the migration guides still listed
+ab600a49 feat: add help, usage and error formatters and command examples
+ed082499 docs: document the help, usage and error formatters
+2561caf6 style(samples): format the samples so the root spotlessCheck passes
+37d36ab0 docs: record the formatters in the roadmap
+59baaa24 fix: leave argument branches that only lead to child commands out of the help usages
+98db08cb test: add the comparison example suite in every definition style
+4f86ecc9 docs: compare seven use cases with CommandAPI, Cloud, Lamp, ACF and Paper
+94807de5 test: map the sender and inject the economy with context values in the balance example
+0275bba6 docs: compare dependency injection with the context values
+c12ef21b docs: record the comparison suite in the roadmap
+f253444c feat(common): fail a command from typed executors with ctx.fail
+f59d49a0 feat(common): query and reset a cooldown
+201bba85 feat(common): word selector feedback with sendSuccessFor
+817308c3 feat(annotation): name reusable prerequisites with @Condition
+30b4e6c9 feat: apply middlewares and providers to a whole registration
+897972b7 docs: point the comparison at ctx.fail and CommandDefaults
+e5eefc70 docs: record the registration defaults and the small API additions in the roadmap
+595e9af2 fix(common): count only the command's own option tokens
+86e93411 fix(common): read parent arguments across redirects while suggesting
+c31bc162 perf(common): loop options through redirects and share argument nodes
+94fda3c8 perf(common): look up the platform adapter once
+89cdaaff fix(common): reject a trailing space after a redirecting option
+2027d83e docs: describe how option states share their nodes through redirects
+608256e9 perf: record the benchmarks after the option redirects
+d98c10e0 docs: record the option redirects in the roadmap
+6c0b8060 feat(modded-testing): add levels, server stubs, suggest and the command tree to CommandTester
+b00165a5 feat(modded): add the Bukkit arguments that have a vanilla argument type or registry
+7cb8c037 feat(modded): add AnnotatedCommands and the player and console requirers
+c475687a feat(modded-testing): add CommandLibExtension and @Sender
+b44458d3 docs: record the modded parity work in the roadmap
+508adede feat(velocity-testing): add CommandLibExtension and @Sender
+3554fece feat(kotlin): add arguments(...) for branches of any number of arguments
+cac78665 feat(kotlin): add require(...) blocks and addMiddlewareSuspend
+774645dd feat(common): list the command examples in the CommandDocs Markdown and JSON
+e509f3e5 docs: record the Velocity testing extension and the Kotlin additions in the roadmap
+e86693b7 docs: build the user docs into a MkDocs Material site
+6d0c5e95 docs: record the documentation site in the roadmap
+5c3fa141 feat(common): take any argument as the value of an option
+1ba78745 feat(common): give options their own permission
+11f4294f feat(common): let options follow the arguments of a command that opts in
+fd559a9f feat(common): show commands and branches by a state predicate
+848d87cb docs: record the option additions and visibleWhen in the roadmap
+74db4532 feat(modded): add forge-1.18.2, forge-1.19.2, neoforge-1.21.4 and fabric-1.21.4 nodes
+c8b3b1e0 docs: drop the stale note that the Fabric module is planned
+1491793e docs: record the wider modded matrix in the roadmap
+ef33c423 feat(common): annotate argument-first paths, middlewares, visibility and the remaining option features
+5137c9d8 docs: document the new annotations and use them in the team and home examples
+b71cea3f docs: map the migration guides onto option values, option permissions and visibleWhen
+00ae2d5e docs: record the annotation additions in the roadmap
+e8b42e13 fix(integration-test): bundle common's resources into the Bukkit fixture plugins
+bde20cbb test(integration): run options, visibleWhen, async middleware, diagnostics and captions on Bukkit servers
+7137e32f fix(spigot): find the color argument of Spigot 26.2+, which renamed ColorArgument
+37f4f909 fix(modded): run sync command tasks at once on the server thread
+907bc135 test(integration): run options, visibleWhen, async middleware and diagnostics on Forge and NeoForge
+5dc77d92 fix(integration-test): name the test objective without Component.nullToEmpty
+37a9fa81 fix(spigot): find the range argument types of 1.16.5 without naming their nested classes
+dd21e62e test(integration): count the #minecraft:load runs after the test commands only
+e51a8297 test(integration): read the recipe id of 1.21.2+ from its registry key
+ad060861 test(integration): accept Mohist 1.20.1's unknown command reply to a failing player command
+23456442 docs: record the real-server runs of 2026-10-16
+17606035 docs: record the real-server campaign in the roadmap

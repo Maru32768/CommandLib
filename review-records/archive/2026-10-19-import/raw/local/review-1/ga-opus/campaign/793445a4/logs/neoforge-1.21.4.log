@@ -1,0 +1,238 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.5.0/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+Running Stonecutter 0.9.8
+> Task :buildSrc:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :buildSrc:compileKotlin UP-TO-DATE
+> Task :buildSrc:compileJava NO-SOURCE
+> Task :buildSrc:compileGroovy NO-SOURCE
+> Task :buildSrc:pluginDescriptors UP-TO-DATE
+> Task :buildSrc:processResources UP-TO-DATE
+> Task :buildSrc:classes UP-TO-DATE
+> Task :buildSrc:jar UP-TO-DATE
+
+> Configure project :modded
+Stonecutter branch root :modded should not be a buildable project. Remove the `base` or `java` plugin to fix the issue.
+
+> Configure project :modded-testing
+Stonecutter branch root :modded-testing should not be a buildable project. Remove the `base` or `java` plugin to fix the issue.
+
+> Configure project :modded:fabric-1.20.1
+Architectury Loom: 1.17.493
+
+> Configure project :integration-test:shared:modded-fixture
+Stonecutter branch root :integration-test:shared:modded-fixture should not be a buildable project. Remove the `base` or `java` plugin to fix the issue.
+
+> Task :integration-test:targets:neoforge-1.21.4:downloadForgeInstaller UP-TO-DATE
+> Task :integration-test:targets:neoforge-1.21.4:installForgeServer SKIPPED
+> Task :integration-test:targets:neoforge-1.21.4:compileJava NO-SOURCE
+> Task :integration-test:shared:modded-fixture:neoforge-1.21.4:stonecutterPrepare UP-TO-DATE
+> Task :integration-test:targets:neoforge-1.21.4:processResources NO-SOURCE
+> Task :modded:neoforge-1.21.4:stonecutterPrepare UP-TO-DATE
+> Task :integration-test:targets:neoforge-1.21.4:classes UP-TO-DATE
+> Task :integration-test:shared:modded-fixture:neoforge-1.21.4:stonecutterGenerate UP-TO-DATE
+> Task :integration-test:shared:core:compileJava UP-TO-DATE
+> Task :integration-test:shared:core:processResources NO-SOURCE
+> Task :integration-test:shared:modded-fixture:neoforge-1.21.4:processResources UP-TO-DATE
+> Task :integration-test:shared:core:classes UP-TO-DATE
+> Task :modded:neoforge-1.21.4:stonecutterGenerate UP-TO-DATE
+> Task :integration-test:shared:modded-fixture:neoforge-1.21.4:processIncludeJars UP-TO-DATE
+> Task :integration-test:shared:core:jar UP-TO-DATE
+> Task :modded:neoforge-1.21.4:processResources NO-SOURCE
+> Task :modded:neoforge-1.21.4:processIncludeJars UP-TO-DATE
+> Task :integration-test:targets:neoforge-1.21.4:compileTestJava UP-TO-DATE
+> Task :integration-test:targets:neoforge-1.21.4:processTestResources NO-SOURCE
+> Task :common:compileJava UP-TO-DATE
+> Task :integration-test:targets:neoforge-1.21.4:testClasses UP-TO-DATE
+> Task :common:processResources UP-TO-DATE
+> Task :common:classes UP-TO-DATE
+> Task :common:jar UP-TO-DATE
+> Task :modded:neoforge-1.21.4:compileJava UP-TO-DATE
+> Task :modded:neoforge-1.21.4:classes UP-TO-DATE
+> Task :modded:neoforge-1.21.4:jar UP-TO-DATE
+> Task :integration-test:shared:modded-fixture:neoforge-1.21.4:compileJava UP-TO-DATE
+> Task :integration-test:shared:modded-fixture:neoforge-1.21.4:classes UP-TO-DATE
+> Task :integration-test:shared:modded-fixture:neoforge-1.21.4:jar UP-TO-DATE
+> Task :modded:neoforge-1.21.4:remapJar UP-TO-DATE
+> Task :integration-test:shared:modded-fixture:neoforge-1.21.4:remapJar UP-TO-DATE
+> Task :integration-test:shared:modded-fixture:neoforge-1.21.4:testModJar UP-TO-DATE
+> Task :integration-test:targets:neoforge-1.21.4:prepareTestPlugin UP-TO-DATE
+> Task :integration-test:targets:neoforge-1.21.4:writeDockerServerProperties
+> Task :integration-test:targets:neoforge-1.21.4:stageDockerServerDirectory
+> Task :integration-test:targets:neoforge-1.21.4:buildMinecraftServerImage SKIPPED
+
+> Task :integration-test:targets:neoforge-1.21.4:minecraftIntegrationTest
+
+IntegrationTest > player_join_log_detection_accepts_and_mohist_formats() STARTED
+
+IntegrationTest > player_join_log_detection_accepts_and_mohist_formats() PASSED
+
+IntegrationTest > commandlib_test_plugin_succeeds_on_target_version_with_a_real_player() STARTED
+
+IntegrationTest > commandlib_test_plugin_succeeds_on_target_version_with_a_real_player() STANDARD_ERROR
+    [Test worker] INFO org.testcontainers.DockerClientFactory - Testcontainers version: 1.21.4
+    [Test worker] INFO org.testcontainers.dockerclient.DockerClientProviderStrategy - Loaded org.testcontainers.dockerclient.NpipeSocketClientProviderStrategy from ~/.testcontainers.properties, will try it first
+    [Test worker] INFO org.testcontainers.dockerclient.DockerClientProviderStrategy - Found Docker environment with local Npipe socket (npipe:////./pipe/docker_engine)
+    [Test worker] INFO org.testcontainers.DockerClientFactory - Docker host IP address is localhost
+    [Test worker] INFO org.testcontainers.DockerClientFactory - Connected to docker: 
+      Server Version: 29.8.2
+      API Version: 1.56
+      Operating System: Docker Desktop
+      Total Memory: 7943 MB
+      Labels: 
+        com.docker.desktop.address=npipe://\\.\pipe\docker_cli
+    [Test worker] INFO org.testcontainers.images.PullPolicy - Image pull policy will be performed by: DefaultPullPolicy()
+    [Test worker] INFO org.testcontainers.utility.ImageNameSubstitutor - Image name substitution will be performed by: DefaultImageNameSubstitutor (composite of 'ConfigurationFileImageNameSubstitutor' and 'PrefixingImageNameSubstitutor')
+    [Test worker] INFO tc.testcontainers/ryuk:0.12.0 - Creating container for image: testcontainers/ryuk:0.12.0
+    [Test worker] INFO org.testcontainers.utility.RegistryAuthLocator - Credential helper/store (docker-credential-desktop) does not have credentials for https://index.docker.io/v1/
+    [Test worker] INFO tc.testcontainers/ryuk:0.12.0 - Container testcontainers/ryuk:0.12.0 is starting: a184466909e4eab248f51617c1ee85a4163501b998a71ac8d5c95e445f6716ff
+    [Test worker] INFO tc.testcontainers/ryuk:0.12.0 - Container testcontainers/ryuk:0.12.0 started in PT0.7263286S
+    [Test worker] INFO org.testcontainers.utility.RyukResourceReaper - Ryuk started - will monitor and terminate Testcontainers containers on JVM exit
+    [Test worker] INFO org.testcontainers.DockerClientFactory - Checking the system...
+    [Test worker] INFO org.testcontainers.DockerClientFactory - ?? Docker server version should be at least 1.6.0
+    [Test worker] INFO tc.commandlib-it-neoforge-1.21.4:0bdf83195181669e - Creating container for image: commandlib-it-neoforge-1.21.4:0bdf83195181669e
+    [Test worker] INFO tc.commandlib-it-neoforge-1.21.4:0bdf83195181669e - Container commandlib-it-neoforge-1.21.4:0bdf83195181669e is starting: 6d00dd5acf9efd7611b810d7042a1527991e2de8659052568f6df7e5779265e6
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:20.405] [main/INFO] [Launcher/MODLAUNCHER]: ModLauncher running: args [--launchTarget, neoforgeserver, --fml.neoForgeVersion, 21.4.161, --fml.fmlVersion, 6.0.18, --fml.mcVersion, 1.21.4, --fml.neoFormVersion, 20241203.161809, nogui] 
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [m[21:41:20.408] [main/INFO] [Launcher/MODLAUNCHER]: JVM identified as Eclipse Adoptium OpenJDK 64-Bit Server VM 21.0.10+7-LTS 
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [m[21:41:20.412] [main/INFO] [Launcher/MODLAUNCHER]: ModLauncher 11.0.4+main.d2e20e43 starting: java version 21.0.10 by Eclipse Adoptium; OS Linux arch amd64 version 6.18.54.1-microsoft-standard-WSL2 
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [m[21:41:20.564] [main/INFO] [loading.ImmediateWindowHandler/]: ImmediateWindowProvider not loading because launch target is neoforgeserver 
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [m[21:41:20.690] [main/INFO] [mixin/]: SpongePowered MIXIN Subsystem Version=0.8.7 Source=union:/workspace/server/libraries/net/fabricmc/sponge-mixin/0.15.2+mixin.0.8.7/sponge-mixin-0.15.2+mixin.0.8.7.jar%2385!/ Service=ModLauncher Env=SERVER 
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [m[21:41:21.190] [main/INFO] [loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "server-1.21.4-20241203.161809-srg.jar" [locator: production server provider +net.neoforged:neoforge:21.4.161:server] 
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [m[21:41:21.216] [main/INFO] [loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "neoforge-21.4.161-universal.jar" [locator: PathBasedLocator[name=neoforge, paths=[libraries/net/neoforged/neoforge/21.4.161/neoforge-21.4.161-universal.jar]], reader: mod manifest] 
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [m[21:41:21.221] [main/INFO] [loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "TestMod-neoforge-1.21.4.jar" [locator: {mods folder locator at /workspace/server/mods}, reader: mod manifest] 
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [m[21:41:21.366] [main/INFO] [loading.moddiscovery.locators.JarInJarDependencyLocator/]: Found 2 dependencies adding them to mods collection 
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [m[21:41:21.366] [main/INFO] [loading.moddiscovery.ModDiscoverer/SCAN]: Found gamelibrary file "mixinextras-neoforge-0.5.3.jar" [parent: neoforge-21.4.161-universal.jar, locator: jarinjar, reader: mod manifest] 
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [m[21:41:21.366] [main/INFO] [loading.moddiscovery.ModDiscoverer/SCAN]: Found library file "net.neoforged.neoforge-coremods-21.4.161.jar" [parent: neoforge-21.4.161-universal.jar, locator: jarinjar, reader: mod manifest] 
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [m[21:41:21.369] [main/INFO] [loading.moddiscovery.ModDiscoverer/]: 
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT:      Mod List:
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: 		Name Version (Mod Id)
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: 
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: 		CommandLib Test Mod 1.0.0 (commandlibtest)
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: 		Minecraft 1.21.4 (minecraft)
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: 		NeoForge 21.4.161 (neoforge) 
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [m[21:41:21.826] [main/INFO] [LaunchServiceHandler/MODLAUNCHER]: Launching target 'neoforgeserver' with arguments [nogui] 
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [m2026-10-16T21:41:22.319319668Z main WARN Advanced terminal features are not available in this environment
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:23] [main/INFO] [MixinExtras|Service/]: Initializing MixinExtras via com.llamalad7.mixinextras.service.MixinExtrasServiceImpl(version=0.5.3).
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:33] [modloading-worker-0/INFO] [ne.ne.ne.co.NeoForgeMod/NEOFORGE-MOD]: NeoForge mod loading, version 21.4.161, for MC 1.21.4
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:34] [main/INFO] [mojang/YggdrasilAuthenticationService]: Environment: Environment[sessionHost=https://sessionserver.mojang.com, servicesHost=https://api.minecraftservices.com, name=PROD]
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:34] [main/WARN] [minecraft/VanillaPackResourcesBuilder]: Assets URL 'union:/workspace/server/libraries/net/minecraft/server/1.21.4-20241203.161809/server-1.21.4-20241203.161809-srg.jar%23142!/assets/.mcassetsroot' uses unexpected schema
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:34] [main/WARN] [minecraft/VanillaPackResourcesBuilder]: Assets URL 'union:/workspace/server/libraries/net/minecraft/server/1.21.4-20241203.161809/server-1.21.4-20241203.161809-srg.jar%23142!/data/.mcassetsroot' uses unexpected schema
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:37] [main/INFO] [minecraft/RecipeManager]: Loaded 1370 recipes
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:37] [main/INFO] [minecraft/AdvancementTree]: Loaded 1481 advancements
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:37] [main/INFO] [ne.ne.ne.co.cr.RecipePriorityManager/]: Loaded 0 recipe priority overrides
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:37] [Server thread/INFO] [minecraft/DedicatedServer]: Starting minecraft server version 1.21.4
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:37] [Server thread/INFO] [minecraft/DedicatedServer]: Loading properties
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:37] [Server thread/INFO] [minecraft/DedicatedServer]: Default game type: CREATIVE
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:37] [Server thread/INFO] [minecraft/MinecraftServer]: Generating keypair
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:37] [Server thread/INFO] [minecraft/DedicatedServer]: Starting Minecraft server on *:25565
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:37] [Server thread/INFO] [minecraft/ServerConnectionListener]: Using epoll channel type
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:37] [Server thread/WARN] [minecraft/DedicatedServer]: **** SERVER IS RUNNING IN OFFLINE/INSECURE MODE!
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:37] [Server thread/WARN] [minecraft/DedicatedServer]: The server will make no attempt to authenticate usernames. Beware.
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:37] [Server thread/WARN] [minecraft/DedicatedServer]: While this makes the game possible to play without internet access, it also opens up the ability for hackers to connect with any username they choose.
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:37] [Server thread/WARN] [minecraft/DedicatedServer]: To change this, set "online-mode" to "true" in the server.properties file.
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:37] [Server thread/INFO] [minecraft/DedicatedServer]: Preparing level "world"
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:38] [Server thread/INFO] [minecraft/MinecraftServer]: Preparing start region for dimension minecraft:overworld
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:38] [Worker-Main-1/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 0%
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:38] [Server thread/INFO] [minecraft/LoggerChunkProgressListener]: Time elapsed: 450 ms
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:38] [Server thread/INFO] [minecraft/DedicatedServer]: Done (0.770s)! For help, type "help"
+    [Test worker] INFO tc.commandlib-it-neoforge-1.21.4:0bdf83195181669e - Container commandlib-it-neoforge-1.21.4:0bdf83195181669e started in PT19.7741108S
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:38] [LanServerPinger #1/WARN] [minecraft/LanServerPinger]: LanServerPinger: Network is unreachable
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:38] [Server thread/INFO] [ne.ne.ne.se.pe.PermissionAPI/]: Successfully initialized permission handler neoforge:default_handler
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:39] [Server thread/INFO] [minecraft/PlayerList]: Maru32768[/172.17.0.1:58282] logged in with entity id 1 at (-6.5, -60.0, -1.5)
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:39] [Server thread/INFO] [minecraft/MinecraftServer]: Maru32768 joined the game
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Received CommandLib test run request.
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Executing CommandLib test cases.
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest advancementArgument minecraft:story/mine_stone
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest attributeArgument minecraft:max_health
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest biomeArgument minecraft:plains
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest blockPositionArgument 1 2 3
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest blockPredicateArgument minecraft:stone
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest blockStateArgument minecraft:stone
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest booleanArgument true
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest chatColorArgument dark_red
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest componentArgument {"text":"hello","color":"red"}
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest doubleArgument 1.5
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest doubleRangeArgument 0.5..10
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest durationArgument 1h30m
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest effectArgument minecraft:speed
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest enchantmentArgument minecraft:sharpness
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest entitiesArgument @a
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest entityArgument Maru32768
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest entityTypeArgument minecraft:zombie
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest enumArgument second
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest floatArgument 1.5
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest gameModeArgument creative
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest gameProfileArgument Maru32768
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest integerArgument 10
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest integerRangeArgument 1..10
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest itemPredicateArgument minecraft:diamond
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest itemStackArgument minecraft:diamond
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest literalArgument second
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest locationArgument 1.25 2.5 3.75
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest uncenteredLocationArgument 1 2 3
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest longArgument 100
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest lootTableArgument minecraft:chests/simple_dungeon
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest messageArgument hello, world!
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest nbtCompoundArgument {a:true}
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest nameableObjectArgument nameable
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest objectArgument one
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest objectiveArgument test
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest particleArgument minecraft:flame
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest playerArgument Maru32768
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest playersArgument @a
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest recipeArgument minecraft:oak_planks
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest resourceLocationArgument commandlib:example/path
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest registryArgument minecraft:diamond
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest scoreboardDisplaySlotArgument sidebar
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest soundArgument minecraft:entity.pig.ambient
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest stringArgument abc
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest teamArgument test
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest timeArgument 0.5d
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest unparsedArgument a
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest uuidArgument Maru32768
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest uuidsArgument @a
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest worldArgument minecraft:overworld
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest consoleActorType
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest consoleActorUnwrapsServer
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: execute as Maru32768 run commandlibtest executeAsPlayerChangesActor
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: execute positioned 10.25 70.5 -20.75 rotated 90 45 run commandlibtest executePositionedSetsLocation
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: setblock ~ ~3 ~ minecraft:command_block{auto:1b,Command:"commandlibtest commandBlockActorType"}
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest verifySuggestionCapture
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest testConvertCommandSyntaxException true
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest flagsAndValues -n 20 -vf alex
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest countAndRepeatableOptions -vv -t a --tag b -v alex
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest argumentOption -f --player Maru32768 alex
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest optionsAnywhere -s alex -d 3 spam
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest visibleWhenRefresh rejected
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [minecraft/MinecraftServer]: Incorrect argument for command
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [minecraft/MinecraftServer]: ...ndlibtest visibleWhenRefresh rejected<--[HERE]
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest visibleWhenRefreshShow
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest executeAsyncAndMiddleware
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest diagnostics
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest deniedProbe
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: summon minecraft:armor_stand ~ ~ ~ {Tags:["commandlibprobe"],NoGravity:1b}
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: execute as @e[type=minecraft:armor_stand,tag=commandlibprobe,limit=1] run commandlibtest deniedProbe
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: setblock ~ ~5 ~ minecraft:command_block{auto:1b,Command:"commandlibtest deniedProbe"}
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest optionalOmitted 1
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest optionalGiven 1 3
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest optionalExtractorOmitted
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest variadicValues x 3 1 2
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest variadicPlayers Maru32768 @p
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest optionalVariadicOmitted
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [minecraft/MinecraftServer]: Changed the block at 0, -57, 0
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [minecraft/MinecraftServer]: Integer must not be more than 2, found 1
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [minecraft/MinecraftServer]: Summoned new Armor Stand
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:40] [Server thread/INFO] [minecraft/MinecraftServer]: Changed the block at 0, -55, 0
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:42] [Server thread/INFO] [de.ma.te.TestMain/]: Reloading data packs to verify registered commands survive.
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:42] [Server thread/INFO] [minecraft/MinecraftServer]: Reloading!
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:43] [Server thread/INFO] [minecraft/RecipeManager]: Loaded 1370 recipes
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:43] [Server thread/INFO] [minecraft/AdvancementTree]: Loaded 1481 advancements
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:43] [Server thread/INFO] [ne.ne.ne.co.cr.RecipePriorityManager/]: Loaded 0 recipe priority overrides
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:44] [Server thread/INFO] [de.ma.te.TestMain/]: SUCCEEDED: 72  FAILED: 0
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:44] [Server thread/INFO] [minecraft/ServerGamePacketListenerImpl]: Maru32768 lost connection: Disconnected
+    [docker-java-stream-1667130409] INFO dev.marulabs.commandlib.integration.IntegrationTest - [neoforge-1.21.4] STDOUT: [21:41:44] [Server thread/INFO] [minecraft/MinecraftServer]: Maru32768 left the game
+
+IntegrationTest > commandlib_test_plugin_succeeds_on_target_version_with_a_real_player() PASSED
+
+BUILD SUCCESSFUL in 1m 7s
+29 actionable tasks: 3 executed, 26 up-to-date
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.5.0/userguide/configuration_cache_enabling.html

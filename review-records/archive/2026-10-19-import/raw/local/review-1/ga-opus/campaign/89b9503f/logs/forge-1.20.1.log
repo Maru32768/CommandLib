@@ -1,0 +1,239 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.5.0/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+Running Stonecutter 0.9.8
+> Task :buildSrc:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :buildSrc:compileKotlin UP-TO-DATE
+> Task :buildSrc:compileJava NO-SOURCE
+> Task :buildSrc:compileGroovy NO-SOURCE
+> Task :buildSrc:pluginDescriptors UP-TO-DATE
+> Task :buildSrc:processResources UP-TO-DATE
+> Task :buildSrc:classes UP-TO-DATE
+> Task :buildSrc:jar UP-TO-DATE
+
+> Configure project :modded
+Stonecutter branch root :modded should not be a buildable project. Remove the `base` or `java` plugin to fix the issue.
+
+> Configure project :modded-testing
+Stonecutter branch root :modded-testing should not be a buildable project. Remove the `base` or `java` plugin to fix the issue.
+
+> Configure project :modded:fabric-1.20.1
+Architectury Loom: 1.17.493
+
+> Configure project :integration-test:shared:modded-fixture
+Stonecutter branch root :integration-test:shared:modded-fixture should not be a buildable project. Remove the `base` or `java` plugin to fix the issue.
+
+> Task :integration-test:targets:forge-1.20.1:downloadForgeInstaller UP-TO-DATE
+> Task :integration-test:targets:forge-1.20.1:installForgeServer SKIPPED
+> Task :modded:forge-1.20.1:processResources NO-SOURCE
+> Task :integration-test:targets:forge-1.20.1:compileJava NO-SOURCE
+> Task :modded:forge-1.20.1:processIncludeJars UP-TO-DATE
+> Task :integration-test:shared:core:compileJava UP-TO-DATE
+> Task :integration-test:shared:core:processResources NO-SOURCE
+> Task :integration-test:targets:forge-1.20.1:processResources NO-SOURCE
+> Task :integration-test:shared:core:classes UP-TO-DATE
+> Task :integration-test:targets:forge-1.20.1:classes UP-TO-DATE
+> Task :integration-test:shared:core:jar UP-TO-DATE
+> Task :integration-test:shared:modded-fixture:forge-1.20.1:processResources UP-TO-DATE
+> Task :integration-test:shared:modded-fixture:forge-1.20.1:processIncludeJars UP-TO-DATE
+> Task :integration-test:targets:forge-1.20.1:compileTestJava UP-TO-DATE
+> Task :integration-test:targets:forge-1.20.1:processTestResources NO-SOURCE
+> Task :integration-test:targets:forge-1.20.1:testClasses UP-TO-DATE
+> Task :common:compileJava UP-TO-DATE
+> Task :common:processResources UP-TO-DATE
+> Task :common:classes UP-TO-DATE
+> Task :common:jar UP-TO-DATE
+> Task :modded:forge-1.20.1:compileJava UP-TO-DATE
+> Task :modded:forge-1.20.1:classes UP-TO-DATE
+> Task :modded:forge-1.20.1:jar UP-TO-DATE
+> Task :integration-test:shared:modded-fixture:forge-1.20.1:compileJava UP-TO-DATE
+> Task :integration-test:shared:modded-fixture:forge-1.20.1:classes UP-TO-DATE
+> Task :integration-test:shared:modded-fixture:forge-1.20.1:jar UP-TO-DATE
+> Task :modded:forge-1.20.1:remapJar UP-TO-DATE
+> Task :integration-test:shared:modded-fixture:forge-1.20.1:remapJar UP-TO-DATE
+> Task :integration-test:shared:modded-fixture:forge-1.20.1:testModJar UP-TO-DATE
+> Task :integration-test:targets:forge-1.20.1:prepareTestPlugin UP-TO-DATE
+> Task :integration-test:targets:forge-1.20.1:writeDockerServerProperties
+> Task :integration-test:targets:forge-1.20.1:stageDockerServerDirectory UP-TO-DATE
+> Task :integration-test:targets:forge-1.20.1:buildMinecraftServerImage SKIPPED
+
+> Task :integration-test:targets:forge-1.20.1:minecraftIntegrationTest
+
+IntegrationTest > player_join_log_detection_accepts_and_mohist_formats() STARTED
+
+IntegrationTest > player_join_log_detection_accepts_and_mohist_formats() PASSED
+
+IntegrationTest > commandlib_test_plugin_succeeds_on_target_version_with_a_real_player() STARTED
+
+IntegrationTest > commandlib_test_plugin_succeeds_on_target_version_with_a_real_player() STANDARD_ERROR
+    [Test worker] INFO org.testcontainers.DockerClientFactory - Testcontainers version: 1.21.4
+    [Test worker] INFO org.testcontainers.dockerclient.DockerClientProviderStrategy - Loaded org.testcontainers.dockerclient.NpipeSocketClientProviderStrategy from ~/.testcontainers.properties, will try it first
+    [Test worker] INFO org.testcontainers.dockerclient.DockerClientProviderStrategy - Found Docker environment with local Npipe socket (npipe:////./pipe/docker_engine)
+    [Test worker] INFO org.testcontainers.DockerClientFactory - Docker host IP address is localhost
+    [Test worker] INFO org.testcontainers.DockerClientFactory - Connected to docker: 
+      Server Version: 29.8.2
+      API Version: 1.56
+      Operating System: Docker Desktop
+      Total Memory: 7943 MB
+      Labels: 
+        com.docker.desktop.address=npipe://\\.\pipe\docker_cli
+    [Test worker] INFO org.testcontainers.images.PullPolicy - Image pull policy will be performed by: DefaultPullPolicy()
+    [Test worker] INFO org.testcontainers.utility.ImageNameSubstitutor - Image name substitution will be performed by: DefaultImageNameSubstitutor (composite of 'ConfigurationFileImageNameSubstitutor' and 'PrefixingImageNameSubstitutor')
+    [Test worker] INFO tc.testcontainers/ryuk:0.12.0 - Creating container for image: testcontainers/ryuk:0.12.0
+    [Test worker] INFO org.testcontainers.utility.RegistryAuthLocator - Credential helper/store (docker-credential-desktop) does not have credentials for https://index.docker.io/v1/
+    [Test worker] INFO tc.testcontainers/ryuk:0.12.0 - Container testcontainers/ryuk:0.12.0 is starting: e83e82a6ea0d739f15e070866f86cdbd2d50547fec21d0e8c518be6ddd8586b4
+    [Test worker] INFO tc.testcontainers/ryuk:0.12.0 - Container testcontainers/ryuk:0.12.0 started in PT0.7092995S
+    [Test worker] INFO org.testcontainers.utility.RyukResourceReaper - Ryuk started - will monitor and terminate Testcontainers containers on JVM exit
+    [Test worker] INFO org.testcontainers.DockerClientFactory - Checking the system...
+    [Test worker] INFO org.testcontainers.DockerClientFactory - ?? Docker server version should be at least 1.6.0
+    [Test worker] INFO tc.commandlib-it-forge-1.20.1:0cea6ca938c32a5c - Creating container for image: commandlib-it-forge-1.20.1:0cea6ca938c32a5c
+    [Test worker] INFO tc.commandlib-it-forge-1.20.1:0cea6ca938c32a5c - Container commandlib-it-forge-1.20.1:0cea6ca938c32a5c is starting: 634ae064388d143c1e5a8d181dd30eca8bbd0ed24d45b89d917113169317147e
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: 2026-10-17 00:06:14,981 main WARN Advanced terminal features are not available in this environment
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:15] [main/INFO] [cp.mo.mo.Launcher/MODLAUNCHER]: ModLauncher running: args [--launchTarget, forgeserver, --fml.forgeVersion, 47.4.10, --fml.mcVersion, 1.20.1, --fml.forgeGroup, net.minecraftforge, --fml.mcpVersion, 20230612.114412, nogui]
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:15] [main/INFO] [cp.mo.mo.Launcher/MODLAUNCHER]: ModLauncher 10.0.9+10.0.9+main.dcd20f30 starting: java version 17.0.18 by Eclipse Adoptium; OS Linux arch amd64 version 6.18.54.1-microsoft-standard-WSL2
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:15] [main/INFO] [ne.mi.fm.lo.ImmediateWindowHandler/]: ImmediateWindowProvider not loading because launch target is forgeserver
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:15] [main/INFO] [mixin/]: SpongePowered MIXIN Subsystem Version=0.8.5 Source=union:/workspace/server/libraries/org/spongepowered/mixin/0.8.5/mixin-0.8.5.jar%2365!/ Service=ModLauncher Env=SERVER
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:15] [main/WARN] [ne.mi.fm.lo.mo.ModFileParser/LOADING]: Mod file /workspace/server/libraries/net/minecraftforge/fmlcore/1.20.1-47.4.10/fmlcore-1.20.1-47.4.10.jar is missing mods.toml file
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:15] [main/WARN] [ne.mi.fm.lo.mo.ModFileParser/LOADING]: Mod file /workspace/server/libraries/net/minecraftforge/javafmllanguage/1.20.1-47.4.10/javafmllanguage-1.20.1-47.4.10.jar is missing mods.toml file
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:15] [main/WARN] [ne.mi.fm.lo.mo.ModFileParser/LOADING]: Mod file /workspace/server/libraries/net/minecraftforge/lowcodelanguage/1.20.1-47.4.10/lowcodelanguage-1.20.1-47.4.10.jar is missing mods.toml file
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:15] [main/WARN] [ne.mi.fm.lo.mo.ModFileParser/LOADING]: Mod file /workspace/server/libraries/net/minecraftforge/mclanguage/1.20.1-47.4.10/mclanguage-1.20.1-47.4.10.jar is missing mods.toml file
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:15] [main/INFO] [ne.mi.fm.lo.mo.JarInJarDependencyLocator/]: No dependencies to load found. Skipping!
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:17] [main/INFO] [cp.mo.mo.LaunchServiceHandler/MODLAUNCHER]: Launching target 'forgeserver' with arguments [nogui]
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:27] [modloading-worker-0/INFO] [ne.mi.co.ForgeMod/FORGEMOD]: Forge mod loading, version 47.4.10, for MC 1.20.1 with MCP 20230612.114412
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:27] [modloading-worker-0/INFO] [ne.mi.co.MinecraftForge/FORGE]: MinecraftForge v47.4.10 Initialized
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:28] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [forge] Starting version check at https://files.minecraftforge.net/net/minecraftforge/forge/promotions_slim.json
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:28] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [forge] Found status: UP_TO_DATE Current: 47.4.10 Target: null
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:29] [main/INFO] [mojang/YggdrasilAuthenticationService]: Environment: authHost='https://authserver.mojang.com', accountsHost='https://api.mojang.com', sessionHost='https://sessionserver.mojang.com', servicesHost='https://api.minecraftservices.com', name='PROD'
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:30] [main/WARN] [minecraft/VanillaPackResourcesBuilder]: Assets URL 'union:/workspace/server/libraries/net/minecraft/server/1.20.1-20230612.114412/server-1.20.1-20230612.114412-srg.jar%23103!/assets/.mcassetsroot' uses unexpected schema
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:30] [main/WARN] [minecraft/VanillaPackResourcesBuilder]: Assets URL 'union:/workspace/server/libraries/net/minecraft/server/1.20.1-20230612.114412/server-1.20.1-20230612.114412-srg.jar%23103!/data/.mcassetsroot' uses unexpected schema
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:30] [main/WARN] [minecraft/Pack]: Missing metadata in pack mod:commandlibtest
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:30] [main/WARN] [minecraft/MinecraftServer]: Missing data pack mod:commandlibtest
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:33] [main/INFO] [minecraft/RecipeManager]: Loaded 7 recipes
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:33] [main/INFO] [minecraft/AdvancementList]: Loaded 1271 advancements
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:33] [Server thread/INFO] [minecraft/DedicatedServer]: Starting minecraft server version 1.20.1
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:33] [Server thread/INFO] [minecraft/DedicatedServer]: Loading properties
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:33] [Server thread/INFO] [minecraft/DedicatedServer]: Default game type: CREATIVE
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:33] [Server thread/INFO] [minecraft/MinecraftServer]: Generating keypair
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:33] [Server thread/INFO] [minecraft/DedicatedServer]: Starting Minecraft server on *:25565
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:33] [Server thread/INFO] [minecraft/ServerConnectionListener]: Using epoll channel type
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:34] [Server thread/WARN] [minecraft/DedicatedServer]: **** SERVER IS RUNNING IN OFFLINE/INSECURE MODE!
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:34] [Server thread/WARN] [minecraft/DedicatedServer]: The server will make no attempt to authenticate usernames. Beware.
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:34] [Server thread/WARN] [minecraft/DedicatedServer]: While this makes the game possible to play without internet access, it also opens up the ability for hackers to connect with any username they choose.
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:34] [Server thread/WARN] [minecraft/DedicatedServer]: To change this, set "online-mode" to "true" in the server.properties file.
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:34] [Server thread/INFO] [minecraft/DedicatedServer]: Preparing level "world"
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:34] [Server thread/INFO] [minecraft/MinecraftServer]: Preparing start region for dimension minecraft:overworld
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:38] [Worker-Main-1/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 0%
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:38] [Worker-Main-1/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 0%
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:38] [Worker-Main-1/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 0%
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:38] [Worker-Main-1/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 0%
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:38] [Worker-Main-1/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 0%
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:38] [Worker-Main-1/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 0%
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:38] [Worker-Main-1/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 0%
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:38] [Worker-Main-1/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 0%
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:38] [Worker-Main-1/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 0%
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:38] [Worker-Main-1/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 0%
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:39] [Worker-Main-1/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 0%
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:39] [Worker-Main-1/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 0%
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:40] [Server thread/INFO] [minecraft/LoggerChunkProgressListener]: Time elapsed: 6054 ms
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:40] [Server thread/INFO] [minecraft/DedicatedServer]: Done (6.407s)! For help, type "help"
+    [Test worker] INFO tc.commandlib-it-forge-1.20.1:0cea6ca938c32a5c - Container commandlib-it-forge-1.20.1:0cea6ca938c32a5c started in PT28.3076791S
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:40] [LanServerPinger #1/WARN] [minecraft/LanServerPinger]: LanServerPinger: Network is unreachable
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:40] [Server thread/INFO] [ne.mi.se.pe.PermissionAPI/]: Successfully initialized permission handler forge:default_handler
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:41] [Server thread/INFO] [minecraft/PlayerList]: Maru32768[/172.17.0.1:39874] logged in with entity id 1 at (-8.5, -60.0, 4.5)
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:41] [Server thread/INFO] [minecraft/MinecraftServer]: Maru32768 joined the game
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Received CommandLib test run request.
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Executing CommandLib test cases.
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest advancementArgument minecraft:story/mine_stone
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest attributeArgument minecraft:generic.max_health
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest biomeArgument minecraft:plains
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest blockPositionArgument 1 2 3
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest blockPredicateArgument minecraft:stone
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest blockStateArgument minecraft:stone
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest booleanArgument true
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest chatColorArgument dark_red
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest componentArgument {"text":"hello","color":"red"}
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest doubleArgument 1.5
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest doubleRangeArgument 0.5..10
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest durationArgument 1h30m
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest effectArgument minecraft:speed
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest enchantmentArgument minecraft:sharpness
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest entitiesArgument @a
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest entityArgument Maru32768
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest entityTypeArgument minecraft:zombie
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest enumArgument second
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest floatArgument 1.5
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest gameModeArgument creative
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest gameProfileArgument Maru32768
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest integerArgument 10
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest integerRangeArgument 1..10
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest itemPredicateArgument minecraft:diamond
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest itemStackArgument minecraft:diamond
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest literalArgument second
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest locationArgument 1.25 2.5 3.75
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest uncenteredLocationArgument 1 2 3
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest longArgument 100
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest lootTableArgument minecraft:chests/simple_dungeon
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest messageArgument hello, world!
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest nbtCompoundArgument {a:true}
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest nameableObjectArgument nameable
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest objectArgument one
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest objectiveArgument test
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest particleArgument minecraft:flame
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest playerArgument Maru32768
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest playersArgument @a
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest recipeArgument minecraft:oak_planks
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest resourceLocationArgument commandlib:example/path
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest registryArgument minecraft:diamond
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest scoreboardDisplaySlotArgument sidebar
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest soundArgument minecraft:entity.pig.ambient
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest stringArgument abc
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest teamArgument test
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest timeArgument 0.5d
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest unparsedArgument a
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest uuidArgument Maru32768
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest uuidsArgument @a
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest worldArgument minecraft:overworld
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest consoleActorType
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest consoleActorUnwrapsServer
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: execute as Maru32768 run commandlibtest executeAsPlayerChangesActor
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: execute positioned 10.25 70.5 -20.75 rotated 90 45 run commandlibtest executePositionedSetsLocation
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: setblock ~ ~3 ~ minecraft:command_block{auto:1b,Command:"commandlibtest commandBlockActorType"}
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [minecraft/MinecraftServer]: Changed the block at 0, -57, 0
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest verifySuggestionCapture
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest testConvertCommandSyntaxException true
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [minecraft/MinecraftServer]: Integer must not be more than 2, found 1
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest flagsAndValues -n 20 -vf alex
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest countAndRepeatableOptions -vv -t a --tag b -v alex
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest argumentOption -f --player Maru32768 alex
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest optionsAnywhere -s alex -d 3 spam
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest visibleWhenRefresh rejected
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [minecraft/MinecraftServer]: Incorrect argument for command
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [minecraft/MinecraftServer]: ...ndlibtest visibleWhenRefresh rejected<--[HERE]
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest visibleWhenRefreshShow
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest executeAsyncAndMiddleware
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest diagnostics
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest deniedProbe
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: summon minecraft:armor_stand ~ ~ ~ {Tags:["commandlibprobe"],NoGravity:1b}
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [minecraft/MinecraftServer]: Summoned new Armor Stand
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: execute as @e[type=minecraft:armor_stand,tag=commandlibprobe,limit=1] run commandlibtest deniedProbe
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: setblock ~ ~5 ~ minecraft:command_block{auto:1b,Command:"commandlibtest deniedProbe"}
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [minecraft/MinecraftServer]: Changed the block at 0, -55, 0
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest optionalOmitted 1
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest optionalGiven 1 3
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest optionalExtractorOmitted
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest variadicValues x 3 1 2
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest variadicPlayers Maru32768 @p
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:42] [Server thread/INFO] [de.ma.te.TestMain/]: Dispatching test command: commandlibtest optionalVariadicOmitted
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:44] [Server thread/INFO] [de.ma.te.TestMain/]: Reloading data packs to verify registered commands survive.
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:44] [Server thread/WARN] [minecraft/Pack]: Missing metadata in pack mod:commandlibtest
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:44] [Server thread/INFO] [minecraft/MinecraftServer]: Reloading!
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:45] [Server thread/INFO] [minecraft/RecipeManager]: Loaded 7 recipes
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:45] [Server thread/INFO] [minecraft/AdvancementList]: Loaded 1271 advancements
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:45] [Server thread/INFO] [de.ma.te.TestMain/]: SUCCEEDED: 72  FAILED: 0
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:46] [Server thread/INFO] [minecraft/ServerGamePacketListenerImpl]: Maru32768 lost connection: Disconnected
+    [docker-java-stream-598458460] INFO dev.marulabs.commandlib.integration.IntegrationTest - [forge-1.20.1] STDOUT: [00:06:46] [Server thread/INFO] [minecraft/MinecraftServer]: Maru32768 left the game
+
+IntegrationTest > commandlib_test_plugin_succeeds_on_target_version_with_a_real_player() PASSED
+
+BUILD SUCCESSFUL in 1m 10s
+25 actionable tasks: 2 executed, 23 up-to-date
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.5.0/userguide/configuration_cache_enabling.html

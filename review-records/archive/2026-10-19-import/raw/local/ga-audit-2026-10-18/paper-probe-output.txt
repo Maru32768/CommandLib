@@ -1,0 +1,29 @@
+Java HotSpot(TM) 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
+invalid definition register returned => true
+Oct 18, 2026 3:11:59 PM dev.marulabs.commandlib.CommandLib logRegistrationFailure
+SEVERE: Failed to register commands
+java.lang.IllegalStateException: Argument 'required' of command 'broken' follows optional argument 'optional'; optional arguments must be the last arguments of their branch
+	at dev.marulabs.commandlib.Arguments.validateTrailingArguments(Arguments.java:85)
+	at dev.marulabs.commandlib.CommandNodeCreator.lambda$toCommandNode$6(CommandNodeCreator.java:131)
+	at java.base/java.lang.Iterable.forEach(Iterable.java:75)
+	at dev.marulabs.commandlib.CommandNodeCreator.toCommandNode(CommandNodeCreator.java:131)
+	at dev.marulabs.commandlib.CommandNodeCreator.toCommandNodes(CommandNodeCreator.java:33)
+	at dev.marulabs.commandlib.CommandNodeCreator.lambda$build$0(CommandNodeCreator.java:25)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.AbstractList$RandomAccessSpliterator.forEachRemaining(AbstractList.java:722)
+invalid definition label after event => null
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:509)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:499)
+	at java.base/java.util.stream.ReduceOps$ReduceOp.evaluateSequential(ReduceOps.java:921)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
+	at java.base/java.util.stream.ReferencePipeline.collect(ReferencePipeline.java:682)
+	at dev.marulabs.commandlib.CommandNodeCreator.build(CommandNodeCreator.java:27)
+	at dev.marulabs.commandlib.CommandSet.buildNodes(CommandSet.java:40)
+	at dev.marulabs.commandlib.CommandLib.registerWithRegistrar(CommandLib.java:667)
+	at dev.marulabs.commandlib.CommandLib.lambda$registerLifecycleHandler$5(CommandLib.java:616)
+	at dev.marulabs.commandlib.CommandLibLifecycleTest.fireCommandsEvent(CommandLibLifecycleTest.java:602)
+	at dev.marulabs.commandlib.CommandLibLifecycleTest.fireCommandsEvent(CommandLibLifecycleTest.java:579)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at dev.marulabs.commandlib.PaperAuditProbe.main(PaperAuditProbe.java:27)
+

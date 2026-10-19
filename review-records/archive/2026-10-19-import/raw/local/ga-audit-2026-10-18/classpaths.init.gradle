@@ -1,0 +1,11 @@
+allprojects {
+    afterEvaluate {
+        if (project.path in [':paper-testing', ':velocity-testing', ':common', ':spigot-testing']) {
+            tasks.register('gaAuditClasspath') {
+                doLast {
+                    rootProject.file('.local/ga-audit-2026-10-18/' + project.name + '-classpath.txt').text = sourceSets.test.runtimeClasspath.asPath
+                }
+            }
+        }
+    }
+}

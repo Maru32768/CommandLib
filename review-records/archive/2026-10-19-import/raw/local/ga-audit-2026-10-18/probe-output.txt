@@ -1,0 +1,76 @@
+nested same name => [parent=B,child=B]
+java.lang.IllegalArgumentException: No such argument 'count' exists on this command
+	at com.mojang.brigadier.context.CommandContext.getArgument(CommandContext.java:85)
+	at com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(IntegerArgumentType.java:37)
+	at dev.marulabs.commandlib.argument.CommonIntegerArgument.parseImpl(CommonIntegerArgument.java:23)
+	at dev.marulabs.commandlib.argument.CommonIntegerArgument.parseImpl(CommonIntegerArgument.java:7)
+	at dev.marulabs.commandlib.CommonArgument.parse(CommonArgument.java:286)
+	at dev.marulabs.commandlib.Arguments.parse(Arguments.java:53)
+	at dev.marulabs.commandlib.CommandRunner.runInContext(CommandRunner.java:145)
+	at dev.marulabs.commandlib.CommandRunner.lambda$run$0(CommandRunner.java:88)
+	at dev.marulabs.commandlib.CurrentCommandContext.call(CurrentCommandContext.java:26)
+	at dev.marulabs.commandlib.CommandRunner.run(CommandRunner.java:88)
+	at com.mojang.brigadier.CommandDispatcher.execute(CommandDispatcher.java:263)
+	at com.mojang.brigadier.CommandDispatcher.execute(CommandDispatcher.java:177)
+	at com.mojang.brigadier.CommandDispatcher.execute(CommandDispatcher.java:142)
+	at dev.marulabs.commandlib.TestCommandRunner.dispatch(TestCommandRunner.java:92)
+	at dev.marulabs.commandlib.TestCommandRunner.executeAndGetResult(TestCommandRunner.java:80)
+	at dev.marulabs.commandlib.TestCommandRunner.execute(TestCommandRunner.java:55)
+	at dev.marulabs.commandlib.AuditProbe.lambda$main$4(AuditProbe.java:32)
+	at dev.marulabs.commandlib.AuditProbe.probe(AuditProbe.java:16)
+	at dev.marulabs.commandlib.AuditProbe.main(AuditProbe.java:29)
+optional matches command => IllegalArgumentException: No such argument 'count' exists on this command
+cycle accepted by addChildren
+cycle => StackOverflowError: null
+shared child parent path => second
+shared child default => dev.marulabs.commandlib.PermissionConfig@470e2030
+shared child docs => {
+  "permissionPrefix": "test.command",
+  "permissions": [
+    {
+      "node": "test.command.root",
+      "default": "OP",
+      "description": "",
+      "route": "/root",
+      "kind": "command"
+    },
+    {
+      "node": "test.command.root.first",
+      "default": "ALL",
+      "description": "",
+      "route": "/root <first>",
+      "kind": "argument"
+    },
+    {
+      "node": "test.command.root.show",
+      "default": "NONE",
+      "description": "",
+      "route": "/root <first> show",
+      "kind": "command"
+    },
+    {
+      "node": "test.command.root.second",
+      "default": "NONE",
+      "description": "",
+      "route": "/root <second>",
+      "kind": "argument"
+    },
+    {
+      "node": "test.command.root.show",
+      "default": "NONE",
+      "description": "",
+      "route": "/root <second> show",
+      "kind": "command"
+    }
+  ]
+}
+
+literal permission suggestion => [help, secret]
+literal permitted children => [help]
+late mutation execute => [old]
+late mutation => CommandSyntaxException: Incorrect argument for command at position 5: root <--[HERE]
+cached permission => 1, [EXECUTED]
+cached confirmation 0 => [Run the command again within 10s to confirm. [Confirm]]
+cached confirmation 1 => []
+cached confirmation 2 => []
+suggestion options => [flag=false]

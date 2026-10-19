@@ -1,0 +1,35 @@
+[jev-review] $ jev-lint review --base 2c8ffd7aa17181325ba6f4759586a2bfb94e86ed
+using C:\Users\maru3\IdeaProjects\CommandLib_2\.jev-lint.yaml
+common-testing/src/main/java/dev/marulabs/commandlib/CommandTester.java
+    170  flag       The comment above this code claims something that is not true of the code.
+         commandlib-comment-describes-declaration  0.85  cutoff 0.74  arm located
+
+common/src/main/java/dev/marulabs/commandlib/CommandOption.java
+    242  flag       The comment above this code claims something that is not true of the code.
+         commandlib-comment-describes-declaration  0.80  cutoff 0.74  arm located
+
+common/src/main/java/dev/marulabs/commandlib/annotation/AnnotationParser.java
+    240  flag       The comment above this code claims something that is not true of the code.
+         commandlib-comment-describes-declaration  0.82  cutoff 0.74  arm local
+   1029  flag       The comment above this code claims something that is not true of the code.
+         commandlib-comment-describes-declaration  0.91  cutoff 0.74  arm local
+   1503  flag       The comment above this code claims something that is not true of the code.
+         commandlib-comment-describes-declaration  0.76  cutoff 0.74  arm local
+
+paper-testing/src/main/java/dev/marulabs/commandlib/CommandTester.java
+    824  flag       The comment above this code claims something that is not true of the code.
+         commandlib-comment-describes-declaration  0.80  cutoff 0.74  arm located
+
+spigot-testing/src/main/java/dev/marulabs/commandlib/CommandTester.java
+    409  flag       The comment above this code claims something that is not true of the code.
+         commandlib-comment-describes-declaration  0.79  cutoff 0.74  arm located
+
+velocity-testing/src/main/java/dev/marulabs/commandlib/CommandTester.java
+    290  flag       The comment above this code claims something that is not true of the code.
+         commandlib-comment-describes-declaration  0.80  cutoff 0.74  arm located
+
+8 finding(s), 1686 subject(s), 1 cached, 652 outside the diff, 52 under an excluded path
+192 request(s), 1,252,093 input tokens, $0.05259, 1668 ms (44173 ms of requests)
+2 batch(es) / 112 subject(s) fell back from `located` to `local`: state budget
+  A step-down is a real loss of context; those verdicts answered a leaner question.
+[jev-review] ERROR task failed
