@@ -14,12 +14,16 @@
 metadata の日時や model 情報は原資料で確認できる範囲だけを記録した。
 新たな request / triage / outcome の案内は原文と区別して作成し、ユーザーの依頼原文を復元したとは扱わない。
 
-`manifest.json` schema 2 は全814ファイルについて次を記録する。
+`manifest.json` schema 2 は保存対象の608ファイルについて次を記録する。
 
 - `source_path`: 整理前の `.local` / `docs/audits` 内のパス。
 - `import_path`: 整理前 snapshot の archive directory を基準にしたパス。
 - `record_path`: `review-records/` を基準にした現在の run 内のパス。
 - `bytes` / `sha256`: 内容を変更していないことを確認する値。
+
+取り込み時の814ファイルから、再生成可能な `.class` 206ファイル（867,741 bytes）を除外した。
+削除前のファイルとmanifestは commit `d7b6d5d8` に残る。
+再現用ソース、実行ログ、対象commitなどの記録は保持している。
 
 原文内の相対リンクや絶対パスは当時のまま。旧パスを manifest で検索して現在の配置を辿る。
 再現時は保存原本を直接編集せず作業用コピーを使う。個々の指摘や実行結果は今回再検証していない。

@@ -1,0 +1,12 @@
+{
+  "id": null,
+  "created_at": null,
+  "repository": null,
+  "base_commit": null,
+  "reviewed_commit": null,
+  "execution_commit": null,
+  "working_tree_patch": null,
+  "untracked_inputs": [],
+  "reviewers": [],
+  "status": "draft"
+}

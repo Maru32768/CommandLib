@@ -16,6 +16,10 @@ Original reviews and supporting evidence belong in version control, including lo
 the record. Directory-local ignore rules override repository-wide exclusions for archived records and review runs.
 Use `runs/<id>/scratch/` only for disposable working copies; it is ignored.
 
+Exclude generated `.class` files. Preserve reproduction source, reviewed commits or ranges, the execution commit
+when it differs, uncommitted changes, Java and dependency versions, commands, and output logs instead.
+If bytecode itself is essential evidence, document the reason and store it explicitly as an exception.
+
 ## Recording a review
 
 1. Copy `templates/run/` to `runs/<YYYY-MM-DD>-<topic>/`. Add a numeric suffix if the name is already in use.
