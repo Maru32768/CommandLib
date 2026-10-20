@@ -629,46 +629,57 @@ public final class CommandLib implements Listener {
             registrationState.instances.remove(this);
         }
 
-        try {
-            if (previous instanceof State.Live live) {
-                List<String> removed = new ArrayList<>();
-                for (String label : live.labels()) {
-                    // Keep going so that one failure does not leave the remaining commands and the permissions
-                    // registered, since unregister() cannot be retried.
-                    try {
-                        // A later registration of the same label took it, and keeps it.
-                        if (!live.owns(label)) {
-                            continue;
-                        }
-                        removed.add(label);
-                        PaperDispatcher.replaceChildren(live.dispatcher()
-                                                            .getRoot(),
-                                                        List.of(label),
-                                                        List.of());
-                    } catch (RuntimeException e) {
-                        plugin.getLogger()
-                              .log(Level.WARNING, "Failed to remove command " + label, e);
-                    }
-                }
-                HelpTopics.remove(plugin, removed);
+        boolean live = previous instanceof State.Live;
+        RegistrationCleanup.runAll(() -> {
+            if (previous instanceof State.Live liveState) {
+                HelpTopics.remove(plugin, removeCommands(liveState));
+            }
+        }, () -> {
+            if (live) {
                 registrationState.updateCommandTrees(plugin, runtime);
-                if (runtime) {
-                    registrationState.recompileFunctionsLater(plugin);
-                }
             }
+        }, () -> {
+            if (live && runtime) {
+                registrationState.recompileFunctionsLater(plugin);
+            }
+        }, this::unregisterPermissions, () -> HandlerList.unregisterAll(this));
+        return live;
+    }
 
-            Set<String> removedPermissions = new HashSet<>();
-            for (Permission permission : registeredPermissions) {
-                if (CommandPermissions.remove(permission)) {
-                    removedPermissions.add(permission.getName());
+    /**
+     * @return the labels removed from the live dispatcher
+     */
+    private List<String> removeCommands(State.Live live) {
+        List<String> removed = new ArrayList<>();
+        for (String label : live.labels()) {
+            // Keep going so that one failure does not leave the remaining commands registered.
+            try {
+                // A later registration of the same label took it, and keeps it.
+                if (!live.owns(label)) {
+                    continue;
                 }
+                removed.add(label);
+                PaperDispatcher.replaceChildren(live.dispatcher()
+                                                    .getRoot(),
+                                                List.of(label),
+                                                List.of());
+            } catch (RuntimeException e) {
+                plugin.getLogger()
+                      .log(Level.WARNING, "Failed to remove command " + label, e);
             }
-            registeredPermissions.clear();
-            restorePermissions(removedPermissions);
-        } finally {
-            HandlerList.unregisterAll(this);
         }
-        return previous instanceof State.Live;
+        return removed;
+    }
+
+    private void unregisterPermissions() {
+        Set<String> removedPermissions = new HashSet<>();
+        for (Permission permission : registeredPermissions) {
+            if (CommandPermissions.remove(permission)) {
+                removedPermissions.add(permission.getName());
+            }
+        }
+        registeredPermissions.clear();
+        restorePermissions(removedPermissions);
     }
 
     /**

@@ -494,6 +494,26 @@ class CommandLibLifecycleTest {
     }
 
     @Test
+    void a_failing_unregister_step_neither_skips_the_others_nor_hides_the_first_failure() {
+        when(plugin.isEnabled()).thenReturn(true);
+        // A prefix of its own, as the registrations other tests leave in this copy of CommandLib are live as well.
+        CommandLib lib = CommandLib.register(plugin, "cleanup", helloCommand());
+        fireCommandsEvent();
+        runScheduledTasks();
+        IllegalStateException failure = new IllegalStateException("Refused");
+        IllegalStateException later = new IllegalStateException("Refused again");
+        GlobalRegionScheduler scheduler = Bukkit.getGlobalRegionScheduler();
+        doThrow(failure).doThrow(later)
+                        .when(scheduler)
+                        .execute(any(Plugin.class), any(Runnable.class));
+
+        assertThatThrownBy(lib::unregister).isSameAs(failure)
+                                           .satisfies(x -> assertThat(x.getSuppressed()).containsExactly(later));
+        assertThat(permissions).doesNotContainKey("cleanup.hello");
+        assertThat(disableListeners()).isEmpty();
+    }
+
+    @Test
     void duplicate_top_level_names_are_rejected_before_anything_is_registered() {
         when(plugin.isEnabled()).thenReturn(true);
 

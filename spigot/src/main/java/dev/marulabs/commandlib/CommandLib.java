@@ -862,31 +862,41 @@ public final class CommandLib implements Listener {
         if (!INSTANCES.remove(this)) {
             return;
         }
-        try {
-            unregisterCommands();
-        } finally {
-            HandlerList.unregisterAll(this);
-            unregisterPermissions();
-            registeredHelpTopics.forEach(topic -> removeHelpTopic(Bukkit.getHelpMap(), topic, plugin.getName()));
-            registeredHelpTopics.clear();
-            registeredCommands.clear();
-            paperLabelNodes.clear();
-            registeredPermissions.clear();
+        RegistrationCleanup.runAll(this::unregisterCommands,
+                                   () -> HandlerList.unregisterAll(this),
+                                   this::unregisterPermissions,
+                                   () -> registeredHelpTopics.forEach(topic -> removeHelpTopic(Bukkit.getHelpMap(),
+                                                                                               topic,
+                                                                                               plugin.getName())),
+                                   () -> {
+                                       registeredHelpTopics.clear();
+                                       registeredCommands.clear();
+                                       paperLabelNodes.clear();
+                                       registeredPermissions.clear();
+                                   },
+                                   () -> {
+                                       if (updatePlayerCommands) {
+                                           updatePlayerCommandsLater();
+                                       }
+                                   },
+                                   () -> {
+                                       if (updatePlayerCommands) {
+                                           compileFunctionsWithoutCommands();
+                                       } else if (INSTANCES.isEmpty()) {
+                                           // The disable handler compiles the functions itself.
+                                           stopFunctionCompiler();
+                                       }
+                                   });
+    }
 
-            if (updatePlayerCommands) {
-                updatePlayerCommandsLater();
-                // Functions that use the commands are dropped. The task compiles them at the start of a tick rather
-                // than here, where a command or function may be running, and stops if no registration is left then.
-                try {
-                    compileFunctionsWithCommands();
-                } catch (RuntimeException | LinkageError ex) {
-                    plugin.getLogger()
-                          .log(Level.WARNING, "Could not compile data pack functions again without the commands", ex);
-                }
-            } else if (INSTANCES.isEmpty()) {
-                // The disable handler compiles the functions itself.
-                stopFunctionCompiler();
-            }
+    private void compileFunctionsWithoutCommands() {
+        // Functions that use the commands are dropped. The task compiles them at the start of a tick rather than here,
+        // where a command or function may be running, and stops if no registration is left then.
+        try {
+            compileFunctionsWithCommands();
+        } catch (RuntimeException | LinkageError ex) {
+            plugin.getLogger()
+                  .log(Level.WARNING, "Could not compile data pack functions again without the commands", ex);
         }
     }
 

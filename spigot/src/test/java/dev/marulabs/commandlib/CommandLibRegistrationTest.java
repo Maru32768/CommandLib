@@ -18,6 +18,7 @@ import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.help.HelpMap;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
+import org.bukkit.plugin.IllegalPluginAccessException;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.SimplePluginManager;
 import org.bukkit.scheduler.BukkitScheduler;
@@ -172,8 +173,24 @@ class CommandLibRegistrationTest {
         NMSCraftServer craftServer = NMSCraftServer.create(server);
         when(craftServer.getServer()).thenThrow(failure);
 
-        assertThatThrownBy(registration::unregister).hasCause(failure);
+        // The function compilation logs its failure, so the registration's removal fails only with its own.
+        assertThatThrownBy(registration::unregister).hasCause(failure)
+                                                    .satisfies(x -> assertThat(x.getSuppressed()).isEmpty());
         assertThat(commandMap.getCommand("spawn")).isNotNull();
+    }
+
+    @Test
+    void a_failing_cleanup_step_neither_hides_the_root_cause_nor_skips_the_others() {
+        CommandLib registration = register("spawn");
+        IllegalStateException failure = new IllegalStateException("No server");
+        NMSCraftServer craftServer = NMSCraftServer.create(server);
+        when(craftServer.getServer()).thenThrow(failure);
+        IllegalPluginAccessException refused = new IllegalPluginAccessException("Plugin attempted to register task");
+        when(scheduler.runTask(any(Plugin.class), any(Runnable.class))).thenThrow(refused);
+
+        assertThatThrownBy(registration::unregister).hasCause(failure)
+                                                    .satisfies(x -> assertThat(x.getSuppressed()).containsExactly(refused));
+        assertThat(pluginManager.getPermission("test.command.spawn")).isNull();
     }
 
     @Test

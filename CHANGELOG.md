@@ -264,6 +264,9 @@ suggestions) and a command for each argument type. Options, permission plugins a
   under the same node name, and `unregister()` of the later one registers the node again for the oldest registration
   that still declares it, with that registration's default and description, instead of leaving its commands with an
   undefined node that only operators have.
+- Spigot / Paper: when a step of `unregister()` fails, such as removing the commands or updating the players' command
+  trees, the other steps still run, so the permissions and listeners are not left registered, and `unregister()`
+  throws the first failure with the later ones suppressed instead of the last one.
 - Velocity: `unregister()` drops the permission defaults of its registration, so a node registered with `ALL`,
   unregistered and registered again with `NONE` is closed.
 - Paper / Forge / NeoForge / Fabric: an invalid command definition, such as an optional argument before a required one,
