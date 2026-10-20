@@ -71,6 +71,27 @@ class CommonCommandContextTest {
     }
 
     @Test
+    void a_variadic_element_and_an_option_value_are_the_only_input_of_their_name_while_parsed() throws Exception {
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("tag") {{
+            option(Options.of("label", new WordArg("label").validator((value, ctx) -> {
+                ctx.sendMessage("label " + ctx.getInput("label") + " " + ctx.getInputs());
+                return true;
+            })));
+            argument(new WordArg("names").validator((value, ctx) -> {
+                ctx.sendMessage("name " + ctx.getInput("names") + " " + ctx.getInput(1) + " " + ctx.getInputs());
+                return true;
+            })
+                                         .variadic()).execute((names, ctx) -> ctx.sendMessage(ctx.getInputs()));
+        }});
+
+        assertThat(runner.execute("tag --label x a b")
+                         .messages()).containsExactly("label x [tag, a b, x]",
+                                                      "name a a [tag, a]",
+                                                      "name b b [tag, b]",
+                                                      "[tag, a b]");
+    }
+
+    @Test
     void missing_argument_lookups_fail_clearly() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("sum") {{
             argument(new CommonIntegerArgument<>("value")).execute((value, ctx) -> {

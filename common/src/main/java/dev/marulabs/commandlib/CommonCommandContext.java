@@ -708,17 +708,31 @@ public abstract class CommonCommandContext<S, C> {
     }
 
     /**
-     * Replaces the handle and the input of the argument {@code name}, so that a variadic argument's element parses one
-     * value as if it were the only one.
+     * Replaces the handle and the input of the argument {@code name}, also in {@link #getInputs()}, so that a variadic
+     * argument's element or an option's value parses one value as if it were the only one.
+     *
+     * @return puts the previous handle and inputs back
      */
-    final void replaceHandle(com.mojang.brigadier.context.CommandContext<S> handle,
-                             String name,
-                             @Nullable String input) {
+    final Runnable replaceHandle(com.mojang.brigadier.context.CommandContext<S> handle, String name, String input) {
+        com.mojang.brigadier.context.CommandContext<S> previousHandle = this.handle;
         this.handle = Objects.requireNonNull(handle);
+        @Nullable
+        String previousInput = argumentInputs.put(name, input);
+        @Nullable
+        String previousNodeInput = argumentNameToInputArgMap.put(name, input);
+        return () -> {
+            this.handle = previousHandle;
+            putBack(argumentInputs, name, previousInput);
+            putBack(argumentNameToInputArgMap, name, previousNodeInput);
+        };
+    }
+
+    // Put, not removed and added again, so the input keeps its place in getInputs().
+    private static void putBack(Map<String, String> inputs, String name, @Nullable String input) {
         if (input == null) {
-            argumentInputs.remove(name);
+            inputs.remove(name);
         } else {
-            argumentInputs.put(name, input);
+            inputs.put(name, input);
         }
     }
 

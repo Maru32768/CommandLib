@@ -73,7 +73,6 @@ public final class VariadicArgument<T, C extends CommonCommandContext<?, ?>> ext
                                  CommonCommandContext<S, ?> sameCtx,
                                  List<T> values) throws ArgumentParseException {
         CommandContext<S> handle = sameCtx.getHandle();
-        String input = sameCtx.getInput(name());
         for (CommandContext<S> context = handle; context != null; context = context.getChild()) {
             for (ParsedCommandNode<S> node : context.getNodes()) {
                 if (!(node.getNode() instanceof ArgumentCommandNode) || !node.getNode()
@@ -82,14 +81,14 @@ public final class VariadicArgument<T, C extends CommonCommandContext<?, ?>> ext
                     continue;
                 }
                 // The element reads its value from the handle by name, so it gets a handle with only this value.
-                sameCtx.replaceHandle(valueHandle(context, node),
-                                      name(),
-                                      node.getRange()
-                                          .get(context.getInput()));
+                Runnable restore = sameCtx.replaceHandle(valueHandle(context, node),
+                                                         name(),
+                                                         node.getRange()
+                                                             .get(context.getInput()));
                 try {
                     values.add(element.parse(ctx));
                 } finally {
-                    sameCtx.replaceHandle(handle, name(), input);
+                    restore.run();
                 }
             }
         }
