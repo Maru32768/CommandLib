@@ -140,6 +140,7 @@ public final class DataPackFunctionTest extends TestBase {
             write(pack.resolve("data/commandlibtest/function/broken.mcfunction"), broken);
             writeFunction(pack, "tagged", command.name() + " " + TAG_PROBE + "\n");
             writeFunction(pack, "load", command.name() + " " + LOAD_PROBE + "\n");
+            writeFunction(pack, ScenarioTest.DENIED_STORE_FUNCTION, ScenarioTest.DENIED_STORE_FUNCTION_BODY);
             writeTag(pack, "commandlibtest", "probes", "commandlibtest:tagged");
             writeTag(pack, "minecraft", "load", "commandlibtest:load");
         } catch (IOException e) {

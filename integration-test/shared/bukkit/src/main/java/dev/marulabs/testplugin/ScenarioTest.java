@@ -8,6 +8,7 @@ import dev.marulabs.commandlib.util.bukkit.BukkitUtil;
 import dev.marulabs.integration.core.TestResult;
 import dev.marulabs.integration.core.TestStatus;
 import org.bukkit.Bukkit;
+import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scoreboard.Objective;
@@ -16,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -38,6 +40,17 @@ public final class ScenarioTest extends TestBase {
      * trees.
      */
     public static final String LATE_COMMAND = "commandliblate";
+    /**
+     * Name of the data pack function, in the {@code commandlibtest} namespace, that stores the success of a command the
+     * console is denied when the function runs. The platform's {@code DataPackFunctionTest} writes it with
+     * {@link #DENIED_STORE_FUNCTION_BODY}.
+     */
+    public static final String DENIED_STORE_FUNCTION = "store_denied";
+    private static final String STORE_OBJECTIVE = "commandlibstore";
+    private static final String DENIED_STORE = "executeStoreSuccessWhenDenied";
+    public static final String DENIED_STORE_FUNCTION_BODY = "execute store success score #denied " + STORE_OBJECTIVE
+            + " run " + MainCommand.NAME + " " + DENIED_STORE + "Target\n";
+    private static final String DENIED_STORE_NODE = "commandlibtest.storedenied";
 
     private final Plugin plugin;
     private final String playerName;
@@ -56,6 +69,7 @@ public final class ScenarioTest extends TestBase {
         commands.addAll(executeRunAsPlayer());
         commands.addAll(executeRunWithArgument());
         commands.addAll(executeStoreReadsResultAndFailure());
+        executeStoreSuccessWhenDenied();
         commands.addAll(runtimeRegisteredCommandIsExecutableUntilUnregistered());
         commands.addAll(lateRegisteredCommandSurvivesReload());
         commands.addAll(unregisteringKeepsALabelTakenSince());
@@ -107,7 +121,7 @@ public final class ScenarioTest extends TestBase {
     public List<String> executeStoreReadsResultAndFailure() {
         String name = getMethodName();
         String key = getKey();
-        String objective = "commandlibstore";
+        String objective = STORE_OBJECTIVE;
 
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name + "Result") {{
@@ -150,6 +164,44 @@ public final class ScenarioTest extends TestBase {
                        "execute store success score #success " + objective + " run "
                                + buildCommand(command, name + "Failure"),
                        buildCommand(command, name));
+    }
+
+    /**
+     * {@code /execute store success} stores 0 when the runner's permission check denies the command. Brigadier checks
+     * the node when it parses the input, so from the console the denial is reached only through a data pack function:
+     * the reload compiles it with a source that passes every requirement, and the console loses the node before
+     * running it. The checks run after the reload, which first loads the function.
+     */
+    private void executeStoreSuccessWhenDenied() {
+        String key = getClass().getSimpleName() + "." + DENIED_STORE;
+        AtomicBoolean executed = new AtomicBoolean();
+        AtomicReference<PermissionAttachment> attachment = new AtomicReference<>();
+
+        putCommandNotExecutedResult(key);
+        command.addChildren(new Command(DENIED_STORE + "Target") {{
+            permission(DENIED_STORE_NODE, PermissionDefault.TRUE);
+            execute(ctx -> executed.set(true));
+        }}, new Command(DENIED_STORE + "Deny") {{
+            execute(ctx -> attachment.set(Bukkit.getConsoleSender()
+                                                .addAttachment(plugin, DENIED_STORE_NODE, false)));
+        }}, new Command(DENIED_STORE) {{
+            execute(ctx -> {
+                PermissionAttachment denial = attachment.getAndSet(null);
+                if (denial != null) {
+                    denial.remove();
+                }
+                Objective scores = Bukkit.getScoreboardManager()
+                                         .getMainScoreboard()
+                                         .getObjective(STORE_OBJECTIVE);
+                String stored = scores == null ? "no objective" : String.valueOf(scores.getScore("#denied")
+                                                                                       .getScore());
+                putResult(key, stored + "," + executed.get(), "0,false");
+            });
+        }});
+        afterReloadCommands.addAll(List.of("scoreboard players set #denied " + STORE_OBJECTIVE + " 7",
+                                           buildCommand(command, DENIED_STORE + "Deny"),
+                                           "function commandlibtest:" + DENIED_STORE_FUNCTION,
+                                           buildCommand(command, DENIED_STORE)));
     }
 
     /**

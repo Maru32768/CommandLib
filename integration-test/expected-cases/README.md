@@ -17,5 +17,6 @@ from the actual registrations: that would accept the missing registration this c
 Initial inventories were cross-checked against fixture sources at `2236d1e721118e69b592ccb500fe1a752baa7720`, using local
 reports as a starting point for IDs, then adding the newer Bukkit cases `ArgumentTest.chatColorArgumentReset` and
 `ScenarioTest.{lateRegisteredCommandSurvivesReload,unregisteringKeepsALabelTakenSince,enableRegisteredCommandIsRemovedByUnregister}`.
-The profiles contain 98 Spigot, 97 Paper, 72 modded and 4 Folia cases before exclusions. The regression tests check
+The profiles contain 99 Spigot, 98 Paper, 72 modded and 4 Folia cases before exclusions, with
+`ScenarioTest.executeStoreSuccessWhenDenied` added since. The regression tests check
 missing cases/suites, replacements, duplicates, inconsistent counters, failures/skips, version exclusions and target coverage.
