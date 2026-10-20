@@ -6,6 +6,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 NMS_SOURCES = ROOT / "spigot/src/main/java/dev/marulabs/commandlib/util/nms"
+MODULE_TABLE = NMS_SOURCES.relative_to(ROOT) / "TypedNmsModules.java"
+# Where the sources are written; generate.py --check points it at a temporary directory.
+OUT = ROOT
 BASE_PACKAGE = "dev.marulabs.commandlib.util.nms"
 NL = "\n"
 
@@ -38,8 +41,8 @@ def module_package(module):
     return "dev.marulabs.commandlib.nms." + module.replace("-", "_").replace(".", "_")
 
 
-def source_directory(module):
-    return ROOT / "nms" / module / "src/main/java" / module_package(module).replace(".", "/")
+def source_directory(module, root=None):
+    return (root or OUT) / "nms" / module / "src/main/java" / module_package(module).replace(".", "/")
 
 
 def clear(module):
@@ -48,7 +51,7 @@ def clear(module):
 
 
 def write_source(module, package, name, source):
-    path = ROOT / "nms" / module / "src/main/java" / package.replace(".", "/") / f"{name}.java"
+    path = OUT / "nms" / module / "src/main/java" / package.replace(".", "/") / f"{name}.java"
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(source, encoding="utf-8", newline=NL)
 
@@ -115,7 +118,8 @@ def write_module_table(modules):
         if module.startswith("paper-"):
             entries.append(f'new NMSClassRegistry.TypedModule("{package}_spigot", "{spec.lower}", "{spec.upper}")')
     separator = f",{NL}{' ' * 12}"
-    path = NMS_SOURCES / "TypedNmsModules.java"
+    path = OUT / MODULE_TABLE
+    path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(f"""package {BASE_PACKAGE};
 
 import java.util.List;

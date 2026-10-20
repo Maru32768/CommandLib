@@ -149,6 +149,9 @@ is left out.
    `<package>_spigot` package.
 4. Verify with `./gradlew :nms:<module>:assemble :spigot:jar :spigot:test` and the matching
    `:integration-test:targets:<target>:minecraftIntegrationTest`.
+5. Run `uv run generate.py --check` in `tools/nms-codegen`. It regenerates every module and `TypedNmsModules` into a
+   temporary directory, lists each committed source that is changed, missing or no longer generated, and exits with
+   status 1 when there is any, so it catches generated classes edited by hand or scripts changed without regenerating.
 
 The Spigot suite's `TypedNmsTest` resolves every class of the modules for the server version
 (`NMSClassRegistry.unavailableClasses()`), so a class that does not link fails there even when no other test uses its

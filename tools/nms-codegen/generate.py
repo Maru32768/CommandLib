@@ -3,11 +3,15 @@ Generates the typed NMS classes of the nms/* modules and the module table of the
 
     uv run generate.py spigot-1.20.4
     uv run generate.py --all
+    uv run generate.py --check
+
+--check regenerates every module into a temporary directory and exits with status 1 when the committed sources differ.
 
 See docs/agents/nms-build.md.
 """
 import runpy
 import sys
+import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -66,19 +70,50 @@ def generate(module):
                    run_name="__main__")
 
 
+def check(codegen):
+    """Regenerates every module into a temporary directory and lists how the committed sources differ from it."""
+    with tempfile.TemporaryDirectory() as temporary:
+        codegen.OUT = Path(temporary)
+        for module in MODULES:
+            generate(module)
+        codegen.write_module_table(MODULES)
+        directories = [codegen.source_directory(module, codegen.ROOT) for module in MODULES]
+        committed = {x.relative_to(codegen.ROOT).as_posix() for d in directories if d.is_dir()
+                     for x in d.rglob("*") if x.is_file()}
+        committed.add(codegen.MODULE_TABLE.as_posix())
+        generated = {x.relative_to(codegen.OUT).as_posix() for x in codegen.OUT.rglob("*") if x.is_file()}
+        differences = []
+        for path in sorted(committed | generated):
+            if path not in generated:
+                differences.append(f"extra (no longer generated): {path}")
+            elif not (codegen.ROOT / path).is_file():
+                differences.append(f"missing: {path}")
+            elif (codegen.ROOT / path).read_bytes() != (codegen.OUT / path).read_bytes():
+                differences.append(f"changed: {path}")
+        return differences
+
+
 def main(args):
+    sys.path.insert(0, str(HERE))
+    import codegen
+    if args == ["--check"]:
+        differences = check(codegen)
+        for difference in differences:
+            print(difference)
+        if differences:
+            raise SystemExit(f"{len(differences)} generated files differ; run generate.py --all")
+        print("generated sources are up to date")
+        return
     if args == ["--all"]:
         modules = MODULES
     elif args and all(x in MODULES for x in args):
         modules = args
     else:
-        raise SystemExit(f"usage: generate.py --all | <module>...{chr(10)}modules: {', '.join(MODULES)}")
-    sys.path.insert(0, str(HERE))
-    from codegen import clear, write_module_table
+        raise SystemExit(f"usage: generate.py --all | --check | <module>...{chr(10)}modules: {', '.join(MODULES)}")
     for module in modules:
-        clear(module)
+        codegen.clear(module)
         generate(module)
-    write_module_table(MODULES)
+    codegen.write_module_table(MODULES)
 
 
 if __name__ == "__main__":

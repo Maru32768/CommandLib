@@ -11,6 +11,7 @@ version pinned in `.python-version`, downloading it when missing:
 cd tools/nms-codegen
 uv run generate.py --all
 uv run generate.py spigot-1.20.4
+uv run generate.py --check   # exits with status 1 when the committed sources differ from a regeneration
 ```
 
 Without uv, any Python 3.10 or later works: `python generate.py --all`.
