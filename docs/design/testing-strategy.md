@@ -244,7 +244,9 @@ Integration tests (Layer 3) guarantee real NMS behavior, so this division of wor
   permissions, options and argument branches. `Snapshots` in `common` compares text with
   `src/test/resources/snapshots/<name>`, writes a missing snapshot and fails, and rewrites snapshots when
   `COMMANDLIB_UPDATE_SNAPSHOTS=true` or `-Dcommandlib.updateSnapshots=true` is set. Both are package-private; the
-  testing artifacts reach them from the same package, as they do `CommandNodeCreator`. The help snapshot tests of
+  testing artifacts reach them from the same package, as they do `CommandNodeCreator`, because `CommandTester` is API
+  in the root package and the tree generation cannot leave it without widening `CommonCommand` (see
+  `module-structure.md#packages-and-visibility`). The help snapshot tests of
   `common` use the same `Snapshots`.
 
 The testing artifacts each have their own copy of `CommandLibExtension` and `@Sender`, because each has its own

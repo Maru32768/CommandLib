@@ -43,7 +43,8 @@ combination fails at startup with a clear message instead of failing later:
 
 Relocate the one package `dev.marulabs.commandlib` to a package of your own, such as
 `com.example.myplugin.libs.commandlib`. It covers every CommandLib artifact: `common`, the platform artifact, the
-typed NMS classes bundled in the `spigot` jar, the annotation API and the Kotlin DSL.
+typed NMS classes bundled in the `spigot` jar, the annotation API, the Kotlin DSL, and the implementation under
+`dev.marulabs.commandlib.internal`.
 
 ```kotlin
 tasks.named<ShadowJar>("shadowJar") {
@@ -58,9 +59,8 @@ tasks.named<ShadowJar>("shadowJar") {
   server provides (on Velocity, Velocity's fork). Paper and Velocity provide Adventure as well.
 - **Do not use Shadow's `minimize()`.** The `spigot` jar loads the typed NMS class for the running server by name, so
   `minimize()` drops classes that are needed at runtime. Relocation is fine: it rewrites those names too.
-- **Kotlin DSL.** `common-kotlin` reads the current command context through a package-private class of `common`, so
-  both must be loaded by the same class loader. Shade them into the same jar under the same relocation, which the one
-  `relocate` above does. Ship the Kotlin standard library as any Kotlin plugin does (shade it unrelocated, or on
+- **Kotlin DSL.** `common-kotlin` reads the current command context through an internal class of `common`, so relocate
+  both under the same package, which the one `relocate` above does. Ship the Kotlin standard library as any Kotlin plugin does (shade it unrelocated, or on
   Spigot 1.17+ and Paper list it under `libraries` in `plugin.yml`), and `kotlinx-coroutines-core` if you call the
   coroutine functions.
 - **Check the result** with the [diagnostics command](diagnostics.md#diagnostics-command): its `CommandLib package`

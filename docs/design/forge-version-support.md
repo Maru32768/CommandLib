@@ -42,7 +42,7 @@ Forge 1.16.5, 1.18.2, 1.19.2 and 1.20.1, NeoForge 1.21.1 and 1.21.4, and Fabric
   `fabric-1.21.4`, artifacts of the same names) under the `fabric` constant. Commands are added
   through Fabric API's `CommandRegistrationCallback` (v2), which fires on every
   server start and `/reload`. The running server comes from Fabric API's
-  `ServerLifecycleEvents`, behind `util.CurrentServer`, which Forge and
+  `ServerLifecycleEvents`, behind `internal.CurrentServer`, which Forge and
   NeoForge back with `ServerLifecycleHooks`. Permissions go through
   fabric-permissions-api (`Permissions.check(player, node, default)`) when a
   mod ships it, and otherwise resolve the node's `DefaultPermission` against

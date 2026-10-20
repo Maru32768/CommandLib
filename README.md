@@ -440,6 +440,19 @@ tasks.named("build") { dependsOn(tasks.named("shadowJar")) }
 
 </details>
 
+### Hiding Internal Classes In IntelliJ IDEA
+
+CommandLib's implementation lives in `dev.marulabs.commandlib.internal` and its sub-packages, marked
+`@ApiStatus.Internal`. It is not API: it changes without notice, and only the code outside it is supported. To keep it
+out of completion and auto-import, open **Settings → Editor → General → Auto Import**, and under **Exclude from import
+and completion** add:
+
+```text
+dev.marulabs.commandlib.internal
+```
+
+The entry covers the sub-packages too.
+
 ## Kotlin DSL
 
 `spigot-kotlin`, `paper-kotlin`, and `velocity-kotlin` add a Kotlin DSL on top of the same command model. Use one of

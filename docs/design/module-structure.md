@@ -110,6 +110,31 @@ velocity-kotlin  -> velocity, common-kotlin
 integration-test -> platform modules
 ```
 
+## Packages And Visibility
+
+Everything outside `dev.marulabs.commandlib.internal` is API. Implementation that another package or module must reach
+is public in `internal` or one of its sub-packages, each annotated `@ApiStatus.Internal` in its `package-info.java`
+(and each public class there too), so a user who excludes `dev.marulabs.commandlib.internal` from completion, as the
+README describes, sees only API. The rule is to hide by package, not to make the internals unreachable: Java has no
+visibility between "package" and "public" that spans packages, and the JPMS cannot be used because CommandLib is shaded
+into plugins and mods.
+
+- `common`: `internal` holds `PlatformAdapter` and its holder, `CurrentCommandContext`, `ArgumentBranchDelegate` and
+  `StringUtil`. `spigot`: the NMS bridge (`internal.nms`, typed modules in `internal.nms.typed.<module>`), reflection
+  and Bukkit helpers. `paper`: `internal.bukkit`, `internal.brigadier`. `modded`: `internal.CurrentServer`.
+  `spigot-testing`: the NMS mocks (`internal.nms.mock`).
+- Each platform's `PlatformAdapterImpl` stays package-private in the root package, since it uses package-private
+  helpers there. `PlatformAdapterHolder` loads it by its fixed name and calls its declared constructor; both are in
+  the same jar after shading, so the access check passes. There is no `ServiceLoader`, which failed on plugin reloads
+  (PlugMan).
+- The tree generation (`CommandNodeCreator`, `CommandRunner`, `OptionGraph`, `CommandTree`, ...) stays package-private
+  in the root package. It reads package-private members of `CommonCommand`, `CommonArgument` and `CommandOption`;
+  moving it out would make those members public on classes every user completes against, which no package exclusion
+  hides.
+- The testing artifacts' `CommandTester` is API in the root package and drives that tree generation, so it keeps
+  reaching it from the same package (see `testing-strategy.md`). That only needs one class loader for both jars,
+  which a test classpath always has.
+
 ## Public API Shape
 
 ### Spigot
@@ -168,9 +193,8 @@ adds no command semantics of its own. Platform types stay out of `common-kotlin`
 its own copy. Forge / NeoForge / Fabric have no Kotlin module yet, since a Loom build per node would be needed for three
 functions.
 
-`common-kotlin` reads the current command context through the package-private `CurrentCommandContext`, from a file
-in the same package. That keeps the core API unchanged but requires `common` and `common-kotlin` to share a class
-loader, which shading gives. kotlinx-coroutines is `compileOnly`, and the coroutine functions are in their own file
+`common-kotlin` reads the current command context through `internal.CurrentCommandContext`, which keeps the core API
+unchanged without requiring `common` and `common-kotlin` to share a class loader. kotlinx-coroutines is `compileOnly`, and the coroutine functions are in their own file
 class, so the rest of the DSL loads without it.
 
 ### Forge / NeoForge / Fabric
@@ -195,4 +219,4 @@ main thread.
 - Should message APIs expose CommandLib's own abstraction, Adventure, or platform-native components?
 - Should `modded` be split into a Minecraft-version module and loader modules (see `docs/roadmap.md`)? Fabric was added as
   a loader of the same tree without the split: the loader-specific code is command registration, permissions, the
-  running server lookup (`util.CurrentServer`) and the `fabric.mod.json` metadata.
+  running server lookup (`internal.CurrentServer`) and the `fabric.mod.json` metadata.

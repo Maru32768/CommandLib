@@ -25,6 +25,14 @@ This file lists the changes in each CommandLib release that affect plugin and mo
   registration with `NMSClassNotFoundException`. The modules cover Spigot 1.16.4 to 26.3
   ([compatibility](docs/compatibility.md)).
 - The unused NMS wrapper `dev.marulabs.commandlib.util.nms.world.NMSEntity` and `NMSClass#getServerClass` are removed.
+- CommandLib's implementation moves to `dev.marulabs.commandlib.internal`, marked `@ApiStatus.Internal` and not API
+  ([hiding it in IntelliJ IDEA](README.md#hiding-internal-classes-in-intellij-idea)). Moved: `PlatformAdapter`,
+  `util.StringUtil`, `branch.ArgumentBranchDelegate`, the NMS wrappers (`util.nms` to `internal.nms`, including
+  `NMSClassRegistry` and the `NMS*` classes that `spigot-testing`'s `mockNmsClass` takes), `util.reflection`,
+  `util.bukkit` (`BukkitUtil`, `MinecraftVersion`), Paper's `util.brigadier.VanillaArgumentTypes` and modded
+  `util.CurrentServer`. The typed NMS classes move from `dev.marulabs.commandlib.nms` to `internal.nms.typed`, and
+  `spigot-testing`'s NMS mocks to `internal.nms.mock`. Each platform's `PlatformAdapterImpl` is no longer public. The
+  `relocate("dev.marulabs.commandlib", ...)` of [packaging](docs/packaging.md) covers the new packages.
 
 #### Commands and arguments
 

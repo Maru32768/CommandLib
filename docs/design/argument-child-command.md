@@ -188,8 +188,9 @@ becoming public just because branch classes live in their own package.
 
 ### `ArgumentBranchDelegate`
 
-`ArgumentBranchDelegate` is a narrow bridge from the public `branch` package back
-to the internal `CommonCommand`/`Arguments` model.
+`ArgumentBranchDelegate` (in `dev.marulabs.commandlib.internal`, `@ApiStatus.Internal`) is a narrow bridge from the
+public `branch` package back to the internal `CommonCommand`/`Arguments` model. It is public only because the branch
+classes are in another package; the branch constructors that take it are `@ApiStatus.Internal` too.
 
 It has only the operations needed by `ArgumentBranch`:
 
@@ -474,9 +475,6 @@ use a real Brigadier command tree shape that fails without that fallback.
 
 ## Open Questions
 
-- Whether `ArgumentBranchDelegate` should remain public. It is public because
-  `ArgumentBranch` has a public constructor, but it is not intended for typical
-  library users.
 - Whether `childCommand(...)` should be added as an alias for readability. The
   current recommendation is to keep only `child(...)` unless user confusion
   appears in real usage.
