@@ -289,6 +289,23 @@ class CommandLibLifecycleTest {
     }
 
     @Test
+    void the_functions_are_compiled_when_the_plugin_is_disabled_before_the_task_runs() throws EventException {
+        when(plugin.isEnabled()).thenReturn(true);
+        CommandLib lib = CommandLib.register(plugin, "test", helloCommand());
+        fireCommandsEvent();
+        runScheduledTasks();
+        RegisteredListener listener = disableListeners().get(0);
+        try (MockedStatic<ServerFunctions> functions = mockStatic(ServerFunctions.class)) {
+            // The plugin unregisters from its own disable listener, ahead of CommandLib's, which Bukkit still calls in
+            // this dispatch. Bukkit then cancels the plugin's tasks, so the task never runs.
+            lib.unregister();
+            listener.callEvent(new PluginDisableEvent(plugin));
+
+            functions.verify(() -> ServerFunctions.recompileFunctions(any()));
+        }
+    }
+
+    @Test
     void a_cooldown_bypass_node_that_exists_is_neither_replaced_nor_removed() {
         when(plugin.isEnabled()).thenReturn(true);
         Permission declared = new Permission("myplugin.admin");
