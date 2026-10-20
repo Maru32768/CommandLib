@@ -133,7 +133,9 @@ suggestions) and a command for each argument type. Options, permission plugins a
 #### Ways to define commands
 
 - An annotation API: `@Command`, `@Subcommand`, `@Flag`, `@Option`, `@Condition` and more, registered through each
-  platform's `AnnotatedCommands` ([annotated commands](docs/annotations.md)).
+  platform's `AnnotatedCommands` ([annotated commands](docs/annotations.md)). Parsing rejects a definition that would
+  fail later: an argument parameter named like a placeholder of its `@Subcommand` path, or a placeholder repeated in
+  the path.
 - A Java builder: `Command.builder(name)` configures a command in one chain ([Java builder](docs/java-builder.md)).
 - A Kotlin DSL for Spigot, Paper and Velocity (`spigot-kotlin`, `paper-kotlin`, `velocity-kotlin`), with delegated
   options, `require(...)` blocks and `suspend` executors ([Kotlin DSL](docs/kotlin.md)).

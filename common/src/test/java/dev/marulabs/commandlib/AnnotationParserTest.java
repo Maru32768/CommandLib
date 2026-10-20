@@ -1150,6 +1150,29 @@ class AnnotationParserTest {
     }
 
     @Command("x")
+    static final class ArgumentNamedLikePlaceholder {
+        @Subcommand("<team> add")
+        void add(@Name("team") String team, @Name("team") String note) {
+        }
+    }
+
+    @Command("x")
+    static final class RepeatedPlaceholder {
+        @Subcommand("<team> move <team>")
+        void move(@Name("team") String team) {
+        }
+    }
+
+    // The arguments of a route share one map by name, so a second "team" would break at run time.
+    @Test
+    void an_argument_cannot_share_the_name_of_a_placeholder_of_its_path() {
+        AnnotationParser<TestCommandContext, TestCommand> parser = parser();
+
+        assertThatThrownBy(() -> parser.parse(new ArgumentNamedLikePlaceholder())).hasMessage("ArgumentNamedLikePlaceholder#add(String, String): parameter team has the name of the placeholder <team> of its @Subcommand path; give it another name with @Name");
+        assertThatThrownBy(() -> parser.parse(new RepeatedPlaceholder())).hasMessage("RepeatedPlaceholder#move(String) has <team> twice in its @Subcommand path");
+    }
+
+    @Command("x")
     static final class ExecuteAndSubcommand {
         @Execute
         @Subcommand("a")

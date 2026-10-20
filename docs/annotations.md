@@ -197,6 +197,8 @@ argument(new TeamArgument("team")).description("Show a team")
   The argument is made by the factory of the parameter's type, once for the path, so every method below `<team>`
   must declare the parameter alike (the same type and annotations). The children read the parsed value, which is
   parsed once.
+- The arguments of a path share one namespace, so each placeholder appears once in the path, and the method's other
+  argument parameters take names other than the placeholders'; parsing fails otherwise.
 - Adjacent placeholders form one argument branch: `@Subcommand("<x> <y> go")` is `argument(x, y).child(...)`.
 - A path that ends in a placeholder, such as `"<team>"` above, executes the branch. The method takes no other
   arguments; `@Description`, `@Permission` and `@VisibleWhen` on it describe the branch, and the other command

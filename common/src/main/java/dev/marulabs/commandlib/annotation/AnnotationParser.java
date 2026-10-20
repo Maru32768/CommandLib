@@ -556,8 +556,26 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
             List<Extractor<C, ?>> resolvers = new ArrayList<>();
             for (Parameter parameter : method.getParameters()) {
                 CommonArgument<?, C, ?> placeholder = target.placeholders.get(parameter);
-                resolvers.add(placeholder != null ? ctx -> ctx.getArgument(placeholder)
-                        : resolve(method, parameter, command, arguments));
+                if (placeholder != null) {
+                    resolvers.add(ctx -> ctx.getArgument(placeholder));
+                    continue;
+                }
+                int count = arguments.size();
+                resolvers.add(resolve(method, parameter, command, arguments));
+                // The arguments of one route share their names, so this one would read the placeholder's value.
+                if (arguments.size() > count) {
+                    String name = arguments.get(count)
+                                           .name();
+                    if (target.placeholders.values()
+                                           .stream()
+                                           .anyMatch(x -> x.name()
+                                                           .equals(name))) {
+                        throw error(method,
+                                    parameter,
+                                    "has the name of the placeholder <" + name + "> of its @Subcommand path; give "
+                                            + "it another name with @Name");
+                    }
+                }
             }
             AsyncCommandExecutor<C> executor = executor(method, resolvers);
 
@@ -636,11 +654,15 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
             if (segments.isEmpty()) {
                 throw error(method, "has an empty @Subcommand; use @Execute for the command itself");
             }
+            Set<String> placeholderNames = new HashSet<>();
             for (String segment : segments) {
                 if (!isPlaceholder(segment) && (segment.contains("<") || segment.contains(">"))) {
                     throw error(method,
                                 "has '" + segment + "' in its @Subcommand path; a placeholder is one name in angle "
                                         + "brackets, such as <team>");
+                }
+                if (isPlaceholder(segment) && !placeholderNames.add(segment)) {
+                    throw error(method, "has " + segment + " twice in its @Subcommand path");
                 }
             }
             T current = root;
