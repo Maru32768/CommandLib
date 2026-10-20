@@ -106,6 +106,7 @@ This file lists the changes in each CommandLib release that affect plugin and mo
   - a child command or alias whose name a sibling already has (`addChildren` / `addAliases` throw
     `IllegalArgumentException`)
   - a greedy string argument that does not end its branch (`IllegalStateException`)
+  - two `required()` options in one `mutuallyExclusive(...)` group, which no input could run (`IllegalStateException`)
   - one permission node that two routes of a registration give different defaults or descriptions, of which one was
     registered (`IllegalStateException`)
   - an argument whose name an argument before it on the route already has, such as `<key>` in a child of a `<key>`

@@ -693,4 +693,33 @@ class CommandOptionTest {
             mutuallyExclusive(json);
         }}).isInstanceOf(IllegalArgumentException.class);
     }
+
+    @Test
+    void two_required_options_of_one_mutually_exclusive_group_are_rejected_at_build() {
+        TestCommand both = new TestCommand("export") {{
+            CommandOption<String, TestCommandContext> to = option(Options.string("to", 't', ""));
+            CommandOption<String, TestCommandContext> format = option(Options.string("format", 'F', "text"));
+            option(Options.flag("force", 'f'));
+            mutuallyExclusive(to, format);
+            // Made required after the group is declared, as the command checks it when it is built.
+            to.required();
+            format.required();
+            execute(ctx -> {
+            });
+        }};
+        TestCommand one = new TestCommand("export") {{
+            CommandOption<String, TestCommandContext> to = option(Options.string("to", 't', "")
+                                                                         .required());
+            CommandOption<String, TestCommandContext> format = option(Options.string("format", 'F', "text"));
+            mutuallyExclusive(to, format);
+            execute(ctx -> {
+            });
+        }};
+
+        assertThatThrownBy(() -> new TestCommandRunner(both)).isInstanceOf(IllegalStateException.class)
+                                                             .hasMessageContaining("--to")
+                                                             .hasMessageContaining("--format")
+                                                             .hasMessageContaining("'export'");
+        new TestCommandRunner(one);
+    }
 }
