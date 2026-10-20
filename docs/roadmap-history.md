@@ -114,6 +114,9 @@
 
 ### P5: Platform expansion（完了分）
 
+- `[x]` `ServerArgument` の補完で quote が必要な名前を quote する（`a761dffa`、`velocity-testing` の `CommandTesterTest`）。
+- `[x]` modded-testing の fake source が level と op を持ち、`@p` / `@a` / `@r` を fake player で解決する（`TesterServerTest`、
+  `UUIDArgumentTest`）。`docs/arguments.md` の「real selectors」はこれで裏付けられた。
 - `[x]` Velocity support を追加する。`velocity` / `velocity-testing` module（`BrigadierCommand` 登録、Adventure message、
   `PlayerArgument` / `ServerArgument`、diagnostics）。Velocity 3.4.0 / 4.2.0 で手動確認（2026-10-15）。
 - `[x]` Fabric support を追加する。`modded` の単一ソースから `fabric-1.20.1` / `fabric-1.21.1` と `fabric-testing-*` を build

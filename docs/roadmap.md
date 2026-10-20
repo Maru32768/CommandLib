@@ -22,7 +22,7 @@
 | Variadic / optional arguments       | `[x]` | 末尾の `optional(default)` / `optional(Extractor)` と `variadic([max])`（`List<T>`）がある。配置違反は登録時に `IllegalStateException`（[`docs/design/optional-variadic-arguments.md`](design/optional-variadic-arguments.md)）。実サーバーでは Spigot / Paper / modded fixture の `OptionalVariadicArgumentTest` が console から、省略時の default、指定値での上書き、`optional(Extractor)`、`variadic(3)` の順序、player 名と `@p` の variadic、空の optional variadic を確認する（spigot-1.21.8、paper-1.21.4、forge-1.20.1、fabric-1.21.1 で実行済み）。 | 上限なしの variadic、`Optional<T>` 形式、player からの実行、command tree の大きさ（`maxCount` × option の展開）の測定。 |
 | Execution result                    | `[x]` | `ctx.setResult(int)` が `/execute store result` に、message のある失敗（例外・権限・prerequisite 等）が `store success 0` に反映される（message のない失敗は 0 を返すだけで、`store success` は 1）。spigot-1.16.5 / paper-26.3 の integration test あり。 | Forge / NeoForge の実サーバー検証。 |
 | Async execution                     | `[x]` | `executeAsync(...)`（全 typed branch）と `ctx.supplyAsync` / `runAsync`、platform 別の `CommandScheduler` で sync thread へ復帰する（[`docs/execution.md`](execution.md)）。 | Folia の command block（region scheduler）経路の実サーバー検証（Bukkit / Forge / NeoForge と、Folia の player / console は 2026-10-16 に検証済み）。 |
-| Dynamic command tree refresh        | `[x]` | `CommandLib.refresh(player)` / `refreshAll()` が Spigot / Paper / Forge / NeoForge にある（[`docs/permissions.md`](permissions.md)）。 | permission 以外の state による表示切替 predicate、実 client での検証。 |
+| Dynamic command tree refresh        | `[x]` | `CommandLib.refresh(player)` / `refreshAll()` が Spigot / Paper / Forge / NeoForge / Fabric にあり、state による表示切替は `visibleWhen(...)` で書ける（[`docs/permissions.md`](permissions.md)）。Velocity は tree を再送する API が無いため `refresh` も無い。 | 実 client での検証。 |
 | Vanilla-style feedback              | `[~]` | `ctx.sendSuccess(message, broadcastToOps)` が Spigot / Paper / Forge / NeoForge / Fabric で vanilla の `CommandSourceStack#sendSuccess` を通り、gamerule と silent source を尊重する。Paper は reflection で呼び、その method がない source（test の mock 等）には通常の message で送る。Velocity には gamerule も operator もないため、`broadcastToOps` を無視して sender に送る。selector の target 数に応じた message は `ctx.sendSuccessFor(...)`。 | `sendCommandFeedback` / `logAdminCommands` gamerule、silent source、operator への broadcast の tests（unit / integration とも無い）。 |
 | Bukkit / Spigot / Paper support     | `[~]` | `spigot` module（Spigot 1.16.5〜26.3 を Tested）と `paper` module（Paper 1.21〜26.3 を Tested、Folia は best effort）がある。 | Folia は smoke target `folia-26.3` のみで、Paper の suite は Folia で走らない。 |
 | Paper 1.20.6+ registration          | `[x]` | `LifecycleEvents.COMMANDS` + `Commands registrar` + `CommandSourceStack` を使った公式 API 登録が実装済み。Adventure component を標準 message path として利用。 | bootstrap 登録の互換性保証・docs / tests の拡充（`CommandLib.bootstrap(BootstrapContext, ...)` は実装済み）。                                                   |
@@ -41,17 +41,17 @@
 | Custom parsing fallback             | `[x]` | `additionalParser(...)` がある。                                                                                                            | behavior spec と tests。                                                     |
 | Sync suggestions                    | `[x]` | `suggestionProvider(...)`、additional suggestions、`SuggestionBuilder#suggest` の String / Brigadier Message tooltip overload がある。                                                                                   | rich tooltip の platform 別保証、ranking、fuzzy suggestions。                                 |
 | Async suggestions                   | `[~]` | `SuggestionBuilder#await(CompletionStage)` がある。                                                                                                      | deadlock policy、cache、invalidation、Paper native path。                      |
-| Permission-aware execution          | `[x]` | command / argument branch permission が実行時に使われる。                                                                                         | option permission、diagnostics、export。                                      |
+| Permission-aware execution          | `[x]` | command / argument branch / option の permission が実行時に使われ、`CommandDocs` で export できる。 | 祖先 command の実行時再検査（P0 の 18-F07）。 |
 | Permission registration             | `[~]` | Bukkit / Forge の permission registration がある。                                                                                           | reload safety の integration tests、LuckPerms guide。                         |
 | Permission-aware help / suggestions | `[~]` | argument branch permission を help / tab completion に反映する設計がある。                                                                          | 網羅 tests と docs。                                                           |
 | Typed command options               | `[~]` | flag / value / count option、任意の argument を値にする `Options.of(...)`、default、dependency、repeatable、alias、required、`mutuallyExclusive(...)`、option 単位の permission、opt-in の `optionsAnywhere()`、`OptionParseException`、help の option section がある（[`docs/options.md`](options.md)）。 | subcommand への継承、固定 arity の multi-value（Pillar 4 の Required）、排他 group の専用 error message。annotation は `@Flag` / `@Option` / `@MutuallyExclusive` で対応済み。 |
 | Generated usage / help              | `[x]` | 生成 help / usage に `HelpFormatter` / `UsageFormatter` と `examples(...)` があり、command ごとに継承される（[`docs/help.md`](help.md)）。`serverHelp(...)` は Bukkit 系の `/help` index に載る。 | usage line の RichText 化（hover / click）。 |
-| Error taxonomy                      | `[~]` | parse / validation / prerequisite / option 系の例外があり、各 error で sender に見える message を [`docs/errors.md`](errors.md) で公開仕様化した。 | unknown subcommand、missing argument の専用 error、cooldown / confirmation / preprocess message の error formatter 経由化。 |
+| Error taxonomy                      | `[~]` | parse / validation / prerequisite / option 系の例外があり、各 error で sender に見える message を [`docs/errors.md`](errors.md) で公開仕様化した。 | unknown subcommand の専用 error（Brigadier が CommandLib より先に報告するため `ErrorFormatter` に届かず、platform の hook が要る）、cooldown / confirmation / preprocess message の error formatter 経由化。missing argument は help を送る。 |
 | Exception handling                  | `[x]` | uncaught exception handler と、middleware での exception mapping / result handling がある。 | global な exception handler。 |
 | Preprocess / prerequisite           | `[~]` | `addPreprocess(...)`（middleware 化済み）、`addPrerequisite(...)`、`requirePlayer()` 等がある。名前付きの condition は annotation の `@Condition`（`AnnotationParser#registerCondition`）だけ。 | fluent / builder / Kotlin の reusable condition registry（現在は `Prerequisite` の値を使い回すだけ）、diagnostics。 |
 | Middleware / interceptor            | `[x]` | `addMiddleware(CommandMiddleware)` で pre / post hook、exception mapping、result handling を合成でき、child と argument branch に継承される。`confirm()` / `cooldown()` / preprocess も middleware 上にある。 | — |
-| Sender abstraction                  | `[x]` | `provide(Type, ctx -> ...)` で sender を plugin の型に変換し、`ctx.get(Type)` で cast なしに読める。middleware は `ctx.put` で値を足せる（[`docs/context-values.md`](context-values.md)）。 | platform 単位の provider 登録。 |
-| Dependency injection                | `[x]` | context value の provider と、annotation API の `registerDependency` / `@Dependency` field がある。DI framework 非依存。 | platform 単位の provider 登録、`require(Class)` の短縮形。 |
+| Sender abstraction                  | `[x]` | `provide(Type, ctx -> ...)` で sender を plugin の型に変換し、`ctx.get(Type)` で cast なしに読める。middleware は `ctx.put` で値を足せる。登録単位の provider は `CommandDefaults`（[`docs/context-values.md`](context-values.md)）。この行の sender は「plugin の型への変換」の意味で、P5 の sender / message abstraction（platform 間の sender 型の差の吸収）とは別。 | — |
+| Dependency injection                | `[x]` | context value の provider、登録単位の `CommandDefaults`、annotation API の `registerDependency` / `@Dependency` field がある。DI framework 非依存。 | `require(Class)` の短縮形。 |
 | Annotation API                      | `[~]` | `AnnotationParser` と `@Command` / `@Subcommand` / `@Permission` / `@Optional` / `@Default` / `@Range` / `@Suggest` / `@Flag` / `@Option` / `@Confirm` / `@Cooldown` 等、custom annotation の拡張点が Spigot / Paper / Velocity / modded にある。Spigot / Paper / modded では fluent と同じ help / permission / 実行結果を snapshot で確認し、Velocity は実行と引数の parse だけを確認（`AnnotatedCommandsTest`、[`docs/annotations.md`](annotations.md)）。 | `java.util.Optional<T>` 引数、`requires(option, predicate)` の annotation、Velocity の snapshot、modded の guild case（placeholder、middleware、visibility、`@Requires`）。 |
 | Kotlin DSL                          | `[~]` | `common-kotlin` + `spigot-kotlin` / `paper-kotlin` / `velocity-kotlin` に型推論の効く builder、delegated option、`executeSuspend`、suspend suggestions がある（[`docs/kotlin.md`](kotlin.md)）。 | Forge / NeoForge 版、Kotlin 関数の default 引数から command を作る形。`common-kotlin` は package-private の `CurrentCommandContext` を同じ package から読むため `common` と同じ class loader が必要。 |
 | Java builder API                    | `[x]` | `Command.builder(name)`（common の `CommandBuilder`）が全 platform にあり、fluent と同じ command tree / permission / 結果を snapshot で確認（[`docs/java-builder.md`](java-builder.md)）。 | — |
@@ -67,6 +67,131 @@
 
 ## 優先度別バックログ
 
+### P0: GA 前の欠陥と契約（レビュー由来）
+
+2026-10-18 / 2026-10-19 / 2026-10-20 のレビューで見つかり、未対応だった指摘をまとめる。ID は各レビュー記録の ID
+（`18-F01` は [2026-10-18 GA 監査](../review-records/runs/2026-10-18-ga-audit/reviews/agents/architecture-api.md)、
+`20-F01` は [2026-10-20 GA 監査](../review-records/runs/2026-10-20-ga-audit/reviews/agents/ga-architecture-api-1.md)、
+`R1-` / `R2-` は [import-review-1](../review-records/runs/2026-10-19-import-review-1/triage/findings.md) /
+[import-review-2](../review-records/runs/2026-10-19-import-review-2/triage.md) の triage ID）。
+「仕様判断不要」は正しい修正が一つに決まるもの、「要判断」は互換性のない選択肢から選ぶ必要があるもの。
+
+#### 仕様判断不要
+
+- `[ ]` route 全体で引数名の一意性を登録時に検証する。親 branch と argument child の同名引数は、同型なら親の `ArgRef` が子の値を
+  返し、異型なら実行時に `IllegalArgumentException` になる。annotation の placeholder と子の引数の同名も parse 時に拒否する
+  （18-F01、20-F01）。
+- `[ ]` command literal と同名の optional 引数を省略すると `No such argument` になる。入力 map の「引数の有無」を argument node
+  だけで判定する（18-F02）。
+- `[ ]` `addChildren` が自身・祖先の追加（循環）を許し、build で `StackOverflowError` になる。接続前に拒否する（18-F03）。
+- `[ ]` 同じ child instance を同じ親の別の位置（直下と argument branch、別の branch）に付けると `parentArguments` が上書きされ、既存
+  route の default permission と help の path が変わる。同じ位置への重複追加も help の usage を重複させる。別位置への再接続と
+  重複追加を拒否する（18-F04、20-F10）。
+- `[ ]` Spigot / Paper で古い登録の `unregister()` が、同じ node を置き換えた新しい登録の permission を削除する。登録時の
+  `Permission` object と現在の registry の object を比較して解除する（18-F05）。
+- `[ ]` Velocity の `unregister()` が permission default を残し、`ALL` で登録・解除した node を `NONE` で再登録しても開いたままに
+  なる。default の寿命を live な登録に揃える（18-F06）。
+- `[ ]` 実行時の権限再検査が終端 command と argument branch だけで、祖先 command の node を見ない。cached parse（function 等）では
+  祖先の権限を失った sender が実行できる。route 上の全 node を再検査する（18-F07）。
+- `[ ]` server 側の補完 API は権限で隠した literal も返す（client tree からは消える）。`CommandTester#suggest(ions)` を client と
+  同じく requirement で絞り、docs の保証範囲を「client の command tree」と明記する（18-F08）。
+- `[ ]` Paper（plugin 初期化中の登録）と modded は command tree の構築が event まで遅れ、optional 配置違反などの定義エラーが
+  `register()` で例外にならず、event 内の log になる。platform 非依存の検証を `register()` 内で行う（18-F09、20-F08）。
+- `[ ]` `ctx.getOption(option)` が実行中の command に無い option（他 command、親 command の option）を黙って default で返す。
+  Kotlin DSL の delegated property では親の option を子の `execute` で自然に読めてしまう。実行中の command の option 以外は例外に
+  する（18-C02、20-F06）。
+- `[ ]` 1 回の登録の中で、同じ permission node に異なる default / description が付いている（直下の子と argument child の同名など）と
+  後勝ちで登録される。登録時に拒否する（18-C03 のうち登録内、20-F03）。
+- `[ ]` `required()` の option 同士を `mutuallyExclusive(...)` にした、必ず失敗する定義を登録時に拒否する（20-F10）。
+- `[ ]` executor の二重設定（`execute` を 2 回、`require(...).execute` と `execute` の併用）が黙って後勝ちになる。Kotlin DSL の
+  `require { execute {} }` は docs と違い command の executor を置き換える。二重設定を `IllegalStateException` にする（20-F13、
+  20-F15）。
+- `[ ]` testing artifact の docs と実装を揃える: `velocity-testing` に `suggestions(input, sender)` を足す、command tree snapshot に
+  executor の有無と cooldown bypass node を含めるか docs の保証範囲を直す、`FakeSender.player(...)` の既定 locale を実 client と
+  同じ `en_us` にする（20-F07）。
+- `[ ]` annotation API: `@Range` の境界が型の範囲外なら黙って飽和せず parse error にする、root command の名前エラーに class 名を
+  付ける、`@Suggest(method=)` の accessibility 失敗を `ParseException` で包む、Kotlin の `-java-parameters` を案内する、
+  `docs/design/annotation-api.md` の stale な "Not done: inherited methods" を直す（20-F14）。
+- `[ ]` docs の不一致を直す: Kotlin DSL の再開 thread（Velocity は calling thread）と "no parent job"、`register` の `@throws`、
+  platform ごとの登録契約（失敗時点、unregister の有無、label 衝突、default の決まり方）の横断表、Paper の
+  `Bukkit.reloadData()` fallback、補完 context では option が未解決であること（18-C02、20-F08、20-F13、20-F15）。
+- `[ ]` Spigot の function 再 compile task が全登録の解除後も毎 tick 走り続ける。登録が無くなったら止める（20-F13）。
+- `[ ]` 使われていない `NMSEntity`（27 の typed NMS module の実装と codegen の entry）と `NMSClass#getServerClass` を削除する
+  （R2-B-7）。
+- `[ ]` annotation API: 引数に `@Optional` と `@Default` を併用した冗長な定義を拒否する（R2-A1-17）、`suspend fun` の method を
+  分かりにくい `Continuation` のエラーでなく明示的な parse error にする（R1-A3-05）。
+- `[ ]` 共有 node の設定比較（`CommandNameValidator#sameSettings`）が `ResourceArgument` の registry key など equals の無い設定を
+  比較しない。registry key を比較する（R2-A-5、`shortcut:` コメントあり）。
+- `[ ]` 重複を減らす: `spigot` / `paper` の main に同一 file が 11 個（`Argument`、`BukkitCommandActor`、primitive / enum / literal
+  などの argument。R1-C-05）、`spigot-testing` / `paper-testing` の test に同一 file が 11 個（R1-C-07、R2-D-32）、Spigot / Paper の
+  TeamColor 処理（R2-P2C）、`Captions` と `Caption` の properties 読み込み（R2-P1B-3）、Paper の reflection lookup の cache
+  （R2-B-8）、`AnnotationParser` 内の重複（R2-A1-18）。共有 source dir か共通 helper にする。
+- `[ ]` 依存 version を `gradle/libs.versions.toml` の version catalog に集める（`brigadier:1.0.18` が 13 file に直書き。R1-C-12）。
+- `[ ]` `tools/nms-codegen/generate.py` に生成済み source との一致を検査する `--check` mode を足す（CI step の前提。R1-C-10）。
+  同じ revision の module（`spigot-1.20.3` と `spigot-1.20.4` は package 名だけが違う）をまとめられるかは `TypedNmsTest` で確かめる。
+- `[ ]` テストを足す: Spigot / Paper の `LocationArgument(name, false)` の unit test（R1-D-15）、Velocity の optional / variadic
+  （R1-D-09）、argument child の subtree に redirect が無いことの構造 test と、redirect の有無だけを見る弱い assertion の置き換え
+  （R1-D-06、R1-B1-07）、英語の assertion が JVM の locale に依存しないよう test の locale を固定する（R1-B1-08）、Spigot の
+  `ownsLabel` / vanilla root の同一性 / Folia 拒否（R2-D-23）、fabric-1.21.4 の `RawWordArgumentType`（R2-E-12）。
+- `[ ]` integration test を足す: 権限拒否の失敗が `/execute store success 0` になる case（R1-D-16）、modded の relocate した
+  CommandLib jar を Forge / NeoForge / Fabric の実サーバーで読み込む target（R1-D-11）。
+- `[ ]` `integration-test/README.md` に、Bukkit の suite の大半は console から、一部は bot から実行することを書く（R1-B2-11）。
+
+#### 要判断
+
+- `[?]` 登録後の command model の変更をどう扱うか。現在は Spigot / Velocity が登録時の tree を保持し、Paper / modded は reload
+  ごとに現在の model から作り直すため、登録後の `addChildren` / `cooldown` / `provide` が platform と時刻で違う結果になる。
+  案: (1) 登録時に freeze して以後の setter を例外にする（推奨）、(2) 登録時の完全 snapshot、(3) 明示的な rebuild API。同じ
+  command の複数登録、`CommandDefaults` の上書き、tester 間の共有も併せて決める（18-C01、20-F02、20-F07）。
+- `[?]` index ベースの `getInput(int)` / `getArgument(int)` の意味。`getInputs()` は literal を含み `getArguments()` は含まないため
+  index が揃わず、Paper 1.21+ は root literal を含まない。案: index API を削除、または `getInputs()` を引数だけにする（20-F05）。
+- `[?]` `CommonArgument#execute` で引数 instance に付けた executor は branch の途中を実行点にするが、help / docs / tree に出ない。
+  案: positional 引数の instance executor を削除して branch だけにする、または help / docs に出す（20-F04）。
+- `[?]` 失敗の `/execute store success` が message の有無で変わる（message の無い失敗は 0 を返すだけで success 1）。失敗状態・表示・
+  result を独立させるか、現挙動を契約にするか（18-C04）。
+- `[?]` cooldown は executor の直前に始まるため、executor が `ctx.fail(...)` で失敗しても消費される。confirmation は失敗時に再要求
+  される（20-F11）。
+- `[?]` 同じ parse（function 等の cached parse）を再実行すると confirmation が「同じ fork の別 target」と判定し、二度と確認できない。
+  dispatch 単位の identity を作るか、confirmation の対象経路を直接入力に限るか（18-F10）。
+- `[?]` 複数の登録（別 plugin、shade した別 copy を含む）が同じ permission node を宣言したときの規則。現在は Bukkit 系が置き換え、
+  Velocity / modded が first-wins（18-C03、20-F08）。
+- `[?]` annotation で `@Subcommand` method の argument branch に description / permission / visibleWhen を付ける手段（fluent では
+  branch ごとに書ける）（20-F14）。
+- `[?]` 非同期処理の寿命（plugin disable、unregister、終わらない stage）と、validator / transformer / provider が補完や option /
+  variadic の再 parse で複数回呼ばれることの契約（純粋性・副作用）（18-C06）。
+- `[?]` GA の定義: 安定を保証する API、release gate（japicmp の baseline、必要な検証）、roadmap の `[x]` が「実装済み」と
+  「検証済み」のどちらを意味するか（18 の roadmap 1・2、20-F12、20-R1）。
+- `[?]` `requires(option, value)` は `ctx.getOption` を見るため未指定の default でも成立し、`requires(option)` は指定を要求する。
+  value 版も明示的な指定を要求するか（R2-A1-9）。
+- `[?]` argument branch は command の `UncaughtExceptionHandler` を継承するが、子 command は親のものを継承しない（middleware は両方
+  継承する）。揃えるか docs に書くか（R2-A2-8）。
+- `[?]` option は位置引数より先に parse されるため、option の validator / transformer / default から `getArgument` を読むと
+  unexpected error になる。parse 順を変えるか制約として明示するか（R2-A-17）。
+- `[?]` `/config -f <key> set` で親 command の option が受理された後に捨てられる（`docs/options.md` は動くと書き、別の節は継承しない
+  と書く）。拒否するか子に見せるか。options の継承（P3）と併せて決める（R2-A-18）。
+- `[?]` `Options.bool / integer / longValue / floatValue / doubleValue / string` が `Options.of` と重複し、default の意味も違う。
+  annotation の `@Range` option は int だけ。typed factory を削除するか、long / float / double の範囲付きを足すか（R2-A-20）。
+- `[?]` `addPreprocess(Predicate)` が `addMiddleware` / `addPrerequisite` と役割で重なる。GA 前に削除するか、役割を明記して残すか
+  （R2-A-21）。
+- `[?]` `sendSuccess(message, true)` の operator への broadcast は呼び出し thread で player list を走査する。sync thread 限定の
+  契約を Javadoc に書くだけか、自動で sync thread に移すか（R2-B-5）。
+- `[?]` modded では command block（level 2）が `OP` default の node に level 4 を要する（vanilla の command は 2）。level を
+  vanilla に合わせるか（R2-E-13）。
+- `[?]` console の扱いが platform で違う: modded / Velocity の console は `NONE` の node も通るが Spigot / Paper は通らない、modded の
+  `requireConsole` は RCON を受理し Spigot / Paper は拒否する。揃えるか docs に書くか（R2-R2C-4）。
+- `[?]` cooldown の予約中に弾かれた実行に、残り時間として cooldown の全期間を伝えている。専用 caption にするか、予約からの経過で
+  計算するか（R2-D-27）。
+- `[?]` Spigot / Paper は `plugin.yml` で宣言済みの command / option / argument の permission を置き換え、default・children・
+  description が消える（cooldown bypass node だけ保護）。どちらを優先するか。上の「複数の登録が同じ node を宣言したときの規則」と
+  併せて決める（R2-R3B-1）。
+- `[?]` Paper 1.21.4+ で実行時に登録した label は plugin の metadata の無い plain node になり、`/help` の分類と `dispatchCommand`
+  の permission（`minecraft.command.<label>`）が変わる。reflection で metadata を付けるか docs に書くか（R2-CME）。
+- `[?]` testing artifact の API を揃える: `with*` の命名（modded-testing は `withPlayer` / `withLevel` / `withServer`、他は
+  `withFakePlayer` / ...）、common の main にある `Snapshots` の置き場所、`CommandLibExtension` の共通化（R1-C-06）。
+- `[?]` `FakeSender` は既定で全 permission を持ち `DefaultPermission` を適用しない（velocity-testing を除く）。登録の default と
+  `isOp` を適用する opt-in mode を足すか。integration test の bot も常に operator で、`OP` default が非 op player を拒否することは
+  実サーバーで未検証（R1-B1-08、R1-B2-09）。
+
 ### P3: Minecraft 連携で CommandAPI を上回る
 
 - `[~]` missing built-in arguments を catalog に基づいて実装する（NMS 依存引数は `MockNMSArgumentXxx` + `XxxArgumentTest`
@@ -75,13 +200,12 @@
   Paper）、`EntityTypeArgument`（Spigot / Paper）、`AttributeArgument`（Spigot / Paper）、`AdvancementArgument`（Spigot /
   Paper）、`LootTableArgument`（Spigot / Paper）、`RecipeArgument`（Spigot / Paper）、`ObjectiveArgument`（Spigot /
   Paper）、`ScoreboardDisplaySlotArgument`（Spigot / Paper）、`ChatColorArgument`（Spigot / Paper）を追加済み。
-- `[~]` `/execute`、command blocks、functions、tags の挙動を検証して docs / tests に落とす。2026-10-16 に Spigot 10 / Paper 10 / Mohist 2 /
-  Forge 4 / NeoForge 2 の計 29 target（`paper-26.3-spigot-jar` を含む）で integration test が全て通った（[`integration-test/README.md`](../integration-test/README.md)）。
+- `[~]` `/execute`、command blocks、functions、tags の挙動を検証して docs / tests に落とす。2026-10-17（`89b9503f`）に全 78 target で
+  integration test が全て通った（[`docs/compatibility.md`](compatibility.md)、[`integration-test/README.md`](../integration-test/README.md)）。
   Spigot / Paper の command block と function tag（`VanillaExecutionTest` / `DataPackFunctionTest`）、modded の command block
   （`ActorTest` / `PermissionTest`）は integration test がある。残り: Forge / NeoForge / Fabric の function / tag、未実行の patch release。
 - `[?]` `/execute as` 後の actor を platform 間で揃えるか決める。Spigot / Paper では sender / actor は元の sender（console）のまま、
   Forge / NeoForge では実行 entity に従う（permission 判定も含む）。
-- `[ ]` modded-testing の fake source は level を持たないため selector を解決できない。`docs/arguments.md` の「real selectors」の記述を見直す。
 - `[ ]` Paper で resolve error の translatable component が実 client で翻訳されること、`MessageComponentSerializer` が
   Paper 1.21.3〜26.x で動くことを integration test（`CommandSyntaxExceptionTest`）で確認する。
 - `[ ]` optional / variadic argument の command tree の大きさ（`maxCount` × option の展開）を確認する。実サーバーでの parse と実行は
@@ -111,7 +235,6 @@
 - `[x]` Forge testing strategy を決め、`forge-testing` を追加する。実サーバーの integration targets（`forge-1.16.5`、`forge-1.20.1`）と、サーバーなしの `forge-testing-<version>`（`CommandTester` / `FakeSender`）を追加済み。
 - `[~]` NeoForge / Fabric / Forge の module 方針を決める。方針案は
   [11. Platform Architecture](#11-platform-architecture) を参照。
-- `[ ]` `ServerArgument` の補完で quote が必要な名前を quote する。
 - `[x]` Architectury Loom + Stonecutter の PoC として、`forge:1.16.5` と `forge:1.20.1` を単一ソースから build する。
 - `[?]` mod loader 系 module を `minecraft`（MC version 依存・loader 非依存）と `loader/*`（loader 依存）に分割する。Fabric 追加時点では
   loader 依存部分が登録・permission・server 取得・reflection 2 箇所と metadata だけで、分割は不要だった。
@@ -150,9 +273,6 @@
   生成済み typed NMS source の手編集や再生成漏れを検出するため、`tools/nms-codegen` で `uv run generate.py --all` を実行し、
   `git status --porcelain -- nms spigot/src/main/java/dev/marulabs/commandlib/util/nms/TypedNmsModules.java` が空でなければ
   失敗させる step も入れる（`git diff --exit-code` は新規の未追跡ファイルを検出しないため）。
-- `[ ]` 2026-10-20 の GA 監査（[review-records/runs/2026-10-20-ga-audit](../review-records/runs/2026-10-20-ga-audit/reviews/agents/ga-architecture-api-1.md)）の
-  指摘 F01〜F15 / R1〜R10 を triage する。未 triage。主要: 親 branch と argument child の同名引数が登録時に検証されない（F01）、
-  登録後のモデル変更の扱いが platform で違う（F02）、API 境界と安定性ポリシーの欠如（F12）。
 - `[ ]` package 構成と可視性を整理し、内部 API を利用者から隠す（F12 と関連）。README に書いた設定をすれば内部 API が
   IDE の補完に出ないことを最優先にし、compile が通らないことは努力目標とする。README の設定を外れた使い方は保証しない。
   ServiceLoader などの実行時 lookup は使わない（以前 Spigot / Paper の plugin reload や PlugMan で動かなくなった）。
