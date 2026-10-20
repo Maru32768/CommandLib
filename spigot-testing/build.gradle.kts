@@ -17,19 +17,19 @@ sourceSets.test {
 
 dependencies {
     api(project(":spigot"))
-    compileOnly("org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT")
-    compileOnly("com.mojang:brigadier:1.0.18")
+    compileOnly(libs.spigot.api)
+    compileOnly(libs.brigadier)
     // CommandLibExtension; tests that use it already have JUnit. 5.8.1 is the oldest docs/testing.md supports.
-    compileOnly("org.junit.jupiter:junit-jupiter-api:5.8.1")
-    api("org.mockito:mockito-inline:4.8.1")
+    compileOnly(libs.junit.jupiter.api.min)
+    api(libs.mockito.inline.legacy)
 
-    testImplementation("com.mojang:brigadier:1.0.18")
-    testImplementation("org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT")
-    testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
+    testImplementation(libs.brigadier)
+    testImplementation(libs.spigot.api)
+    testImplementation(libs.junit.jupiter)
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     // Runs fixture classes to see how CommandLibExtension refuses parameters.
     testImplementation("org.junit.platform:junit-platform-testkit")
-    testImplementation("org.assertj:assertj-core:3.25.1")
+    testImplementation(libs.assertj.legacy)
 }
 
 tasks.test {

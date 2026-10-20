@@ -23,5 +23,5 @@ dependencies {
     api(project(":velocity"))
 
     testImplementation(project(":velocity-testing"))
-    testImplementation("com.velocitypowered:velocity-api:3.4.0")
+    testImplementation(libs.velocity.api)
 }

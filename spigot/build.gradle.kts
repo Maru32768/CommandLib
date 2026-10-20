@@ -20,21 +20,21 @@ sourceSets.main {
 
 dependencies {
     api(project(":common"))
-    compileOnly("org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT")
-    compileOnlyApi("org.jetbrains:annotations:16.0.2")
+    compileOnly(libs.spigot.api)
+    compileOnlyApi(libs.annotations)
     // FunctionLoadErrorFilter extends a Log4j class; the servers provide Log4j.
-    compileOnly("org.apache.logging.log4j:log4j-core:2.17.1")
-    compileOnly("com.mojang:brigadier:1.0.18")
+    compileOnly(libs.log4j.core)
+    compileOnly(libs.brigadier)
 
-    testImplementation("org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT")
-    testImplementation("com.mojang:brigadier:1.0.18")
-    testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
+    testImplementation(libs.spigot.api)
+    testImplementation(libs.brigadier)
+    testImplementation(libs.junit.jupiter)
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-    testImplementation("org.assertj:assertj-core:3.25.1")
-    testImplementation("org.mockito:mockito-core:4.8.1")
-    testImplementation("org.mockito:mockito-inline:4.8.1")
+    testImplementation(libs.assertj.legacy)
+    testImplementation(libs.mockito.core.legacy)
+    testImplementation(libs.mockito.inline.legacy)
     // Mockito's own dependency, for an instance of CommandLib without its constructor, which Mockito cannot mock.
-    testImplementation("org.objenesis:objenesis:3.3")
+    testImplementation(libs.objenesis)
 }
 
 tasks.test {

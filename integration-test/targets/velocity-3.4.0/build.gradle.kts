@@ -32,10 +32,10 @@ repositories {
 val testPlugin by sourceSets.creating
 
 dependencies {
-    mcProtocol("org.geysermc.mcprotocollib:protocol:1.21.4-SNAPSHOT")
-    "testPluginCompileOnly"("com.velocitypowered:velocity-api:3.4.0")
+    mcProtocol(libs.mcprotocollib.protocol)
+    "testPluginCompileOnly"(libs.velocity.api)
     // Writes velocity-plugin.json from @Plugin, as a downstream plugin build does.
-    "testPluginAnnotationProcessor"("com.velocitypowered:velocity-api:3.4.0")
+    "testPluginAnnotationProcessor"(libs.velocity.api)
     "testPluginImplementation"(project(":velocity"))
 }
 

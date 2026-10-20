@@ -7,16 +7,16 @@ configure<JavaPluginExtension> {
 }
 
 dependencies {
-    testImplementation(platform("org.junit:junit-bom:5.10.2"))
+    testImplementation(platform(libs.junit.bom))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-    testImplementation("org.assertj:assertj-core:3.25.3")
-    testImplementation("org.awaitility:awaitility:4.2.1")
-    testImplementation("org.testcontainers:junit-jupiter:1.21.4")
-    testImplementation("org.testcontainers:testcontainers:1.21.4")
-    testRuntimeOnly("org.slf4j:slf4j-simple:2.0.17")
-    testImplementation("net.kyori:adventure-text-serializer-gson:4.15.0")
-    testImplementation("net.kyori:adventure-text-serializer-json-legacy-impl:4.15.0")
+    testImplementation(libs.assertj)
+    testImplementation(libs.awaitility)
+    testImplementation(libs.testcontainers.junit.jupiter)
+    testImplementation(libs.testcontainers)
+    testRuntimeOnly(libs.slf4j.simple)
+    testImplementation(libs.adventure.text.serializer.gson)
+    testImplementation(libs.adventure.text.serializer.json.legacy.impl)
 }
 
 tasks.test {

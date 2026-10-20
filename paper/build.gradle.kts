@@ -22,16 +22,16 @@ sourceSets.test {
 
 dependencies {
     api(project(":common"))
-    compileOnly("io.papermc.paper:paper-api:1.21-R0.1-SNAPSHOT")
-    compileOnlyApi("com.mojang:brigadier:1.0.18")
-    compileOnlyApi("org.jetbrains:annotations:16.0.2")
+    compileOnly(libs.paper.api)
+    compileOnlyApi(libs.brigadier)
+    compileOnlyApi(libs.annotations)
     // FunctionLoadErrorFilter extends a Log4j class; the servers provide Log4j.
-    compileOnly("org.apache.logging.log4j:log4j-core:2.17.1")
+    compileOnly(libs.log4j.core)
 
-    testImplementation("io.papermc.paper:paper-api:1.21-R0.1-SNAPSHOT")
-    testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
+    testImplementation(libs.paper.api)
+    testImplementation(libs.junit.jupiter)
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-    testImplementation("org.assertj:assertj-core:3.25.3")
+    testImplementation(libs.assertj)
 }
 
 tasks.test {

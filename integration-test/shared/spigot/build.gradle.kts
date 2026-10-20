@@ -17,8 +17,8 @@ dependencies {
     compileOnly(project(":common"))
     compileOnly(project(":spigot"))
     compileOnly(project(":integration-test:shared:core"))
-    compileOnly("org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT")
-    compileOnly("com.mojang:brigadier:1.0.18")
+    compileOnly(libs.spigot.api)
+    compileOnly(libs.brigadier)
 }
 
 // The fixture classes the Spigot and Paper suites share.

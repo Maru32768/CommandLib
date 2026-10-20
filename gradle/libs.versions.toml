@@ -1,0 +1,60 @@
+# Dependency versions of the root build. The modded nodes (gradle/modded-node.gradle.kts), buildSrc, the nested
+# integration-test plugin builds and samples/ are separate builds or Stonecutter nodes and keep their own versions.
+
+[versions]
+brigadier = "1.0.18"
+annotations = "16.0.2"
+log4j = "2.17.1"
+spigot-api = "1.16.5-R0.1-SNAPSHOT"
+paper-api = "1.21-R0.1-SNAPSHOT"
+# paper-testing and paper-kotlin test against 1.21.8, which added ArgumentTypes.blockInWorldPredicate().
+paper-api-test = "1.21.8-R0.1-SNAPSHOT"
+velocity-api = "3.4.0"
+junit = "5.10.2"
+# The *-testing modules compile CommandLibExtension against the oldest JUnit docs/testing.md supports.
+junit-api-min = "5.8.1"
+assertj = "3.25.3"
+# common, common-testing, spigot and spigot-testing use the older AssertJ, and spigot and spigot-testing Mockito 4.
+assertj-legacy = "3.25.1"
+mockito-legacy = "4.8.1"
+mockito = "5.11.0"
+objenesis = "3.3"
+kotlinx-coroutines = "1.8.0"
+errorprone = "2.50.0"
+nullaway = "0.14.2"
+jmh = "1.37"
+awaitility = "4.2.1"
+testcontainers = "1.21.4"
+slf4j = "2.0.17"
+adventure = "4.15.0"
+mcprotocollib = "1.21.4-SNAPSHOT"
+
+[libraries]
+brigadier = { module = "com.mojang:brigadier", version.ref = "brigadier" }
+annotations = { module = "org.jetbrains:annotations", version.ref = "annotations" }
+log4j-core = { module = "org.apache.logging.log4j:log4j-core", version.ref = "log4j" }
+spigot-api = { module = "org.spigotmc:spigot-api", version.ref = "spigot-api" }
+paper-api = { module = "io.papermc.paper:paper-api", version.ref = "paper-api" }
+paper-api-test = { module = "io.papermc.paper:paper-api", version.ref = "paper-api-test" }
+velocity-api = { module = "com.velocitypowered:velocity-api", version.ref = "velocity-api" }
+junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
+junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit" }
+junit-jupiter-api-min = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit-api-min" }
+assertj = { module = "org.assertj:assertj-core", version.ref = "assertj" }
+assertj-legacy = { module = "org.assertj:assertj-core", version.ref = "assertj-legacy" }
+mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito" }
+mockito-core-legacy = { module = "org.mockito:mockito-core", version.ref = "mockito-legacy" }
+mockito-inline-legacy = { module = "org.mockito:mockito-inline", version.ref = "mockito-legacy" }
+objenesis = { module = "org.objenesis:objenesis", version.ref = "objenesis" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
+errorprone-core = { module = "com.google.errorprone:error_prone_core", version.ref = "errorprone" }
+nullaway = { module = "com.uber.nullaway:nullaway", version.ref = "nullaway" }
+jmh-core = { module = "org.openjdk.jmh:jmh-core", version.ref = "jmh" }
+jmh-generator-annprocess = { module = "org.openjdk.jmh:jmh-generator-annprocess", version.ref = "jmh" }
+awaitility = { module = "org.awaitility:awaitility", version.ref = "awaitility" }
+testcontainers = { module = "org.testcontainers:testcontainers", version.ref = "testcontainers" }
+testcontainers-junit-jupiter = { module = "org.testcontainers:junit-jupiter", version.ref = "testcontainers" }
+slf4j-simple = { module = "org.slf4j:slf4j-simple", version.ref = "slf4j" }
+adventure-text-serializer-gson = { module = "net.kyori:adventure-text-serializer-gson", version.ref = "adventure" }
+adventure-text-serializer-json-legacy-impl = { module = "net.kyori:adventure-text-serializer-json-legacy-impl", version.ref = "adventure" }
+mcprotocollib-protocol = { module = "org.geysermc.mcprotocollib:protocol", version.ref = "mcprotocollib" }

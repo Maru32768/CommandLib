@@ -11,9 +11,9 @@ configure<JavaPluginExtension> {
 
 dependencies {
     implementation(project(":common-testing"))
-    implementation("com.mojang:brigadier:1.0.18")
-    implementation("org.openjdk.jmh:jmh-core:1.37")
-    annotationProcessor("org.openjdk.jmh:jmh-generator-annprocess:1.37")
+    implementation(libs.brigadier)
+    implementation(libs.jmh.core)
+    annotationProcessor(libs.jmh.generator.annprocess)
 }
 
 val jmhResults = layout.buildDirectory.file("results/jmh/results.json")

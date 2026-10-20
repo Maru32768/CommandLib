@@ -13,6 +13,9 @@ allprojects {
     version = "0.17.2"
 }
 
+// gradle/libs.versions.toml. The subproject blocks below run before the subprojects have their own `libs` extension.
+val rootLibs = libs
+
 // Spotless resolves the formatter from here.
 repositories {
     mavenCentral()
@@ -204,11 +207,11 @@ configure(subprojects.filter { it.name.endsWith("-kotlin") }) {
     dependencies {
         // Only executeSuspend and the other coroutine functions need it, so a plugin that does not call them does not
         // need it either.
-        "compileOnly"("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
-        "testImplementation"("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
-        "testImplementation"("org.junit.jupiter:junit-jupiter:5.10.2")
+        "compileOnly"(rootLibs.kotlinx.coroutines.core)
+        "testImplementation"(rootLibs.kotlinx.coroutines.core)
+        "testImplementation"(rootLibs.junit.jupiter)
         "testRuntimeOnly"("org.junit.platform:junit-platform-launcher")
-        "testImplementation"("org.assertj:assertj-core:3.25.3")
+        "testImplementation"(rootLibs.assertj)
     }
 
     tasks.named<Test>("test") {
@@ -270,8 +273,8 @@ configure(subprojects.filter { it.path in publishedProjectPaths || it.path.start
     apply(plugin = "net.ltgt.errorprone")
 
     dependencies {
-        "errorprone"("com.google.errorprone:error_prone_core:2.50.0")
-        "errorprone"("com.uber.nullaway:nullaway:0.14.2")
+        "errorprone"(rootLibs.errorprone.core)
+        "errorprone"(rootLibs.nullaway)
     }
 
     val typedNms = path.startsWith(":nms:")

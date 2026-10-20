@@ -6,16 +6,16 @@ repositories {
 }
 
 dependencies {
-    compileOnlyApi("com.mojang:brigadier:1.0.18")
-    compileOnlyApi("org.jetbrains:annotations:16.0.2")
+    compileOnlyApi(libs.brigadier)
+    compileOnlyApi(libs.annotations)
     // The servers log through Log4j; FunctionLoadErrorFilter uses it when it is there.
-    compileOnly("org.apache.logging.log4j:log4j-core:2.17.1")
+    compileOnly(libs.log4j.core)
 
-    testImplementation("com.mojang:brigadier:1.0.18")
-    testImplementation("org.apache.logging.log4j:log4j-core:2.17.1")
-    testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
+    testImplementation(libs.brigadier)
+    testImplementation(libs.log4j.core)
+    testImplementation(libs.junit.jupiter)
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-    testImplementation("org.assertj:assertj-core:3.25.1")
+    testImplementation(libs.assertj.legacy)
 }
 
 tasks.test {

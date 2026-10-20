@@ -22,13 +22,13 @@ sourceSets.test {
 dependencies {
     api(project(":common"))
     // Brings Velocity's Brigadier fork and Adventure.
-    compileOnlyApi("com.velocitypowered:velocity-api:3.4.0")
-    compileOnlyApi("org.jetbrains:annotations:16.0.2")
+    compileOnlyApi(libs.velocity.api)
+    compileOnlyApi(libs.annotations)
 
-    testImplementation("com.velocitypowered:velocity-api:3.4.0")
-    testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
+    testImplementation(libs.velocity.api)
+    testImplementation(libs.junit.jupiter)
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-    testImplementation("org.assertj:assertj-core:3.25.3")
+    testImplementation(libs.assertj)
 }
 
 tasks.test {

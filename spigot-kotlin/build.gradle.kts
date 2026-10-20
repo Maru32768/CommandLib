@@ -20,12 +20,12 @@ sourceSets.test {
 dependencies {
     api(project(":common-kotlin"))
     api(project(":spigot"))
-    compileOnly("org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT")
-    compileOnly("com.mojang:brigadier:1.0.18")
+    compileOnly(libs.spigot.api)
+    compileOnly(libs.brigadier)
 
     testImplementation(project(":spigot-testing"))
-    testImplementation("org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT")
-    testImplementation("com.mojang:brigadier:1.0.18")
+    testImplementation(libs.spigot.api)
+    testImplementation(libs.brigadier)
 }
 
 // As in spigot-testing: the classes of :spigot, not its jar with the typed NMS modules, which CommandTester stubs.

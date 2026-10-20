@@ -21,8 +21,8 @@ sourceSets.test {
 dependencies {
     api(project(":common-kotlin"))
     api(project(":paper"))
-    compileOnly("io.papermc.paper:paper-api:1.21-R0.1-SNAPSHOT")
+    compileOnly(libs.paper.api)
 
     testImplementation(project(":paper-testing"))
-    testImplementation("io.papermc.paper:paper-api:1.21.8-R0.1-SNAPSHOT")
+    testImplementation(libs.paper.api.test)
 }

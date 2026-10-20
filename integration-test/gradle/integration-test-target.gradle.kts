@@ -120,17 +120,20 @@ val mohistBootstrapSlot = gradle.sharedServices.registerIfAbsent(
     maxParallelUsages.set(mohistBootstrapMaxParallel)
 }
 
+// An applied script has no generated catalog accessors.
+val libs = the<VersionCatalogsExtension>().named("libs")
+
 dependencies {
-    "testImplementation"(platform("org.junit:junit-bom:5.10.2"))
+    "testImplementation"(platform(libs.findLibrary("junit-bom").get()))
     "testImplementation"("org.junit.jupiter:junit-jupiter")
     "testRuntimeOnly"("org.junit.platform:junit-platform-launcher")
-    "testImplementation"("org.assertj:assertj-core:3.25.3")
-    "testImplementation"("org.awaitility:awaitility:4.2.1")
-    "testImplementation"("org.testcontainers:junit-jupiter:1.21.4")
-    "testImplementation"("org.testcontainers:testcontainers:1.21.4")
-    "testRuntimeOnly"("org.slf4j:slf4j-simple:2.0.17")
-    "testImplementation"("net.kyori:adventure-text-serializer-gson:4.15.0")
-    "testImplementation"("net.kyori:adventure-text-serializer-json-legacy-impl:4.15.0")
+    "testImplementation"(libs.findLibrary("assertj").get())
+    "testImplementation"(libs.findLibrary("awaitility").get())
+    "testImplementation"(libs.findLibrary("testcontainers-junit-jupiter").get())
+    "testImplementation"(libs.findLibrary("testcontainers").get())
+    "testRuntimeOnly"(libs.findLibrary("slf4j-simple").get())
+    "testImplementation"(libs.findLibrary("adventure-text-serializer-gson").get())
+    "testImplementation"(libs.findLibrary("adventure-text-serializer-json-legacy-impl").get())
 }
 
 // Java release of the test JVM, which runs the MCProtocolLib bot. MCProtocolLib needs Java 21 from 26.2.
