@@ -3,14 +3,12 @@ package dev.marulabs.commandlib;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.brigadier.tree.CommandNode;
 import dev.marulabs.commandlib.argument.CommonEnumArgument;
 import dev.marulabs.commandlib.argument.CommonStringArgument;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -56,18 +54,25 @@ class OptionArgumentTest {
     }
 
     @Test
-    void a_command_with_a_type_that_is_no_brigadier_primitive_uses_redirects() {
+    void a_command_with_a_type_that_is_no_brigadier_primitive_redirects_to_the_node_of_the_same_options() {
         TestCommandRunner runner = new TestCommandRunner(scan());
-        Deque<CommandNode<TestCommandSource>> queue = new ArrayDeque<>(runner.root()
-                                                                             .getChildren());
-        boolean redirects = false;
-        while (!queue.isEmpty()) {
-            CommandNode<TestCommandSource> node = queue.poll();
-            redirects |= node.getRedirect() != null;
-            queue.addAll(node.getChildren());
-        }
 
-        assertThat(redirects).isTrue();
+        assertThat(OptionTrees.assertRedirectsReachTheSameOptions(runner.root()
+                                                                        .getChild("scan"),
+                                                                  Map.of("force",
+                                                                         "force",
+                                                                         "f",
+                                                                         "force",
+                                                                         "verbose",
+                                                                         "verbose",
+                                                                         "v",
+                                                                         "verbose",
+                                                                         "mode",
+                                                                         "mode",
+                                                                         "m",
+                                                                         "mode",
+                                                                         "at",
+                                                                         "at"))).isPositive();
     }
 
     @Test

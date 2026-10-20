@@ -5,9 +5,8 @@ import com.mojang.brigadier.tree.CommandNode;
 import dev.marulabs.commandlib.argument.CommonStringArgument;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -36,20 +35,59 @@ class OptionRedirectTest {
     }
 
     @Test
-    void the_tree_redirects_tokens_that_reach_the_same_options() {
+    void the_tree_redirects_tokens_to_the_node_of_the_same_options() {
         TestCommandRunner runner = new TestCommandRunner(scan());
-        List<CommandNode<TestCommandSource>> redirects = new java.util.ArrayList<>();
-        Deque<CommandNode<TestCommandSource>> queue = new ArrayDeque<>(runner.root()
-                                                                             .getChildren());
-        while (!queue.isEmpty()) {
-            CommandNode<TestCommandSource> node = queue.poll();
-            if (node.getRedirect() != null) {
-                redirects.add(node);
-            }
-            queue.addAll(node.getChildren());
-        }
 
-        assertThat(redirects).isNotEmpty();
+        // "scan -f -v" and "scan -v -f" give the same options, so one of them redirects to the other.
+        assertThat(OptionTrees.assertRedirectsReachTheSameOptions(runner.root()
+                                                                        .getChild("scan"),
+                                                                  Map.of("force",
+                                                                         "force",
+                                                                         "f",
+                                                                         "force",
+                                                                         "verbose",
+                                                                         "verbose",
+                                                                         "v",
+                                                                         "verbose",
+                                                                         "limit",
+                                                                         "limit",
+                                                                         "n",
+                                                                         "limit",
+                                                                         "tag",
+                                                                         "tag",
+                                                                         "t",
+                                                                         "tag"))).isPositive();
+    }
+
+    @Test
+    void an_argument_child_keeps_a_tree_without_redirects() throws Exception {
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("config") {{
+            option(Options.flag("force", 'f'));
+            argument(new CommonStringArgument<>("key")).child(new TestCommand("set") {{
+                CommandOption<Boolean, TestCommandContext> force = option(Options.flag("force", 'f'));
+                CommandOption<Integer, TestCommandContext> verbose = option(Options.count("verbose", 'v', 2));
+                execute(ctx -> ctx.sendMessage("force=" + ctx.getOption(force) + " verbose="
+                        + ctx.getOption(verbose)));
+            }});
+        }});
+        TestCommandRunner topLevel = new TestCommandRunner(new TestCommand("set") {{
+            option(Options.flag("force", 'f'));
+            option(Options.count("verbose", 'v', 2));
+            execute(ctx -> {
+            });
+        }});
+        CommandNode<TestCommandSource> child = runner.root()
+                                                     .getChild("config")
+                                                     .getChild("key")
+                                                     .getChild("set");
+
+        // The same options on a top-level command redirect, so the child's tree would too if it used them.
+        assertThat(OptionTrees.redirects(topLevel.root()
+                                                 .getChild("set"))).isNotEmpty();
+        assertThat(child.getChild("-f")).isNotNull();
+        assertThat(OptionTrees.redirects(child)).isEmpty();
+        assertThat(runner.execute("config -f difficulty set -v -f -v")
+                         .messages()).containsExactly("force=true verbose=2");
     }
 
     @Test
