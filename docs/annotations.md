@@ -265,6 +265,8 @@ Context values: `CommandSender`, `ConsoleCommandSender` and `Player` on Spigot a
 | `@Greedy` | A string argument that takes the rest of the input |
 | `@Variadic(max = 5)` | A `List` argument that accepts up to 5 values, `variadic(5)` |
 
+`@Default` and `@Optional` are alternatives: parsing fails for a parameter that has both.
+
 Optional arguments must be the last arguments of a method, and a variadic one the very last; registration fails
 otherwise, as for fluent commands ([optional and variadic arguments](design/optional-variadic-arguments.md)).
 

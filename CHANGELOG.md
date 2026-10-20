@@ -135,8 +135,8 @@ suggestions) and a command for each argument type. Options, permission plugins a
 - An annotation API: `@Command`, `@Subcommand`, `@Flag`, `@Option`, `@Condition` and more, registered through each
   platform's `AnnotatedCommands` ([annotated commands](docs/annotations.md)). Parsing rejects a definition that would
   fail later or behave differently from what it says: an argument parameter named like a placeholder of its
-  `@Subcommand` path, a placeholder repeated in the path, or a `@Range` bound outside the range of an `int`, `long` or
-  `float` parameter.
+  `@Subcommand` path, a placeholder repeated in the path, a `@Range` bound outside the range of an `int`, `long` or
+  `float` parameter, an argument with both `@Optional` and `@Default`, or a Kotlin `suspend fun`.
 - A Java builder: `Command.builder(name)` configures a command in one chain ([Java builder](docs/java-builder.md)).
 - A Kotlin DSL for Spigot, Paper and Velocity (`spigot-kotlin`, `paper-kotlin`, `velocity-kotlin`), with delegated
   options, `require(...)` blocks and `suspend` executors ([Kotlin DSL](docs/kotlin.md)).

@@ -1041,6 +1041,9 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
 
             Default defaultValue = parameter.getAnnotation(Default.class);
             if (defaultValue != null) {
+                if (parameter.isAnnotationPresent(Optional.class)) {
+                    throw error(method, parameter, "has both @Optional and @Default; @Default makes it optional alone");
+                }
                 if (variadic) {
                     throw error(method,
                                 parameter,

@@ -557,6 +557,20 @@ class AnnotationParserTest {
     }
 
     @Command("x")
+    static final class OptionalWithDefault {
+        @Execute
+        void run(@Name("n") @Optional @Default("1") int n) {
+        }
+    }
+
+    @Command("x")
+    static final class OptionalOptionWithDefault {
+        @Execute
+        void run(@Option("mode") @Optional @Default("creative") Mode mode) {
+        }
+    }
+
+    @Command("x")
     static final class DefaultOutsideRange {
         @Execute
         void run(@Name("n") @Range(min = 1, max = 10) @Default("0") int n) {
@@ -672,6 +686,8 @@ class AnnotationParserTest {
         assertThatThrownBy(() -> parser.parse(new SpacedPlaceholder())).hasMessageContaining("has '<a' in its @Subcommand path");
         assertThatThrownBy(() -> parser.parse(new EmptyPlaceholder())).hasMessageContaining("has '<>' in its @Subcommand path");
         assertThatThrownBy(() -> parser.parse(new RequiredOptionWithDefault())).hasMessageContaining("is a required option and cannot take @Default or @Optional");
+        assertThatThrownBy(() -> parser.parse(new OptionalWithDefault())).hasMessage("OptionalWithDefault#run(int): parameter n has both @Optional and @Default; @Default makes it optional alone");
+        assertThatThrownBy(() -> parser.parse(new OptionalOptionWithDefault())).hasMessageContaining("parameter mode has both @Optional and @Default");
         assertThatThrownBy(() -> parser.parse(new DefaultOutsideRange())).hasMessageContaining("parameter n defaults to 0, outside its @Range");
         assertThatThrownBy(() -> parser.parse(new OptionalOutsideRange())).hasMessageContaining("parameter n defaults to 0, outside its @Range");
         assertThatThrownBy(() -> parser.parse(new OptionOutsideRange())).hasMessageContaining("parameter n defaults to 0, outside its @Range");
