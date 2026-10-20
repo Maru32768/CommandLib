@@ -4,11 +4,6 @@ import dev.marulabs.commandlib.util.text.RichText;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.UncheckedIOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -33,7 +28,9 @@ import java.util.function.Function;
  * Set it up before the commands are registered; a lookup may run on any thread.
  */
 public final class Captions {
-    static final String BUILT_IN_BUNDLE = "lang/commandlib";
+    static final String BUILT_IN_BUNDLE = Captions.class.getPackageName()
+                                                        .replace('.', '/')
+            + "/lang/commandlib";
     static final Captions DEFAULT = create();
 
     // Locale suffix ("_ja_JP", "_ja", "") to key to text.
@@ -53,7 +50,7 @@ public final class Captions {
         Captions captions = new Captions();
         // The English file holds the defaults, which come after every text, also one set for the root locale.
         captions.bundles.add(cached(suffix -> suffix.equals("_en") || suffix.startsWith("_en_") ? new Properties()
-                : Caption.load(BUILT_IN_BUNDLE + suffix + ".properties")));
+                : Caption.load(Captions.class.getClassLoader(), BUILT_IN_BUNDLE + suffix + ".properties")));
         return captions;
     }
 
@@ -102,18 +99,7 @@ public final class Captions {
     public Captions bundle(@NotNull String baseName, @NotNull ClassLoader loader) {
         Objects.requireNonNull(baseName);
         Objects.requireNonNull(loader);
-        bundles.add(cached(suffix -> {
-            String resource = baseName + suffix + ".properties";
-            Properties properties = new Properties();
-            try (InputStream in = loader.getResourceAsStream(resource)) {
-                if (in != null) {
-                    properties.load(new InputStreamReader(in, StandardCharsets.UTF_8));
-                }
-            } catch (IOException e) {
-                throw new UncheckedIOException("Could not read " + resource, e);
-            }
-            return properties;
-        }));
+        bundles.add(cached(suffix -> Caption.load(loader, baseName + suffix + ".properties")));
         return this;
     }
 

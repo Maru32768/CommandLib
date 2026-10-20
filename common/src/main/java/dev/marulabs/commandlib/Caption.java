@@ -24,7 +24,8 @@ import java.util.Properties;
  */
 public final class Caption {
     // The English texts of the built-in captions, the same file translators start from.
-    private static final Properties ENGLISH = load(Captions.BUILT_IN_BUNDLE + "_en.properties");
+    private static final Properties ENGLISH = load(Caption.class.getClassLoader(),
+                                                   Captions.BUILT_IN_BUNDLE + "_en.properties");
     private static final List<Caption> BUILT_IN = new ArrayList<>();
 
     /** {@code You do not have permission to execute this command.} */
@@ -158,9 +159,12 @@ public final class Caption {
         return translationKey;
     }
 
-    static Properties load(String resource) {
+    /**
+     * Reads a properties file as UTF-8, or no properties when {@code loader} does not find it.
+     */
+    static Properties load(ClassLoader loader, String resource) {
         Properties properties = new Properties();
-        try (InputStream in = Caption.class.getResourceAsStream(resource)) {
+        try (InputStream in = loader.getResourceAsStream(resource)) {
             if (in != null) {
                 properties.load(new InputStreamReader(in, StandardCharsets.UTF_8));
             }

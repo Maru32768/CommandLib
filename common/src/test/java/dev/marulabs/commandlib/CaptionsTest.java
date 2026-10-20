@@ -38,12 +38,13 @@ class CaptionsTest {
                                   .stream()
                                   .map(Caption::key)
                                   .collect(Collectors.toSet());
-        Set<String> japanese = new HashSet<>(Caption.load(Captions.BUILT_IN_BUNDLE + "_ja.properties")
+        Set<String> japanese = new HashSet<>(Caption.load(Caption.class.getClassLoader(),
+                                                          Captions.BUILT_IN_BUNDLE + "_ja.properties")
                                                     .stringPropertyNames());
         // Sent as vanilla's command.failed, which the client translates.
         japanese.add(Caption.UNEXPECTED_ERROR.key());
 
-        assertThat(Caption.load(Captions.BUILT_IN_BUNDLE + "_en.properties")
+        assertThat(Caption.load(Caption.class.getClassLoader(), Captions.BUILT_IN_BUNDLE + "_en.properties")
                           .stringPropertyNames()).isEqualTo(keys);
         assertThat(japanese).isEqualTo(keys);
     }
@@ -157,7 +158,8 @@ class CaptionsTest {
 
     @Test
     void properties_files_are_read_as_utf_8() {
-        Properties properties = Caption.load(Captions.BUILT_IN_BUNDLE + "_ja.properties");
+        Properties properties = Caption.load(Caption.class.getClassLoader(),
+                                             Captions.BUILT_IN_BUNDLE + "_ja.properties");
 
         assertThat(properties.getProperty("commandlib.help.usage")).isEqualTo("使い方:");
     }
