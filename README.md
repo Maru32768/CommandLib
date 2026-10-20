@@ -1185,7 +1185,7 @@ last `List<T>` parameter is variadic, `@Optional` / `@Default` make arguments op
 `CompletionStage` runs as `executeAsync`. `@Subcommand("<team> add")` puts a subcommand after an argument, and
 `@Middleware`, `@VisibleWhen`, `@Requires`, `@MutuallyExclusive`, `@OptionsAnywhere`, `@Examples` and
 `@Description(caption = ...)` match the fluent settings of the same names. Argument names come from the parameter
-names, so compile with `-parameters` or use `@Name`. See [annotated commands](docs/annotations.md) for every annotation, custom types and annotations, and
+names, so compile with `-parameters` (`-java-parameters` in Kotlin) or use `@Name`. See [annotated commands](docs/annotations.md) for every annotation, custom types and annotations, and
 the fluent equivalent.
 
 ## Help and Error Formatting

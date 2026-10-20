@@ -103,6 +103,9 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
                                                                                         Permission.class,
                                                                                         VisibleWhen.class);
 
+    private static final String NAME_HINT = "compile with -parameters (javaParameters = true or -java-parameters in "
+            + "Kotlin) or annotate it with @Name";
+
     // The values of an omitted @Optional argument and of an @Option without @Default.
     private static final Map<Class<?>, Object> EMPTY_VALUES = Map.of(Boolean.class,
                                                                      false,
@@ -533,6 +536,14 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
         }
 
         private void addMethod(Method method) {
+            Class<?>[] parameterTypes = method.getParameterTypes();
+            // Read by name, since common does not depend on Kotlin.
+            if (parameterTypes.length > 0 && parameterTypes[parameterTypes.length - 1].getName()
+                                                                                      .equals("kotlin.coroutines.Continuation")) {
+                throw error(method,
+                            "is a Kotlin suspend function, which the annotation API does not support; return a "
+                                    + "CompletionStage instead");
+            }
             Execute execute = method.getAnnotation(Execute.class);
             Subcommand subcommand = method.getAnnotation(Subcommand.class);
             if (execute != null && subcommand != null) {
@@ -759,8 +770,8 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
                 }
             }
             throw error(method,
-                        "has <" + name + "> in its @Subcommand path, but no argument parameter named " + name
-                                + " (compile with -parameters or annotate it with @Name)");
+                        "has <" + name + "> in its @Subcommand path, but no argument parameter named " + name + " ("
+                                + NAME_HINT + ")");
         }
 
         /**
@@ -1466,7 +1477,7 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
 
         private String parameterName(Method method, Parameter parameter) {
             if (!parameter.isNamePresent()) {
-                throw error(method, parameter, "has no name; compile with -parameters or annotate it with @Name");
+                throw error(method, parameter, "has no name; " + NAME_HINT);
             }
             return parameter.getName();
         }

@@ -787,7 +787,7 @@ class AnnotationParserTest {
         AnnotationParser<TestCommandContext, TestCommand> parser = parser();
 
         assertThatThrownBy(() -> parser.parse(new NotACommand())).hasMessageEndingWith("NotACommand is not annotated with @Command");
-        assertThatThrownBy(() -> parser.parse(new UnnamedParameter())).hasMessage("UnnamedParameter#run(String): parameter arg0 has no name; compile with -parameters or annotate it with @Name");
+        assertThatThrownBy(() -> parser.parse(new UnnamedParameter())).hasMessage("UnnamedParameter#run(String): parameter arg0 has no name; compile with -parameters (javaParameters = true or -java-parameters in Kotlin) or annotate it with @Name");
         assertThatThrownBy(() -> parser.parse(new UnknownType())).hasMessageContaining("has no argument type for java.lang.Thread");
         assertThatThrownBy(() -> parser.parse(new RangeOnString())).hasMessageContaining("has @Range, but java.lang.String is not a number");
         assertThatThrownBy(() -> parser.parse(new BadDefault())).hasMessageContaining("has @Default(\"ten\"), which is not a valid Integer");

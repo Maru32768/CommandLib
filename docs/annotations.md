@@ -114,8 +114,24 @@ tasks.withType<JavaCompile>().configureEach {
 }
 ```
 
+Kotlin keeps them with `-java-parameters`:
+
+```kotlin
+// build.gradle.kts
+kotlin {
+    compilerOptions {
+        javaParameters = true
+    }
+}
+```
+
 Without it, name each argument with `@Name("target")`, and give `@Flag` and `@Option` their name. Parsing fails with
-`compile with -parameters or annotate it with @Name` for an argument without a name.
+`compile with -parameters (javaParameters = true or -java-parameters in Kotlin) or annotate it with @Name` for an
+argument without a name.
+
+A Kotlin `suspend fun` cannot be a command method, because its last parameter is a hidden `Continuation`; parsing
+fails for it. Return a `CompletionStage` instead, or write the command with the [Kotlin DSL](kotlin.md), whose
+executors can suspend.
 
 ## Commands and methods
 
