@@ -212,9 +212,11 @@ See [context values](context-values.md) for the order in which values are read, 
 `executeSuspend { ctx -> }` on a command or an argument branch sets a suspending executor. It is an `executeAsync`
 executor ([execution](execution.md)) whose stage is a coroutine started with kotlinx-coroutines' `future { }`:
 
-- The block starts on the sync thread (the server thread on Spigot and Paper) and resumes there after each suspension,
-  through `ctx.syncDispatcher`, which uses the platform's `CommandScheduler`. Messages and the platform API may be used
-  between suspensions.
+- The block starts on the sync thread and resumes there after each suspension, through `ctx.syncDispatcher`, which uses
+  the platform's `CommandScheduler`. The sync thread is the server thread on Spigot, Paper and Forge / NeoForge /
+  Fabric. Velocity has no main thread, so its sync executor runs a task on the calling thread: the block starts on the
+  thread that runs the command and may resume on any thread, such as the one that completed what it waited for.
+  Messages and the platform API may be used between suspensions.
 - `yield()` gives the sync thread back: the block resumes on a later tick, so a long loop can spread its work over
   several ticks.
 - `withContext(ctx.asyncDispatcher) { ... }` runs blocking work, such as a database query, on the scheduler's async
@@ -227,8 +229,9 @@ executor ([execution](execution.md)) whose stage is a coroutine started with kot
   `UncaughtExceptionHandler`s. A cancelled coroutine reports nothing, but a `withTimeout` that runs out is reported as a
   timeout (`The command timed out.`).
 - `/execute store` gets the result set before the first suspension, as for any async command.
-- The coroutine has no parent job, so disabling the plugin does not cancel it; the Bukkit scheduler then refuses its
-  remaining sync work. Bound slow work with `withTimeout`.
+- The coroutine has its own `Job`, created by the `CoroutineScope(...)` it is started in, but nothing cancels that job:
+  disabling the plugin or unregistering the command does not stop the coroutine, and the Bukkit scheduler then refuses
+  its remaining sync work. Bound slow work with `withTimeout`.
 
 `addMiddlewareSuspend { ctx, next -> }` adds a suspending [middleware](execution.md#middleware). It starts on the sync thread
 and resumes there, like `executeSuspend`; `next()` runs the remaining middlewares and the executor and returns once

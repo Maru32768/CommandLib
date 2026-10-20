@@ -26,6 +26,14 @@ Each `minecraftIntegrationTest*` task does the following:
 7. Checks the report's case IDs against the independent [expected inventories](expected-cases/README.md), including
    version exclusions, and fails on missing, unexpected, duplicate, failed or skipped cases or inconsistent counters.
 
+On the Bukkit-family targets (Spigot, Paper, Mohist) most of the suite runs from the server console, not from the bot.
+The bot sends `/commandlibtest runTests`, and the fixture then dispatches every case of the JUnit report as
+`Bukkit.getConsoleSender()`, so those cases run with the console's permissions and do not see what a player receives.
+A case that needs a player names the bot (`Maru32768`) as an argument instead. Only a few checks use the bot itself: a
+tab completion request before the run, the command tree it receives, and the bot-side checks in `IntegrationTest` after
+the report (help usage, argument errors, a node and an option the bot may not use, a caption in the player's locale,
+and the diagnostics command).
+
 The report is written under:
 
 ```text

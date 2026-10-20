@@ -83,6 +83,9 @@ argument(new WorldArgument("world"), new StringArgument("region", StringArgument
 
 In a child command built with `child(ref -> ...)`, read the parent value with `ref.get()` inside the provider.
 
+Options are not parsed for suggestions: `getContext().getOption(option)` in a provider returns the option's default,
+even when the option was typed earlier in the input.
+
 ### Validators filter suggestions
 
 For arguments whose suggestions CommandLib builds from candidates (`EnumArgument`, `ObjectArgument`,

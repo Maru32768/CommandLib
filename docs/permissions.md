@@ -146,6 +146,33 @@ function permission level applies.
 
 ## Registration and reload
 
+### Registration contract
+
+What `CommandLib.register(...)` and the other entry points promise differs by platform:
+
+| | Spigot | Paper | Forge / NeoForge / Fabric | Velocity |
+|---|---|---|---|---|
+| Invalid definition (optional argument before a required one, name clash, and so on) | `register` throws | `register` and `bootstrap` throw | `register` throws | `register` throws |
+| First `register` after startup | Works | Throws `IllegalStateException` unless the plugin's first `register` was during its initialization (constructor, `onLoad`, `onEnable`) | Works: the commands are added to the running server's dispatcher | Works |
+| `unregister()` | Yes | Yes, except for `bootstrap` registrations | No: a registration lasts for the game's lifetime | Yes |
+| A label another plugin or mod already has | Replaced: CommandLib's command takes the label in Bukkit's command map | Kept by the other plugin: Paper's registrar, which adds the commands at startup and on every data reload, gives CommandLib's command only `<plugin>:<label>`. A `register` after startup takes the label until the next data reload | Merged: Brigadier adds both commands' children under one literal | Velocity's `CommandManager#register` decides |
+| Two registrations declare the same node with different defaults | The later registration replaces the permission (a [cooldown bypass](#cooldown-bypass) node keeps the existing one) | The later registration replaces the permission (a cooldown bypass node keeps the existing one) | The first registration's default wins | The first registration's default wins |
+| `register`, `unregister` | Main thread, or `IllegalStateException` | Main thread (Folia: the global region thread), or `IllegalStateException` | Not checked: register during mod initialization or on the server thread | Any thread |
+| `refresh`, `refreshAll` | Main thread, or `IllegalStateException` | Main thread (Folia: a region or the global region thread), or `IllegalStateException` | Any thread; the tree is sent on the server thread | Not available |
+| `diagnostics()` | Main thread, or `IllegalStateException` | Any thread | Any thread | Any thread |
+
+Rejecting an invalid definition in `register` on every platform is new in 0.18.0: Paper used to build a registration
+made during plugin initialization only when the `COMMANDS` event fired, and Forge, NeoForge and Fabric in
+`RegisterCommandsEvent` or the command registration callback, so the error was logged there and `register` returned
+normally. The rule for the same node with different defaults in two registrations is the current behavior, not a
+promise: it may change in a later release.
+
+On Paper, a plugin enabled after the server started, such as by a plugin manager, has missed the `COMMANDS` event that
+adds its commands. On the next tick CommandLib adds them to Paper's dispatcher itself. When it cannot read that
+dispatcher, it calls `Bukkit.reloadData()` instead, which fires the event again but also reloads every data pack, as
+`/minecraft:reload` does. On Folia, which has no data reload, it logs a warning and the commands come with the next
+server start.
+
 ### Spigot
 
 `CommandLib.register(...)` registers every node in Bukkit's `PluginManager` with its default and description,
