@@ -129,6 +129,7 @@ final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U ext
         }
 
         argumentsList.forEach(x -> x.validateTrailingArguments(command));
+        argumentsList.forEach(x -> validateNamesAlongRoute(command, inheritedArguments, x));
         List<Arguments<C>> allOptional = argumentsList.stream()
                                                       .filter(Arguments::isAllOptional)
                                                       .collect(Collectors.toList());
@@ -211,6 +212,36 @@ final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U ext
         optionGraph.build(new ArrayList<>(argumentNodes.getChildren()), bareRunner)
                    .forEach(node::addChild);
         return node;
+    }
+
+    // The context keeps the values of a route by argument name, so a repeated name would replace the earlier value.
+    private static <C extends CommonCommandContext<?, ?>> void validateNamesAlongRoute(CommonCommand<C, ?> command,
+                                                                                       List<Arguments<C>> inheritedArguments,
+                                                                                       Arguments<C> arguments) {
+        Set<String> inherited = inheritedArguments.stream()
+                                                  .flatMap(Arguments::stream)
+                                                  .map(CommonArgument::name)
+                                                  .collect(Collectors.toSet());
+        arguments.stream()
+                 .filter(x -> inherited.contains(x.name()))
+                 .findFirst()
+                 .ifPresent(x -> {
+                     throw new IllegalStateException("Argument '" + x.name() + "' of command '" + route(command)
+                             + "' has the name of an argument before it on its route; argument names must be unique along a route");
+                 });
+    }
+
+    // The route by names, such as /config <key> set.
+    private static String route(CommonCommand<?, ?> command) {
+        CommonCommand<?, ?> parent = command.parent();
+        if (parent == null) {
+            return "/" + command.name();
+        }
+        Arguments<?> parentArguments = command.parentArguments();
+        String tags = parentArguments == null ? "" : parentArguments.stream()
+                                                                    .map(x -> " <" + x.name() + ">")
+                                                                    .collect(Collectors.joining());
+        return route(parent) + tags + " " + command.name();
     }
 
     private List<Arguments<C>> appendArgument(List<Arguments<C>> inheritedArguments, Arguments<C> arguments) {

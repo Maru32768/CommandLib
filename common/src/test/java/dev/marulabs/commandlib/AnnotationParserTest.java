@@ -1005,6 +1005,19 @@ class AnnotationParserTest {
                               .permissionsMarkdown()).contains("test.command.export.option.reason");
     }
 
+    @Command("squad")
+    static final class RepeatedRouteArgumentName {
+        @Subcommand("<team> add")
+        void add(TestCommandContext ctx, @Name("team") String team, @Name("team") Integer count) {
+        }
+    }
+
+    // Parsing may already reject it; registration must not accept it.
+    @Test
+    void argument_repeating_a_placeholder_name_fails_at_the_latest_on_registration() {
+        assertThatThrownBy(() -> new TestCommandRunner(parser().parse(new RepeatedRouteArgumentName()))).hasMessageContaining("team");
+    }
+
     @Command("team")
     @Middleware("audit")
     static final class AnnotatedTeam {

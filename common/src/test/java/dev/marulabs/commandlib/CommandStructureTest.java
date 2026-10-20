@@ -269,6 +269,31 @@ class CommandStructureTest {
     }
 
     @Test
+    void argument_of_an_argument_child_cannot_repeat_a_name_of_its_route() {
+        TestCommand differentTypes = new TestCommand("config") {{
+            argument(new IntArg("key")).child(key -> new TestCommand("set") {{
+                argument(new StrArg("key")).execute((value, ctx) -> {
+                });
+            }});
+        }};
+        TestCommand sameTypes = new TestCommand("config") {{
+            argument(new StrArg("key")).child(key -> new TestCommand("set") {{
+                addChildren(new TestCommand("value") {{
+                    argument(new StrArg("key")).execute((value, ctx) -> {
+                    });
+                }});
+            }});
+        }};
+
+        assertThatThrownBy(() -> new TestCommandRunner(differentTypes)).isInstanceOf(IllegalStateException.class)
+                                                                       .hasMessageContaining("'key'")
+                                                                       .hasMessageContaining("/config <key> set");
+        assertThatThrownBy(() -> new TestCommandRunner(sameTypes)).isInstanceOf(IllegalStateException.class)
+                                                                  .hasMessageContaining("'key'")
+                                                                  .hasMessageContaining("/config <key> set value");
+    }
+
+    @Test
     void execute_rejects_null() {
         assertThatThrownBy(() -> new TestCommand("set") {{
             argument(new IntArg("value")).execute((CommandExecutor<TestCommandContext>) null);

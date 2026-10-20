@@ -694,7 +694,9 @@ public final class ConfigCommand extends Command {
 
 The `child(...)` factory receives an `ArgRef<T>` for each parent argument. Call `key.get()` inside the child's executor
 or suggestion providers to read the parsed value. In code that runs after the callback returns, such as a scheduled task,
-read the value first or use `key.get(ctx)`.
+read the value first or use `key.get(ctx)`. Argument values are kept by name, so the arguments of a child must not
+repeat the name of an argument before them on the route, such as `<key>` under `<key>`; registration fails
+otherwise.
 
 Valid inputs:
 
