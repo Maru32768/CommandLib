@@ -1064,6 +1064,26 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
                             "has @Range with a fractional bound, but " + valueType.getSimpleName()
                                     + " takes whole numbers");
             }
+            if (!fits(range.min(), valueType) || !fits(range.max(), valueType)) {
+                throw error(method,
+                            parameter,
+                            "has @Range with a bound outside the range of " + valueType.getSimpleName());
+            }
+        }
+
+        // A bound left out is ±Double.MAX_VALUE, which stands for the limit of the type.
+        private boolean fits(double bound, Class<?> valueType) {
+            if (Math.abs(bound) == Double.MAX_VALUE) {
+                return true;
+            }
+            if (valueType == Integer.class) {
+                return bound >= Integer.MIN_VALUE && bound <= Integer.MAX_VALUE;
+            }
+            if (valueType == Long.class) {
+                // Long.MAX_VALUE converts to 2^63, so @Range(max = Long.MAX_VALUE) fits.
+                return bound >= Long.MIN_VALUE && bound <= Long.MAX_VALUE;
+            }
+            return valueType != Float.class || Math.abs(bound) <= Float.MAX_VALUE;
         }
 
         // The value of an omitted argument or option skips the argument's bounds, so it must be within @Range.

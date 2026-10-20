@@ -244,7 +244,7 @@ Context values: `CommandSender`, `ConsoleCommandSender` and `Player` on Spigot a
 | `@Name("target")` | The argument name, used in help and in the branch's permission node |
 | `@Default("16")` | Makes the argument optional with this value: a string, a number, `true` / `false`, or an enum constant name |
 | `@Optional` | Makes the argument optional; an omitted value is the context value of the type (a `Player` defaults to the sender, as `optional(playerRequirer())`), or else `0`, `false`, `""`, or an empty list for a `List` |
-| `@Range(min, max)` | Bounds of a numeric argument; whole numbers for an integer type, and `min` not above `max`. The default, `@Default` or the `0` of `@Optional` or of an `@Option` without `@Default`, must be within them |
+| `@Range(min, max)` | Bounds of a numeric argument; whole numbers for an integer type, within the range of the type, and `min` not above `max`. The default, `@Default` or the `0` of `@Optional` or of an `@Option` without `@Default`, must be within them |
 | `@Suggest({"a", "b"})`, `@Suggest(method = "names")` | Replaces the suggestions with fixed values and / or the values of a method of the class, which returns an `Iterable<String>` or takes the `SuggestionBuilder` |
 | `@Greedy` | A string argument that takes the rest of the input |
 | `@Variadic(max = 5)` | A `List` argument that accepts up to 5 values, `variadic(5)` |

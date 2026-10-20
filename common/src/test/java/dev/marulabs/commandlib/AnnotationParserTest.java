@@ -578,6 +578,62 @@ class AnnotationParserTest {
     }
 
     @Command("x")
+    static final class IntRangeBeyondInt {
+        @Execute
+        void run(@Name("n") @Range(min = -3e9) int n) {
+        }
+    }
+
+    @Command("x")
+    static final class IntOptionRangeBeyondInt {
+        @Execute
+        void run(@Option("n") @Range(max = 3e9) int n) {
+        }
+    }
+
+    @Command("x")
+    static final class LongRangeBeyondLong {
+        @Execute
+        void run(@Name("n") @Range(max = 1e19) long n) {
+        }
+    }
+
+    @Command("x")
+    static final class FloatRangeBeyondFloat {
+        @Execute
+        void run(@Name("n") @Range(min = -1e39) float n) {
+        }
+    }
+
+    @Command("x")
+    static final class RangesAtTheLimits {
+        @Execute
+        void run(@Name("a") @Range(min = Integer.MIN_VALUE, max = Integer.MAX_VALUE) int a,
+                 @Name("b") @Range(min = Long.MIN_VALUE, max = Long.MAX_VALUE) long b,
+                 @Name("c") @Range(min = -Float.MAX_VALUE, max = Float.MAX_VALUE) float c,
+                 @Name("d") @Range(min = 1e300) double d) {
+        }
+    }
+
+    // A bound the type cannot hold would be clamped to the limit of the type, so the argument would accept other values.
+    @Test
+    void a_range_bound_outside_the_type_is_rejected() {
+        // The factories only need to exist: parsing fails before they run, or the command is not executed.
+        AnnotationParser<TestCommandContext, TestCommand> parser = parser().registerArgument(Long.class,
+                                                                                             p -> new IntArg(p.name()))
+                                                                           .registerArgument(Float.class,
+                                                                                             p -> new IntArg(p.name()))
+                                                                           .registerArgument(Double.class,
+                                                                                             p -> new IntArg(p.name()));
+
+        assertThatThrownBy(() -> parser.parse(new IntRangeBeyondInt())).hasMessage("IntRangeBeyondInt#run(int): parameter n has @Range with a bound outside the range of Integer");
+        assertThatThrownBy(() -> parser.parse(new IntOptionRangeBeyondInt())).hasMessageContaining("parameter n has @Range with a bound outside the range of Integer");
+        assertThatThrownBy(() -> parser.parse(new LongRangeBeyondLong())).hasMessageContaining("parameter n has @Range with a bound outside the range of Long");
+        assertThatThrownBy(() -> parser.parse(new FloatRangeBeyondFloat())).hasMessageContaining("parameter n has @Range with a bound outside the range of Float");
+        parser.parse(new RangesAtTheLimits());
+    }
+
+    @Command("x")
     @dev.marulabs.commandlib.annotation.Cooldown(0)
     static final class ZeroCooldown {
         @Execute
