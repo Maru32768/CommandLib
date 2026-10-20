@@ -635,6 +635,22 @@ class CommandStructureTest {
     }
 
     @Test
+    void an_alias_repeating_the_command_name_runs_the_command() throws Exception {
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("game") {{
+            addAliases("game");
+            addChildren(new TestCommand("list") {{
+                addAliases("list", "ls", "ls");
+                execute(ctx -> ctx.sendMessage("list"));
+            }});
+        }});
+
+        assertThat(runner.execute("game list")
+                         .messages()).containsExactly("list");
+        assertThat(runner.execute("game ls")
+                         .messages()).containsExactly("list");
+    }
+
+    @Test
     void alias_shows_help_of_original_command() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("game") {{
             addAliases("g");

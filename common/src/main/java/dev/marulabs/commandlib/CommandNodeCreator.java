@@ -267,8 +267,11 @@ final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U ext
 
     private List<LiteralCommandNode<S>> createAliasCommands(U source, LiteralCommandNode<S> redirectTarget) {
         Predicate<S> requirement = requirement(source);
+        // An alias node named like the command would merge into it and make its command call itself.
         return source.aliases()
                      .stream()
+                     .filter(x -> !x.equals(source.name()))
+                     .distinct()
                      .map(s -> {
                          LiteralCommandNode<S> node = LiteralArgumentBuilder.<S>literal(s)
                                                                             .requires(requirement)

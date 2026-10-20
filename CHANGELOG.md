@@ -231,6 +231,7 @@ suggestions) and a command for each argument type. Options, permission plugins a
   default instead of failing with `No such argument`.
 - The permission check at execution covers the parent commands too, so input parsed before the sender lost the
   permission of a parent command, such as a function's, no longer runs.
+- A command or child command with an alias equal to its own name runs instead of failing with a `StackOverflowError`.
 - `UncaughtExceptionHandler` receives exceptions thrown by executors.
 - Spigot: commands work after Bukkit `/reload`, because CommandLib adds them to the vanilla dispatcher.
 - Spigot: commands appear under the plugin's `/help` index with their permission and description, instead of as "A
