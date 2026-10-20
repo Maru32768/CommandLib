@@ -1,6 +1,7 @@
-package dev.marulabs.commandlib.util;
+package dev.marulabs.commandlib.internal;
 
 import net.minecraft.server.MinecraftServer;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 //? if fabric {
 /*import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -15,6 +16,7 @@ import net.minecraftforge.server.ServerLifecycleHooks;
 /**
  * The running server, for CommandLib's own code. Not part of the public API.
  */
+@ApiStatus.Internal
 public final class CurrentServer {
     //? if fabric {
     /*// Fabric has no global server accessor, so remember the server from the lifecycle events. They are registered

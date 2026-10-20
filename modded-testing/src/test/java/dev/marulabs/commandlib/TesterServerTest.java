@@ -1,7 +1,7 @@
 package dev.marulabs.commandlib;
 
 import dev.marulabs.commandlib.argument.PlayerArgument;
-import dev.marulabs.commandlib.util.CurrentServer;
+import dev.marulabs.commandlib.internal.CurrentServer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;

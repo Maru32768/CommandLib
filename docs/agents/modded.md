@@ -75,7 +75,7 @@ final class Messages {
 
 - Prefer code that needs no condition when the same call works on every
   version.
-- Use `dev.marulabs.commandlib.util.CurrentServer.get()` for the running server.
+- Use `dev.marulabs.commandlib.internal.CurrentServer.get()` for the running server.
   It wraps Forge's `ServerLifecycleHooks` and follows Fabric's server lifecycle
   events, and `modded-testing` mocks it (and `ServerLifecycleHooks` on Forge and NeoForge).
 - If the active node was switched in the IDE, switch back to the

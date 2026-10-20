@@ -2,7 +2,7 @@ package dev.marulabs.testmod;
 
 import dev.marulabs.commandlib.Command;
 import dev.marulabs.commandlib.CommandLib;
-import dev.marulabs.commandlib.util.CurrentServer;
+import dev.marulabs.commandlib.internal.CurrentServer;
 import dev.marulabs.integration.core.TestResult;
 import dev.marulabs.integration.core.TestStatus;
 

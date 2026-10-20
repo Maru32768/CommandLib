@@ -1,7 +1,7 @@
 package dev.marulabs.commandlib;
 
 //? if fabric {
-/*import dev.marulabs.commandlib.util.CurrentServer;
+/*import dev.marulabs.commandlib.internal.CurrentServer;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;

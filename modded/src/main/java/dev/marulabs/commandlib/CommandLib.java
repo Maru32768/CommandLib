@@ -1,7 +1,7 @@
 package dev.marulabs.commandlib;
 
 import com.mojang.brigadier.tree.RootCommandNode;
-import dev.marulabs.commandlib.util.CurrentServer;
+import dev.marulabs.commandlib.internal.CurrentServer;
 import net.minecraft.SharedConstants;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.MinecraftServer;

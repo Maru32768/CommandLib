@@ -1,7 +1,7 @@
 package dev.marulabs.commandlib.argument;
 
 //? if >=1.19.3 {
-import dev.marulabs.commandlib.util.CurrentServer;
+import dev.marulabs.commandlib.internal.CurrentServer;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;

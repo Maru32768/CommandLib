@@ -4,7 +4,7 @@ package dev.marulabs.commandlib;
 //? if fabric || >=1.19 {
 import com.mojang.brigadier.CommandDispatcher;
 import dev.marulabs.commandlib.argument.IntegerArgument;
-import dev.marulabs.commandlib.util.CurrentServer;
+import dev.marulabs.commandlib.internal.CurrentServer;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.server.MinecraftServer;

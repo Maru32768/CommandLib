@@ -11,7 +11,7 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "dev.marulabs.commandlib.util.CurrentServer::listen"
+      "dev.marulabs.commandlib.internal.CurrentServer::listen"
     ]
   },
   "depends": {

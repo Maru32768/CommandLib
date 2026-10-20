@@ -4,7 +4,7 @@ import dev.marulabs.commandlib.Command;
 import dev.marulabs.commandlib.CommandContext;
 import dev.marulabs.commandlib.CommonArgument;
 import dev.marulabs.commandlib.argument.*;
-import dev.marulabs.commandlib.util.CurrentServer;
+import dev.marulabs.commandlib.internal.CurrentServer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 //? if >=1.19.3

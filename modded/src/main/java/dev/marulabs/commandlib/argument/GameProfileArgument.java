@@ -5,7 +5,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import dev.marulabs.commandlib.Argument;
 import dev.marulabs.commandlib.CommandContext;
 import dev.marulabs.commandlib.exception.ArgumentParseException;
-import dev.marulabs.commandlib.util.CurrentServer;
+import dev.marulabs.commandlib.internal.CurrentServer;
 import dev.marulabs.commandlib.internal.StringUtil;
 import net.minecraft.server.players.GameProfileCache;
 
