@@ -53,7 +53,7 @@
 | Sender abstraction                  | `[x]` | `provide(Type, ctx -> ...)` で sender を plugin の型に変換し、`ctx.get(Type)` で cast なしに読める。middleware は `ctx.put` で値を足せる。登録単位の provider は `CommandDefaults`（[`docs/context-values.md`](context-values.md)）。この行の sender は「plugin の型への変換」の意味で、P5 の sender / message abstraction（platform 間の sender 型の差の吸収）とは別。 | — |
 | Dependency injection                | `[x]` | context value の provider、登録単位の `CommandDefaults`、annotation API の `registerDependency` / `@Dependency` field がある。DI framework 非依存。 | `require(Class)` の短縮形。 |
 | Annotation API                      | `[~]` | `AnnotationParser` と `@Command` / `@Subcommand` / `@Permission` / `@Optional` / `@Default` / `@Range` / `@Suggest` / `@Flag` / `@Option` / `@Confirm` / `@Cooldown` 等、custom annotation の拡張点が Spigot / Paper / Velocity / modded にある。Spigot / Paper / modded では fluent と同じ help / permission / 実行結果を snapshot で確認し、Velocity は実行と引数の parse だけを確認（`AnnotatedCommandsTest`、[`docs/annotations.md`](annotations.md)）。 | `java.util.Optional<T>` 引数、`requires(option, predicate)` の annotation、Velocity の snapshot、modded の guild case（placeholder、middleware、visibility、`@Requires`）。 |
-| Kotlin DSL                          | `[~]` | `common-kotlin` + `spigot-kotlin` / `paper-kotlin` / `velocity-kotlin` に型推論の効く builder、delegated option、`executeSuspend`、suspend suggestions がある（[`docs/kotlin.md`](kotlin.md)）。 | Forge / NeoForge 版、Kotlin 関数の default 引数から command を作る形。`common-kotlin` は package-private の `CurrentCommandContext` を同じ package から読むため `common` と同じ class loader が必要。 |
+| Kotlin DSL                          | `[~]` | `common-kotlin` + `spigot-kotlin` / `paper-kotlin` / `velocity-kotlin` に型推論の効く builder、delegated option、`executeSuspend`、suspend suggestions がある（[`docs/kotlin.md`](kotlin.md)）。 | Forge / NeoForge 版、Kotlin 関数の default 引数から command を作る形。 |
 | Java builder API                    | `[x]` | `Command.builder(name)`（common の `CommandBuilder`）が全 platform にあり、fluent と同じ command tree / permission / 結果を snapshot で確認（[`docs/java-builder.md`](java-builder.md)）。 | — |
 | Localization / captions             | `[~]` | `Caption` / `Captions` で組み込み message を key 化し、sender の locale で解決する（en / ja 同梱、override、ResourceBundle、`CaptionSender`。[`docs/localization.md`](localization.md)）。 | diagnostics / `CommandDocs` の文言、Fabric node での locale 取得の確認。 |
 | Public testing framework            | `[~]` | `common-testing` / `spigot-testing` / `paper-testing` / `velocity-testing` / loader 別 `modded-testing` がある。`CommandTester`（`suggest()`、int を返す `execute`、`assertCommandTreeMatchesSnapshot`）、`FakeSender`、NMS mock、JUnit 5 の `CommandLibExtension` + `@Sender`（全 testing artifact）と downstream guide（[`docs/testing.md`](testing.md)）がある。 | testing artifact 間の共通化、gamerule / silent source の模擬。 |
@@ -87,6 +87,9 @@
 
 #### 要判断
 
+- `[?]` `spigot-testing` の `CommandTester.Builder.mockNmsClass(Class<T extends NMSClass>, ...)` は docs に載る公開 API だが、
+  引数の型は内部 package（`dev.marulabs.commandlib.internal.nms`）に移った。公開 API として残すか、内部扱いにするか
+  （2026-10-21 の package 整理で判明）。
 - `[?]` `ctx.getOption(option)` / `hasOption` が実行中の command に無い option（他 command、親 command の option）を黙って
   default / false で返す。Kotlin DSL の delegated property では親の option を子の `execute` で自然に読めてしまう。ただし
   `6142b594` で「親や `CommandDefaults` の middleware が一部の子にしか無い option を読むと default を得る」ために意図して
@@ -226,17 +229,8 @@
   CI では `check`（Spotless、compile 時の Error Prone / NullAway、doclint）と japicmp を実行する。jev-lint を CI で
   使う場合は、verdict cache（`.jev-lint/baseline.json`）を commit して key なしで lint する運用に切り替える。
   生成済み typed NMS source の手編集や再生成漏れを検出するため、`tools/nms-codegen` で `uv run generate.py --all` を実行し、
-  `git status --porcelain -- nms spigot/src/main/java/dev/marulabs/commandlib/util/nms/TypedNmsModules.java` が空でなければ
+  `git status --porcelain -- nms spigot/src/main/java/dev/marulabs/commandlib/internal/nms/TypedNmsModules.java` が空でなければ
   失敗させる step も入れる（`git diff --exit-code` は新規の未追跡ファイルを検出しないため）。
-- `[ ]` package 構成と可視性を整理し、内部 API を利用者から隠す（F12 と関連）。README に書いた設定をすれば内部 API が
-  IDE の補完に出ないことを最優先にし、compile が通らないことは努力目標とする。README の設定を外れた使い方は保証しない。
-  ServiceLoader などの実行時 lookup は使わない（以前 Spigot / Paper の plugin reload や PlugMan で動かなくなった）。
-  - 内部実装（NMS bridge、platform adapter、tree 生成など）を `internal` 系の package に集める。`common-kotlin` が
-    package-private の `CurrentCommandContext` を同じ package から読んでいる件もここで解消する。
-  - 内部 package と class に `@ApiStatus.Internal` を付ける。`common` の `org.jetbrains:annotations` は 16.0.2 で
-    `ApiStatus` を含まないため、version を上げる。
-  - README に、IntelliJ IDEA の Settings → Editor → General → Auto Import → Exclude from import and completion に
-    登録する package を書く。
 - `[?]` （候補）compile 用の API jar を build で自動生成する。公開 class だけを抜き出した jar を `compileOnly`、
   全 class を含む jar を runtime / shade 用に配布すれば、内部 API は補完に出ず compile も通らない。両 jar に同じ
   binary の公開 class を持たせる方法、shade 時の class の重複、Gradle の variant と公開 metadata を検証する必要がある。

@@ -4,6 +4,21 @@
 
 ## 完了済みバックログ
 
+### P6: package 構成と可視性（完了分）
+
+- `[x]` package 構成と可視性を整理し、内部 API を利用者から隠す（F12 と関連）。README に書いた設定をすれば内部 API が
+  IDE の補完に出ないことを最優先にし、compile が通らないことは努力目標とする。README の設定を外れた使い方は保証しない。
+  ServiceLoader などの実行時 lookup は使わない（以前 Spigot / Paper の plugin reload や PlugMan で動かなくなった）。
+  - 内部実装（NMS bridge、platform adapter、tree 生成など）を `internal` 系の package に集める。`common-kotlin` が
+    package-private の `CurrentCommandContext` を同じ package から読んでいる件もここで解消する。
+  - 内部 package と class に `@ApiStatus.Internal` を付ける。`common` の `org.jetbrains:annotations` は 16.0.2 で
+    `ApiStatus` を含まないため、version を上げる。
+  - README に、IntelliJ IDEA の Settings → Editor → General → Auto Import → Exclude from import and completion に
+    登録する package を書く。
+  2026-10-21 に実施: 利用者が除外するのは `dev.marulabs.commandlib.internal` の 1 つ。tree 生成など package-private の class は
+  公開 API の class の member を広げないため root package に残した（`docs/design/module-structure.md` の
+  "Packages And Visibility"）。testing artifact は同じ package から package-private class を使い続ける。
+
 ### P0: GA 前の欠陥と契約（完了分）
 
 2026-10-18 / 2026-10-19 / 2026-10-20 のレビューの指摘のうち、仕様判断の要らないものを 2026-10-21 に修正した（`3279d890` 以降の
