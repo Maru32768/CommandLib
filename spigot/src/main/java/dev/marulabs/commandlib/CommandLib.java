@@ -939,7 +939,11 @@ public final class CommandLib implements Listener {
     }
 
     private void unregisterPermissions() {
-        restorePermissions(removePermissions(registeredPermissions));
+        RegistrationCleanup.restorePermissions(removePermissions(registeredPermissions),
+                                               INSTANCES,
+                                               x -> Command.permissions(x.commands, x.permissionPrefix),
+                                               x -> x.registeredPermissions,
+                                               CommandLib::addPermission);
         // dirtyPermissibles is not called when removing a TRUE permission, so force
         // recalculation here so players lose the permission immediately.
         Bukkit.getOnlinePlayers()
@@ -962,28 +966,6 @@ public final class CommandLib implements Listener {
             }
         }
         return removed;
-    }
-
-    /**
-     * Adds each removed node that a live registration still declares again, as the oldest of them declares it, and
-     * makes that registration own it, so its commands keep their default until it is unregistered itself. Its own
-     * permission object was given the default FALSE when a later registration replaced it.
-     */
-    private static void restorePermissions(Set<String> removed) {
-        Set<String> remaining = new HashSet<>(removed);
-        for (CommandLib instance : INSTANCES) {
-            if (remaining.isEmpty()) {
-                return;
-            }
-            for (Permission permission : Command.permissions(instance.commands, instance.permissionPrefix)) {
-                if (remaining.remove(permission.getName())) {
-                    addPermission(permission);
-                    instance.registeredPermissions.removeIf(x -> x.getName()
-                                                                  .equals(permission.getName()));
-                    instance.registeredPermissions.add(permission);
-                }
-            }
-        }
     }
 
     private static void removePermissionCompletely(String name) {

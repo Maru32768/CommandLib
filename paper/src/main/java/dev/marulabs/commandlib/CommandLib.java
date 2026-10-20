@@ -683,9 +683,7 @@ public final class CommandLib implements Listener {
     }
 
     /**
-     * Adds each removed node that a live registration of this copy of CommandLib still declares again, as the oldest
-     * of them declares it, and makes that registration own it, so its commands keep their default until it is
-     * unregistered itself. Its own permission object was given the default FALSE when a later registration replaced it.
+     * {@link RegistrationCleanup#restorePermissions} with the live registrations of every plugin.
      */
     private static void restorePermissions(Set<String> removed) {
         if (removed.isEmpty()) {
@@ -702,20 +700,11 @@ public final class CommandLib implements Listener {
             }
         }
         live.sort(Comparator.comparingLong(x -> x.sequence));
-        Set<String> remaining = new HashSet<>(removed);
-        for (CommandLib instance : live) {
-            if (remaining.isEmpty()) {
-                return;
-            }
-            for (Permission permission : instance.commands.permissions()) {
-                if (remaining.remove(permission.getName())) {
-                    CommandPermissions.add(permission);
-                    instance.registeredPermissions.removeIf(x -> x.getName()
-                                                                  .equals(permission.getName()));
-                    instance.registeredPermissions.add(permission);
-                }
-            }
-        }
+        RegistrationCleanup.restorePermissions(removed,
+                                               live,
+                                               x -> x.commands.permissions(),
+                                               x -> x.registeredPermissions,
+                                               CommandPermissions::add);
     }
 
     /**
