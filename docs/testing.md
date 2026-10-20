@@ -198,9 +198,9 @@ Adjust a sender with `op(boolean)`, `permissions(nodes...)` (grants only these n
 `common-testing`). The builders have the same methods. `velocity-testing` has no builders and only `permissions`,
 `denyPermissions` and `locale`. In `modded-testing` the console passes every permission check, as on a server, so
 `permissions` and `denyPermissions` throw for it. A player's locale decides the language of CommandLib's messages
-and of your [captions](localization.md). Players start with `en_us` (`Locale.US` in `velocity-testing`; not yet in
-the Forge / NeoForge / Fabric artifacts), which a vanilla client reports by default, so English assertions do not
-depend on the JVM's default locale. The console uses the JVM's default locale, as on a server.
+and of your [captions](localization.md). Players start with `en_us` (`Locale.US` in `velocity-testing`), which a vanilla
+client reports by default, so English assertions do not depend on the JVM's default locale. On Fabric 1.20.1, where
+CommandLib does not read a player's language, players get the JVM's default locale. The console uses the JVM's default locale, as on a server.
 
 Keep the returned sender: in `common-testing` these methods return a new `FakeSender`, in the other artifacts they
 change the sender and return it.
@@ -292,7 +292,7 @@ void suggests_modes() {
 `suggestions(input, sender).join()` returns.
 
 Both complete as the client does from its command tree: a command, literal or argument the sender cannot use (a missing
-permission or a failing `visibleWhen`) is left out (not yet in the Forge / NeoForge / Fabric artifacts). Brigadier's server-side `getCompletionSuggestions` would still list
+permission or a failing `visibleWhen`) is left out. Brigadier's server-side `getCompletionSuggestions` would still list
 such a literal ([permissions](permissions.md#where-permissions-are-checked)).
 
 A provider that throws an exception does not fail `suggest` or `suggestions`, as on a server: the exception is printed

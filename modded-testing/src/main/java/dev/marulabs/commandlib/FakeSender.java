@@ -35,6 +35,7 @@ import java.util.UUID;
  */
 public final class FakeSender {
     private static final String CONSOLE_NAME = "Server";
+    static final String DEFAULT_PLAYER_LOCALE = "en_us";
 
     private final List<Component> sentMessages = new ArrayList<>();
     // null for the console.
@@ -52,7 +53,9 @@ public final class FakeSender {
     private final Set<String> deniedPermissions = new HashSet<>();
 
     /**
-     * Creates a non-operator fake player with the offline-mode UUID for the name.
+     * Creates a non-operator fake player with the offline-mode UUID for the name and the locale {@code en_us}, which a
+     * vanilla client reports by default, so that messages do not depend on the JVM's default locale. Change it with
+     * {@link #locale(String)}.
      */
     public static FakeSender player(@NotNull String name) {
         return player(name, UUID.nameUUIDFromBytes(("OfflinePlayer:" + name).getBytes(StandardCharsets.UTF_8)));
@@ -62,8 +65,7 @@ public final class FakeSender {
         // Mocking ServerPlayer initializes it, which fails for the rest of the JVM before Minecraft is bootstrapped.
         CommandTester.MinecraftBootstrap.ensureBootstrapped();
         FakeSender sender = new FakeSender(Mockito.mock(ServerPlayer.class), name, uniqueId, false);
-        sender.stubPlayer();
-        return sender;
+        return sender.locale(DEFAULT_PLAYER_LOCALE);
     }
 
     /**
@@ -74,8 +76,8 @@ public final class FakeSender {
     }
 
     /**
-     * Creates a builder for a non-operator fake player. Without {@link Builder#uniqueId(UUID)} the player gets the
-     * offline-mode UUID for its name.
+     * Creates a builder for a non-operator fake player with the locale {@code en_us}. Without
+     * {@link Builder#uniqueId(UUID)} the player gets the offline-mode UUID for its name.
      */
     public static Builder playerBuilder(@NotNull String name) {
         return new Builder(false, name, false);
@@ -161,7 +163,7 @@ public final class FakeSender {
     }
 
     /**
-     * Returns the player's language code, or empty for the console or a player without one.
+     * Returns the player's language code, or empty for the console.
      */
     public Optional<String> getLocale() {
         return Optional.ofNullable(locale);

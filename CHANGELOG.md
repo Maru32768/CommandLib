@@ -221,12 +221,10 @@ suggestions) and a command for each argument type. Options, permission plugins a
   `<loader>-testing-<version>` ([testing](docs/testing.md)).
 - `CommandTester` runs commands, suggestions and command tree snapshots. `FakeSender` has player and console builders.
 - `CommandTester#suggest` and `suggestions` leave out the nodes the sender cannot use, as the client's command tree
-  does, instead of every literal Brigadier's server-side completion lists (not yet in the Forge / NeoForge / Fabric
-  artifacts).
+  does, instead of every literal Brigadier's server-side completion lists.
 - `CommandTester#commandTree()` and its snapshots show the cooldown bypass node of a command. `velocity-testing`'s
   `CommandTester` has `suggestions(input, sender)`. `FakeSender.player(...)` and `playerBuilder(...)` start with the
-  locale `en_us` (not yet in the Forge / NeoForge / Fabric artifacts), so caption assertions no longer depend on the
-  JVM's default locale.
+  locale `en_us`, so caption assertions no longer depend on the JVM's default locale.
 - `spigot-testing` and `paper-testing` parse `LocationArgument` like the server: an integer x or z moves to the center
   of its block unless the argument is created with `centerIntegers` false.
 - A JUnit 5 extension, `CommandLibExtension`, creates a tester per test and injects `CommandTester` and `@Sender`
