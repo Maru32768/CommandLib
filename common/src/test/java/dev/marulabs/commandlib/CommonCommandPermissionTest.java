@@ -1,11 +1,15 @@
 package dev.marulabs.commandlib;
 
+import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.marulabs.commandlib.argument.CommonStringArgument;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -360,6 +364,66 @@ class CommonCommandPermissionTest {
         TestCommandContext help = execute(runner, "game");
         assertThat(help.messages()).anyMatch(x -> x.contains("Start the game"))
                                    .noneMatch(x -> x.contains("Stop the game"));
+    }
+
+    // A parse kept for later, as a function keeps it, runs only while the sender has every node of its route.
+    @Test
+    void the_runner_rejects_a_route_whose_parent_permission_is_gone_at_execution() throws Exception {
+        String game = "test.command.game";
+        String team = "test.command.game.team";
+        assertRevokedAtExecutionIsRejected("game team join", "joined", game);
+        assertRevokedAtExecutionIsRejected("game team join", "joined", team);
+        assertRevokedAtExecutionIsRejected("game t join", "joined", game);
+        assertRevokedAtExecutionIsRejected("game team help", "/game team", game);
+        assertRevokedAtExecutionIsRejected("game arena show", "shown arena", game);
+    }
+
+    private static void assertRevokedAtExecutionIsRejected(String input,
+                                                           String output,
+                                                           String revoked) throws Exception {
+        TestCommand command = new TestCommand("game") {{
+            addChildren(new TestCommand("team") {{
+                addAliases("t");
+                addChildren(new TestCommand("join") {{
+                    execute(ctx -> ctx.sendMessage("joined"));
+                }});
+            }});
+            argument(new CommonStringArgument<>("name")).child(new TestCommand("show") {{
+                execute(ctx -> ctx.sendMessage("shown " + ctx.getArgument("name")));
+            }});
+        }};
+        Set<String> permissions = new HashSet<>(Set.of("test.command.game",
+                                                       "test.command.game.team",
+                                                       "test.command.game.team.join",
+                                                       "test.command.game.name",
+                                                       "test.command.game.show"));
+        TestCommandSource source = new TestCommandSource() {
+            @Override
+            public boolean hasPermission(String permission) {
+                return permissions.contains(permission);
+            }
+        };
+        TestCommandRunner runner = new TestCommandRunner(command, source);
+        CommandDispatcher<TestCommandSource> dispatcher = new CommandDispatcher<>(runner.root());
+        assertThat(execute(dispatcher, dispatcher.parse(input, source))).as(input)
+                                                                        .anyMatch(x -> x.contains(output));
+        ParseResults<TestCommandSource> parsed = dispatcher.parse(input, source);
+        permissions.remove(revoked);
+
+        assertThat(execute(dispatcher, parsed)).as(input + " without " + revoked)
+                                               .containsExactly("You do not have permission to execute this command.");
+    }
+
+    private static List<String> execute(CommandDispatcher<TestCommandSource> dispatcher,
+                                        ParseResults<TestCommandSource> parsed) throws CommandSyntaxException {
+        TestCommandContext.clearLatest();
+        try {
+            dispatcher.execute(parsed);
+        } catch (CommandFailure e) {
+            e.sendMessages();
+        }
+        return TestCommandContext.latest()
+                                 .messages();
     }
 
     @Test

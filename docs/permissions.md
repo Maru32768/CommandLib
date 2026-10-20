@@ -223,7 +223,7 @@ no permission plugin sets the node. A `TRUE` or `FALSE` value always wins.
 | Client command tree, parsing | Each literal and argument node has a `requires` predicate. A sender without the node does not see it and the server parses the input as if it did not exist, reporting an unknown command or argument. Each option token requires the nodes of its options, including every flag of a combined token such as `-fs`. |
 | Tab completion | The client completes commands and literals from its command tree, so hidden nodes are not completed, and an argument's suggestions are empty without its branch node. The server's own completion (Brigadier's `CommandDispatcher#getCompletionSuggestions`, which answers a client's request for an argument's server-side suggestions) does not check requirements, so its answer may still list a hidden literal next to that argument. |
 | Generated help | Only routes the sender may use are listed, and only options the sender may give. |
-| Execution | The runner checks the command node, the node of every given option and every argument branch node on the route again before parsing; a failure sends `You do not have permission to execute this command.` |
+| Execution | The runner checks every node of the route again before parsing: the command's, each parent command's, every argument branch's and every given option's, so input parsed earlier, such as a function's, does not run once the sender lost one of them. A failure sends `You do not have permission to execute this command.` |
 
 A [`visibleWhen`](#refreshing-the-command-tree) predicate is checked in the same places as the command's or branch's
 node.

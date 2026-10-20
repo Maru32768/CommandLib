@@ -107,8 +107,12 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
 
     private int runInContext(C ctx) throws CommandFailure {
         try {
-            if (!platformAdapter.hasPermission(ctx, command.permissionName(permissionPrefix))) {
-                return denied(ctx);
+            // The parse may be older than the sender's permissions, as a function's is, so every node of the route that
+            // the command tree requires is checked again: the parent commands here, the branches and options below.
+            for (CommonCommand<C, ?> current = command; current != null; current = current.parent()) {
+                if (!platformAdapter.hasPermission(ctx, current.permissionName(permissionPrefix))) {
+                    return denied(ctx);
+                }
             }
 
             try {
