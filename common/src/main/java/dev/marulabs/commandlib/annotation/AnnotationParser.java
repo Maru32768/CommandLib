@@ -88,7 +88,6 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
                                                                                            Permission.class,
                                                                                            Requires.class,
                                                                                            Variadic.class,
-                                                                                           // Last, so that a @Sender parameter can allow it.
                                                                                            Sender.class);
     // The annotations that configure a command, and those that describe an argument branch on an @Execute method.
     private static final List<Class<? extends Annotation>> COMMAND_ANNOTATIONS = List.of(Confirm.class,
@@ -640,12 +639,7 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
         private void describeBranch(Method method, ArgumentBranch<C, T> branch) {
             Description description = method.getAnnotation(Description.class);
             if (description != null) {
-                Function<C, String> localized = localized(description);
-                if (localized != null) {
-                    branch.description(localized);
-                } else {
-                    branch.description(description.value());
-                }
+                applyDescription(description, branch::description, branch::description);
             }
             Permission permission = method.getAnnotation(Permission.class);
             if (permission != null) {
@@ -755,10 +749,7 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
 
         private Parameter placeholderParameter(Method method, String name) {
             for (Parameter parameter : method.getParameters()) {
-                Class<?> rawType = parameter.getType();
-                boolean isContext = CommonCommandContext.class.isAssignableFrom(rawType)
-                        && rawType.isAssignableFrom(contextType);
-                if (isContext || has(parameter, Sender.class) || has(parameter, Flag.class)
+                if (isContext(parameter.getType()) || has(parameter, Sender.class) || has(parameter, Flag.class)
                         || has(parameter, Option.class)) {
                     continue;
                 }
@@ -805,12 +796,7 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
                                          .bundle(captionBundle.value(), type.getClassLoader()));
             }
             if (description != null) {
-                Function<C, String> localized = localized(description);
-                if (localized != null) {
-                    command.description(localized);
-                } else {
-                    command.description(description.value());
-                }
+                applyDescription(description, command::description, command::description);
             }
             if (examples != null) {
                 command.examples(examples.value());
@@ -880,14 +866,16 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
             return value;
         }
 
-        @Nullable
-        private Function<C, String> localized(Description description) {
+        private void applyDescription(Description description,
+                                      Consumer<Function<C, String>> localized,
+                                      Consumer<String> text) {
             if (description.caption()
                            .isEmpty()) {
-                return null;
+                text.accept(description.value());
+                return;
             }
             Caption caption = Caption.of(description.caption(), description.value());
-            return ctx -> ctx.caption(caption);
+            localized.accept(ctx -> ctx.caption(caption));
         }
 
         @SuppressWarnings({"unchecked", "rawtypes"})
@@ -931,7 +919,7 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
                                         T command,
                                         List<CommonArgument<?, C, ?>> arguments) {
             Class<?> rawType = parameter.getType();
-            if (CommonCommandContext.class.isAssignableFrom(rawType) && rawType.isAssignableFrom(contextType)) {
+            if (isContext(rawType)) {
                 reject(method, parameter, "the context", PARAMETER_ANNOTATIONS);
                 rejectRegisteredAnnotations(method, parameter, "the context");
                 return ctx -> ctx;
@@ -940,7 +928,9 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
                 reject(method,
                        parameter,
                        "a @Sender parameter",
-                       PARAMETER_ANNOTATIONS.subList(0, PARAMETER_ANNOTATIONS.size() - 1));
+                       PARAMETER_ANNOTATIONS.stream()
+                                            .filter(x -> x != Sender.class)
+                                            .collect(Collectors.toList()));
                 rejectRegisteredAnnotations(method, parameter, "a @Sender parameter");
                 if (!contextTypes.contains(box(rawType))) {
                     throw error(method,
@@ -972,6 +962,11 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
             CommonArgument<?, C, ?> argument = argument(method, parameter, factory, valueType, variadic);
             arguments.add(argument);
             return ctx -> ctx.getArgument(argument);
+        }
+
+        // A parameter of a context type the platform's context is assignable to receives the context.
+        private boolean isContext(Class<?> rawType) {
+            return CommonCommandContext.class.isAssignableFrom(rawType) && rawType.isAssignableFrom(contextType);
         }
 
         @Nullable
