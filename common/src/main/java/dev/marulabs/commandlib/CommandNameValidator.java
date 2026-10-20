@@ -84,9 +84,8 @@ final class CommandNameValidator {
                 if (arguments.containsKey(name)) {
                     throw conflictWithArgument(name);
                 }
-                // An alias repeating the command's name or another alias merges identical nodes and is harmless, so
-                // only collisions between different commands are rejected. CommonCommand rejects adding a command
-                // twice, which would list its usages twice in the help.
+                // CommonCommand rejects an alias repeating the command's name or another alias, and adding a command
+                // twice, which would list its usages twice in the help, so only other commands are checked here.
                 CommonCommand<?, ?> owner = literals.putIfAbsent(name, command);
                 if (owner != null && owner != command) {
                     throw new IllegalArgumentException((location == null ? "Duplicate command name or alias '"

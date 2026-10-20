@@ -193,6 +193,12 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
         }
     }
 
+    /**
+     * Adds other names this command runs under.
+     *
+     * @throws IllegalArgumentException if an alias is this command's name or one of its aliases, given twice, or the
+     *                                  name or an alias of a sibling command
+     */
     public final void addAliases(@NotNull String alias, @NotNull String... aliases) {
         List<String> list = new ArrayList<>();
         list.add(alias);
@@ -200,10 +206,22 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
         addAliases(list);
     }
 
+    /**
+     * Adds other names this command runs under.
+     *
+     * @throws IllegalArgumentException if an alias is this command's name or one of its aliases, given twice, or the
+     *                                  name or an alias of a sibling command
+     */
     public final void addAliases(@NotNull Collection<String> aliases) {
         Objects.requireNonNull(aliases);
+        Set<String> names = new HashSet<>(this.aliases);
+        names.add(name);
         for (String alias : aliases) {
             Objects.requireNonNull(alias);
+            if (!names.add(alias)) {
+                throw new IllegalArgumentException("Alias '" + alias + "' of command '" + name + "' is "
+                        + (alias.equals(name) ? "its own name" : "already one of its aliases"));
+            }
         }
         int size = this.aliases.size();
         this.aliases.addAll(aliases);

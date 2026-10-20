@@ -731,20 +731,6 @@ class CommandStructureTest {
     }
 
     @Test
-    void repeated_names_within_one_child_are_accepted() throws Exception {
-        TestCommand list = new TestCommand("list") {{
-            addAliases("list", "ls", "ls");
-            execute(ctx -> ctx.sendMessage("list"));
-        }};
-        TestCommandRunner runner = new TestCommandRunner(new TestCommand("game") {{
-            addChildren(list);
-        }});
-
-        assertThat(runner.execute("game ls")
-                         .messages()).containsExactly("list");
-    }
-
-    @Test
     void duplicate_top_level_command_names_are_rejected_at_build() {
         List<TestCommand> commands = List.of(new TestCommand("foo"), new TestCommand("bar") {{
             addAliases("foo");
@@ -799,19 +785,17 @@ class CommandStructureTest {
     }
 
     @Test
-    void an_alias_repeating_the_command_name_runs_the_command() throws Exception {
-        TestCommandRunner runner = new TestCommandRunner(new TestCommand("game") {{
-            addAliases("game");
-            addChildren(new TestCommand("list") {{
-                addAliases("list", "ls", "ls");
-                execute(ctx -> ctx.sendMessage("list"));
-            }});
-        }});
+    void an_alias_cannot_repeat_the_command_name_or_another_alias() {
+        TestCommand game = new TestCommand("game");
+        game.addAliases("g");
 
-        assertThat(runner.execute("game list")
-                         .messages()).containsExactly("list");
-        assertThat(runner.execute("game ls")
-                         .messages()).containsExactly("list");
+        assertThatThrownBy(() -> game.addAliases("game")).isInstanceOf(IllegalArgumentException.class)
+                                                         .hasMessageContaining("its own name");
+        assertThatThrownBy(() -> game.addAliases("g")).isInstanceOf(IllegalArgumentException.class)
+                                                      .hasMessageContaining("already one of its aliases");
+        assertThatThrownBy(() -> game.addAliases("ls", "ls")).isInstanceOf(IllegalArgumentException.class)
+                                                             .hasMessageContaining("already one of its aliases");
+        assertThat(game.aliases()).containsExactly("g");
     }
 
     @Test
