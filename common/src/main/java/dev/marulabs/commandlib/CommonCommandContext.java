@@ -182,6 +182,9 @@ public abstract class CommonCommandContext<S, C> {
 
     /**
      * Returns the value of {@code option}: the given value, or its default when it is not given.
+     * <p>
+     * Suggestion providers and {@code visibleWhen} predicates run without the options being parsed, so there it gives
+     * the default, also for an option typed before the argument being completed.
      *
      * @throws IllegalArgumentException if no command registers the option, such as a copy
      *                                  {@link CommandOption#repeatable(int)} returns of a registered option
@@ -202,6 +205,10 @@ public abstract class CommonCommandContext<S, C> {
         return option.cast(value);
     }
 
+    /**
+     * Whether {@code option} was given. Like {@link #getOption(CommandOption)}, it does not see the options in
+     * suggestion providers and {@code visibleWhen} predicates, where it is {@code false}.
+     */
     public final boolean hasOption(@NotNull CommandOption<?, ?> option) {
         Objects.requireNonNull(option);
         return presentOptions.contains(option);
