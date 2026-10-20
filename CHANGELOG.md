@@ -224,6 +224,8 @@ suggestions) and a command for each argument type. Options, permission plugins a
 - Suggestions match case-insensitively.
 - Vanilla argument types such as item, block and entity selector arguments keep their own suggestions.
 - An argument named like the literal before it keeps its own input.
+- An omitted optional argument named like a command literal of its route, such as `<count>` of `/count`, gets its
+  default instead of failing with `No such argument`.
 - `UncaughtExceptionHandler` receives exceptions thrown by executors.
 - Spigot: commands work after Bukkit `/reload`, because CommandLib adds them to the vanilla dispatcher.
 - Spigot: commands appear under the plugin's `/help` index with their permission and description, instead of as "A

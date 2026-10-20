@@ -57,6 +57,44 @@ class OptionalVariadicArgumentTest {
                          .messages()).containsExactly("n=3");
     }
 
+    // The command literals are in the inputs by name too, and must not count as the omitted argument.
+    @Test
+    void omitted_optional_argument_named_like_a_command_literal_gives_its_default() throws Exception {
+        TestCommandRunner command = new TestCommandRunner(new TestCommand("count") {{
+            argument(new IntArg("count").optional(7)).execute((n, ctx) -> ctx.sendMessage("n=" + n));
+        }});
+        TestCommandRunner alias = new TestCommandRunner(new TestCommand("counter") {{
+            addAliases("c");
+            argument(new IntArg("c").optional(7)).execute((n, ctx) -> ctx.sendMessage("n=" + n));
+        }});
+        TestCommandRunner ancestor = new TestCommandRunner(new TestCommand("count") {{
+            addChildren(new TestCommand("set") {{
+                argument(new IntArg("count").optional(7)).execute((n, ctx) -> ctx.sendMessage("n=" + n));
+            }});
+        }});
+        TestCommandRunner variadic = new TestCommandRunner(new TestCommand("targets") {{
+            argument(new WordArg("targets").variadic()
+                                           .optional(List.of())).execute((targets, ctx) -> ctx.sendMessage(targets));
+        }});
+
+        assertThat(command.execute("count")
+                          .messages()).containsExactly("n=7");
+        assertThat(command.execute("count 3")
+                          .messages()).containsExactly("n=3");
+        assertThat(alias.execute("c")
+                        .messages()).containsExactly("n=7");
+        assertThat(alias.execute("c 3")
+                        .messages()).containsExactly("n=3");
+        assertThat(ancestor.execute("count set")
+                           .messages()).containsExactly("n=7");
+        assertThat(ancestor.execute("count set 3")
+                           .messages()).containsExactly("n=3");
+        assertThat(variadic.execute("targets")
+                           .messages()).containsExactly("[]");
+        assertThat(variadic.execute("targets Steve Alex")
+                           .messages()).containsExactly("[Steve, Alex]");
+    }
+
     @Test
     void default_extractor_failure_is_sent_and_stops_the_command() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("heal") {{

@@ -41,7 +41,7 @@ final class Arguments<C extends CommonCommandContext<?, ?>> {
 
     void parse(C ctx) throws ArgumentParseException, CommandPrerequisiteException {
         for (CommonArgument<?, C, ?> argument : arguments) {
-            if (!ctx.hasInput(argument.name())) {
+            if (!ctx.isArgumentGiven(argument.name())) {
                 if (argument.isOptional()) {
                     ctx.setParsedArgument(argument.name(), argument.defaultValue(ctx));
                     continue;
