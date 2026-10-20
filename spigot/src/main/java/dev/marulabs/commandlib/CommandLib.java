@@ -665,7 +665,14 @@ public final class CommandLib implements Listener {
                                                       .getServer();
             // Kept by the task, so each tick's check is a field read and an identity comparison.
             functionCompiler = Bukkit.getScheduler()
-                                     .runTaskTimer(plugin, () -> compileFunctionsIfStale(plugin, server), 0L, 1L);
+                                     .runTaskTimer(plugin, () -> {
+                                         compileFunctionsIfStale(plugin, server);
+                                         // With no registration left, the functions that used the commands have been
+                                         // compiled without them, so the task stops until the next registration.
+                                         if (INSTANCES.isEmpty()) {
+                                             stopFunctionCompiler();
+                                         }
+                                     }, 0L, 1L);
             if (functionLoadErrorFilter == null) {
                 installFunctionLoadErrorFilter();
             }
@@ -867,20 +874,17 @@ public final class CommandLib implements Listener {
 
             if (updatePlayerCommands) {
                 updatePlayerCommandsLater();
-            }
-            if (INSTANCES.isEmpty()) {
-                // With no registration left, the task stops until the next one, so the functions that used the
-                // commands are compiled without them now. The disable handler compiles them itself.
-                if (updatePlayerCommands) {
-                    FunctionCompilationMarker.changed();
-                    compileFunctionsIfStale(plugin,
-                                            NMSCraftServer.create(plugin.getServer())
-                                                          .getServer());
+                // Functions that use the commands are dropped. The task compiles them at the start of a tick rather
+                // than here, where a command or function may be running, and stops if no registration is left then.
+                try {
+                    compileFunctionsWithCommands();
+                } catch (RuntimeException | LinkageError ex) {
+                    plugin.getLogger()
+                          .log(Level.WARNING, "Could not compile data pack functions again without the commands", ex);
                 }
+            } else if (INSTANCES.isEmpty()) {
+                // The disable handler compiles the functions itself.
                 stopFunctionCompiler();
-            } else if (updatePlayerCommands) {
-                // Functions that use the commands are dropped.
-                compileFunctionsWithCommands();
             }
         }
     }

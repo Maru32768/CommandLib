@@ -56,6 +56,7 @@ class CommandLibRegistrationTest {
     private final RootCommandNode<Object> vanillaRoot = new RootCommandNode<>();
     private final SimpleCommandMap commandMap = new SimpleCommandMap(server);
     private final List<BukkitTask> timers = new ArrayList<>();
+    private final List<Runnable> timerTasks = new ArrayList<>();
     private final List<CommandLib> registrations = new ArrayList<>();
     private MockedStatic<Bukkit> bukkit;
     private MockedStatic<NMSCraftServer> craftServers;
@@ -88,6 +89,7 @@ class CommandLibRegistrationTest {
         when(scheduler.runTaskTimer(any(Plugin.class), any(Runnable.class), anyLong(), anyLong())).thenAnswer(x -> {
             BukkitTask task = mock(BukkitTask.class);
             timers.add(task);
+            timerTasks.add(x.getArgument(1));
             return task;
         });
 
@@ -114,6 +116,8 @@ class CommandLibRegistrationTest {
     void tearDown() {
         // The registrations and the function compiler task are static, so none is left for other tests.
         registrations.forEach(CommandLib::unregister);
+        // With no registration left, the task stops at its next run.
+        timerTasks.forEach(Runnable::run);
         wrappers.close();
         craftServers.close();
         bukkit.close();
@@ -129,12 +133,28 @@ class CommandLibRegistrationTest {
         verify(timers.get(0), never()).cancel();
 
         home.unregister();
-        verify(timers.get(0)).cancel();
-        // No task is left to drop the functions that used the commands, so they are compiled at once.
+        // A command or function may be running, so the task compiles the functions without the commands on its next
+        // run, and then stops.
+        verify(dedicatedServer, never()).recompileFunctions(any(), anyBoolean());
+        verify(timers.get(0), never()).cancel();
+        timerTasks.get(0)
+                  .run();
         verify(dedicatedServer).recompileFunctions(any(), anyBoolean());
+        verify(timers.get(0)).cancel();
 
         register("spawn");
         assertThat(timers).hasSize(2);
+    }
+
+    @Test
+    void a_failure_to_remove_the_commands_is_not_hidden_by_the_cleanup() {
+        CommandLib registration = register("spawn");
+        IllegalStateException failure = new IllegalStateException("No server");
+        NMSCraftServer craftServer = NMSCraftServer.create(server);
+        when(craftServer.getServer()).thenThrow(failure);
+
+        assertThatThrownBy(registration::unregister).hasCause(failure);
+        assertThat(commandMap.getCommand("spawn")).isNotNull();
     }
 
     @Test
