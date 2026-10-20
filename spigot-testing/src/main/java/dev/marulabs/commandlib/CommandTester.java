@@ -5,26 +5,27 @@ import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.Suggestions;
-import dev.marulabs.commandlib.nms.argument.*;
-import dev.marulabs.commandlib.nms.command.MockNMSCommandListenerWrapper;
-import dev.marulabs.commandlib.nms.resources.MockNMSCraftParticle;
-import dev.marulabs.commandlib.nms.world.MockNMSCraftBlockData;
-import dev.marulabs.commandlib.nms.world.MockNMSCraftEnchantment;
-import dev.marulabs.commandlib.nms.world.MockNMSCraftItemStack;
-import dev.marulabs.commandlib.nms.world.MockNMSCraftPotionEffectType;
-import dev.marulabs.commandlib.util.nms.NMSClass;
-import dev.marulabs.commandlib.util.nms.NMSClassRegistry;
-import dev.marulabs.commandlib.util.nms.argument.*;
-import dev.marulabs.commandlib.util.nms.command.NMSCommandListenerWrapper;
-import dev.marulabs.commandlib.util.nms.resources.NMSCraftParticle;
-import dev.marulabs.commandlib.util.nms.world.NMSCraftBlockData;
-import dev.marulabs.commandlib.util.nms.world.NMSCraftEnchantment;
-import dev.marulabs.commandlib.util.nms.world.NMSCraftItemStack;
-import dev.marulabs.commandlib.util.nms.world.NMSCraftPotionEffectType;
+import dev.marulabs.commandlib.internal.nms.NMSClass;
+import dev.marulabs.commandlib.internal.nms.NMSClassRegistry;
+import dev.marulabs.commandlib.internal.nms.argument.*;
+import dev.marulabs.commandlib.internal.nms.command.NMSCommandListenerWrapper;
+import dev.marulabs.commandlib.internal.nms.mock.argument.*;
+import dev.marulabs.commandlib.internal.nms.mock.command.MockNMSCommandListenerWrapper;
+import dev.marulabs.commandlib.internal.nms.mock.resources.MockNMSCraftParticle;
+import dev.marulabs.commandlib.internal.nms.mock.world.MockNMSCraftBlockData;
+import dev.marulabs.commandlib.internal.nms.mock.world.MockNMSCraftEnchantment;
+import dev.marulabs.commandlib.internal.nms.mock.world.MockNMSCraftItemStack;
+import dev.marulabs.commandlib.internal.nms.mock.world.MockNMSCraftPotionEffectType;
+import dev.marulabs.commandlib.internal.nms.resources.NMSCraftParticle;
+import dev.marulabs.commandlib.internal.nms.world.NMSCraftBlockData;
+import dev.marulabs.commandlib.internal.nms.world.NMSCraftEnchantment;
+import dev.marulabs.commandlib.internal.nms.world.NMSCraftItemStack;
+import dev.marulabs.commandlib.internal.nms.world.NMSCraftPotionEffectType;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.mockito.MockedStatic;
@@ -60,6 +61,7 @@ public class CommandTester implements AutoCloseable {
     /**
      * For use by mock NMS classes only.
      */
+    @ApiStatus.Internal
     @Nullable
     public static Entity getFakeEntity(String name) {
         return requireCurrent().fakeEntities.get(name.toLowerCase(Locale.ROOT));
@@ -68,6 +70,7 @@ public class CommandTester implements AutoCloseable {
     /**
      * For use by mock NMS classes only. Returns the registered fake entities in registration order.
      */
+    @ApiStatus.Internal
     public static Collection<Entity> getFakeEntities() {
         return List.copyOf(requireCurrent().fakeEntities.values());
     }
@@ -75,6 +78,7 @@ public class CommandTester implements AutoCloseable {
     /**
      * For use by mock NMS classes only.
      */
+    @ApiStatus.Internal
     @Nullable
     public static World getFakeWorld(String key) {
         return requireCurrent().fakeWorlds.get(MockArgumentTypes.normalizeKey(key));
@@ -83,6 +87,7 @@ public class CommandTester implements AutoCloseable {
     /**
      * For use by mock NMS classes only.
      */
+    @ApiStatus.Internal
     public static CommandSender getCurrentCommandSender() {
         CommandSender sender = requireCurrent().currentCommandSender.get();
         if (sender == null) {

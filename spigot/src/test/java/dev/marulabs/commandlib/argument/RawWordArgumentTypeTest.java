@@ -1,7 +1,7 @@
 package dev.marulabs.commandlib.argument;
 
 import com.mojang.brigadier.StringReader;
-import dev.marulabs.commandlib.util.nms.argument.NMSArgumentTypeRegistrar;
+import dev.marulabs.commandlib.internal.nms.argument.NMSArgumentTypeRegistrar;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

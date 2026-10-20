@@ -5,7 +5,7 @@ import dev.marulabs.commandlib.Argument;
 import dev.marulabs.commandlib.CommandContext;
 import dev.marulabs.commandlib.exception.ArgumentParseException;
 import dev.marulabs.commandlib.internal.StringUtil;
-import dev.marulabs.commandlib.util.nms.argument.NMSArgumentScoreboardTeam;
+import dev.marulabs.commandlib.internal.nms.argument.NMSArgumentScoreboardTeam;
 import org.bukkit.Bukkit;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;

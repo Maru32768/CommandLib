@@ -4,8 +4,8 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.marulabs.commandlib.Argument;
 import dev.marulabs.commandlib.CommandContext;
 import dev.marulabs.commandlib.exception.ArgumentParseException;
-import dev.marulabs.commandlib.util.nms.argument.NMSArgumentParticle;
-import dev.marulabs.commandlib.util.nms.resources.NMSCraftParticle;
+import dev.marulabs.commandlib.internal.nms.argument.NMSArgumentParticle;
+import dev.marulabs.commandlib.internal.nms.resources.NMSCraftParticle;
 import org.bukkit.Particle;
 
 public class ParticleArgument extends Argument<Particle, ParticleArgument> {

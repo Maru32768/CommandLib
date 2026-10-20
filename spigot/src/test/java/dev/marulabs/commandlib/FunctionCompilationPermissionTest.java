@@ -1,7 +1,7 @@
 package dev.marulabs.commandlib;
 
-import dev.marulabs.commandlib.util.nms.NMSClassRegistry;
-import dev.marulabs.commandlib.util.nms.command.NMSCommandListenerWrapper;
+import dev.marulabs.commandlib.internal.nms.NMSClassRegistry;
+import dev.marulabs.commandlib.internal.nms.command.NMSCommandListenerWrapper;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
@@ -64,12 +64,12 @@ class FunctionCompilationPermissionTest {
         }
 
         @Override
-        protected dev.marulabs.commandlib.util.nms.world.NMSVec3D getPosition() {
+        protected dev.marulabs.commandlib.internal.nms.world.NMSVec3D getPosition() {
             return null;
         }
 
         @Override
-        protected dev.marulabs.commandlib.util.nms.world.NMSVec2D getRotation() {
+        protected dev.marulabs.commandlib.internal.nms.world.NMSVec2D getRotation() {
             return null;
         }
 

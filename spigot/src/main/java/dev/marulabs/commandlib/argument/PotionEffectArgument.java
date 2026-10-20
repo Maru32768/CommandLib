@@ -4,8 +4,8 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.marulabs.commandlib.Argument;
 import dev.marulabs.commandlib.CommandContext;
 import dev.marulabs.commandlib.exception.ArgumentParseException;
-import dev.marulabs.commandlib.util.nms.argument.NMSArgumentMobEffect;
-import dev.marulabs.commandlib.util.nms.world.NMSCraftPotionEffectType;
+import dev.marulabs.commandlib.internal.nms.argument.NMSArgumentMobEffect;
+import dev.marulabs.commandlib.internal.nms.world.NMSCraftPotionEffectType;
 import org.bukkit.potion.PotionEffect;
 
 public class PotionEffectArgument extends Argument<PotionEffect, PotionEffectArgument> {

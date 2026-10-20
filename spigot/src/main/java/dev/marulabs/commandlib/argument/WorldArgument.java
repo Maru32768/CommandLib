@@ -3,7 +3,7 @@ package dev.marulabs.commandlib.argument;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.marulabs.commandlib.Argument;
 import dev.marulabs.commandlib.CommandContext;
-import dev.marulabs.commandlib.util.nms.argument.NMSArgumentDimension;
+import dev.marulabs.commandlib.internal.nms.argument.NMSArgumentDimension;
 import org.bukkit.World;
 
 public class WorldArgument extends Argument<World, WorldArgument> {

@@ -1,0 +1,32 @@
+package dev.marulabs.commandlib.internal.nms.typed.spigot_1_16_5;
+
+import com.mojang.brigadier.arguments.ArgumentType;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import dev.marulabs.commandlib.internal.nms.argument.NMSArgumentDimension;
+import dev.marulabs.commandlib.internal.nms.exception.UncheckedCommandSyntaxException;
+import net.minecraft.server.v1_16_R3.ArgumentDimension;
+import net.minecraft.server.v1_16_R3.CommandListenerWrapper;
+import org.bukkit.World;
+
+public class NMSArgumentDimension_spigot_1_16_5 extends NMSArgumentDimension {
+    public NMSArgumentDimension_spigot_1_16_5() {
+        super(null, ArgumentDimension.class);
+    }
+
+    @Override
+    public ArgumentType<?> argument() {
+        return ArgumentDimension.a();
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    protected World parseImpl(CommandContext<?> ctx, String name) {
+        CommandContext<CommandListenerWrapper> context = (CommandContext<CommandListenerWrapper>) ctx;
+        try {
+            return ArgumentDimension.a(context, name).getWorld();
+        } catch (CommandSyntaxException e) {
+            throw new UncheckedCommandSyntaxException(e);
+        }
+    }
+}

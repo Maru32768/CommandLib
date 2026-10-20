@@ -1,0 +1,25 @@
+package dev.marulabs.commandlib.internal.nms.typed.spigot_1_16_5;
+
+import com.mojang.brigadier.arguments.ArgumentType;
+import com.mojang.brigadier.context.CommandContext;
+import dev.marulabs.commandlib.internal.nms.argument.NMSArgumentNamespacedKey;
+import net.minecraft.server.v1_16_R3.ArgumentMinecraftKeyRegistered;
+import net.minecraft.server.v1_16_R3.CommandListenerWrapper;
+
+public class NMSArgumentNamespacedKey_spigot_1_16_5 extends NMSArgumentNamespacedKey {
+    public NMSArgumentNamespacedKey_spigot_1_16_5() {
+        super(null, ArgumentMinecraftKeyRegistered.class);
+    }
+
+    @Override
+    public ArgumentType<?> argument() {
+        return ArgumentMinecraftKeyRegistered.a();
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    protected String parseImpl(CommandContext<?> ctx, String name) {
+        CommandContext<CommandListenerWrapper> context = (CommandContext<CommandListenerWrapper>) ctx;
+        return ArgumentMinecraftKeyRegistered.e(context, name).toString();
+    }
+}

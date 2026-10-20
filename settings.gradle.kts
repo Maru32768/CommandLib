@@ -24,7 +24,7 @@ val typedNmsModules = file("nms").listFiles()
     .sorted()
 // NMSClassRegistry only looks up modules listed in the table that tools/nms-codegen/generate.py writes.
 val typedNmsTable = Regex("""new NMSClassRegistry\.TypedModule\("([^"]+)"""")
-    .findAll(file("spigot/src/main/java/dev/marulabs/commandlib/util/nms/TypedNmsModules.java").readText())
+    .findAll(file("spigot/src/main/java/dev/marulabs/commandlib/internal/nms/TypedNmsModules.java").readText())
     .map { it.groupValues[1] }
     .toSet()
 typedNmsModules.forEach {

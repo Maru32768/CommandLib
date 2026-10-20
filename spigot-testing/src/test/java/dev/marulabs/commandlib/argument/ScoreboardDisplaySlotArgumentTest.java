@@ -6,8 +6,8 @@ import com.mojang.brigadier.suggestion.Suggestion;
 import dev.marulabs.commandlib.Command;
 import dev.marulabs.commandlib.CommandTester;
 import dev.marulabs.commandlib.FakeSender;
-import dev.marulabs.commandlib.nms.argument.MockNMSArgumentScoreboardSlot;
-import dev.marulabs.commandlib.util.nms.argument.NMSArgumentScoreboardSlot;
+import dev.marulabs.commandlib.internal.nms.argument.NMSArgumentScoreboardSlot;
+import dev.marulabs.commandlib.internal.nms.mock.argument.MockNMSArgumentScoreboardSlot;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

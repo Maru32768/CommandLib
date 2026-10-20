@@ -1,0 +1,28 @@
+package dev.marulabs.commandlib.internal.nms.typed.spigot_1_20_4;
+
+import com.mojang.brigadier.arguments.ArgumentType;
+import com.mojang.brigadier.context.CommandContext;
+import dev.marulabs.commandlib.internal.nms.argument.NMSArgumentChatComponent;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.chat.ComponentSerializer;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.arguments.ComponentArgument;
+import org.bukkit.craftbukkit.v1_20_R3.util.CraftChatMessage;
+
+public class NMSArgumentChatComponent_spigot_1_20_4 extends NMSArgumentChatComponent {
+    public NMSArgumentChatComponent_spigot_1_20_4() {
+        super(null, ComponentArgument.class);
+    }
+
+    @Override
+    public ArgumentType<?> argument() {
+        return ComponentArgument.textComponent();
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    protected BaseComponent parseImpl(CommandContext<?> ctx, String name) {
+        CommandContext<CommandSourceStack> context = (CommandContext<CommandSourceStack>) ctx;
+        return ComponentSerializer.parse(CraftChatMessage.toJSON(ComponentArgument.getComponent(context, name)))[0];
+    }
+}

@@ -5,7 +5,7 @@ import dev.marulabs.commandlib.Argument;
 import dev.marulabs.commandlib.Caption;
 import dev.marulabs.commandlib.CommandContext;
 import dev.marulabs.commandlib.exception.ArgumentParseException;
-import dev.marulabs.commandlib.util.brigadier.VanillaArgumentTypes;
+import dev.marulabs.commandlib.internal.brigadier.VanillaArgumentTypes;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.util.Locale;

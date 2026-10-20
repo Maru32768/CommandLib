@@ -4,7 +4,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.marulabs.commandlib.Argument;
 import dev.marulabs.commandlib.CommandContext;
 import dev.marulabs.commandlib.exception.ArgumentParseException;
-import dev.marulabs.commandlib.util.nms.argument.NMSArgumentPlayers;
+import dev.marulabs.commandlib.internal.nms.argument.NMSArgumentPlayers;
 import org.bukkit.entity.Player;
 
 import java.util.List;

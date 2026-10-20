@@ -1,0 +1,26 @@
+package dev.marulabs.commandlib.internal.nms.typed.spigot_1_16_5;
+
+import com.mojang.brigadier.arguments.ArgumentType;
+import com.mojang.brigadier.context.CommandContext;
+import dev.marulabs.commandlib.internal.nms.argument.NMSArgumentTile;
+import dev.marulabs.commandlib.internal.nms.argument.NMSArgumentTileLocation;
+import net.minecraft.server.v1_16_R3.ArgumentTile;
+import net.minecraft.server.v1_16_R3.CommandListenerWrapper;
+
+public class NMSArgumentTile_spigot_1_16_5 extends NMSArgumentTile {
+    public NMSArgumentTile_spigot_1_16_5() {
+        super(null, ArgumentTile.class);
+    }
+
+    @Override
+    public ArgumentType<?> argument() {
+        return ArgumentTile.a();
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    protected NMSArgumentTileLocation parseImpl(CommandContext<?> ctx, String name) {
+        CommandContext<CommandListenerWrapper> context = (CommandContext<CommandListenerWrapper>) ctx;
+        return NMSArgumentTileLocation.create(ArgumentTile.a(context, name));
+    }
+}

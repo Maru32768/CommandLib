@@ -4,7 +4,7 @@ Read this before touching `nms/*`, `buildSrc`, `tools/nms-codegen`, or the NMS w
 
 ## Overview
 
-The `spigot` module talks to NMS through abstract wrappers (`util/nms`). Their only implementations live in the
+The `spigot` module talks to NMS through abstract wrappers (`internal/nms`). Their only implementations live in the
 `nms/*` modules, which compile against real server jars, so a renamed NMS class or member fails the build instead of a
 server. They follow CommandAPI's build layout:
 
@@ -141,10 +141,10 @@ is left out.
 2. Generate the classes with `tools/nms-codegen` (see its README): add the module, its versions and, for a Spigot
    module, its CraftBukkit package to `MODULES` in `generate.py`, then run `uv run generate.py <module>`. That also
    writes the module table to `TypedNmsModules`, and `settings.gradle.kts` fails for a module directory missing from
-   it. Classes go to `dev.marulabs.commandlib.nms.<module>`, named `<NMSWrapper>_<module>` with dots replaced by
-   underscores, such as `NMSArgumentPlayer_spigot_1_20_4`, and are listed in `TypedNmsClasses`. Where the Minecraft
-   API changed, add a version flag in `mojang.py` rather than editing the generated classes, which a regeneration
-   overwrites. A new wrapper needs a class in every module whose versions use it.
+   it. Classes go to `dev.marulabs.commandlib.internal.nms.typed.<module>`, named `<NMSWrapper>_<module>` with dots
+   replaced by underscores, such as `NMSArgumentPlayer_spigot_1_20_4`, and are listed in `TypedNmsClasses`; the
+   package's generated `package-info.java` marks it `@ApiStatus.Internal`. Where the Minecraft API changed, add a
+   version flag in `mojang.py` rather than editing the generated classes, which a regeneration overwrites. A new wrapper needs a class in every module whose versions use it.
 3. For a Paper module, give the module a `MappingProbe` like `nms/paper-1.20.6`; the table already lists its
    `<package>_spigot` package.
 4. Verify with `./gradlew :nms:<module>:assemble :spigot:jar :spigot:test` and the matching

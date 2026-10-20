@@ -3,7 +3,7 @@ package dev.marulabs.commandlib.argument;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.marulabs.commandlib.Argument;
 import dev.marulabs.commandlib.CommandContext;
-import dev.marulabs.commandlib.util.nms.argument.NMSArgumentItemPredicate;
+import dev.marulabs.commandlib.internal.nms.argument.NMSArgumentItemPredicate;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.function.Predicate;

@@ -2,7 +2,7 @@ package dev.marulabs.commandlib.argument;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
-import dev.marulabs.commandlib.util.nms.argument.NMSArgumentTypeRegistrar;
+import dev.marulabs.commandlib.internal.nms.argument.NMSArgumentTypeRegistrar;
 
 import java.util.Arrays;
 import java.util.Collection;

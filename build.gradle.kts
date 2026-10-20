@@ -27,7 +27,7 @@ fun javaSources(vararg includes: String) = fileTree(rootDir) {
     include(*includes)
     exclude("**/build/**", "**/.gradle*/**", ".claude/**")
     // Written by tools/nms-codegen.
-    exclude("nms/**", "spigot/src/main/java/dev/marulabs/commandlib/util/nms/TypedNmsModules.java")
+    exclude("nms/**", "spigot/src/main/java/dev/marulabs/commandlib/internal/nms/TypedNmsModules.java")
 }
 
 // Stonecutter trees keep version-specific imports in conditional comments, which sorting the imports would break.

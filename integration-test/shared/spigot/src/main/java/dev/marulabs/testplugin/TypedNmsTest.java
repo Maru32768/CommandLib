@@ -1,7 +1,7 @@
 package dev.marulabs.testplugin;
 
 import dev.marulabs.commandlib.Command;
-import dev.marulabs.commandlib.util.nms.NMSClassRegistry;
+import dev.marulabs.commandlib.internal.nms.NMSClassRegistry;
 import dev.marulabs.integration.core.ExceptionUtil;
 import dev.marulabs.integration.core.TestResult;
 import dev.marulabs.integration.core.TestStatus;

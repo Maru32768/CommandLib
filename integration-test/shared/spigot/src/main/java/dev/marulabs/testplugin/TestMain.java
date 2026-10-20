@@ -3,7 +3,7 @@ package dev.marulabs.testplugin;
 import dev.marulabs.commandlib.Command;
 import dev.marulabs.commandlib.CommandLib;
 import dev.marulabs.commandlib.CommandLibDiagnosticsCommand;
-import dev.marulabs.commandlib.util.bukkit.BukkitUtil;
+import dev.marulabs.commandlib.internal.bukkit.BukkitUtil;
 import dev.marulabs.integration.core.JUnitXmlReport;
 import dev.marulabs.integration.core.TestResult;
 import dev.marulabs.integration.core.TestStatus;

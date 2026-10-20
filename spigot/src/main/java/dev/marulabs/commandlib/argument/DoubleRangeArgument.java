@@ -4,7 +4,7 @@ import com.google.common.collect.Range;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.marulabs.commandlib.Argument;
 import dev.marulabs.commandlib.CommandContext;
-import dev.marulabs.commandlib.util.nms.argument.NMSArgumentFloatRange;
+import dev.marulabs.commandlib.internal.nms.argument.NMSArgumentFloatRange;
 
 /**
  * A decimal range in the vanilla {@code float_range} syntax: {@code 0.5..10}, {@code ..5}, {@code 3.5..} or

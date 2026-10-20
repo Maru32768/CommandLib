@@ -3,8 +3,8 @@ package dev.marulabs.commandlib.argument;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.marulabs.commandlib.Argument;
 import dev.marulabs.commandlib.CommandContext;
-import dev.marulabs.commandlib.util.nms.argument.NMSArgumentBlockPosition;
-import dev.marulabs.commandlib.util.nms.command.NMSCommandListenerWrapper;
+import dev.marulabs.commandlib.internal.nms.argument.NMSArgumentBlockPosition;
+import dev.marulabs.commandlib.internal.nms.command.NMSCommandListenerWrapper;
 import org.bukkit.Location;
 import org.bukkit.util.BlockVector;
 

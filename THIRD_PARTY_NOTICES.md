@@ -25,7 +25,7 @@ CommandLib's original code is licensed under the [MIT License](LICENSE). This do
 
 Paper and Velocity modules also reference Adventure (MIT), and NMS/modded code references platform-provided Gson (Apache-2.0). These arrive through platform classpaths rather than standalone embedded library dependencies. Their selected versions must be read from the resolved classpath for the target server.
 
-The spigot artifact embeds only CommandLib's own typed NMS adapter classes from `dev/marulabs/commandlib/nms/**`. The typed NMS configuration is non-transitive. Compiling or remapping those adapters does not authorize redistribution of upstream server code or mappings.
+The spigot artifact embeds only CommandLib's own typed NMS adapter classes from `dev/marulabs/commandlib/internal/nms/typed/**`. The typed NMS configuration is non-transitive. Compiling or remapping those adapters does not authorize redistribution of upstream server code or mappings.
 
 ## Repository-only tools and tests
 

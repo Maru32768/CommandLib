@@ -4,7 +4,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.marulabs.commandlib.Argument;
 import dev.marulabs.commandlib.CommandContext;
 import dev.marulabs.commandlib.exception.ArgumentParseException;
-import dev.marulabs.commandlib.util.brigadier.VanillaArgumentTypes;
+import dev.marulabs.commandlib.internal.brigadier.VanillaArgumentTypes;
 
 /**
  * A vanilla NBT compound in SNBT, such as {@code {CustomName:"Bob",Health:20.0f}}, checked by the server's parser and

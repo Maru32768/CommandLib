@@ -226,7 +226,7 @@ arg("NMSArgumentFloatRange", "commands.arguments.RangeArgument", "Range<Double>"
 BUNGEE = [f"{CB}.util.CraftChatMessage", "net.md_5.bungee.api.chat.BaseComponent",
           "net.md_5.bungee.chat.ComponentSerializer"]
 if V == (1, 20, 3):
-    BUNGEE.append("dev.marulabs.commandlib.util.nms.argument.BungeeChatJson")
+    BUNGEE.append("dev.marulabs.commandlib.internal.nms.argument.BungeeChatJson")
     TO_JSON = "BungeeChatJson.withStringEntityIds(CraftChatMessage.toJSON({}))"
 else:
     TO_JSON = "CraftChatMessage.toJSON({})"
@@ -730,7 +730,7 @@ HELPER_PACKAGE = module_package(M)
 if HAS_BUILD_CONTEXT:
     write_source(M, HELPER_PACKAGE, "BuildContexts", f"""package {HELPER_PACKAGE};
 
-import dev.marulabs.commandlib.util.nms.server.NMSCraftServer;
+import dev.marulabs.commandlib.internal.nms.server.NMSCraftServer;
 import net.minecraft.commands.CommandBuildContext;
 
 final class BuildContexts {{

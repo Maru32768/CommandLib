@@ -1,0 +1,20 @@
+package dev.marulabs.commandlib.internal.nms.typed.paper_1_20_6;
+
+import dev.marulabs.commandlib.internal.nms.world.NMSVec2D;
+import net.minecraft.world.phys.Vec2;
+
+public class NMSVec2D_paper_1_20_6 extends NMSVec2D {
+    public NMSVec2D_paper_1_20_6(Object handle) {
+        super(handle, Vec2.class);
+    }
+
+    @Override
+    public float x() {
+        return ((Vec2) requireHandle()).x;
+    }
+
+    @Override
+    public float y() {
+        return ((Vec2) requireHandle()).y;
+    }
+}

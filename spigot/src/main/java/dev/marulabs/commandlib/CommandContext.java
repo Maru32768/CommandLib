@@ -1,7 +1,7 @@
 package dev.marulabs.commandlib;
 
 import com.mojang.brigadier.Message;
-import dev.marulabs.commandlib.util.nms.command.NMSCommandListenerWrapper;
+import dev.marulabs.commandlib.internal.nms.command.NMSCommandListenerWrapper;
 import dev.marulabs.commandlib.util.text.RichText;
 import dev.marulabs.commandlib.util.text.RichTexts;
 import net.md_5.bungee.api.ChatColor;

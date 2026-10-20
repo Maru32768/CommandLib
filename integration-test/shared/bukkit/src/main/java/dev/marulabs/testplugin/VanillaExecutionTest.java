@@ -4,7 +4,7 @@ import dev.marulabs.commandlib.Command;
 import dev.marulabs.commandlib.CommandActorType;
 import dev.marulabs.commandlib.argument.EntityArgument;
 import dev.marulabs.commandlib.exception.CommandPrerequisiteException;
-import dev.marulabs.commandlib.util.bukkit.BukkitUtil;
+import dev.marulabs.commandlib.internal.bukkit.BukkitUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;

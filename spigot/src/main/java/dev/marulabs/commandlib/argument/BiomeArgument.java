@@ -5,7 +5,7 @@ import dev.marulabs.commandlib.Argument;
 import dev.marulabs.commandlib.Caption;
 import dev.marulabs.commandlib.CommandContext;
 import dev.marulabs.commandlib.exception.ArgumentParseException;
-import dev.marulabs.commandlib.util.nms.argument.NMSArgumentNamespacedKey;
+import dev.marulabs.commandlib.internal.nms.argument.NMSArgumentNamespacedKey;
 import org.bukkit.Registry;
 import org.bukkit.block.Biome;
 

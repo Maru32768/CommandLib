@@ -5,8 +5,8 @@ import com.mojang.brigadier.suggestion.Suggestion;
 import dev.marulabs.commandlib.Command;
 import dev.marulabs.commandlib.CommandTester;
 import dev.marulabs.commandlib.FakeSender;
-import dev.marulabs.commandlib.nms.argument.MockNMSArgumentTime;
-import dev.marulabs.commandlib.util.nms.argument.NMSArgumentTime;
+import dev.marulabs.commandlib.internal.nms.argument.NMSArgumentTime;
+import dev.marulabs.commandlib.internal.nms.mock.argument.MockNMSArgumentTime;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

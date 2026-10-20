@@ -4,7 +4,7 @@ import com.google.common.collect.Range;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.marulabs.commandlib.Argument;
 import dev.marulabs.commandlib.CommandContext;
-import dev.marulabs.commandlib.util.nms.argument.NMSArgumentIntRange;
+import dev.marulabs.commandlib.internal.nms.argument.NMSArgumentIntRange;
 
 /**
  * An integer range in the vanilla {@code int_range} syntax: {@code 1..10}, {@code ..5}, {@code 3..} or {@code 5}. The

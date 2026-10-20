@@ -30,7 +30,7 @@ own still reaches the sender.
 dev.marulabs.commandlib
 |-- CommandTester.java
 |-- FakeSender.java
-`-- nms/
+`-- internal/nms/mock/
     |-- argument/
     |-- command/
     |-- core/
@@ -38,13 +38,14 @@ dev.marulabs.commandlib
     `-- world/
 ```
 
-Mock NMS classes live under `nms/`, mirroring the production `util/nms`
-structure. New NMS argument types go in `nms/argument/`; other NMS types should
-follow the same sub-package as production.
+Mock NMS classes live under `internal/nms/mock/`, mirroring the production `internal/nms`
+structure. New NMS argument types go in `internal/nms/mock/argument/`; other NMS types should
+follow the same sub-package as production. Every package there has a `package-info.java` with `@ApiStatus.Internal`,
+and each public class carries the annotation too.
 
 ## Adding A New NMS Argument Mock
 
-1. Create `MockNMSArgumentXxx extends NMSArgumentXxx` in `nms/argument/`.
+1. Create `MockNMSArgumentXxx extends NMSArgumentXxx` in `internal/nms/mock/argument/`.
 2. Add a public no-arg constructor that calls the production superclass with
    mock-safe values.
 3. Make `argument()` return an `ArgumentType` that accepts the same tokens as

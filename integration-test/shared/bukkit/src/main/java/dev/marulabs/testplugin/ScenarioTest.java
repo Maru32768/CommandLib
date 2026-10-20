@@ -4,7 +4,7 @@ import dev.marulabs.commandlib.Command;
 import dev.marulabs.commandlib.CommandLib;
 import dev.marulabs.commandlib.argument.StringArgument;
 import dev.marulabs.commandlib.exception.CommandPrerequisiteException;
-import dev.marulabs.commandlib.util.bukkit.BukkitUtil;
+import dev.marulabs.commandlib.internal.bukkit.BukkitUtil;
 import dev.marulabs.integration.core.TestResult;
 import dev.marulabs.integration.core.TestStatus;
 import org.bukkit.Bukkit;

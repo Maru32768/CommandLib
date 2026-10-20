@@ -2,7 +2,7 @@ package dev.marulabs.commandlib;
 
 import com.mojang.brigadier.LiteralMessage;
 import com.mojang.brigadier.context.StringRange;
-import dev.marulabs.commandlib.util.nms.command.NMSCommandListenerWrapper;
+import dev.marulabs.commandlib.internal.nms.command.NMSCommandListenerWrapper;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.junit.jupiter.api.Test;

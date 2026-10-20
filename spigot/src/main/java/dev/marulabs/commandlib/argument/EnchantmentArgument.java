@@ -4,8 +4,8 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.marulabs.commandlib.Argument;
 import dev.marulabs.commandlib.CommandContext;
 import dev.marulabs.commandlib.exception.ArgumentParseException;
-import dev.marulabs.commandlib.util.nms.argument.NMSArgumentEnchantment;
-import dev.marulabs.commandlib.util.nms.world.NMSCraftEnchantment;
+import dev.marulabs.commandlib.internal.nms.argument.NMSArgumentEnchantment;
+import dev.marulabs.commandlib.internal.nms.world.NMSCraftEnchantment;
 import org.bukkit.enchantments.Enchantment;
 
 public class EnchantmentArgument extends Argument<Enchantment, EnchantmentArgument> {
