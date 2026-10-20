@@ -490,4 +490,47 @@ class CommonCommandPermissionTest {
         assertThat(help.messages()).anyMatch(x -> x.contains("Get value"))
                                    .noneMatch(x -> x.contains("Reset value"));
     }
+
+    // The node of a child command leaves out the arguments before it, so a direct child and an argument child share it.
+    @Test
+    void one_node_with_different_defaults_on_two_routes_is_rejected_at_build() {
+        TestCommand children = new TestCommand("cmd") {{
+            addChildren(new TestCommand("b") {{
+                permission(DefaultPermission.ALL);
+            }});
+            argument(new CommonStringArgument<>("a")).child(a -> new TestCommand("b") {{
+                permission(DefaultPermission.NONE);
+            }});
+        }};
+        TestCommand explicit = new TestCommand("cmd") {{
+            addChildren(new TestCommand("x") {{
+                permission("shared.node", DefaultPermission.ALL);
+            }}, new TestCommand("y") {{
+                permission("shared.node", DefaultPermission.ALL, "Shared");
+            }});
+        }};
+
+        assertThatThrownBy(() -> new TestCommandRunner(children)).isInstanceOf(IllegalStateException.class)
+                                                                 .hasMessageContaining("'test.command.cmd.b'")
+                                                                 .hasMessageContaining("/cmd b with default ALL")
+                                                                 .hasMessageContaining("/cmd <a> b with default NONE");
+        assertThatThrownBy(() -> new TestCommandRunner(explicit)).isInstanceOf(IllegalStateException.class)
+                                                                 .hasMessageContaining("'shared.node'")
+                                                                 .hasMessageContaining("description 'Shared'");
+    }
+
+    @Test
+    void one_node_with_the_same_config_on_two_routes_is_accepted() throws CommandSyntaxException {
+        TestCommand command = new TestCommand("cmd") {{
+            addChildren(new TestCommand("x") {{
+                permission("shared.node", DefaultPermission.ALL, "Shared");
+                execute(ctx -> ctx.sendMessage("x"));
+            }}, new TestCommand("y") {{
+                permission("shared.node", DefaultPermission.ALL, "Shared");
+            }});
+        }};
+
+        assertThat(new TestCommandRunner(command).execute("cmd x")
+                                                 .messages()).containsExactly("x");
+    }
 }

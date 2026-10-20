@@ -54,6 +54,11 @@ class SpawnCommand extends Command {
 An overridden node replaces only that step; children keep building their own path from names
 (`/spawn` children still get `<prefix>.spawn.<child>`).
 
+Routes of one registration can share a node, such as two commands that set the same `permission("myplugin.admin")`, or
+`/config get` and `/config <key> get`, whose paths are both `config.get`. They must then give it the same default and
+description; registration fails with an `IllegalStateException` that names both routes otherwise, since the node is
+registered once. A cooldown bypass node is not checked (see [Cooldown bypass](#cooldown-bypass)).
+
 ### Options
 
 Options need no node of their own unless they ask for one. `permission(...)` on an option makes a sender without the

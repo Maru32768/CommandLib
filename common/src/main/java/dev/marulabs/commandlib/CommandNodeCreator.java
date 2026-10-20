@@ -21,6 +21,7 @@ final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U ext
 
     public List<LiteralCommandNode<S>> build() {
         CommandNameValidator.validateTopLevel(commands);
+        CommandTree.validatePermissions(commands, permissionPrefix);
         return commands.stream()
                        .map(x -> toCommandNodes(x, List.of()))
                        .flatMap(Collection::stream)

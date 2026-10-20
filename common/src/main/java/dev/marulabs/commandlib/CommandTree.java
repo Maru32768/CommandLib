@@ -4,7 +4,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -139,6 +141,29 @@ final class CommandTree {
                           .filter(x -> !x.kind.equals(PermissionEntry.COOLDOWN_BYPASS) || !otherNodes.contains(x.node))
                           .map(x -> new PermissionConfig(x.node, x.defaultPermission, x.description))
                           .collect(Collectors.toList());
+    }
+
+    /**
+     * Rejects a node that two places of {@code commands} declare with different defaults or descriptions, which the
+     * platforms would register as one of them. A cooldown bypass node is left out, as the platforms leave one that
+     * exists as is.
+     *
+     * @throws IllegalStateException if they do
+     */
+    static void validatePermissions(Collection<? extends CommonCommand<?, ?>> commands, String permissionPrefix) {
+        Map<String, PermissionEntry> byNode = new HashMap<>();
+        for (PermissionEntry entry : permissions(of(commands, permissionPrefix))) {
+            if (entry.kind.equals(PermissionEntry.COOLDOWN_BYPASS)) {
+                continue;
+            }
+            PermissionEntry other = byNode.putIfAbsent(entry.node, entry);
+            if (other != null && (other.defaultPermission != entry.defaultPermission
+                    || !other.description.equals(entry.description))) {
+                throw new IllegalStateException("Permission node '" + entry.node + "' is declared by " + other.route
+                        + " with " + other.describeConfig() + " and by " + entry.route + " with "
+                        + entry.describeConfig() + "; give them the same default and description, or different nodes");
+            }
+        }
     }
 
     private static Set<String> nonBypassNodes(List<PermissionEntry> permissions) {
@@ -392,6 +417,10 @@ final class CommandTree {
             this.description = config.description();
             this.route = route;
             this.kind = kind;
+        }
+
+        String describeConfig() {
+            return "default " + defaultPermission + " and description '" + description + "'";
         }
     }
 }
