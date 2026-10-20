@@ -192,15 +192,15 @@ final class CommandNameValidator {
          * equals. An object with a collaborator, a field a module keeps unread, or no field at all is not one.
          */
         private static boolean isValueObject(@Nullable Object value, int depth) {
-            if (value == null || depth == 0 || isValue(value) || value instanceof ArgumentType
-                    || value.getClass()
-                            .isArray()
-                    || value.getClass()
-                            .isSynthetic()) {
+            if (value == null || depth == 0 || isValue(value) || value instanceof ArgumentType) {
+                return false;
+            }
+            Class<?> valueType = value.getClass();
+            if (valueType.isArray() || valueType.isSynthetic()) {
                 return false;
             }
             boolean hasField = false;
-            for (Class<?> type = value.getClass(); type != Object.class; type = type.getSuperclass()) {
+            for (Class<?> type = valueType; type != Object.class; type = type.getSuperclass()) {
                 for (Field field : type.getDeclaredFields()) {
                     if (Modifier.isStatic(field.getModifiers())) {
                         continue;
