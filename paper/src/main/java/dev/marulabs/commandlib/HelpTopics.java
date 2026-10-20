@@ -17,8 +17,6 @@ import java.util.TreeSet;
  * The /help topics of the labels a registration added to the live dispatcher.
  */
 final class HelpTopics {
-    private static volatile @Nullable Field allTopics;
-
     private HelpTopics() {
     }
 
@@ -119,13 +117,8 @@ final class HelpTopics {
             return null;
         }
         try {
-            // Kept once found; a failed lookup fails each call, as it did before it was kept.
-            Field field = allTopics;
-            if (field == null) {
-                field = IndexHelpTopic.class.getDeclaredField("allTopics");
-                field.setAccessible(true);
-                allTopics = field;
-            }
+            Field field = IndexHelpTopic.class.getDeclaredField("allTopics");
+            field.setAccessible(true);
             return (Collection<HelpTopic>) field.get(index);
         } catch (ReflectiveOperationException e) {
             throw new IllegalStateException(e);
