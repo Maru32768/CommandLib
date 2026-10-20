@@ -13,6 +13,11 @@ repositories {
     }
 }
 
+// The sources that compile unchanged on Spigot and Paper.
+sourceSets.main {
+    java.srcDir(rootProject.file("common/src/bukkit/java"))
+}
+
 dependencies {
     api(project(":common"))
     compileOnly("org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT")

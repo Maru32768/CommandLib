@@ -197,6 +197,9 @@ configure<JavaPluginExtension> {
         if (commandlibModule == "paper") {
             java.srcDir("../../../../common/src/adventure/java")
         }
+        if (commandlibModule == "spigot" || commandlibModule == "paper") {
+            java.srcDir("../../../../common/src/bukkit/java")
+        }
         resources.srcDirs("../../../../$commandlibModule/src/main/resources", "../../../../common/src/main/resources")
     }
 }

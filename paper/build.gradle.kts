@@ -13,6 +13,8 @@ configure<JavaPluginExtension> {
 // The Adventure converter and its test are the same on Paper and Velocity.
 sourceSets.main {
     java.srcDir(rootProject.file("common/src/adventure/java"))
+    // The sources that compile unchanged on Spigot and Paper.
+    java.srcDir(rootProject.file("common/src/bukkit/java"))
 }
 sourceSets.test {
     java.srcDir(rootProject.file("common/src/adventureTest/java"))

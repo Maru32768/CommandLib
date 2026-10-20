@@ -31,6 +31,12 @@ instructions.
   through Stonecutter conditional comments and Architectury Loom. Read
   `docs/agents/modded.md` before editing it.
 - `sample`: sample usage.
+- Shared source trees that several modules add with `srcDir`: `common/src/bukkit/java` (main sources that compile
+  unchanged in `spigot` and `paper`), `common-testing/src/bukkitTest/java` (tests of `spigot-testing` and
+  `paper-testing`; their snapshots stay in each module), `common/src/adventure/java` (`paper` and `velocity`) and
+  `common-kotlin/src/platform/kotlin` (the platform Kotlin modules). Move a file there only when it is byte-identical
+  on every platform, and back out when one platform needs to change it. The integration-test plugins inline the same
+  trees (`integration-test/shared/integration-test.gradle.kts`).
 
 Prefer the existing module boundaries. Keep shared behavior in `common` when it
 does not depend on Bukkit APIs. Keep Bukkit and NMS-specific behavior in

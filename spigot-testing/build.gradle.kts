@@ -9,6 +9,12 @@ repositories {
     }
 }
 
+// The tests that run unchanged on Spigot and Paper. Their snapshots stay in each module, since Snapshots reads them
+// from the project directory.
+sourceSets.test {
+    java.srcDir(rootProject.file("common-testing/src/bukkitTest/java"))
+}
+
 dependencies {
     api(project(":spigot"))
     compileOnly("org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT")

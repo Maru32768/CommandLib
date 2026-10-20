@@ -10,6 +10,12 @@ configure<JavaPluginExtension> {
     toolchain.languageVersion.set(JavaLanguageVersion.of(21))
 }
 
+// The tests that run unchanged on Spigot and Paper. Their snapshots stay in each module, since Snapshots reads them
+// from the project directory.
+sourceSets.test {
+    java.srcDir(rootProject.file("common-testing/src/bukkitTest/java"))
+}
+
 dependencies {
     api(project(":paper"))
     compileOnly("io.papermc.paper:paper-api:1.21-R0.1-SNAPSHOT")

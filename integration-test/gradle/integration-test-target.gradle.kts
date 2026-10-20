@@ -237,6 +237,7 @@ val prepareTask = if ("prepareTestPlugin" in tasks.names) tasks.named("prepareTe
     }
     if (fixtureSuite != "folia") inputs.files(rootProject.fileTree("integration-test/shared/bukkit/src/main"))
     if (commandlibModule == "paper") inputs.files(rootProject.fileTree("common/src/adventure"))
+    if (commandlibModule == "spigot" || commandlibModule == "paper") inputs.files(rootProject.fileTree("common/src/bukkit"))
     outputs.file(testPluginDir.resolve("$serverDirectory/$serverJarName"))
     outputs.files(fileTree(testPluginDir.resolve("$serverDirectory/$testPluginSubdirectory")) {
         include("TestPlugin*.jar")
