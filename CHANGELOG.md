@@ -122,7 +122,8 @@ This file lists the changes in each CommandLib release that affect plugin and mo
   - an alias equal to the command's own name, which made the command fail with a `StackOverflowError`, or to one of its
     aliases (`addAliases` throws `IllegalArgumentException`)
   - a greedy string argument that does not end its branch (`IllegalStateException`)
-  - two `required()` options in one `mutuallyExclusive(...)` group, which no input could run (`IllegalStateException`)
+  - two options in one `mutuallyExclusive(...)` group that every input must give, as each is `required()` or one that
+    a required option `requires(...)`, which no input could run (`IllegalStateException`)
   - one permission node that two routes of a registration give different defaults or descriptions, of which one was
     registered (`IllegalStateException`)
   - an argument whose name an argument before it on the route already has, such as `<key>` in a child of a `<key>`

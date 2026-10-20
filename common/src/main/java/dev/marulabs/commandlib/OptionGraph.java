@@ -113,13 +113,26 @@ final class OptionGraph<S, C extends CommonCommandContext<S, ?>> {
                 }
             }
         }
-        for (int i = 0; i < options.size(); i++) {
-            for (CommandOption<?, C> other : options.subList(i + 1, options.size())) {
-                CommandOption<?, C> option = options.get(i);
-                if (option.isRequired() && other.isRequired() && command.excludes(option, other)) {
+        // The options every input that runs the command gives: the required ones and those they require.
+        Set<CommandOption<?, ?>> alwaysGiven = new LinkedHashSet<>();
+        Deque<CommandOption<?, ?>> pending = options.stream()
+                                                    .filter(CommandOption::isRequired)
+                                                    .collect(Collectors.toCollection(ArrayDeque::new));
+        while (!pending.isEmpty()) {
+            CommandOption<?, ?> option = pending.pop();
+            if (alwaysGiven.add(option)) {
+                pending.addAll(option.requiredOptions());
+            }
+        }
+        List<CommandOption<?, ?>> given = new ArrayList<>(alwaysGiven);
+        for (int i = 0; i < given.size(); i++) {
+            for (CommandOption<?, ?> other : given.subList(i + 1, given.size())) {
+                CommandOption<?, ?> option = given.get(i);
+                if (command.excludes(option, other)) {
                     throw new IllegalStateException("Options " + option.formatName() + " and " + other.formatName()
-                            + " of command '" + command.name()
-                            + "' are both required but mutually exclusive, so no input can run the command");
+                            + " of command '" + command.name() + "' are mutually exclusive, but every input must give"
+                            + " both, as each is required or required by a required option, so no input can run the"
+                            + " command");
                 }
             }
         }

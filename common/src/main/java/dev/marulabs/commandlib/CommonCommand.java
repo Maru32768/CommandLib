@@ -259,8 +259,9 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
     /**
      * Allows at most one of {@code options} in one input. Once one of them is given, the command tree no longer
      * offers the others, so they are neither suggested nor accepted. Building the command fails with an
-     * {@link IllegalStateException} when two of them are {@link CommandOption#required() required}, as no input could
-     * give both.
+     * {@link IllegalStateException} when every input would have to give two of them, as each is
+     * {@link CommandOption#required() required} or {@link CommandOption#requires(CommandOption) required by} a required
+     * option.
      *
      * @throws IllegalArgumentException if fewer than two options are given or one of them is not registered on this
      *                                  command

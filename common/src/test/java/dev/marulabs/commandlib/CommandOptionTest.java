@@ -722,4 +722,45 @@ class CommandOptionTest {
                                                              .hasMessageContaining("'export'");
         new TestCommandRunner(one);
     }
+
+    @Test
+    void options_a_required_option_needs_cannot_be_mutually_exclusive() {
+        TestCommand requiresExcluded = new TestCommand("deploy") {{
+            CommandOption<Boolean, TestCommandContext> dryRun = option(Options.flag("dry-run", 'n'));
+            CommandOption<Boolean, TestCommandContext> force = option(Options.flag("force", 'f'));
+            force.required()
+                 .requires(dryRun);
+            mutuallyExclusive(force, dryRun);
+            execute(ctx -> {
+            });
+        }};
+        TestCommand requiresExcludedByAnother = new TestCommand("deploy") {{
+            CommandOption<Boolean, TestCommandContext> dryRun = option(Options.flag("dry-run", 'n'));
+            CommandOption<Boolean, TestCommandContext> verbose = option(Options.flag("verbose", 'v'));
+            CommandOption<Boolean, TestCommandContext> quiet = option(Options.flag("quiet", 'q'));
+            option(Options.flag("force", 'f')).required()
+                                              .requires(dryRun);
+            dryRun.requires(verbose);
+            quiet.required();
+            mutuallyExclusive(verbose, quiet);
+            execute(ctx -> {
+            });
+        }};
+        TestCommand optionalRequiresExcluded = new TestCommand("deploy") {{
+            CommandOption<Boolean, TestCommandContext> dryRun = option(Options.flag("dry-run", 'n'));
+            CommandOption<Boolean, TestCommandContext> force = option(Options.flag("force", 'f'));
+            force.requires(dryRun);
+            mutuallyExclusive(force, dryRun);
+            execute(ctx -> {
+            });
+        }};
+
+        assertThatThrownBy(() -> new TestCommandRunner(requiresExcluded)).isInstanceOf(IllegalStateException.class)
+                                                                         .hasMessageContaining("--force")
+                                                                         .hasMessageContaining("--dry-run");
+        assertThatThrownBy(() -> new TestCommandRunner(requiresExcludedByAnother)).isInstanceOf(IllegalStateException.class)
+                                                                                  .hasMessageContaining("--verbose")
+                                                                                  .hasMessageContaining("--quiet");
+        new TestCommandRunner(optionalRequiresExcluded);
+    }
 }
