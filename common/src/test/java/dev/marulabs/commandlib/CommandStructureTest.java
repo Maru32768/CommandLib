@@ -196,6 +196,84 @@ class CommandStructureTest {
         }};
     }
 
+    // Like vanilla's ResourceArgument, whose registry key has no equals and whose lookup differs per instance.
+    @Test
+    void arguments_sharing_a_node_with_registry_keys_held_in_objects_must_name_the_same_registry() {
+        new TestCommand("x") {{
+            argument(new RegistryArg("v", "enchantment"), new StrArg("more")).execute((v, more, ctx) -> {
+            });
+            argument(new RegistryArg("v", "enchantment")).execute((v, ctx) -> {
+            });
+        }};
+
+        assertThatThrownBy(() -> new TestCommand("x") {{
+            argument(new RegistryArg("v", "enchantment"), new StrArg("more")).execute((v, more, ctx) -> {
+            });
+            argument(new RegistryArg("v", "mob_effect")).execute((v, ctx) -> {
+            });
+        }}).isInstanceOf(IllegalArgumentException.class)
+           .hasMessageContaining("'v'");
+    }
+
+    private static final class Location {
+        @SuppressWarnings("unused")
+        private final String namespace = "minecraft";
+        @SuppressWarnings("unused")
+        private final String path;
+
+        Location(String path) {
+            this.path = path;
+        }
+    }
+
+    private static final class Key {
+        @SuppressWarnings("unused")
+        private final Location registryName = new Location("root");
+        @SuppressWarnings("unused")
+        private final Location location;
+
+        Key(String registry) {
+            this.location = new Location(registry);
+        }
+    }
+
+    private static final class Lookup {
+        @SuppressWarnings("unused")
+        private final Object registry = new Object();
+    }
+
+    private static final class RegistryType implements ArgumentType<String> {
+        @SuppressWarnings("unused")
+        private final Key registryKey;
+        @SuppressWarnings("unused")
+        private final Lookup registryLookup = new Lookup();
+
+        RegistryType(String registry) {
+            this.registryKey = new Key(registry);
+        }
+
+        @Override
+        public String parse(StringReader reader) {
+            return reader.readUnquotedString();
+        }
+    }
+
+    private static final class RegistryArg extends CommonArgument<String, TestCommandContext, RegistryArg> {
+        RegistryArg(String name, String registry) {
+            super(name, new RegistryType(registry));
+        }
+
+        @Override
+        public String cast(Object parsedArgument) {
+            return (String) parsedArgument;
+        }
+
+        @Override
+        protected String parseImpl(TestCommandContext ctx) {
+            return ctx.getInput(name());
+        }
+    }
+
     // Like a record, equals compares its collaborator by identity.
     private static final class Parser {
         private final Object rules = new Object();

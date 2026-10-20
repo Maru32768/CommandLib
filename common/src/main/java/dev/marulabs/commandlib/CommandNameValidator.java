@@ -140,11 +140,11 @@ final class CommandNameValidator {
         /**
          * Whether two instances of a type without equals, such as a vanilla one, have the same settings: the values of
          * their fields that are plain values (boxed primitives, strings, enums and classes), such as EntityArgument's
-         * single and playersOnly or TimeArgument's minimum, and the types they wrap. Other fields hold collaborators, such as the registry lookup a ResourceArgument gets from the build
-         * context, which differ between instances that parse alike.
+         * single and playersOnly or TimeArgument's minimum, the {@link #isValueObject value objects} made of them, such
+         * as ResourceArgument's registry key, and the types they wrap. Other fields hold collaborators, such as the
+         * registry lookup a ResourceArgument gets from the build context, which differ between instances that parse
+         * alike.
          */
-        // shortcut: a setting held in an object without equals, such as ResourceArgument's registry key, is not compared;
-        // compare such values when a merged node of that kind turns up.
         private static boolean sameSettings(Object a, Object b) {
             for (Class<?> type = a.getClass(); type != Object.class; type = type.getSuperclass()) {
                 for (Field field : type.getDeclaredFields()) {
@@ -167,6 +167,9 @@ final class CommandNameValidator {
                         }
                     } else if ((isValue(x) || isValue(y)) && !Objects.equals(x, y)) {
                         return false;
+                    } else if ((isValueObject(x, VALUE_OBJECT_DEPTH) || isValueObject(y, VALUE_OBJECT_DEPTH))
+                            && (x == null || y == null || x.getClass() != y.getClass() || !sameSettings(x, y))) {
+                        return false;
                     }
                 }
             }
@@ -178,6 +181,46 @@ final class CommandNameValidator {
         private static boolean isValue(@Nullable Object value) {
             return (value != null && PLAIN_VALUES.contains(value.getClass())) || value instanceof Enum
                     || value instanceof Class;
+        }
+
+        // ResourceKey holds two ResourceLocations, which hold strings.
+        private static final int VALUE_OBJECT_DEPTH = 3;
+
+        /**
+         * Whether {@code value} is an object whose fields all hold plain values or such objects, up to {@code depth}
+         * levels, such as vanilla's ResourceKey: a setting compared field by field, whether or not its class has
+         * equals. An object with a collaborator, a field a module keeps unread, or no field at all is not one.
+         */
+        private static boolean isValueObject(@Nullable Object value, int depth) {
+            if (value == null || depth == 0 || isValue(value) || value instanceof ArgumentType
+                    || value.getClass()
+                            .isArray()
+                    || value.getClass()
+                            .isSynthetic()) {
+                return false;
+            }
+            boolean hasField = false;
+            for (Class<?> type = value.getClass(); type != Object.class; type = type.getSuperclass()) {
+                for (Field field : type.getDeclaredFields()) {
+                    if (Modifier.isStatic(field.getModifiers())) {
+                        continue;
+                    }
+                    Object x;
+                    try {
+                        if (!field.trySetAccessible()) {
+                            return false;
+                        }
+                        x = field.get(value);
+                    } catch (IllegalAccessException e) {
+                        return false;
+                    }
+                    if (x != null && !isValue(x) && !isValueObject(x, depth - 1)) {
+                        return false;
+                    }
+                    hasField = true;
+                }
+            }
+            return hasField;
         }
 
         private static final Set<Class<?>> PLAIN_VALUES = Set.of(Boolean.class,

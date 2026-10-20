@@ -104,7 +104,9 @@ This file lists the changes in each CommandLib release that affect plugin and mo
   call them from `onEnable` / `onDisable` or the global region thread; region threads are refused.
 - Registration rejects trees it used to accept:
   - two argument branches that both run for the same input (`IllegalStateException`)
-  - same-named first arguments of different types, which share one node (`IllegalArgumentException`)
+  - same-named first arguments of different types, which share one node (`IllegalArgumentException`). Types of one
+    class with different settings count as different, including a registry argument's registry, such as an
+    enchantment and an effect argument of one name
   - a command added a second time, under the same parent or another one, or under itself or one of its descendants,
     which ended in a `StackOverflowError` (`addChildren` and `child` throw `IllegalArgumentException`)
   - a child command or alias whose name a sibling already has (`addChildren` / `addAliases` throw
