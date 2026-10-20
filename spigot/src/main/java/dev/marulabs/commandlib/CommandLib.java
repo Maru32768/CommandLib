@@ -61,6 +61,16 @@ public final class CommandLib implements Listener {
     private static @Nullable BukkitTask functionCompiler;
     private static @Nullable FunctionLoadErrorFilter functionLoadErrorFilter;
 
+    /**
+     * Registers the commands.
+     *
+     * @throws IllegalArgumentException if the permission prefix is empty, or if names clash, such as two commands
+     *                                  or aliases with the same name
+     * @throws IllegalStateException    if a command is defined wrongly, such as an optional argument before a required
+     *                                  one or more options than a command can take; or if called off the main server
+     *                                  thread. Nothing is registered then
+     * @throws UnsupportedOperationException on Folia, which the paper artifact supports
+     */
     public static CommandLib register(@NotNull Plugin plugin, @NotNull Command command, @NotNull Command... commands) {
         List<Command> list = new ArrayList<>();
         list.add(command);
@@ -68,6 +78,16 @@ public final class CommandLib implements Listener {
         return register(plugin, list);
     }
 
+    /**
+     * Registers the commands.
+     *
+     * @throws IllegalArgumentException if the permission prefix is empty, or if names clash, such as two commands
+     *                                  or aliases with the same name
+     * @throws IllegalStateException    if a command is defined wrongly, such as an optional argument before a required
+     *                                  one or more options than a command can take; or if called off the main server
+     *                                  thread. Nothing is registered then
+     * @throws UnsupportedOperationException on Folia, which the paper artifact supports
+     */
     public static CommandLib register(@NotNull Plugin plugin, @NotNull Collection<? extends Command> commands) {
         return register(plugin, CommandDefaults.of(CommandContext.class), commands);
     }
@@ -75,6 +95,13 @@ public final class CommandLib implements Listener {
     /**
      * Same as {@link #register(Plugin, Collection)}, with the middlewares and context value providers of
      * {@code defaults} applied to every command. See {@link CommandDefaults}.
+     *
+     * @throws IllegalArgumentException if the permission prefix is empty, or if names clash, such as two commands
+     *                                  or aliases with the same name
+     * @throws IllegalStateException    if a command is defined wrongly, such as an optional argument before a required
+     *                                  one or more options than a command can take; or if called off the main server
+     *                                  thread. Nothing is registered then
+     * @throws UnsupportedOperationException on Folia, which the paper artifact supports
      */
     public static CommandLib register(@NotNull Plugin plugin,
                                       @NotNull CommandDefaults<CommandContext> defaults,
@@ -86,6 +113,16 @@ public final class CommandLib implements Listener {
                         commands);
     }
 
+    /**
+     * Registers the commands.
+     *
+     * @throws IllegalArgumentException if the permission prefix is empty, or if names clash, such as two commands
+     *                                  or aliases with the same name
+     * @throws IllegalStateException    if a command is defined wrongly, such as an optional argument before a required
+     *                                  one or more options than a command can take; or if called off the main server
+     *                                  thread. Nothing is registered then
+     * @throws UnsupportedOperationException on Folia, which the paper artifact supports
+     */
     public static CommandLib register(@NotNull Plugin plugin,
                                       @NotNull String permissionPrefix,
                                       @NotNull Command command,
@@ -96,6 +133,16 @@ public final class CommandLib implements Listener {
         return register(plugin, permissionPrefix, list);
     }
 
+    /**
+     * Registers the commands.
+     *
+     * @throws IllegalArgumentException if the permission prefix is empty, or if names clash, such as two commands
+     *                                  or aliases with the same name
+     * @throws IllegalStateException    if a command is defined wrongly, such as an optional argument before a required
+     *                                  one or more options than a command can take; or if called off the main server
+     *                                  thread. Nothing is registered then
+     * @throws UnsupportedOperationException on Folia, which the paper artifact supports
+     */
     public static CommandLib register(@NotNull Plugin plugin,
                                       @NotNull String permissionPrefix,
                                       @NotNull Collection<? extends Command> commands) {
@@ -105,6 +152,13 @@ public final class CommandLib implements Listener {
     /**
      * Same as {@link #register(Plugin, String, Collection)}, with the middlewares and context value providers of
      * {@code defaults} applied to every command. See {@link CommandDefaults}.
+     *
+     * @throws IllegalArgumentException if the permission prefix is empty, or if names clash, such as two commands
+     *                                  or aliases with the same name
+     * @throws IllegalStateException    if a command is defined wrongly, such as an optional argument before a required
+     *                                  one or more options than a command can take; or if called off the main server
+     *                                  thread. Nothing is registered then
+     * @throws UnsupportedOperationException on Folia, which the paper artifact supports
      */
     public static CommandLib register(@NotNull Plugin plugin,
                                       @NotNull String permissionPrefix,

@@ -3,6 +3,7 @@ package dev.marulabs.commandlib;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import dev.marulabs.commandlib.argument.IntegerArgument;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.plugin.bootstrap.BootstrapContext;
@@ -26,6 +27,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
@@ -68,6 +70,19 @@ class CommandLibBootstrapTest {
                                       .getChild("boothello")).isNotNull();
         assertThat(fireCommandsEvent().getRoot()
                                       .getChild("boothello")).isNotNull();
+    }
+
+    @Test
+    void an_invalid_definition_throws_from_bootstrap_before_anything_is_registered() {
+        Command broken = new Command("broken") {{
+            argument(new IntegerArgument("count").optional(1),
+                     new IntegerArgument("amount")).execute((count, amount, ctx) -> {
+                     });
+        }};
+
+        assertThatThrownBy(() -> CommandLib.bootstrap(context, broken)).isInstanceOf(IllegalStateException.class)
+                                                                       .hasMessageContaining("optional argument 'count'");
+        assertThat(handlers).isEmpty();
     }
 
     @Test

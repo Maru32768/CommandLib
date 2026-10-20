@@ -4,6 +4,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
+import dev.marulabs.commandlib.argument.IntegerArgument;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.event.server.ServerResourcesReloadedEvent;
@@ -480,6 +481,22 @@ class CommandLibLifecycleTest {
             .hasMessageContaining("hello");
         verify(pluginManager, never()).addPermission(any(Permission.class));
         assertThat(disableListeners()).isEmpty();
+    }
+
+    @Test
+    void an_invalid_definition_throws_from_a_registration_during_initialization_before_anything_is_registered() {
+        when(plugin.isEnabled()).thenReturn(false);
+        Command broken = new Command("broken") {{
+            argument(new IntegerArgument("count").optional(1),
+                     new IntegerArgument("amount")).execute((count, amount, ctx) -> {
+                     });
+        }};
+
+        assertThatThrownBy(() -> CommandLib.register(plugin, "test", broken)).isInstanceOf(IllegalStateException.class)
+                                                                             .hasMessageContaining("optional argument 'count'");
+        verify(pluginManager, never()).addPermission(any(Permission.class));
+        assertThat(disableListeners()).isEmpty();
+        assertThat(handlers).isEmpty();
     }
 
     @Test

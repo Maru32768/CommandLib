@@ -242,6 +242,9 @@ suggestions) and a command for each argument type. Options, permission plugins a
   under the same node name.
 - Velocity: `unregister()` drops the permission defaults of its registration, so a node registered with `ALL`,
   unregistered and registered again with `NONE` is closed.
+- Paper / Forge / NeoForge / Fabric: an invalid command definition, such as an optional argument before a required one,
+  makes `register()` (and Paper's `bootstrap()`) throw before anything is registered, as on Spigot and Velocity. It was
+  only logged when the server added the commands. The `register` Javadoc of every platform lists what it throws.
 - The command source location carries the sender's rotation.
 - Forge 1.16.5: commands survive `/reload`, failure messages go through `sendFailure`, `Location#getChunk` returns the
   right chunk, and `BlockPositionArgument` rejects fractional coordinates like vanilla.

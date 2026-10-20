@@ -3,6 +3,7 @@ package dev.marulabs.commandlib;
 // Forge before 1.19 cannot register event listeners outside a real Forge launch.
 //? if fabric || >=1.19 {
 import com.mojang.brigadier.CommandDispatcher;
+import dev.marulabs.commandlib.argument.IntegerArgument;
 import dev.marulabs.commandlib.util.CurrentServer;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -81,6 +82,21 @@ class CommandLibRegistrationTest {
         assertThatThrownBy(() -> CommandLib.register("collisiontest",
                                                      new Command("same"),
                                                      new Command("same"))).isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void an_invalid_definition_throws_from_register_before_its_defaults_are_kept() {
+        Command broken = new Command("broken") {{
+            permission(DefaultPermission.ALL);
+            argument(new IntegerArgument("count").optional(1),
+                     new IntegerArgument("amount")).execute((count, amount, ctx) -> {
+                     });
+        }};
+
+        assertThatThrownBy(() -> CommandLib.register("brokentest", broken)).isInstanceOf(IllegalStateException.class)
+                                                                           .hasMessageContaining("optional argument 'count'");
+        // An undeclared node needs level 4, which an ALL default kept by the failed registration would not.
+        assertThat(CommandLib.hasDefaultPermission(Mockito.mock(CommandSourceStack.class), "brokentest.broken")).isFalse();
     }
 
     @Test

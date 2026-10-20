@@ -71,6 +71,11 @@ public final class CommandLib {
      * Registers the commands with the permission prefix {@code <plugin id>.command}.
      *
      * @param plugin the plugin instance, the class annotated with {@code @Plugin}
+     *
+     * @throws IllegalArgumentException if the permission prefix is empty, or if names clash, such as two commands
+     *                                  or aliases with the same name
+     * @throws IllegalStateException    if a command is defined wrongly, such as an optional argument before a required
+     *                                  one or more options than a command can take. Nothing is registered then
      */
     public static CommandLib register(@NotNull Object plugin,
                                       @NotNull ProxyServer proxy,
@@ -83,6 +88,11 @@ public final class CommandLib {
      * Registers the commands with the permission prefix {@code <plugin id>.command}.
      *
      * @param plugin the plugin instance, the class annotated with {@code @Plugin}
+     *
+     * @throws IllegalArgumentException if the permission prefix is empty, or if names clash, such as two commands
+     *                                  or aliases with the same name
+     * @throws IllegalStateException    if a command is defined wrongly, such as an optional argument before a required
+     *                                  one or more options than a command can take. Nothing is registered then
      */
     public static CommandLib register(@NotNull Object plugin,
                                       @NotNull ProxyServer proxy,
@@ -93,6 +103,11 @@ public final class CommandLib {
     /**
      * Same as {@link #register(Object, ProxyServer, Collection)}, with the middlewares and context value providers of
      * {@code defaults} applied to every command. See {@link CommandDefaults}.
+     *
+     * @throws IllegalArgumentException if the permission prefix is empty, or if names clash, such as two commands
+     *                                  or aliases with the same name
+     * @throws IllegalStateException    if a command is defined wrongly, such as an optional argument before a required
+     *                                  one or more options than a command can take. Nothing is registered then
      */
     public static CommandLib register(@NotNull Object plugin,
                                       @NotNull ProxyServer proxy,
@@ -107,6 +122,14 @@ public final class CommandLib {
         return register(plugin, proxy, pluginId.toLowerCase(Locale.ROOT) + ".command", defaults, commands);
     }
 
+    /**
+     * Registers the commands.
+     *
+     * @throws IllegalArgumentException if the permission prefix is empty, or if names clash, such as two commands
+     *                                  or aliases with the same name
+     * @throws IllegalStateException    if a command is defined wrongly, such as an optional argument before a required
+     *                                  one or more options than a command can take. Nothing is registered then
+     */
     public static CommandLib register(@NotNull Object plugin,
                                       @NotNull ProxyServer proxy,
                                       @NotNull String permissionPrefix,
@@ -115,6 +138,14 @@ public final class CommandLib {
         return register(plugin, proxy, permissionPrefix, list(command, commands));
     }
 
+    /**
+     * Registers the commands.
+     *
+     * @throws IllegalArgumentException if the permission prefix is empty, or if names clash, such as two commands
+     *                                  or aliases with the same name
+     * @throws IllegalStateException    if a command is defined wrongly, such as an optional argument before a required
+     *                                  one or more options than a command can take. Nothing is registered then
+     */
     public static CommandLib register(@NotNull Object plugin,
                                       @NotNull ProxyServer proxy,
                                       @NotNull String permissionPrefix,
@@ -125,6 +156,11 @@ public final class CommandLib {
     /**
      * Same as {@link #register(Object, ProxyServer, String, Collection)}, with the middlewares and context value
      * providers of {@code defaults} applied to every command. See {@link CommandDefaults}.
+     *
+     * @throws IllegalArgumentException if the permission prefix is empty, or if names clash, such as two commands
+     *                                  or aliases with the same name
+     * @throws IllegalStateException    if a command is defined wrongly, such as an optional argument before a required
+     *                                  one or more options than a command can take. Nothing is registered then
      */
     public static CommandLib register(@NotNull Object plugin,
                                       @NotNull ProxyServer proxy,

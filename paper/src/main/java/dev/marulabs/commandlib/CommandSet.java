@@ -31,7 +31,10 @@ record CommandSet(List<Command> commands, String permissionPrefix, Map<String, C
             command.aliases()
                    .forEach(alias -> byLabel.put(alias, command));
         }
-        return new CommandSet(List.copyOf(commands), permissionPrefix, Map.copyOf(byLabel), scheduler);
+        CommandSet set = new CommandSet(List.copyOf(commands), permissionPrefix, Map.copyOf(byLabel), scheduler);
+        // Built once here, so an invalid definition fails registration instead of being logged by the COMMANDS event.
+        set.buildNodes();
+        return set;
     }
 
     List<LiteralCommandNode<CommandSourceStack>> buildNodes() {

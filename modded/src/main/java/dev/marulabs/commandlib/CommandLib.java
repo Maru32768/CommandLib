@@ -64,6 +64,15 @@ public final class CommandLib {
     private final Collection<? extends Command> commands;
     private final String permissionPrefix;
 
+    /**
+     * Registers the commands, whose permission nodes start with {@code permissionPrefix}. The command tree is built
+     * here once, so a wrong definition throws from this call instead of failing when the server adds the commands.
+     *
+     * @throws IllegalArgumentException if the permission prefix is empty, or if names clash, such as two commands
+     *                                  or aliases with the same name
+     * @throws IllegalStateException    if a command is defined wrongly, such as an optional argument before a required
+     *                                  one or more options than a command can take; nothing is registered then
+     */
     public static CommandLib register(@NotNull String permissionPrefix,
                                       @NotNull Command command,
                                       @NotNull Command... commands) {
@@ -73,6 +82,14 @@ public final class CommandLib {
         return register(permissionPrefix, list);
     }
 
+    /**
+     * Same as {@link #register(String, Command, Command...)}.
+     *
+     * @throws IllegalArgumentException if the permission prefix is empty, or if names clash, such as two commands
+     *                                  or aliases with the same name
+     * @throws IllegalStateException    if a command is defined wrongly, such as an optional argument before a required
+     *                                  one or more options than a command can take; nothing is registered then
+     */
     public static CommandLib register(@NotNull String permissionPrefix,
                                       @NotNull Collection<? extends Command> commands) {
         return register(permissionPrefix, CommandDefaults.of(CommandContext.class), commands);
@@ -81,6 +98,11 @@ public final class CommandLib {
     /**
      * Same as {@link #register(String, Collection)}, with the middlewares and context value providers of
      * {@code defaults} applied to every command. See {@link CommandDefaults}.
+     *
+     * @throws IllegalArgumentException if the permission prefix is empty, or if names clash, such as two commands
+     *                                  or aliases with the same name
+     * @throws IllegalStateException    if a command is defined wrongly, such as an optional argument before a required
+     *                                  one or more options than a command can take; nothing is registered then
      */
     public static CommandLib register(@NotNull String permissionPrefix,
                                       @NotNull CommandDefaults<CommandContext> defaults,
@@ -93,6 +115,8 @@ public final class CommandLib {
         List<Command> list = List.copyOf(commands);
         CommandNameValidator.validateTopLevel(list);
         defaults.applyTo(list);
+        // Built once here, so an invalid definition fails registration instead of being logged by the command event.
+        new CommandNodeCreator<>(list, permissionPrefix, ServerCommandScheduler.INSTANCE).build();
         CommandTree.permissionConfigs(list, permissionPrefix)
                    .forEach(c -> DEFAULTS.putIfAbsent(c.node(), c.defaultPermission()));
         CommandLib registration = new CommandLib(list, permissionPrefix);
