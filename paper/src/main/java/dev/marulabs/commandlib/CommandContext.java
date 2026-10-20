@@ -21,10 +21,24 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 @SuppressWarnings("UnstableApiUsage")
 public final class CommandContext extends CommonCommandContext<CommandSourceStack, Component> {
+    // The server's source is Minecraft's CommandSourceStack, which the Paper API does not expose. Looked up once per
+    // source class, since a test mock is another class.
+    private static final ClassValue<Optional<Method>> SEND_SUCCESS = new ClassValue<>() {
+        @Override
+        protected Optional<Method> computeValue(Class<?> type) {
+            try {
+                return Optional.of(type.getMethod("sendSuccess", Supplier.class, boolean.class));
+            } catch (NoSuchMethodException e) {
+                return Optional.empty();
+            }
+        }
+    };
+
     public CommandContext(com.mojang.brigadier.context.CommandContext<CommandSourceStack> ctx) {
         super(ctx);
     }
@@ -138,12 +152,9 @@ public final class CommandContext extends CommonCommandContext<CommandSourceStac
 
     private void sendFeedback(Component component, boolean broadcastToOps) {
         CommandSourceStack source = handle.getSource();
-        Method sendSuccess;
-        try {
-            // The server's source is Minecraft's CommandSourceStack, which the Paper API does not expose.
-            sendSuccess = source.getClass()
-                                .getMethod("sendSuccess", Supplier.class, boolean.class);
-        } catch (NoSuchMethodException e) {
+        Method sendSuccess = SEND_SUCCESS.get(source.getClass())
+                                         .orElse(null);
+        if (sendSuccess == null) {
             // Another source, such as a test mock, has no vanilla feedback.
             getSender().sendMessage(component);
             return;

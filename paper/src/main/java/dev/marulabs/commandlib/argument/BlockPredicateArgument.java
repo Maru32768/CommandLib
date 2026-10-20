@@ -25,6 +25,7 @@ import java.util.function.Predicate;
 public class BlockPredicateArgument extends Argument<Predicate<Block>, BlockPredicateArgument> {
     private static final String BLOCK_IN_WORLD_PREDICATE = "io.papermc.paper.command.brigadier.argument.predicate"
             + ".BlockInWorldPredicate";
+    private static volatile @Nullable TestBlock testBlock;
 
     public BlockPredicateArgument(String name) {
         super(name, blockInWorldPredicate());
@@ -51,17 +52,30 @@ public class BlockPredicateArgument extends Argument<Predicate<Block>, BlockPred
     protected Predicate<Block> parseImpl(CommandContext ctx) {
         Object predicate = ctx.getHandle()
                               .getArgument(name(), Object.class);
-        Method testBlock;
-        Method asBoolean;
+        TestBlock methods = testBlock();
+        return block -> (Boolean) invoke(methods.asBoolean(), invoke(methods.testBlock(), predicate, block, true));
+    }
+
+    // Kept once found; a failed lookup fails each parse, as it did before it was kept.
+    private static TestBlock testBlock() {
+        TestBlock found = testBlock;
+        if (found != null) {
+            return found;
+        }
         try {
-            testBlock = Class.forName(BLOCK_IN_WORLD_PREDICATE, false, ArgumentTypes.class.getClassLoader())
-                             .getMethod("testBlock", Block.class, boolean.class);
-            asBoolean = testBlock.getReturnType()
-                                 .getMethod("asBoolean");
+            Method testBlock = Class.forName(BLOCK_IN_WORLD_PREDICATE, false, ArgumentTypes.class.getClassLoader())
+                                    .getMethod("testBlock", Block.class, boolean.class);
+            found = new TestBlock(testBlock,
+                                  testBlock.getReturnType()
+                                           .getMethod("asBoolean"));
         } catch (ClassNotFoundException | NoSuchMethodException e) {
             throw new IllegalStateException("Paper's BlockInWorldPredicate has no testBlock(Block, boolean)", e);
         }
-        return block -> (Boolean) invoke(asBoolean, invoke(testBlock, predicate, block, true));
+        BlockPredicateArgument.testBlock = found;
+        return found;
+    }
+
+    private record TestBlock(Method testBlock, Method asBoolean) {
     }
 
     private static Object invoke(Method method, @Nullable Object target, Object... args) {

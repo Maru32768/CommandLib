@@ -13,6 +13,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Optional;
 
 /**
  * The rest of the input as a chat message, like {@code /say}: Paper's {@code ArgumentTypes.signedMessage()}. Entity
@@ -26,6 +27,32 @@ import java.lang.reflect.Method;
  */
 @SuppressWarnings("UnstableApiUsage")
 public class MessageArgument extends Argument<Component, MessageArgument> {
+    // Looked up once per class: the resolver and its message are instances of Paper's and vanilla's classes.
+    private static final ClassValue<Optional<Method>> MESSAGE = new ClassValue<>() {
+        @Override
+        protected Optional<Method> computeValue(Class<?> type) {
+            try {
+                return Optional.of(type.getMethod("message"));
+            } catch (NoSuchMethodException e) {
+                return Optional.empty();
+            }
+        }
+    };
+    private static final ClassValue<Optional<Method>> RESOLVE_COMPONENT = new ClassValue<>() {
+        @Override
+        protected Optional<Method> computeValue(Class<?> type) {
+            for (Method method : type.getDeclaredMethods()) {
+                if (method.getName()
+                          .equals("resolveComponent")
+                        && method.getParameterCount() == 1) {
+                    method.setAccessible(true);
+                    return Optional.of(method);
+                }
+            }
+            return Optional.empty();
+        }
+    };
+
     public MessageArgument(String name) {
         super(name, ArgumentTypes.signedMessage());
     }
@@ -62,34 +89,27 @@ public class MessageArgument extends Argument<Component, MessageArgument> {
         }
         Object message;
         try {
-            message = resolver.getClass()
-                              .getMethod("message")
-                              .invoke(resolver);
+            message = MESSAGE.get(resolver.getClass())
+                             .orElseThrow(NoSuchMethodException::new)
+                             .invoke(resolver);
         } catch (ReflectiveOperationException e) {
             throw new IllegalStateException("Cannot resolve the selectors of a message: " + resolver.getClass()
                                                                                                     .getName()
                     + " has no message()", e);
         }
-        for (Method method : message.getClass()
-                                    .getDeclaredMethods()) {
-            if (method.getName()
-                      .equals("resolveComponent")
-                    && method.getParameterCount() == 1) {
-                try {
-                    method.setAccessible(true);
-                    return (Message) method.invoke(message, source);
-                } catch (InvocationTargetException e) {
-                    if (e.getCause() instanceof CommandSyntaxException) {
-                        throw (CommandSyntaxException) e.getCause();
-                    }
-                    throw new IllegalStateException(e.getCause());
-                } catch (IllegalAccessException e) {
-                    throw new IllegalStateException(e);
-                }
+        Method resolveComponent = RESOLVE_COMPONENT.get(message.getClass())
+                                                   .orElseThrow(() -> new IllegalStateException(message.getClass()
+                                                                                                       .getName()
+                                                           + " has no resolveComponent method"));
+        try {
+            return (Message) resolveComponent.invoke(message, source);
+        } catch (InvocationTargetException e) {
+            if (e.getCause() instanceof CommandSyntaxException) {
+                throw (CommandSyntaxException) e.getCause();
             }
+            throw new IllegalStateException(e.getCause());
+        } catch (IllegalAccessException e) {
+            throw new IllegalStateException(e);
         }
-        throw new IllegalStateException(message.getClass()
-                                               .getName()
-                + " has no resolveComponent method");
     }
 }
