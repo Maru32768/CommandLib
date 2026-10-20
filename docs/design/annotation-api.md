@@ -36,19 +36,25 @@ The class is read with reflection when `parse` is called, which is at plugin ena
   types a plugin registers at runtime.
 - Reflection runs once per command at startup, so its cost is negligible next to building the Brigadier tree, and it
   sees the parser's registries, so custom types and annotations need no build step.
-- Invalid signatures fail at `parse` with an `IllegalArgumentException` naming the class, the method and the
-  parameter. This is the same moment the core reports its own registration errors, so the failure mode does not change.
+- A signature the parser cannot map, or annotations that contradict each other, fail at `parse` with an
+  `IllegalArgumentException` naming the class, the method and the parameter. The constraints of the arguments
+  themselves, such as optional arguments being last, a variadic argument being the very last and the placement of a
+  greedy string, are the core's: they fail when the command is registered, as for a fluent command. Both happen at
+  startup, so the failure mode does not change.
 
 Consequences of reflection:
 
 - **Order.** `getDeclaredMethods()` has no defined order, and help lists children and branches in the order they are
   added. The parser sorts methods by subcommand path, then name, then parameter count, so the output is deterministic.
   The fluent equivalent of an annotated command adds its children in that order.
-- **Parameter names.** Java keeps them only with `-parameters`. The parser uses `Parameter#getName()` when
+- **Parameter names.** Java keeps them only with `-parameters`, and Kotlin with `-java-parameters`. The parser uses `Parameter#getName()` when
   `isNamePresent()`, otherwise the parameter needs `@Name`, and a missing name is a parse error rather than a silent
   `arg0`. Options take their name from the annotation, falling back to the parameter name.
+- **Inheritance.** Methods of the superclasses and the interfaces are read too. An overridden method counts once, with
+  the annotations of its most derived declaration that has them, and a call runs the override as usual.
 - **Access.** Methods are made accessible with `setAccessible`, so they may be private. Plugins run on the class path,
-  where this always works.
+  where this works for their own classes; a method that cannot be opened, such as an inherited JDK method named by
+  `@Suggest(method = ...)`, fails parsing.
 
 ## Mapping
 
@@ -137,7 +143,7 @@ return a `CompletionStage` that returns null fails with a clear message.
 
 ## Not done
 
-- `@Subcommand` on nested classes, inherited methods, and an explicit method order (`@Order`).
+- `@Subcommand` on nested classes, and an explicit method order (`@Order`).
 - `requires(option, predicate, description)`, captions other than one properties bundle, and
   `disableParentMiddleware()` / `disableParentPrerequisite()`. The parsed command is an ordinary `Command`, so these
   can be added fluently after parsing.
