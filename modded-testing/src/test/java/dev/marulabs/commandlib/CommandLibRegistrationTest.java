@@ -96,7 +96,8 @@ class CommandLibRegistrationTest {
         assertThatThrownBy(() -> CommandLib.register("brokentest", broken)).isInstanceOf(IllegalStateException.class)
                                                                            .hasMessageContaining("optional argument 'count'");
         // An undeclared node needs level 4, which an ALL default kept by the failed registration would not.
-        assertThat(CommandLib.hasDefaultPermission(Mockito.mock(CommandSourceStack.class), "brokentest.broken")).isFalse();
+        assertThat(CommandLib.hasDefaultPermission(Mockito.mock(CommandSourceStack.class),
+                                                   "brokentest.broken")).isFalse();
     }
 
     @Test
