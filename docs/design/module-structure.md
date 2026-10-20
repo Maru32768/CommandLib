@@ -113,11 +113,14 @@ integration-test -> platform modules
 ## Packages And Visibility
 
 Everything outside `dev.marulabs.commandlib.internal` is API. Implementation that another package or module must reach
-is public in `internal` or one of its sub-packages, each annotated `@ApiStatus.Internal` in its `package-info.java`
-(and each public class there too), so a user who excludes `dev.marulabs.commandlib.internal` from completion, as the
-README describes, sees only API. The rule is to hide by package, not to make the internals unreachable: Java has no
-visibility between "package" and "public" that spans packages, and the JPMS cannot be used because CommandLib is shaded
-into plugins and mods.
+is public in `internal` or one of its sub-packages. Each Java package there is annotated `@ApiStatus.Internal` in its
+`package-info.java`, and so is each hand-written public class; the generated typed NMS classes rely on the annotation of
+their generated `package-info.java`. The Kotlin package `internal.kotlin` of `common-kotlin` has no annotation, as
+Kotlin has no package annotation: its functions are `internal` to Kotlin code, but they and their file class are public
+on the JVM, so only the package hides them from Java. A user who excludes `dev.marulabs.commandlib.internal` from
+completion, as the README describes, sees only API. The rule is to hide by package, not to make the internals
+unreachable: Java has no visibility between "package" and "public" that spans packages, and the JPMS cannot be used
+because CommandLib is shaded into plugins and mods.
 
 - `common`: `internal` holds `PlatformAdapter` and its holder, `CurrentCommandContext`, `ArgumentBranchDelegate` and
   `StringUtil`. `spigot`: the NMS bridge (`internal.nms`, typed modules in `internal.nms.typed.<module>`), reflection
