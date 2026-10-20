@@ -5,9 +5,13 @@ import dev.marulabs.commandlib.annotation.AnnotatedCommands;
 import dev.marulabs.commandlib.annotation.Execute;
 import dev.marulabs.commandlib.annotation.Name;
 import dev.marulabs.commandlib.annotation.Subcommand;
+import dev.marulabs.commandlib.annotation.Suggest;
 import org.junit.jupiter.api.Test;
 
+import java.util.concurrent.locks.ReentrantLock;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class AnnotatedCommandsTest {
     @dev.marulabs.commandlib.annotation.Command("hub")
@@ -38,5 +42,22 @@ class AnnotatedCommandsTest {
         assertThat(sender.getSentMessageTexts()).containsExactly("hub", "send lobby x3");
         assertThat(result).isEqualTo(3);
         assertThat(tester.suggest("hub send ", sender)).containsExactly("help", "lobby");
+    }
+
+    // ReentrantLock#getQueuedThreads is a protected Collection<Thread> getter of java.base, which a class path class
+    // cannot open. The common tests run on Java 11, which still permits it, so this test is here.
+    @dev.marulabs.commandlib.annotation.Command("lock")
+    public static final class InaccessibleSuggestions extends ReentrantLock {
+        private static final long serialVersionUID = 1L;
+
+        @Execute
+        public void run(@Name("name") @Suggest(method = "getQueuedThreads") String name) {
+        }
+    }
+
+    @Test
+    void an_inaccessible_suggestion_method_fails_parsing() {
+        assertThatThrownBy(() -> AnnotatedCommands.parse(new InaccessibleSuggestions())).isInstanceOf(IllegalArgumentException.class)
+                                                                                        .hasMessage("ReentrantLock#getQueuedThreads() is not accessible");
     }
 }

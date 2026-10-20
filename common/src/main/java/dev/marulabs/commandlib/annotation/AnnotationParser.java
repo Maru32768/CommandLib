@@ -560,11 +560,7 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
                 }
             }
             T command = target.command;
-            try {
-                method.setAccessible(true);
-            } catch (RuntimeException e) {
-                throw new ParseException(describe(method) + " is not accessible", e);
-            }
+            makeAccessible(method);
 
             List<CommonArgument<?, C, ?>> arguments = new ArrayList<>();
             List<Extractor<C, ?>> resolvers = new ArrayList<>();
@@ -1134,7 +1130,7 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
                                     + "parameters and return an Iterable<String>, or take the SuggestionBuilder");
             }
             Method source = candidates.get(0);
-            source.setAccessible(true);
+            makeAccessible(source);
             boolean takesBuilder = source.getParameterCount() == 1;
             return builder -> {
                 values.forEach(builder::suggest);
@@ -1146,6 +1142,15 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
                     builder.suggest(String.valueOf(x));
                 }
             };
+        }
+
+        // An InaccessibleObjectException or a SecurityException.
+        private void makeAccessible(Method method) {
+            try {
+                method.setAccessible(true);
+            } catch (RuntimeException e) {
+                throw new ParseException(describe(method) + " is not accessible", e);
+            }
         }
 
         private boolean isSuggestionMethod(Method method) {
