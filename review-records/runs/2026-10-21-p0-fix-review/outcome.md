@@ -47,3 +47,9 @@ string and the moved `CurrentServer` on real servers.
 ## Round 2
 
 See `reviews/agents/code-review-2.md` and `reviews/agents/ponytail-review-2.md` (range `6f116a35..0f40c1a5`).
+
+Accepted findings fixed in `8144fa25..366de2b1` (CR2-1 `8144fa25`, CR2-2 `3a56d74b` and Paper `366de2b1`, CR2-5
+`06d7c227`, CR2-4 `a0f07dac`, CR2-7 `5c959f88`, CR2-3 / CR2-6 `8febc53c`, PT2-4 `eb5bf956`). The fix agent ran the
+non-modded suite (all modules, `spotlessCheck`) green. CR2-2 is only partly fixed: a runtime `unregister()` followed by
+the plugin's disable in the same tick still skips the recompilation; this predates the session and is on the roadmap as a
+decision. CR2-8 is on the roadmap as a decision. No third review round and no integration run were done on these commits.

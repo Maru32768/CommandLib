@@ -87,6 +87,12 @@
 
 #### 要判断
 
+- `[?]` Spigot / Paper で最後の登録を実行時に `unregister()` し、同じ tick に plugin が disable されると、data pack function の
+  再 compile が行われず function が外した command を呼び続ける（以前からの挙動。`unregister()` が disable listener も外すため）。
+  案: plugin ごとに登録より長く生きる disable listener を持つ、または command 実行中でなければ `unregister()` 内で同期 compile する
+  （2026-10-21 review の CR2-2 の残り）。
+- `[?]` permission node の所有者を登録時に記録する設計（現在は解除時に identity 比較と全登録の再走査で決める）。下の「複数の登録が
+  同じ node を宣言したときの規則」と併せて決める（2026-10-21 review の CR2-8）。
 - `[?]` `spigot-testing` の `CommandTester.Builder.mockNmsClass(Class<T extends NMSClass>, ...)` は docs に載る公開 API だが、
   引数の型は内部 package（`dev.marulabs.commandlib.internal.nms`）に移った。公開 API として残すか、内部扱いにするか
   （2026-10-21 の package 整理で判明）。
