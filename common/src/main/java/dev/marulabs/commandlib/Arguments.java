@@ -134,7 +134,15 @@ final class Arguments<C extends CommonCommandContext<?, ?>> {
     void executor(AsyncCommandExecutor<C> executor) {
         // Keep the executor on the branch instead of the argument instance, so one argument instance can be reused
         // as the last argument of several branches without them overwriting each other's executor.
-        this.executor = Objects.requireNonNull(executor);
+        Objects.requireNonNull(executor);
+        if (this.executor != null) {
+            throw new IllegalStateException("The branch " + arguments.stream()
+                                                                     .map(x -> "<" + x.name() + ">")
+                                                                     .collect(Collectors.joining(" "))
+                    + " of command '" + owner.name() + "' already has an executor, set by execute, executeAsync or "
+                    + "require(...).execute; a branch has one executor");
+        }
+        this.executor = executor;
     }
 
     @Nullable

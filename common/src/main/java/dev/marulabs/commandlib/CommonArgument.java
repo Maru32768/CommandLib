@@ -206,10 +206,17 @@ public abstract class CommonArgument<T, C extends CommonCommandContext<?, ?>, SE
 
     /**
      * Sets an executor whose work finishes later, like {@link CommonCommand#executeAsync(AsyncCommandExecutor)}.
+     *
+     * @throws IllegalStateException if this argument already has an executor
      */
     @SuppressWarnings("unchecked")
     public final SELF executeAsync(@NotNull AsyncCommandExecutor<C> executor) {
-        this.executor = Objects.requireNonNull(executor);
+        Objects.requireNonNull(executor);
+        if (this.executor != null) {
+            throw new IllegalStateException("Argument '" + name + "' already has an executor, set by execute or "
+                    + "executeAsync; an argument has one executor");
+        }
+        this.executor = executor;
         return (SELF) this;
     }
 

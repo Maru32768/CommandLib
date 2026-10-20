@@ -4,6 +4,7 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.marulabs.commandlib.argument.*;
+import dev.marulabs.commandlib.branch.UnaryArgumentBranch;
 import dev.marulabs.commandlib.command.CommandExecutor;
 import dev.marulabs.commandlib.command.Extractor;
 import dev.marulabs.commandlib.exception.CommandPrerequisiteException;
@@ -346,6 +347,36 @@ class CommandStructureTest {
         parent.addChildren(twice);
         assertThatThrownBy(() -> parent.addChildren(twice)).isInstanceOf(IllegalArgumentException.class);
         assertThat(parent.children()).containsExactly(twice);
+    }
+
+    @Test
+    void a_second_executor_is_rejected() {
+        TestCommand command = new TestCommand("heal") {{
+            execute(ctx -> {
+            });
+        }};
+        UnaryArgumentBranch<String, TestCommandContext, TestCommand> branch = command.argument(new StrArg("target"))
+                                                                                     .execute((target, ctx) -> {
+                                                                                     });
+        StrArg argument = new StrArg("x").execute(ctx -> {
+        });
+
+        assertThatThrownBy(() -> command.execute(ctx -> {
+        })).isInstanceOf(IllegalStateException.class)
+           .hasMessageContaining("Command 'heal' already has an executor");
+        assertThatThrownBy(() -> command.require(ctx -> "player")
+                                        .execute((player, ctx) -> {
+                                        })).isInstanceOf(IllegalStateException.class)
+                                           .hasMessageContaining("Command 'heal' already has an executor");
+        assertThatThrownBy(() -> branch.executeAsync(ctx -> null)).isInstanceOf(IllegalStateException.class)
+                                                                  .hasMessageContaining("branch <target> of command 'heal'");
+        assertThatThrownBy(() -> branch.require(ctx -> "player")
+                                       .execute((target, player, ctx) -> {
+                                       })).isInstanceOf(IllegalStateException.class)
+                                          .hasMessageContaining("branch <target>");
+        assertThatThrownBy(() -> argument.execute(ctx -> {
+        })).isInstanceOf(IllegalStateException.class)
+           .hasMessageContaining("Argument 'x' already has an executor");
     }
 
     @Test

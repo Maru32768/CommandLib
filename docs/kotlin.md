@@ -156,9 +156,10 @@ Only the last arguments of a branch can be optional or variadic, as in Java ([ar
 
 ### Required values
 
-`require(extractor) { }` adds a branch that runs only when the extractor gives a value, as the fluent `require(...)`
-does, and runs the block with the branch as its receiver. Its `execute { value, ctx -> }` and
-`executeSuspend { value, ctx -> }` receive the value; a `subcommand` of it is checked by the extractor too:
+`require(extractor) { }` runs the block with the fluent `require(...)` as its receiver. It adds no branch: its
+`execute { value, ctx -> }` and `executeSuspend { value, ctx -> }` set the command's own executor, which then runs only
+when the extractor gives a value and receives the value. A command has one executor, so calling `execute { }` on the
+command as well throws `IllegalStateException`. A `subcommand` of it is checked by the extractor too:
 
 ```kotlin
 require(Command.playerRequirer()) {
@@ -167,7 +168,8 @@ require(Command.playerRequirer()) {
 }
 ```
 
-It also works inside an `argument(...)` block, after the branch's arguments.
+It also works inside an `argument(...)` block, after the branch's arguments, where it sets the executor of that
+branch.
 
 ## Options
 

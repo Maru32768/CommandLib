@@ -509,6 +509,11 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
         }
     }
 
+    /**
+     * Gives the value {@code extractor} reads to the executor set through the returned object, which is this command's
+     * executor and runs only when the extractor gives a value, and checks the extractor for the child commands added
+     * through it. It adds no branch, so the command keeps one executor.
+     */
     public final <S> RequiredArgumentBranch<S, C, T> require(@NotNull Extractor<C, S> extractor) {
         return new RequiredArgumentBranch<>(Objects.requireNonNull(extractor), this::executeAsync, this::addChildren);
     }
@@ -702,6 +707,12 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
         return examples;
     }
 
+    /**
+     * Sets the executor of this command.
+     *
+     * @throws IllegalStateException if the command already has an executor, set with this method,
+     *                               {@link #executeAsync(AsyncCommandExecutor)} or {@code require(...).execute(...)}
+     */
     public final void execute(@NotNull CommandExecutor<C> executor) {
         executeAsync(AsyncCommandExecutor.of(executor));
     }
@@ -710,9 +721,17 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
      * Sets an executor whose work finishes later. It runs on the sync thread and returns the stage that completes when
      * the command is done, such as one made with {@link CommonCommandContext#supplyAsync}. See
      * {@link AsyncCommandExecutor}.
+     *
+     * @throws IllegalStateException if the command already has an executor, set with this method,
+     *                               {@link #execute(CommandExecutor)} or {@code require(...).execute(...)}
      */
     public final void executeAsync(@NotNull AsyncCommandExecutor<C> executor) {
-        this.executor = Objects.requireNonNull(executor);
+        Objects.requireNonNull(executor);
+        if (this.executor != null) {
+            throw new IllegalStateException("Command '" + name + "' already has an executor, set by execute, "
+                    + "executeAsync or require(...).execute; a command has one executor");
+        }
+        this.executor = executor;
     }
 
     public final void addUncaughtExceptionHandler(UncaughtExceptionHandler<C> executor) {

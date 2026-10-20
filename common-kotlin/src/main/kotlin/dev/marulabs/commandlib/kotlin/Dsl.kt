@@ -186,8 +186,9 @@ private fun <C : CommonCommandContext<*, *>, T : CommonCommand<C, T>> T.branch(
 ): ArgumentBranch<C, T> = argument(*arguments)
 
 /**
- * Adds a branch that runs only when [extractor] gives a value, and configures it in [block]. Its executor receives the
- * value; a `subcommand` of it is checked by the extractor too, and reads the value again from its context:
+ * Configures [CommonCommand.require] in [block]. Its executor is the command's own, which runs only when [extractor]
+ * gives a value and receives the value; a `subcommand` of it is checked by the extractor too, and reads the value
+ * again from its context:
  *
  * ```kotlin
  * require(Command.playerRequirer()) {

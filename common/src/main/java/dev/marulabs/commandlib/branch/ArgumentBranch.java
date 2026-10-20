@@ -38,6 +38,8 @@ public class ArgumentBranch<C extends CommonCommandContext<?, ?>, T extends Comm
 
     /**
      * Sets an executor whose work finishes later, like {@link CommonCommand#executeAsync(AsyncCommandExecutor)}.
+     *
+     * @throws IllegalStateException if the branch already has an executor
      */
     public ArgumentBranch<C, T> executeAsync(@NotNull AsyncCommandExecutor<C> action) {
         delegate.execute(Objects.requireNonNull(action));
