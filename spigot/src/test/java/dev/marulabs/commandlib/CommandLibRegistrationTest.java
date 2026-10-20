@@ -1,12 +1,16 @@
 package dev.marulabs.commandlib;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.tree.CommandNode;
+import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
 import dev.marulabs.commandlib.MinecraftNamespacedCommandRemovalTest.FakeVanillaCommandWrapper;
 import dev.marulabs.commandlib.util.nms.command.NMSCommandDispatcher;
 import dev.marulabs.commandlib.util.nms.command.NMSVanillaCommandWrapper;
 import dev.marulabs.commandlib.util.nms.server.NMSCraftServer;
 import dev.marulabs.commandlib.util.nms.server.NMSDedicatedServer;
+import net.bytebuddy.ByteBuddy;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
 import org.bukkit.command.SimpleCommandMap;
@@ -20,11 +24,17 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.logging.Logger;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -120,6 +130,87 @@ class CommandLibRegistrationTest {
 
         register("spawn");
         assertThat(timers).hasSize(2);
+    }
+
+    @Test
+    void unregister_leaves_the_labels_and_the_vanilla_node_a_later_registration_took() {
+        CommandLib first = register("spawn");
+        CommandNode<Object> firstNode = vanillaRoot.getChild("spawn");
+        CommandLib second = register("spawn");
+        CommandNode<Object> secondNode = vanillaRoot.getChild("spawn");
+        org.bukkit.command.Command wrapper = commandMap.getCommand("spawn");
+
+        first.unregister();
+
+        assertThat(secondNode).isNotSameAs(firstNode);
+        assertThat(vanillaRoot.getChild("spawn")).isSameAs(secondNode);
+        assertThat(root.getChild("spawn")).isSameAs(secondNode);
+        assertThat(root.getChild("test:spawn")).isNotNull();
+        assertThat(commandMap.getCommand("spawn")).isSameAs(wrapper);
+        assertThat(commandMap.getCommand("test:spawn")).isSameAs(wrapper);
+
+        second.unregister();
+
+        assertThat(vanillaRoot.getChild("spawn")).isNull();
+        assertThat(root.getChild("spawn")).isNull();
+        assertThat(root.getChild("test:spawn")).isNull();
+        assertThat(commandMap.getCommand("spawn")).isNull();
+        assertThat(commandMap.getCommand("test:spawn")).isNull();
+    }
+
+    @Test
+    void unregister_leaves_a_node_that_replaced_the_command_in_the_vanilla_dispatcher() {
+        CommandLib registration = register("spawn");
+        LiteralCommandNode<Object> other = LiteralArgumentBuilder.literal("spawn")
+                                                                 .build();
+        CommandNodeChildren.replace(vanillaRoot, List.of("spawn"), List.of(other));
+
+        registration.unregister();
+
+        assertThat(vanillaRoot.getChild("spawn")).isSameAs(other);
+        assertThat(root.getChild("spawn")).isNull();
+        assertThat(commandMap.getCommand("spawn")).isNull();
+    }
+
+    @Test
+    void the_spigot_artifact_refuses_folia_before_anything_is_registered() throws Exception {
+        // CommandLib looks for Folia's RegionizedServer through its own class loader, which here also defines one.
+        ClassLoader parent = CommandLib.class.getClassLoader();
+        ClassLoader folia = new ClassLoader(parent) {
+            @Override
+            protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+                byte[] bytes;
+                if (name.equals("io.papermc.paper.threadedregions.RegionizedServer")) {
+                    bytes = new ByteBuddy().subclass(Object.class)
+                                           .name(name)
+                                           .make()
+                                           .getBytes();
+                } else if (name.equals(CommandLib.class.getName())) {
+                    try (InputStream in = parent.getResourceAsStream(name.replace('.', '/') + ".class")) {
+                        bytes = Objects.requireNonNull(in)
+                                       .readAllBytes();
+                    } catch (IOException e) {
+                        throw new ClassNotFoundException(name, e);
+                    }
+                } else {
+                    return super.loadClass(name, resolve);
+                }
+                synchronized (getClassLoadingLock(name)) {
+                    Class<?> loaded = findLoadedClass(name);
+                    return loaded != null ? loaded : defineClass(name, bytes, 0, bytes.length);
+                }
+            }
+        };
+        // The constructor, since the other copy of the class is in another runtime package than the commands.
+        Constructor<?> constructor = folia.loadClass(CommandLib.class.getName())
+                                          .getDeclaredConstructor(Plugin.class, Collection.class, String.class);
+        constructor.setAccessible(true);
+
+        assertThatThrownBy(() -> constructor.newInstance(plugin,
+                                                         List.of(),
+                                                         "test")).hasCauseInstanceOf(UnsupportedOperationException.class);
+        bukkit.verify(Bukkit::isPrimaryThread, never());
+        verifyNoInteractions(pluginManager);
     }
 
     private CommandLib register(String name) {
