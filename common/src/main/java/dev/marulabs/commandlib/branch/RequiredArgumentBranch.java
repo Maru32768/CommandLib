@@ -51,9 +51,10 @@ public class RequiredArgumentBranch<S, C extends CommonCommandContext<?, ?>, T e
         List<T> list = new ArrayList<>();
         list.add(child);
         list.addAll(Arrays.asList(children));
+        // Added first, so that a rejected child keeps no prerequisite.
+        childrenAdder.accept(list);
         Prerequisite<C> prerequisite = extractor::extract;
         list.forEach(c -> c.addPrerequisite(prerequisite));
-        childrenAdder.accept(list);
         return this;
     }
 }

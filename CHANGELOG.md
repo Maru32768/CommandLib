@@ -101,7 +101,8 @@ This file lists the changes in each CommandLib release that affect plugin and mo
 - Registration rejects trees it used to accept:
   - two argument branches that both run for the same input (`IllegalStateException`)
   - same-named first arguments of different types, which share one node (`IllegalArgumentException`)
-  - a command added under a second parent (`addChildren` throws `IllegalArgumentException`)
+  - a command added a second time, under the same parent or another one, or under itself or one of its descendants,
+    which ended in a `StackOverflowError` (`addChildren` and `child` throw `IllegalArgumentException`)
   - a child command or alias whose name a sibling already has (`addChildren` / `addAliases` throw
     `IllegalArgumentException`)
   - a greedy string argument that does not end its branch (`IllegalStateException`)

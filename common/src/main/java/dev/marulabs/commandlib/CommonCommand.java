@@ -165,13 +165,21 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
     }
 
     private void validateChildren(@NotNull Collection<? extends T> children) {
+        Set<T> added = Collections.newSetFromMap(new IdentityHashMap<>());
         for (T child : children) {
             Objects.requireNonNull(child);
-            // The parent decides the child's permission node, middlewares and route, so it can have only one.
+            for (CommonCommand<C, T> x = this; x != null; x = x.parent()) {
+                if (x == child) {
+                    throw new IllegalArgumentException("Command '" + child.name() + "' cannot be added under "
+                            + (x == this ? "itself" : "its own descendant '" + name + "'"));
+                }
+            }
+            // The parent and its branch decide the child's permission node, default, middlewares and route, so the
+            // child can have only one position.
             T parent = child.parent();
-            if (parent != null && parent != this) {
+            if (parent != null || !added.add(child)) {
                 throw new IllegalArgumentException("Command '" + child.name() + "' is already a child of '"
-                        + parent.name() + "'");
+                        + (parent != null ? parent.name() : name) + "'; use a new instance for each position");
             }
         }
     }

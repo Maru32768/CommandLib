@@ -5,6 +5,8 @@ import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.marulabs.commandlib.argument.*;
 import dev.marulabs.commandlib.command.CommandExecutor;
+import dev.marulabs.commandlib.command.Extractor;
+import dev.marulabs.commandlib.exception.CommandPrerequisiteException;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -294,6 +296,59 @@ class CommandStructureTest {
     }
 
     @Test
+    void a_command_cannot_be_added_under_itself_or_a_descendant() throws Exception {
+        TestCommand loop = new TestCommand("loop");
+        TestCommand a = new TestCommand("a");
+        TestCommand b = new TestCommand("b");
+        a.addChildren(b);
+
+        assertThatThrownBy(() -> loop.addChildren(loop)).isInstanceOf(IllegalArgumentException.class)
+                                                        .hasMessageContaining("itself");
+        assertThatThrownBy(() -> b.addChildren(a)).isInstanceOf(IllegalArgumentException.class)
+                                                  .hasMessageContaining("descendant");
+        assertThatThrownBy(() -> b.argument(new StrArg("x"))
+                                  .child(a)).isInstanceOf(IllegalArgumentException.class);
+        TestCommand required = new TestCommand("r") {{
+            execute(ctx -> ctx.sendMessage("ran"));
+        }};
+        Extractor<TestCommandContext, String> blocked = ctx -> {
+            throw new CommandPrerequisiteException("blocked");
+        };
+        assertThatThrownBy(() -> required.require(blocked)
+                                         .child(required)).isInstanceOf(IllegalArgumentException.class);
+
+        // Nothing was attached, and the rejected child did not get the prerequisite.
+        assertThat(loop.children()).isEmpty();
+        assertThat(b.children()).isEmpty();
+        assertThat(a.parent()).isNull();
+        assertThat(new TestCommandRunner(required).execute("r")
+                                                  .messages()).containsExactly("ran");
+    }
+
+    @Test
+    void a_command_has_one_position_under_its_parent() {
+        TestCommand show = new TestCommand("show");
+        TestCommand root = new TestCommand("root") {{
+            argument(new StrArg("first")).permission(DefaultPermission.ALL)
+                                         .child(show);
+        }};
+
+        assertThatThrownBy(() -> root.argument(new StrArg("second"))
+                                     .permission(DefaultPermission.NONE)
+                                     .child(show)).isInstanceOf(IllegalArgumentException.class)
+                                                  .hasMessageContaining("'show' is already a child of 'root'");
+        assertThatThrownBy(() -> root.addChildren(show)).isInstanceOf(IllegalArgumentException.class);
+        assertThat(show.effectiveDefaultPermission()).isEqualTo(DefaultPermission.ALL);
+
+        TestCommand twice = new TestCommand("twice");
+        TestCommand parent = new TestCommand("parent");
+        assertThatThrownBy(() -> parent.addChildren(twice, twice)).isInstanceOf(IllegalArgumentException.class);
+        parent.addChildren(twice);
+        assertThatThrownBy(() -> parent.addChildren(twice)).isInstanceOf(IllegalArgumentException.class);
+        assertThat(parent.children()).containsExactly(twice);
+    }
+
+    @Test
     void execute_rejects_null() {
         assertThatThrownBy(() -> new TestCommand("set") {{
             argument(new IntArg("value")).execute((CommandExecutor<TestCommandContext>) null);
@@ -573,7 +628,7 @@ class CommandStructureTest {
             execute(ctx -> ctx.sendMessage("list"));
         }};
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("game") {{
-            addChildren(list, list);
+            addChildren(list);
         }});
 
         assertThat(runner.execute("game ls")
