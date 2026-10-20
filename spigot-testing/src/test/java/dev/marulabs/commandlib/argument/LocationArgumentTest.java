@@ -55,4 +55,35 @@ class LocationArgumentTest {
 
         assertThat(steve.getSentMessageTexts()).containsExactly("correct_world");
     }
+
+    @Test
+    void integer_x_and_z_are_centered_by_default() {
+        FakeSender sender = FakeSender.player("Alice");
+
+        try (CommandTester tester = new CommandTester(() -> new Command("tp") {{
+            argument(new LocationArgument("pos")).execute((pos, ctx) -> {
+                ctx.sendMessage(pos.getX() + "," + pos.getY() + "," + pos.getZ());
+            });
+        }}, "test.command")) {
+            tester.execute("tp 1 64 -2", sender);
+            tester.execute("tp 1.0 64 -2.25", sender);
+        }
+
+        assertThat(sender.getSentMessageTexts()).containsExactly("1.5,64.0,-1.5", "1.0,64.0,-2.25");
+    }
+
+    @Test
+    void integer_coordinates_are_kept_without_centering() {
+        FakeSender sender = FakeSender.player("Alice");
+
+        try (CommandTester tester = new CommandTester(() -> new Command("tp") {{
+            argument(new LocationArgument("pos", false)).execute((pos, ctx) -> {
+                ctx.sendMessage(pos.getX() + "," + pos.getY() + "," + pos.getZ());
+            });
+        }}, "test.command")) {
+            tester.execute("tp 1 64 -2", sender);
+        }
+
+        assertThat(sender.getSentMessageTexts()).containsExactly("1.0,64.0,-2.0");
+    }
 }

@@ -203,6 +203,35 @@ class LightweightArgumentExecutionTest {
         assertThat(sender.getSentMessageTexts()).containsExactly("1.5:2.0:3.25");
     }
 
+    @Test
+    void paperLocationArgumentCentersIntegerXAndZByDefault() {
+        CommandTester tester = new CommandTester(() -> new Command("args") {{
+            argument(new LocationArgument("location")).execute((location, ctx) -> {
+                ctx.sendMessage(location.getX() + ":" + location.getY() + ":" + location.getZ());
+            });
+        }}, "test.command");
+        FakeSender sender = FakeSender.player("Steve");
+
+        tester.execute("args 1 64 -2", sender);
+        tester.execute("args 1.0 64 -2.25", sender);
+
+        assertThat(sender.getSentMessageTexts()).containsExactly("1.5:64.0:-1.5", "1.0:64.0:-2.25");
+    }
+
+    @Test
+    void paperLocationArgumentWithoutCenteringKeepsIntegerCoordinates() {
+        CommandTester tester = new CommandTester(() -> new Command("args") {{
+            argument(new LocationArgument("location", false)).execute((location, ctx) -> {
+                ctx.sendMessage(location.getX() + ":" + location.getY() + ":" + location.getZ());
+            });
+        }}, "test.command");
+        FakeSender sender = FakeSender.player("Steve");
+
+        tester.execute("args 1 64 -2", sender);
+
+        assertThat(sender.getSentMessageTexts()).containsExactly("1.0:64.0:-2.0");
+    }
+
     private MockedStatic<Bukkit> mockBukkitStatics() {
         OfflinePlayer offlinePlayer = Mockito.mock(OfflinePlayer.class);
         Mockito.when(offlinePlayer.getName())

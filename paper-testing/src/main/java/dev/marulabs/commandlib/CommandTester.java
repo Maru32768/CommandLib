@@ -316,9 +316,9 @@ public final class CommandTester implements AutoCloseable {
                          return blockState;
                      }));
         argumentTypes.when(ArgumentTypes::finePosition)
-                     .thenReturn(finePosition());
+                     .thenReturn(finePosition(false));
         argumentTypes.when(() -> ArgumentTypes.finePosition(Mockito.anyBoolean()))
-                     .thenReturn(finePosition());
+                     .thenAnswer(invocation -> finePosition(invocation.getArgument(0)));
         argumentTypes.when(ArgumentTypes::itemStack)
                      .thenReturn(word(token -> requireCurrent().fakeItemStack));
         argumentTypes.when(ArgumentTypes::blockPosition)
@@ -772,15 +772,25 @@ public final class CommandTester implements AutoCloseable {
         };
     }
 
-    private static ArgumentType<FinePositionResolver> finePosition() {
+    // Like vanilla, with centerIntegers an x or z written without a decimal point moves to the center of its block.
+    private static ArgumentType<FinePositionResolver> finePosition(boolean centerIntegers) {
         return reader -> {
-            double x = reader.readDouble();
+            double x = coordinate(reader, centerIntegers);
             reader.skipWhitespace();
-            double y = reader.readDouble();
+            double y = coordinate(reader, false);
             reader.skipWhitespace();
-            double z = reader.readDouble();
+            double z = coordinate(reader, centerIntegers);
             return source -> Position.fine(x, y, z);
         };
+    }
+
+    private static double coordinate(StringReader reader, boolean center) throws CommandSyntaxException {
+        int start = reader.getCursor();
+        double value = reader.readDouble();
+        boolean integer = reader.getString()
+                                .substring(start, reader.getCursor())
+                                .indexOf('.') < 0;
+        return center && integer ? value + 0.5 : value;
     }
 
     public static final class Builder {

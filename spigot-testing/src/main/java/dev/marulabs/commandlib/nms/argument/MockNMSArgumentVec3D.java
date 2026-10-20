@@ -15,13 +15,12 @@ public class MockNMSArgumentVec3D extends NMSArgumentVec3D {
 
     @Override
     public ArgumentType<?> argument() {
-        return new Vec3DArgumentType();
+        return argument(true);
     }
 
     @Override
     public ArgumentType<?> argument(boolean centerIntegers) {
-        // The mock never centers coordinates.
-        return argument();
+        return new Vec3DArgumentType(centerIntegers);
     }
 
     @Override
@@ -31,18 +30,34 @@ public class MockNMSArgumentVec3D extends NMSArgumentVec3D {
     }
 
     /**
-     * Reads three space-separated doubles from the input, e.g. {@code 1.0 2.0 3.0}.
-     * Use this format when writing location arguments in test commands.
+     * Reads three space-separated numbers from the input, e.g. {@code 1.0 2.0 3.0}. Like vanilla, with
+     * {@code centerIntegers} an x or z written without a decimal point moves to the center of its block: {@code 1 64 1}
+     * is {@code 1.5 64.0 1.5}. Relative and local coordinates are not supported.
      */
     private static final class Vec3DArgumentType implements ArgumentType<double[]> {
+        private final boolean centerIntegers;
+
+        private Vec3DArgumentType(boolean centerIntegers) {
+            this.centerIntegers = centerIntegers;
+        }
+
         @Override
         public double[] parse(StringReader reader) throws CommandSyntaxException {
-            double x = reader.readDouble();
+            double x = coordinate(reader, centerIntegers);
             reader.expect(' ');
-            double y = reader.readDouble();
+            double y = coordinate(reader, false);
             reader.expect(' ');
-            double z = reader.readDouble();
+            double z = coordinate(reader, centerIntegers);
             return new double[]{x, y, z};
+        }
+
+        private static double coordinate(StringReader reader, boolean center) throws CommandSyntaxException {
+            int start = reader.getCursor();
+            double value = reader.readDouble();
+            boolean integer = reader.getString()
+                                    .substring(start, reader.getCursor())
+                                    .indexOf('.') < 0;
+            return center && integer ? value + 0.5 : value;
         }
     }
 }

@@ -214,6 +214,8 @@ suggestions) and a command for each argument type. Options, permission plugins a
   `CommandTester` has `suggestions(input, sender)`. `FakeSender.player(...)` and `playerBuilder(...)` start with the
   locale `en_us` (not yet in the Forge / NeoForge / Fabric artifacts), so caption assertions no longer depend on the
   JVM's default locale.
+- `spigot-testing` and `paper-testing` parse `LocationArgument` like the server: an integer x or z moves to the center
+  of its block unless the argument is created with `centerIntegers` false.
 - A JUnit 5 extension, `CommandLibExtension`, creates a tester per test and injects `CommandTester` and `@Sender`
   `FakeSender` parameters.
 
