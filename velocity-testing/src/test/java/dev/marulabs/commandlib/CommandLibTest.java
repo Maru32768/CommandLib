@@ -25,7 +25,8 @@ import java.util.stream.Collectors;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-// Each test registers its own labels: the permission defaults of CommandLib.register are global and first-wins.
+// Each test registers its own labels: the permission defaults of CommandLib.register are global, and the oldest live
+// registration of a node decides its default.
 class CommandLibTest {
     private final Object plugin = new Object();
     private final ProxyServer proxy = Mockito.mock(ProxyServer.class);
@@ -166,6 +167,58 @@ class CommandLibTest {
                .thenReturn(Tristate.UNDEFINED);
 
         assertThatThrownBy(() -> dispatcher.execute("vote", player)).isInstanceOf(CommandSyntaxException.class);
+    }
+
+    @Test
+    void the_default_of_an_unregistered_registration_does_not_outlive_it() {
+        CommandLib.register(plugin, proxy, new Command("audit") {{
+            permission(DefaultPermission.ALL);
+            execute(ctx -> ctx.sendMessage("audit"));
+        }})
+                  .unregister();
+        CommandLib.register(plugin, proxy, new Command("audit") {{
+            permission(DefaultPermission.NONE);
+            execute(ctx -> ctx.sendMessage("audit"));
+        }});
+
+        assertThatThrownBy(() -> lastRegistered().execute("audit",
+                                                          undefinedPlayer())).isInstanceOf(CommandSyntaxException.class);
+    }
+
+    @Test
+    void the_next_registration_of_a_node_decides_its_default_once_the_first_is_unregistered() throws CommandSyntaxException {
+        CommandLib first = CommandLib.register(plugin, proxy, new Command("relay") {{
+            permission(DefaultPermission.NONE);
+            execute(ctx -> ctx.sendMessage("relay"));
+        }});
+        CommandLib.register(plugin, proxy, new Command("relay") {{
+            permission(DefaultPermission.ALL);
+            execute(ctx -> ctx.sendMessage("relay"));
+        }});
+        CommandDispatcher<CommandSource> dispatcher = lastRegistered();
+        Player player = undefinedPlayer();
+        assertThatThrownBy(() -> dispatcher.execute("relay", player)).isInstanceOf(CommandSyntaxException.class);
+
+        first.unregister();
+
+        dispatcher.execute("relay", player);
+    }
+
+    private CommandDispatcher<CommandSource> lastRegistered() {
+        Mockito.verify(commandManager, Mockito.atLeastOnce())
+               .register(Mockito.any(CommandMeta.class), registered.capture());
+        CommandDispatcher<CommandSource> dispatcher = new CommandDispatcher<>();
+        dispatcher.getRoot()
+                  .addChild(registered.getValue()
+                                      .getNode());
+        return dispatcher;
+    }
+
+    private static Player undefinedPlayer() {
+        Player player = Mockito.mock(Player.class);
+        Mockito.when(player.getPermissionValue(Mockito.anyString()))
+               .thenReturn(Tristate.UNDEFINED);
+        return player;
     }
 
     @Test

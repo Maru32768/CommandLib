@@ -26,6 +26,7 @@ import org.bukkit.event.server.ServerLoadEvent;
 import org.bukkit.help.HelpMap;
 import org.bukkit.help.HelpTopic;
 import org.bukkit.permissions.Permission;
+import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredListener;
@@ -50,6 +51,8 @@ class CommandLibLifecycleTest {
     private final List<LifecycleEventHandler<ReloadableRegistrarEvent<Commands>>> handlers = new ArrayList<>();
     private final Set<String> foreignLabels = new HashSet<>();
     private final List<Runnable> scheduledTasks = new ArrayList<>();
+    // What the plugin manager holds, by name, as Bukkit's does.
+    private final Map<String, Permission> permissions = new HashMap<>();
     private MockedStatic<Bukkit> bukkit;
     private PluginManager pluginManager;
     private Plugin plugin;
@@ -57,6 +60,18 @@ class CommandLibLifecycleTest {
     @BeforeEach
     void setUp() {
         pluginManager = mock(PluginManager.class);
+        when(pluginManager.getPermission(anyString())).thenAnswer(x -> permissions.get(x.<String>getArgument(0)));
+        doAnswer(x -> {
+            Permission permission = x.getArgument(0);
+            if (permissions.putIfAbsent(permission.getName(), permission) != null) {
+                throw new IllegalArgumentException("The permission " + permission.getName() + " is already defined!");
+            }
+            return null;
+        }).when(pluginManager)
+          .addPermission(any(Permission.class));
+        doAnswer(x -> permissions.remove(x.<Permission>getArgument(0)
+                                          .getName())).when(pluginManager)
+                                                      .removePermission(any(Permission.class));
         Server server = mock(Server.class);
         when(server.getPluginManager()).thenReturn(pluginManager);
 
@@ -276,7 +291,7 @@ class CommandLibLifecycleTest {
     void a_cooldown_bypass_node_that_exists_is_neither_replaced_nor_removed() {
         when(plugin.isEnabled()).thenReturn(true);
         Permission declared = new Permission("myplugin.admin");
-        when(pluginManager.getPermission("myplugin.admin")).thenReturn(declared);
+        permissions.put("myplugin.admin", declared);
         Command command = new Command("hello") {{
             cooldown(Cooldown.of(Duration.ofSeconds(5))
                              .bypassPermission("myplugin.admin"));
@@ -291,6 +306,26 @@ class CommandLibLifecycleTest {
                                                                                 .equals("myplugin.admin")));
         verify(pluginManager, never()).removePermission(declared);
         verify(pluginManager, times(1)).removePermission(any(Permission.class));
+    }
+
+    @Test
+    void unregister_leaves_the_permission_a_later_registration_put_under_the_same_name() {
+        when(plugin.isEnabled()).thenReturn(false);
+        CommandLib first = CommandLib.register(plugin, "test", helloCommand());
+        Permission older = permissions.get("test.hello");
+        CommandLib second = CommandLib.register(plugin, "test", helloCommand());
+        Permission newer = permissions.get("test.hello");
+
+        first.unregister();
+
+        assertThat(newer).isNotNull()
+                         .isNotSameAs(older);
+        assertThat(permissions.get("test.hello")).isSameAs(newer);
+        assertThat(newer.getDefault()).isEqualTo(PermissionDefault.OP);
+
+        second.unregister();
+
+        assertThat(permissions).doesNotContainKey("test.hello");
     }
 
     @Test

@@ -238,6 +238,10 @@ suggestions) and a command for each argument type. Options, permission plugins a
   "Failed to load function" for those functions.
 - Spigot: `ParticleArgument` accepts particles with options, such as `dust`, from 1.20.4.
 - Spigot: potion effect lookups on 1.17 to 1.19.2, and commands after `/minecraft:reload` on 1.20.6+.
+- Spigot / Paper: `unregister()` of an older registration no longer removes the permission a later registration put
+  under the same node name.
+- Velocity: `unregister()` drops the permission defaults of its registration, so a node registered with `ALL`,
+  unregistered and registered again with `NONE` is closed.
 - The command source location carries the sender's rotation.
 - Forge 1.16.5: commands survive `/reload`, failure messages go through `sendFailure`, `Location#getChunk` returns the
   right chunk, and `BlockPositionArgument` rejects fractional coordinates like vanilla.

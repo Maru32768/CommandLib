@@ -56,10 +56,14 @@ final class CommandPermissions {
     }
 
     /**
-     * Removes the permission, after taking its default from the players who had it only by that default.
+     * Removes the permission, after taking its default from the players who had it only by that default. A permission
+     * that another registration has put under the same name since stays, as that registration still uses it.
      */
     static void remove(Permission permission) {
         PluginManager pluginManager = Bukkit.getPluginManager();
+        if (pluginManager.getPermission(permission.getName()) != permission) {
+            return;
+        }
         permission.setDefault(PermissionDefault.FALSE);
         pluginManager.recalculatePermissionDefaults(permission);
         pluginManager.removePermission(permission);

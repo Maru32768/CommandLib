@@ -178,8 +178,9 @@ server start.
 `CommandLib.register(...)` registers every node in Bukkit's `PluginManager` with its default and description,
 replacing a permission of the same name (except a cooldown bypass node, see [Cooldown bypass](#cooldown-bypass)).
 `unregister()` and the plugin's disable remove them again, take their
-defaults away from players, and recalculate online players' permissions. Plugin reloads therefore start from a clean
-state. `/minecraft:reload` keeps the permissions.
+defaults away from players, and recalculate online players' permissions. A permission that a later registration has
+replaced under the same name since stays, since that registration still uses it. Plugin reloads therefore start from a
+clean state. `/minecraft:reload` keeps the permissions.
 
 ### Paper
 
@@ -214,7 +215,9 @@ LuckPerms to answer; without it the default decides.
 
 Velocity has no registry of permissions, so nothing is registered. `CommandLib.register(plugin, proxy, ...)` keeps the
 defaults of its nodes and applies them when `PermissionSubject#getPermissionValue(node)` is `UNDEFINED`, that is when
-no permission plugin sets the node. A `TRUE` or `FALSE` value always wins.
+no permission plugin sets the node. A `TRUE` or `FALSE` value always wins. When several registrations declare a node,
+the oldest one that is not unregistered decides its default, so a later one cannot open an `OP` node to everyone;
+`unregister()` drops the defaults of its registration.
 
 ## Where permissions are checked
 

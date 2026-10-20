@@ -831,24 +831,42 @@ public final class CommandLib implements Listener {
                                                                            .getPermission(permission.getName()) != null) {
                        return;
                    }
-                   removePermissionCompletely(permission.getName());
-                   Bukkit.getPluginManager()
-                         .addPermission(permission);
+                   addPermission(permission);
                    registeredPermissions.add(permission);
                });
     }
 
+    /**
+     * Adds the permission, replacing one of the same name.
+     */
+    static void addPermission(Permission permission) {
+        removePermissionCompletely(permission.getName());
+        Bukkit.getPluginManager()
+              .addPermission(permission);
+    }
+
     private void unregisterPermissions() {
-        registeredPermissions.stream()
-                             .map(Permission::getName)
-                             .forEach(this::removePermissionCompletely);
+        removePermissions(registeredPermissions);
         // dirtyPermissibles is not called when removing a TRUE permission, so force
         // recalculation here so players lose the permission immediately.
         Bukkit.getOnlinePlayers()
               .forEach(Permissible::recalculatePermissions);
     }
 
-    private void removePermissionCompletely(String name) {
+    /**
+     * Removes the permissions that are still registered, leaving one that another registration has put under the same
+     * name since, which that registration still uses.
+     */
+    static void removePermissions(Collection<Permission> permissions) {
+        for (Permission permission : permissions) {
+            if (Bukkit.getPluginManager()
+                      .getPermission(permission.getName()) == permission) {
+                removePermissionCompletely(permission.getName());
+            }
+        }
+    }
+
+    private static void removePermissionCompletely(String name) {
         // removePermission only removes from the permissions map and leaves defaultPerms intact.
         // Changing the default to FALSE and calling recalculatePermissionDefaults first ensures
         // the stale TRUE entry is evicted from defaultPerms; otherwise an ALL->NONE change does

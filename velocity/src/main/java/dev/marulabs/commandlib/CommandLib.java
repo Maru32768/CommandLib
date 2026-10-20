@@ -50,20 +50,20 @@ public final class CommandLib {
     private final String permissionPrefix;
     private final List<Command> commands;
     private final CommandManager commandManager;
-    private final List<CommandMeta> registered;
+    private final List<PermissionConfig> permissionConfigs;
+    private final List<CommandMeta> registered = new ArrayList<>();
     private final List<String> labels;
 
     private CommandLib(String owner,
                        String permissionPrefix,
                        List<Command> commands,
                        CommandManager commandManager,
-                       List<CommandMeta> registered,
                        List<String> labels) {
         this.owner = owner;
         this.permissionPrefix = permissionPrefix;
         this.commands = commands;
         this.commandManager = commandManager;
-        this.registered = registered;
+        this.permissionConfigs = CommandTree.permissionConfigs(commands, permissionPrefix);
         this.labels = labels;
     }
 
@@ -146,20 +146,8 @@ public final class CommandLib {
                                                                                                                                   new VelocityCommandScheduler(plugin,
                                                                                                                                                                proxy)).build();
         CommandContext.proxy = proxy;
-        VelocityPermissions.addDefaults(CommandTree.permissionConfigs(list, permissionPrefix));
 
         CommandManager commandManager = proxy.getCommandManager();
-        List<CommandMeta> registered = new ArrayList<>();
-        List<String> labels = new ArrayList<>();
-        for (LiteralCommandNode<CommandSource> node : nodes) {
-            BrigadierCommand command = new BrigadierCommand(node);
-            CommandMeta meta = commandManager.metaBuilder(command)
-                                             .plugin(plugin)
-                                             .build();
-            commandManager.register(meta, command);
-            registered.add(meta);
-            labels.add(node.getLiteral());
-        }
         String owner = proxy.getPluginManager()
                             .fromInstance(plugin)
                             .map(c -> c.getDescription()
@@ -169,19 +157,45 @@ public final class CommandLib {
                                              permissionPrefix,
                                              list,
                                              commandManager,
-                                             registered,
-                                             List.copyOf(labels));
+                                             nodes.stream()
+                                                  .map(LiteralCommandNode::getLiteral)
+                                                  .toList());
+        // Before the commands, so they never run without their defaults.
         REGISTRATIONS.add(instance);
+        updateDefaults();
+        try {
+            for (LiteralCommandNode<CommandSource> node : nodes) {
+                BrigadierCommand command = new BrigadierCommand(node);
+                CommandMeta meta = commandManager.metaBuilder(command)
+                                                 .plugin(plugin)
+                                                 .build();
+                commandManager.register(meta, command);
+                instance.registered.add(meta);
+            }
+        } catch (RuntimeException e) {
+            instance.unregister();
+            throw e;
+        }
         return instance;
     }
 
     /**
-     * Removes the commands this registration added.
+     * Removes the commands this registration added, and the permission defaults it declared: a node another
+     * registration still declares gets the default of the oldest of them.
      */
     public synchronized void unregister() {
         registered.forEach(commandManager::unregister);
         registered.clear();
-        REGISTRATIONS.remove(this);
+        if (REGISTRATIONS.remove(this)) {
+            updateDefaults();
+        }
+    }
+
+    // Synchronized, so the defaults set last are those of the registrations live then.
+    private static synchronized void updateDefaults() {
+        VelocityPermissions.setDefaults(REGISTRATIONS.stream()
+                                                     .flatMap(x -> x.permissionConfigs.stream())
+                                                     .toList());
     }
 
     /**

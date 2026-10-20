@@ -13,7 +13,9 @@ import org.mockito.MockedStatic;
 
 import java.time.Duration;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -25,9 +27,19 @@ class CommandRegistrationRollbackTest {
     private final Plugin plugin = mock(Plugin.class);
     private MockedStatic<Bukkit> bukkit;
 
+    // What the plugin manager holds, by name, as Bukkit's does.
+    private final Map<String, Permission> permissions = new HashMap<>();
+
     @BeforeEach
     void setUp() {
         when(pluginManager.getPermissionSubscriptions(anyString())).thenReturn(Collections.emptySet());
+        when(pluginManager.getPermission(anyString())).thenAnswer(x -> permissions.get(x.<String>getArgument(0)));
+        doAnswer(x -> permissions.put(x.<Permission>getArgument(0)
+                                       .getName(),
+                                      x.getArgument(0))).when(pluginManager)
+                                                        .addPermission(any(Permission.class));
+        doAnswer(x -> permissions.remove(x.<String>getArgument(0))).when(pluginManager)
+                                                                   .removePermission(anyString());
         when(server.getPluginManager()).thenReturn(pluginManager);
         when(plugin.getName()).thenReturn("Test");
         when(plugin.getServer()).thenReturn(server);
@@ -70,7 +82,7 @@ class CommandRegistrationRollbackTest {
     @Test
     void a_declared_cooldown_bypass_node_is_neither_replaced_nor_removed() {
         Permission declared = new Permission("myplugin.admin");
-        when(pluginManager.getPermission("myplugin.admin")).thenReturn(declared);
+        permissions.put("myplugin.admin", declared);
 
         assertThatThrownBy(() -> CommandLib.register(plugin,
                                                      cooldownCommand("myplugin.admin"))).isInstanceOf(RuntimeException.class);
