@@ -1,0 +1,27 @@
+# Output of GaAuditScratchTest (common module, JUnit XML report), commit a65a9974, 2026-10-20
+# Each test asserts a sentinel so that the failure message shows the observed behavior.
+
+---- h11_option_argument_name_equals_positional_name()
+org.opentest4j.AssertionFailedError: [H11 observed] 
+Expecting actual:
+  ["n=9 limit=3 input(n)=9"]
+to contain exactly (and in same order):
+  ["H11-EXPECTED-TO-FAIL"]
+but some elements were not found:
+  ["H11-EXPECTED-TO-FAIL"]
+and others were not expected:
+  ["n=9 limit=3 input(n)=9"]
+
+
+---- h1b_parent_and_child_argument_with_same_name_and_type()
+org.opentest4j.AssertionFailedError: [H1b observed] 
+Expecting actual:
+  ["parent=inner child=inner inputs=[config, inner, set]"]
+to contain exactly (and in same order):
+  ["H1b-EXPECTED-TO-FAIL"]
+but some elements were not found:
+  ["H1b-EXPECTED-TO-FAIL"]
+and others were not expected:
+  ["parent=inner child=inner inputs=[config, inner, set]"]
+
+

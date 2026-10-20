@@ -150,6 +150,22 @@
   生成済み typed NMS source の手編集や再生成漏れを検出するため、`tools/nms-codegen` で `uv run generate.py --all` を実行し、
   `git status --porcelain -- nms spigot/src/main/java/dev/marulabs/commandlib/util/nms/TypedNmsModules.java` が空でなければ
   失敗させる step も入れる（`git diff --exit-code` は新規の未追跡ファイルを検出しないため）。
+- `[ ]` 2026-10-20 の GA 監査（[review-records/runs/2026-10-20-ga-audit](../review-records/runs/2026-10-20-ga-audit/reviews/agents/ga-architecture-api-1.md)）の
+  指摘 F01〜F15 / R1〜R10 を triage する。未 triage。主要: 親 branch と argument child の同名引数が登録時に検証されない（F01）、
+  登録後のモデル変更の扱いが platform で違う（F02）、API 境界と安定性ポリシーの欠如（F12）。
+- `[ ]` package 構成と可視性を整理し、内部 API を利用者から隠す（F12 と関連）。README に書いた設定をすれば内部 API が
+  IDE の補完に出ないことを最優先にし、compile が通らないことは努力目標とする。README の設定を外れた使い方は保証しない。
+  ServiceLoader などの実行時 lookup は使わない（以前 Spigot / Paper の plugin reload や PlugMan で動かなくなった）。
+  - 内部実装（NMS bridge、platform adapter、tree 生成など）を `internal` 系の package に集める。`common-kotlin` が
+    package-private の `CurrentCommandContext` を同じ package から読んでいる件もここで解消する。
+  - 内部 package と class に `@ApiStatus.Internal` を付ける。`common` の `org.jetbrains:annotations` は 16.0.2 で
+    `ApiStatus` を含まないため、version を上げる。
+  - README に、IntelliJ IDEA の Settings → Editor → General → Auto Import → Exclude from import and completion に
+    登録する package を書く。
+- `[?]` （候補）compile 用の API jar を build で自動生成する。公開 class だけを抜き出した jar を `compileOnly`、
+  全 class を含む jar を runtime / shade 用に配布すれば、内部 API は補完に出ず compile も通らない。両 jar に同じ
+  binary の公開 class を持たせる方法、shade 時の class の重複、Gradle の variant と公開 metadata を検証する必要がある。
+  上の整理の後に、需要を見て採否を決める。
 - `[ ]` 0.18.0 を release する。`AbstractCommandContext` の削除や `net.kunmc.lab` から `dev.marulabs` への package 移動など、
   0.17.x と binary 互換でない変更を含む。
 - `[ ]` JitPack から Maven Central に移行する。javadoc jar と doclint は Bukkit 側の module と modded / modded-testing の

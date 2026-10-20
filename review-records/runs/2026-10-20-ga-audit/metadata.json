@@ -1,0 +1,21 @@
+{
+  "id": "2026-10-20-ga-audit",
+  "created_at": "2026-10-20",
+  "repository": "CommandLib_2",
+  "base_commit": null,
+  "reviewed_commit": "a65a9974",
+  "execution_commit": "a65a9974",
+  "working_tree_patch": null,
+  "working_tree_state": "Clean at start. The only file added during the audit, common/src/test/java/dev/marulabs/commandlib/GaAuditScratchTest.java, was removed again and is kept in evidence/reproduction/.",
+  "untracked_inputs": [],
+  "reviewers": [
+    {
+      "author": "Claude Fable 5.1 (Claude Code), independent GA auditor",
+      "model": "claude-fable-5-1",
+      "prompt": "request.md (user request, Japanese)",
+      "source": "reviews/agents/ga-architecture-api-1.md",
+      "tools": "Read-only review of sources and docs; one temporary JUnit test in :common run with Gradle 9.5.0 / JDK 21 (-Pcommandlib.typedNms=false --offline). Two read-only subagents (same model) covered the annotation API and the Kotlin DSL / testing artifacts; their claims used in the report were re-checked against the sources."
+    }
+  ],
+  "status": "draft"
+}
