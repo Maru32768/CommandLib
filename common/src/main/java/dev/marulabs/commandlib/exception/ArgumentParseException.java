@@ -6,7 +6,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.ArgumentCommandNode;
 import dev.marulabs.commandlib.Caption;
 import dev.marulabs.commandlib.CommonCommandContext;
-import dev.marulabs.commandlib.PlatformAdapter;
+import dev.marulabs.commandlib.internal.PlatformAdapter;
 import dev.marulabs.commandlib.util.ChatColorUtil;
 import dev.marulabs.commandlib.util.text.RichText;
 

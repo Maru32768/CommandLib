@@ -8,9 +8,11 @@ import dev.marulabs.commandlib.DefaultPermission;
 import dev.marulabs.commandlib.command.AsyncCommandExecutor;
 import dev.marulabs.commandlib.command.CommandExecutor;
 import dev.marulabs.commandlib.command.Extractor;
+import dev.marulabs.commandlib.internal.ArgumentBranchDelegate;
 import dev.marulabs.commandlib.util.function.TetraConsumer;
 import dev.marulabs.commandlib.util.function.TetraFunction;
 import dev.marulabs.commandlib.util.function.TriFunction;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.CompletionStage;
@@ -22,6 +24,7 @@ public final class TriArgumentBranch<T1, T2, T3, C extends CommonCommandContext<
     private final CommonArgument<T2, C, ?> argument2;
     private final CommonArgument<T3, C, ?> argument3;
 
+    @ApiStatus.Internal
     public TriArgumentBranch(ArgumentBranchDelegate<C, T> delegate,
                              CommonArgument<T1, C, ?> argument1,
                              CommonArgument<T2, C, ?> argument2,

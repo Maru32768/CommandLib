@@ -4,10 +4,11 @@ import com.mojang.brigadier.Message;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.velocitypowered.api.command.CommandSource;
 import dev.marulabs.commandlib.exception.ArgumentParseException;
+import dev.marulabs.commandlib.internal.PlatformAdapter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 
-public final class PlatformAdapterImpl implements PlatformAdapter<CommandSource, Component, CommandContext> {
+final class PlatformAdapterImpl implements PlatformAdapter<CommandSource, Component, CommandContext> {
     @Override
     public CommandContext createCommandContext(com.mojang.brigadier.context.CommandContext<CommandSource> ctx) {
         return new CommandContext(ctx);

@@ -8,9 +8,11 @@ import dev.marulabs.commandlib.DefaultPermission;
 import dev.marulabs.commandlib.command.AsyncCommandExecutor;
 import dev.marulabs.commandlib.command.CommandExecutor;
 import dev.marulabs.commandlib.command.Extractor;
+import dev.marulabs.commandlib.internal.ArgumentBranchDelegate;
 import dev.marulabs.commandlib.util.function.HeptConsumer;
 import dev.marulabs.commandlib.util.function.HeptFunction;
 import dev.marulabs.commandlib.util.function.HexaFunction;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.CompletionStage;
@@ -25,6 +27,7 @@ public final class HexaArgumentBranch<T1, T2, T3, T4, T5, T6, C extends CommonCo
     private final CommonArgument<T5, C, ?> argument5;
     private final CommonArgument<T6, C, ?> argument6;
 
+    @ApiStatus.Internal
     public HexaArgumentBranch(ArgumentBranchDelegate<C, T> delegate,
                               CommonArgument<T1, C, ?> argument1,
                               CommonArgument<T2, C, ?> argument2,

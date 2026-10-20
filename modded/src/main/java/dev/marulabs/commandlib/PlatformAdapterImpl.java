@@ -1,12 +1,13 @@
 package dev.marulabs.commandlib;
 
+import dev.marulabs.commandlib.internal.PlatformAdapter;
 import com.mojang.brigadier.Message;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.marulabs.commandlib.exception.ArgumentParseException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
 
-public final class PlatformAdapterImpl implements PlatformAdapter<CommandSourceStack, Component, CommandContext> {
+final class PlatformAdapterImpl implements PlatformAdapter<CommandSourceStack, Component, CommandContext> {
     @Override
     public CommandContext createCommandContext(com.mojang.brigadier.context.CommandContext<CommandSourceStack> ctx) {
         return new CommandContext(ctx);

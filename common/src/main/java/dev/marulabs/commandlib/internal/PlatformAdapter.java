@@ -1,13 +1,20 @@
-package dev.marulabs.commandlib;
+package dev.marulabs.commandlib.internal;
 
 import com.mojang.brigadier.context.StringRange;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.RootCommandNode;
+import dev.marulabs.commandlib.CommonCommandContext;
 import dev.marulabs.commandlib.exception.ArgumentParseException;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
 import java.util.Map;
 
+/**
+ * What {@code common} needs from the platform module. Each platform implements it in the package-private
+ * {@code dev.marulabs.commandlib.PlatformAdapterImpl}.
+ */
+@ApiStatus.Internal
 public interface PlatformAdapter<S, T, C extends CommonCommandContext<S, T>> {
     /**
      * The platform's adapter. Its class is looked up once.

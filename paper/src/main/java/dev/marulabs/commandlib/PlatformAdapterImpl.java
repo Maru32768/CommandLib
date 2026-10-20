@@ -4,12 +4,13 @@ import com.mojang.brigadier.LiteralMessage;
 import com.mojang.brigadier.Message;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.marulabs.commandlib.exception.ArgumentParseException;
+import dev.marulabs.commandlib.internal.PlatformAdapter;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.MessageComponentSerializer;
 import net.kyori.adventure.text.Component;
 
 @SuppressWarnings("UnstableApiUsage")
-public final class PlatformAdapterImpl implements PlatformAdapter<CommandSourceStack, Component, CommandContext> {
+final class PlatformAdapterImpl implements PlatformAdapter<CommandSourceStack, Component, CommandContext> {
     @Override
     public CommandContext createCommandContext(com.mojang.brigadier.context.CommandContext<CommandSourceStack> ctx) {
         return new CommandContext(ctx);

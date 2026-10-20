@@ -6,6 +6,7 @@ import dev.marulabs.commandlib.command.CommandExecutor;
 import dev.marulabs.commandlib.command.CommandMiddleware;
 import dev.marulabs.commandlib.command.Extractor;
 import dev.marulabs.commandlib.command.Prerequisite;
+import dev.marulabs.commandlib.internal.ArgumentBranchDelegate;
 import dev.marulabs.commandlib.util.UncaughtExceptionHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

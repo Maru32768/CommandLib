@@ -173,7 +173,7 @@ dependencies {
     platformDependencies.forEach { add("compileOnly", it) }
     add("compileOnly", "com.mojang:brigadier:1.0.18")
     // paper-api brings these annotations along, spigot-api does not.
-    add("compileOnly", "org.jetbrains:annotations:16.0.2")
+    add("compileOnly", "org.jetbrains:annotations:26.0.2")
     // The servers provide Log4j, which CommandLib filters the function load errors with.
     add("compileOnly", "org.apache.logging.log4j:log4j-core:2.17.1")
     if (commandlibModule == "spigot") {

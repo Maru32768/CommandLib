@@ -6,7 +6,7 @@ import dev.marulabs.commandlib.CommonCommand
 import dev.marulabs.commandlib.CommonCommandContext
 import dev.marulabs.commandlib.branch.ArgumentBranch
 import dev.marulabs.commandlib.branch.RequiredArgumentBranch
-import dev.marulabs.commandlib.runInCommandContext
+import dev.marulabs.commandlib.internal.kotlin.runInCommandContext
 import dev.marulabs.commandlib.suggestion.SuggestionBuilder
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope

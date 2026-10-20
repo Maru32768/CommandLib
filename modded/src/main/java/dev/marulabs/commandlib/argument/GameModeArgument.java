@@ -7,7 +7,7 @@ import dev.marulabs.commandlib.exception.ArgumentParseException;
 import net.minecraft.world.level.GameType;
 //? if <1.19.4 {
 /*import com.mojang.brigadier.arguments.StringArgumentType;
-import dev.marulabs.commandlib.util.StringUtil;
+import dev.marulabs.commandlib.internal.StringUtil;
 
 import java.util.Arrays;
 *///?}

@@ -8,6 +8,8 @@ import com.mojang.brigadier.tree.ArgumentCommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import dev.marulabs.commandlib.command.CommandExecutor;
 import dev.marulabs.commandlib.command.Extractor;
+import dev.marulabs.commandlib.internal.CurrentCommandContext;
+import dev.marulabs.commandlib.internal.PlatformAdapter;
 import dev.marulabs.commandlib.suggestion.SuggestionBuilder;
 import dev.marulabs.commandlib.suggestion.SuggestionProvider;
 import dev.marulabs.commandlib.util.UncaughtExceptionHandler;

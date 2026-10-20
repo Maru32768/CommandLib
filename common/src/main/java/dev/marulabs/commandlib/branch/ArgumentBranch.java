@@ -6,6 +6,8 @@ import dev.marulabs.commandlib.DefaultPermission;
 import dev.marulabs.commandlib.command.AsyncCommandExecutor;
 import dev.marulabs.commandlib.command.CommandExecutor;
 import dev.marulabs.commandlib.command.Extractor;
+import dev.marulabs.commandlib.internal.ArgumentBranchDelegate;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -18,6 +20,7 @@ import java.util.function.Predicate;
 public class ArgumentBranch<C extends CommonCommandContext<?, ?>, T extends CommonCommand<C, T>> {
     protected final ArgumentBranchDelegate<C, T> delegate;
 
+    @ApiStatus.Internal
     public ArgumentBranch(@NotNull ArgumentBranchDelegate<C, T> delegate) {
         this.delegate = Objects.requireNonNull(delegate);
     }

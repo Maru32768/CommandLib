@@ -1,8 +1,10 @@
-package dev.marulabs.commandlib
+package dev.marulabs.commandlib.internal.kotlin
 
-// shortcut: reaches the package-private CurrentCommandContext from the same package, so common-kotlin must be loaded by
-// the class loader of common, as it is when both are shaded into one plugin; make CurrentCommandContext public if
-// they ever need separate loaders.
+import dev.marulabs.commandlib.CommonCommandContext
+import dev.marulabs.commandlib.internal.CurrentCommandContext
+
+// Internal to common-kotlin. Its file class is public on the JVM, so it is in the internal package to stay out of the
+// completion of Java code.
 
 /**
  * The command context of the callback running on this thread.

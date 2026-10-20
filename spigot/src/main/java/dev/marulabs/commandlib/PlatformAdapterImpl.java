@@ -2,6 +2,7 @@ package dev.marulabs.commandlib;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.marulabs.commandlib.exception.ArgumentParseException;
+import dev.marulabs.commandlib.internal.PlatformAdapter;
 import dev.marulabs.commandlib.util.nms.chat.NMSChatMessage;
 import dev.marulabs.commandlib.util.nms.chat.NMSIChatMutableComponent;
 import dev.marulabs.commandlib.util.nms.chat.NMSTranslatableContents;
@@ -14,7 +15,7 @@ import org.bukkit.command.CommandSender;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public final class PlatformAdapterImpl implements PlatformAdapter<Object, BaseComponent, CommandContext> {
+final class PlatformAdapterImpl implements PlatformAdapter<Object, BaseComponent, CommandContext> {
     private static final Logger LOGGER = Logger.getLogger(PlatformAdapterImpl.class.getName());
 
     @Override

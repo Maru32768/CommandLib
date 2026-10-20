@@ -12,6 +12,8 @@ import dev.marulabs.commandlib.exception.ArgumentParseException;
 import dev.marulabs.commandlib.exception.ArgumentValidationException;
 import dev.marulabs.commandlib.exception.CommandPrerequisiteException;
 import dev.marulabs.commandlib.exception.OptionParseException;
+import dev.marulabs.commandlib.internal.CurrentCommandContext;
+import dev.marulabs.commandlib.internal.PlatformAdapter;
 import dev.marulabs.commandlib.util.UncaughtExceptionHandler;
 import org.jetbrains.annotations.Nullable;
 

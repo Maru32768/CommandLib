@@ -1,6 +1,13 @@
-package dev.marulabs.commandlib.util;
+package dev.marulabs.commandlib.internal;
 
-public class StringUtil {
+import org.jetbrains.annotations.ApiStatus;
+
+@ApiStatus.Internal
+public final class StringUtil {
+    private StringUtil() {
+    }
+
+
     public static boolean containsIgnoreCase(String s, String search) {
         if (s == null || search == null) {
             return false;

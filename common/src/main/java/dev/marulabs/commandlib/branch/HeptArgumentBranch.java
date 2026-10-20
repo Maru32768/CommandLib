@@ -8,9 +8,11 @@ import dev.marulabs.commandlib.DefaultPermission;
 import dev.marulabs.commandlib.command.AsyncCommandExecutor;
 import dev.marulabs.commandlib.command.CommandExecutor;
 import dev.marulabs.commandlib.command.Extractor;
+import dev.marulabs.commandlib.internal.ArgumentBranchDelegate;
 import dev.marulabs.commandlib.util.function.HeptFunction;
 import dev.marulabs.commandlib.util.function.OctoConsumer;
 import dev.marulabs.commandlib.util.function.OctoFunction;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.CompletionStage;
@@ -26,6 +28,7 @@ public final class HeptArgumentBranch<T1, T2, T3, T4, T5, T6, T7, C extends Comm
     private final CommonArgument<T6, C, ?> argument6;
     private final CommonArgument<T7, C, ?> argument7;
 
+    @ApiStatus.Internal
     public HeptArgumentBranch(ArgumentBranchDelegate<C, T> delegate,
                               CommonArgument<T1, C, ?> argument1,
                               CommonArgument<T2, C, ?> argument2,

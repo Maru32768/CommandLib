@@ -2,6 +2,7 @@ package dev.marulabs.commandlib;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import dev.marulabs.commandlib.internal.PlatformAdapter;
 
 import java.util.*;
 import java.util.function.Predicate;

@@ -5,7 +5,7 @@ import com.velocitypowered.api.proxy.Player;
 import dev.marulabs.commandlib.Argument;
 import dev.marulabs.commandlib.CommandContext;
 import dev.marulabs.commandlib.exception.ArgumentParseException;
-import dev.marulabs.commandlib.util.StringUtil;
+import dev.marulabs.commandlib.internal.StringUtil;
 
 /**
  * A player online on the proxy, by name, ignoring case. Suggests the names of the online players. The client sees a

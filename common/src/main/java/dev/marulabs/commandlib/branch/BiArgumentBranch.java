@@ -8,8 +8,10 @@ import dev.marulabs.commandlib.DefaultPermission;
 import dev.marulabs.commandlib.command.AsyncCommandExecutor;
 import dev.marulabs.commandlib.command.CommandExecutor;
 import dev.marulabs.commandlib.command.Extractor;
+import dev.marulabs.commandlib.internal.ArgumentBranchDelegate;
 import dev.marulabs.commandlib.util.function.TriConsumer;
 import dev.marulabs.commandlib.util.function.TriFunction;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.CompletionStage;
@@ -21,6 +23,7 @@ public final class BiArgumentBranch<T1, T2, C extends CommonCommandContext<?, ?>
     private final CommonArgument<T1, C, ?> argument1;
     private final CommonArgument<T2, C, ?> argument2;
 
+    @ApiStatus.Internal
     public BiArgumentBranch(ArgumentBranchDelegate<C, T> delegate,
                             CommonArgument<T1, C, ?> argument1,
                             CommonArgument<T2, C, ?> argument2) {

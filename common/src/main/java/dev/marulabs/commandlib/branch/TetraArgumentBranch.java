@@ -8,9 +8,11 @@ import dev.marulabs.commandlib.DefaultPermission;
 import dev.marulabs.commandlib.command.AsyncCommandExecutor;
 import dev.marulabs.commandlib.command.CommandExecutor;
 import dev.marulabs.commandlib.command.Extractor;
+import dev.marulabs.commandlib.internal.ArgumentBranchDelegate;
 import dev.marulabs.commandlib.util.function.QuintConsumer;
 import dev.marulabs.commandlib.util.function.QuintFunction;
 import dev.marulabs.commandlib.util.function.TetraFunction;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.CompletionStage;
@@ -23,6 +25,7 @@ public final class TetraArgumentBranch<T1, T2, T3, T4, C extends CommonCommandCo
     private final CommonArgument<T3, C, ?> argument3;
     private final CommonArgument<T4, C, ?> argument4;
 
+    @ApiStatus.Internal
     public TetraArgumentBranch(ArgumentBranchDelegate<C, T> delegate,
                                CommonArgument<T1, C, ?> argument1,
                                CommonArgument<T2, C, ?> argument2,

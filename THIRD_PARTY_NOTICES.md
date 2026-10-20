@@ -7,7 +7,7 @@ CommandLib's original code is licensed under the [MIT License](LICENSE). This do
 | Dependency | Declared version | Upstream license | Use / packaging |
 | --- | --- | --- | --- |
 | [Brigadier](https://github.com/Mojang/brigadier/blob/master/LICENSE) | 1.0.18 | MIT | Provided by the platform for library modules; an external `api` dependency of common-testing. |
-| [JetBrains annotations](https://github.com/JetBrains/java-annotations) | 16.0.2 | Apache-2.0 | compileOnlyApi; not bundled. |
+| [JetBrains annotations](https://github.com/JetBrains/java-annotations) | 26.0.2 | Apache-2.0 | compileOnlyApi; not bundled. |
 | [Log4j Core](https://github.com/apache/logging-log4j2/blob/rel/2.17.1/LICENSE.txt) | 2.17.1 | Apache-2.0 | compileOnly and repository tests; provided by the server, not bundled. |
 | [Bukkit](https://github.com/Bukkit/Bukkit/blob/master/LICENCE.txt) / [Spigot](https://hub.spigotmc.org/stash/projects/SPIGOT/repos/bukkit/browse/LICENCE.txt) | API 1.16.5-R0.1-SNAPSHOT; typed NMS targets in nms/ | GPL-3.0 family; check the exact upstream revision and notices | Compile-time platform; server/API classes are not bundled. |
 | [Paper](https://github.com/PaperMC/Paper/blob/main/LICENSE.md) | API 1.21-R0.1-SNAPSHOT; dev bundles 1.20.6 and 1.21.1 | Inherited GPL terms, with some contributions additionally MIT | Compile-time platform; API/server/dev bundles are not bundled. |

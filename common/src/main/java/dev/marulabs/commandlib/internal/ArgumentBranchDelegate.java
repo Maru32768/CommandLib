@@ -1,15 +1,21 @@
-package dev.marulabs.commandlib.branch;
+package dev.marulabs.commandlib.internal;
 
 import dev.marulabs.commandlib.CommonCommand;
 import dev.marulabs.commandlib.CommonCommandContext;
 import dev.marulabs.commandlib.DefaultPermission;
 import dev.marulabs.commandlib.command.AsyncCommandExecutor;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+/**
+ * What an argument branch changes on the command that created it. Public only because the branch classes are in
+ * another package.
+ */
+@ApiStatus.Internal
 public interface ArgumentBranchDelegate<C extends CommonCommandContext<?, ?>, T extends CommonCommand<C, T>> {
     void description(@NotNull String description);
 

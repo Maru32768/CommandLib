@@ -8,9 +8,11 @@ import dev.marulabs.commandlib.DefaultPermission;
 import dev.marulabs.commandlib.command.AsyncCommandExecutor;
 import dev.marulabs.commandlib.command.CommandExecutor;
 import dev.marulabs.commandlib.command.Extractor;
+import dev.marulabs.commandlib.internal.ArgumentBranchDelegate;
 import dev.marulabs.commandlib.util.function.HexaConsumer;
 import dev.marulabs.commandlib.util.function.HexaFunction;
 import dev.marulabs.commandlib.util.function.QuintFunction;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.CompletionStage;
@@ -24,6 +26,7 @@ public final class QuintArgumentBranch<T1, T2, T3, T4, T5, C extends CommonComma
     private final CommonArgument<T4, C, ?> argument4;
     private final CommonArgument<T5, C, ?> argument5;
 
+    @ApiStatus.Internal
     public QuintArgumentBranch(ArgumentBranchDelegate<C, T> delegate,
                                CommonArgument<T1, C, ?> argument1,
                                CommonArgument<T2, C, ?> argument2,

@@ -1,4 +1,4 @@
-package dev.marulabs.commandlib.util;
+package dev.marulabs.commandlib.internal;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;

@@ -2,8 +2,8 @@ package dev.marulabs.commandlib.argument;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import dev.marulabs.commandlib.internal.StringUtil;
 import dev.marulabs.commandlib.suggestion.SuggestionBuilder;
-import dev.marulabs.commandlib.util.StringUtil;
 
 import java.util.stream.Stream;
 

@@ -2,8 +2,9 @@ package dev.marulabs.commandlib;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.marulabs.commandlib.exception.ArgumentParseException;
+import dev.marulabs.commandlib.internal.PlatformAdapter;
 
-public final class PlatformAdapterImpl implements PlatformAdapter<TestCommandSource, String, TestCommandContext> {
+final class PlatformAdapterImpl implements PlatformAdapter<TestCommandSource, String, TestCommandContext> {
     @Override
     public TestCommandContext createCommandContext(com.mojang.brigadier.context.CommandContext<TestCommandSource> ctx) {
         return new TestCommandContext(ctx);

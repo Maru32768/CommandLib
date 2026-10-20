@@ -8,6 +8,8 @@ import dev.marulabs.commandlib.DefaultPermission;
 import dev.marulabs.commandlib.command.AsyncCommandExecutor;
 import dev.marulabs.commandlib.command.CommandExecutor;
 import dev.marulabs.commandlib.command.Extractor;
+import dev.marulabs.commandlib.internal.ArgumentBranchDelegate;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.CompletionStage;
@@ -19,6 +21,7 @@ import java.util.function.Predicate;
 public final class UnaryArgumentBranch<T1, C extends CommonCommandContext<?, ?>, T extends CommonCommand<C, T>> extends ArgumentBranch<C, T> {
     private final CommonArgument<T1, C, ?> argument1;
 
+    @ApiStatus.Internal
     public UnaryArgumentBranch(ArgumentBranchDelegate<C, T> delegate, CommonArgument<T1, C, ?> argument1) {
         super(delegate);
         this.argument1 = argument1;

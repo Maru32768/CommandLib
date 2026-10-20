@@ -4,7 +4,7 @@ import dev.marulabs.commandlib.Caption;
 import dev.marulabs.commandlib.CommandContext;
 import dev.marulabs.commandlib.exception.ArgumentParseException;
 import dev.marulabs.commandlib.suggestion.SuggestionBuilder;
-import dev.marulabs.commandlib.util.StringUtil;
+import dev.marulabs.commandlib.internal.StringUtil;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;

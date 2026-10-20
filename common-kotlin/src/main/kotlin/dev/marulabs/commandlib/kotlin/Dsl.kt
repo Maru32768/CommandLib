@@ -9,7 +9,7 @@ import dev.marulabs.commandlib.Options
 import dev.marulabs.commandlib.branch.ArgumentBranch
 import dev.marulabs.commandlib.branch.RequiredArgumentBranch
 import dev.marulabs.commandlib.command.Extractor
-import dev.marulabs.commandlib.currentCommandContext
+import dev.marulabs.commandlib.internal.kotlin.currentCommandContext
 import kotlin.reflect.KProperty
 
 /**

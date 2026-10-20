@@ -3,6 +3,7 @@ package dev.marulabs.commandlib;
 import dev.marulabs.commandlib.CommandHelp.Token;
 import dev.marulabs.commandlib.CommandHelp.Usage;
 import dev.marulabs.commandlib.command.CommandExecutor;
+import dev.marulabs.commandlib.internal.PlatformAdapter;
 
 import java.util.ArrayList;
 import java.util.HashSet;

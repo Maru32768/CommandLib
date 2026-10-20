@@ -2,6 +2,7 @@ package dev.marulabs.commandlib;
 
 import dev.marulabs.commandlib.argument.CommonIntegerArgument;
 import dev.marulabs.commandlib.argument.CommonStringArgument;
+import dev.marulabs.commandlib.internal.CurrentCommandContext;
 import org.junit.jupiter.api.Test;
 
 import java.util.Locale;

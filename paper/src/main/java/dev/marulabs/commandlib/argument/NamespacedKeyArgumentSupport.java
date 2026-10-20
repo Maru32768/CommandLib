@@ -2,8 +2,8 @@ package dev.marulabs.commandlib.argument;
 
 import dev.marulabs.commandlib.Caption;
 import dev.marulabs.commandlib.exception.ArgumentParseException;
+import dev.marulabs.commandlib.internal.StringUtil;
 import dev.marulabs.commandlib.suggestion.SuggestionBuilder;
-import dev.marulabs.commandlib.util.StringUtil;
 import org.bukkit.Keyed;
 import org.bukkit.NamespacedKey;
 

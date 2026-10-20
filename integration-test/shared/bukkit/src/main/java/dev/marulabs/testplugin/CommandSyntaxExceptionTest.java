@@ -5,7 +5,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.marulabs.commandlib.Argument;
 import dev.marulabs.commandlib.Command;
 import dev.marulabs.commandlib.CommandContext;
-import dev.marulabs.commandlib.PlatformAdapter;
+import dev.marulabs.commandlib.internal.PlatformAdapter;
 import dev.marulabs.commandlib.util.UncaughtExceptionHandler;
 import dev.marulabs.integration.core.ExceptionUtil;
 import dev.marulabs.integration.core.TestResult;

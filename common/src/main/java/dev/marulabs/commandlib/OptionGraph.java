@@ -16,6 +16,7 @@ import com.mojang.brigadier.tree.ArgumentCommandNode;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import dev.marulabs.commandlib.command.Extractor;
+import dev.marulabs.commandlib.internal.PlatformAdapter;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayDeque;

@@ -1,5 +1,8 @@
-package dev.marulabs.commandlib;
+package dev.marulabs.commandlib.internal;
 
+import dev.marulabs.commandlib.ArgRef;
+import dev.marulabs.commandlib.CommonCommandContext;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -10,7 +13,8 @@ import java.util.Deque;
  * Tracks the command context being processed on the current thread so that {@link ArgRef#get()} can resolve
  * values without an explicit context. Uses a stack because a command callback may dispatch another command.
  */
-final class CurrentCommandContext {
+@ApiStatus.Internal
+public final class CurrentCommandContext {
     private static final ThreadLocal<Deque<CommonCommandContext<?, ?>>> STACK = new ThreadLocal<>();
 
     private CurrentCommandContext() {
@@ -19,8 +23,8 @@ final class CurrentCommandContext {
     /**
      * Runs {@code action} with {@code ctx} as the current context and returns its result.
      */
-    static <R, E extends Exception> R call(@NotNull CommonCommandContext<?, ?> ctx,
-                                           @NotNull Action<R, E> action) throws E {
+    public static <R, E extends Exception> R call(@NotNull CommonCommandContext<?, ?> ctx,
+                                                  @NotNull Action<R, E> action) throws E {
         push(ctx);
         try {
             return action.get();
@@ -32,7 +36,7 @@ final class CurrentCommandContext {
     /**
      * Runs {@code action} with {@code ctx} as the current context.
      */
-    static void run(@NotNull CommonCommandContext<?, ?> ctx, @NotNull Runnable action) {
+    public static void run(@NotNull CommonCommandContext<?, ?> ctx, @NotNull Runnable action) {
         push(ctx);
         try {
             action.run();
@@ -42,12 +46,12 @@ final class CurrentCommandContext {
     }
 
     @FunctionalInterface
-    interface Action<R, E extends Exception> {
+    public interface Action<R, E extends Exception> {
         R get() throws E;
     }
 
     @Nullable
-    static CommonCommandContext<?, ?> get() {
+    public static CommonCommandContext<?, ?> get() {
         Deque<CommonCommandContext<?, ?>> stack = STACK.get();
         return stack == null ? null : stack.peek();
     }

@@ -1,5 +1,6 @@
 package dev.marulabs.commandlib;
 
+import dev.marulabs.commandlib.internal.CurrentCommandContext;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
