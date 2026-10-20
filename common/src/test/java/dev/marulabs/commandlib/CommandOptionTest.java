@@ -763,4 +763,19 @@ class CommandOptionTest {
                                                                                   .hasMessageContaining("--quiet");
         new TestCommandRunner(optionalRequiresExcluded);
     }
+
+    @Test
+    void a_required_option_can_require_a_value_an_excluded_option_has_by_default() throws Exception {
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("deploy") {{
+            CommandOption<Boolean, TestCommandContext> dryRun = option(Options.flag("dry-run", 'n'));
+            CommandOption<Boolean, TestCommandContext> force = option(Options.flag("force", 'f'));
+            force.required()
+                 .requires(dryRun, false);
+            mutuallyExclusive(force, dryRun);
+            execute(ctx -> ctx.sendMessage("deployed"));
+        }});
+
+        assertThat(runner.execute("deploy --force")
+                         .messages()).containsExactly("deployed");
+    }
 }

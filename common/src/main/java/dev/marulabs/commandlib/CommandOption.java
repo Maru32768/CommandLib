@@ -46,6 +46,8 @@ public final class CommandOption<T, C extends CommonCommandContext<?, ?>> {
     private final List<OptionValidator<C>> validators = new ArrayList<>();
     // The options that requires(...) names, which must be options of the same command.
     private final List<CommandOption<?, ?>> requiredOptions = new ArrayList<>();
+    // The options requires(option) names, which must be given; a value requirement can be met by a default value.
+    private final List<CommandOption<?, ?>> optionsToGive = new ArrayList<>();
     private String description = "";
     private boolean required;
     // Whether required() was called, as opposed to an option of an argument that is not optional.
@@ -320,12 +322,14 @@ public final class CommandOption<T, C extends CommonCommandContext<?, ?>> {
         option.requiredByCall = requiredByCall;
         option.validators.addAll(validators);
         option.requiredOptions.addAll(requiredOptions);
+        option.optionsToGive.addAll(optionsToGive);
         return option;
     }
 
     public CommandOption<T, C> requires(@NotNull CommandOption<?, ?> option) {
         Objects.requireNonNull(option);
         requiredOptions.add(option);
+        optionsToGive.add(option);
         validators.add(ctx -> {
             if (!ctx.hasOption(option)) {
                 throw new OptionParseException(Caption.OPTION_REQUIRES,
@@ -427,6 +431,13 @@ public final class CommandOption<T, C extends CommonCommandContext<?, ?>> {
 
     List<CommandOption<?, ?>> requiredOptions() {
         return requiredOptions;
+    }
+
+    /**
+     * The options that must be given with this one, which {@link #requires(CommandOption)} names.
+     */
+    List<CommandOption<?, ?>> optionsToGive() {
+        return optionsToGive;
     }
 
     void validate(C ctx, boolean checkRequired) throws OptionParseException {

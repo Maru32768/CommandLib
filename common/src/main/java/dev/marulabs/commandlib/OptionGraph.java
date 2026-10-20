@@ -113,7 +113,7 @@ final class OptionGraph<S, C extends CommonCommandContext<S, ?>> {
                 }
             }
         }
-        // The options every input that runs the command gives: the required ones and those they require.
+        // The options every input that runs the command gives: the required ones and those they must be given with.
         Set<CommandOption<?, ?>> alwaysGiven = new LinkedHashSet<>();
         Deque<CommandOption<?, ?>> pending = options.stream()
                                                     .filter(CommandOption::isRequired)
@@ -121,7 +121,7 @@ final class OptionGraph<S, C extends CommonCommandContext<S, ?>> {
         while (!pending.isEmpty()) {
             CommandOption<?, ?> option = pending.pop();
             if (alwaysGiven.add(option)) {
-                pending.addAll(option.requiredOptions());
+                pending.addAll(option.optionsToGive());
             }
         }
         List<CommandOption<?, ?>> given = new ArrayList<>(alwaysGiven);
