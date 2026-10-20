@@ -3,6 +3,8 @@
 # for a human to judge, and no rule blocks anything.
 files:
   - common/src/main/java
+  - common/src/bukkit/java
+  - common/src/adventure/java
   - spigot/src/main/java
   - paper/src/main/java
   - velocity/src/main/java
