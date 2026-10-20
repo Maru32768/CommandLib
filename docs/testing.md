@@ -55,7 +55,7 @@ class HealCommandTest {
 | `new CommandTester(Command, prefix)`, `new CommandTester(Collection<Command>, prefix)` | For commands without platform argument types. |
 | `CommandTester.builder().command(...).commands(...).permissionPrefix(...).build()` | Several commands, or extra setup (`mockNmsClass` in `spigot-testing`, `defaults(...)` for the registration's [middlewares and providers](execution.md#registration-wide-middlewares-and-providers)). |
 | `execute(input, sender)` | Runs the input as the sender and returns the result `/execute store result` would store (`0` for a failure). No leading `/`. |
-| `suggestions(input, sender)` | Returns Brigadier's `CompletableFuture<Suggestions>` for a partial input. |
+| `suggestions(input, sender)` | Returns the `CompletableFuture<Suggestions>` for a partial input. Like the client's command tree, it leaves out the nodes the sender cannot use. |
 | `suggest(input, sender)` | Returns the suggestion texts for a partial input as a `List<String>`. |
 | `commandTree()`, `assertCommandTreeMatchesSnapshot(name)` | Renders the registered commands as text and compares it with a snapshot file. See [command tree snapshots](#command-tree-snapshots). |
 | `close()` | Ends the tester. Use try-with-resources. |
@@ -187,7 +187,7 @@ would share their tester.
 
 | Factory | Sender |
 |---|---|
-| `FakeSender.player(name)`, `player(name, uuid)` | A non-operator player with every permission |
+| `FakeSender.player(name)`, `player(name, uuid)` | A non-operator player with every permission and the locale `en_us` |
 | `FakeSender.console()` | The console, an operator with every permission |
 | `FakeSender.playerBuilder(name)`, `consoleBuilder()` | Builders for the same senders |
 | `FakeSender.unknown()` (`common-testing` only) | A sender of unknown type without permissions |
@@ -198,7 +198,9 @@ Adjust a sender with `op(boolean)`, `permissions(nodes...)` (grants only these n
 `common-testing`). The builders have the same methods. `velocity-testing` has no builders and only `permissions`,
 `denyPermissions` and `locale`. In `modded-testing` the console passes every permission check, as on a server, so
 `permissions` and `denyPermissions` throw for it. A player's locale decides the language of CommandLib's messages
-and of your [captions](localization.md); the console uses the JVM's default locale.
+and of your [captions](localization.md). Players start with `en_us` (`Locale.US` in `velocity-testing`; not yet in
+the Forge / NeoForge / Fabric artifacts), which a vanilla client reports by default, so English assertions do not
+depend on the JVM's default locale. The console uses the JVM's default locale, as on a server.
 
 Keep the returned sender: in `common-testing` these methods return a new `FakeSender`, in the other artifacts they
 change the sender and return it.
@@ -289,26 +291,34 @@ void suggests_modes() {
 `suggest` waits for the suggestions and returns their texts. For tooltips or ranges, read the `Suggestions` that
 `suggestions(input, sender).join()` returns.
 
+Both complete as the client does from its command tree: a command, literal or argument the sender cannot use (a missing
+permission or a failing `visibleWhen`) is left out (not yet in the Forge / NeoForge / Fabric artifacts). Brigadier's server-side `getCompletionSuggestions` would still list
+such a literal ([permissions](permissions.md#where-permissions-are-checked)).
+
 A provider that throws an exception does not fail `suggest` or `suggestions`, as on a server: the exception is printed
 and only that provider's suggestions are missing. Assert the expected suggestions to catch it.
 
 ### Command tree snapshots
 
 `commandTree()` renders the registered commands: each command with its aliases, permission node and
-`DefaultPermission`, then its options (long names and aliases, short name, value name, and whether it is required or
-repeatable), argument branches (argument names and classes, `[optional]` and `<variadic...>` markers, and the branch's
-permission) and child commands, indented by depth. The generated `help` children are left out. It is the same text as
+`DefaultPermission`, then the bypass node of its cooldown (when the cooldown has a `bypassPermission`), its options
+(long names and aliases, short name, value name, and whether it is required or repeatable), argument branches (argument
+names and classes, `[optional]` and `<variadic...>` markers, and the branch's permission) and child commands, indented
+by depth. The generated `help` children are left out. It is the same text as
 [`CommandDocs#tree()`](diagnostics.md#command-documentation).
 
 ```text
 heal (aliases: h) [myplugin.command.heal, OP]
+  cooldown bypass [myplugin.heal.nocooldown, OP]
   --silent, -s
   <target: PlayerArgument> <amount: IntegerArgument> [myplugin.command.heal.target.amount, OP]
 ```
 
 `assertCommandTreeMatchesSnapshot(name)` compares the tree with `src/test/resources/snapshots/<name>`, relative to the
-working directory (the project directory under Gradle and Maven), so a change to the tree, a permission node, or an
-alias fails a test:
+working directory (the project directory under Gradle and Maven), so a change to the tree, a permission node or its
+default, a cooldown bypass node, an option, or an alias fails a test. Only what the text above lists is compared:
+executors, descriptions, prerequisites (`require`, `addPrerequisite`) and `visibleWhen` predicates are not, so adding
+or removing an `execute(...)` or changing a description does not fail it.
 
 ```java
 @Test

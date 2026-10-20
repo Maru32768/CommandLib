@@ -124,6 +124,10 @@ Suggestions follow [permissions](permissions.md):
 
 - A command, subcommand, or argument branch the sender may not use is not in the sender's command tree, so it is
   neither shown nor completed.
+- This holds for the client's command tree and the completion the client does from it. The server's own completion
+  (Brigadier's `CommandDispatcher#getCompletionSuggestions`, which answers a client's request for an argument's
+  server-side suggestions) does not check requirements, so its answer may still list a literal the sender cannot use
+  next to that argument. The testing artifacts' `suggest` and `suggestions` follow the client and leave such nodes out.
 - The argument's suggestion callback also checks the branch permission and returns no suggestions without it.
 - Generated help lists only the routes the sender may use.
 

@@ -28,7 +28,7 @@ Files.writeString(Path.of("permissions.json"), docs.permissionsJson());
 | `json()` | `permissionPrefix` and a `commands` array with the same content as a tree: each command has its `examples`, `branches` (argument branches with their `arguments` and `children`) and `children`. |
 | `permissionsMarkdown()` | A table of every permission node with its default, the route it guards and its description. |
 | `permissionsJson()` | The same as a `permissions` array of `node`, `default`, `description`, `route` and `kind` (`command`, `argument`, `option` or `cooldown-bypass`). |
-| `tree()` | Indented text, one line per command, option and argument branch, as `CommandTester#commandTree()` renders it in the [testing artifacts](testing.md#command-tree-snapshots). |
+| `tree()` | Indented text, one line per command, cooldown bypass permission, option and argument branch, as `CommandTester#commandTree()` renders it in the [testing artifacts](testing.md#command-tree-snapshots). |
 
 Each call reads the commands again. Arguments are shown as `<name>`, optional ones as `[name]` and variadic ones as
 `<name...>`; argument types are the simple class names, so an anonymous subclass shows the class it extends. A command

@@ -6,6 +6,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 public final class FakeSender implements CommandActor {
+    static final String DEFAULT_PLAYER_LOCALE = "en_us";
+
     private final String name;
     private final @Nullable UUID uniqueId;
     private final CommandActorType type;
@@ -17,12 +19,23 @@ public final class FakeSender implements CommandActor {
     private final List<String> sentMessages = new ArrayList<>();
     private final List<String> sentMessageLegacyTexts = new ArrayList<>();
 
+    /**
+     * Creates a non-operator player that has every permission and the locale {@code en_us}, which a vanilla client
+     * reports by default, so that messages do not depend on the JVM's default locale. Change it with {@code locale}.
+     */
     public static FakeSender player(String name) {
-        return new FakeSender(name, UUID.randomUUID(), CommandActorType.PLAYER, false, true, Set.of(), Set.of(), null);
+        return player(name, UUID.randomUUID());
     }
 
     public static FakeSender player(String name, UUID uniqueId) {
-        return new FakeSender(name, uniqueId, CommandActorType.PLAYER, false, true, Set.of(), Set.of(), null);
+        return new FakeSender(name,
+                              uniqueId,
+                              CommandActorType.PLAYER,
+                              false,
+                              true,
+                              Set.of(),
+                              Set.of(),
+                              DEFAULT_PLAYER_LOCALE);
     }
 
     public static FakeSender console() {
@@ -34,10 +47,10 @@ public final class FakeSender implements CommandActor {
     }
 
     /**
-     * Creates a builder for a non-operator player that has every permission.
+     * Creates a builder for a non-operator player that has every permission and the locale {@code en_us}.
      */
     public static Builder playerBuilder(String name) {
-        return new Builder(name, UUID.randomUUID(), CommandActorType.PLAYER, false);
+        return new Builder(name, UUID.randomUUID(), CommandActorType.PLAYER, false).locale(DEFAULT_PLAYER_LOCALE);
     }
 
     /**

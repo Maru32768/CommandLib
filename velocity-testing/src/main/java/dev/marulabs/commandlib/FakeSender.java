@@ -31,6 +31,10 @@ public final class FakeSender {
     private @Nullable Set<String> grantedPermissions;
     private final Set<String> deniedPermissions = new HashSet<>();
 
+    /**
+     * Creates a non-operator player that has every permission and the locale {@code en_US}, which a vanilla client
+     * reports by default, so that messages do not depend on the JVM's default locale. Change it with {@code locale}.
+     */
     public static FakeSender player(@NotNull String name) {
         return player(name, UUID.randomUUID());
     }
@@ -41,7 +45,7 @@ public final class FakeSender {
                .thenReturn(name);
         Mockito.when(player.getUniqueId())
                .thenReturn(uniqueId);
-        return new FakeSender(player);
+        return new FakeSender(player).locale(Locale.US);
     }
 
     public static FakeSender console() {

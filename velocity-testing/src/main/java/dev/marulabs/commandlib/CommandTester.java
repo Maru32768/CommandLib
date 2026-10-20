@@ -137,6 +137,24 @@ public final class CommandTester implements AutoCloseable {
     }
 
     /**
+     * Returns the suggestions a client gets for the given partial input. Like the client's command tree, they leave out
+     * the nodes the sender cannot use.
+     */
+    public CompletableFuture<Suggestions> suggestions(@NotNull String input, @NotNull FakeSender sender) {
+        return suggestions(input, sender.asSender());
+    }
+
+    /**
+     * Returns the suggestions a client gets for the given partial input, like
+     * {@link #suggestions(String, FakeSender)}.
+     */
+    public CompletableFuture<Suggestions> suggestions(@NotNull String input, @NotNull CommandSource sender) {
+        activate();
+        ParseResults<CommandSource> parseResults = dispatcher.parse(input, sender);
+        return ClientSuggestions.complete(parseResults);
+    }
+
+    /**
      * Returns the texts of the suggestions for the given partial input, waiting for them to complete.
      */
     public List<String> suggest(@NotNull String input, @NotNull FakeSender sender) {
@@ -147,19 +165,17 @@ public final class CommandTester implements AutoCloseable {
      * Returns the texts of the suggestions for the given partial input, waiting for them to complete.
      */
     public List<String> suggest(@NotNull String input, @NotNull CommandSource sender) {
-        activate();
-        ParseResults<CommandSource> parseResults = dispatcher.parse(input, sender);
-        CompletableFuture<Suggestions> suggestions = dispatcher.getCompletionSuggestions(parseResults);
-        return suggestions.join()
-                          .getList()
-                          .stream()
-                          .map(Suggestion::getText)
-                          .collect(Collectors.toList());
+        return suggestions(input, sender).join()
+                                         .getList()
+                                         .stream()
+                                         .map(Suggestion::getText)
+                                         .collect(Collectors.toList());
     }
 
     /**
      * Renders the registered commands as indented text: each command with its aliases and permission node, then its
-     * options, argument branches and child commands.
+     * cooldown bypass permission, options, argument branches and child commands. Executors, descriptions,
+     * prerequisites and {@code visibleWhen} predicates are not shown.
      */
     public String commandTree() {
         return CommandTreeRenderer.render(commands, permissionPrefix);

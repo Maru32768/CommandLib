@@ -140,8 +140,8 @@ public final class CommandDocs {
     }
 
     /**
-     * Returns the commands as indented text, one line per command, option and argument branch, with each permission
-     * node and its default. It is the format of the testing artifacts' {@code CommandTester#commandTree()}.
+     * Returns the commands as indented text, one line per command, cooldown bypass, option and argument branch, with
+     * each permission node and its default. It is the format of the testing artifacts' {@code CommandTester#commandTree()}.
      */
     public String tree() {
         return CommandTreeRenderer.render(entries());

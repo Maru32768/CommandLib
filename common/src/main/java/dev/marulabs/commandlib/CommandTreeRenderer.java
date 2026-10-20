@@ -12,8 +12,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Renders registered commands as indented text: each command with its aliases and permission, then its options,
- * argument branches and child commands. The testing artifacts compare it with golden snapshot files, and
+ * Renders registered commands as indented text: each command with its aliases and permission, then its cooldown
+ * bypass permission, options, argument branches and child commands. The testing artifacts compare it with golden snapshot files, and
  * {@link CommandDocs#tree()} returns it.
  */
 final class CommandTreeRenderer {
@@ -33,6 +33,9 @@ final class CommandTreeRenderer {
     private static void renderCommand(StringBuilder out, CommandEntry command, int depth) {
         String aliases = command.aliases.isEmpty() ? "" : " (aliases: " + String.join(", ", command.aliases) + ")";
         line(out, depth, command.name + aliases + permission(command.permission));
+        if (command.cooldownBypass != null) {
+            line(out, depth + 1, "cooldown bypass" + permission(command.cooldownBypass));
+        }
         for (OptionEntry option : command.options) {
             List<String> names = new ArrayList<>();
             option.names.forEach(x -> names.add("--" + x));

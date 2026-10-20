@@ -229,14 +229,16 @@ public class CommandTester implements AutoCloseable {
     }
 
     /**
-     * Returns Brigadier suggestions for the given partial input.
+     * Returns the suggestions a client gets for the given partial input. Like the client's command tree, they leave out
+     * the nodes the sender cannot use.
      */
     public CompletableFuture<Suggestions> suggestions(String input, FakeSender sender) {
         return suggestions(input, sender.getCommandSender());
     }
 
     /**
-     * Returns Brigadier suggestions for the given partial input.
+     * Returns the suggestions a client gets for the given partial input, like
+     * {@link #suggestions(String, FakeSender)}.
      */
     public CompletableFuture<Suggestions> suggestions(String input, CommandSender sender) {
         CommandTester previous = current.get();
@@ -245,7 +247,7 @@ public class CommandTester implements AutoCloseable {
         try {
             // The sender is the source, as in execute, so a suggestion that completes later still finds it.
             ParseResults<Object> parseResults = dispatcher.parse(input, sender);
-            return dispatcher.getCompletionSuggestions(parseResults);
+            return ClientSuggestions.complete(parseResults);
         } finally {
             currentCommandSender.remove();
             restoreCurrent(previous);
@@ -272,7 +274,8 @@ public class CommandTester implements AutoCloseable {
 
     /**
      * Renders the registered commands as indented text: each command with its aliases and permission node, then its
-     * options, argument branches and child commands.
+     * cooldown bypass permission, options, argument branches and child commands. Executors, descriptions,
+     * prerequisites and {@code visibleWhen} predicates are not shown.
      */
     public String commandTree() {
         return CommandTreeRenderer.render(commands, permissionPrefix);

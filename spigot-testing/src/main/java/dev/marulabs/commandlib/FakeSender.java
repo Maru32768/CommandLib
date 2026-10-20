@@ -20,11 +20,17 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class FakeSender {
+    static final String DEFAULT_PLAYER_LOCALE = "en_us";
+
     private final CommandSender commandSender;
     private final List<BaseComponent> sentMessages = new ArrayList<>();
     private @Nullable Set<String> grantedPermissions;
     private final Set<String> deniedPermissions = new HashSet<>();
 
+    /**
+     * Creates a non-operator player that has every permission and the locale {@code en_us}, which a vanilla client
+     * reports by default, so that messages do not depend on the JVM's default locale. Change it with {@code locale}.
+     */
     public static FakeSender player(String name) {
         Player player = Mockito.mock(Player.class);
         Player.Spigot spigot = Mockito.mock(Player.Spigot.class);
@@ -36,7 +42,8 @@ public class FakeSender {
                .thenReturn(spigot);
 
         FakeSender fakeSender = new FakeSender(player);
-        fakeSender.op(false);
+        fakeSender.op(false)
+                  .locale(DEFAULT_PLAYER_LOCALE);
         Mockito.doAnswer(invocation -> {
             fakeSender.sentMessages.add(invocation.getArgument(0));
             return null;
@@ -72,7 +79,7 @@ public class FakeSender {
     }
 
     /**
-     * Creates a builder for a non-operator player that has every permission.
+     * Creates a builder for a non-operator player that has every permission and the locale {@code en_us}.
      */
     public static Builder playerBuilder(String name) {
         return new Builder(false, name, false);

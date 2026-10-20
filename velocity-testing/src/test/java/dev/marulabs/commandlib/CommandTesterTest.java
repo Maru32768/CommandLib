@@ -285,4 +285,24 @@ class CommandTesterTest {
                          .get(0)
                          .hasDecoration(TextDecoration.BOLD)).isTrue();
     }
+
+    @Test
+    void suggestions_leave_out_children_the_sender_cannot_use() {
+        // Brigadier's server-side completion would also list "stop"; the client's command tree hides it.
+        CommandTester tester = new CommandTester(new Command("game") {{
+            addChildren(new Command("start") {{
+                execute(ctx -> ctx.sendMessage("start"));
+            }}, new Command("stop") {{
+                execute(ctx -> ctx.sendMessage("stop"));
+            }});
+        }}, "proxy.command");
+        FakeSender sender = FakeSender.player("Steve")
+                                      .permissions("proxy.command.game", "proxy.command.game.start");
+
+        assertThat(tester.suggest("game ", sender)).containsExactly("help", "start");
+        assertThat(tester.suggest("game s", sender)).containsExactly("start");
+        assertThat(tester.suggestions("game ", sender)
+                         .join()
+                         .getList()).hasSize(2);
+    }
 }

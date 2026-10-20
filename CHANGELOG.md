@@ -207,6 +207,13 @@ suggestions) and a command for each argument type. Options, permission plugins a
 - Server-free test artifacts: `common-testing`, `spigot-testing`, `paper-testing`, `velocity-testing` and
   `<loader>-testing-<version>` ([testing](docs/testing.md)).
 - `CommandTester` runs commands, suggestions and command tree snapshots. `FakeSender` has player and console builders.
+- `CommandTester#suggest` and `suggestions` leave out the nodes the sender cannot use, as the client's command tree
+  does, instead of every literal Brigadier's server-side completion lists (not yet in the Forge / NeoForge / Fabric
+  artifacts).
+- `CommandTester#commandTree()` and its snapshots show the cooldown bypass node of a command. `velocity-testing`'s
+  `CommandTester` has `suggestions(input, sender)`. `FakeSender.player(...)` and `playerBuilder(...)` start with the
+  locale `en_us` (not yet in the Forge / NeoForge / Fabric artifacts), so caption assertions no longer depend on the
+  JVM's default locale.
 - A JUnit 5 extension, `CommandLibExtension`, creates a tester per test and injects `CommandTester` and `@Sender`
   `FakeSender` parameters.
 

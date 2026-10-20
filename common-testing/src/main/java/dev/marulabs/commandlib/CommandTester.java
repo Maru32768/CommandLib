@@ -86,9 +86,13 @@ public final class CommandTester implements AutoCloseable {
         return ctx;
     }
 
+    /**
+     * Returns the suggestions a client gets for the given partial input. Like the client's command tree, they leave out
+     * the nodes the sender cannot use.
+     */
     public CompletableFuture<Suggestions> suggestions(@NotNull String input, @NotNull FakeSender sender) {
         ParseResults<FakeSender> parseResults = dispatcher.parse(input, sender);
-        return dispatcher.getCompletionSuggestions(parseResults);
+        return ClientSuggestions.complete(parseResults);
     }
 
     /**
@@ -105,7 +109,8 @@ public final class CommandTester implements AutoCloseable {
 
     /**
      * Renders the registered commands as indented text: each command with its aliases and permission node, then its
-     * options, argument branches and child commands.
+     * cooldown bypass permission, options, argument branches and child commands. Executors, descriptions,
+     * prerequisites and {@code visibleWhen} predicates are not shown.
      */
     @NotNull
     public String commandTree() {

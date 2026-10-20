@@ -4,11 +4,14 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.marulabs.commandlib.argument.CommonIntegerArgument;
 import dev.marulabs.commandlib.argument.CommonLiteralArgument;
 import dev.marulabs.commandlib.argument.CommonStringArgument;
+import dev.marulabs.commandlib.exception.CommandPrerequisiteException;
 import dev.marulabs.commandlib.util.text.ClickAction;
 import dev.marulabs.commandlib.util.text.RichText;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -280,5 +283,65 @@ class CommandTesterTest {
         assertThat(otherContext[0]).isNotNull()
                                    .isNotSameAs(mainContext);
         assertThat(TestCommandContext.latest()).isSameAs(otherContext[0]);
+    }
+
+    @Test
+    void suggestions_leave_out_children_the_sender_cannot_use() {
+        // Brigadier's server-side completion would also list "stop"; the client's command tree hides it.
+        CommandTester tester = new CommandTester(new TestCommand("game") {{
+            addChildren(new TestCommand("start") {{
+                execute(ctx -> ctx.sendMessage("start"));
+            }}, new TestCommand("stop") {{
+                execute(ctx -> ctx.sendMessage("stop"));
+            }});
+        }}, "test.command");
+        FakeSender sender = FakeSender.player("Steve")
+                                      .permissions("test.command.game", "test.command.game.start");
+
+        assertThat(tester.suggest("game ", sender)).containsExactly("help", "start");
+        assertThat(tester.suggest("game s", sender)).containsExactly("start");
+        assertThat(tester.suggestions("game ", sender)
+                         .join()
+                         .getList()).hasSize(2);
+    }
+
+    @Test
+    void command_tree_shows_the_cooldown_bypass_node() {
+        CommandTester tester = new CommandTester(new TestCommand("kit") {{
+            cooldown(Cooldown.of(Duration.ofMinutes(1))
+                             .bypassPermission("kits.cooldown.bypass"));
+            execute(ctx -> {
+            });
+        }}, "test.command");
+
+        assertThat(tester.commandTree()).isEqualTo("kit [test.command.kit, OP]\n"
+                + "  cooldown bypass [kits.cooldown.bypass, OP]\n");
+    }
+
+    @Test
+    void a_player_gets_english_messages_whatever_the_jvm_locale() {
+        Locale previous = Locale.getDefault();
+        Locale.setDefault(Locale.JAPAN);
+        try (CommandTester tester = new CommandTester(new TestCommand("deny") {{
+            execute(ctx -> {
+                throw new CommandPrerequisiteException();
+            });
+        }}, "test.command")) {
+            FakeSender player = FakeSender.player("Steve");
+            FakeSender console = FakeSender.console();
+
+            tester.execute("deny", player);
+            tester.execute("deny", console);
+
+            // A player reports en_us like a vanilla client; the console follows the JVM.
+            assertThat(player.getSentMessageTexts()).containsExactly("You do not have permission to execute this command.");
+            assertThat(console.getSentMessageTexts()).containsExactly("このコマンドを実行する権限がありません。");
+            FakeSender built = FakeSender.playerBuilder("Alex")
+                                         .build();
+            tester.execute("deny", built);
+            assertThat(built.getSentMessageTexts()).containsExactly("You do not have permission to execute this command.");
+        } finally {
+            Locale.setDefault(previous);
+        }
     }
 }
