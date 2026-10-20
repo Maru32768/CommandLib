@@ -348,7 +348,7 @@ public abstract class CommonArgument<T, C extends CommonCommandContext<?, ?>, SE
                                                              handle.getRedirectModifier(),
                                                              handle.isForked());
         @Nullable
-        String input = sameCtx.hasInput(name) ? sameCtx.getInput(name) : null;
+        String input = sameCtx.isArgumentGiven(name) ? sameCtx.getInput(name) : null;
         sameCtx.replaceHandle(valueHandle, name, range.get(handle.getInput()));
         try {
             return parse(ctx);

@@ -27,10 +27,12 @@ import java.util.function.Supplier;
 public abstract class CommonCommandContext<S, C> {
     // Replaced only while a variadic argument parses one of its values.
     protected com.mojang.brigadier.context.CommandContext<S> handle;
+    // The inputs of the command literals and the arguments, in input order; a later node replaces an earlier one of the
+    // same name.
     private final Map<String, String> argumentNameToInputArgMap = new LinkedHashMap<>();
-    // The names of the argument nodes in the input. The map above also has the command literals, which can share an
-    // argument's name, so it cannot tell whether the argument was given.
-    private final Set<String> givenArguments = new HashSet<>();
+    // The inputs of the argument nodes only. A command literal can share an argument's name, so the map above can hold
+    // the literal's text under the argument's name.
+    private final Map<String, String> argumentInputs = new HashMap<>();
     private final LinkedHashMap<String, Object> parsedArgMap = new LinkedHashMap<>();
     private final Map<CommandOption<?, ?>, Object> optionValues = new LinkedHashMap<>();
     private final Set<CommandOption<?, ?>> presentOptions = new LinkedHashSet<>();
@@ -80,15 +82,15 @@ public abstract class CommonCommandContext<S, C> {
             if (name.startsWith("-") || name.startsWith(CommandOption.INTERNAL_NAME_PREFIX)) {
                 continue;
             }
-            if (isArgument) {
-                givenArguments.add(name);
-            }
-
             if (repeated) {
                 // A variadic argument repeats its node, so its input is all of its tokens.
                 argumentNameToInputArgMap.merge(name, input, (a, b) -> a + " " + b);
+                argumentInputs.merge(name, input, (a, b) -> a + " " + b);
             } else {
                 argumentNameToInputArgMap.put(name, input);
+                if (isArgument) {
+                    argumentInputs.put(name, input);
+                }
             }
         }
 
@@ -103,20 +105,21 @@ public abstract class CommonCommandContext<S, C> {
         return handle;
     }
 
+    /**
+     * Returns the input of the argument {@code name} as the sender typed it, or of the command literal {@code name} when
+     * no such argument was given, or {@code ""} when neither was.
+     */
     @NotNull
     public final String getInput(String name) {
-        return argumentNameToInputArgMap.getOrDefault(name, "");
-    }
-
-    final boolean hasInput(String name) {
-        return argumentNameToInputArgMap.containsKey(name);
+        String input = argumentInputs.get(name);
+        return input != null ? input : argumentNameToInputArgMap.getOrDefault(name, "");
     }
 
     /**
      * Whether the input has a value for the argument {@code name}, not only a command literal of that name.
      */
     final boolean isArgumentGiven(String name) {
-        return givenArguments.contains(name);
+        return argumentInputs.containsKey(name);
     }
 
     /**
@@ -713,9 +716,9 @@ public abstract class CommonCommandContext<S, C> {
                              @Nullable String input) {
         this.handle = Objects.requireNonNull(handle);
         if (input == null) {
-            argumentNameToInputArgMap.remove(name);
+            argumentInputs.remove(name);
         } else {
-            argumentNameToInputArgMap.put(name, input);
+            argumentInputs.put(name, input);
         }
     }
 

@@ -242,7 +242,8 @@ suggestions) and a command for each argument type. Options, permission plugins a
 
 - Suggestions match case-insensitively.
 - Vanilla argument types such as item, block and entity selector arguments keep their own suggestions.
-- An argument named like the literal before it keeps its own input.
+- An argument named like the literal before it keeps its own input, and so does an argument named like a command
+  literal after it, such as `<x>` of `/cmd <x> x`: `getInput(name)`, validators and `additionalParser` saw the literal.
 - An omitted optional argument named like a command literal of its route, such as `<count>` of `/count`, gets its
   default instead of failing with `No such argument`.
 - The permission check at execution covers the parent commands too, so input parsed before the sender lost the

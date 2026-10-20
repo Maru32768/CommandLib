@@ -56,6 +56,21 @@ class CommonCommandContextTest {
     }
 
     @Test
+    void argument_keeps_its_input_when_a_later_literal_has_its_name() throws Exception {
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("cmd") {{
+            argument(new WordArg("x").validator((value, ctx) -> {
+                ctx.sendMessage("validated " + ctx.getInput("x"));
+                return true;
+            })).child(x -> new TestCommand("x") {{
+                execute(ctx -> ctx.sendMessage(ctx.getInput("x")));
+            }});
+        }});
+
+        assertThat(runner.execute("cmd foo x")
+                         .messages()).containsExactly("validated foo", "foo");
+    }
+
+    @Test
     void missing_argument_lookups_fail_clearly() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("sum") {{
             argument(new CommonIntegerArgument<>("value")).execute((value, ctx) -> {
