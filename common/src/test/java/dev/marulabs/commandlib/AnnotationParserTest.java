@@ -648,9 +648,17 @@ class AnnotationParserTest {
         }
     }
 
+    @Command("")
+    static final class EmptyName {
+        @Execute
+        void run() {
+        }
+    }
+
     // The builder methods do not know the annotation their value comes from.
     @Test
     void builder_errors_name_the_class_or_the_method() {
+        assertThatThrownBy(() -> parser().parse(new EmptyName())).hasMessageStartingWith("class EmptyName: name is not expected to empty");
         assertThatThrownBy(() -> parser().parse(new ZeroCooldown())).hasMessageStartingWith("class ZeroCooldown: duration must be positive");
         assertThatThrownBy(() -> parser().parse(new ZeroVariadic())).hasMessageStartingWith("ZeroVariadic#run(List): maxCount must be at least 1");
     }

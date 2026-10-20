@@ -31,6 +31,7 @@ import java.util.concurrent.CompletionStage;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -332,18 +333,24 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
             if (command == null) {
                 throw new ParseException(type.getName() + " is not annotated with @Command");
             }
-            this.root = commandFactory.apply(command.value());
-            if (command.aliases().length > 0) {
-                root.addAliases(Arrays.asList(command.aliases()));
-            }
+            this.root = at(source(), () -> {
+                T created = commandFactory.apply(command.value());
+                if (command.aliases().length > 0) {
+                    created.addAliases(Arrays.asList(command.aliases()));
+                }
+                return created;
+            });
+        }
+
+        private String source() {
+            return "class " + type.getSimpleName();
         }
 
         T run() {
             injectDependencies();
             contextValues.forEach((x, extractor) -> provide(root, x, extractor));
             commands.put("", root);
-            String source = "class " + type.getSimpleName();
-            at(source, () -> configure(root, type, source, new String[0]));
+            at(source(), () -> configure(root, type, source(), new String[0]));
 
             List<Method> methods = methods(this::isCommandMethod).stream()
                                                                  .sorted(Comparator.comparing((Method x) -> pathOf(x))
@@ -462,8 +469,15 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
          * do not know the annotation they come from, such as {@code duration must be positive} for {@code @Cooldown(0)}.
          */
         private void at(String source, Runnable step) {
-            try {
+            at(source, () -> {
                 step.run();
+                return null;
+            });
+        }
+
+        private <R> R at(String source, Supplier<R> step) {
+            try {
+                return step.get();
             } catch (ParseException e) {
                 throw e;
             } catch (IllegalArgumentException | IllegalStateException e) {
