@@ -15,8 +15,10 @@ import org.bukkit.Bukkit;
 import org.bukkit.Server;
 import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.help.HelpMap;
+import org.bukkit.permissions.Permission;
+import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.PluginManager;
+import org.bukkit.plugin.SimplePluginManager;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scheduler.BukkitTask;
 import org.junit.jupiter.api.AfterEach;
@@ -45,7 +47,8 @@ import static org.mockito.Mockito.*;
 class CommandLibRegistrationTest {
     private final Server server = mock(Server.class);
     private final Plugin plugin = mock(Plugin.class);
-    private final PluginManager pluginManager = mock(PluginManager.class);
+    // Bukkit's own permission registry, in which a permission is replaced and removed by its name.
+    private final SimplePluginManager pluginManager = spy(new SimplePluginManager(server, null));
     private final BukkitScheduler scheduler = mock(BukkitScheduler.class);
     private final NMSDedicatedServer dedicatedServer = mock(NMSDedicatedServer.class);
     // The dispatcher players see, and the vanilla one that "execute run" and functions use.
@@ -61,6 +64,8 @@ class CommandLibRegistrationTest {
     @BeforeEach
     void setUp() {
         when(server.getPluginManager()).thenReturn(pluginManager);
+        doNothing().when(pluginManager)
+                   .registerEvents(any(), any());
         when(plugin.getName()).thenReturn("Test");
         when(plugin.getServer()).thenReturn(server);
         when(plugin.getLogger()).thenReturn(Logger.getLogger("Test"));
@@ -159,6 +164,32 @@ class CommandLibRegistrationTest {
     }
 
     @Test
+    void unregistering_the_newer_of_two_registrations_of_a_node_gives_it_back_to_the_older_one() {
+        CommandLib older = register(new Command("spawn") {{
+            permission(PermissionDefault.TRUE);
+            execute(ctx -> {
+            });
+        }});
+        CommandLib newer = register(new Command("spawn") {{
+            permission(PermissionDefault.OP);
+            execute(ctx -> {
+            });
+        }});
+
+        newer.unregister();
+
+        Permission restored = pluginManager.getPermission("test.command.spawn");
+        assertThat(restored).isNotNull();
+        assertThat(restored.getDefault()).isEqualTo(PermissionDefault.TRUE);
+        assertThat(pluginManager.getDefaultPermissions(false)).containsExactly(restored);
+
+        older.unregister();
+
+        assertThat(pluginManager.getPermission("test.command.spawn")).isNull();
+        assertThat(pluginManager.getDefaultPermissions(false)).isEmpty();
+    }
+
+    @Test
     void unregister_leaves_a_node_that_replaced_the_command_in_the_vanilla_dispatcher() {
         CommandLib registration = register("spawn");
         LiteralCommandNode<Object> other = LiteralArgumentBuilder.literal("spawn")
@@ -214,10 +245,14 @@ class CommandLibRegistrationTest {
     }
 
     private CommandLib register(String name) {
-        CommandLib registration = CommandLib.register(plugin, new Command(name) {{
+        return register(new Command(name) {{
             execute(ctx -> {
             });
         }});
+    }
+
+    private CommandLib register(Command command) {
+        CommandLib registration = CommandLib.register(plugin, command);
         registrations.add(registration);
         return registration;
     }

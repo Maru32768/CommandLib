@@ -330,6 +330,28 @@ class CommandLibLifecycleTest {
     }
 
     @Test
+    void unregistering_the_newer_of_two_registrations_of_a_node_gives_it_back_to_the_older_one() {
+        when(plugin.isEnabled()).thenReturn(false);
+        // A prefix of its own, as the registrations other tests leave in this copy of CommandLib are live as well.
+        CommandLib older = CommandLib.register(plugin, "restore", new Command("hello") {{
+            permission(PermissionDefault.TRUE);
+            execute(ctx -> {
+            });
+        }});
+        CommandLib newer = CommandLib.register(plugin, "restore", helloCommand());
+
+        newer.unregister();
+
+        assertThat(permissions.get("restore.hello")).isNotNull()
+                                                    .extracting(Permission::getDefault)
+                                                    .isEqualTo(PermissionDefault.TRUE);
+
+        older.unregister();
+
+        assertThat(permissions).doesNotContainKey("restore.hello");
+    }
+
+    @Test
     void a_first_registration_after_the_plugins_initialization_is_refused() {
         when(plugin.isEnabled()).thenReturn(true);
         CommandLib.register(plugin, "test", helloCommand());

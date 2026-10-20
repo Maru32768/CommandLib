@@ -161,7 +161,7 @@ What `CommandLib.register(...)` and the other entry points promise differs by pl
 | First `register` after startup | Works | Throws `IllegalStateException` unless the plugin's first `register` was during its initialization (constructor, `onLoad`, `onEnable`) | Works: the commands are added to the running server's dispatcher | Works |
 | `unregister()` | Yes | Yes, except for `bootstrap` registrations | No: a registration lasts for the game's lifetime | Yes |
 | A label another plugin or mod already has | Replaced: CommandLib's command takes the label in Bukkit's command map | Kept by the other plugin: Paper's registrar, which adds the commands at startup and on every data reload, gives CommandLib's command only `<plugin>:<label>`. A `register` after startup takes the label until the next data reload | Merged: Brigadier adds both commands' children under one literal | Velocity's `CommandManager#register` decides |
-| Two registrations declare the same node with different defaults | The later registration replaces the permission (a [cooldown bypass](#cooldown-bypass) node keeps the existing one) | The later registration replaces the permission (a cooldown bypass node keeps the existing one) | The first registration's default wins | The first registration's default wins |
+| Two registrations declare the same node with different defaults | The later registration replaces the permission (a [cooldown bypass](#cooldown-bypass) node keeps the existing one); once it is unregistered, the oldest registration left that declares the node registers it again | The later registration replaces the permission (a cooldown bypass node keeps the existing one); once it is unregistered, the oldest registration left that declares the node registers it again | The first registration's default wins | The first registration's default wins |
 | `register`, `unregister` | Main thread, or `IllegalStateException` | Main thread (Folia: the global region thread), or `IllegalStateException` | Not checked: register during mod initialization or on the server thread | Any thread |
 | `refresh`, `refreshAll` | Main thread, or `IllegalStateException` | Main thread (Folia: a region or the global region thread), or `IllegalStateException` | Any thread; the tree is sent on the server thread | Not available |
 | `diagnostics()` | Main thread, or `IllegalStateException` | Any thread | Any thread | Any thread |
@@ -185,12 +185,15 @@ replacing a permission of the same name (except a cooldown bypass node, see [Coo
 `unregister()` and the plugin's disable remove them again, take their
 defaults away from players, and recalculate online players' permissions. A permission that a later registration has
 replaced under the same name since stays, since that registration still uses it. Plugin reloads therefore start from a
-clean state. `/minecraft:reload` keeps the permissions.
+clean state. When a registration removes a node that another registration of the same copy of CommandLib still
+declares, the oldest of those registers it again with its own default and description, and removes it when it is
+unregistered itself. `/minecraft:reload` keeps the permissions.
 
 ### Paper
 
-`CommandLib.register(...)` from `onEnable` behaves like Spigot. `CommandLib.bootstrap(context, ...)` from a
-`PluginBootstrap` runs before Bukkit's plugin manager exists, so the nodes are **not** registered with it. CommandLib
+`CommandLib.register(...)` from `onEnable` behaves like Spigot, also when a registration removes a node that another
+still declares. `CommandLib.bootstrap(context, ...)` from a `PluginBootstrap` runs before Bukkit's plugin manager
+exists, so the nodes are **not** registered with it. CommandLib
 applies their defaults itself unless a permission plugin sets the node or the permission is declared in
 `paper-plugin.yml`. Bootstrap commands cannot be unregistered.
 

@@ -924,7 +924,7 @@ public final class CommandLib implements Listener {
     }
 
     private void unregisterPermissions() {
-        removePermissions(registeredPermissions);
+        restorePermissions(removePermissions(registeredPermissions));
         // dirtyPermissibles is not called when removing a TRUE permission, so force
         // recalculation here so players lose the permission immediately.
         Bukkit.getOnlinePlayers()
@@ -934,12 +934,39 @@ public final class CommandLib implements Listener {
     /**
      * Removes the permissions that are still registered, leaving one that another registration has put under the same
      * name since, which that registration still uses.
+     *
+     * @return the names of the removed permissions
      */
-    static void removePermissions(Collection<Permission> permissions) {
+    static Set<String> removePermissions(Collection<Permission> permissions) {
+        Set<String> removed = new HashSet<>();
         for (Permission permission : permissions) {
             if (Bukkit.getPluginManager()
                       .getPermission(permission.getName()) == permission) {
                 removePermissionCompletely(permission.getName());
+                removed.add(permission.getName());
+            }
+        }
+        return removed;
+    }
+
+    /**
+     * Adds each removed node that a live registration still declares again, as the oldest of them declares it, and
+     * makes that registration own it, so its commands keep their default until it is unregistered itself. Its own
+     * permission object was given the default FALSE when a later registration replaced it.
+     */
+    private static void restorePermissions(Set<String> removed) {
+        Set<String> remaining = new HashSet<>(removed);
+        for (CommandLib instance : INSTANCES) {
+            if (remaining.isEmpty()) {
+                return;
+            }
+            for (Permission permission : Command.permissions(instance.commands, instance.permissionPrefix)) {
+                if (remaining.remove(permission.getName())) {
+                    addPermission(permission);
+                    instance.registeredPermissions.removeIf(x -> x.getName()
+                                                                  .equals(permission.getName()));
+                    instance.registeredPermissions.add(permission);
+                }
             }
         }
     }

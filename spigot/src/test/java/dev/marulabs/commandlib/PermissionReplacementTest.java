@@ -53,18 +53,4 @@ class PermissionReplacementTest {
 
         assertThat(pluginManager.getPermission("test.command.spawn")).isNull();
     }
-
-    @Test
-    void removing_the_newer_registrations_permission_first_removes_it() {
-        Permission older = new Permission("test.command.spawn", PermissionDefault.TRUE);
-        Permission newer = new Permission("test.command.spawn", PermissionDefault.TRUE);
-        CommandLib.addPermission(older);
-        CommandLib.addPermission(newer);
-
-        CommandLib.removePermissions(List.of(newer));
-        CommandLib.removePermissions(List.of(older));
-
-        assertThat(pluginManager.getPermission("test.command.spawn")).isNull();
-        assertThat(pluginManager.getDefaultPermissions(false)).isEmpty();
-    }
 }

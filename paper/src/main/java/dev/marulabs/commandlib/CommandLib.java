@@ -24,6 +24,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 
 /**
@@ -54,13 +55,17 @@ public final class CommandLib implements Listener {
     private static @Nullable FunctionLoadErrorFilter functionLoadErrorFilter;
     // The bootstrap registrations, which last for the server's lifetime.
     private static final List<BootstrapRegistration> BOOTSTRAP_REGISTRATIONS = new CopyOnWriteArrayList<>();
+    // Orders the registrations of every plugin, so a node that two of them declare goes back to the oldest one.
+    private static final AtomicLong REGISTRATION_COUNT = new AtomicLong();
 
     private final Plugin plugin;
     private final PluginRegistrationState registrationState;
     private final CommandSet commands;
     // Guarded by registrationState.
     private State state = State.PENDING;
+    // Main thread (Folia: global region thread) only.
     private final List<Permission> registeredPermissions = new ArrayList<>();
+    private final long sequence = REGISTRATION_COUNT.getAndIncrement();
     private boolean missedCommandsEventCheckScheduled;
 
     /**
@@ -652,12 +657,54 @@ public final class CommandLib implements Listener {
                 }
             }
 
-            registeredPermissions.forEach(CommandPermissions::remove);
+            Set<String> removedPermissions = new HashSet<>();
+            for (Permission permission : registeredPermissions) {
+                if (CommandPermissions.remove(permission)) {
+                    removedPermissions.add(permission.getName());
+                }
+            }
             registeredPermissions.clear();
+            restorePermissions(removedPermissions);
         } finally {
             HandlerList.unregisterAll(this);
         }
         return previous instanceof State.Live;
+    }
+
+    /**
+     * Adds each removed node that a live registration of this copy of CommandLib still declares again, as the oldest
+     * of them declares it, and makes that registration own it, so its commands keep their default until it is
+     * unregistered itself. Its own permission object was given the default FALSE when a later registration replaced it.
+     */
+    private static void restorePermissions(Set<String> removed) {
+        if (removed.isEmpty()) {
+            return;
+        }
+        List<PluginRegistrationState> states;
+        synchronized (REGISTRATION_STATES) {
+            states = new ArrayList<>(REGISTRATION_STATES.values());
+        }
+        List<CommandLib> live = new ArrayList<>();
+        for (PluginRegistrationState state : states) {
+            synchronized (state) {
+                live.addAll(state.instances);
+            }
+        }
+        live.sort(Comparator.comparingLong(x -> x.sequence));
+        Set<String> remaining = new HashSet<>(removed);
+        for (CommandLib instance : live) {
+            if (remaining.isEmpty()) {
+                return;
+            }
+            for (Permission permission : instance.commands.permissions()) {
+                if (remaining.remove(permission.getName())) {
+                    CommandPermissions.add(permission);
+                    instance.registeredPermissions.removeIf(x -> x.getName()
+                                                                  .equals(permission.getName()));
+                    instance.registeredPermissions.add(permission);
+                }
+            }
+        }
     }
 
     /**

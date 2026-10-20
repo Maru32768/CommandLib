@@ -261,7 +261,9 @@ suggestions) and a command for each argument type. Options, permission plugins a
 - Spigot: `ParticleArgument` accepts particles with options, such as `dust`, from 1.20.4.
 - Spigot: potion effect lookups on 1.17 to 1.19.2, and commands after `/minecraft:reload` on 1.20.6+.
 - Spigot / Paper: `unregister()` of an older registration no longer removes the permission a later registration put
-  under the same node name.
+  under the same node name, and `unregister()` of the later one registers the node again for the oldest registration
+  that still declares it, with that registration's default and description, instead of leaving its commands with an
+  undefined node that only operators have.
 - Velocity: `unregister()` drops the permission defaults of its registration, so a node registered with `ALL`,
   unregistered and registered again with `NONE` is closed.
 - Paper / Forge / NeoForge / Fabric: an invalid command definition, such as an optional argument before a required one,
