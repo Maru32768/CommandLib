@@ -51,7 +51,6 @@ public final class TypedNmsClasses {
                        NMSDataPackResources_spigot_1_18.class,
                        NMSDedicatedServer_spigot_1_18.class,
                        NMSEnchantment_spigot_1_18.class,
-                       NMSEntity_spigot_1_18.class,
                        NMSIBlockData_spigot_1_18.class,
                        NMSItemStack_spigot_1_18.class,
                        NMSMobEffectList_spigot_1_18.class,

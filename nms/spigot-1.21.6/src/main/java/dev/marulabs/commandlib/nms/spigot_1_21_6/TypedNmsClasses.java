@@ -51,7 +51,6 @@ public final class TypedNmsClasses {
                        NMSDataPackResources_spigot_1_21_6.class,
                        NMSDedicatedServer_spigot_1_21_6.class,
                        NMSEnchantment_spigot_1_21_6.class,
-                       NMSEntity_spigot_1_21_6.class,
                        NMSIBlockData_spigot_1_21_6.class,
                        NMSIChatMutableComponent_spigot_1_21_6.class,
                        NMSItemStack_spigot_1_21_6.class,

@@ -24,6 +24,7 @@ This file lists the changes in each CommandLib release that affect plugin and mo
 - The `spigot` artifact reaches the server only through typed NMS modules. A server version without one fails at
   registration with `NMSClassNotFoundException`. The modules cover Spigot 1.16.4 to 26.3
   ([compatibility](docs/compatibility.md)).
+- The unused NMS wrapper `dev.marulabs.commandlib.util.nms.world.NMSEntity` and `NMSClass#getServerClass` are removed.
 
 #### Commands and arguments
 

@@ -51,7 +51,6 @@ public final class TypedNmsClasses {
                        NMSDataPackResources_paper_1_20_6.class,
                        NMSDedicatedServer_paper_1_20_6.class,
                        NMSEnchantment_paper_1_20_6.class,
-                       NMSEntity_paper_1_20_6.class,
                        NMSIBlockData_paper_1_20_6.class,
                        NMSIChatMutableComponent_paper_1_20_6.class,
                        NMSItemStack_paper_1_20_6.class,

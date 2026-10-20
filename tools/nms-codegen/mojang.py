@@ -677,16 +677,6 @@ w("NMSCraftPotionEffectType", ('''    public NMSCraftPotionEffectType_SUFFIX() {
 
 handle("NMSEnchantment", "net.minecraft.world.item.enchantment.Enchantment")
 
-w("NMSEntity", '''    public NMSEntity_SUFFIX(Object handle) {
-        super(handle, Entity.class);
-    }
-
-    @Override
-    public org.bukkit.entity.Entity getBukkitEntity() {
-        return ((Entity) requireHandle()).getBukkitEntity();
-    }
-''', ["net.minecraft.world.entity.Entity"])
-
 handle("NMSIBlockData", "net.minecraft.world.level.block.state.BlockState")
 handle("NMSItemStack", "net.minecraft.world.item.ItemStack")
 handle("NMSMobEffectList", "net.minecraft.world.effect.MobEffect")

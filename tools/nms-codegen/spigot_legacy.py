@@ -457,16 +457,6 @@ w("NMSCraftPotionEffectType", '''    public NMSCraftPotionEffectType_SUFFIX() {
     }
 ''', [f"{NMS}.MobEffectList", f"{CB}.potion.CraftPotionEffectType", "org.bukkit.potion.PotionEffectType"])
 
-w("NMSEntity", '''    public NMSEntity_SUFFIX(Object handle) {
-        super(handle, Entity.class);
-    }
-
-    @Override
-    public org.bukkit.entity.Entity getBukkitEntity() {
-        return ((Entity) requireHandle()).getBukkitEntity();
-    }
-''', [f"{NMS}.Entity"])
-
 w("NMSScoreboardTeam", '''    public NMSScoreboardTeam_SUFFIX(Object handle) {
         super(handle, ScoreboardTeam.class);
     }

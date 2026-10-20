@@ -43,11 +43,4 @@ public abstract class NMSClass {
         }
         return handle;
     }
-
-    /**
-     * The server class the wrapper wraps, which the handle, if any, is an instance of.
-     */
-    public final Class<?> getServerClass() {
-        return serverClass;
-    }
 }
