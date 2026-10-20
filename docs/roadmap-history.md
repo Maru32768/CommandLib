@@ -4,6 +4,68 @@
 
 ## 完了済みバックログ
 
+### P0: GA 前の欠陥と契約（完了分）
+
+2026-10-18 / 2026-10-19 / 2026-10-20 のレビューの指摘のうち、仕様判断の要らないものを 2026-10-21 に修正した（`3279d890` 以降の
+commit、各 commit の本文に指摘 ID）。TeamColor 処理の共有（R2-P2C）は、Spigot は NMS wrapper の helper、Paper は
+paper-testing が `mockStatic` で差し替える factory 呼び出しで、約 5 行の共有が結合を増やすため見送った。
+
+- `[x]` route 全体で引数名の一意性を登録時に検証する。親 branch と argument child の同名引数は、同型なら親の `ArgRef` が子の値を
+  返し、異型なら実行時に `IllegalArgumentException` になる。annotation の placeholder と子の引数の同名も parse 時に拒否する
+  （18-F01、20-F01）。
+- `[x]` command literal と同名の optional 引数を省略すると `No such argument` になる。入力 map の「引数の有無」を argument node
+  だけで判定する（18-F02）。
+- `[x]` `addChildren` が自身・祖先の追加（循環）を許し、build で `StackOverflowError` になる。接続前に拒否する（18-F03）。
+- `[x]` 同じ child instance を同じ親の別の位置（直下と argument branch、別の branch）に付けると `parentArguments` が上書きされ、既存
+  route の default permission と help の path が変わる。同じ位置への重複追加も help の usage を重複させる。別位置への再接続と
+  重複追加を拒否する（18-F04、20-F10）。
+- `[x]` Spigot / Paper で古い登録の `unregister()` が、同じ node を置き換えた新しい登録の permission を削除する。登録時の
+  `Permission` object と現在の registry の object を比較して解除する（18-F05）。
+- `[x]` Velocity の `unregister()` が permission default を残し、`ALL` で登録・解除した node を `NONE` で再登録しても開いたままに
+  なる。default の寿命を live な登録に揃える（18-F06）。
+- `[x]` 実行時の権限再検査が終端 command と argument branch だけで、祖先 command の node を見ない。cached parse（function 等）では
+  祖先の権限を失った sender が実行できる。route 上の全 node を再検査する（18-F07）。
+- `[x]` server 側の補完 API は権限で隠した literal も返す（client tree からは消える）。`CommandTester#suggest(ions)` を client と
+  同じく requirement で絞り、docs の保証範囲を「client の command tree」と明記する（18-F08）。
+- `[x]` Paper（plugin 初期化中の登録）と modded は command tree の構築が event まで遅れ、optional 配置違反などの定義エラーが
+  `register()` で例外にならず、event 内の log になる。platform 非依存の検証を `register()` 内で行う（18-F09、20-F08）。
+- `[x]` 1 回の登録の中で、同じ permission node に異なる default / description が付いている（直下の子と argument child の同名など）と
+  後勝ちで登録される。登録時に拒否する（18-C03 のうち登録内、20-F03）。
+- `[x]` `required()` の option 同士を `mutuallyExclusive(...)` にした、必ず失敗する定義を登録時に拒否する（20-F10）。
+- `[x]` executor の二重設定（`execute` を 2 回、`require(...).execute` と `execute` の併用）が黙って後勝ちになる。Kotlin DSL の
+  `require { execute {} }` は docs と違い command の executor を置き換える。二重設定を `IllegalStateException` にする（20-F13、
+  20-F15）。
+- `[x]` testing artifact の docs と実装を揃える: `velocity-testing` に `suggestions(input, sender)` を足す、command tree snapshot に
+  executor の有無と cooldown bypass node を含めるか docs の保証範囲を直す、`FakeSender.player(...)` の既定 locale を実 client と
+  同じ `en_us` にする（20-F07）。
+- `[x]` annotation API: `@Range` の境界が型の範囲外なら黙って飽和せず parse error にする、root command の名前エラーに class 名を
+  付ける、`@Suggest(method=)` の accessibility 失敗を `ParseException` で包む、Kotlin の `-java-parameters` を案内する、
+  `docs/design/annotation-api.md` の stale な "Not done: inherited methods" を直す（20-F14）。
+- `[x]` docs の不一致を直す: Kotlin DSL の再開 thread（Velocity は calling thread）と "no parent job"、`register` の `@throws`、
+  platform ごとの登録契約（失敗時点、unregister の有無、label 衝突、default の決まり方）の横断表、Paper の
+  `Bukkit.reloadData()` fallback、補完 context では option が未解決であること（18-C02、20-F08、20-F13、20-F15）。
+- `[x]` Spigot の function 再 compile task が全登録の解除後も毎 tick 走り続ける。登録が無くなったら止める（20-F13）。
+- `[x]` 使われていない `NMSEntity`（27 の typed NMS module の実装と codegen の entry）と `NMSClass#getServerClass` を削除する
+  （R2-B-7）。
+- `[x]` annotation API: 引数に `@Optional` と `@Default` を併用した冗長な定義を拒否する（R2-A1-17）、`suspend fun` の method を
+  分かりにくい `Continuation` のエラーでなく明示的な parse error にする（R1-A3-05）。
+- `[x]` 共有 node の設定比較（`CommandNameValidator#sameSettings`）が `ResourceArgument` の registry key など equals の無い設定を
+  比較しない。registry key を比較する（R2-A-5、`shortcut:` コメントあり）。
+- `[x]` 重複を減らす: `spigot` / `paper` の main に同一 file が 11 個（`Argument`、`BukkitCommandActor`、primitive / enum / literal
+  などの argument。R1-C-05）、`spigot-testing` / `paper-testing` の test に同一 file が 11 個（R1-C-07、R2-D-32）、Spigot / Paper の
+  TeamColor 処理（R2-P2C）、`Captions` と `Caption` の properties 読み込み（R2-P1B-3）、Paper の reflection lookup の cache
+  （R2-B-8）、`AnnotationParser` 内の重複（R2-A1-18）。共有 source dir か共通 helper にする。
+- `[x]` non-modded の build script の依存 version を `gradle/libs.versions.toml` の version catalog に集める（`brigadier:1.0.18` が
+  13 file に直書きだった。R1-C-12。modded 側は roadmap に残す）。
+- `[x]` `tools/nms-codegen/generate.py` に生成済み source との一致を検査する `--check` mode を足す（CI step の前提。R1-C-10。module の統合の確認は roadmap に残す）。
+- `[x]` テストを足す: Spigot / Paper の `LocationArgument(name, false)` の unit test（R1-D-15）、Velocity の optional / variadic
+  （R1-D-09）、argument child の subtree に redirect が無いことの構造 test と、redirect の有無だけを見る弱い assertion の置き換え
+  （R1-D-06、R1-B1-07）、英語の assertion が JVM の locale に依存しないよう test の locale を固定する（R1-B1-08）、Spigot の
+  `ownsLabel` / vanilla root の同一性 / Folia 拒否（R2-D-23）、fabric-1.21.4 の `RawWordArgumentType`（R2-E-12）。
+- `[x]` 権限拒否の失敗が `/execute store success 0` になる integration case を足す（R1-D-16。data pack function 経由、paper-1.21.4 で
+  確認）。
+- `[x]` `integration-test/README.md` に、Bukkit の suite の大半は console から、一部は bot から実行することを書く（R1-B2-11）。
+
 - `[x]` integration test の期待ケース ID を実行結果と独立して管理し、全76 positive shared-runner target の
   suite / builder 登録漏れ、ケースの重複・置き換わり、失敗・skip、集計値の不整合を検出する。バージョン除外も明示した。
   回帰テスト8件と Paper 26.3 実サーバーの97ケースで確認（2026-10-20、
