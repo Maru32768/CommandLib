@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Properties;
+import java.util.function.Function;
 
 /**
  * The key of a text that {@link Captions} translates, with its English default. The built-in texts of CommandLib are
@@ -24,7 +25,7 @@ import java.util.Properties;
  */
 public final class Caption {
     // The English texts of the built-in captions, the same file translators start from.
-    private static final Properties ENGLISH = load(Caption.class.getClassLoader(),
+    private static final Properties ENGLISH = load(Caption.class::getResourceAsStream,
                                                    Captions.BUILT_IN_BUNDLE + "_en.properties");
     private static final List<Caption> BUILT_IN = new ArrayList<>();
 
@@ -160,11 +161,13 @@ public final class Caption {
     }
 
     /**
-     * Reads a properties file as UTF-8, or no properties when {@code loader} does not find it.
+     * Reads a properties file as UTF-8, or no properties when {@code open} returns null. The built-in bundle is opened
+     * with {@code Caption.class::getResourceAsStream}, which also finds it when CommandLib is part of an explicit JPMS
+     * module, a user bundle with its class loader.
      */
-    static Properties load(ClassLoader loader, String resource) {
+    static Properties load(Function<String, InputStream> open, String resource) {
         Properties properties = new Properties();
-        try (InputStream in = loader.getResourceAsStream(resource)) {
+        try (InputStream in = open.apply(resource)) {
             if (in != null) {
                 properties.load(new InputStreamReader(in, StandardCharsets.UTF_8));
             }
