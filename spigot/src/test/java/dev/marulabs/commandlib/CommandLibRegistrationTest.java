@@ -14,6 +14,7 @@ import net.bytebuddy.ByteBuddy;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
 import org.bukkit.command.SimpleCommandMap;
+import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.help.HelpMap;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
@@ -29,6 +30,7 @@ import org.mockito.MockedStatic;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -144,6 +146,20 @@ class CommandLibRegistrationTest {
 
         register("spawn");
         assertThat(timers).hasSize(2);
+    }
+
+    @Test
+    void the_functions_are_compiled_when_the_plugin_is_disabled_before_the_task_runs() throws Exception {
+        CommandLib registration = register("spawn");
+        when(dedicatedServer.isRunning()).thenReturn(true);
+        // The plugin unregisters from its own disable listener, ahead of CommandLib's, which Bukkit still calls in
+        // this dispatch. Bukkit then cancels the plugin's tasks, so the task never runs.
+        registration.unregister();
+        Method onPluginDisable = CommandLib.class.getDeclaredMethod("onPluginDisable", PluginDisableEvent.class);
+        onPluginDisable.setAccessible(true);
+        onPluginDisable.invoke(registration, new PluginDisableEvent(plugin));
+
+        verify(dedicatedServer).recompileFunctions(any(), anyBoolean());
     }
 
     @Test

@@ -730,14 +730,15 @@ public final class CommandLib implements Listener {
             }
         }
         // Compiled functions hold the nodes they use, so they would run the disabled plugin's commands until the next
-        // data reload. The plugin's tasks are cancelled, so they are compiled now, unless the server is stopping.
-        if (removed) {
-            NMSDedicatedServer server = NMSCraftServer.create(plugin.getServer())
-                                                      .getServer();
-            if (server.isRunning()) {
+        // data reload. The plugin's tasks are cancelled, so they are compiled now, unless the server is stopping. Also
+        // when nothing was removed here: an unregister() earlier in this tick left the compilation to the task.
+        NMSDedicatedServer server = NMSCraftServer.create(plugin.getServer())
+                                                  .getServer();
+        if (server.isRunning()) {
+            if (removed) {
                 FunctionCompilationMarker.changed();
-                compileFunctionsIfStale(plugin, server);
             }
+            compileFunctionsIfStale(plugin, server);
         }
         // Shaded into this plugin, this copy compiles functions only for it.
         if (functionLoadErrorFilter != null) {
