@@ -81,9 +81,9 @@ dropped.
 
 - **Forge / NeoForge** add the commands on `RegisterCommandsEvent` and **Fabric** on `CommandRegistrationCallback`,
   which the server fires before it compiles the functions, so functions see them without help from CommandLib.
-- **Spigot** compiles the functions before plugins can add commands, and has no event for a data reload. CommandLib
-  checks every tick whether the data pack resources were replaced or its commands changed, and then compiles the
-  functions and function tags again with its commands.
+- **Spigot** compiles the functions before plugins can add commands, and has no event for a data reload. While it has
+  a registration, CommandLib checks every tick whether the data pack resources were replaced or its commands changed,
+  and then compiles the functions and function tags again with its commands.
 - **Paper** fires the `COMMANDS` lifecycle event after the functions were compiled, at startup and on every reload.
   CommandLib compiles them again on the next tick.
 

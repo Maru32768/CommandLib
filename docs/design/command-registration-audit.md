@@ -123,6 +123,9 @@ dev bundles. Line numbers refer to the commit that adds this document.
   library lacks the `#minecraft:load` tag that CommandLib's compilation has,
   the run that `replaceLibrary` schedules stays, so the tag runs once, a tick
   late.
+  The task stops when the last registration of the copy is unregistered, after
+  compiling the functions once without the commands, and the next registration
+  starts it again.
   A compiled function holds the nodes it uses, so a plugin disable removes every
   instance of the plugin and compiles the functions at once, while the server
   runs, since the plugin's tasks are cancelled then; otherwise the functions ran

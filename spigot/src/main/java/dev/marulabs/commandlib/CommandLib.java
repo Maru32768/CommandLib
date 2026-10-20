@@ -699,8 +699,9 @@ public final class CommandLib implements Listener {
                     : server.getVanillaCommandDispatcher(), FunctionCompilationMarker.reloaded(resources));
             FunctionCompilationMarker.markCompiled(resources);
         } catch (RuntimeException | LinkageError ex) {
-            Objects.requireNonNull(functionCompiler)
-                   .cancel();
+            if (functionCompiler != null) {
+                functionCompiler.cancel();
+            }
             plugin.getLogger()
                   .log(Level.WARNING, "Could not compile data pack functions again with CommandLib's commands", ex);
         }
@@ -866,9 +867,32 @@ public final class CommandLib implements Listener {
 
             if (updatePlayerCommands) {
                 updatePlayerCommandsLater();
+            }
+            if (INSTANCES.isEmpty()) {
+                // With no registration left, the task stops until the next one, so the functions that used the
+                // commands are compiled without them now. The disable handler compiles them itself.
+                if (updatePlayerCommands) {
+                    FunctionCompilationMarker.changed();
+                    compileFunctionsIfStale(plugin,
+                                            NMSCraftServer.create(plugin.getServer())
+                                                          .getServer());
+                }
+                stopFunctionCompiler();
+            } else if (updatePlayerCommands) {
                 // Functions that use the commands are dropped.
                 compileFunctionsWithCommands();
             }
+        }
+    }
+
+    private static void stopFunctionCompiler() {
+        if (functionCompiler != null) {
+            functionCompiler.cancel();
+            functionCompiler = null;
+        }
+        if (functionLoadErrorFilter != null) {
+            functionLoadErrorFilter.uninstall();
+            functionLoadErrorFilter = null;
         }
     }
 
