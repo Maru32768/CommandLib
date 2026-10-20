@@ -165,6 +165,9 @@ class CommandLibRegistrationTest {
     @Test
     void a_failure_to_remove_the_commands_is_not_hidden_by_the_cleanup() {
         CommandLib registration = register("spawn");
+        // As after a failed compilation, so the cleanup creates the task again, which needs the server too.
+        when(timers.get(0)
+                   .isCancelled()).thenReturn(true);
         IllegalStateException failure = new IllegalStateException("No server");
         NMSCraftServer craftServer = NMSCraftServer.create(server);
         when(craftServer.getServer()).thenThrow(failure);
