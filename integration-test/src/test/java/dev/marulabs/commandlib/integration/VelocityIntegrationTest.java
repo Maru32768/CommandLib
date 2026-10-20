@@ -199,7 +199,7 @@ class VelocityIntegrationTest {
     private static List<String> commandTreeChildren(BotSession client,
                                                     String literal) throws ReflectiveOperationException {
         Object packet = null;
-        for (Object received : client.receivedPackets) {
+        for (Object received : client.receivedPackets.snapshot()) {
             if (received.getClass()
                         .getSimpleName()
                         .equals("ClientboundCommandsPacket")) {
@@ -253,7 +253,7 @@ class VelocityIntegrationTest {
         } catch (org.awaitility.core.ConditionTimeoutException e) {
             fail("The bot received no suggestions.");
         }
-        for (Object packet : client.receivedPackets) {
+        for (Object packet : client.receivedPackets.snapshot()) {
             if (packet.getClass()
                       .getSimpleName()
                       .equals("ClientboundCommandSuggestionsPacket")) {

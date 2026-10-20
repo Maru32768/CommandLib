@@ -83,8 +83,10 @@ The shared Gradle script for current Bukkit-compatible plugin fixtures is:
 integration-test/shared/integration-test.gradle.kts
 ```
 
-Current Bukkit-compatible target setup downloads PlugManX and AutoReloader into each configured server `plugins`
-directory.
+The manual `buildAndCopy` workflow downloads PlugManX and AutoReloader into each configured server `plugins`
+directory. Automated targets use `prepareIntegrationFixture`, which builds and copies only the fixture and downloads
+the server. Their Docker images exclude the local `plugins` directory, including helper plugins and remapping caches;
+the current fixture is injected at test startup. No fixture uses those reload helpers.
 The AutoReloader URL can be overridden when needed:
 
 ```powershell
@@ -258,6 +260,14 @@ Run one target:
 .\gradlew.bat :integration-test:targets:paper-1.20.4:minecraftIntegrationTest
 ```
 
+For focused runs, `--configure-on-demand` avoids configuring unrelated loader and NMS projects. Once the Gradle
+dependencies and server image have been prepared, `--offline` also avoids Gradle dependency checks; it is forwarded
+to the nested fixture build. It does not disable network access by a server or Docker image build.
+
+```powershell
+.\gradlew.bat --configure-on-demand --offline :integration-test:targets:paper-1.21.4:minecraftIntegrationTest
+```
+
 Run all configured targets:
 
 ```powershell
@@ -273,16 +283,28 @@ one image, and different server bases never replace each other's image. Images o
 until removed, for example with `docker image rm` or `docker image prune -a`.
 
 The image build starts the server once (without the fixture) and stops it after `Done`. That run generates the world
-and, on Paper, downloads and patches the server jar, remaps it, and downloads plugin libraries, so a test run no longer
+and, on Paper, downloads and patches the server jar and remaps it, so a test run no longer
 repeats that work or depends on those downloads. Docker caches the step until the staged server base
-changes; rebuilding the image therefore takes about one extra server start.
+changes; rebuilding the image therefore takes about one extra server start. A failed or timed-out shutdown fails the
+image build instead of caching a forcibly stopped world.
 
 The nested `test-plugin` builds use the same Gradle user home as the outer build, so they reuse its Gradle
 distributions, dependencies and toolchains. Pass `-Pcommandlib.integrationGradleUserHome=<dir>` to give them a separate
 one.
 
+The outer `prepareTestPlugin` task tracks fixture sources, CommandLib sources and resources, build scripts, local
+libraries, typed NMS jars and the prepared server/fixture jars. An unchanged run skips the nested Gradle process;
+changing an input or removing a prepared jar runs it again. `--refresh-dependencies` forces preparation and is
+forwarded to the nested build. `--rerun-tasks` also forces the outer preparation task when diagnosing the build.
+
+All targets use the runner compiled once by `:integration-test:testClasses` as Java 17 bytecode. Each target still
+has its own MCProtocolLib classpath and test JVM, including Java 21 for the newest clients. The packet inbox retains
+only command trees, suggestions and chat, and atomically hands received batches to assertions so a concurrent receive
+cannot be cleared accidentally. The ordinary `:integration-test:test` checks these runner helpers without Docker.
+
 Gradle project parallelism is enabled by default, but Minecraft server tests are throttled to avoid starting every
-Docker server at once. The default server-test concurrency is 4.
+Docker server at once. The default server-test concurrency is 4. Cold image builds also start a server and share this
+same limit with running tests, so preparing a full matrix cannot start an unbounded number of warm-up servers.
 
 The server JVM sets no `-Xmx`, so its heap limit is the JVM default of a quarter of the Docker VM memory (about 1.9 GiB
 in an 8 GiB VM). Containers used about 1.1 GiB each after startup in measurements on paper-1.21.0 and forge-1.20.1, so

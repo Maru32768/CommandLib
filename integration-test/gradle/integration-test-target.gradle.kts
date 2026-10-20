@@ -94,7 +94,10 @@ val isBukkitPlatform = targetPlatform == "paper" || targetPlatform == "mohist" |
 val reportFileName = "TEST-commandlib-$minecraftVersion-$targetPlatform.xml"
 
 val mcProtocol = configurations.named("mcProtocol")
-val sourceSets = extensions.getByType<SourceSetContainer>()
+val testRuntimeClasspath = configurations.named("testRuntimeClasspath")
+// The reflective runner is Java 17 bytecode for every protocol. Only its runtime dependencies and JVM vary.
+evaluationDependsOn(":integration-test")
+val sharedTestOutput = project(":integration-test").extensions.getByType<SourceSetContainer>()["test"].output
 val minecraftIntegrationMaxParallel = providers.gradleProperty("commandlib.minecraftIntegrationMaxParallel")
     .map(String::toInt)
     .orElse(4)
@@ -155,9 +158,6 @@ val expectedEnableFailure = if (extra.has("commandlib.integration.expectedEnable
 
 configure<JavaPluginExtension> {
     toolchain.languageVersion.set(JavaLanguageVersion.of(botJavaVersion))
-    sourceSets.named("test") {
-        java.srcDir(rootProject.file("integration-test/src/test/java"))
-    }
 }
 
 tasks.named<Test>("test") {
@@ -209,9 +209,10 @@ val javaToolchains = extensions.getByType<JavaToolchainService>()
 
 // CommandLib module that the nested test-plugin build inlines. That build also runs on its own, so it keeps the
 // setting and this build reads it from there.
-val commandlibModule = testPluginDir.resolve("build.gradle.kts")
+val fixtureBuildScript = testPluginDir.resolve("build.gradle.kts")
     .takeIf { it.isFile }
     ?.readText()
+val commandlibModule = fixtureBuildScript
     ?.let { Regex("""extra\["commandlibModule"]\s*=\s*"([^"]+)"""").find(it)?.groupValues?.get(1) }
 
 // A target can register its own prepareTestPlugin task before applying this script, for example to install a
@@ -221,7 +222,27 @@ val prepareTask = if ("prepareTestPlugin" in tasks.names) tasks.named("prepareTe
     if (commandlibModule == "spigot") {
         // The nested build bundles the typed NMS jars from spigot/build/typed-nms.
         dependsOn(":spigot:collectTypedNms")
+        inputs.files(rootProject.fileTree("spigot/build/typed-nms") { include("*.jar") })
     }
+    inputs.files(fileTree(testPluginDir) {
+        include("*.gradle.kts", "gradle.properties", "gradlew", "gradlew.bat", "gradle/**", "src/**", "libs/**", "LICENSE*")
+    })
+    inputs.file(sharedDir.resolve("integration-test.gradle.kts"))
+    val fixtureSuite = fixtureBuildScript
+        ?.let { Regex("""extra\["testPluginSuite"]\s*=\s*"([^"]+)"""").find(it)?.groupValues?.get(1) }
+        ?: if (commandlibModule == "paper") "paper" else "spigot"
+    for (source in listOf("common/src/main", "$commandlibModule/src/main", "integration-test/shared/core/src/main",
+        "integration-test/shared/$fixtureSuite/src/main")) {
+        inputs.files(rootProject.fileTree(source))
+    }
+    if (fixtureSuite != "folia") inputs.files(rootProject.fileTree("integration-test/shared/bukkit/src/main"))
+    if (commandlibModule == "paper") inputs.files(rootProject.fileTree("common/src/adventure"))
+    outputs.file(testPluginDir.resolve("$serverDirectory/$serverJarName"))
+    outputs.files(fileTree(testPluginDir.resolve("$serverDirectory/$testPluginSubdirectory")) {
+        include("TestPlugin*.jar")
+    })
+    // Dependency refresh must reach the nested build even when sources have not changed.
+    outputs.upToDateWhen { !gradle.startParameter.isRefreshDependencies }
     val hasWrapperJar = testPluginDir.resolve("gradle/wrapper/gradle-wrapper.jar").isFile
 
     workingDir(if (hasWrapperJar) testPluginDir else rootProject.projectDir)
@@ -229,7 +250,7 @@ val prepareTask = if ("prepareTestPlugin" in tasks.names) tasks.named("prepareTe
 
     if (isWindows) {
         if (hasWrapperJar) {
-            commandLine("cmd", "/c", ".\\gradlew.bat", "buildAndCopy", "downloadServerJar")
+            commandLine("cmd", "/c", ".\\gradlew.bat", "prepareIntegrationFixture")
         } else {
             commandLine(
                 "cmd",
@@ -237,24 +258,24 @@ val prepareTask = if ("prepareTestPlugin" in tasks.names) tasks.named("prepareTe
                 ".\\gradlew.bat",
                 "-p",
                 testPluginDir.absolutePath,
-                "buildAndCopy",
-                "downloadServerJar",
+                "prepareIntegrationFixture",
             )
         }
     } else {
         if (hasWrapperJar) {
-            commandLine("sh", "./gradlew", "buildAndCopy", "downloadServerJar")
+            commandLine("sh", "./gradlew", "prepareIntegrationFixture")
         } else {
             commandLine(
                 "sh",
                 "./gradlew",
                 "-p",
                 testPluginDir.absolutePath,
-                "buildAndCopy",
-                "downloadServerJar",
+                "prepareIntegrationFixture",
             )
         }
     }
+    if (gradle.startParameter.isOffline) args("--offline")
+    if (gradle.startParameter.isRefreshDependencies) args("--refresh-dependencies")
 }
 
 // Spigot server jars are only produced by BuildTools, so a Spigot target builds its own. When a typed NMS module of the
@@ -407,6 +428,10 @@ val stageDockerServerDirectory = tasks.register<Sync>("stageDockerServerDirector
 
     from(serverDir)
     into(stagedDockerServerDir)
+    if (isBukkitPlatform || targetPlatform == "folia") {
+        // The fixture is injected at startup. Manual reload helpers and their remapping caches are not test inputs.
+        exclude("plugins/**")
+    }
     exclude(
         "logs/**",
         "crash-reports/**",
@@ -462,7 +487,17 @@ val stageDockerServerDirectory = tasks.register<Sync>("stageDockerServerDirector
               sleep 1
               waited=${'$'}((waited + 1))
             done
-            kill -9 ${'$'}pid 2> /dev/null || true
+            if kill -0 ${'$'}pid 2> /dev/null; then
+              kill -9 ${'$'}pid 2> /dev/null || true
+              cat /tmp/warmup.log
+              echo 'The server did not stop cleanly while warming up the image.'
+              exit 1
+            fi
+            if ! wait ${'$'}pid; then
+              cat /tmp/warmup.log
+              echo 'The server failed while warming up the image.'
+              exit 1
+            fi
             rm -rf logs crash-reports world/session.lock commandlib-warmup.sh
             """.trimIndent() + "\n"
         )
@@ -486,6 +521,8 @@ val buildMinecraftServerImage = tasks.register<Exec>("buildMinecraftServerImage"
     group = "verification"
     description = "Builds the reusable Docker image for the $targetName integration server."
     dependsOn(stageDockerServerDirectory)
+    // A cold image build starts a real server too, so it shares the test runtime's concurrency budget.
+    usesService(minecraftIntegrationSlot)
     // Also rebuilds an image that was removed, for example by `docker image prune -a`.
     onlyIf("the image for the staged server is not in Docker yet") {
         !dockerImageExists(dockerImageTagFile.get().asFile.readText().trim())
@@ -654,7 +691,8 @@ tasks.register<Test>("minecraftIntegrationTest") {
     description = "Runs the Docker-based Minecraft integration test for $minecraftVersion."
     usesService(minecraftIntegrationSlot)
     outputs.upToDateWhen { false }
-    testClassesDirs = sourceSets["test"].output.classesDirs
+    testClassesDirs = sharedTestOutput.classesDirs
+    dependsOn(":integration-test:testClasses")
     // The test reads Adventure only by reflection. Its own Adventure 4 goes first for bots that bring none or an older
     // one, and MCProtocolLib first for bots built on Adventure 5 (26.2 and later), which Adventure 4 would shadow.
     classpath = files(provider {
@@ -662,8 +700,8 @@ tasks.register<Test>("minecraftIntegrationTest") {
             val module = it.moduleVersion
             module != null && module.group == "net.kyori" && module.name == "adventure-api" && module.version.startsWith("5.")
         }
-        if (botUsesAdventure5) listOf(mcProtocol, sourceSets["test"].runtimeClasspath)
-        else listOf(sourceSets["test"].runtimeClasspath, mcProtocol)
+        if (botUsesAdventure5) listOf(mcProtocol, sharedTestOutput, testRuntimeClasspath)
+        else listOf(sharedTestOutput, testRuntimeClasspath, mcProtocol)
     })
     useJUnitPlatform()
     filter {

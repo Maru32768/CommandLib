@@ -27,7 +27,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -257,13 +256,6 @@ class IntegrationTest {
         return platform.equals("paper") || platform.equals("mohist") || platform.equals("spigot");
     }
 
-    @Test
-    void player_join_log_detection_accepts_and_mohist_formats() {
-        assertThat(isPlayerJoinLog("[12:47:42 INFO]: Maru32768 joined the game")).isTrue();
-        assertThat(isPlayerJoinLog("[12:47:42 INFO]: Maru32768[/172.17.0.1:52648] logged in with entity id 127 at (-245.5, 63, 153.5)")).isTrue();
-        assertThat(isPlayerJoinLog("[12:47:42 INFO]: OtherPlayer joined the game")).isFalse();
-    }
-
     static List<String> assertBotReceives(BotSession client,
                                           String command,
                                           String description,
@@ -299,7 +291,7 @@ class IntegrationTest {
                   });
     }
 
-    private static boolean isPlayerJoinLog(String line) {
+    static boolean isPlayerJoinLog(String line) {
         if (!line.contains(TEST_PLAYER_NAME)) {
             return false;
         }
@@ -376,12 +368,17 @@ class IntegrationTest {
 
     static Path findTestPluginJar(Path pluginsDir, String jarPattern) throws IOException {
         try (var files = Files.list(pluginsDir)) {
-            return files.filter(Files::isRegularFile)
-                        .filter(path -> path.getFileName()
-                                            .toString()
-                                            .matches(jarPattern))
-                        .findFirst()
-                        .orElseThrow(() -> new IllegalStateException("Test plugin jar was not found in " + pluginsDir));
+            List<Path> candidates = files.filter(Files::isRegularFile)
+                                         .filter(path -> path.getFileName()
+                                                             .toString()
+                                                             .matches(jarPattern))
+                                         .sorted()
+                                         .toList();
+            if (candidates.size() != 1) {
+                throw new IllegalStateException("Expected exactly one test plugin jar matching " + jarPattern + " in "
+                        + pluginsDir + ", found: " + candidates);
+            }
+            return candidates.get(0);
         }
     }
 
@@ -689,7 +686,7 @@ class IntegrationTest {
         private final Method isConnectedMethod;
         private final Method sendMethod;
         private final Method disconnectMethod;
-        final CopyOnWriteArrayList<Object> receivedPackets = new CopyOnWriteArrayList<>();
+        final BotPacketInbox receivedPackets = new BotPacketInbox();
         final AtomicReference<String> disconnectionReason = new AtomicReference<>();
         private volatile boolean connectedOnce = false;
 
@@ -701,10 +698,7 @@ class IntegrationTest {
         }
 
         boolean hasReceived(String... packetSimpleNames) {
-            List<String> names = List.of(packetSimpleNames);
-            return receivedPackets.stream()
-                                  .anyMatch(packet -> names.contains(packet.getClass()
-                                                                           .getSimpleName()));
+            return receivedPackets.hasReceived(packetSimpleNames);
         }
 
         void clearReceivedPackets() {
@@ -712,8 +706,7 @@ class IntegrationTest {
         }
 
         List<String> drainSystemMessages() throws ReflectiveOperationException {
-            List<Object> snapshot = new ArrayList<>(receivedPackets);
-            receivedPackets.clear();
+            List<Object> snapshot = receivedPackets.drain();
             List<String> messages = new ArrayList<>();
             for (Object packet : snapshot) {
                 String className = packet.getClass()

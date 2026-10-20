@@ -22,7 +22,7 @@ repositories {
 // separate builds, so per-project source sets would miss or duplicate files.
 fun javaSources(vararg includes: String) = fileTree(rootDir) {
     include(*includes)
-    exclude("**/build/**", ".gradle/**", ".claude/**")
+    exclude("**/build/**", "**/.gradle*/**", ".claude/**")
     // Written by tools/nms-codegen.
     exclude("nms/**", "spigot/src/main/java/dev/marulabs/commandlib/util/nms/TypedNmsModules.java")
 }

@@ -248,11 +248,15 @@ tasks.named<Copy>("processResources") {
 }
 
 tasks.register("copyToServer") {
+    val fixtureJar = tasks.named<ShadowJar>("shadowJar").flatMap { it.archiveFile }
+    dependsOn("shadowJar")
     mustRunAfter("build")
+    inputs.file(fixtureJar)
+    outputs.files(copyTargets.map { file("$it/${rootProject.name}-${version}.jar") })
     doLast {
         copyTargets.forEach { target ->
             copy {
-                from(File(layout.buildDirectory.get().asFile.absolutePath, "libs/${rootProject.name}-${version}.jar"))
+                from(fixtureJar)
                 into(target)
             }
         }
@@ -276,6 +280,12 @@ if (includeProtocolLib) {
 tasks.register("buildAndCopy") {
     group = "build"
     dependsOn("build", "copyToServer", "downloadPluginJars")
+}
+
+// Docker runs only the fixture. Reload helpers remain available to the manual buildAndCopy workflow.
+tasks.register("prepareIntegrationFixture") {
+    group = "build"
+    dependsOn("copyToServer", "downloadServerJar")
 }
 
 tasks.register("downloadServerJar") {
@@ -357,11 +367,12 @@ fun downloadIfMissing(urlString: String, outputFile: File) {
 }
 
 fun getMainClassFQDN(projectPath: java.nio.file.Path): String {
-    val mainClassFile = Files.walk(projectPath)
-        .filter { it.fileName.toString().endsWith(".java") }
-        .filter { file -> Files.lines(file).use { lines -> lines.anyMatch { it.contains("extends JavaPlugin") } } }
-        .findFirst()
-        .get()
+    val mainClassFile = Files.walk(projectPath.resolve("src/main/java")).use { sources ->
+        sources.filter { it.fileName.toString().endsWith(".java") }
+            .filter { file -> Files.lines(file).use { lines -> lines.anyMatch { it.contains("extends JavaPlugin") } } }
+            .findFirst()
+            .orElseThrow { IllegalStateException("No JavaPlugin source in $projectPath/src/main/java") }
+    }
     return mainClassFile.toString()
         .replace("\\", ".")
         .replace("/", ".")
