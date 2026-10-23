@@ -1,5 +1,6 @@
 package dev.marulabs.commandlib;
 
+import dev.marulabs.commandlib.internal.ContextState;
 import dev.marulabs.commandlib.internal.PlatformAdapter;
 import com.mojang.brigadier.Message;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -10,8 +11,9 @@ import org.apache.logging.log4j.LogManager;
 
 final class PlatformAdapterImpl implements PlatformAdapter<CommandSourceStack, Component, CommandContext> {
     @Override
-    public CommandContext createCommandContext(com.mojang.brigadier.context.CommandContext<CommandSourceStack> ctx) {
-        return new CommandContext(ctx);
+    public CommandContext createCommandContext(com.mojang.brigadier.context.CommandContext<CommandSourceStack> ctx,
+                                               ContextState state) {
+        return new CommandContext(ctx, state);
     }
 
     @Override

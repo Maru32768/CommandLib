@@ -3,6 +3,7 @@ package dev.marulabs.commandlib;
 import dev.marulabs.commandlib.CommandHelp.Token;
 import dev.marulabs.commandlib.CommandHelp.Usage;
 import dev.marulabs.commandlib.command.CommandExecutor;
+import dev.marulabs.commandlib.internal.ContextState;
 import dev.marulabs.commandlib.internal.PlatformAdapter;
 
 import java.util.ArrayList;
@@ -26,7 +27,6 @@ final class HelpMessageAction<S, T, C extends CommonCommandContext<S, T>> implem
 
     @Override
     public void accept(C ctx) {
-        ctx.captions(command.captions());
         command.helpFormatter()
                .format(ctx, help(ctx));
     }
@@ -109,20 +109,21 @@ final class HelpMessageAction<S, T, C extends CommonCommandContext<S, T>> implem
 
     private boolean hasArgumentPermission(Arguments<C> arguments, C ctx) {
         return platformAdapter.hasPermission(ctx, arguments.permissionName(permissionPrefix))
-                && (!arguments.hasVisibility() || arguments.isVisibleTo(sourceContext(ctx)));
+                && (!arguments.hasVisibility() || arguments.isVisibleTo(state -> sourceContext(ctx, state)));
     }
 
     // The sender has the command's permission and the command is visible to the sender.
     private boolean isUsable(CommonCommand<C, ?> child, C ctx) {
         return platformAdapter.hasPermission(ctx, child.permissionName(permissionPrefix))
-                && (!child.hasVisibility() || child.isVisibleTo(sourceContext(ctx)));
+                && (!child.hasVisibility() || child.isVisibleTo(state -> sourceContext(ctx, state)));
     }
 
     // The predicates get the context the command tree gives them, which has the providers of the command or branch
     // they belong to, without changing the providers of the help's own context.
-    private C sourceContext(C ctx) {
+    private C sourceContext(C ctx, ContextState state) {
         return platformAdapter.createSourceContext(ctx.getHandle()
-                                                      .getSource());
+                                                      .getSource(),
+                                                   state);
     }
 
     /**

@@ -26,12 +26,15 @@ public interface PlatformAdapter<S, T, C extends CommonCommandContext<S, T>> {
         return (PlatformAdapter<S, T, C>) PlatformAdapterHolder.get();
     }
 
-    C createCommandContext(com.mojang.brigadier.context.CommandContext<S> ctx);
+    /**
+     * The platform's context of {@code ctx}, with what {@code state} gives from the command.
+     */
+    C createCommandContext(com.mojang.brigadier.context.CommandContext<S> ctx, ContextState state);
 
     /**
      * A context of the source alone, without input or arguments, for a predicate that decides what the source sees.
      */
-    default C createSourceContext(S source) {
+    default C createSourceContext(S source, ContextState state) {
         return createCommandContext(new com.mojang.brigadier.context.CommandContext<>(source,
                                                                                       "",
                                                                                       Map.of(),
@@ -41,7 +44,8 @@ public interface PlatformAdapter<S, T, C extends CommonCommandContext<S, T>> {
                                                                                       StringRange.at(0),
                                                                                       null,
                                                                                       null,
-                                                                                      false));
+                                                                                      false),
+                                    state);
     }
 
     boolean hasPermission(S commandSource, String permissionNode);

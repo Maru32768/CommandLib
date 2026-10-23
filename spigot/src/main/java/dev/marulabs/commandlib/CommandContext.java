@@ -1,6 +1,7 @@
 package dev.marulabs.commandlib;
 
 import com.mojang.brigadier.Message;
+import dev.marulabs.commandlib.internal.ContextState;
 import dev.marulabs.commandlib.internal.nms.command.NMSCommandListenerWrapper;
 import dev.marulabs.commandlib.util.text.RichText;
 import dev.marulabs.commandlib.util.text.RichTexts;
@@ -21,8 +22,8 @@ import java.util.Locale;
 import java.util.Objects;
 
 public final class CommandContext extends CommonCommandContext<Object, BaseComponent> {
-    public CommandContext(com.mojang.brigadier.context.CommandContext<Object> ctx) {
-        super(ctx);
+    CommandContext(com.mojang.brigadier.context.CommandContext<Object> ctx, ContextState state) {
+        super(ctx, state);
     }
 
     @Nullable

@@ -2,6 +2,7 @@ package dev.marulabs.commandlib;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import dev.marulabs.commandlib.internal.ContextState;
 import dev.marulabs.commandlib.internal.PlatformAdapter;
 
 import java.util.*;
@@ -264,7 +265,7 @@ final class CommandNodeCreator<S, T, C extends CommonCommandContext<S, T>, U ext
             return x -> platformAdapter.hasPermission(x, permission);
         }
         return x -> platformAdapter.hasPermission(x, permission)
-                && command.isVisibleTo(platformAdapter.createSourceContext(x));
+                && command.isVisibleTo(state -> platformAdapter.createSourceContext(x, state));
     }
 
     private List<LiteralCommandNode<S>> createAliasCommands(U source, LiteralCommandNode<S> redirectTarget) {

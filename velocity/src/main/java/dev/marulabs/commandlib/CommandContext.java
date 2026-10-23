@@ -6,6 +6,7 @@ import com.velocitypowered.api.command.VelocityBrigadierMessage;
 import com.velocitypowered.api.proxy.ConsoleCommandSource;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
+import dev.marulabs.commandlib.internal.ContextState;
 import dev.marulabs.commandlib.util.text.RichText;
 import dev.marulabs.commandlib.util.text.RichTexts;
 import net.kyori.adventure.text.Component;
@@ -22,8 +23,8 @@ public final class CommandContext extends CommonCommandContext<CommandSource, Co
     // Set by CommandLib.register, and by the tester from its first command until it closes. One proxy runs per JVM.
     static volatile @Nullable ProxyServer proxy;
 
-    public CommandContext(com.mojang.brigadier.context.CommandContext<CommandSource> ctx) {
-        super(ctx);
+    CommandContext(com.mojang.brigadier.context.CommandContext<CommandSource> ctx, ContextState state) {
+        super(ctx, state);
     }
 
     /**

@@ -4,6 +4,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import dev.marulabs.commandlib.command.AsyncCommandExecutor;
 import dev.marulabs.commandlib.exception.ArgumentParseException;
 import dev.marulabs.commandlib.exception.CommandPrerequisiteException;
+import dev.marulabs.commandlib.internal.ContextState;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -225,9 +226,8 @@ final class Arguments<C extends CommonCommandContext<?, ?>> {
     /**
      * As {@link CommonCommand#isVisibleTo}, for this branch.
      */
-    boolean isVisibleTo(C ctx) {
-        ctx.providers(owner.providers());
-        return isVisible(ctx);
+    boolean isVisibleTo(Function<ContextState, C> contextFor) {
+        return isVisible(contextFor.apply(owner.sourceState()));
     }
 
     boolean hasVisibility() {

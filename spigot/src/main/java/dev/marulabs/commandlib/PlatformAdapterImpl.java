@@ -2,6 +2,7 @@ package dev.marulabs.commandlib;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.marulabs.commandlib.exception.ArgumentParseException;
+import dev.marulabs.commandlib.internal.ContextState;
 import dev.marulabs.commandlib.internal.PlatformAdapter;
 import dev.marulabs.commandlib.internal.nms.chat.NMSChatMessage;
 import dev.marulabs.commandlib.internal.nms.chat.NMSIChatMutableComponent;
@@ -19,8 +20,9 @@ final class PlatformAdapterImpl implements PlatformAdapter<Object, BaseComponent
     private static final Logger LOGGER = Logger.getLogger(PlatformAdapterImpl.class.getName());
 
     @Override
-    public CommandContext createCommandContext(com.mojang.brigadier.context.CommandContext<Object> ctx) {
-        return new CommandContext(ctx);
+    public CommandContext createCommandContext(com.mojang.brigadier.context.CommandContext<Object> ctx,
+                                               ContextState state) {
+        return new CommandContext(ctx, state);
     }
 
     @Override

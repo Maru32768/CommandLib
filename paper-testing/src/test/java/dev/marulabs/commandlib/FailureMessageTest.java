@@ -2,6 +2,7 @@ package dev.marulabs.commandlib;
 
 import com.mojang.brigadier.LiteralMessage;
 import com.mojang.brigadier.context.StringRange;
+import dev.marulabs.commandlib.internal.ContextState;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.MessageComponentSerializer;
 import net.kyori.adventure.text.Component;
@@ -34,7 +35,8 @@ class FailureMessageTest {
                                                                                                   StringRange.at(0),
                                                                                                   null,
                                                                                                   null,
-                                                                                                  false));
+                                                                                                  false),
+                                                ContextState.EMPTY);
 
         try (MockedStatic<MessageComponentSerializer> serializers = Mockito.mockStatic(MessageComponentSerializer.class)) {
             serializers.when(MessageComponentSerializer::message)

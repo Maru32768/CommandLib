@@ -7,6 +7,7 @@ import dev.marulabs.commandlib.command.CommandMiddleware;
 import dev.marulabs.commandlib.command.Extractor;
 import dev.marulabs.commandlib.command.Prerequisite;
 import dev.marulabs.commandlib.internal.ArgumentBranchDelegate;
+import dev.marulabs.commandlib.internal.ContextState;
 import dev.marulabs.commandlib.internal.PlatformAdapter;
 import dev.marulabs.commandlib.util.UncaughtExceptionHandler;
 import org.jetbrains.annotations.NotNull;
@@ -169,12 +170,18 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
     }
 
     /**
-     * Whether a source sees this command, for a predicate that has no execution: the context gets the command's
-     * providers.
+     * Whether a source sees this command, for a predicate that has no execution: {@code contextFor} makes the context
+     * of the source with the state it gets, the command's providers.
      */
-    final boolean isVisibleTo(C ctx) {
-        ctx.providers(providers());
-        return isVisible(ctx);
+    final boolean isVisibleTo(Function<ContextState, C> contextFor) {
+        return isVisible(contextFor.apply(sourceState()));
+    }
+
+    /**
+     * The state of a context that runs this command's code outside an execution.
+     */
+    final ContextState sourceState() {
+        return ContextState.of(providers());
     }
 
     private void validateChildren(@NotNull Collection<? extends T> children) {

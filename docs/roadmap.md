@@ -214,7 +214,8 @@
 
 ### P6: Ecosystem と tooling
 
-- `[?]` `CommonCommandContext` の可変状態と変更経路を棚卸しし、責務を分割する。解析済みの入力・引数などの読み取り用データと、
+- `[~]` `CommonCommandContext` の可変状態と変更経路を棚卸しし、責務を分割する。scheduler・parse・captions・providers は
+  生成時に `ContextState` で渡して final にした（2026-10-24）。残りは解析済みの入力・引数などの読み取り用データと、
   実行結果・失敗・出力などの実行中の状態を分離し、初期化後の変更を減らす。option 復元時の handle 差し替え、遅延解決の cache、
   非同期実行で共有される状態を含めて検討し、既存 API への影響と段階的な移行方法を設計する。
 - `[ ]` override したメソッドの戻り値・引数に `@NotNull` / `@Nullable` などの annotation が欠けていないか全 module を点検する。

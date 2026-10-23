@@ -8,6 +8,7 @@ import com.mojang.brigadier.tree.ArgumentCommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import dev.marulabs.commandlib.command.CommandExecutor;
 import dev.marulabs.commandlib.command.Extractor;
+import dev.marulabs.commandlib.internal.ContextState;
 import dev.marulabs.commandlib.internal.CurrentCommandContext;
 import dev.marulabs.commandlib.internal.PlatformAdapter;
 import dev.marulabs.commandlib.suggestion.SuggestionBuilder;
@@ -89,7 +90,7 @@ final class ArgumentCommandNodeCreator<S, T, C extends CommonCommandContext<S, T
                 suggestions.add(suggestions(platformAdapter,
                                             other,
                                             anyRequirement(reusing),
-                                            parent.providers(),
+                                            parent.sourceState(),
                                             otherArguments));
             }
         }
@@ -147,7 +148,7 @@ final class ArgumentCommandNodeCreator<S, T, C extends CommonCommandContext<S, T
         String permission = branch.permissionName(permissionPrefix);
         return branch.hasVisibility()
                 ? source -> platformAdapter.hasPermission(source, permission)
-                        && branch.isVisibleTo(platformAdapter.createSourceContext(source))
+                        && branch.isVisibleTo(state -> platformAdapter.createSourceContext(source, state))
                 : source -> platformAdapter.hasPermission(source, permission);
     }
 
@@ -164,7 +165,7 @@ final class ArgumentCommandNodeCreator<S, T, C extends CommonCommandContext<S, T
     static <S, C extends CommonCommandContext<S, ?>> com.mojang.brigadier.suggestion.SuggestionProvider<S> suggestions(PlatformAdapter<S, ?, C> platformAdapter,
                                                                                                                        CommonArgument<?, C, ?> argument,
                                                                                                                        Predicate<S> requirement,
-                                                                                                                       Map<ContextKey<?>, ? extends Extractor<?, ?>> providers,
+                                                                                                                       ContextState state,
                                                                                                                        List<Arguments<C>> executorArguments) {
         return (context, sb) -> {
             try {
@@ -174,8 +175,7 @@ final class ArgumentCommandNodeCreator<S, T, C extends CommonCommandContext<S, T
                 // Brigadier suggests with the first context of the input, which has the nodes before the first
                 // redirect only, such as those of "execute run" or of a Paper label that redirects to
                 // <plugin>:<label>.
-                C ctx = platformAdapter.createCommandContext(ChainedCommandContext.flatten(context));
-                ctx.providers(providers);
+                C ctx = platformAdapter.createCommandContext(ChainedCommandContext.flatten(context), state);
                 SuggestionBuilder<C> suggestionBuilder = new SuggestionBuilder<>(ctx, sb.getRemaining());
                 List<CompletableFuture<Suggestions>> defaultFutures = new ArrayList<>();
                 // Parsing runs user code (validators, transformers) too, so it shares the current context with the

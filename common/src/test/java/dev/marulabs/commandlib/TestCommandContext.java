@@ -2,6 +2,7 @@ package dev.marulabs.commandlib;
 
 import com.mojang.brigadier.LiteralMessage;
 import com.mojang.brigadier.Message;
+import dev.marulabs.commandlib.internal.ContextState;
 import dev.marulabs.commandlib.util.text.RichText;
 
 import java.util.ArrayList;
@@ -11,8 +12,8 @@ final class TestCommandContext extends CommonCommandContext<TestCommandSource, S
     private static TestCommandContext latest;
     private final List<String> messages = new ArrayList<>();
 
-    TestCommandContext(com.mojang.brigadier.context.CommandContext<TestCommandSource> ctx) {
-        super(ctx);
+    TestCommandContext(com.mojang.brigadier.context.CommandContext<TestCommandSource> ctx, ContextState state) {
+        super(ctx, state);
         // A source context, which the help creates for the visibility predicates, has no input and is no execution.
         if (!ctx.getInput()
                 .isEmpty()) {

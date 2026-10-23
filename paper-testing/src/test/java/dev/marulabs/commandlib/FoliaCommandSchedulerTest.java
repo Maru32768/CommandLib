@@ -1,5 +1,6 @@
 package dev.marulabs.commandlib;
 
+import dev.marulabs.commandlib.internal.ContextState;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.threadedregions.scheduler.AsyncScheduler;
 import io.papermc.paper.threadedregions.scheduler.EntityScheduler;
@@ -163,6 +164,6 @@ class FoliaCommandSchedulerTest {
         when(source.getExecutor()).thenReturn(executor);
         com.mojang.brigadier.context.CommandContext<CommandSourceStack> handle = mock(com.mojang.brigadier.context.CommandContext.class);
         when(handle.getSource()).thenReturn(source);
-        return new CommandContext(handle);
+        return new CommandContext(handle, ContextState.EMPTY);
     }
 }

@@ -1,5 +1,6 @@
 package dev.marulabs.commandlib;
 
+import dev.marulabs.commandlib.internal.ContextState;
 import com.mojang.brigadier.Message;
 import dev.marulabs.commandlib.CommonCommandContext;
 import dev.marulabs.commandlib.util.Location;
@@ -24,8 +25,8 @@ import java.util.Locale;
 import java.util.Objects;
 
 public final class CommandContext extends CommonCommandContext<CommandSourceStack, Component> {
-    public CommandContext(com.mojang.brigadier.context.CommandContext<CommandSourceStack> ctx) {
-        super(ctx);
+    CommandContext(com.mojang.brigadier.context.CommandContext<CommandSourceStack> ctx, ContextState state) {
+        super(ctx, state);
     }
 
     public Entity getEntity() {

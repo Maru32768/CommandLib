@@ -12,6 +12,7 @@ import dev.marulabs.commandlib.exception.ArgumentParseException;
 import dev.marulabs.commandlib.exception.ArgumentValidationException;
 import dev.marulabs.commandlib.exception.CommandPrerequisiteException;
 import dev.marulabs.commandlib.exception.OptionParseException;
+import dev.marulabs.commandlib.internal.ContextState;
 import dev.marulabs.commandlib.internal.CurrentCommandContext;
 import dev.marulabs.commandlib.internal.PlatformAdapter;
 import dev.marulabs.commandlib.util.UncaughtExceptionHandler;
@@ -73,12 +74,13 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
         C ctx;
         try {
             // After options, Brigadier executes a context without them; the graph adds them back.
-            ctx = platformAdapter.createCommandContext(optionGraph.recover(context));
-            // Brigadier gives the targets of a forked execution copies of one context, which share its node list.
-            ctx.parse(context.getNodes());
-            ctx.scheduler(scheduler);
-            ctx.captions(command.captions());
-            ctx.providers(providers);
+            // Brigadier gives the targets of a forked execution copies of one context, which share its node list, the
+            // parse that Confirmation compares.
+            ctx = platformAdapter.createCommandContext(optionGraph.recover(context),
+                                                       ContextState.execution(scheduler,
+                                                                              context.getNodes(),
+                                                                              command.captions(),
+                                                                              providers));
             checkVisible(ctx);
         } catch (CommandSyntaxException e) {
             throw e;

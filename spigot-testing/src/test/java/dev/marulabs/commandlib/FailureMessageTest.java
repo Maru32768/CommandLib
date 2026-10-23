@@ -2,6 +2,7 @@ package dev.marulabs.commandlib;
 
 import com.mojang.brigadier.LiteralMessage;
 import com.mojang.brigadier.context.StringRange;
+import dev.marulabs.commandlib.internal.ContextState;
 import dev.marulabs.commandlib.internal.nms.command.NMSCommandListenerWrapper;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -32,7 +33,8 @@ class FailureMessageTest {
                                                                                                   StringRange.at(0),
                                                                                                   null,
                                                                                                   null,
-                                                                                                  false));
+                                                                                                  false),
+                                                ContextState.EMPTY);
 
         try (MockedStatic<NMSCommandListenerWrapper> wrappers = Mockito.mockStatic(NMSCommandListenerWrapper.class)) {
             wrappers.when(() -> NMSCommandListenerWrapper.create(Mockito.any()))

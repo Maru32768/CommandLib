@@ -5,6 +5,7 @@ import com.mojang.brigadier.context.ParsedCommandNode;
 import com.mojang.brigadier.tree.ArgumentCommandNode;
 import dev.marulabs.commandlib.command.Extractor;
 import dev.marulabs.commandlib.exception.CommandPrerequisiteException;
+import dev.marulabs.commandlib.internal.ContextState;
 import dev.marulabs.commandlib.util.ChatColorUtil;
 import dev.marulabs.commandlib.util.text.RichText;
 import org.jetbrains.annotations.NotNull;
@@ -38,21 +39,28 @@ public abstract class CommonCommandContext<S, C> {
     // Non-null while CommandRunner collects the messages of a failure.
     private @Nullable List<C> failureMessages;
     private @Nullable List<Runnable> failureSends;
-    // Set by CommandRunner before the command runs; null in suggestion contexts.
-    private @Nullable CommandScheduler scheduler;
+    // Null outside an execution.
+    private final @Nullable CommandScheduler scheduler;
     // The parse this execution came from, which the targets of one forked execution share.
-    private @Nullable Object parse;
-    // Set by CommandRunner and the help to those of the command; the default in suggestion contexts.
-    private Captions captions = Captions.DEFAULT;
+    private final @Nullable Object parse;
+    private final Captions captions;
     // The values put by middlewares and those the providers gave so far.
     private final Map<ContextKey<?>, Object> values = new HashMap<>();
-    // Set by the node creators from the command, before any user code runs.
-    private Map<ContextKey<?>, ? extends Extractor<?, ?>> providers = Map.of();
+    private final Map<ContextKey<?>, ? extends Extractor<?, ?>> providers;
     // The keys whose provider is running, to report a provider that needs its own value.
     private final Set<ContextKey<?>> resolving = new HashSet<>();
 
-    protected CommonCommandContext(@NotNull com.mojang.brigadier.context.CommandContext<S> ctx) {
+    /**
+     * A context of {@code ctx} with what {@code state} gives from its command, which it keeps unchanged.
+     */
+    protected CommonCommandContext(@NotNull com.mojang.brigadier.context.CommandContext<S> ctx,
+                                   @NotNull ContextState state) {
         this.handle = Objects.requireNonNull(ctx);
+        this.scheduler = state.scheduler();
+        this.parse = state.parse();
+        Captions captions = state.captions();
+        this.captions = captions != null ? captions : Captions.DEFAULT;
+        this.providers = state.providers();
 
         collectInputs(ctx);
     }
@@ -401,10 +409,6 @@ public abstract class CommonCommandContext<S, C> {
         return captions;
     }
 
-    final void captions(Captions captions) {
-        this.captions = Objects.requireNonNull(captions);
-    }
-
     @NotNull
     public abstract CommandActor getActor();
 
@@ -497,14 +501,6 @@ public abstract class CommonCommandContext<S, C> {
             throw new IllegalStateException("The executors are available only while a command executes.");
         }
         return scheduler;
-    }
-
-    final void scheduler(CommandScheduler scheduler) {
-        this.scheduler = Objects.requireNonNull(scheduler);
-    }
-
-    final void parse(Object parse) {
-        this.parse = Objects.requireNonNull(parse);
     }
 
     @Nullable
@@ -601,10 +597,6 @@ public abstract class CommonCommandContext<S, C> {
     @SuppressWarnings("unchecked")
     private static <E extends Throwable> RuntimeException sneakyThrow(Throwable e) throws E {
         throw (E) e;
-    }
-
-    final void providers(Map<ContextKey<?>, ? extends Extractor<?, ?>> providers) {
-        this.providers = Objects.requireNonNull(providers);
     }
 
     /**

@@ -63,6 +63,8 @@ This file lists the changes in each CommandLib release that affect plugin and mo
   ([execution](docs/execution.md#middleware)). `addPreprocess(Consumer)` is removed, because an expression lambda
   matched both overloads; return `true` from the preprocess or use `addMiddleware`.
 - Forge 1.16.5: `BlockPosArgument` is now `BlockPositionArgument`.
+- The public `CommandContext(CommandContext)` constructor of each platform is removed. CommandLib makes the
+  contexts; tests get them from the testers.
 - A command, argument branch or argument takes one executor: a second `execute`, `executeAsync` or
   `require(...).execute(...)` throws `IllegalStateException` instead of replacing the first. `require(...)` sets the
   executor of the command or branch it is called on, so it cannot be combined with that one's own `execute`; in Kotlin,

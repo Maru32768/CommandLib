@@ -1,5 +1,6 @@
 package dev.marulabs.commandlib;
 
+import dev.marulabs.commandlib.internal.ContextState;
 import com.mojang.brigadier.context.StringRange;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.MinecraftServer;
@@ -55,7 +56,8 @@ class ServerCommandSchedulerTest {
                                                                                     StringRange.at(0),
                                                                                     null,
                                                                                     null,
-                                                                                    false));
+                                                                                    false),
+                                  ContextState.EMPTY);
     }
 
     @Test

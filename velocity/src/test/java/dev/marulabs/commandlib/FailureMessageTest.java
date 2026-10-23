@@ -5,6 +5,7 @@ import com.mojang.brigadier.context.StringRange;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.command.VelocityBrigadierMessage;
 import com.velocitypowered.api.permission.Tristate;
+import dev.marulabs.commandlib.internal.ContextState;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.junit.jupiter.api.Test;
@@ -28,7 +29,8 @@ class FailureMessageTest {
                                                                                                   StringRange.at(0),
                                                                                                   null,
                                                                                                   null,
-                                                                                                  false));
+                                                                                                  false),
+                                                ContextState.EMPTY);
 
         Message message = ctx.toFailureMessage(List.of(Component.text("first"), Component.text("second")));
 

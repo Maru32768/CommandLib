@@ -1,6 +1,7 @@
 package dev.marulabs.commandlib;
 
 import com.mojang.brigadier.Message;
+import dev.marulabs.commandlib.internal.ContextState;
 import dev.marulabs.commandlib.util.text.RichText;
 import dev.marulabs.commandlib.util.text.RichTexts;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
@@ -39,8 +40,8 @@ public final class CommandContext extends CommonCommandContext<CommandSourceStac
         }
     };
 
-    public CommandContext(com.mojang.brigadier.context.CommandContext<CommandSourceStack> ctx) {
-        super(ctx);
+    CommandContext(com.mojang.brigadier.context.CommandContext<CommandSourceStack> ctx, ContextState state) {
+        super(ctx, state);
     }
 
     /**

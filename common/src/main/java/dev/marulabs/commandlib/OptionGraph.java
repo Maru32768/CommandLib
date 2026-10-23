@@ -16,6 +16,7 @@ import com.mojang.brigadier.tree.ArgumentCommandNode;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import dev.marulabs.commandlib.command.Extractor;
+import dev.marulabs.commandlib.internal.ContextState;
 import dev.marulabs.commandlib.internal.PlatformAdapter;
 import org.jetbrains.annotations.Nullable;
 
@@ -151,7 +152,7 @@ final class OptionGraph<S, C extends CommonCommandContext<S, ?>> {
             names.addAll(current.aliases());
             path.addFirst(names);
         }
-        Map<ContextKey<?>, ? extends Extractor<?, ?>> providers = command.providers();
+        ContextState state = command.sourceState();
         return new OptionGraph<>(options,
                                  command::excludes,
                                  redirects,
@@ -160,7 +161,7 @@ final class OptionGraph<S, C extends CommonCommandContext<S, ?>> {
                                  argument -> ArgumentCommandNodeCreator.suggestions(platformAdapter,
                                                                                     argument,
                                                                                     source -> true,
-                                                                                    providers,
+                                                                                    state,
                                                                                     inheritedArguments),
                                  permissions,
                                  platformAdapter::hasPermission);
