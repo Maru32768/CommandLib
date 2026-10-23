@@ -163,12 +163,12 @@ fun <C : CommonCommandContext<*, *>, T : CommonCommand<C, T>, A1, A2, A3, A4, A5
     }
 
 /**
- * Adds an argument branch of any number of arguments, such as eight or more, and configures it in [block]. Keep the
- * arguments in variables and read each value typed from its argument with `ctx[argument]`:
+ * Adds an argument branch of the arguments in [arguments], such as eight or more, and configures it in [block]. Keep
+ * the arguments in variables and read each value typed from its argument with `ctx[argument]`:
  *
  * ```kotlin
  * val world = WorldArgument("world")
- * arguments(x1, y1, z1, x2, y2, z2, world, name) {
+ * arguments(listOf(x1, y1, z1, x2, y2, z2, world, name)) {
  *     execute { ctx -> ctx.sendMessage("${ctx[name]} in ${ctx[world].name}") }
  * }
  * ```
@@ -176,14 +176,14 @@ fun <C : CommonCommandContext<*, *>, T : CommonCommand<C, T>, A1, A2, A3, A4, A5
  * It is named apart from [argument] so that `argument(a) { ... }` stays the typed form.
  */
 fun <C : CommonCommandContext<*, *>, T : CommonCommand<C, T>> T.arguments(
-    vararg arguments: CommonArgument<*, C, *>,
+    arguments: List<CommonArgument<*, C, *>>,
     block: (@CommandLibDsl ArgumentBranch<C, T>).() -> Unit,
-): ArgumentBranch<C, T> = branch(*arguments).apply(block)
+): ArgumentBranch<C, T> = argument(arguments).apply(block)
 
-// The varargs form adds the same branch as the typed argument(...) overloads of the fluent API.
+// The list form adds the same branch as the typed argument(...) overloads of the fluent API.
 private fun <C : CommonCommandContext<*, *>, T : CommonCommand<C, T>> T.branch(
     vararg arguments: CommonArgument<*, C, *>,
-): ArgumentBranch<C, T> = argument(*arguments)
+): ArgumentBranch<C, T> = argument(arguments.toList())
 
 /**
  * Configures [CommonCommand.require] in [block]. Its executor is the command's own, which runs only when [extractor]

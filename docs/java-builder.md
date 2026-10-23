@@ -97,7 +97,7 @@ The builder configures its command as it goes: `build()` returns that command, a
 
 ## Eight or more arguments
 
-The typed callbacks take one to seven arguments. A branch of any number of arguments reads each value typed from its
+The typed callbacks take one to seven arguments. A branch of a list of arguments reads each value typed from its
 argument instance with `ctx.getArgument(argument)`, without a name lookup or a cast:
 
 ```java
@@ -107,7 +107,7 @@ WorldArgument world = new WorldArgument("world");
 StringArgument name = new StringArgument("name");
 
 // Fluent
-argument(x1, y1, z1, x2, y2, z2, world, name).execute(ctx -> {
+argument(List.of(x1, y1, z1, x2, y2, z2, world, name)).execute(ctx -> {
     double width = Math.abs(ctx.getArgument(x2) - ctx.getArgument(x1));
     regions.create(ctx.getArgument(name), ctx.getArgument(world), width);
 });
@@ -118,7 +118,7 @@ Command.builder("region")
        .build();
 ```
 
-`argument(List)` on `Command` takes the arguments of a branch built at runtime. A child command of such a branch reads
+`argument(List)` also takes the arguments of a branch built at runtime. A child command of such a branch reads
 the parent's values with `ArgRef.of(argument).get()` or `ctx.getArgument(argument)`.
 
 ## Testing

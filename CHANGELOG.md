@@ -39,7 +39,7 @@ This file lists the changes in each CommandLib release that affect plugin and mo
 - `argument(arg, (value, ctx) -> ...)` and the other overloads that took an executor are removed. Call
   `argument(arg).execute((value, ctx) -> ...)`. The returned branch also takes `permission`, `description` and `child`.
 - `argument(Consumer<ArgumentBuilder>)` is removed together with `ArgumentBuilder` and `AbstractArgumentBuilder`. For
-  eight or more arguments, call `argument(a, b, ..., h)` or `argument(List)` and read each value with
+  eight or more arguments, call `argument(List.of(a, b, ..., h))` and read each value with
   `ctx.getArgument(argument)` ([Java builder](docs/java-builder.md#eight-or-more-arguments)).
 - The argument constructors that took a `Consumer<CommonArgument.Option>` are removed, and so is `CommonArgument.Option`.
   Chain the methods on the argument instead, for example

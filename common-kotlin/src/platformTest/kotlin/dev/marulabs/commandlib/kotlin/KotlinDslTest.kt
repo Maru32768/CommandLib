@@ -139,7 +139,7 @@ class KotlinDslTest {
         val label = StringArgument("label")
         val sum =
             command("sum") {
-                arguments(numbers[0], numbers[1], numbers[2], numbers[3], numbers[4], numbers[5], numbers[6], label) {
+                arguments(numbers + label) {
                     description("Sum seven numbers")
                     execute { ctx -> ctx.sendMessage(ctx[label] + ":" + numbers.sumOf { ctx[it] }) }
                     subcommand("first") { execute { ctx -> ctx.sendMessage("${ctx[label]}:${ctx[numbers[0]]}") } }

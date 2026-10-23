@@ -475,22 +475,16 @@ class CommandStructureTest {
         }
         StrArg label = new StrArg("label");
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("sum") {{
-            argument(numbers.get(0),
-                     numbers.get(1),
-                     numbers.get(2),
-                     numbers.get(3),
-                     numbers.get(4),
-                     numbers.get(5),
-                     numbers.get(6),
-                     numbers.get(7),
-                     label).execute(ctx -> {
-                         int sum = 0;
-                         for (IntArg number : numbers) {
-                             sum += ctx.getArgument(number);
-                         }
-                         String text = ctx.getArgument(label);
-                         ctx.sendMessage(text + ":" + sum);
-                     });
+            List<CommonArgument<?, TestCommandContext, ?>> arguments = new ArrayList<>(numbers);
+            arguments.add(label);
+            argument(arguments).execute(ctx -> {
+                int sum = 0;
+                for (IntArg number : numbers) {
+                    sum += ctx.getArgument(number);
+                }
+                String text = ctx.getArgument(label);
+                ctx.sendMessage(text + ":" + sum);
+            });
         }});
 
         assertThat(runner.execute("sum 1 2 3 4 5 6 7 8 total")
@@ -512,9 +506,6 @@ class CommandStructureTest {
 
     @Test
     void empty_argument_branch_is_rejected() {
-        assertThatThrownBy(() -> new TestCommand("empty") {{
-            argument();
-        }}).isInstanceOf(IllegalArgumentException.class);
         assertThatThrownBy(() -> new TestCommand("empty") {{
             argument(List.<IntArg>of());
         }}).isInstanceOf(IllegalArgumentException.class);

@@ -110,14 +110,14 @@ with the branch (`ArgumentBranch`) as its receiver. Each lambda parameter is an 
 so `PlayerArgument` gives `ArgRef<Player>` and `PlayerArgument(...).variadic()` gives `ArgRef<List<Player>>`; no
 casts and no lookups by name.
 
-For eight or more arguments, use `arguments(arg1, ..., argN) { }`: it takes any number of arguments and runs the block
+For eight or more arguments, use `arguments(listOf(arg1, ..., argN)) { }`: it takes a list of arguments and runs the block
 with the branch as its receiver, without references. Keep the arguments in variables and read each value typed from
 its argument with `ctx[arg]`, also in a `subcommand` of the branch:
 
 ```kotlin
 val world = WorldArgument("world")
 val name = StringArgument("name")
-arguments(x1, y1, z1, x2, y2, z2, world, name) {
+arguments(listOf(x1, y1, z1, x2, y2, z2, world, name)) {
     execute { ctx -> ctx.sendMessage("${ctx[name]}: ${ctx[x2] - ctx[x1]} wide") }
     subcommand("preview") { execute { ctx -> ctx.sendMessage("${ctx[name]} in ${ctx[world].name}") } }
 }

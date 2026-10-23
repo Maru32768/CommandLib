@@ -19,10 +19,7 @@ class CommandBuilderTest {
                                                             // They read the command instead of configuring it.
                                                             "name()",
                                                             "description(CommonCommandContext)",
-                                                            "permissionName(String)",
-                                                            // A callback cannot follow varargs; the List form covers
-                                                            // it.
-                                                            "argument(CommonArgument[])");
+                                                            "permissionName(String)");
 
     /**
      * Each method of {@link CommonCommand} that configures the command has a builder method of the same name. One that
