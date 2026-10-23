@@ -18,7 +18,7 @@ class WorldArgumentTest {
         List<String> messages;
 
         try (CommandTester tester = new CommandTester(() -> new Command("world") {{
-            argument(new WorldArgument("world")).execute((world, ctx) -> {
+            argument(new WorldArgument("world")).execute((ctx, world) -> {
                 ctx.sendMessage(world.dimension()
                                      .location()
                                      .toString());

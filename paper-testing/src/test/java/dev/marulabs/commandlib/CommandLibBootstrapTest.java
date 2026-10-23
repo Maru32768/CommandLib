@@ -76,7 +76,7 @@ class CommandLibBootstrapTest {
     void an_invalid_definition_throws_from_bootstrap_before_anything_is_registered() {
         Command broken = new Command("broken") {{
             argument(new IntegerArgument("count").optional(1),
-                     new IntegerArgument("amount")).execute((count, amount, ctx) -> {
+                     new IntegerArgument("amount")).execute((ctx, count, amount) -> {
                      });
         }};
 

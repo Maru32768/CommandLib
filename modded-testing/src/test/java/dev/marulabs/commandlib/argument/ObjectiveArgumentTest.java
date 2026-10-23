@@ -23,7 +23,7 @@ class ObjectiveArgumentTest {
         List<String> messages;
 
         try (CommandTester tester = new CommandTester(() -> new Command("objective") {{
-            argument(new ObjectiveArgument("name").scoreboard(current::get)).execute((objective, ctx) -> {
+            argument(new ObjectiveArgument("name").scoreboard(current::get)).execute((ctx, objective) -> {
                 ctx.sendMessage(objective.getName());
             });
         }}, "test.command")) {
@@ -50,8 +50,8 @@ class ObjectiveArgumentTest {
         List<String> messages;
 
         try (CommandTester tester = new CommandTester(() -> new Command("objective") {{
-            argument(new ObjectiveArgument("name")).execute((objective,
-                                                             ctx) -> ctx.sendMessage(objective.getName()));
+            argument(new ObjectiveArgument("name")).execute((ctx,
+                                                             objective) -> ctx.sendMessage(objective.getName()));
         }}, "test.command")) {
             FakeSender sender = FakeSender.player("Alice");
             Objective kills = addObjective(new Scoreboard(), "kills");

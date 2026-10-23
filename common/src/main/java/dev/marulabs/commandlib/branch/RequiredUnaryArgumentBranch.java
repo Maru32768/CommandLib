@@ -26,13 +26,13 @@ public final class RequiredUnaryArgumentBranch<S, T1, C extends CommonCommandCon
         this.argument1 = argument1;
     }
 
-    public RequiredUnaryArgumentBranch<S, T1, C, T> execute(@NotNull TriConsumer<T1, S, C> action) {
-        super.execute((s, ctx) -> action.accept(ctx.getArgument(argument1), s, ctx));
+    public RequiredUnaryArgumentBranch<S, T1, C, T> execute(@NotNull TriConsumer<C, T1, S> action) {
+        super.execute((ctx, s) -> action.accept(ctx, ctx.getArgument(argument1), s));
         return this;
     }
 
-    public RequiredUnaryArgumentBranch<S, T1, C, T> executeAsync(@NotNull TriFunction<T1, S, C, CompletionStage<?>> action) {
-        super.executeAsync((s, ctx) -> action.apply(ctx.getArgument(argument1), s, ctx));
+    public RequiredUnaryArgumentBranch<S, T1, C, T> executeAsync(@NotNull TriFunction<C, T1, S, CompletionStage<?>> action) {
+        super.executeAsync((ctx, s) -> action.apply(ctx, ctx.getArgument(argument1), s));
         return this;
     }
 

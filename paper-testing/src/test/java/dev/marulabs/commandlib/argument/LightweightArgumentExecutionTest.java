@@ -36,7 +36,7 @@ class LightweightArgumentExecutionTest {
                      new LongArgument("long"),
                      new FloatArgument("float"),
                      new DoubleArgument("double"),
-                     new StringArgument("word")).execute((bool, integer, longValue, floatValue, doubleValue, word, ctx) -> {
+                     new StringArgument("word")).execute((ctx, bool, integer, longValue, floatValue, doubleValue, word) -> {
                          ctx.sendMessage(bool + ":" + integer + ":" + longValue + ":" + floatValue + ":"
                                  + doubleValue + ":" + word);
                      });
@@ -55,7 +55,7 @@ class LightweightArgumentExecutionTest {
                      new NameableObjectArgument<>("nameable", List.of(new SampleNameable("beta"))),
                      new EnumArgument<>("mode", SampleMode.class),
                      new LiteralArgument("literal", List.of("literal")),
-                     new UnparsedArgument("tail")).execute((object, nameable, mode, literal, tail, ctx) -> {
+                     new UnparsedArgument("tail")).execute((ctx, object, nameable, mode, literal, tail) -> {
                          ctx.sendMessage(object + ":" + nameable.tabCompleteName() + ":" + mode + ":" + literal
                                  + ":" + tail);
                      });
@@ -73,7 +73,7 @@ class LightweightArgumentExecutionTest {
             CommandTester tester = new CommandTester(new Command("args") {{
                 argument(new OfflinePlayerArgument("offline"),
                          new UUIDArgument("uuid"),
-                         new TeamArgument("team")).execute((offline, uuid, team, ctx) -> {
+                         new TeamArgument("team")).execute((ctx, offline, uuid, team) -> {
                              ctx.sendMessage(offline.getName() + ":" + uuid + ":" + team.getName());
                          });
             }}, "test.command");
@@ -97,7 +97,7 @@ class LightweightArgumentExecutionTest {
             argument(new PlayerArgument("player"),
                      new PlayersArgument("players"),
                      new EntityArgument("entity"),
-                     new EntitiesArgument("entities")).execute((player, players, entity, entities, ctx) -> {
+                     new EntitiesArgument("entities")).execute((ctx, player, players, entity, entities) -> {
                          ctx.sendMessage(player.getName() + ":" + players.size() + ":" + entity.getName() + ":"
                                  + entities.size());
                      });
@@ -118,7 +118,7 @@ class LightweightArgumentExecutionTest {
         CommandTester tester = new CommandTester(() -> new Command("args") {{
             argument(new BlockDataArgument("block"),
                      new ItemStackArgument("item"),
-                     new ParticleArgument("particle")).execute((block, item, particle, ctx) -> {
+                     new ParticleArgument("particle")).execute((ctx, block, item, particle) -> {
                          ctx.sendMessage((block == blockData) + ":" + (item == itemStack) + ":" + particle.name());
                      });
         }}, "test.command").withFakeBlockData(blockData)
@@ -134,7 +134,7 @@ class LightweightArgumentExecutionTest {
     @Test
     void registryArgumentsWithoutFakeValuesRejectEveryKey() {
         CommandTester tester = new CommandTester(() -> new Command("args") {{
-            argument(new ParticleArgument("particle")).execute((particle, ctx) -> ctx.sendMessage(particle.name()));
+            argument(new ParticleArgument("particle")).execute((ctx, particle) -> ctx.sendMessage(particle.name()));
         }}, "test.command");
         FakeSender sender = FakeSender.player("Steve");
 
@@ -146,7 +146,7 @@ class LightweightArgumentExecutionTest {
     @Test
     void gameModeArgumentExecutes() {
         CommandTester tester = new CommandTester(() -> new Command("args") {{
-            argument(new GameModeArgument("mode")).execute((mode, ctx) -> ctx.sendMessage(mode.name()));
+            argument(new GameModeArgument("mode")).execute((ctx, mode) -> ctx.sendMessage(mode.name()));
         }}, "test.command");
         FakeSender sender = FakeSender.player("Steve");
 
@@ -161,7 +161,7 @@ class LightweightArgumentExecutionTest {
     void displaySlotAndColorArgumentsReadVanillaNames() {
         CommandTester tester = new CommandTester(() -> new Command("args") {{
             argument(new ScoreboardDisplaySlotArgument("slot"),
-                     new ChatColorArgument("color")).execute((slot, color, ctx) -> ctx.sendMessage(slot.name() + ":" + color));
+                     new ChatColorArgument("color")).execute((ctx, slot, color) -> ctx.sendMessage(slot.name() + ":" + color));
         }}, "test.command");
         FakeSender sender = FakeSender.player("Steve");
 
@@ -178,7 +178,7 @@ class LightweightArgumentExecutionTest {
     @Test
     void colorArgumentRejectsResetAndFormats() {
         CommandTester tester = new CommandTester(() -> new Command("color") {{
-            argument(new ChatColorArgument("color")).execute((color, ctx) -> ctx.sendMessage(color.toString()));
+            argument(new ChatColorArgument("color")).execute((ctx, color) -> ctx.sendMessage(color.toString()));
         }}, "test.command");
         FakeSender sender = FakeSender.player("Steve");
 
@@ -191,7 +191,7 @@ class LightweightArgumentExecutionTest {
     @Test
     void paperLocationArgumentExecutes() {
         CommandTester tester = new CommandTester(() -> new Command("args") {{
-            argument(new LocationArgument("location")).execute((location, ctx) -> {
+            argument(new LocationArgument("location")).execute((ctx, location) -> {
                 Location loc = location;
                 ctx.sendMessage(loc.getX() + ":" + loc.getY() + ":" + loc.getZ());
             });
@@ -206,7 +206,7 @@ class LightweightArgumentExecutionTest {
     @Test
     void paperLocationArgumentCentersIntegerXAndZByDefault() {
         CommandTester tester = new CommandTester(() -> new Command("args") {{
-            argument(new LocationArgument("location")).execute((location, ctx) -> {
+            argument(new LocationArgument("location")).execute((ctx, location) -> {
                 ctx.sendMessage(location.getX() + ":" + location.getY() + ":" + location.getZ());
             });
         }}, "test.command");
@@ -221,7 +221,7 @@ class LightweightArgumentExecutionTest {
     @Test
     void paperLocationArgumentWithoutCenteringKeepsIntegerCoordinates() {
         CommandTester tester = new CommandTester(() -> new Command("args") {{
-            argument(new LocationArgument("location", false)).execute((location, ctx) -> {
+            argument(new LocationArgument("location", false)).execute((ctx, location) -> {
                 ctx.sendMessage(location.getX() + ":" + location.getY() + ":" + location.getZ());
             });
         }}, "test.command");

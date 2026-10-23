@@ -25,7 +25,7 @@ class CommandResultTest {
     @Test
     void executor_sets_the_result() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("count") {{
-            argument(new CommonStringArgument<>("word")).execute((word, ctx) -> ctx.setResult(word.length()));
+            argument(new CommonStringArgument<>("word")).execute((ctx, word) -> ctx.setResult(word.length()));
         }});
 
         assertThat(runner.dispatch("count hello")).isEqualTo(5);
@@ -50,7 +50,7 @@ class CommandResultTest {
     @Test
     void ctx_fail_fails_a_typed_executor_like_a_prerequisite_exception() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("count") {{
-            argument(new CommonStringArgument<>("word")).execute((word, ctx) -> {
+            argument(new CommonStringArgument<>("word")).execute((ctx, word) -> {
                 if (word.equals("none")) {
                     throw ctx.fail("nothing to count", "try another word");
                 }
@@ -77,7 +77,7 @@ class CommandResultTest {
     @Test
     void parse_failure_is_thrown_to_the_platform() {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("go") {{
-            argument(new CommonLiteralArgument<>("dir", List.of("north"))).execute((dir, ctx) -> {
+            argument(new CommonLiteralArgument<>("dir", List.of("north"))).execute((ctx, dir) -> {
             });
         }});
 

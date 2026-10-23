@@ -44,13 +44,13 @@ class ArgumentFailureTest {
         try (CommandTester tester = CommandTester.builder()
                                                  .command(() -> new Command("go") {{
                                                      argument(new EnumArgument<>("dir",
-                                                                                 Direction.class)).execute((dir, ctx) -> ctx.sendMessage("unreachable"));
+                                                                                 Direction.class)).execute((ctx, dir) -> ctx.sendMessage("unreachable"));
                                                  }})
                                                  .command(() -> new Command("give") {{
                                                      argument(new ObjectArgument<>("item",
                                                                                    Map.of("sword", 1)))
-                                                                                                       .execute((item,
-                                                                                                                 ctx) -> ctx.sendMessage("unreachable"));
+                                                                                                       .execute((ctx,
+                                                                                                                 item) -> ctx.sendMessage("unreachable"));
                                                  }})
                                                  .permissionPrefix("test.command")
                                                  .build()) {
@@ -70,7 +70,7 @@ class ArgumentFailureTest {
     @Test
     void unknown_world_is_a_syntax_error() {
         try (CommandTester tester = new CommandTester(() -> new Command("tp") {{
-            argument(new WorldArgument("world")).execute((world, ctx) -> ctx.sendMessage("world=" + world));
+            argument(new WorldArgument("world")).execute((ctx, world) -> ctx.sendMessage("world=" + world));
         }}, "test.command")) {
             assertThatThrownBy(() -> tester.execute("tp missing",
                                                     FakeSender.player("Alice"))).hasCauseInstanceOf(CommandSyntaxException.class);
@@ -86,7 +86,7 @@ class ArgumentFailureTest {
 
         try (MockedStatic<Bukkit> bukkit = Mockito.mockStatic(Bukkit.class);
              CommandTester tester = new CommandTester(() -> new Command("team") {{
-                 argument(new TeamArgument("team")).execute((team, ctx) -> ctx.sendMessage("unreachable"));
+                 argument(new TeamArgument("team")).execute((ctx, team) -> ctx.sendMessage("unreachable"));
              }}, "test.command")) {
             bukkit.when(Bukkit::getScoreboardManager)
                   .thenReturn(manager);
@@ -100,7 +100,7 @@ class ArgumentFailureTest {
     @Test
     void unparsed_argument_has_no_placeholder_suggestions() {
         try (CommandTester tester = new CommandTester(() -> new Command("raw") {{
-            argument(new UnparsedArgument("value")).execute((value, ctx) -> ctx.sendMessage(value));
+            argument(new UnparsedArgument("value")).execute((ctx, value) -> ctx.sendMessage(value));
         }}, "test.command")) {
             List<String> suggestions = tester.suggestions("raw ", FakeSender.player("Alice"))
                                              .join()
@@ -118,7 +118,7 @@ class ArgumentFailureTest {
         FakeSender sender = FakeSender.player("Alice");
 
         try (CommandTester tester = new CommandTester(() -> new Command("raw") {{
-            argument(new UnparsedArgument("value"), new StringArgument("next")).execute((value, next, ctx) -> {
+            argument(new UnparsedArgument("value"), new StringArgument("next")).execute((ctx, value, next) -> {
                 ctx.sendMessage(value + "|" + next);
             });
         }}, "test.command")) {
@@ -136,20 +136,20 @@ class ArgumentFailureTest {
 
         try (CommandTester tester = CommandTester.builder()
                                                  .command(() -> new Command("player") {{
-                                                     argument(new PlayerArgument("p")).execute((p,
-                                                                                                ctx) -> executed.incrementAndGet());
+                                                     argument(new PlayerArgument("p")).execute((ctx,
+                                                                                                p) -> executed.incrementAndGet());
                                                  }})
                                                  .command(() -> new Command("players") {{
-                                                     argument(new PlayersArgument("p")).execute((p,
-                                                                                                 ctx) -> executed.incrementAndGet());
+                                                     argument(new PlayersArgument("p")).execute((ctx,
+                                                                                                 p) -> executed.incrementAndGet());
                                                  }})
                                                  .command(() -> new Command("entity") {{
-                                                     argument(new EntityArgument("e")).execute((e,
-                                                                                                ctx) -> executed.incrementAndGet());
+                                                     argument(new EntityArgument("e")).execute((ctx,
+                                                                                                e) -> executed.incrementAndGet());
                                                  }})
                                                  .command(() -> new Command("entities") {{
-                                                     argument(new EntitiesArgument("e")).execute((e,
-                                                                                                  ctx) -> executed.incrementAndGet());
+                                                     argument(new EntitiesArgument("e")).execute((ctx,
+                                                                                                  e) -> executed.incrementAndGet());
                                                  }})
                                                  .permissionPrefix("test.command")
                                                  .build()) {
@@ -176,7 +176,7 @@ class ArgumentFailureTest {
         FakeSender sender = FakeSender.player("Alice");
 
         try (CommandTester tester = new CommandTester(() -> new Command("check") {{
-            argument(new ResolvingArgument("value")).execute((value, ctx) -> ctx.sendMessage("unreachable"));
+            argument(new ResolvingArgument("value")).execute((ctx, value) -> ctx.sendMessage("unreachable"));
         }}, "test.command")) {
             tester.execute("check bad", sender);
         }

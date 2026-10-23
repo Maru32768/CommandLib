@@ -162,11 +162,11 @@ return an empty list, so CommandLib's `PlayersArgument` / `EntitiesArgument` rej
   - `ArgumentValidationException.ofIncorrectInput(name, ctx, input)` sends the vanilla-style message.
 
 ```java
-argument(new IntegerArgument("amount").validator((amount, ctx) -> {
+argument(new IntegerArgument("amount").validator((ctx, amount) -> {
     if (amount % 2 != 0) {
         throw new ArgumentValidationException("The amount must be even.");
     }
-})).execute((amount, ctx) -> ctx.sendSuccess("ok " + amount));
+})).execute((ctx, amount) -> ctx.sendSuccess("ok " + amount));
 ```
 
 Validators also filter suggestions: the enum, object, nameable object, team, offline player, and UUID arguments drop
@@ -232,12 +232,12 @@ addPrerequisite(Conditions.DAYTIME);
 Annotated commands name it: `AnnotationParser#registerPrerequisite("daytime", Conditions.DAYTIME)` and
 `@Prerequisites("daytime")` on the class or a `@Subcommand` method ([annotations](annotations.md#customizing-the-parser)).
 
-The typed executors (`execute((a, b, ctx) -> ...)`) take `java.util.function` style consumers that cannot throw
+The typed executors (`execute((ctx, a, b) -> ...)`) take `java.util.function` style consumers that cannot throw
 checked exceptions. `ctx.fail(...)` throws the `CommandPrerequisiteException` without declaring it, so it fails them
 like any other executor; it never returns, and `throw ctx.fail(...)` lets the compiler see that the branch ends:
 
 ```java
-argument(new PlayersArgument("targets")).execute((targets, ctx) -> {
+argument(new PlayersArgument("targets")).execute((ctx, targets) -> {
     if (targets.isEmpty()) {
         throw ctx.fail("No player was found");
     }
@@ -287,7 +287,7 @@ An exception thrown by the executor or a middleware, or a failed stage of an asy
 - the sender gets `An unexpected error occurred trying to execute that command` (vanilla's translatable
   `command.failed`, unless `Caption.UNEXPECTED_ERROR` is given a text) and `Check the console for details.` in red;
 - every `UncaughtExceptionHandler` added with `addUncaughtExceptionHandler` on the command (and, for an argument node,
-  on the argument) is called with the exception and the context;
+  on the argument) is called with the context and the exception;
 - the command [fails](#results-and-failures) with those two lines, or, for an async command that has already
   returned, sends them to the sender directly; the handlers then run on the sync thread.
 

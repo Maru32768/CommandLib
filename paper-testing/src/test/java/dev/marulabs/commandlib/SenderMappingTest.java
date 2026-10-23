@@ -53,7 +53,7 @@ class SenderMappingTest {
                 execute(ctx -> ctx.sendMessage(ctx.get(GamePlayer.class)
                                                   .describe()));
             }}, new Command("join") {{
-                argument(new StringArgument("team")).execute((team, ctx) -> {
+                argument(new StringArgument("team")).execute((ctx, team) -> {
                     GamePlayer player = ctx.get(GamePlayer.class);
                     games.teams.put(ctx.getPlayer()
                                        .getName(),
@@ -73,7 +73,7 @@ class SenderMappingTest {
                                        .execute(ctx -> ctx.sendMessage(ctx.get(GamePlayer.class)
                                                                           .describe())))
                       .addChild(Command.builder("join")
-                                       .argument(new StringArgument("team"), branch -> branch.execute((team, ctx) -> {
+                                       .argument(new StringArgument("team"), branch -> branch.execute((ctx, team) -> {
                                            GamePlayer player = ctx.get(GamePlayer.class);
                                            games.teams.put(ctx.getPlayer()
                                                               .getName(),

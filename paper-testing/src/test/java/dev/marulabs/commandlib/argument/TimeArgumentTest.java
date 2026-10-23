@@ -13,8 +13,8 @@ class TimeArgumentTest {
     // The argument is created inside the command supplier, where the tester stubs Paper's argument types.
     private static CommandTester tester(int minimum) {
         return new CommandTester(() -> new Command("wait") {{
-            argument(new TimeArgument("ticks", minimum)).execute((ticks,
-                                                                  ctx) -> ctx.sendMessage(String.valueOf(ticks)));
+            argument(new TimeArgument("ticks", minimum)).execute((ctx,
+                                                                  ticks) -> ctx.sendMessage(String.valueOf(ticks)));
         }}, "test.command");
     }
 

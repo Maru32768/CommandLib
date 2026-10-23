@@ -19,7 +19,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class PotionEffectArgumentTest {
     private static CommandTester tester(AtomicReference<PotionEffect> received, PotionEffectType speed) {
         return new CommandTester(() -> new Command("effect") {{
-            argument(new PotionEffectArgument("value")).execute((effect, ctx) -> received.set(effect));
+            argument(new PotionEffectArgument("value")).execute((ctx, effect) -> received.set(effect));
         }}, "test.command").withFakeRegistryValue(RegistryKey.MOB_EFFECT, "minecraft:speed", speed);
     }
 

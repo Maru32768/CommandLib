@@ -66,7 +66,7 @@ public final class OptionTest extends TestBase {
             CommandOption<String, CommandContext> format = option(Options.string("format", 'F', "text")
                                                                          .description("Output format"));
 
-            argument(new StringArgument("str", StringArgument.Type.WORD)).execute((target, ctx) -> {
+            argument(new StringArgument("str", StringArgument.Type.WORD)).execute((ctx, target) -> {
                 putResult(key,
                           ctx.getOption(force) + ":" + ctx.getOption(limit) + ":" + ctx.getOption(format) + ":"
                                   + target,
@@ -87,7 +87,7 @@ public final class OptionTest extends TestBase {
             CommandOption<Integer, CommandContext> limit = option(Options.integer("limit", 'n', 10, 1, 100));
             CommandOption<String, CommandContext> format = option(Options.string("format", 'F', "text"));
 
-            argument(new StringArgument("target", StringArgument.Type.WORD)).execute((target, ctx) -> {
+            argument(new StringArgument("target", StringArgument.Type.WORD)).execute((ctx, target) -> {
                 putResult(key,
                           ctx.getOption(force) + ":" + ctx.getOption(limit) + ":" + ctx.getOption(format) + ":"
                                   + target,
@@ -107,7 +107,7 @@ public final class OptionTest extends TestBase {
             CommandOption<Boolean, CommandContext> force = option(Options.flag("force", 'f'));
             CommandOption<Boolean, CommandContext> verbose = option(Options.flag("verbose", 'v'));
 
-            argument(new StringArgument("target", StringArgument.Type.WORD)).execute((target, ctx) -> {
+            argument(new StringArgument("target", StringArgument.Type.WORD)).execute((ctx, target) -> {
                 putResult(key,
                           ctx.getOption(force) + ":" + ctx.getOption(verbose) + ":" + target,
                           "true:true:alex");
@@ -127,7 +127,7 @@ public final class OptionTest extends TestBase {
             CommandOption<String, CommandContext> reason = option(Options.string("reason", 'r', "")
                                                                          .requires(force));
 
-            argument(new StringArgument("target", StringArgument.Type.WORD)).execute((target, ctx) -> {
+            argument(new StringArgument("target", StringArgument.Type.WORD)).execute((ctx, target) -> {
                 putResult(key,
                           ctx.getOption(force) + ":" + ctx.getOption(reason) + ":" + target,
                           "true:cleanup:alex");
@@ -147,7 +147,7 @@ public final class OptionTest extends TestBase {
             CommandOption<Integer, CommandContext> limit = option(Options.integer("limit", 'n', 10)
                                                                          .requires(mode, "parallel"));
 
-            argument(new StringArgument("target", StringArgument.Type.WORD)).execute((target, ctx) -> {
+            argument(new StringArgument("target", StringArgument.Type.WORD)).execute((ctx, target) -> {
                 putResult(key, ctx.getOption(mode) + ":" + ctx.getOption(limit) + ":" + target, "parallel:20:alex");
             });
         }});
@@ -168,7 +168,7 @@ public final class OptionTest extends TestBase {
             CommandOption<Integer, CommandContext> limit = option(Options.integer("limit", 'n', 10)
                                                                          .requires(mode, "parallel"));
 
-            argument(new StringArgument("target", StringArgument.Type.WORD)).execute((target, ctx) -> {
+            argument(new StringArgument("target", StringArgument.Type.WORD)).execute((ctx, target) -> {
                 recordRejectedInputResult(key,
                                           target,
                                           rejectedInputExecuted,
@@ -189,7 +189,7 @@ public final class OptionTest extends TestBase {
         command.addChildren(new Command(name) {{
             CommandOption<String, CommandContext> format = option(Options.string("format", 'F', "text"));
 
-            argument(new StringArgument("target", StringArgument.Type.WORD)).execute((target, ctx) -> {
+            argument(new StringArgument("target", StringArgument.Type.WORD)).execute((ctx, target) -> {
                 recordRejectedInputResult(key, target, rejectedInputExecuted, "format=" + ctx.getOption(format));
             });
             execute(ctx -> recordRejectedInputResult(key, "rejected", rejectedInputExecuted, "without target"));
@@ -208,7 +208,7 @@ public final class OptionTest extends TestBase {
         command.addChildren(new Command(name) {{
             CommandOption<Boolean, CommandContext> force = option(Options.flag("force", 'f'));
 
-            argument(new StringArgument("target", StringArgument.Type.WORD)).execute((target, ctx) -> {
+            argument(new StringArgument("target", StringArgument.Type.WORD)).execute((ctx, target) -> {
                 recordRejectedInputResult(key, target, rejectedInputExecuted, "force=" + ctx.getOption(force));
             });
         }});
@@ -226,7 +226,7 @@ public final class OptionTest extends TestBase {
             CommandOption<List<String>, CommandContext> tags = option(Options.string("tag", 't', "")
                                                                              .repeatable(3));
 
-            argument(new StringArgument("target", StringArgument.Type.WORD)).execute((target, ctx) -> {
+            argument(new StringArgument("target", StringArgument.Type.WORD)).execute((ctx, target) -> {
                 putResult(key, ctx.getOption(verbose) + ":" + ctx.getOption(tags) + ":" + target, "3:[a, b]:alex");
             });
         }});
@@ -248,7 +248,7 @@ public final class OptionTest extends TestBase {
                                                                              'p',
                                                                              new PlayerArgument("player")));
 
-            argument(new StringArgument("target", StringArgument.Type.WORD)).execute((target, ctx) -> {
+            argument(new StringArgument("target", StringArgument.Type.WORD)).execute((ctx, target) -> {
                 putResult(key,
                           ctx.getOption(force) + ":" + ctx.getOption(player)
                                                           .getName()
@@ -271,7 +271,7 @@ public final class OptionTest extends TestBase {
             CommandOption<Integer, CommandContext> days = option(Options.integer("days", 'd', 1));
 
             argument(new StringArgument("target", StringArgument.Type.WORD),
-                     new StringArgument("reason", StringArgument.Type.WORD)).execute((target, reason, ctx) -> {
+                     new StringArgument("reason", StringArgument.Type.WORD)).execute((ctx, target, reason) -> {
                          putResult(key,
                                    ctx.getOption(silent) + ":" + ctx.getOption(days) + ":" + target + ":" + reason,
                                    "true:3:alex:spam");
@@ -293,7 +293,7 @@ public final class OptionTest extends TestBase {
             CommandOption<Boolean, CommandContext> loud = option(Options.flag("loud", 'l'));
             mutuallyExclusiveOptions(quiet, loud);
 
-            argument(new StringArgument("target", StringArgument.Type.WORD)).execute((target, ctx) -> {
+            argument(new StringArgument("target", StringArgument.Type.WORD)).execute((ctx, target) -> {
                 if (!ctx.getOption(quiet)) {
                     putResult(new TestResult(key, TestStatus.FAILED, "--silent did not give --quiet."));
                     return;
@@ -315,7 +315,7 @@ public final class OptionTest extends TestBase {
             CommandOption<Boolean, CommandContext> admin = option(Options.flag("admin", 'a')
                                                                          .permission(DefaultPermission.OP));
 
-            argument(new StringArgument("target", StringArgument.Type.WORD)).execute((target, ctx) -> {
+            argument(new StringArgument("target", StringArgument.Type.WORD)).execute((ctx, target) -> {
                 putResult(key, ctx.getOption(admin) + ":" + target, "true:alex");
             });
         }});
@@ -336,7 +336,7 @@ public final class OptionTest extends TestBase {
         AtomicBoolean visible = new AtomicBoolean();
         command.addChildren(new Command(name) {{
             visibleWhen(ctx -> visible.get());
-            argument(new StringArgument("target", StringArgument.Type.WORD)).execute((target, ctx) -> {
+            argument(new StringArgument("target", StringArgument.Type.WORD)).execute((ctx, target) -> {
                 recordRejectedInputResult(key, target, rejectedInputExecuted, "the predicate false");
             });
         }}, new Command(name + "Show") {{

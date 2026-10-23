@@ -27,8 +27,8 @@ class CommonCommandConfirmCooldownTest {
         TestCommand command = new TestCommand("wipe") {{
             confirm(Confirmation.within(Duration.ofSeconds(10))
                                 .clock(clock));
-            argument(new CommonStringArgument<>("world")).execute((world,
-                                                                   ctx) -> ctx.sendMessage("wiped " + world));
+            argument(new CommonStringArgument<>("world")).execute((ctx,
+                                                                   world) -> ctx.sendMessage("wiped " + world));
         }};
         TestCommandRunner runner = new TestCommandRunner(command, player("Steve"));
 

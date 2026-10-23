@@ -303,7 +303,7 @@ class CommandTesterTest {
         @Test
         void command_with_string_argument() {
             try (CommandTester tester = new CommandTester(new Command("greet") {{
-                argument(new StringArgument("name")).execute((name, ctx) -> {
+                argument(new StringArgument("name")).execute((ctx, name) -> {
                     ctx.sendMessage("Hello, " + name + "!");
                 });
             }}, "test.command")) {
@@ -423,7 +423,7 @@ class CommandTesterTest {
             FakeSender sender = FakeSender.player(senderName);
 
             try (CommandTester tester = new CommandTester(() -> new Command("who") {{
-                argument(new PlayerArgument("target")).execute((targetPlayer, ctx) -> {
+                argument(new PlayerArgument("target")).execute((ctx, targetPlayer) -> {
                     ctx.sendMessage(senderName + " -> " + targetPlayer.getName());
                 });
             }}, "test.command")) {
@@ -445,8 +445,8 @@ class CommandTesterTest {
             try (CommandTester tester = new CommandTester(new Command("cmd") {{
                 argument(new StringArgument("value").addSuggestionProvider(sb -> sb.suggest("alpha",
                                                                                             new LiteralMessage("alpha tooltip"))
-                                                                                   .suggest("beta"))).execute((v,
-                                                                                                               ctx) -> {
+                                                                                   .suggest("beta"))).execute((ctx,
+                                                                                                               v) -> {
                                                                                    });
             }}, "test.command")) {
                 FakeSender sender = FakeSender.player("Steve");
@@ -471,8 +471,8 @@ class CommandTesterTest {
             try (CommandTester tester = new CommandTester(new Command("cmd") {{
                 argument(new StringArgument("value").addSuggestionProvider(sb -> sb.await(later.thenRun(() -> sb.suggest(sb.getContext()
                                                                                                                            .getSender()
-                                                                                                                           .getName()))))).execute((v,
-                                                                                                                                                    ctx) -> {
+                                                                                                                           .getName()))))).execute((ctx,
+                                                                                                                                                    v) -> {
                                                                                                                            });
             }}, "test.command")) {
                 CompletableFuture<Suggestions> suggestions = tester.suggestions("cmd ", FakeSender.player("Steve"));

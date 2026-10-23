@@ -21,7 +21,7 @@ class EnchantmentArgumentTest {
 
         try (MockedStatic<Enchantment> enchStatic = Mockito.mockStatic(Enchantment.class);
              CommandTester tester = new CommandTester(() -> new Command("enchant") {{
-                 argument(new EnchantmentArgument("type")).execute((ench, ctx) -> {
+                 argument(new EnchantmentArgument("type")).execute((ctx, ench) -> {
                      ctx.sendMessage(ench.getKey()
                                          .getKey());
                  });

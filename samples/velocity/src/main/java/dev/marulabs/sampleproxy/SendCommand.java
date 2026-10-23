@@ -12,7 +12,7 @@ public class SendCommand extends Command {
         super("send");
 
         // 'player' is a com.velocitypowered.api.proxy.Player, 'server' a RegisteredServer.
-        argument(new PlayerArgument("player"), new ServerArgument("server")).execute((player, server, ctx) -> {
+        argument(new PlayerArgument("player"), new ServerArgument("server")).execute((ctx, player, server) -> {
             player.createConnectionRequest(server)
                   .fireAndForget();
             ctx.sendSuccess("Sending " + player.getUsername() + " to " + server.getServerInfo()

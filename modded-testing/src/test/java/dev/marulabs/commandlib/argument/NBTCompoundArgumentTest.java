@@ -42,7 +42,7 @@ class NBTCompoundArgumentTest {
 
     private static Command command() {
         return new Command("data") {{
-            argument(new NBTCompoundArgument("nbt"), new IntegerArgument("count")).execute((nbt, count, ctx) -> {
+            argument(new NBTCompoundArgument("nbt"), new IntegerArgument("count")).execute((ctx, nbt, count) -> {
                 ctx.sendMessage(nbt + " x" + count);
             });
         }};

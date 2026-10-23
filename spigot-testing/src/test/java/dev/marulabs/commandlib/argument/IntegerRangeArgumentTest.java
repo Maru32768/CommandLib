@@ -12,7 +12,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class IntegerRangeArgumentTest {
     private static Command rangeCommand() {
         return new Command("range") {{
-            argument(new IntegerRangeArgument("range")).execute((range, ctx) -> ctx.sendMessage(range.toString()));
+            argument(new IntegerRangeArgument("range")).execute((ctx, range) -> ctx.sendMessage(range.toString()));
         }};
     }
 
@@ -61,8 +61,8 @@ class IntegerRangeArgumentTest {
         FakeSender sender = FakeSender.player("Alice");
 
         try (CommandTester tester = new CommandTester(() -> new Command("range") {{
-            argument(new IntegerRangeArgument("range").validator(x -> x.hasUpperBound())).execute((range,
-                                                                                                   ctx) -> ctx.sendMessage("ok"));
+            argument(new IntegerRangeArgument("range").validator(x -> x.hasUpperBound())).execute((ctx,
+                                                                                                   range) -> ctx.sendMessage("ok"));
         }}, "test.command")) {
             tester.execute("range 1..2", sender);
             tester.execute("range 1..", sender);

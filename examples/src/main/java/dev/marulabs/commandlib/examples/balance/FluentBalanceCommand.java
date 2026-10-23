@@ -21,7 +21,7 @@ public final class FluentBalanceCommand extends Command {
         addChildren(new Command("pay") {{
             description("Pay a player");
             argument(new PlayerArgument("target"),
-                     new IntegerArgument("amount", 1, 1000)).execute((target, amount, ctx) -> {
+                     new IntegerArgument("amount", 1, 1000)).execute((ctx, target, amount) -> {
                          Economy.Account account = ctx.get(Economy.Account.class);
                          economy.pay(account, target.getName(), amount);
                          ctx.sendSuccess("Paid " + amount + " to " + target.getName() + ", " + account.balance()

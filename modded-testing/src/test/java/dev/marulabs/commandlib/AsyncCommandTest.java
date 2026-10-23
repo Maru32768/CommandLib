@@ -11,7 +11,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class AsyncCommandTest {
     private static Command loadCommand() {
         return new Command("load") {{
-            argument(new StringArgument("name")).executeAsync((name, ctx) -> ctx.supplyAsync(() -> name.length())
+            argument(new StringArgument("name")).executeAsync((ctx, name) -> ctx.supplyAsync(() -> name.length())
                                                                                 .thenAccept(length -> ctx.sendSuccess(name
                                                                                         + " has " + length
                                                                                         + " letters")));

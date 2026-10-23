@@ -17,7 +17,7 @@ class CommandOptionTest {
                                                                              't',
                                                                              new PlayerArgument("target")));
             CommandOption<Boolean, CommandContext> force = option(Options.flag("force", 'f'));
-            argument(new IntegerArgument("amount")).execute((amount, ctx) -> {
+            argument(new IntegerArgument("amount")).execute((ctx, amount) -> {
                 ctx.sendMessage(ctx.getOption(target)
                                    .getUsername()
                         + ":" + amount + ":" + ctx.getOption(force));
@@ -42,7 +42,7 @@ class CommandOptionTest {
             optionsAnywhere();
             CommandOption<Boolean, CommandContext> force = option(Options.flag("force", 'f'));
             CommandOption<Integer, CommandContext> times = option(Options.integer("times", 't', 1));
-            argument(new PlayerArgument("target"), new IntegerArgument("amount")).execute((target, amount, ctx) -> {
+            argument(new PlayerArgument("target"), new IntegerArgument("amount")).execute((ctx, target, amount) -> {
                 ctx.sendMessage(target.getUsername() + ":" + amount + ":" + ctx.getOption(force) + ":"
                         + ctx.getOption(times));
             });
@@ -84,7 +84,7 @@ class CommandOptionTest {
             CommandOption<Boolean, CommandContext> silent = option(Options.flag("silent", 's')
                                                                           .permission(DefaultPermission.OP));
             CommandOption<Boolean, CommandContext> force = option(Options.flag("force", 'f'));
-            argument(new StringArgument("target")).execute((target, ctx) -> {
+            argument(new StringArgument("target")).execute((ctx, target) -> {
                 ctx.sendMessage(target + ":" + ctx.getOption(silent) + ":" + ctx.getOption(force));
             });
         }}, "proxy.command");

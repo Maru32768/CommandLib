@@ -31,7 +31,7 @@ class NameableObjectArgumentTest {
         List<Item> items = List.of(new Item("sword", 1), new Item("bow", 2));
 
         try (CommandTester tester = new CommandTester(new Command("equip") {{
-            argument(new NameableObjectArgument<>("item", items)).execute((item, ctx) -> {
+            argument(new NameableObjectArgument<>("item", items)).execute((ctx, item) -> {
                 ctx.sendMessage("equipped id=" + item.id);
             });
         }}, "test.command")) {

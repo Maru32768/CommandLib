@@ -22,13 +22,13 @@ public final class BuilderKitCommand {
                                        .description("Give yourself a kit")
                                        .argument(new StringArgument("name"),
                                                  new IntegerArgument("count", 1, 64).optional(1),
-                                                 branch -> branch.execute((name, count, ctx) -> {
+                                                 branch -> branch.execute((ctx, name, count) -> {
                                                      ctx.sendSuccess("Gave " + count + " x " + name);
                                                  })))
                       .addChild(Command.builder("send")
                                        .description("Send the starter kit to players")
                                        .argument(new PlayerArgument("players").variadic(),
-                                                 branch -> branch.execute((players, ctx) -> {
+                                                 branch -> branch.execute((ctx, players) -> {
                                                      ctx.sendSuccess("Sent the starter kit to " + players.stream()
                                                                                                          .map(Player::getName)
                                                                                                          .collect(Collectors.joining(", ")));

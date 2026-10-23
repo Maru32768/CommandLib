@@ -23,7 +23,7 @@ class LootTableArgumentTest {
             bukkit.when(() -> Bukkit.getLootTable(key))
                   .thenReturn(lootTable);
             try (CommandTester tester = new CommandTester(() -> new Command("loot") {{
-                argument(new LootTableArgument("value")).execute((value, ctx) -> ctx.sendMessage("ok"));
+                argument(new LootTableArgument("value")).execute((ctx, value) -> ctx.sendMessage("ok"));
             }}, "test.command")) {
                 tester.execute("loot chests/simple_dungeon", sender);
             }
@@ -35,7 +35,7 @@ class LootTableArgumentTest {
     @Test
     void suggestions_include_loot_table_keys() throws Exception {
         try (CommandTester tester = new CommandTester(() -> new Command("loot") {{
-            argument(new LootTableArgument("value")).execute((value, ctx) -> {
+            argument(new LootTableArgument("value")).execute((ctx, value) -> {
             });
         }}, "test.command")) {
             var suggestions = tester.suggestions("loot simple", FakeSender.player("Alice"))

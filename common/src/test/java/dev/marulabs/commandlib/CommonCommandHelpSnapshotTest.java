@@ -103,7 +103,7 @@ class CommonCommandHelpSnapshotTest {
                           .description("Tag to add")
                           .repeatable(5)
                           .required());
-            argument(new CommonStringArgument<>("target")).execute((target, ctx) -> {
+            argument(new CommonStringArgument<>("target")).execute((ctx, target) -> {
             });
         }});
 

@@ -24,7 +24,7 @@ public final class BuilderBanCommand {
                       .permission(DefaultPermission.OP, "Ban players")
                       .option(silent)
                       .option(reason)
-                      .argument(new PlayerArgument("target"), branch -> branch.execute((target, ctx) -> {
+                      .argument(new PlayerArgument("target"), branch -> branch.execute((ctx, target) -> {
                           ctx.sendSuccess("Banned " + target.getName() + ": " + ctx.getOption(reason)
                                   + (ctx.getOption(silent) ? " (silent)" : ""));
                       }))

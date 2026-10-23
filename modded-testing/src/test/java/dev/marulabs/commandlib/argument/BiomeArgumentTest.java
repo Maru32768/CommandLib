@@ -21,7 +21,7 @@ class BiomeArgumentTest {
         List<String> suggestions;
 
         try (CommandTester tester = new CommandTester(() -> new Command("biome") {{
-            argument(new BiomeArgument("biome")).execute((biome, ctx) -> {
+            argument(new BiomeArgument("biome")).execute((ctx, biome) -> {
                 //? if >=1.19.3 {
                 ctx.sendMessage(String.valueOf(RegistryEntries.registry(ctx.getSender()
                                                                            .getServer(),

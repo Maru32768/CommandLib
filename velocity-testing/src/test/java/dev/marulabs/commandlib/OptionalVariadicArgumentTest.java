@@ -14,7 +14,7 @@ class OptionalVariadicArgumentTest {
     @Test
     void an_optional_argument_gives_its_default_when_left_out() {
         CommandTester tester = new CommandTester(new Command("heal") {{
-            argument(new IntegerArgument("amount").optional(20)).execute((amount, ctx) -> ctx.sendMessage("amount "
+            argument(new IntegerArgument("amount").optional(20)).execute((ctx, amount) -> ctx.sendMessage("amount "
                     + amount));
         }}, "proxy.command");
         FakeSender sender = FakeSender.player("Admin");
@@ -28,8 +28,8 @@ class OptionalVariadicArgumentTest {
     @Test
     void a_variadic_argument_takes_every_value_and_needs_one() {
         CommandTester tester = new CommandTester(new Command("kick") {{
-            argument(new PlayerArgument("targets").variadic()).execute((targets,
-                                                                        ctx) -> ctx.sendMessage(names(targets)));
+            argument(new PlayerArgument("targets").variadic()).execute((ctx,
+                                                                        targets) -> ctx.sendMessage(names(targets)));
         }}, "proxy.command");
         FakeSender sender = FakeSender.player("Admin");
         tester.withFakePlayer(FakeSender.player("Steve"))
@@ -51,7 +51,7 @@ class OptionalVariadicArgumentTest {
         CommandTester tester = new CommandTester(new Command("heal") {{
             argument(new IntegerArgument("amount").optional(20),
                      new PlayerArgument("targets").variadic()
-                                                  .optional(List.of())).execute((amount, targets, ctx) -> ctx.sendMessage(amount + ":" + names(targets)));
+                                                  .optional(List.of())).execute((ctx, amount, targets) -> ctx.sendMessage(amount + ":" + names(targets)));
         }}, "proxy.command");
         FakeSender sender = FakeSender.player("Admin");
         tester.withFakePlayer(FakeSender.player("Steve"))

@@ -16,7 +16,7 @@ class DurationArgumentTest {
         List<String> messages;
 
         try (CommandTester tester = new CommandTester(() -> new Command("wait") {{
-            argument(new DurationArgument("duration")).execute((duration, ctx) -> {
+            argument(new DurationArgument("duration")).execute((ctx, duration) -> {
                 ctx.sendMessage(duration.toString());
             });
         }}, "test.command")) {

@@ -63,7 +63,7 @@ class GiveCommand extends Command {
     GiveCommand() {
         super("give");
 
-        argument(new PlayerArgument("target"), new IntegerArgument("amount", 1, 64).optional(1)).execute((target, amount, ctx) -> {
+        argument(new PlayerArgument("target"), new IntegerArgument("amount", 1, 64).optional(1)).execute((ctx, target, amount) -> {
             ctx.sendSuccess("Gave " + amount + " to " + target.getName());
         });
     }
@@ -105,7 +105,7 @@ class HealCommand extends Command {
     HealCommand() {
         super("heal");
 
-        argument(new PlayerArgument("target").optional(Command.player())).execute((target, ctx) -> {
+        argument(new PlayerArgument("target").optional(Command.player())).execute((ctx, target) -> {
             target.setHealth(20);
         });
     }
@@ -136,7 +136,7 @@ public final class QuestParameterType implements ParameterType<BukkitCommandActo
 
 ```java
 // CommandLib
-argument(new ObjectArgument<Quest>("quest", questManager::byName)).execute((quest, ctx) -> ctx.sendMessage(quest.name()));
+argument(new ObjectArgument<Quest>("quest", questManager::byName)).execute((ctx, quest) -> ctx.sendMessage(quest.name()));
 ```
 
 `questManager.byName()` stands for your own code returning a `Map<String, Quest>`; `ObjectArgument` reads it for
@@ -161,7 +161,7 @@ class HomeCommand extends Command {
     HomeCommand() {
         super("home");
 
-        require(Command.player()).execute((player, ctx) -> player.teleport(player.getWorld()
+        require(Command.player()).execute((ctx, player) -> player.teleport(player.getWorld()
                                                                                          .getSpawnLocation()));
     }
 }
@@ -184,7 +184,7 @@ class QuestCommand extends Command {
         super("quest");
 
         addChildren(new Command("create") {{
-            argument(new StringArgument("name", StringArgument.Type.WORD)).execute((name, ctx) -> ctx.sendMessage("created " + name));
+            argument(new StringArgument("name", StringArgument.Type.WORD)).execute((ctx, name) -> ctx.sendMessage("created " + name));
         }});
         argument(new StringArgument("quest", StringArgument.Type.WORD)).child(quest -> new Command("delete") {{
             execute(ctx -> ctx.sendMessage("deleted " + quest.get()));
@@ -228,7 +228,7 @@ class ScanCommand extends Command {
 
         CommandOption<Boolean, CommandContext> force = option(Options.flag("force", 'f'));
         CommandOption<Integer, CommandContext> limit = option(Options.integer("limit", 'n', 10, 1, 100));
-        argument(new PlayerArgument("target")).execute((target, ctx) -> {
+        argument(new PlayerArgument("target")).execute((ctx, target) -> {
             boolean isForce = ctx.getOption(force);
             int maxCount = ctx.getOption(limit);
         });
@@ -262,7 +262,7 @@ argument(new WorldArgument("world").setSuggestionProvider(sb -> Bukkit.getWorlds
                                                                       .stream()
                                                                       .map(World::getName)
                                                                       .filter(name -> name.startsWith("world"))
-                                                                      .forEach(sb::suggest))).execute((world, ctx) -> {
+                                                                      .forEach(sb::suggest))).execute((ctx, world) -> {
     ctx.getPlayer()
        .teleport(world.getSpawnLocation());
 });
@@ -352,7 +352,7 @@ class ArenaCommand extends Command {
 | Lamp | CommandLib |
 |---|---|
 | Response handlers (a returned value is sent) | **Not available**; send it with `ctx.sendMessage(...)`. `ctx.setResult(int)` sets the value `/execute store result` stores |
-| `ExceptionHandler`, `@HandleException` | `errorFormatter((ctx, error) -> ...)` on a command decides what the sender gets for each failure CommandLib reports (see [help](../help.md#error-formatter)); `addUncaughtExceptionHandler((e, ctx) -> ...)` on a command or argument handles unexpected exceptions |
+| `ExceptionHandler`, `@HandleException` | `errorFormatter((ctx, error) -> ...)` on a command decides what the sender gets for each failure CommandLib reports (see [help](../help.md#error-formatter)); `addUncaughtExceptionHandler((ctx, e) -> ...)` on a command or argument handles unexpected exceptions |
 | Lamp's built-in error messages, `Translator` / `LocaleReader` | CommandLib's messages are captions in the sender's locale, replaceable with `Captions`; see [localization](../localization.md) and [errors](../errors.md) |
 | `Help.ChildrenCommands` / `Help.RelatedCommands` parameter | Built in: `/<command> help`, and the usage is sent when a node has no executor |
 | `@Description("...")` | `description("...")` on commands and branches |

@@ -36,7 +36,7 @@ class ArgumentErrorMessageTest {
     void incorrect_input_message_truncates_long_prefix() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("go") {{
             argument(new CommonStringArgument<>("label"),
-                     new CommonEnumArgument<>("dir", Direction.class)).execute((label, dir, ctx) -> {
+                     new CommonEnumArgument<>("dir", Direction.class)).execute((ctx, label, dir) -> {
                          ctx.sendMessage("unreachable");
                      });
         }});
@@ -49,7 +49,7 @@ class ArgumentErrorMessageTest {
     @Test
     void validator_failure_uses_incorrect_input_message() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("go") {{
-            argument(new DirArg("dir").validator(x -> x != Direction.NORTH)).execute((dir, ctx) -> {
+            argument(new DirArg("dir").validator(x -> x != Direction.NORTH)).execute((ctx, dir) -> {
                 ctx.sendMessage("unreachable");
             });
         }});
@@ -62,7 +62,7 @@ class ArgumentErrorMessageTest {
     @Test
     void validator_filters_enum_suggestions_without_failing() {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("go") {{
-            argument(new DirArg("dir").validator(x -> x != Direction.NORTH)).execute((dir, ctx) -> {
+            argument(new DirArg("dir").validator(x -> x != Direction.NORTH)).execute((ctx, dir) -> {
             });
         }});
 
@@ -75,7 +75,7 @@ class ArgumentErrorMessageTest {
     @Test
     void context_aware_validator_filters_enum_suggestions_without_failing() {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("go") {{
-            argument(new DirArg("dir").validator((x, ctx) -> x == Direction.EAST)).execute((dir, ctx) -> {
+            argument(new DirArg("dir").validator((ctx, x) -> x == Direction.EAST)).execute((ctx, dir) -> {
             });
         }});
 
@@ -84,7 +84,7 @@ class ArgumentErrorMessageTest {
 
     private static TestCommand directionCommand() {
         return new TestCommand("go") {{
-            argument(new CommonEnumArgument<>("dir", Direction.class)).execute((dir, ctx) -> {
+            argument(new CommonEnumArgument<>("dir", Direction.class)).execute((ctx, dir) -> {
                 ctx.sendMessage("unreachable");
             });
         }};
@@ -112,7 +112,7 @@ class ArgumentErrorMessageTest {
     @Test
     void incorrect_input_message_uses_argument_node_when_command_has_same_name() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("dir") {{
-            argument(new CommonEnumArgument<>("dir", Direction.class)).execute((dir, ctx) -> {
+            argument(new CommonEnumArgument<>("dir", Direction.class)).execute((ctx, dir) -> {
                 ctx.sendMessage("unreachable");
             });
         }});
@@ -125,7 +125,7 @@ class ArgumentErrorMessageTest {
     @Test
     void incorrect_input_message_without_matching_node_shows_token_once() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("go") {{
-            argument(new CommonStringArgument<>("label")).execute((label, ctx) -> {
+            argument(new CommonStringArgument<>("label")).execute((ctx, label) -> {
                 ArgumentParseException.ofIncorrectInput("missing", ctx, label)
                                       .sendMessage(ctx);
             });
@@ -140,7 +140,7 @@ class ArgumentErrorMessageTest {
     void rejected_option_value_message_points_at_the_value_not_a_later_token_with_the_same_text() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("go") {{
             option(Options.of("n", new StrArg("n").validator(x -> !x.equals("bad"))));
-            argument(new CommonStringArgument<>("label")).execute((label, ctx) -> {
+            argument(new CommonStringArgument<>("label")).execute((ctx, label) -> {
                 ctx.sendMessage("unreachable");
             });
         }});
@@ -162,7 +162,7 @@ class ArgumentErrorMessageTest {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("go") {{
             errorFormatter((ctx, error) -> ctx.sendFailure(String.valueOf(error.exception()
                                                                                .getMessage())));
-            argument(new StrArg("dir").validator(x -> false)).execute((dir, ctx) -> {
+            argument(new StrArg("dir").validator(x -> false)).execute((ctx, dir) -> {
             });
         }});
         CommandSyntaxException syntax = CommandSyntaxException.BUILT_IN_EXCEPTIONS.integerTooLow()

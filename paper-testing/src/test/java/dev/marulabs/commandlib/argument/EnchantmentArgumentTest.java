@@ -18,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class EnchantmentArgumentTest {
     private static CommandTester tester(AtomicReference<Enchantment> received, Enchantment value) {
         return new CommandTester(() -> new Command("enchant") {{
-            argument(new EnchantmentArgument("value")).execute((parsed, ctx) -> received.set(parsed));
+            argument(new EnchantmentArgument("value")).execute((ctx, parsed) -> received.set(parsed));
         }}, "test.command").withFakeRegistryValue(RegistryKey.ENCHANTMENT, "minecraft:sharpness", value);
     }
 

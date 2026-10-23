@@ -43,7 +43,7 @@ class PredicateArgumentTest {
         List<String> messages;
 
         try (CommandTester tester = new CommandTester(() -> new Command("clear") {{
-            argument(new ItemPredicateArgument("item")).execute((predicate, ctx) -> {
+            argument(new ItemPredicateArgument("item")).execute((ctx, predicate) -> {
                 ctx.sendMessage(predicate.test(new ItemStack(Items.STONE)) + ","
                         + predicate.test(new ItemStack(Items.DIRT)));
             });
@@ -65,7 +65,7 @@ class PredicateArgumentTest {
         List<String> messages;
 
         try (CommandTester tester = new CommandTester(() -> new Command("test") {{
-            argument(new BlockPredicateArgument("block")).execute((predicate, ctx) -> {
+            argument(new BlockPredicateArgument("block")).execute((ctx, predicate) -> {
                 ctx.sendMessage(predicate.test(blockInWorld(Blocks.STONE)) + ","
                         + predicate.test(blockInWorld(Blocks.DIRT)));
             });

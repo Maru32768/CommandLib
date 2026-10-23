@@ -22,7 +22,7 @@ class ComponentArgumentTest {
         FakeSender sender = FakeSender.player("Alice");
 
         try (CommandTester tester = new CommandTester(() -> new Command("tell") {{
-            argument(new IntegerArgument("count"), new ComponentArgument("text")).execute((count, text, ctx) -> {
+            argument(new IntegerArgument("count"), new ComponentArgument("text")).execute((ctx, count, text) -> {
                 components.add(text);
                 ctx.sendMessage(text);
                 ctx.sendMessage("count=" + count);
@@ -57,7 +57,7 @@ class ComponentArgumentTest {
 
     private static Command command() {
         return new Command("tell") {{
-            argument(new ComponentArgument("text")).execute((text, ctx) -> ctx.sendMessage(text));
+            argument(new ComponentArgument("text")).execute((ctx, text) -> ctx.sendMessage(text));
         }};
     }
 }

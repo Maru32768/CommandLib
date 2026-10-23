@@ -174,10 +174,10 @@ class EntitySelectorArgumentTest {
     void player_and_entities_arguments_cannot_share_a_node() {
         assertThatThrownBy(() -> CommandTester.builder()
                                               .command(() -> new Command("x") {{
-                                                  argument(new PlayerArgument("target")).execute((target, ctx) -> {
+                                                  argument(new PlayerArgument("target")).execute((ctx, target) -> {
                                                   });
                                                   argument(new EntitiesArgument("target"),
-                                                           new StringArgument("reason")).execute((target, reason, ctx) -> {
+                                                           new StringArgument("reason")).execute((ctx, target, reason) -> {
                                                            });
                                               }})
                                               .permissionPrefix("test.command")
@@ -200,23 +200,23 @@ class EntitySelectorArgumentTest {
         // Commands are created through suppliers so the ArgumentTypes mocks are active while they are constructed.
         return CommandTester.builder()
                             .command(() -> new Command("entity") {{
-                                argument(new EntityArgument("target")).execute((target,
-                                                                                ctx) -> ctx.sendMessage("entity="
+                                argument(new EntityArgument("target")).execute((ctx,
+                                                                                target) -> ctx.sendMessage("entity="
                                                                                         + target.getName()));
                             }})
                             .command(() -> new Command("entities") {{
-                                argument(new EntitiesArgument("targets")).execute((targets,
-                                                                                   ctx) -> ctx.sendMessage("entities="
+                                argument(new EntitiesArgument("targets")).execute((ctx,
+                                                                                   targets) -> ctx.sendMessage("entities="
                                                                                            + names(targets)));
                             }})
                             .command(() -> new Command("player") {{
-                                argument(new PlayerArgument("target")).execute((target,
-                                                                                ctx) -> ctx.sendMessage("player="
+                                argument(new PlayerArgument("target")).execute((ctx,
+                                                                                target) -> ctx.sendMessage("player="
                                                                                         + target.getName()));
                             }})
                             .command(() -> new Command("players") {{
-                                argument(new PlayersArgument("targets")).execute((targets,
-                                                                                  ctx) -> ctx.sendMessage("players="
+                                argument(new PlayersArgument("targets")).execute((ctx,
+                                                                                  targets) -> ctx.sendMessage("players="
                                                                                           + names(targets)));
                             }})
                             .permissionPrefix("test.command")

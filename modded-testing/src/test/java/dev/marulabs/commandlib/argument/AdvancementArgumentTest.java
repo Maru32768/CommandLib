@@ -23,7 +23,7 @@ class AdvancementArgumentTest {
         List<String> suggestions;
 
         try (CommandTester tester = new CommandTester(() -> new Command("advancement") {{
-            argument(new AdvancementArgument("advancement")).execute((advancement, ctx) -> {
+            argument(new AdvancementArgument("advancement")).execute((ctx, advancement) -> {
                 //? if >=1.20.2 {
                 /*ctx.sendMessage(advancement.id()
                    .toString());

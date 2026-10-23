@@ -31,7 +31,7 @@ class LootTableArgumentTest {
         ResourceLocation id = ResourceLocation.tryParse("minecraft:chests/simple_dungeon");
 
         try (CommandTester tester = new CommandTester(() -> new Command("loot") {{
-            argument(new LootTableArgument("table")).execute((table, ctx) -> {
+            argument(new LootTableArgument("table")).execute((ctx, table) -> {
                 ctx.sendMessage(String.valueOf(table == LootTable.EMPTY));
             });
         }}, "test.command")) {

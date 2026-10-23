@@ -13,7 +13,7 @@ class BooleanArgumentTest {
         FakeSender sender = FakeSender.player("Alice");
 
         try (CommandTester tester = new CommandTester(new Command("toggle") {{
-            argument(new BooleanArgument("value")).execute((value, ctx) -> {
+            argument(new BooleanArgument("value")).execute((ctx, value) -> {
                 ctx.sendMessage(value ? "on" : "off");
             });
         }}, "test.command")) {
@@ -28,7 +28,7 @@ class BooleanArgumentTest {
         FakeSender sender = FakeSender.player("Alice");
 
         try (CommandTester tester = new CommandTester(new Command("toggle") {{
-            argument(new BooleanArgument("value")).execute((value, ctx) -> {
+            argument(new BooleanArgument("value")).execute((ctx, value) -> {
                 ctx.sendMessage(value ? "on" : "off");
             });
         }}, "test.command")) {

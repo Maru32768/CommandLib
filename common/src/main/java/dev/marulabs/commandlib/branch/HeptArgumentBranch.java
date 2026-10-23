@@ -49,27 +49,27 @@ public final class HeptArgumentBranch<T1, T2, T3, T4, T5, T6, T7, C extends Comm
         this.argument7 = argument7;
     }
 
-    public HeptArgumentBranch<T1, T2, T3, T4, T5, T6, T7, C, T> execute(@NotNull OctoConsumer<T1, T2, T3, T4, T5, T6, T7, C> action) {
-        super.execute(ctx -> action.accept(ctx.getArgument(argument1),
+    public HeptArgumentBranch<T1, T2, T3, T4, T5, T6, T7, C, T> execute(@NotNull OctoConsumer<C, T1, T2, T3, T4, T5, T6, T7> action) {
+        super.execute(ctx -> action.accept(ctx,
+                                           ctx.getArgument(argument1),
                                            ctx.getArgument(argument2),
                                            ctx.getArgument(argument3),
                                            ctx.getArgument(argument4),
                                            ctx.getArgument(argument5),
                                            ctx.getArgument(argument6),
-                                           ctx.getArgument(argument7),
-                                           ctx));
+                                           ctx.getArgument(argument7)));
         return this;
     }
 
-    public HeptArgumentBranch<T1, T2, T3, T4, T5, T6, T7, C, T> executeAsync(@NotNull OctoFunction<T1, T2, T3, T4, T5, T6, T7, C, CompletionStage<?>> action) {
-        super.executeAsync(ctx -> action.apply(ctx.getArgument(argument1),
+    public HeptArgumentBranch<T1, T2, T3, T4, T5, T6, T7, C, T> executeAsync(@NotNull OctoFunction<C, T1, T2, T3, T4, T5, T6, T7, CompletionStage<?>> action) {
+        super.executeAsync(ctx -> action.apply(ctx,
+                                               ctx.getArgument(argument1),
                                                ctx.getArgument(argument2),
                                                ctx.getArgument(argument3),
                                                ctx.getArgument(argument4),
                                                ctx.getArgument(argument5),
                                                ctx.getArgument(argument6),
-                                               ctx.getArgument(argument7),
-                                               ctx));
+                                               ctx.getArgument(argument7)));
         return this;
     }
 

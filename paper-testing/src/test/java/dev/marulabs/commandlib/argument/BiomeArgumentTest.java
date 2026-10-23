@@ -18,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class BiomeArgumentTest {
     private static CommandTester tester(AtomicReference<Biome> received, Biome value) {
         return new CommandTester(() -> new Command("biome") {{
-            argument(new BiomeArgument("value")).execute((parsed, ctx) -> received.set(parsed));
+            argument(new BiomeArgument("value")).execute((ctx, parsed) -> received.set(parsed));
         }}, "test.command").withFakeRegistryValue(RegistryKey.BIOME, "minecraft:plains", value);
     }
 

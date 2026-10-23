@@ -96,16 +96,16 @@ class OfflinePlayerSelectorArgumentTest {
         try (MockedStatic<Bukkit> bukkit = Mockito.mockStatic(Bukkit.class);
              CommandTester tester = CommandTester.builder()
                                                  .command(() -> new Command("players") {{
-                                                     argument(new OfflinePlayersArgument("targets")).execute((targets,
-                                                                                                              ctx) -> {
+                                                     argument(new OfflinePlayersArgument("targets")).execute((ctx,
+                                                                                                              targets) -> {
                                                          ctx.sendMessage(targets.size() + ":" + targets.stream()
                                                                                                        .map(OfflinePlayer::getName)
                                                                                                        .collect(java.util.stream.Collectors.toList()));
                                                      });
                                                  }})
                                                  .command(() -> new Command("uuids") {{
-                                                     argument(new UUIDsArgument("targets")).execute((targets,
-                                                                                                     ctx) -> {
+                                                     argument(new UUIDsArgument("targets")).execute((ctx,
+                                                                                                     targets) -> {
                                                          ctx.sendMessage(targets.size() + ":" + targets);
                                                      });
                                                  }})

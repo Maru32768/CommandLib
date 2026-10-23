@@ -28,7 +28,7 @@ class HelloCommandTest {
     @Test
     void hello_sends_message() {
         Command command = new Command("hello") {{
-            argument(new StringArgument("name")).execute((name, ctx) -> {
+            argument(new StringArgument("name")).execute((ctx, name) -> {
                 ctx.sendSuccess("Hello, " + name + "!");
             });
         }};
@@ -58,7 +58,7 @@ class HealCommandTest {
         FakeSender admin = FakeSender.player("Admin");
 
         try (CommandTester tester = new CommandTester(() -> new Command("heal") {{
-            argument(new PlayerArgument("target")).execute((target, ctx) -> {
+            argument(new PlayerArgument("target")).execute((ctx, target) -> {
                 ctx.sendSuccess("Healed " + target.getName() + "!");
             });
         }}, "myplugin.command")) {

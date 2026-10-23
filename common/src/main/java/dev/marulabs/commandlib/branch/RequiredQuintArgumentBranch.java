@@ -38,25 +38,25 @@ public final class RequiredQuintArgumentBranch<S, T1, T2, T3, T4, T5, C extends 
         this.argument5 = argument5;
     }
 
-    public RequiredQuintArgumentBranch<S, T1, T2, T3, T4, T5, C, T> execute(@NotNull HeptConsumer<T1, T2, T3, T4, T5, S, C> action) {
-        super.execute((s, ctx) -> action.accept(ctx.getArgument(argument1),
+    public RequiredQuintArgumentBranch<S, T1, T2, T3, T4, T5, C, T> execute(@NotNull HeptConsumer<C, T1, T2, T3, T4, T5, S> action) {
+        super.execute((ctx, s) -> action.accept(ctx,
+                                                ctx.getArgument(argument1),
                                                 ctx.getArgument(argument2),
                                                 ctx.getArgument(argument3),
                                                 ctx.getArgument(argument4),
                                                 ctx.getArgument(argument5),
-                                                s,
-                                                ctx));
+                                                s));
         return this;
     }
 
-    public RequiredQuintArgumentBranch<S, T1, T2, T3, T4, T5, C, T> executeAsync(@NotNull HeptFunction<T1, T2, T3, T4, T5, S, C, CompletionStage<?>> action) {
-        super.executeAsync((s, ctx) -> action.apply(ctx.getArgument(argument1),
+    public RequiredQuintArgumentBranch<S, T1, T2, T3, T4, T5, C, T> executeAsync(@NotNull HeptFunction<C, T1, T2, T3, T4, T5, S, CompletionStage<?>> action) {
+        super.executeAsync((ctx, s) -> action.apply(ctx,
+                                                    ctx.getArgument(argument1),
                                                     ctx.getArgument(argument2),
                                                     ctx.getArgument(argument3),
                                                     ctx.getArgument(argument4),
                                                     ctx.getArgument(argument5),
-                                                    s,
-                                                    ctx));
+                                                    s));
         return this;
     }
 

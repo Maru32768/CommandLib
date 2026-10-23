@@ -32,7 +32,7 @@ class TeamArgumentTest {
 
         try (MockedStatic<Bukkit> bukkit = Mockito.mockStatic(Bukkit.class);
              CommandTester tester = new CommandTester(() -> new Command("team") {{
-                 argument(new TeamArgument("name")).execute((team, ctx) -> {
+                 argument(new TeamArgument("name")).execute((ctx, team) -> {
                      ctx.sendMessage(team.getName());
                  });
              }}, "test.command")) {
@@ -54,7 +54,7 @@ class TeamArgumentTest {
 
         try (MockedStatic<Bukkit> bukkit = Mockito.mockStatic(Bukkit.class);
              CommandTester tester = new CommandTester(() -> new Command("team") {{
-                 argument(new TeamArgument("name")).execute((team, ctx) -> {
+                 argument(new TeamArgument("name")).execute((ctx, team) -> {
                      ctx.sendMessage(team.getName());
                  });
              }}, "test.command")) {
@@ -82,7 +82,7 @@ class TeamArgumentTest {
 
         // No Bukkit static mock: the main scoreboard must not be touched.
         try (CommandTester tester = new CommandTester(() -> new Command("team") {{
-            argument(new TeamArgument("name").scoreboard(current::get)).execute((team, ctx) -> {
+            argument(new TeamArgument("name").scoreboard(current::get)).execute((ctx, team) -> {
                 ctx.sendMessage(team.getName());
             });
         }}, "test.command")) {

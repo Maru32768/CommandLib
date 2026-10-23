@@ -28,7 +28,7 @@ class HelloCommandTest {
     @Test
     void hello_sends_message() {
         Command command = new Command("hello") {{
-            argument(new StringArgument("name")).execute((name, ctx) -> {
+            argument(new StringArgument("name")).execute((ctx, name) -> {
                 ctx.sendSuccess("Hello, " + name + "!");
             });
         }};

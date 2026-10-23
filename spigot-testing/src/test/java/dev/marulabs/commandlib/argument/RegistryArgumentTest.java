@@ -13,7 +13,7 @@ class RegistryArgumentTest {
     private static Command command() {
         return new Command("spawn") {{
             argument(new RegistryArgument<>("type",
-                                            Registry.ENTITY_TYPE)).execute((type, ctx) -> ctx.sendMessage(type.name()));
+                                            Registry.ENTITY_TYPE)).execute((ctx, type) -> ctx.sendMessage(type.name()));
         }};
     }
 

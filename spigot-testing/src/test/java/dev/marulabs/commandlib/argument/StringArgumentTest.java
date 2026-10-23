@@ -13,7 +13,7 @@ class StringArgumentTest {
         FakeSender sender = FakeSender.player("Alice");
 
         try (CommandTester tester = new CommandTester(new Command("say") {{
-            argument(new StringArgument("message")).execute((message, ctx) -> {
+            argument(new StringArgument("message")).execute((ctx, message) -> {
                 ctx.sendMessage(">" + message);
             });
         }}, "test.command")) {
@@ -28,7 +28,7 @@ class StringArgumentTest {
         FakeSender sender = FakeSender.player("Alice");
 
         try (CommandTester tester = new CommandTester(new Command("say") {{
-            argument(new StringArgument("message")).execute((message, ctx) -> {
+            argument(new StringArgument("message")).execute((ctx, message) -> {
                 ctx.sendMessage(">" + message);
             });
         }}, "test.command")) {

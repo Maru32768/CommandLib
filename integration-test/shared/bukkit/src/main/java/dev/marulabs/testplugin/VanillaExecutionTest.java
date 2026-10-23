@@ -122,7 +122,7 @@ public final class VanillaExecutionTest extends TestBase {
 
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name) {{
-            argument(new EntityArgument("target")).execute((target, ctx) -> {
+            argument(new EntityArgument("target")).execute((ctx, target) -> {
                 resolved.append(resolved.length() == 0 ? "" : ",")
                         .append(target.getName());
                 putResult(key, resolved.toString(), playerName + "," + playerName);

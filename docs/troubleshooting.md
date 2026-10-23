@@ -58,7 +58,7 @@ the plugin runs on both. See [arguments](arguments.md#entities-and-players).
 ## "An unexpected error occurred trying to execute that command"
 
 The executor threw an exception. It is in the server log, with the command's input and sender. To report it elsewhere, add an
-`addUncaughtExceptionHandler((e, ctx) -> ...)` to the command. See [errors](errors.md#unexpected-exception).
+`addUncaughtExceptionHandler((ctx, e) -> ...)` to the command. See [errors](errors.md#unexpected-exception).
 
 ## Commands from data pack functions fail to load
 

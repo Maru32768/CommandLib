@@ -115,17 +115,16 @@ class AnnotationParserTest {
             addAliases("g");
             description("Manage games");
             argument(new IntArg("id", 0, 99)).description("Show a game")
-                                             .execute((id,
-                                                       ctx) -> ctx.sendMessage("show " + id + " to "
-                                                               + ctx.getActor()
-                                                                    .getName()));
+                                             .execute((ctx, id) -> ctx.sendMessage("show " + id + " to "
+                                                     + ctx.getActor()
+                                                          .getName()));
             addChildren(new TestCommand("kick") {{
                 argument(new StrArg("reason").setSuggestionProvider(sb -> {
                     sb.suggest("afk");
                     sb.suggest("spam");
                 }),
                          new StrArg("players").variadic()
-                                              .optional(List.of())).execute((reason, players, ctx) -> ctx.sendMessage("kick " + players + " " + reason));
+                                              .optional(List.of())).execute((ctx, reason, players) -> ctx.sendMessage("kick " + players + " " + reason));
             }}, new TestCommand("start") {{
                 description("Start a game");
                 permission(DefaultPermission.ALL, "Start games");
@@ -138,9 +137,9 @@ class AnnotationParserTest {
                                                                                           10));
                 argument(new StrArg("arena"),
                          new EnumArg<>("mode", Mode.class).optional(Mode.CREATIVE))
-                                                                                   .execute((arena,
-                                                                                             mode,
-                                                                                             ctx) -> ctx.sendMessage("start "
+                                                                                   .execute((ctx,
+                                                                                             arena,
+                                                                                             mode) -> ctx.sendMessage("start "
                                                                                                      + arena
                                                                                                      + " "
                                                                                                      + mode
@@ -974,7 +973,7 @@ class AnnotationParserTest {
             CommandOption<Boolean, TestCommandContext> json = option(Options.flag("json", 'j'));
             CommandOption<Boolean, TestCommandContext> yaml = option(Options.flag("yaml", 'y'));
             mutuallyExclusiveOptions(json, yaml);
-            argument(new StrArg("file")).execute((file, ctx) -> ctx.sendMessage(file + " " + ctx.getOption(force)
+            argument(new StrArg("file")).execute((ctx, file) -> ctx.sendMessage(file + " " + ctx.getOption(force)
                     + " " + ctx.getOption(reason) + " " + ctx.getOption(mode) + " " + ctx.getOption(threads) + " "
                     + ctx.getOption(json) + " " + ctx.getOption(yaml)));
         }};
@@ -1057,12 +1056,12 @@ class AnnotationParserTest {
             addMiddleware(audit);
             execute(ctx -> ctx.sendMessage("teams"));
             argument(new StrArg("team")).description(show)
-                                        .execute((team, ctx) -> ctx.sendMessage("team " + team))
+                                        .execute((ctx, team) -> ctx.sendMessage("team " + team))
                                         .child(team -> new TestCommand("add") {{
                                             description("Add players");
                                             visibleWhen(ctx -> open[0]);
-                                            argument(new StrArg("players").variadic(3)).execute((players,
-                                                                                                 ctx) -> ctx.sendMessage("add "
+                                            argument(new StrArg("players").variadic(3)).execute((ctx,
+                                                                                                 players) -> ctx.sendMessage("add "
                                                                                                          + players
                                                                                                          + " to "
                                                                                                          + team.get()));
@@ -1071,8 +1070,8 @@ class AnnotationParserTest {
                                             optionsAnywhere();
                                             CommandOption<Boolean, TestCommandContext> silent = option(Options.flag("silent",
                                                                                                                     's'));
-                                            argument(new StrArg("player")).execute((player,
-                                                                                    ctx) -> ctx.sendMessage("remove "
+                                            argument(new StrArg("player")).execute((ctx,
+                                                                                    player) -> ctx.sendMessage("remove "
                                                                                             + player + " from "
                                                                                             + team.get() + " "
                                                                                             + ctx.getOption(silent)));

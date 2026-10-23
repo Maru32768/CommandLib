@@ -24,7 +24,7 @@ class OptionsAnywhereTest {
             CommandOption<Boolean, TestCommandContext> json = option(Options.flag("json", 'j'));
             CommandOption<Boolean, TestCommandContext> yaml = option(Options.flag("yaml", 'y'));
             mutuallyExclusiveOptions(json, yaml);
-            argument(new Word("target"), new Word("reason").optional("none")).execute((target, reason, ctx) -> {
+            argument(new Word("target"), new Word("reason").optional("none")).execute((ctx, target, reason) -> {
                 ctx.sendMessage(target + " reason=" + reason + " force=" + ctx.getOption(force) + " silent="
                         + ctx.getOption(silent) + " days=" + ctx.getOption(days) + " inputs=" + ctx.getInputs());
             });
@@ -106,10 +106,10 @@ class OptionsAnywhereTest {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("heal") {{
             optionsAnywhere();
             CommandOption<Boolean, TestCommandContext> force = option(Options.flag("force", 'f'));
-            argument(new Word("item"), new Int("amounts").variadic(3)).execute((item,
-                                                                                amounts,
-                                                                                ctx) -> ctx.sendMessage(item + " "
-                                                                                        + amounts + " "
+            argument(new Word("item"), new Int("amounts").variadic(3)).execute((ctx,
+                                                                                item,
+                                                                                amounts) -> ctx.sendMessage(item
+                                                                                        + " " + amounts + " "
                                                                                         + ctx.getOption(force)));
         }});
 
@@ -126,7 +126,7 @@ class OptionsAnywhereTest {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("config") {{
             optionsAnywhere();
             CommandOption<Boolean, TestCommandContext> force = option(Options.flag("force", 'f'));
-            argument(new Word("key")).execute((key, ctx) -> ctx.sendMessage(key + " " + ctx.getOption(force)))
+            argument(new Word("key")).execute((ctx, key) -> ctx.sendMessage(key + " " + ctx.getOption(force)))
                                      .child(key -> new TestCommand("set") {{
                                          execute(ctx -> ctx.sendMessage("set " + key.get(ctx)));
                                      }});
@@ -149,9 +149,9 @@ class OptionsAnywhereTest {
             CommandOption<Boolean, TestCommandContext> force = option(Options.flag("force", 'f'));
             option(Options.flag("verbose", 'v'));
             argument(new Word("k1"), new Word("k2"))
-                                                    .execute((k1,
-                                                              k2,
-                                                              ctx) -> ctx.sendMessage(k1 + " " + k2 + " "
+                                                    .execute((ctx,
+                                                              k1,
+                                                              k2) -> ctx.sendMessage(k1 + " " + k2 + " "
                                                                       + ctx.getOption(force)))
                                                     .child((k1, k2) -> new TestCommand("set") {{
                                                         execute(ctx -> ctx.sendMessage("set " + k1.get(ctx)
@@ -179,7 +179,7 @@ class OptionsAnywhereTest {
     void a_command_that_does_not_opt_in_still_rejects_options_after_arguments() {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("ban") {{
             option(Options.flag("silent", 's'));
-            argument(new Word("target"), new Word("reason").optional("none")).execute((target, reason, ctx) -> {
+            argument(new Word("target"), new Word("reason").optional("none")).execute((ctx, target, reason) -> {
             });
         }});
 
@@ -194,9 +194,9 @@ class OptionsAnywhereTest {
                                                                                          'a',
                                                                                          new Int("amount"))
                                                                                      .repeatable(2));
-            argument(new Word("item"), new Word("target").optional("me")).execute((item,
-                                                                                   target,
-                                                                                   ctx) -> ctx.sendMessage(item
+            argument(new Word("item"), new Word("target").optional("me")).execute((ctx,
+                                                                                   item,
+                                                                                   target) -> ctx.sendMessage(item
                                                                                            + " " + target + " "
                                                                                            + ctx.getOption(amounts)));
         }});

@@ -501,7 +501,7 @@ Command heal = Command.builder("heal")
                       .addAliases("h")
                       .addPrerequisite(Command.player())
                       .argument(new PlayerArgument("target"), new IntegerArgument("amount"),
-                                branch -> branch.execute((target, amount, ctx) -> {
+                                branch -> branch.execute((ctx, target, amount) -> {
                                     target.setHealth(Math.min(20, target.getHealth() + amount));
                                 }))
                       .addChild(Command.builder("all")
@@ -590,7 +590,7 @@ public final class MyProxyPlugin {
     @Subscribe
     public void onProxyInitialize(ProxyInitializeEvent event) {
         Command send = new Command("send");
-        send.argument(new PlayerArgument("player"), new ServerArgument("server")).execute((player, server, ctx) -> {
+        send.argument(new PlayerArgument("player"), new ServerArgument("server")).execute((ctx, player, server) -> {
             // 'player' is a com.velocitypowered.api.proxy.Player, 'server' a RegisteredServer
             player.createConnectionRequest(server)
                   .fireAndForget();
@@ -619,7 +619,7 @@ the next time their backend server sends the command tree, such as on a server s
 public final class TestPlugin extends JavaPlugin {
     public void onEnable() {
         Command message = new Command("message");
-        message.argument(new PlayerArgument("target"), new StringArgument("message")).execute((target, messageText, ctx) -> {
+        message.argument(new PlayerArgument("target"), new StringArgument("message")).execute((ctx, target, messageText) -> {
             // 'target' is inferred as 'org.bukkit.entity.Player'. No need to cast.
             target.sendMessage(messageText);
         });
@@ -633,7 +633,7 @@ public final class TestPlugin extends JavaPlugin {
 public final class MessageCommand extends Command {
     public MessageCommand() {
         super("message");
-        argument(new PlayerArgument("target"), new StringArgument("message")).execute((target, message, ctx) -> {
+        argument(new PlayerArgument("target"), new StringArgument("message")).execute((ctx, target, message) -> {
             target.sendMessage(message);
         });
     }
@@ -695,7 +695,7 @@ public final class ConfigCommand extends Command {
                                                });
                                            }})
                                            .child(key -> new Command("set") {{
-                                               argument(new StringArgument("value")).execute((value, ctx) -> {
+                                               argument(new StringArgument("value")).execute((ctx, value) -> {
                                                    String configKey = key.get();
 
                                                    // Set config value
@@ -738,7 +738,7 @@ public final class ScanCommand extends Command {
         CommandOption<Integer, CommandContext> limit = option(Options.integer("limit", 'n', 10, 1, 100)
                                                                      .description("Maximum number of targets."));
 
-        argument(new PlayerArgument("target")).execute((target, ctx) -> {
+        argument(new PlayerArgument("target")).execute((ctx, target) -> {
             boolean isForce = ctx.getOption(force);
             boolean isVerbose = ctx.getOption(verbose);
             int maxCount = ctx.getOption(limit);
@@ -787,7 +787,7 @@ public final class GameCommand extends Command {
         addChildren(new Command("start") {{
             CommandOption<Boolean, CommandContext> force = option(Options.flag("force", 'f'));
 
-            argument(new StringArgument("arena")).execute((arena, ctx) -> {
+            argument(new StringArgument("arena")).execute((ctx, arena) -> {
                 boolean isForce = ctx.getOption(force);
 
                 // Starts game
@@ -832,7 +832,7 @@ public final class ExportCommand extends Command {
         CommandOption<Integer, CommandContext> threads = option(Options.integer("threads", 't', 1, 1, 16)
                                                                        .requires(mode, "parallel"));
 
-        argument(new StringArgument("target")).execute((target, ctx) -> {
+        argument(new StringArgument("target")).execute((ctx, target) -> {
             // --reason can be used only with --force.
             // --threads can be used only when ctx.getOption(mode) is parallel.
         });
@@ -874,7 +874,7 @@ public final class TagCommand extends Command {
         CommandOption<Boolean, CommandContext> yaml = option(Options.flag("yaml", 'y'));
         mutuallyExclusiveOptions(json, yaml);
 
-        argument(new PlayerArgument("target")).execute((target, ctx) -> {
+        argument(new PlayerArgument("target")).execute((ctx, target) -> {
             boolean isForce = ctx.getOption(force);     // --force or --yes
             int verbosity = ctx.getOption(verbose);     // 2 for -vv
             List<String> tagList = ctx.getOption(tags); // [red, blue] for -t red --tag blue
@@ -901,7 +901,7 @@ output and the limits.
 public final class TestPlugin extends JavaPlugin {
     public void onEnable() {
         CommandLib.register(this, new Command("test") {{
-            argument(new EnumArgument<>("block", Material.class).validator(Material::isBlock)).execute((m, ctx) -> {
+            argument(new EnumArgument<>("block", Material.class).validator(Material::isBlock)).execute((ctx, m) -> {
                 // Do something
             });
         }});
@@ -924,17 +924,17 @@ public final class TestPlugin extends JavaPlugin {
     public void onEnable() {
         CommandLib.register(this, new Command("give") {{
             // /give <item> [count]
-            argument(new StringArgument("item"), new IntegerArgument("count").optional(1)).execute((item, count, ctx) -> {
+            argument(new StringArgument("item"), new IntegerArgument("count").optional(1)).execute((ctx, item, count) -> {
                 // count is 1 when omitted
             });
         }}, new Command("heal") {{
             // /heal [target]: heals the sender when omitted
-            argument(new PlayerArgument("target").optional(Command.player())).execute((target, ctx) -> {
+            argument(new PlayerArgument("target").optional(Command.player())).execute((ctx, target) -> {
                 target.setHealth(20);
             });
         }}, new Command("kick") {{
             // /kick <reason> <targets...>
-            argument(new StringArgument("reason"), new PlayerArgument("targets").variadic()).execute((reason, targets, ctx) -> {
+            argument(new StringArgument("reason"), new PlayerArgument("targets").variadic()).execute((ctx, reason, targets) -> {
                 targets.forEach(x -> x.kickPlayer(reason));
             });
         }});
@@ -1000,7 +1000,7 @@ public final class HomeCommand extends Command {
     public HomeCommand(Captions captions) {
         super("home");
         captions(captions);
-        argument(new StringArgument("name")).execute((name, ctx) -> ctx.sendSuccess(HOME_SET, Map.of("name", name)));
+        argument(new StringArgument("name")).execute((ctx, name) -> ctx.sendSuccess(HOME_SET, Map.of("name", name)));
     }
 }
 ```
@@ -1025,7 +1025,7 @@ public final class CountCommand extends Command {
     public CountCommand() {
         super("count");
 
-        argument(new PlayersArgument("targets")).execute((targets, ctx) -> {
+        argument(new PlayersArgument("targets")).execute((ctx, targets) -> {
             if (targets.isEmpty()) {
                 throw ctx.fail("No player was found");
             }
@@ -1124,7 +1124,7 @@ Velocity and `register(permissionPrefix, defaults, commands)` on Forge, NeoForge
 thread and completes back on it, so the follow-up may send messages and use the platform API:
 
 ```java
-argument(new OfflinePlayerArgument("player")).executeAsync((player, ctx) ->
+argument(new OfflinePlayerArgument("player")).executeAsync((ctx, player) ->
         ctx.supplyAsync(() -> database.loadStats(player.getUniqueId()))
            .thenAccept(stats -> ctx.sendSuccess(player.getName() + " has " + stats.kills() + " kills")));
 ```
@@ -1149,7 +1149,7 @@ public final class TeamCommand extends Command {
             ctx.put(Account.class, accounts.load(ctx.getSender()));
             return next.proceed();
         });
-        argument(new StringArgument("team")).execute((team, ctx) -> ctx.get(GamePlayer.class).join(team));
+        argument(new StringArgument("team")).execute((ctx, team) -> ctx.get(GamePlayer.class).join(team));
     }
 }
 ```
@@ -1342,7 +1342,7 @@ public final class ConfigCommand extends Command {
         super("config");
 
         argument(new StringArgument("key")).description("Select a config key")
-                                           .execute((key, ctx) -> {
+                                           .execute((ctx, key) -> {
                                                // Runs only when the sender has myplugin.command.config.key
                                            });
     }
@@ -1362,7 +1362,7 @@ public final class ConfigCommand extends Command {
 
         argument(new StringArgument("key")).permission("myplugin.command.config.key")
                                            .description("Select a config key")
-                                           .execute((key, ctx) -> {
+                                           .execute((ctx, key) -> {
                                                // Runs only when the sender has myplugin.command.config.key
                                            });
     }
@@ -1400,7 +1400,7 @@ public final class ConfigCommand extends Command {
                                                });
                                            }})
                                            .child(key -> new Command("set") {{
-                                               argument(new StringArgument("value")).execute((value, ctx) -> {
+                                               argument(new StringArgument("value")).execute((ctx, value) -> {
                                                    String configKey = key.get();
 
                                                    // Set config value

@@ -7,9 +7,9 @@ typed callbacks free of casts, and keep the Brigadier tree native so clients par
 argument's own type.
 
 ```java
-argument(new StringArgument("item"), new IntegerArgument("count").optional(1)).execute((item, count, ctx) -> {});
-argument(new PlayerArgument("target").optional(Command.player())).execute((target, ctx) -> {});
-argument(new StringArgument("reason"), new PlayerArgument("targets").variadic()).execute((reason, targets, ctx) -> {});
+argument(new StringArgument("item"), new IntegerArgument("count").optional(1)).execute((ctx, item, count) -> {});
+argument(new PlayerArgument("target").optional(Command.player())).execute((ctx, target) -> {});
+argument(new StringArgument("reason"), new PlayerArgument("targets").variadic()).execute((ctx, reason, targets) -> {});
 ```
 
 ## API

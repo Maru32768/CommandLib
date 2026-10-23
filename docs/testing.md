@@ -119,7 +119,7 @@ void finds_offline_player() {
 
     try (MockedStatic<Bukkit> bukkit = Mockito.mockStatic(Bukkit.class);
          CommandTester tester = new CommandTester(() -> new Command("info") {{
-             argument(new OfflinePlayerArgument("player")).execute((player, ctx) -> ctx.sendMessage(player.getName()));
+             argument(new OfflinePlayerArgument("player")).execute((ctx, player) -> ctx.sendMessage(player.getName()));
          }}, "test.command")) {
         bukkit.when(Bukkit::getOfflinePlayers)
               .thenReturn(new OfflinePlayer[]{steve});
@@ -264,7 +264,7 @@ The denied branch is hidden, so Brigadier rejects the input before CommandLib ru
 void rejects_unknown_mode() {
     FakeSender sender = FakeSender.player("Alice");
     try (CommandTester tester = new CommandTester(() -> new Command("mode") {{
-        argument(new LiteralArgument("mode", List.of("auto", "manual"))).execute((mode, ctx) -> ctx.sendMessage(mode));
+        argument(new LiteralArgument("mode", List.of("auto", "manual"))).execute((ctx, mode) -> ctx.sendMessage(mode));
     }}, "test.command")) {
         tester.execute("mode turbo", sender);
     }
@@ -281,7 +281,7 @@ This is `spigot-testing` output; `paper-testing` gives `command.unknown.argument
 void suggests_modes() {
     FakeSender sender = FakeSender.player("Alice");
     try (CommandTester tester = new CommandTester(() -> new Command("mode") {{
-        argument(new LiteralArgument("mode", List.of("auto", "manual"))).execute((mode, ctx) -> ctx.sendMessage(mode));
+        argument(new LiteralArgument("mode", List.of("auto", "manual"))).execute((ctx, mode) -> ctx.sendMessage(mode));
     }}, "test.command")) {
         assertThat(tester.suggest("mode au", sender)).containsExactly("auto");
     }

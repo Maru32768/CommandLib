@@ -21,7 +21,7 @@ public final class FluentTeamCommand extends Command {
                                                                     .keySet())));
         argument(new ObjectArgument<Set<String>>("team", teams::byName)).child(team -> new Command("add") {{
             description("Add a player to the team");
-            argument(new PlayerArgument("player")).execute((player, ctx) -> {
+            argument(new PlayerArgument("player")).execute((ctx, player) -> {
                 team.get()
                     .add(player.getName());
                 ctx.sendSuccess("Members: " + team.get());
@@ -29,8 +29,8 @@ public final class FluentTeamCommand extends Command {
         }})
                                                                         .child(team -> new Command("remove") {{
                                                                             description("Remove a player from the team");
-                                                                            argument(new PlayerArgument("player")).execute((player,
-                                                                                                                            ctx) -> {
+                                                                            argument(new PlayerArgument("player")).execute((ctx,
+                                                                                                                            player) -> {
                                                                                 team.get()
                                                                                     .remove(player.getName());
                                                                                 ctx.sendSuccess("Members: "

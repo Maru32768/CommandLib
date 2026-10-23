@@ -18,7 +18,7 @@ class PositionArgumentTest {
 
         try (CommandTester tester = new CommandTester(() -> new Command("pos") {{
             argument(new LocationArgument("centered"),
-                     new LocationArgument("exact", false)).execute((centered, exact, ctx) -> {
+                     new LocationArgument("exact", false)).execute((ctx, centered, exact) -> {
                          ctx.sendMessage(centered.getX() + " " + centered.getZ() + " " + exact.getX() + " "
                                  + exact.getZ());
                      });
@@ -36,7 +36,7 @@ class PositionArgumentTest {
         List<String> messages;
 
         try (CommandTester tester = new CommandTester(() -> new Command("pos") {{
-            argument(new BlockPositionArgument("pos")).execute((pos, ctx) -> ctx.sendMessage(pos.getX() + ","
+            argument(new BlockPositionArgument("pos")).execute((ctx, pos) -> ctx.sendMessage(pos.getX() + ","
                     + pos.getY() + "," + pos.getZ()));
         }}, "test.command")) {
             FakeSender sender = FakeSender.player("Alice");

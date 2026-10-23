@@ -12,7 +12,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class BlockPositionArgumentTest {
     private static Command positionCommand() {
         return new Command("pos") {{
-            argument(new BlockPositionArgument("pos")).execute((pos, ctx) -> {
+            argument(new BlockPositionArgument("pos")).execute((ctx, pos) -> {
                 ctx.sendMessage(pos.getX() + "," + pos.getY() + "," + pos.getZ());
             });
         }};

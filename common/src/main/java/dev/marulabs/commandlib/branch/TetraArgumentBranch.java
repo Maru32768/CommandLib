@@ -40,21 +40,21 @@ public final class TetraArgumentBranch<T1, T2, T3, T4, C extends CommonCommandCo
         this.argument4 = argument4;
     }
 
-    public TetraArgumentBranch<T1, T2, T3, T4, C, T> execute(@NotNull QuintConsumer<T1, T2, T3, T4, C> action) {
-        super.execute(ctx -> action.accept(ctx.getArgument(argument1),
+    public TetraArgumentBranch<T1, T2, T3, T4, C, T> execute(@NotNull QuintConsumer<C, T1, T2, T3, T4> action) {
+        super.execute(ctx -> action.accept(ctx,
+                                           ctx.getArgument(argument1),
                                            ctx.getArgument(argument2),
                                            ctx.getArgument(argument3),
-                                           ctx.getArgument(argument4),
-                                           ctx));
+                                           ctx.getArgument(argument4)));
         return this;
     }
 
-    public TetraArgumentBranch<T1, T2, T3, T4, C, T> executeAsync(@NotNull QuintFunction<T1, T2, T3, T4, C, CompletionStage<?>> action) {
-        super.executeAsync(ctx -> action.apply(ctx.getArgument(argument1),
+    public TetraArgumentBranch<T1, T2, T3, T4, C, T> executeAsync(@NotNull QuintFunction<C, T1, T2, T3, T4, CompletionStage<?>> action) {
+        super.executeAsync(ctx -> action.apply(ctx,
+                                               ctx.getArgument(argument1),
                                                ctx.getArgument(argument2),
                                                ctx.getArgument(argument3),
-                                               ctx.getArgument(argument4),
-                                               ctx));
+                                               ctx.getArgument(argument4)));
         return this;
     }
 

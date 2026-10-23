@@ -52,7 +52,7 @@ class TesterServerTest {
     void the_nearest_player_resolves_among_several() {
         List<String> nearest = new ArrayList<>();
         try (CommandTester tester = new CommandTester(new Command("nearest") {{
-            argument(new PlayerArgument("p")).execute((p, ctx) -> nearest.add(p.getScoreboardName()));
+            argument(new PlayerArgument("p")).execute((ctx, p) -> nearest.add(p.getScoreboardName()));
         }}, "test").withPlayer(at("Alex", 25))
                    .withPlayer(at("Bob", 1))
                    .withPlayer(at("Carl", 9))) {

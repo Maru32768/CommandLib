@@ -93,7 +93,7 @@ class HealCommandTest {
         FakeSender sender = FakeSender.player("Steve");
 
         try (CommandTester tester = new CommandTester(() -> new Command("heal") {{
-            argument(new PlayerArgument("target")).execute((target, ctx) -> ctx.sendMessage("healed " + target.getName()));
+            argument(new PlayerArgument("target")).execute((ctx, target) -> ctx.sendMessage("healed " + target.getName()));
         }}, "myplugin.command")) {
             tester.withFakePlayer((Player) sender.asSender());
             tester.execute("heal Steve", sender);
@@ -109,7 +109,7 @@ class HealCommandTest {
 
 ```java
 try (CommandTester tester = new CommandTester(() -> new Command("tp") {{
-    argument(new WorldArgument("world")).execute((world, ctx) -> ctx.sendMessage(world.getName()));
+    argument(new WorldArgument("world")).execute((ctx, world) -> ctx.sendMessage(world.getName()));
 }}, "myplugin.command").withFakeWorld("minecraft:the_nether", netherWorld)) {
     tester.execute("tp minecraft:the_nether", sender);
 }
@@ -133,7 +133,7 @@ class InfoCommandTest {
 
         try (MockedStatic<Bukkit> bukkit = Mockito.mockStatic(Bukkit.class);
              CommandTester tester = new CommandTester(() -> new Command("info") {{
-                 argument(new OfflinePlayerArgument("player")).execute((player, ctx) -> ctx.sendMessage(player.getName()));
+                 argument(new OfflinePlayerArgument("player")).execute((ctx, player) -> ctx.sendMessage(player.getName()));
              }}, "myplugin.command")) {
             bukkit.when(Bukkit::getOfflinePlayers)
                   .thenReturn(new OfflinePlayer[]{steve});
@@ -164,7 +164,7 @@ class PaperCommandTest {
         FakeSender sender = FakeSender.player("Steve");
 
         try (CommandTester tester = new CommandTester(() -> new Command("heal") {{
-            argument(new PlayerArgument("target")).execute((target, ctx) -> ctx.sendMessage("healed " + target.getName()));
+            argument(new PlayerArgument("target")).execute((ctx, target) -> ctx.sendMessage("healed " + target.getName()));
         }}, "myplugin.command")) {
             tester.withFakePlayer((Player) sender.asSender());
             tester.execute("heal Steve", sender);

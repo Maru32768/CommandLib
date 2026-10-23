@@ -16,8 +16,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class ScoreboardDisplaySlotArgumentTest {
     private static Command command() {
         return new Command("slot") {{
-            argument(new ScoreboardDisplaySlotArgument("value")).execute((slot,
-                                                                          ctx) -> ctx.sendMessage(slot.name()));
+            argument(new ScoreboardDisplaySlotArgument("value")).execute((ctx,
+                                                                          slot) -> ctx.sendMessage(slot.name()));
         }};
     }
 

@@ -23,16 +23,16 @@ class KeyedArgumentFailureTest {
         try (MockedStatic<Bukkit> ignored = Mockito.mockStatic(Bukkit.class);
              CommandTester tester = CommandTester.builder()
                                                  .command(() -> new Command("advancement") {{
-                                                     argument(new AdvancementArgument("key")).execute((value,
-                                                                                                       ctx) -> ctx.sendMessage("unreachable"));
+                                                     argument(new AdvancementArgument("key")).execute((ctx,
+                                                                                                       value) -> ctx.sendMessage("unreachable"));
                                                  }})
                                                  .command(() -> new Command("loot") {{
-                                                     argument(new LootTableArgument("key")).execute((value,
-                                                                                                     ctx) -> ctx.sendMessage("unreachable"));
+                                                     argument(new LootTableArgument("key")).execute((ctx,
+                                                                                                     value) -> ctx.sendMessage("unreachable"));
                                                  }})
                                                  .command(() -> new Command("recipe") {{
-                                                     argument(new RecipeArgument("key")).execute((value,
-                                                                                                  ctx) -> ctx.sendMessage("unreachable"));
+                                                     argument(new RecipeArgument("key")).execute((ctx,
+                                                                                                  value) -> ctx.sendMessage("unreachable"));
                                                  }})
                                                  .permissionPrefix("test.command")
                                                  .build()) {
@@ -52,7 +52,7 @@ class KeyedArgumentFailureTest {
 
         try (MockedStatic<Bukkit> ignored = Mockito.mockStatic(Bukkit.class);
              CommandTester tester = new CommandTester(() -> new Command("recipe") {{
-                 argument(new RecipeArgument("key")).execute((value, ctx) -> ctx.sendMessage("unreachable"));
+                 argument(new RecipeArgument("key")).execute((ctx, value) -> ctx.sendMessage("unreachable"));
              }}, "test.command")) {
             tester.execute("recipe Bad:Key", sender);
         }
@@ -69,8 +69,8 @@ class KeyedArgumentFailureTest {
 
         try (MockedStatic<Bukkit> bukkit = Mockito.mockStatic(Bukkit.class);
              CommandTester tester = new CommandTester(() -> new Command("score") {{
-                 argument(new ObjectiveArgument("objective")).execute((value,
-                                                                       ctx) -> ctx.sendMessage("unreachable"));
+                 argument(new ObjectiveArgument("objective")).execute((ctx,
+                                                                       value) -> ctx.sendMessage("unreachable"));
              }}, "test.command")) {
             bukkit.when(Bukkit::getScoreboardManager)
                   .thenReturn(manager);
@@ -85,8 +85,8 @@ class KeyedArgumentFailureTest {
         FakeSender sender = FakeSender.player("Alice");
 
         try (CommandTester tester = new CommandTester(() -> new Command("score") {{
-            argument(new ObjectiveArgument("objective").scoreboard(() -> null)).execute((value,
-                                                                                         ctx) -> ctx.sendMessage("unreachable"));
+            argument(new ObjectiveArgument("objective").scoreboard(() -> null)).execute((ctx,
+                                                                                         value) -> ctx.sendMessage("unreachable"));
         }}, "test.command")) {
             tester.execute("score kills", sender);
         }

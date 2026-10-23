@@ -59,7 +59,7 @@ class MessageCommand extends Command {
     MessageCommand() {
         super("message");
 
-        argument(new PlayerArgument("target"), new StringArgument("text", StringArgument.Type.PHRASE)).execute((target, text, ctx) -> {
+        argument(new PlayerArgument("target"), new StringArgument("text", StringArgument.Type.PHRASE)).execute((ctx, target, text) -> {
             target.sendMessage(text);
         });
     }
@@ -119,7 +119,7 @@ class HealCommand extends Command {
     HealCommand() {
         super("heal");
 
-        argument(new PlayerArgument("target").optional(player())).execute((target, ctx) -> {
+        argument(new PlayerArgument("target").optional(player())).execute((ctx, target) -> {
             target.setHealth(20);
         });
     }
@@ -135,7 +135,7 @@ becomes `variadic()` on the element argument, such as `new PlayerArgument("targe
 
 | CommandAPI | CommandLib |
 |---|---|
-| `executes((sender, args) -> ...)` | `execute(ctx -> ...)` or the typed `execute((a, b, ctx) -> ...)`; the sender is `ctx.getSender()` |
+| `executes((sender, args) -> ...)` | `execute(ctx -> ...)` or the typed `execute((ctx, a, b) -> ...)`; the sender is `ctx.getSender()` |
 | `executesPlayer((player, args) -> ...)` | `addPrerequisite(Command.player())` on the command, then `ctx.getPlayer()`; or `require(Command.player())` for a typed player |
 | `executesConsole(...)` | `addPrerequisite(Command.console())`, then `ctx.getConsole()` |
 | `executesCommandBlock`, `executesProxy`, `executesNative`, `executesEntity` | **Not available** as separate executors; check `ctx.getSender()` (`BlockCommandSender`, ...) yourself |
@@ -149,7 +149,7 @@ class HomeCommand extends Command {
     HomeCommand() {
         super("home");
 
-        require(Command.player()).execute((player, ctx) -> player.teleport(player.getWorld()
+        require(Command.player()).execute((ctx, player) -> player.teleport(player.getWorld()
                                                                                          .getSpawnLocation()));
     }
 }
@@ -264,7 +264,7 @@ a rejected value gets vanilla's "Incorrect argument for command" message, and th
 
 ```java
 argument(new IntegerArgument("amount", 1, 64).validator(amount -> amount % 2 == 0))
-        .execute((amount, ctx) -> ctx.sendSuccess("ok " + amount));
+        .execute((ctx, amount) -> ctx.sendSuccess("ok " + amount));
 ```
 
 `transformer(...)` maps a parsed value, and `additionalParser(...)` accepts input the argument type rejects. See
@@ -280,7 +280,7 @@ class ScanCommand extends Command {
         super("scan");
 
         CommandOption<Boolean, CommandContext> force = option(Options.flag("force", 'f'));
-        argument(new PlayerArgument("target")).execute((target, ctx) -> {
+        argument(new PlayerArgument("target")).execute((ctx, target) -> {
             boolean isForce = ctx.getOption(force);
         });
     }

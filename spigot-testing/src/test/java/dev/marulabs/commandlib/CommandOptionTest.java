@@ -18,7 +18,7 @@ class CommandOptionTest {
         try (CommandTester tester = new CommandTester(new Command("scan") {{
             CommandOption<Boolean, CommandContext> force = option(Options.flag("force", 'f'));
             CommandOption<Integer, CommandContext> limit = option(Options.integer("limit", 'n', 10, 1, 100));
-            argument(new StringArgument("target")).execute((target, ctx) -> {
+            argument(new StringArgument("target")).execute((ctx, target) -> {
                 ctx.sendMessage(target + ":" + ctx.getOption(force) + ":" + ctx.getOption(limit));
             });
         }}, "test.command")) {
@@ -39,7 +39,7 @@ class CommandOptionTest {
                                                                         .aliases("machine"));
             CommandOption<Boolean, CommandContext> yaml = option(Options.flag("yaml", 'y'));
             mutuallyExclusiveOptions(json, yaml);
-            argument(new StringArgument("target")).execute((target, ctx) -> {
+            argument(new StringArgument("target")).execute((ctx, target) -> {
                 ctx.sendMessage(target + ":" + ctx.getOption(verbose) + ":" + ctx.getOption(tags) + ":"
                         + ctx.getOption(json));
             });
@@ -67,7 +67,7 @@ class CommandOptionTest {
                                                                              't',
                                                                              new PlayerArgument("target").optional(player())));
             CommandOption<Boolean, CommandContext> force = option(Options.flag("force", 'f'));
-            argument(new IntegerArgument("amount")).execute((amount, ctx) -> {
+            argument(new IntegerArgument("amount")).execute((ctx, amount) -> {
                 ctx.sendMessage(ctx.getOption(target)
                                    .getName()
                         + ":" + amount + ":" + ctx.getOption(force));
@@ -91,7 +91,7 @@ class CommandOptionTest {
             optionsAnywhere();
             CommandOption<Boolean, CommandContext> force = option(Options.flag("force", 'f'));
             CommandOption<Integer, CommandContext> times = option(Options.integer("times", 't', 1));
-            argument(new PlayerArgument("target"), new IntegerArgument("amount")).execute((target, amount, ctx) -> {
+            argument(new PlayerArgument("target"), new IntegerArgument("amount")).execute((ctx, target, amount) -> {
                 ctx.sendMessage(target.getName() + ":" + amount + ":" + ctx.getOption(force) + ":"
                         + ctx.getOption(times));
             });
@@ -111,7 +111,7 @@ class CommandOptionTest {
             CommandOption<Boolean, CommandContext> silent = option(Options.flag("silent", 's')
                                                                           .permission(DefaultPermission.OP));
             CommandOption<Boolean, CommandContext> force = option(Options.flag("force", 'f'));
-            argument(new StringArgument("target")).execute((target, ctx) -> {
+            argument(new StringArgument("target")).execute((ctx, target) -> {
                 ctx.sendMessage(target + ":" + ctx.getOption(silent) + ":" + ctx.getOption(force));
             });
         }}, "test.command")) {
@@ -159,7 +159,7 @@ class CommandOptionTest {
             option(Options.integer("limit", 'n', 10, 1, 100)
                           .description("Maximum count"));
 
-            argument(new StringArgument("target")).execute((target, ctx) -> {
+            argument(new StringArgument("target")).execute((ctx, target) -> {
             });
         }}, "test.command")) {
             FakeSender sender = FakeSender.player("Steve");

@@ -16,7 +16,7 @@ class OptionalVariadicArgumentTest {
     @Test
     void omitted_optional_argument_gives_its_default() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("give") {{
-            argument(new WordArg("item"), new IntArg("count").optional(1)).execute((item, count, ctx) -> {
+            argument(new WordArg("item"), new IntArg("count").optional(1)).execute((ctx, item, count) -> {
                 ctx.sendMessage(item + "x" + count);
             });
         }});
@@ -32,7 +32,7 @@ class OptionalVariadicArgumentTest {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("tp") {{
             argument(new IntArg("x"),
                      new IntArg("y").optional(0),
-                     new IntArg("z").optional(0)).execute((x, y, z, ctx) -> {
+                     new IntArg("z").optional(0)).execute((ctx, x, y, z) -> {
                          ctx.sendMessage(x + "," + y + "," + z);
                      });
         }});
@@ -48,7 +48,7 @@ class OptionalVariadicArgumentTest {
     @Test
     void branch_of_only_optional_arguments_runs_on_the_bare_command() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("count") {{
-            argument(new IntArg("n").optional(ctx -> 10)).execute((n, ctx) -> ctx.sendMessage("n=" + n));
+            argument(new IntArg("n").optional(ctx -> 10)).execute((ctx, n) -> ctx.sendMessage("n=" + n));
         }});
 
         assertThat(runner.execute("count")
@@ -61,20 +61,20 @@ class OptionalVariadicArgumentTest {
     @Test
     void omitted_optional_argument_named_like_a_command_literal_gives_its_default() throws Exception {
         TestCommandRunner command = new TestCommandRunner(new TestCommand("count") {{
-            argument(new IntArg("count").optional(7)).execute((n, ctx) -> ctx.sendMessage("n=" + n));
+            argument(new IntArg("count").optional(7)).execute((ctx, n) -> ctx.sendMessage("n=" + n));
         }});
         TestCommandRunner alias = new TestCommandRunner(new TestCommand("counter") {{
             addAliases("c");
-            argument(new IntArg("c").optional(7)).execute((n, ctx) -> ctx.sendMessage("n=" + n));
+            argument(new IntArg("c").optional(7)).execute((ctx, n) -> ctx.sendMessage("n=" + n));
         }});
         TestCommandRunner ancestor = new TestCommandRunner(new TestCommand("count") {{
             addChildren(new TestCommand("set") {{
-                argument(new IntArg("count").optional(7)).execute((n, ctx) -> ctx.sendMessage("n=" + n));
+                argument(new IntArg("count").optional(7)).execute((ctx, n) -> ctx.sendMessage("n=" + n));
             }});
         }});
         TestCommandRunner variadic = new TestCommandRunner(new TestCommand("targets") {{
             argument(new WordArg("targets").variadic()
-                                           .optional(List.of())).execute((targets, ctx) -> ctx.sendMessage(targets));
+                                           .optional(List.of())).execute((ctx, targets) -> ctx.sendMessage(targets));
         }});
 
         assertThat(command.execute("count")
@@ -100,7 +100,7 @@ class OptionalVariadicArgumentTest {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("heal") {{
             argument(new WordArg("target").optional(ctx -> {
                 throw new CommandPrerequisiteException("Give a target.");
-            })).execute((target, ctx) -> ctx.sendMessage("healed " + target));
+            })).execute((ctx, target) -> ctx.sendMessage("healed " + target));
         }});
 
         assertThat(runner.execute("heal")
@@ -112,7 +112,7 @@ class OptionalVariadicArgumentTest {
     @Test
     void variadic_argument_gives_every_value() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("heal") {{
-            argument(new IntArg("amount"), new WordArg("targets").variadic()).execute((amount, targets, ctx) -> {
+            argument(new IntArg("amount"), new WordArg("targets").variadic()).execute((ctx, amount, targets) -> {
                 List<String> names = targets;
                 ctx.sendMessage(amount + ":" + names + ":" + ctx.getInput("targets"));
             });
@@ -127,11 +127,11 @@ class OptionalVariadicArgumentTest {
     @Test
     void variadic_argument_needs_one_value_unless_optional() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("heal") {{
-            argument(new WordArg("targets").variadic()).execute((targets, ctx) -> ctx.sendMessage("unreachable"));
+            argument(new WordArg("targets").variadic()).execute((ctx, targets) -> ctx.sendMessage("unreachable"));
         }});
         TestCommandRunner optional = new TestCommandRunner(new TestCommand("heal") {{
             argument(new WordArg("targets").variadic()
-                                           .optional(List.of())).execute((targets, ctx) -> ctx.sendMessage("healed " + targets));
+                                           .optional(List.of())).execute((ctx, targets) -> ctx.sendMessage("healed " + targets));
         }});
 
         // Input without a value ends at the command, which shows its usage.
@@ -146,7 +146,7 @@ class OptionalVariadicArgumentTest {
     @Test
     void variadic_argument_accepts_up_to_its_max_count() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("sum") {{
-            argument(new IntArg("n").variadic(2)).execute((n, ctx) -> ctx.sendMessage(n.stream()
+            argument(new IntArg("n").variadic(2)).execute((ctx, n) -> ctx.sendMessage(n.stream()
                                                                                        .mapToInt(Integer::intValue)
                                                                                        .sum()));
         }});
@@ -160,7 +160,7 @@ class OptionalVariadicArgumentTest {
     void variadic_element_validator_points_at_its_own_token() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("go") {{
             argument(new DirArg("dirs").validator(x -> x != Direction.NORTH)
-                                       .variadic()).execute((dirs, ctx) -> ctx.sendMessage("unreachable"));
+                                       .variadic()).execute((ctx, dirs) -> ctx.sendMessage("unreachable"));
         }});
 
         TestCommandContext ctx = runner.execute("go south north");
@@ -174,7 +174,7 @@ class OptionalVariadicArgumentTest {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("go") {{
             argument(new DirArg("dirs").transformer(x -> x == Direction.SOUTH ? Direction.NORTH : Direction.WEST)
                                        .variadic()
-                                       .validator(x -> x.size() > 1)).execute((dirs, ctx) -> ctx.sendMessage(dirs));
+                                       .validator(x -> x.size() > 1)).execute((ctx, dirs) -> ctx.sendMessage(dirs));
         }});
 
         assertThat(runner.execute("go south east")
@@ -187,7 +187,7 @@ class OptionalVariadicArgumentTest {
     @Test
     void variadic_argument_suggests_each_value() {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("go") {{
-            argument(new DirArg("dirs").variadic()).execute((dirs, ctx) -> {
+            argument(new DirArg("dirs").variadic()).execute((ctx, dirs) -> {
             });
         }});
 
@@ -198,7 +198,7 @@ class OptionalVariadicArgumentTest {
     @Test
     void branch_permission_applies_to_every_variadic_value() throws Exception {
         TestCommand command = new TestCommand("heal") {{
-            argument(new WordArg("targets").variadic()).execute((targets, ctx) -> ctx.sendMessage("healed"));
+            argument(new WordArg("targets").variadic()).execute((ctx, targets) -> ctx.sendMessage("healed"));
         }};
         TestCommandRunner denied = new TestCommandRunner(command, new TestCommandSource("test.command.heal"));
         TestCommandRunner allowed = new TestCommandRunner(command,
@@ -214,9 +214,9 @@ class OptionalVariadicArgumentTest {
     @Test
     void help_marks_optional_and_variadic_arguments() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("give") {{
-            argument(new WordArg("item"), new IntArg("count").optional(1)).execute((item, count, ctx) -> {
+            argument(new WordArg("item"), new IntArg("count").optional(1)).execute((ctx, item, count) -> {
             });
-            argument(new WordArg("kit"), new WordArg("targets").variadic()).execute((kit, targets, ctx) -> {
+            argument(new WordArg("kit"), new WordArg("targets").variadic()).execute((ctx, kit, targets) -> {
             });
         }});
 
@@ -232,7 +232,7 @@ class OptionalVariadicArgumentTest {
     @Test
     void required_argument_after_optional_one_fails_registration() {
         TestCommand command = new TestCommand("give") {{
-            argument(new IntArg("count").optional(1), new WordArg("item")).execute((count, item, ctx) -> {
+            argument(new IntArg("count").optional(1), new WordArg("item")).execute((ctx, count, item) -> {
             });
         }};
 
@@ -245,7 +245,7 @@ class OptionalVariadicArgumentTest {
     void variadic_argument_that_is_not_last_fails_registration() {
         TestCommand command = new TestCommand("give") {{
             argument(new WordArg("targets").variadic(),
-                     new IntArg("count").optional(1)).execute((targets, count, ctx) -> {
+                     new IntArg("count").optional(1)).execute((ctx, targets, count) -> {
                      });
         }};
 
@@ -268,7 +268,7 @@ class OptionalVariadicArgumentTest {
         TestCommand command = new TestCommand("count") {{
             execute(ctx -> {
             });
-            argument(new IntArg("n").optional(1)).execute((n, ctx) -> {
+            argument(new IntArg("n").optional(1)).execute((ctx, n) -> {
             });
         }};
 
@@ -283,7 +283,7 @@ class OptionalVariadicArgumentTest {
         assertThatThrownBy(() -> new IntArg("n").execute(ctx -> {
         })
                                                 .variadic()).isInstanceOf(IllegalStateException.class);
-        assertThatThrownBy(() -> new IntArg("n").addUncaughtExceptionHandler((e, ctx) -> {
+        assertThatThrownBy(() -> new IntArg("n").addUncaughtExceptionHandler((ctx, e) -> {
         })
                                                 .variadic()).isInstanceOf(IllegalStateException.class);
     }

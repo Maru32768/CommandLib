@@ -16,7 +16,7 @@ class RegistryArgumentTest {
     private static CommandTester tester() {
         return new CommandTester(() -> new Command("spawn") {{
             argument(new RegistryArgument<>("type",
-                                            RegistryKey.ENTITY_TYPE)).execute((type, ctx) -> ctx.sendMessage(type.name()));
+                                            RegistryKey.ENTITY_TYPE)).execute((ctx, type) -> ctx.sendMessage(type.name()));
         }}, "test.command").withFakeRegistryValue(RegistryKey.ENTITY_TYPE, "zombie", EntityType.ZOMBIE);
     }
 

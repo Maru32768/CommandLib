@@ -61,7 +61,7 @@ class GiveCommand extends Command {
     GiveCommand() {
         super("give");
 
-        argument(new PlayerArgument("target"), new IntegerArgument("amount", 1, 64).optional(1)).execute((target, amount, ctx) -> {
+        argument(new PlayerArgument("target"), new IntegerArgument("amount", 1, 64).optional(1)).execute((ctx, target, amount) -> {
             ctx.sendSuccess("Gave " + amount + " to " + target.getName());
         });
     }
@@ -130,7 +130,7 @@ class JoinCommand extends Command {
         super("join");
 
         addPrerequisite(Command.player());
-        argument(new ObjectArgument<Arena>("arena", arenas::byName)).execute((arena, ctx) -> arena.join(ctx.getPlayer()));
+        argument(new ObjectArgument<Arena>("arena", arenas::byName)).execute((ctx, arena) -> arena.join(ctx.getPlayer()));
     }
 }
 ```
@@ -155,10 +155,10 @@ class CoinsCommand extends Command {
         super("coins");
 
         provide(Profile.class, ctx -> profiles.of(ctx.getSender()));
-        argument(new IntegerArgument("amount", 1, 1000)).execute((amount, ctx) -> ctx.get(Profile.class)
+        argument(new IntegerArgument("amount", 1, 1000)).execute((ctx, amount) -> ctx.get(Profile.class)
                                                                                     .addCoins(amount));
         addChildren(new Command("show") {{
-            require(ctx -> ctx.get(Profile.class)).execute((profile, ctx) -> ctx.sendMessage(profile.coins()));
+            require(ctx -> ctx.get(Profile.class)).execute((ctx, profile) -> ctx.sendMessage(profile.coins()));
         }});
     }
 }
@@ -251,7 +251,7 @@ class ScanCommand extends Command {
 
         CommandOption<Boolean, CommandContext> force = option(Options.flag("force", 'f'));
         CommandOption<Integer, CommandContext> limit = option(Options.integer("limit", 'n', 10, 1, 100));
-        argument(new PlayerArgument("target")).execute((target, ctx) -> {
+        argument(new PlayerArgument("target")).execute((ctx, target) -> {
             boolean isForce = ctx.getOption(force);
             int maxCount = ctx.getOption(limit);
         });
@@ -284,7 +284,7 @@ class StatsCommand extends Command {
     StatsCommand(Stats stats) {
         super("stats");
 
-        argument(new StringArgument("name", StringArgument.Type.WORD)).executeAsync((name, ctx) ->
+        argument(new StringArgument("name", StringArgument.Type.WORD)).executeAsync((ctx, name) ->
                 ctx.supplyAsync(() -> stats.load(name))
                    .thenAccept(ctx::sendMessage));
     }
@@ -313,7 +313,7 @@ See [confirmation and cooldown](../../README.md#confirmation-and-cooldown) in th
 | Cloud | CommandLib |
 |---|---|
 | `exceptionController().registerHandler(...)` for `NoPermissionException`, `InvalidSyntaxException`, `InvalidCommandSenderException`, ... | `errorFormatter((ctx, error) -> ...)` gets each failure CommandLib reports with its `kind()`; Brigadier syntax errors are the platform's vanilla messages. See [help](../help.md#error-formatter) and [errors](../errors.md) |
-| An exception thrown by the handler | `addUncaughtExceptionHandler((e, ctx) -> ...)` on the command or argument |
+| An exception thrown by the handler | `addUncaughtExceptionHandler((ctx, e) -> ...)` on the command or argument |
 | `ArgumentParseResult.failure(...)` from a parser | `throw new ArgumentValidationException("...")` from `validator(...)` |
 | Failing from the handler | `throw new CommandPrerequisiteException("...")` from `execute(ctx -> ...)`, `throw ctx.fail("...")` from any executor, or `ctx.sendFailure("..."); return;` |
 | `Caption.of(key)`, `StandardCaptionKeys` | `Caption.of(key, englishDefault)`, CommandLib's own keys as `Caption` constants. See [localization](../localization.md) |
@@ -324,11 +324,11 @@ See [confirmation and cooldown](../../README.md#confirmation-and-cooldown) in th
 | `MinecraftExceptionHandler` (minecraft-extras) | Not needed: failures are sent in red like vanilla errors |
 
 ```java
-argument(new IntegerArgument("amount").validator((amount, ctx) -> {
+argument(new IntegerArgument("amount").validator((ctx, amount) -> {
     if (amount % 2 != 0) {
         throw new ArgumentValidationException("The amount must be even.");
     }
-})).execute((amount, ctx) -> ctx.sendSuccess("ok " + amount));
+})).execute((ctx, amount) -> ctx.sendSuccess("ok " + amount));
 ```
 
 ## Help

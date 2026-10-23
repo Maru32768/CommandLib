@@ -18,7 +18,7 @@ public class IncrementCommand extends Command {
 
         // An omitted count is 1.
         argument(new StringArgument("target", StringArgument.Type.WORD),
-                 new IntegerArgument("count").optional(1)).execute((name, count, ctx) -> {
+                 new IntegerArgument("count").optional(1)).execute((ctx, name, count) -> {
                      int value = values.merge(name, count, Integer::sum);
                      ctx.sendSuccess(name + " = " + value);
                  });

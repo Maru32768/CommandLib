@@ -66,14 +66,14 @@ class KotlinDslTest {
                     val limit = option(Options.integer<CommandContext>("limit", 'n', 10, 1, 100))
                     argument(StringArgument("name"), IntegerArgument("count").optional(1))
                         .description("Give a kit to yourself")
-                        .execute { name, count, ctx ->
+                        .execute { ctx, name, count ->
                             ctx.sendMessage("$name x$count force=${ctx.getOption(force)} limit=${ctx.getOption(limit)}")
                         }
                 },
             )
             addChildren(
                 Command("heal").apply {
-                    argument(StringArgument("targets").variadic()).execute { targets, ctx ->
+                    argument(StringArgument("targets").variadic()).execute { ctx, targets ->
                         ctx.sendMessage("Healed " + targets.joinToString(","))
                     }
                 },
@@ -340,17 +340,14 @@ class KotlinDslTest {
                 require({ ctx ->
                     ctx.actor.name.takeIf { it != "Guest" } ?: throw CommandPrerequisiteException("VIPs only.")
                 }) {
-                    execute { name, ctx -> ctx.sendMessage("Welcome $name") }
+                    execute { ctx, name -> ctx.sendMessage("Welcome $name") }
                     subcommand("lounge") { execute { ctx -> ctx.sendMessage("Lounge") } }
                 }
             }
         val back =
             command("back") {
                 require({ ctx -> ctx.actor.name }) {
-                    executeSuspend {
-                        name,
-                        ctx,
-                        ->
+                    executeSuspend { ctx, name ->
                         ctx.sendMessage("Welcome back $name")
                     }
                 }
@@ -373,7 +370,7 @@ class KotlinDslTest {
         val join =
             command("join") {
                 argument(StringArgument("room")) { room ->
-                    require({ ctx -> ctx.actor.name }) { execute { name, ctx -> ctx.sendMessage("$name joins ${room.get()}") } }
+                    require({ ctx -> ctx.actor.name }) { execute { ctx, name -> ctx.sendMessage("$name joins ${room.get()}") } }
                 }
             }
 

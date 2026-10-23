@@ -35,7 +35,7 @@ public final class AuditedCommand extends Command {
                        // After: runs when the executor is done, also for an async executor.
                        .whenComplete((ignored, e) -> log(ctx.getSender(), System.nanoTime() - start, e));
         });
-        argument(new PlayerArgument("target")).execute((target, ctx) -> ctx.sendSuccess("Banned " + target.getName()));
+        argument(new PlayerArgument("target")).execute((ctx, target) -> ctx.sendSuccess("Banned " + target.getName()));
     }
 }
 ```
@@ -119,7 +119,7 @@ public final class StatsCommand extends Command {
     public StatsCommand(Database database) {
         super("stats");
 
-        argument(new OfflinePlayerArgument("player")).executeAsync((player, ctx) ->
+        argument(new OfflinePlayerArgument("player")).executeAsync((ctx, player) ->
                 // Runs on the async executor; the future completes back on the sync thread.
                 ctx.supplyAsync(() -> database.loadStats(player.getUniqueId()))
                    // So this runs on the sync thread and may send messages and use the Bukkit API.
@@ -134,7 +134,7 @@ public final class StatsCommand extends Command {
 - `ctx.syncExecutor()` and `ctx.asyncExecutor()` are the executors themselves, for a future from another API:
   `luckPerms.getUserManager().loadUser(id).thenAcceptAsync(user -> ctx.sendSuccess(...), ctx.syncExecutor())`.
 - `executeAsync(ctx -> ...)` may also throw `CommandPrerequisiteException` before it returns the stage, which fails
-  the command at once like a synchronous executor. The typed forms (`(player, ctx) -> ...`) cannot throw checked
+  the command at once like a synchronous executor. The typed forms (`(ctx, player) -> ...`) cannot throw checked
   exceptions; call `throw ctx.fail(...)` instead, or return
   `CompletableFuture.failedFuture(new CommandPrerequisiteException(...))`.
 

@@ -175,12 +175,12 @@ others do with string keys or not at all.
 addChildren(new Command("give") {{
     description("Give yourself a kit");
     argument(new StringArgument("name"),
-             new IntegerArgument("count", 1, 64).optional(1)).execute((name, count, ctx) -> {
+             new IntegerArgument("count", 1, 64).optional(1)).execute((ctx, name, count) -> {
                  ctx.sendSuccess("Gave " + count + " x " + name);
              });
 }}, new Command("send") {{
     description("Send the starter kit to players");
-    argument(new PlayerArgument("players").variadic()).execute((players, ctx) -> { /* List<Player> */ });
+    argument(new PlayerArgument("players").variadic()).execute((ctx, players) -> { /* List<Player> */ });
 }});
 ```
 
@@ -318,7 +318,7 @@ handler.
 
 ```java
 // CommandLib, fluent (examples/.../stats/FluentStatsCommand.java)
-argument(new StringArgument("player")).executeAsync((player, ctx) -> ctx.supplyAsync(() -> store.kills(player))
+argument(new StringArgument("player")).executeAsync((ctx, player) -> ctx.supplyAsync(() -> store.kills(player))
                                                                         // Back on the server thread.
                                                                         .thenAccept(kills -> ctx.sendSuccess(player + " has " + kills + " kills")));
 ```
@@ -385,7 +385,7 @@ public FluentBalanceCommand(Economy economy) {
     provide(Economy.Account.class, ctx -> economy.account(ctx.getSender()));
     execute(ctx -> ctx.sendMessage("You have " + ctx.get(Economy.Account.class).balance() + " coins"));
     addChildren(new Command("pay") {{
-        argument(new PlayerArgument("target"), new IntegerArgument("amount", 1, 1000)).execute((target, amount, ctx) -> {
+        argument(new PlayerArgument("target"), new IntegerArgument("amount", 1, 1000)).execute((ctx, target, amount) -> {
             economy.pay(ctx.get(Economy.Account.class), target.getName(), amount);
         });
     }});
@@ -476,7 +476,7 @@ public static Captions create() {
 // CommandLib, fluent (examples/.../home/FluentHomeCommand.java)
 captions(HomeCaptions.create());
 description(HomeCaptions.DESCRIPTION);
-argument(new StringArgument("name")).execute((name, ctx) -> ctx.sendSuccess(HomeCaptions.SET, Map.of("name", name)));
+argument(new StringArgument("name")).execute((ctx, name) -> ctx.sendSuccess(HomeCaptions.SET, Map.of("name", name)));
 ```
 
 A player whose client is Japanese gets `ホーム base を設定しました。` and the help heading `使い方:`; CommandLib's own

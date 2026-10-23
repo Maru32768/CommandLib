@@ -18,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class SoundArgumentTest {
     private static CommandTester tester(AtomicReference<Sound> received, Sound value) {
         return new CommandTester(() -> new Command("playsound") {{
-            argument(new SoundArgument("value")).execute((parsed, ctx) -> received.set(parsed));
+            argument(new SoundArgument("value")).execute((ctx, parsed) -> received.set(parsed));
         }}, "test.command").withFakeRegistryValue(RegistryKey.SOUND_EVENT, "minecraft:block.anvil.land", value);
     }
 

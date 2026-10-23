@@ -51,7 +51,7 @@ class ConfigCommand extends Command {
         execute(ctx -> ctx.sendSuccess("..."));
         argument(new StringArgument("key")).permission(DefaultPermission.OP, "Access config keys")
                                            .description("Show a key")
-                                           .execute((key, ctx) -> ctx.sendSuccess(key));
+                                           .execute((ctx, key) -> ctx.sendSuccess(key));
     }
 }
 ```

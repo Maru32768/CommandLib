@@ -17,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class LootTableArgumentTest {
     private static Command command(AtomicReference<LootTable> received) {
         return new Command("loot") {{
-            argument(new LootTableArgument("value")).execute((value, ctx) -> received.set(value));
+            argument(new LootTableArgument("value")).execute((ctx, value) -> received.set(value));
         }};
     }
 

@@ -13,7 +13,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class GameModeArgumentTest {
     private static CommandTester tester() {
         return new CommandTester(() -> new Command("mode") {{
-            argument(new GameModeArgument("mode")).execute((mode, ctx) -> ctx.sendMessage(mode.name()));
+            argument(new GameModeArgument("mode")).execute((ctx, mode) -> ctx.sendMessage(mode.name()));
         }}, "test.command");
     }
 

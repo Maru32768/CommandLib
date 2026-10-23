@@ -17,7 +17,7 @@ class UnparsedArgumentTest {
     private static CommandTester tester() {
         // A supplier, so the argument registers its type after the tester has bootstrapped Minecraft.
         return new CommandTester(() -> new Command("raw") {{
-            argument(new UnparsedArgument("value")).execute((value, ctx) -> ctx.sendMessage(value));
+            argument(new UnparsedArgument("value")).execute((ctx, value) -> ctx.sendMessage(value));
         }}, "test");
     }
 

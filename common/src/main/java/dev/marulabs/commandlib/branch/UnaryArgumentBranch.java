@@ -29,13 +29,13 @@ public final class UnaryArgumentBranch<T1, C extends CommonCommandContext<?, ?>,
         this.argument1 = argument1;
     }
 
-    public UnaryArgumentBranch<T1, C, T> execute(@NotNull BiConsumer<T1, C> action) {
-        super.execute(ctx -> action.accept(ctx.getArgument(argument1), ctx));
+    public UnaryArgumentBranch<T1, C, T> execute(@NotNull BiConsumer<C, T1> action) {
+        super.execute(ctx -> action.accept(ctx, ctx.getArgument(argument1)));
         return this;
     }
 
-    public UnaryArgumentBranch<T1, C, T> executeAsync(@NotNull BiFunction<T1, C, CompletionStage<?>> action) {
-        super.executeAsync(ctx -> action.apply(ctx.getArgument(argument1), ctx));
+    public UnaryArgumentBranch<T1, C, T> executeAsync(@NotNull BiFunction<C, T1, CompletionStage<?>> action) {
+        super.executeAsync(ctx -> action.apply(ctx, ctx.getArgument(argument1)));
         return this;
     }
 

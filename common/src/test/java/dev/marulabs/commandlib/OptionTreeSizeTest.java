@@ -54,7 +54,7 @@ class OptionTreeSizeTest {
             option(Options.string("tag", 't', "")
                           .repeatable(5));
             option(Options.flag("force", 'f'));
-            argument(new Word("target")).execute((target, ctx) -> {
+            argument(new Word("target")).execute((ctx, target) -> {
             });
         }};
 
@@ -164,7 +164,7 @@ class OptionTreeSizeTest {
             command.option(Options.flag("flag" + i, (char) ('a' + i)));
         }
         command.argument(new Word("target"))
-               .execute((target, ctx) -> {
+               .execute((ctx, target) -> {
                });
         return command;
     }
@@ -176,11 +176,11 @@ class OptionTreeSizeTest {
         command.option(Options.flag("verbose", 'v'));
         command.option(Options.integer("limit", 'n', 10, 1, 100));
         command.argument(new Word("target"), new Int("count").optional(1))
-               .execute((target, count, ctx) -> {
+               .execute((ctx, target, count) -> {
                });
         TestCommand list = new TestCommand("list");
         list.argument(new Word("words").variadic(4))
-            .execute((words, ctx) -> {
+            .execute((ctx, words) -> {
             });
         TestCommand admin = new TestCommand("admin");
         admin.execute(ctx -> {

@@ -14,7 +14,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class ItemPredicateArgumentTest {
     private static Command clearCommand() {
         return new Command("clear") {{
-            argument(new ItemPredicateArgument("item")).execute((predicate, ctx) -> {
+            argument(new ItemPredicateArgument("item")).execute((ctx, predicate) -> {
                 ctx.sendMessage(predicate.test(item(Material.STONE)) + "," + predicate.test(item(Material.DIRT)));
             });
         }};

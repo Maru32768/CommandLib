@@ -22,7 +22,7 @@ class DocumentedErrorBehaviorTest {
         FakeSender sender = FakeSender.player("Alice");
         try (CommandTester tester = new CommandTester(() -> new Command("msg") {{
             argument(new StringArgument("target", StringArgument.Type.WORD),
-                     new StringArgument("text")).execute((target, text, ctx) -> ctx.sendMessage("sent"));
+                     new StringArgument("text")).execute((ctx, target, text) -> ctx.sendMessage("sent"));
         }}, "test.command")) {
             tester.execute("msg Steve", sender);
         }
@@ -35,11 +35,11 @@ class DocumentedErrorBehaviorTest {
     void custom_validator_message_is_sent_as_failure() {
         FakeSender sender = FakeSender.player("Alice");
         try (CommandTester tester = new CommandTester(() -> new Command("give") {{
-            argument(new IntegerArgument("amount").validator((amount, ctx) -> {
+            argument(new IntegerArgument("amount").validator((ctx, amount) -> {
                 if (amount % 2 != 0) {
                     throw new ArgumentValidationException("The amount must be even.");
                 }
-            })).execute((amount, ctx) -> ctx.sendSuccess("ok " + amount));
+            })).execute((ctx, amount) -> ctx.sendSuccess("ok " + amount));
         }}, "test.command")) {
             tester.execute("give 3", sender);
             tester.execute("give 4", sender);
@@ -53,7 +53,7 @@ class DocumentedErrorBehaviorTest {
         FakeSender sender = FakeSender.player("Alice")
                                       .denyPermissions("myplugin.command.config.key");
         try (CommandTester tester = new CommandTester(() -> new Command("config") {{
-            argument(new StringArgument("key")).execute((key, ctx) -> ctx.sendMessage("config " + key));
+            argument(new StringArgument("key")).execute((ctx, key) -> ctx.sendMessage("config " + key));
         }}, "myplugin.command")) {
             assertThatThrownBy(() -> tester.execute("config difficulty",
                                                     sender)).hasCauseInstanceOf(CommandSyntaxException.class);
@@ -69,7 +69,7 @@ class DocumentedErrorBehaviorTest {
     void syntax_exception_while_resolving_sends_its_message_and_context() {
         FakeSender sender = FakeSender.player("Alice");
         try (CommandTester tester = new CommandTester(() -> new Command("check") {{
-            argument(new ResolvingArgument("value")).execute((value, ctx) -> ctx.sendMessage("unreachable"));
+            argument(new ResolvingArgument("value")).execute((ctx, value) -> ctx.sendMessage("unreachable"));
         }}, "test.command")) {
             tester.execute("check bad", sender);
         }

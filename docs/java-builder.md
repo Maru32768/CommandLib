@@ -17,10 +17,10 @@ Command heal = Command.builder("heal")
                       .addAliases("h")
                       .option(silent)
                       .require(Command.player(),
-                               branch -> branch.execute((player, ctx) -> player.setHealth(20)))
+                               branch -> branch.execute((ctx, player) -> player.setHealth(20)))
                       .argument(new PlayerArgument("target"), new IntegerArgument("amount"),
                                 branch -> branch.description("Heal by an amount")
-                                                .execute((target, amount, ctx) -> {
+                                                .execute((ctx, target, amount) -> {
                                                     target.setHealth(Math.min(20, target.getHealth() + amount));
                                                     if (!ctx.getOption(silent)) {
                                                         target.sendMessage("You were healed");
@@ -43,9 +43,9 @@ Command heal = new Command("heal") {{
     addAliases("h");
     CommandOption<Boolean, CommandContext> silent = option(Options.<CommandContext>flag("silent", 's')
                                                                   .description("Do not tell the target"));
-    require(Command.player()).execute((player, ctx) -> player.setHealth(20));
+    require(Command.player()).execute((ctx, player) -> player.setHealth(20));
     argument(new PlayerArgument("target"), new IntegerArgument("amount")).description("Heal by an amount")
-                                                                         .execute((target, amount, ctx) -> { ... });
+                                                                         .execute((ctx, target, amount) -> { ... });
     addChildren(new Command("all") {{ ... }});
 }};
 ```
@@ -63,9 +63,9 @@ The methods that return a branch on `Command` take a callback for it instead:
 
 | `Command` | `CommandBuilder` |
 |---|---|
-| `argument(a, b).execute((a, b, ctx) -> ...)` | `.argument(a, b, branch -> branch.execute((a, b, ctx) -> ...))` |
+| `argument(a, b).execute((ctx, a, b) -> ...)` | `.argument(a, b, branch -> branch.execute((ctx, a, b) -> ...))` |
 | `argument(a).child(ref -> ...)` | `.argument(a, branch -> branch.child(ref -> ...))` |
-| `require(extractor).execute((value, ctx) -> ...)` | `.require(extractor, branch -> branch.execute((value, ctx) -> ...))` |
+| `require(extractor).execute((ctx, value) -> ...)` | `.require(extractor, branch -> branch.execute((ctx, value) -> ...))` |
 | `option(option)` returns the option typed for the context | `.option(option)` returns the builder; keep the option you passed |
 | `addChildren(new Command("x") {{ ... }})` | `.addChild(Command.builder("x")...)`, or `.addChildren(command)` |
 

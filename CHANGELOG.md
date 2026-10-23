@@ -37,7 +37,11 @@ This file lists the changes in each CommandLib release that affect plugin and mo
 #### Commands and arguments
 
 - `argument(arg, (value, ctx) -> ...)` and the other overloads that took an executor are removed. Call
-  `argument(arg).execute((value, ctx) -> ...)`. The returned branch also takes `permission`, `description` and `child`.
+  `argument(arg).execute((ctx, value) -> ...)`. The returned branch also takes `permission`, `description` and `child`.
+- Every callback takes the context first: the typed executors (`execute((ctx, target, amount) -> ...)`), those of
+  `require(...)` (`(ctx, player)`), argument validators and transformers (`validator((ctx, value) -> ...)`),
+  `ArgumentValidator#validate(ctx, value)` and `UncaughtExceptionHandler#uncaughtException(ctx, e)`, like the
+  middlewares and formatters already did. In Kotlin, `execute { ctx, value -> }` in a `require` block.
 - `argument(Consumer<ArgumentBuilder>)` is removed together with `ArgumentBuilder` and `AbstractArgumentBuilder`. For
   eight or more arguments, call `argument(List.of(a, b, ..., h))` and read each value with
   `ctx.getArgument(argument)` ([Java builder](docs/java-builder.md#eight-or-more-arguments)).

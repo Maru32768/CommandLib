@@ -29,13 +29,13 @@ public final class RequiredBiArgumentBranch<S, T1, T2, C extends CommonCommandCo
         this.argument2 = argument2;
     }
 
-    public RequiredBiArgumentBranch<S, T1, T2, C, T> execute(@NotNull TetraConsumer<T1, T2, S, C> action) {
-        super.execute((s, ctx) -> action.accept(ctx.getArgument(argument1), ctx.getArgument(argument2), s, ctx));
+    public RequiredBiArgumentBranch<S, T1, T2, C, T> execute(@NotNull TetraConsumer<C, T1, T2, S> action) {
+        super.execute((ctx, s) -> action.accept(ctx, ctx.getArgument(argument1), ctx.getArgument(argument2), s));
         return this;
     }
 
-    public RequiredBiArgumentBranch<S, T1, T2, C, T> executeAsync(@NotNull TetraFunction<T1, T2, S, C, CompletionStage<?>> action) {
-        super.executeAsync((s, ctx) -> action.apply(ctx.getArgument(argument1), ctx.getArgument(argument2), s, ctx));
+    public RequiredBiArgumentBranch<S, T1, T2, C, T> executeAsync(@NotNull TetraFunction<C, T1, T2, S, CompletionStage<?>> action) {
+        super.executeAsync((ctx, s) -> action.apply(ctx, ctx.getArgument(argument1), ctx.getArgument(argument2), s));
         return this;
     }
 

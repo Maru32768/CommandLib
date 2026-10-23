@@ -23,7 +23,7 @@ public final class BuilderTeamCommand {
                                 branch -> branch.child(team -> Command.builder("add")
                                                                       .description("Add a player to the team")
                                                                       .argument(new PlayerArgument("player"),
-                                                                                b -> b.execute((player, ctx) -> {
+                                                                                b -> b.execute((ctx, player) -> {
                                                                                     team.get()
                                                                                         .add(player.getName());
                                                                                     ctx.sendSuccess("Members: "
@@ -33,7 +33,7 @@ public final class BuilderTeamCommand {
                                                 .child(team -> Command.builder("remove")
                                                                       .description("Remove a player from the team")
                                                                       .argument(new PlayerArgument("player"),
-                                                                                b -> b.execute((player, ctx) -> {
+                                                                                b -> b.execute((ctx, player) -> {
                                                                                     team.get()
                                                                                         .remove(player.getName());
                                                                                     ctx.sendSuccess("Members: "

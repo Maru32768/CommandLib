@@ -22,7 +22,7 @@ public final class BuilderBalanceCommand {
                                        .description("Pay a player")
                                        .argument(new PlayerArgument("target"),
                                                  new IntegerArgument("amount", 1, 1000),
-                                                 branch -> branch.execute((target, amount, ctx) -> {
+                                                 branch -> branch.execute((ctx, target, amount) -> {
                                                      Economy.Account account = ctx.get(Economy.Account.class);
                                                      economy.pay(account, target.getName(), amount);
                                                      ctx.sendSuccess("Paid " + amount + " to " + target.getName() + ", "

@@ -21,10 +21,10 @@ class CommandStructureTest {
     void shared_argument_instance_keeps_executor_per_branch() throws Exception {
         StrArg key = new StrArg("key");
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("set") {{
-            argument(new CommonIntegerArgument<>("number"), key).execute((number, value, ctx) -> {
+            argument(new CommonIntegerArgument<>("number"), key).execute((ctx, number, value) -> {
                 ctx.sendMessage("number:" + value);
             });
-            argument(new CommonBooleanArgument<>("flag"), key).execute((flag, value, ctx) -> {
+            argument(new CommonBooleanArgument<>("flag"), key).execute((ctx, flag, value) -> {
                 ctx.sendMessage("flag:" + value);
             });
         }});
@@ -40,13 +40,13 @@ class CommandStructureTest {
         for (boolean executorFirst : new boolean[]{true, false}) {
             TestCommandRunner runner = new TestCommandRunner(new TestCommand("x") {{
                 if (executorFirst) {
-                    argument(new StrArg("team")).execute((team, ctx) -> ctx.sendMessage("exec " + team));
+                    argument(new StrArg("team")).execute((ctx, team) -> ctx.sendMessage("exec " + team));
                 }
                 argument(new StrArg("team")).child(team -> new TestCommand("add") {{
                     execute(ctx -> ctx.sendMessage("add " + team.get(ctx)));
                 }});
                 if (!executorFirst) {
-                    argument(new StrArg("team")).execute((team, ctx) -> ctx.sendMessage("exec " + team));
+                    argument(new StrArg("team")).execute((ctx, team) -> ctx.sendMessage("exec " + team));
                 }
             }});
 
@@ -63,7 +63,7 @@ class CommandStructureTest {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("x") {{
             helpFormatter((ctx, help) -> ctx.sendMessage("help"));
             argument(new StrArg("a").optional("dflt"));
-            argument(new StrArg("a")).execute((a, ctx) -> ctx.sendMessage("exec " + a));
+            argument(new StrArg("a")).execute((ctx, a) -> ctx.sendMessage("exec " + a));
         }});
 
         assertThat(runner.execute("x")
@@ -77,8 +77,8 @@ class CommandStructureTest {
         for (boolean alphaFirst : new boolean[]{true, false}) {
             TestCommandRunner runner = new TestCommandRunner(new TestCommand("x") {{
                 if (alphaFirst) {
-                    argument(new StrArg("team").setSuggestionProvider(b -> b.suggest("alpha"))).execute((team,
-                                                                                                         ctx) -> {
+                    argument(new StrArg("team").setSuggestionProvider(b -> b.suggest("alpha"))).execute((ctx,
+                                                                                                         team) -> {
                     });
                 }
                 argument(new StrArg("team").setSuggestionProvider(b -> b.suggest("bravo"))).child(team -> new TestCommand("add") {{
@@ -86,8 +86,8 @@ class CommandStructureTest {
                     });
                 }});
                 if (!alphaFirst) {
-                    argument(new StrArg("team").setSuggestionProvider(b -> b.suggest("alpha"))).execute((team,
-                                                                                                         ctx) -> {
+                    argument(new StrArg("team").setSuggestionProvider(b -> b.suggest("alpha"))).execute((ctx,
+                                                                                                         team) -> {
                     });
                 }
             }});
@@ -102,10 +102,10 @@ class CommandStructureTest {
             StrArg team = new StrArg("team").setSuggestionProvider(b -> b.suggest("alpha"));
             TestCommandRunner runner = new TestCommandRunner(new TestCommand("x") {{
                 argument(team).permission("perm.a")
-                              .execute((t, ctx) -> {
+                              .execute((ctx, t) -> {
                               });
                 argument(team, new StrArg("member")).permission("perm.b")
-                                                    .execute((t, m, ctx) -> {
+                                                    .execute((ctx, t, m) -> {
                                                     });
             }}, new TestCommandSource("test.command.x", permission));
 
@@ -119,10 +119,10 @@ class CommandStructureTest {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("x") {{
             argument(new StrArg("team").setSuggestionProvider(b -> {
                 throw new IllegalStateException("broken suggestion");
-            })).execute((team, ctx) -> {
+            })).execute((ctx, team) -> {
             });
             argument(new StrArg("team").setSuggestionProvider(b -> b.suggest("bravo")),
-                     new StrArg("member")).execute((team, member, ctx) -> {
+                     new StrArg("member")).execute((ctx, team, member) -> {
                      });
         }});
 
@@ -132,11 +132,11 @@ class CommandStructureTest {
     @Test
     void a_shared_argument_node_lists_a_suggestion_with_a_tooltip_once() {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("x") {{
-            argument(new StrArg("team").setSuggestionProvider(b -> b.suggest("alpha", "tip"))).execute((team,
-                                                                                                        ctx) -> {
+            argument(new StrArg("team").setSuggestionProvider(b -> b.suggest("alpha", "tip"))).execute((ctx,
+                                                                                                        team) -> {
             });
             argument(new StrArg("team").setSuggestionProvider(b -> b.suggest("alpha", "tip")),
-                     new StrArg("member")).execute((team, member, ctx) -> {
+                     new StrArg("member")).execute((ctx, team, member) -> {
                      });
         }});
 
@@ -146,8 +146,8 @@ class CommandStructureTest {
     @Test
     void two_branches_executing_at_the_same_argument_are_rejected() {
         TestCommand command = new TestCommand("x") {{
-            argument(new StrArg("team")).execute((team, ctx) -> ctx.sendMessage("a"));
-            argument(new StrArg("team")).execute((team, ctx) -> ctx.sendMessage("b"));
+            argument(new StrArg("team")).execute((ctx, team) -> ctx.sendMessage("a"));
+            argument(new StrArg("team")).execute((ctx, team) -> ctx.sendMessage("b"));
         }};
 
         assertThatThrownBy(() -> new TestCommandRunner(command)).isInstanceOf(IllegalStateException.class)
@@ -158,9 +158,9 @@ class CommandStructureTest {
     void quotable_and_greedy_arguments_sharing_a_node_are_rejected() {
         assertThatThrownBy(() -> new TestCommand("say") {{
             argument(new CommonStringArgument<>("text"),
-                     new CommonStringArgument<>("to")).execute((text, to, ctx) -> {
+                     new CommonStringArgument<>("to")).execute((ctx, text, to) -> {
                      });
-            argument(new CommonStringArgument<>("text", CommonStringArgument.Type.PHRASE)).execute((text, ctx) -> {
+            argument(new CommonStringArgument<>("text", CommonStringArgument.Type.PHRASE)).execute((ctx, text) -> {
             });
         }}).isInstanceOf(IllegalArgumentException.class)
            .hasMessageContaining("parse differently: QUOTABLE_PHRASE and GREEDY_PHRASE");
@@ -170,17 +170,17 @@ class CommandStructureTest {
     @Test
     void arguments_sharing_a_node_with_types_of_other_settings_are_rejected() {
         assertThatThrownBy(() -> new TestCommand("x") {{
-            argument(new MaxLengthArg("v", 2), new StrArg("more")).execute((v, more, ctx) -> {
+            argument(new MaxLengthArg("v", 2), new StrArg("more")).execute((ctx, v, more) -> {
             });
-            argument(new MaxLengthArg("v", 10)).execute((v, ctx) -> {
+            argument(new MaxLengthArg("v", 10)).execute((ctx, v) -> {
             });
         }}).isInstanceOf(IllegalArgumentException.class)
            .hasMessageContaining("parse differently");
         // Separate instances of one setting still share the node.
         new TestCommand("x") {{
-            argument(new MaxLengthArg("v", 2), new StrArg("more")).execute((v, more, ctx) -> {
+            argument(new MaxLengthArg("v", 2), new StrArg("more")).execute((ctx, v, more) -> {
             });
-            argument(new MaxLengthArg("v", 2)).execute((v, ctx) -> {
+            argument(new MaxLengthArg("v", 2)).execute((ctx, v) -> {
             });
         }};
     }
@@ -189,9 +189,9 @@ class CommandStructureTest {
     @Test
     void arguments_sharing_a_node_with_types_holding_per_instance_records_share_it() {
         new TestCommand("x") {{
-            argument(new ParserHolderArg("v"), new StrArg("more")).execute((v, more, ctx) -> {
+            argument(new ParserHolderArg("v"), new StrArg("more")).execute((ctx, v, more) -> {
             });
-            argument(new ParserHolderArg("v")).execute((v, ctx) -> {
+            argument(new ParserHolderArg("v")).execute((ctx, v) -> {
             });
         }};
     }
@@ -200,16 +200,16 @@ class CommandStructureTest {
     @Test
     void arguments_sharing_a_node_with_registry_keys_held_in_objects_must_name_the_same_registry() {
         new TestCommand("x") {{
-            argument(new RegistryArg("v", "enchantment"), new StrArg("more")).execute((v, more, ctx) -> {
+            argument(new RegistryArg("v", "enchantment"), new StrArg("more")).execute((ctx, v, more) -> {
             });
-            argument(new RegistryArg("v", "enchantment")).execute((v, ctx) -> {
+            argument(new RegistryArg("v", "enchantment")).execute((ctx, v) -> {
             });
         }};
 
         assertThatThrownBy(() -> new TestCommand("x") {{
-            argument(new RegistryArg("v", "enchantment"), new StrArg("more")).execute((v, more, ctx) -> {
+            argument(new RegistryArg("v", "enchantment"), new StrArg("more")).execute((ctx, v, more) -> {
             });
-            argument(new RegistryArg("v", "mob_effect")).execute((v, ctx) -> {
+            argument(new RegistryArg("v", "mob_effect")).execute((ctx, v) -> {
             });
         }}).isInstanceOf(IllegalArgumentException.class)
            .hasMessageContaining("'v'");
@@ -353,14 +353,14 @@ class CommandStructureTest {
     void argument_of_an_argument_child_cannot_repeat_a_name_of_its_route() {
         TestCommand differentTypes = new TestCommand("config") {{
             argument(new IntArg("key")).child(key -> new TestCommand("set") {{
-                argument(new StrArg("key")).execute((value, ctx) -> {
+                argument(new StrArg("key")).execute((ctx, value) -> {
                 });
             }});
         }};
         TestCommand sameTypes = new TestCommand("config") {{
             argument(new StrArg("key")).child(key -> new TestCommand("set") {{
                 addChildren(new TestCommand("value") {{
-                    argument(new StrArg("key")).execute((value, ctx) -> {
+                    argument(new StrArg("key")).execute((ctx, value) -> {
                     });
                 }});
             }});
@@ -434,7 +434,7 @@ class CommandStructureTest {
             });
         }};
         UnaryArgumentBranch<String, TestCommandContext, TestCommand> branch = command.argument(new StrArg("target"))
-                                                                                     .execute((target, ctx) -> {
+                                                                                     .execute((ctx, target) -> {
                                                                                      });
         StrArg argument = new StrArg("x").execute(ctx -> {
         });
@@ -443,13 +443,13 @@ class CommandStructureTest {
         })).isInstanceOf(IllegalStateException.class)
            .hasMessageContaining("Command 'heal' already has an executor");
         assertThatThrownBy(() -> command.require(ctx -> "player")
-                                        .execute((player, ctx) -> {
+                                        .execute((ctx, player) -> {
                                         })).isInstanceOf(IllegalStateException.class)
                                            .hasMessageContaining("Command 'heal' already has an executor");
         assertThatThrownBy(() -> branch.executeAsync(ctx -> null)).isInstanceOf(IllegalStateException.class)
                                                                   .hasMessageContaining("branch <target> of command 'heal'");
         assertThatThrownBy(() -> branch.require(ctx -> "player")
-                                       .execute((target, player, ctx) -> {
+                                       .execute((ctx, target, player) -> {
                                        })).isInstanceOf(IllegalStateException.class)
                                           .hasMessageContaining("branch <target>");
         assertThatThrownBy(() -> argument.execute(ctx -> {
@@ -604,8 +604,8 @@ class CommandStructureTest {
     @Test
     void variable_length_branches_sharing_an_argument_prefix_are_accepted() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("sum") {{
-            argument(new IntArg("a"), new IntArg("b")).execute((a, b, ctx) -> ctx.sendMessage(a + b));
-            argument(new IntArg("a")).execute((a, ctx) -> ctx.sendMessage(a));
+            argument(new IntArg("a"), new IntArg("b")).execute((ctx, a, b) -> ctx.sendMessage(a + b));
+            argument(new IntArg("a")).execute((ctx, a) -> ctx.sendMessage(a));
         }});
 
         assertThat(runner.execute("sum 1 2")
@@ -618,10 +618,10 @@ class CommandStructureTest {
     @Test
     void a_shared_argument_node_is_usable_with_the_permission_of_any_branch_that_shares_it() throws Exception {
         TestCommand give = new TestCommand("give") {{
-            argument(new StrArg("player")).execute((player, ctx) -> ctx.sendMessage("one " + player));
-            argument(new StrArg("player"), new IntArg("count")).execute((player,
-                                                                         count,
-                                                                         ctx) -> ctx.sendMessage("two " + player
+            argument(new StrArg("player")).execute((ctx, player) -> ctx.sendMessage("one " + player));
+            argument(new StrArg("player"), new IntArg("count")).execute((ctx,
+                                                                         player,
+                                                                         count) -> ctx.sendMessage("two " + player
                                                                                  + " " + count));
         }};
         TestCommandRunner shortBranch = new TestCommandRunner(give,
@@ -645,16 +645,16 @@ class CommandStructureTest {
     @Test
     void arguments_sharing_a_node_must_have_the_same_type() {
         assertThatThrownBy(() -> new TestCommandRunner(new TestCommand("t") {{
-            argument(new IntArg("x")).execute((x, ctx) -> {
+            argument(new IntArg("x")).execute((ctx, x) -> {
             });
-            argument(new StrArg("x"), new IntArg("y")).execute((x, y, ctx) -> {
+            argument(new StrArg("x"), new IntArg("y")).execute((ctx, x, y) -> {
             });
         }})).isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("'x'");
         assertThatThrownBy(() -> new TestCommandRunner(new TestCommand("t") {{
-            argument(new CommonIntegerArgument<>("x", 0, 10)).execute((x, ctx) -> {
+            argument(new CommonIntegerArgument<>("x", 0, 10)).execute((ctx, x) -> {
             });
-            argument(new CommonIntegerArgument<>("x", 0, 5), new IntArg("y")).execute((x, y, ctx) -> {
+            argument(new CommonIntegerArgument<>("x", 0, 5), new IntArg("y")).execute((ctx, x, y) -> {
             });
         }})).isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("'x'");
@@ -665,19 +665,19 @@ class CommandStructureTest {
     void a_greedy_argument_must_end_its_branch() {
         assertThatThrownBy(() -> new TestCommandRunner(new TestCommand("ban") {{
             argument(new CommonStringArgument<>("reason", CommonStringArgument.Type.PHRASE),
-                     new IntArg("days")).execute((reason, days, ctx) -> {
+                     new IntArg("days")).execute((ctx, reason, days) -> {
                      });
         }})).isInstanceOf(IllegalStateException.class)
             .hasMessageContaining("'reason'");
         assertThatThrownBy(() -> new TestCommandRunner(new TestCommand("ban") {{
-            argument(new CommonStringArgument<>("reason", CommonStringArgument.Type.PHRASE)).execute((reason,
-                                                                                                      ctx) -> {
+            argument(new CommonStringArgument<>("reason", CommonStringArgument.Type.PHRASE)).execute((ctx,
+                                                                                                      reason) -> {
             })
                                                                                             .child(reason -> new TestCommand("confirm"));
         }})).isInstanceOf(IllegalStateException.class)
             .hasMessageContaining("'reason'");
         assertThatThrownBy(() -> new TestCommandRunner(new TestCommand("ban") {{
-            argument(new PhraseArg("reasons").variadic()).execute((reasons, ctx) -> {
+            argument(new PhraseArg("reasons").variadic()).execute((ctx, reasons) -> {
             });
         }})).isInstanceOf(IllegalStateException.class)
             .hasMessageContaining("'reasons'");
@@ -686,16 +686,16 @@ class CommandStructureTest {
     @Test
     void two_branches_that_run_for_the_same_input_are_rejected() {
         assertThatThrownBy(() -> new TestCommandRunner(new TestCommand("a") {{
-            argument(new StrArg("w")).execute((w, ctx) -> {
+            argument(new StrArg("w")).execute((ctx, w) -> {
             });
-            argument(new StrArg("w"), new IntArg("n").optional(7)).execute((w, n, ctx) -> {
+            argument(new StrArg("w"), new IntArg("n").optional(7)).execute((ctx, w, n) -> {
             });
         }})).isInstanceOf(IllegalStateException.class)
             .hasMessageContaining("<w>");
         assertThatThrownBy(() -> new TestCommandRunner(new TestCommand("a") {{
-            argument(new StrArg("w")).execute((w, ctx) -> {
+            argument(new StrArg("w")).execute((ctx, w) -> {
             });
-            argument(new StrArg("w")).execute((w, ctx) -> {
+            argument(new StrArg("w")).execute((ctx, w) -> {
             });
         }})).isInstanceOf(IllegalStateException.class);
     }
@@ -703,7 +703,7 @@ class CommandStructureTest {
     @Test
     void a_first_argument_named_help_keeps_its_executor() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("faq") {{
-            argument(new StrArg("help")).execute((topic, ctx) -> ctx.sendMessage("topic " + topic));
+            argument(new StrArg("help")).execute((ctx, topic) -> ctx.sendMessage("topic " + topic));
         }});
 
         assertThat(runner.execute("faq options")
@@ -808,8 +808,8 @@ class CommandStructureTest {
     void alias_executes_argument_branch() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("give") {{
             addAliases("g");
-            argument(new CommonIntegerArgument<>("amount")).execute((amount,
-                                                                     ctx) -> ctx.sendMessage("amount=" + amount));
+            argument(new CommonIntegerArgument<>("amount")).execute((ctx, amount) -> ctx.sendMessage("amount="
+                    + amount));
         }});
 
         assertThat(runner.execute("g 3")
@@ -835,9 +835,9 @@ class CommandStructureTest {
     @Test
     void shorter_variable_length_branch_uses_its_own_executor() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("set") {{
-            argument(new CommonStringArgument<>("name")).execute((name, ctx) -> ctx.sendMessage("one:" + name));
+            argument(new CommonStringArgument<>("name")).execute((ctx, name) -> ctx.sendMessage("one:" + name));
             argument(new CommonStringArgument<>("name"),
-                     new CommonIntegerArgument<>("value")).execute((name, value, ctx) -> ctx.sendMessage("two:" + name + "=" + value));
+                     new CommonIntegerArgument<>("value")).execute((ctx, name, value) -> ctx.sendMessage("two:" + name + "=" + value));
         }});
 
         assertThat(runner.execute("set foo")
@@ -853,20 +853,20 @@ class CommandStructureTest {
                 argument(i("a"),
                          i("b"),
                          i("c"),
-                         i("d")).execute((a, b, c, d, ctx) -> ctx.sendMessage(List.of(a, b, c, d)));
+                         i("d")).execute((ctx, a, b, c, d) -> ctx.sendMessage(List.of(a, b, c, d)));
             }}, new TestCommand("five") {{
                 argument(i("a"),
                          i("b"),
                          i("c"),
                          i("d"),
-                         i("e")).execute((a, b, c, d, e, ctx) -> ctx.sendMessage(List.of(a, b, c, d, e)));
+                         i("e")).execute((ctx, a, b, c, d, e) -> ctx.sendMessage(List.of(a, b, c, d, e)));
             }}, new TestCommand("six") {{
                 argument(i("a"),
                          i("b"),
                          i("c"),
                          i("d"),
                          i("e"),
-                         i("f")).execute((a, b, c, d, e, f, ctx) -> ctx.sendMessage(List.of(a, b, c, d, e, f)));
+                         i("f")).execute((ctx, a, b, c, d, e, f) -> ctx.sendMessage(List.of(a, b, c, d, e, f)));
             }}, new TestCommand("seven") {{
                 argument(i("a"),
                          i("b"),
@@ -874,7 +874,7 @@ class CommandStructureTest {
                          i("d"),
                          i("e"),
                          i("f"),
-                         i("g")).execute((a, b, c, d, e, f, g, ctx) -> ctx.sendMessage(List.of(a, b, c, d, e, f, g)));
+                         i("g")).execute((ctx, a, b, c, d, e, f, g) -> ctx.sendMessage(List.of(a, b, c, d, e, f, g)));
             }});
         }});
 
@@ -892,7 +892,7 @@ class CommandStructureTest {
     void command_uncaught_exception_handler_receives_executor_exception() throws Exception {
         List<String> handled = new ArrayList<>();
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("boom") {{
-            addUncaughtExceptionHandler((e, ctx) -> handled.add("command:" + e.getMessage()));
+            addUncaughtExceptionHandler((ctx, e) -> handled.add("command:" + e.getMessage()));
             execute(ctx -> {
                 throw new IllegalStateException("bare");
             });
@@ -924,7 +924,7 @@ class CommandStructureTest {
         };
         IllegalStateException thrown = new IllegalStateException("bare");
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("boom") {{
-            argument(new IntArg("value")).execute((value, ctx) -> {
+            argument(new IntArg("value")).execute((ctx, value) -> {
                 throw thrown;
             });
         }});
@@ -948,14 +948,11 @@ class CommandStructureTest {
     void command_and_argument_uncaught_exception_handlers_receive_argument_executor_exception() throws Exception {
         List<String> handled = new ArrayList<>();
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("boom") {{
-            addUncaughtExceptionHandler((e, ctx) -> handled.add("command:" + e.getMessage()));
-            argument(new IntArg("value").addUncaughtExceptionHandler((e,
-                                                                      ctx) -> handled.add("argument:"
-                                                                              + e.getMessage()))).execute((value,
-                                                                                                           ctx) -> {
-                                                                                  throw new IllegalStateException("value="
-                                                                                          + value);
-                                                                              });
+            addUncaughtExceptionHandler((ctx, e) -> handled.add("command:" + e.getMessage()));
+            argument(new IntArg("value").addUncaughtExceptionHandler((ctx, e) -> handled.add("argument:"
+                    + e.getMessage()))).execute((ctx, value) -> {
+                        throw new IllegalStateException("value=" + value);
+                    });
         }});
 
         runner.execute("boom 3");
@@ -967,11 +964,11 @@ class CommandStructureTest {
     void failing_uncaught_exception_handler_does_not_reach_other_handlers_twice() throws Exception {
         List<String> handled = new ArrayList<>();
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("boom") {{
-            addUncaughtExceptionHandler((e, ctx) -> {
+            addUncaughtExceptionHandler((ctx, e) -> {
                 handled.add("first:" + e.getMessage());
                 throw new IllegalStateException("handler");
             });
-            addUncaughtExceptionHandler((e, ctx) -> handled.add("second:" + e.getMessage()));
+            addUncaughtExceptionHandler((ctx, e) -> handled.add("second:" + e.getMessage()));
             execute(ctx -> {
                 throw new IllegalStateException("bare");
             });
@@ -987,10 +984,10 @@ class CommandStructureTest {
     void uncaught_exception_handler_receives_transformer_exception() {
         List<String> handled = new ArrayList<>();
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("boom") {{
-            addUncaughtExceptionHandler((e, ctx) -> handled.add(e.getMessage()));
+            addUncaughtExceptionHandler((ctx, e) -> handled.add(e.getMessage()));
             argument(new IntArg("value").transformer(x -> {
                 throw new IllegalStateException("transform");
-            })).execute((value, ctx) -> ctx.sendMessage("unreachable"));
+            })).execute((ctx, value) -> ctx.sendMessage("unreachable"));
         }});
 
         assertThatThrownBy(() -> runner.execute("boom 1")).isInstanceOf(IllegalStateException.class)
@@ -1001,7 +998,7 @@ class CommandStructureTest {
     @Test
     void parse_failure_returns_zero_result() throws CommandSyntaxException {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("go") {{
-            argument(new CommonLiteralArgument<>("dir", List.of("north"))).execute((dir, ctx) -> {
+            argument(new CommonLiteralArgument<>("dir", List.of("north"))).execute((ctx, dir) -> {
             });
         }});
 

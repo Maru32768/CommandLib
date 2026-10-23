@@ -17,7 +17,7 @@ class ChatColorArgumentTest {
         List<String> suggestions;
 
         try (CommandTester tester = new CommandTester(() -> new Command("color") {{
-            argument(new ChatColorArgument("color")).execute((color, ctx) -> ctx.sendMessage(color.name()));
+            argument(new ChatColorArgument("color")).execute((ctx, color) -> ctx.sendMessage(color.name()));
         }}, "test.command")) {
             FakeSender sender = FakeSender.player("Alice");
             tester.execute("color dark_red", sender);

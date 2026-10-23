@@ -37,10 +37,10 @@ class HelpErrorFormatterSnapshotTest {
             addChildren(new Command("create") {{
                 description("Create an arena");
                 argument(new StringArgument("name"),
-                         new IntegerArgument("size").optional(16)).execute((name, size, ctx) -> ctx.sendSuccess("Created " + name));
+                         new IntegerArgument("size").optional(16)).execute((ctx, name, size) -> ctx.sendSuccess("Created " + name));
             }}, new Command("mode") {{
                 argument(new EnumArgument<>("mode", Mode.class),
-                         new IntegerArgument("rounds")).execute((mode, rounds, ctx) -> ctx.sendSuccess("Mode " + mode));
+                         new IntegerArgument("rounds")).execute((ctx, mode, rounds) -> ctx.sendSuccess("Mode " + mode));
             }});
         }}, "test.command")) {
             for (String input : INPUTS) {

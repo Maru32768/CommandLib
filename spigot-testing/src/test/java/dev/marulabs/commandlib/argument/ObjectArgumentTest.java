@@ -16,7 +16,7 @@ class ObjectArgumentTest {
         Map<String, Integer> items = Map.of("sword", 1, "bow", 2);
 
         try (CommandTester tester = new CommandTester(new Command("give") {{
-            argument(new ObjectArgument<>("item", items)).execute((item, ctx) -> {
+            argument(new ObjectArgument<>("item", items)).execute((ctx, item) -> {
                 ctx.sendMessage("item=" + item);
             });
         }}, "test.command")) {
@@ -32,7 +32,7 @@ class ObjectArgumentTest {
         Map<String, Integer> items = Map.of("sword", 1);
 
         try (CommandTester tester = new CommandTester(new Command("give") {{
-            argument(new ObjectArgument<>("item", items)).execute((item, ctx) -> {
+            argument(new ObjectArgument<>("item", items)).execute((ctx, item) -> {
                 ctx.sendMessage("item=" + item);
             });
         }}, "test.command")) {

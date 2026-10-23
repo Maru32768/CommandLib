@@ -32,7 +32,7 @@ public final class BuilderHomeCommand {
                                                            Map.of("name", ctx.getArgument(goName)));
                                        })))
                       .addChild(Command.builder("set")
-                                       .argument(new StringArgument("name"), branch -> branch.execute((name, ctx) -> {
+                                       .argument(new StringArgument("name"), branch -> branch.execute((ctx, name) -> {
                                            homes.add(name);
                                            ctx.sendSuccess(HomeCaptions.SET, Map.of("name", name));
                                        })))

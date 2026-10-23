@@ -16,8 +16,8 @@ class CommandBehaviorTest {
     void argumentBranchPermissionFiltersSuggestions() {
         CommandTester tester = new CommandTester(new Command("config") {{
             argument(new StringArgument("key").addSuggestionProvider(sb -> sb.suggest("difficulty"))).permission("custom.config.key")
-                                                                                                     .execute((key,
-                                                                                                               ctx) -> ctx.sendMessage(key));
+                                                                                                     .execute((ctx,
+                                                                                                               key) -> ctx.sendMessage(key));
         }}, "test.command");
         FakeSender sender = FakeSender.player("Steve");
         Mockito.when(sender.asSender()
@@ -47,7 +47,7 @@ class CommandBehaviorTest {
     @Test
     void playerExtractorPassesThePlayerToTheExecutor() {
         Command command = new Command("whoami") {{
-            require(Command.player()).execute((player, ctx) -> ctx.sendSuccess(player.getName()));
+            require(Command.player()).execute((ctx, player) -> ctx.sendSuccess(player.getName()));
         }};
         CommandTester tester = new CommandTester(command, "test.command");
         FakeSender player = FakeSender.player("Steve");

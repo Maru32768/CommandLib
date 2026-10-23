@@ -13,7 +13,7 @@ public class HelloCommand extends Command {
     public HelloCommand() {
         super("hello");
 
-        argument(new PlayersArgument("players")).execute((players, ctx) -> {
+        argument(new PlayersArgument("players")).execute((ctx, players) -> {
             players.forEach(x -> {
                 x.sendMessage(new StringTextComponent("Hello " + x.getName()
                                                                   .getString()

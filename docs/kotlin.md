@@ -157,13 +157,13 @@ Only the last arguments of a branch can be optional or variadic, as in Java ([ar
 ### Required values
 
 `require(extractor) { }` runs the block with the fluent `require(...)` as its receiver. It adds no branch: its
-`execute { value, ctx -> }` and `executeSuspend { value, ctx -> }` set the command's own executor, which then runs only
+`execute { ctx, value -> }` and `executeSuspend { ctx, value -> }` set the command's own executor, which then runs only
 when the extractor gives a value and receives the value. A command has one executor, so calling `execute { }` on the
 command as well throws `IllegalStateException`. A `subcommand` of it is checked by the extractor too:
 
 ```kotlin
 require(Command.player()) {
-    execute { player, ctx -> player.health = 20.0 }
+    execute { ctx, player -> player.health = 20.0 }
     subcommand("food") { execute { ctx -> ctx.player.foodLevel = 20 } }
 }
 ```
@@ -281,12 +281,12 @@ between, give the builder a scheduler that queues the async tasks, as in [execut
 |---|---|
 | `command("heal") { ... }` | `new Command("heal") {{ ... }}` |
 | `subcommand("all") { ... }` | `addChildren(new Command("all") {{ ... }})` |
-| `argument(a, b) { ra, rb -> execute { ctx -> ra.get() } }` | `argument(a, b).execute((va, vb, ctx) -> ...)` |
+| `argument(a, b) { ra, rb -> execute { ctx -> ra.get() } }` | `argument(a, b).execute((ctx, va, vb) -> ...)` |
 | `arguments(a, ..., h) { execute { ctx -> ctx[a] } }` | `argument(a, ..., h).execute(ctx -> ctx.getArgument(a))` |
 | `argument(a) { ra -> subcommand("get") { ... } }` | `argument(a).child(ra -> new Command("get") {{ ... }})` |
 | `val force by flag("force", 'f')` and `force` | `option(Options.flag("force", 'f'))` and `ctx.getOption(force)` |
 | `executeSuspend { ctx -> ... }` | `executeAsync(ctx -> ctx.supplyAsync(...).thenAccept(...))` |
-| `require(extractor) { execute { value, ctx -> ... } }` | `require(extractor).execute((value, ctx) -> ...)` |
+| `require(extractor) { execute { ctx, value -> ... } }` | `require(extractor).execute((ctx, value) -> ...)` |
 | `addMiddlewareSuspend { ctx, next -> ...; next() }` | `addMiddleware((ctx, next) -> ... next.proceed() ...)` |
 | `provide { ctx -> games.of(ctx.player) }`, `ctx.get<GamePlayer>()` | `provide(GamePlayer.class, ctx -> ...)`, `ctx.get(GamePlayer.class)` |
 | `arg.addSuggestionProviderSuspend { sb -> ... }` | `arg.addSuggestionProvider(sb -> sb.await(...))` |

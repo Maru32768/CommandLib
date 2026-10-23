@@ -18,7 +18,7 @@ class AsyncExecutionTest {
     private final List<Throwable> uncaught = new ArrayList<>();
 
     private TestCommandRunner runner(TestCommand command) {
-        command.addUncaughtExceptionHandler((e, ctx) -> uncaught.add(e));
+        command.addUncaughtExceptionHandler((ctx, e) -> uncaught.add(e));
         return new TestCommandRunner(command, scheduler);
     }
 
@@ -67,7 +67,7 @@ class AsyncExecutionTest {
     @Test
     void typed_branches_take_async_executors() throws Exception {
         TestCommandRunner runner = runner(new TestCommand("len") {{
-            argument(new CommonStringArgument<>("word")).executeAsync((word, ctx) -> ctx.supplyAsync(word::length)
+            argument(new CommonStringArgument<>("word")).executeAsync((ctx, word) -> ctx.supplyAsync(word::length)
                                                                                         .thenAccept(ctx::sendMessage));
         }});
 
@@ -99,7 +99,7 @@ class AsyncExecutionTest {
     void an_unexpected_exception_after_the_dispatch_reaches_the_handlers_on_the_sync_thread() throws Exception {
         List<Boolean> handlerOnSyncThread = new ArrayList<>();
         TestCommandRunner runner = runner(new TestCommand("load") {{
-            addUncaughtExceptionHandler((e, ctx) -> handlerOnSyncThread.add(scheduler.isSyncThread()));
+            addUncaughtExceptionHandler((ctx, e) -> handlerOnSyncThread.add(scheduler.isSyncThread()));
             executeAsync(ctx -> CompletableFuture.runAsync(() -> {
                 throw new IllegalStateException("disk full");
             }, ctx.asyncExecutor()));
@@ -191,7 +191,7 @@ class AsyncExecutionTest {
         CommonStringArgument<TestCommandContext, ?> word = new CommonStringArgument<>("word");
         word.setSuggestionProvider(builder -> suggestionContext[0] = builder.getContext());
         TestCommandRunner runner = runner(new TestCommand("pick") {{
-            argument(word).execute((w, ctx) -> {
+            argument(word).execute((ctx, w) -> {
             });
         }});
 

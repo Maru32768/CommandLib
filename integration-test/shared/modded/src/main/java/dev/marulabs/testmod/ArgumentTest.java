@@ -278,9 +278,9 @@ public final class ArgumentTest extends TestBase {
         String key = getKey(name);
 
         putCommandNotExecutedResult(key);
-        arg.addUncaughtExceptionHandler((e, ctx) -> putException(key, e));
+        arg.addUncaughtExceptionHandler((ctx, e) -> putException(key, e));
         command.addChildren(new Command(name) {{
-            argument(arg).execute((a, ctx) -> {
+            argument(arg).execute((ctx, a) -> {
                 putResult(key, actual.apply(a), expected);
             });
         }});
@@ -295,9 +295,9 @@ public final class ArgumentTest extends TestBase {
         BlockPredicateArgument arg = new BlockPredicateArgument("a");
 
         putCommandNotExecutedResult(key);
-        arg.addUncaughtExceptionHandler((e, ctx) -> putException(key, e));
+        arg.addUncaughtExceptionHandler((ctx, e) -> putException(key, e));
         command.addChildren(new Command(name) {{
-            argument(arg).execute((a, ctx) -> {
+            argument(arg).execute((ctx, a) -> {
                 ServerLevel level = ctx.getWorld();
                 BlockPos pos = new BlockPos(0, 200, 0);
                 level.setBlockAndUpdate(pos, Blocks.STONE.defaultBlockState());

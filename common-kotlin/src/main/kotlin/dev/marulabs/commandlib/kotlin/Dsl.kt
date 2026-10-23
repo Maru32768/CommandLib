@@ -192,7 +192,7 @@ private fun <C : CommonCommandContext<*, *>, T : CommonCommand<C, T>> T.branch(
  *
  * ```kotlin
  * require(Command.player()) {
- *     execute { player, ctx -> player.health = 20.0 }
+ *     execute { ctx, player -> player.health = 20.0 }
  *     subcommand("food") { execute { ctx -> ctx.player.foodLevel = 20 } }
  * }
  * ```

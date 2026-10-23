@@ -25,7 +25,7 @@ import java.util.function.Predicate;
  * Command heal = Command.builder("heal")
  *                       .description("Heal a player")
  *                       .permission(DefaultPermission.OP)
- *                       .argument(new PlayerArgument("target"), branch -> branch.execute((target, ctx) -> {
+ *                       .argument(new PlayerArgument("target"), branch -> branch.execute((ctx, target) -> {
  *                           target.setHealth(20);
  *                       }))
  *                       .build();

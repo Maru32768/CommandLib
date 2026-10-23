@@ -45,7 +45,7 @@ class SpawnCommand extends Command {
         permission("myplugin.spawn"); // this exact node, without the prefix
 
         argument(new PlayerArgument("target")).permission("myplugin.spawn.others")
-                                              .execute((target, ctx) -> target.teleport(target.getWorld()
+                                              .execute((ctx, target) -> target.teleport(target.getWorld()
                                                                                               .getSpawnLocation()));
     }
 }
@@ -77,7 +77,7 @@ class BanCommand extends Command {
         // this exact node and default
         option(Options.flag("broadcast", 'b').permission("myplugin.ban.broadcast", DefaultPermission.NONE));
 
-        argument(new PlayerArgument("target")).execute((target, ctx) -> target.kickPlayer("Banned"));
+        argument(new PlayerArgument("target")).execute((ctx, target) -> target.kickPlayer("Banned"));
     }
 }
 ```
@@ -291,7 +291,7 @@ class GameCommand extends Command {
             });
         }}, new Command("kick") {{
             argument(new PlayerArgument("target")).visibleWhen(ctx -> game.isHost(ctx.getSender()))
-                                                  .execute((target, ctx) -> game.kick(target));
+                                                  .execute((ctx, target) -> game.kick(target));
         }});
     }
 }

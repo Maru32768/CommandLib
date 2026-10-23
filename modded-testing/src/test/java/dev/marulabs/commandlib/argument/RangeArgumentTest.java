@@ -19,7 +19,7 @@ class RangeArgumentTest {
 
         try (CommandTester tester = new CommandTester(() -> new Command("range") {{
             argument(new IntegerRangeArgument("ints"),
-                     new DoubleRangeArgument("doubles")).execute((ints, doubles, ctx) -> {
+                     new DoubleRangeArgument("doubles")).execute((ctx, ints, doubles) -> {
                          ctx.sendMessage(ints + " " + doubles);
                      });
         }}, "test.command")) {

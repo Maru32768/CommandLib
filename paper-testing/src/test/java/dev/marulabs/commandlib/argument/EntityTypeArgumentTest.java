@@ -17,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class EntityTypeArgumentTest {
     private static CommandTester tester(AtomicReference<EntityType> received, EntityType value) {
         return new CommandTester(() -> new Command("summon") {{
-            argument(new EntityTypeArgument("value")).execute((parsed, ctx) -> received.set(parsed));
+            argument(new EntityTypeArgument("value")).execute((ctx, parsed) -> received.set(parsed));
         }}, "test.command").withFakeRegistryValue(RegistryKey.ENTITY_TYPE, "minecraft:pig", value);
     }
 

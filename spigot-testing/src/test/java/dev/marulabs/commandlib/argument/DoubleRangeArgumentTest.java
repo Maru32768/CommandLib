@@ -14,7 +14,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class DoubleRangeArgumentTest {
     private static Command rangeCommand() {
         return new Command("range") {{
-            argument(new DoubleRangeArgument("range")).execute((range, ctx) -> ctx.sendMessage(range.toString()));
+            argument(new DoubleRangeArgument("range")).execute((ctx, range) -> ctx.sendMessage(range.toString()));
         }};
     }
 

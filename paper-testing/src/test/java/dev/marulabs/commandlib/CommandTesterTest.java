@@ -269,8 +269,8 @@ class CommandTesterTest {
         @Test
         void command_with_string_argument() {
             CommandTester tester = new CommandTester(new Command("greet") {{
-                argument(new StringArgument("name")).execute((name,
-                                                              ctx) -> ctx.sendMessage("Hello, " + name + "!"));
+                argument(new StringArgument("name")).execute((ctx,
+                                                              name) -> ctx.sendMessage("Hello, " + name + "!"));
             }}, "test.command");
             FakeSender sender = FakeSender.player("Steve");
 
@@ -356,7 +356,7 @@ class CommandTesterTest {
             FakeSender sender = FakeSender.player(senderName);
 
             try (CommandTester tester = new CommandTester(() -> new Command("who") {{
-                argument(new PlayerArgument("target")).execute((targetPlayer, ctx) -> {
+                argument(new PlayerArgument("target")).execute((ctx, targetPlayer) -> {
                     ctx.sendMessage(senderName + " -> " + targetPlayer.getName());
                 });
             }}, "test.command")) {
@@ -377,8 +377,8 @@ class CommandTesterTest {
         void returns_suggestions_with_string_tooltip() throws Exception {
             CommandTester tester = new CommandTester(new Command("choose") {{
                 argument(new StringArgument("value").addSuggestionProvider(sb -> sb.suggest("alpha",
-                                                                                            "first value"))).execute((value,
-                                                                                                                      ctx) -> ctx.sendSuccess(value));
+                                                                                            "first value"))).execute((ctx,
+                                                                                                                      value) -> ctx.sendSuccess(value));
             }}, "test.command");
 
             var suggestions = tester.suggestions("choose a", FakeSender.player("Steve"))
@@ -399,8 +399,8 @@ class CommandTesterTest {
             CommandTester tester = new CommandTester(new Command("cmd") {{
                 argument(new StringArgument("value").addSuggestionProvider(sb -> sb.suggest("alpha",
                                                                                             new LiteralMessage("alpha tooltip"))
-                                                                                   .suggest("beta"))).execute((v,
-                                                                                                               ctx) -> {
+                                                                                   .suggest("beta"))).execute((ctx,
+                                                                                                               v) -> {
                                                                                    });
             }}, "test.command");
             FakeSender sender = FakeSender.player("Steve");

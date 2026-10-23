@@ -33,7 +33,7 @@ class ObjectiveArgumentTest {
 
         try (MockedStatic<Bukkit> bukkit = mainScoreboard(scoreboard);
              CommandTester tester = new CommandTester(() -> new Command("score") {{
-                 argument(new ObjectiveArgument("objective")).execute((value, ctx) -> received.set(value));
+                 argument(new ObjectiveArgument("objective")).execute((ctx, value) -> received.set(value));
              }}, "test.command")) {
             tester.execute("score kills", FakeSender.player("Alice"));
         }
@@ -47,8 +47,8 @@ class ObjectiveArgumentTest {
 
         try (MockedStatic<Bukkit> ignored = mainScoreboard(Mockito.mock(Scoreboard.class));
              CommandTester tester = new CommandTester(() -> new Command("score") {{
-                 argument(new ObjectiveArgument("objective")).execute((value,
-                                                                       ctx) -> ctx.sendMessage("unreachable"));
+                 argument(new ObjectiveArgument("objective")).execute((ctx,
+                                                                       value) -> ctx.sendMessage("unreachable"));
              }}, "test.command")) {
             tester.execute("score kills", sender);
         }
@@ -61,8 +61,8 @@ class ObjectiveArgumentTest {
         FakeSender sender = FakeSender.player("Alice");
 
         try (CommandTester tester = new CommandTester(() -> new Command("score") {{
-            argument(new ObjectiveArgument("objective").scoreboard(() -> null)).execute((value,
-                                                                                         ctx) -> ctx.sendMessage("unreachable"));
+            argument(new ObjectiveArgument("objective").scoreboard(() -> null)).execute((ctx,
+                                                                                         value) -> ctx.sendMessage("unreachable"));
         }}, "test.command")) {
             tester.execute("score kills", sender);
             assertThat(tester.suggest("score k", sender)).isEmpty();
@@ -80,7 +80,7 @@ class ObjectiveArgumentTest {
         FakeSender sender = FakeSender.player("Alice");
 
         try (CommandTester tester = new CommandTester(() -> new Command("score") {{
-            argument(new ObjectiveArgument("objective").scoreboard(() -> scoreboard)).execute((value, ctx) -> {
+            argument(new ObjectiveArgument("objective").scoreboard(() -> scoreboard)).execute((ctx, value) -> {
             });
         }}, "test.command")) {
             assertThat(tester.suggest("score Kill", sender)).containsExactlyInAnyOrder("kills", "arena_KILLS");

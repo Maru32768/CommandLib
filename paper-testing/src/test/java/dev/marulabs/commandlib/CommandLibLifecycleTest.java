@@ -547,7 +547,7 @@ class CommandLibLifecycleTest {
         when(plugin.isEnabled()).thenReturn(false);
         Command broken = new Command("broken") {{
             argument(new IntegerArgument("count").optional(1),
-                     new IntegerArgument("amount")).execute((count, amount, ctx) -> {
+                     new IntegerArgument("amount")).execute((ctx, count, amount) -> {
                      });
         }};
 

@@ -13,7 +13,7 @@ class DoubleArgumentTest {
         FakeSender sender = FakeSender.player("Alice");
 
         try (CommandTester tester = new CommandTester(new Command("set") {{
-            argument(new DoubleArgument("value")).execute((value, ctx) -> {
+            argument(new DoubleArgument("value")).execute((ctx, value) -> {
                 ctx.sendMessage("value=" + value);
             });
         }}, "test.command")) {

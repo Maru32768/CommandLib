@@ -27,21 +27,21 @@ public final class FluentArenaCommand extends Command {
             CommandOption<Boolean, CommandContext> force = option(Options.flag("force", 'f')
                                                                          .description("Replace an existing arena"));
             argument(new StringArgument("name"),
-                     new IntegerArgument("size", 1, 64).optional(16)).execute((name, size, ctx) -> {
+                     new IntegerArgument("size", 1, 64).optional(16)).execute((ctx, name, size) -> {
                          arenas.add(name);
                          ctx.sendSuccess("Created " + name + " with " + size + " slots"
                                  + (ctx.getOption(force) ? " (forced)" : ""));
                      });
         }}, new Command("delete") {{
             confirm();
-            argument(new StringArgument("name").setSuggestionProvider(sb -> arenas.forEach(sb::suggest))).execute((name,
-                                                                                                                   ctx) -> {
+            argument(new StringArgument("name").setSuggestionProvider(sb -> arenas.forEach(sb::suggest))).execute((ctx,
+                                                                                                                   name) -> {
                 arenas.remove(name);
                 ctx.sendSuccess("Deleted " + name);
             });
         }}, new Command("invite") {{
             argument(new StringArgument("arena"),
-                     new PlayerArgument("players").variadic()).execute((arena, players, ctx) -> {
+                     new PlayerArgument("players").variadic()).execute((ctx, arena, players) -> {
                          ctx.sendSuccess("Invited " + players.stream()
                                                              .map(x -> x.getName()
                                                                         .getString())
@@ -50,7 +50,7 @@ public final class FluentArenaCommand extends Command {
                      });
         }}, new Command("join") {{
             argument(new StringArgument("arena"),
-                     new PlayerArgument("player").optional(player())).execute((arena, player, ctx) -> {
+                     new PlayerArgument("player").optional(player())).execute((ctx, arena, player) -> {
                          ctx.sendSuccess(player.getName()
                                                .getString()
                                  + " joined " + arena);
@@ -64,7 +64,7 @@ public final class FluentArenaCommand extends Command {
                                                                       Math.min(ctx.getOption(limit),
                                                                                arenas.size())))));
         }}, new Command("stats") {{
-            argument(new StringArgument("arena")).executeAsync((arena, ctx) -> ctx.supplyAsync(arena::length)
+            argument(new StringArgument("arena")).executeAsync((ctx, arena) -> ctx.supplyAsync(arena::length)
                                                                                   .thenAccept(games -> ctx.sendSuccess(arena
                                                                                           + " has " + games
                                                                                           + " games")));

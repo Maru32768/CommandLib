@@ -224,7 +224,7 @@ class CommandContextTest {
             }}, new Command("stop") {{
                 execute(ctx -> ctx.sendMessage("stop"));
             }}, new Command("say") {{
-                argument(new StringArgument("text")).execute((text, ctx) -> ctx.sendMessage(text));
+                argument(new StringArgument("text")).execute((ctx, text) -> ctx.sendMessage(text));
             }});
         }}, "test.command")) {
             tester.execute("game start", sender);

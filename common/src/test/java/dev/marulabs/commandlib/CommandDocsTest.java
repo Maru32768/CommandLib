@@ -71,7 +71,7 @@ class CommandDocsTest {
     void markdown_escapes_table_cells_and_strips_color_codes() {
         TestCommand command = new TestCommand("pipe") {{
             argument(new CommonStringArgument<>("a")).description("§ea | b")
-                                                     .execute((a, ctx) -> {
+                                                     .execute((ctx, a) -> {
                                                      });
         }};
 
@@ -133,12 +133,12 @@ class CommandDocsTest {
             });
             argument(new CommonStringArgument<>("key")).permission(DefaultPermission.OP, "Access config keys")
                                                        .description("Show a key")
-                                                       .execute((key, ctx) -> {
+                                                       .execute((ctx, key) -> {
                                                        })
                                                        .child(key -> new TestCommand("set") {{
                                                            description("Set a key");
-                                                           argument(new IntArg("value").optional(0)).execute((value,
-                                                                                                              ctx) -> {
+                                                           argument(new IntArg("value").optional(0)).execute((ctx,
+                                                                                                              value) -> {
                                                            });
                                                        }});
             addChildren(new TestCommand("reload") {{
@@ -151,7 +151,7 @@ class CommandDocsTest {
         TestCommand msg = new TestCommand("msg") {{
             argument(new CommonStringArgument<>("target"),
                      new WordArg("words").variadic(4)).description("Send a message")
-                                                      .execute((target, words, ctx) -> {
+                                                      .execute((ctx, target, words) -> {
                                                       });
         }};
         TestCommand game = new TestCommand("game") {{

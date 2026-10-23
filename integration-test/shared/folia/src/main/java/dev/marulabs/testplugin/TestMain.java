@@ -110,7 +110,7 @@ public class TestMain {
             argument(new StringArgument("a").addSuggestionProvider(builder -> {
                 capturedLatestInput.set(builder.getLatestInput());
                 builder.suggest("result");
-            })).execute((a, ctx) -> {
+            })).execute((ctx, a) -> {
             });
         }});
         // The commands below are the ones IntegrationTest sends from the bot and checks the messages of.
@@ -124,12 +124,12 @@ public class TestMain {
         }});
         main.addChildren(new Command("enumArgument") {{
             permission(PermissionDefault.TRUE);
-            argument(new EnumArgument<>("a", Material.class)).execute((a, ctx) -> {
+            argument(new EnumArgument<>("a", Material.class)).execute((ctx, a) -> {
             });
         }});
         main.addChildren(new Command("testConvertCommandSyntaxException") {{
             permission(PermissionDefault.TRUE);
-            argument(new IntegerTooHighArgument("a")).execute((a, ctx) -> {
+            argument(new IntegerTooHighArgument("a")).execute((ctx, a) -> {
             });
         }});
         main.addChildren(new Command("deniedProbe") {{

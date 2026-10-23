@@ -103,7 +103,7 @@ public final class ScenarioTest extends TestBase {
 
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name) {{
-            argument(new StringArgument("value", StringArgument.Type.WORD)).execute((value, ctx) -> {
+            argument(new StringArgument("value", StringArgument.Type.WORD)).execute((ctx, value) -> {
                 putResult(key,
                           ctx.getSender()
                              .getName() + ":" + value,

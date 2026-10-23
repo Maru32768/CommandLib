@@ -10,7 +10,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class UnparsedArgumentTest {
     private CommandTester testerFor(String commandName) {
         return new CommandTester(() -> new Command(commandName) {{
-            argument(new UnparsedArgument("text")).execute((text, ctx) -> {
+            argument(new UnparsedArgument("text")).execute((ctx, text) -> {
                 ctx.sendMessage("raw:" + text);
             });
         }}, "test.command");

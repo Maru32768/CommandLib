@@ -28,7 +28,7 @@ public final class FluentGuildCommand extends Command {
         execute(ctx -> ctx.sendSuccess("Guilds: red"));
         argument(new StringArgument("guild")).child(guild -> new Command("invite") {{
             description("Invite players");
-            argument(new PlayerArgument("players").variadic(3)).execute((players, ctx) -> {
+            argument(new PlayerArgument("players").variadic(3)).execute((ctx, players) -> {
                 ctx.sendSuccess("Invited " + players.stream()
                                                     .map(Player::getName)
                                                     .collect(Collectors.joining(", "))
@@ -51,7 +51,7 @@ public final class FluentGuildCommand extends Command {
                                                                                                               new PlayerArgument("by").optional(player())));
                                                  reason.requires(by);
                                                  mutuallyExclusiveOptions(silent, loud);
-                                                 argument(new PlayerArgument("target")).execute((target, ctx) -> {
+                                                 argument(new PlayerArgument("target")).execute((ctx, target) -> {
                                                      ctx.sendSuccess("Kicked " + target.getName() + " from "
                                                              + guild.get() + " by " + ctx.getOption(by)
                                                                                          .getName()

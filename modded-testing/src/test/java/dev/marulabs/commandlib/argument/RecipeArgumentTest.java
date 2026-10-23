@@ -30,7 +30,7 @@ class RecipeArgumentTest {
         ResourceLocation id = ResourceLocation.tryParse("minecraft:oak_planks");
 
         try (CommandTester tester = new CommandTester(() -> new Command("recipe") {{
-            argument(new RecipeArgument("recipe")).execute((recipe, ctx) -> {
+            argument(new RecipeArgument("recipe")).execute((ctx, recipe) -> {
                 //? if >=1.21.2 {
                 /*ctx.sendMessage(recipe.id()
                   .location()

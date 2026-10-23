@@ -15,7 +15,7 @@ class MyCommand extends Command {
     MyCommand() {
         super("message");
 
-        argument(new PlayerArgument("target"), new StringArgument("text")).execute((target, text, ctx) -> {
+        argument(new PlayerArgument("target"), new StringArgument("text")).execute((ctx, target, text) -> {
             target.sendMessage(text);
         });
     }
@@ -34,7 +34,7 @@ argument(List.of(x1, y1, z1, x2, y2, z2, world, name)).execute(ctx -> {
 When the user asks for a chained builder instead of a subclass, use
 `Command.builder(name)...build()`. It has the same methods, and `argument(...)`
 takes a callback for the branch:
-`.argument(new PlayerArgument("target"), b -> b.execute((target, ctx) -> ...))`.
+`.argument(new PlayerArgument("target"), b -> b.execute((ctx, target) -> ...))`.
 
 Options such as validation and suggestions are set via fluent methods on the
 argument instance:
@@ -45,7 +45,7 @@ class MyCommand extends Command {
         super("cmd");
 
         argument(new PlayerArgument("target").validator(Player::isOp)
-                                             .addSuggestionProvider(sb -> sb.suggest("Steve"))).execute((player, ctx) -> {
+                                             .addSuggestionProvider(sb -> sb.suggest("Steve"))).execute((ctx, player) -> {
             ctx.sendMessage("ok");
         });
     }
@@ -62,7 +62,7 @@ class MyCommand extends Command {
 
         // /kick <targets...> [reason]  is not allowed: a variadic argument must be last.
         // /kick <reason> <targets...>
-        argument(new StringArgument("reason"), new PlayerArgument("targets").variadic()).execute((reason, targets, ctx) -> {
+        argument(new StringArgument("reason"), new PlayerArgument("targets").variadic()).execute((ctx, reason, targets) -> {
             targets.forEach(x -> x.kickPlayer(reason));
         });
     }
@@ -114,7 +114,7 @@ class ConfigCommand extends Command {
                                                });
                                            }})
                                            .child(key -> new Command("set") {{
-                                               argument(new StringArgument("value")).execute((value, ctx) -> {
+                                               argument(new StringArgument("value")).execute((ctx, value) -> {
                                                    ctx.sendMessage("set " + key.get() + " to " + value);
                                                });
                                            }});
@@ -153,7 +153,7 @@ class ConfigCommand extends Command {
     ConfigCommand() {
         super("config");
 
-        argument(new StringArgument("key")).execute((key, ctx) -> {
+        argument(new StringArgument("key")).execute((ctx, key) -> {
             ctx.sendMessage("config " + key);
         });
     }
@@ -194,7 +194,7 @@ class ScanCommand extends Command {
         CommandOption<String, CommandContext> format = option(Options.string("format", 'F', "text")
                                                                      .description("Output format"));
 
-        argument(new StringArgument("text", StringArgument.Type.WORD)).execute((text, ctx) -> {
+        argument(new StringArgument("text", StringArgument.Type.WORD)).execute((ctx, text) -> {
             boolean isForce = ctx.getOption(force);
             int maxCount = ctx.getOption(limit);
             String outputFormat = ctx.getOption(format);

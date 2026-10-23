@@ -13,7 +13,7 @@ class LongArgumentTest {
         FakeSender sender = FakeSender.player("Alice");
 
         try (CommandTester tester = new CommandTester(new Command("set") {{
-            argument(new LongArgument("value")).execute((value, ctx) -> {
+            argument(new LongArgument("value")).execute((ctx, value) -> {
                 ctx.sendMessage("value=" + value);
             });
         }}, "test.command")) {

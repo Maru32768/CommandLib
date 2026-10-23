@@ -32,21 +32,21 @@ public final class RequiredTriArgumentBranch<S, T1, T2, T3, C extends CommonComm
         this.argument3 = argument3;
     }
 
-    public RequiredTriArgumentBranch<S, T1, T2, T3, C, T> execute(@NotNull QuintConsumer<T1, T2, T3, S, C> action) {
-        super.execute((s, ctx) -> action.accept(ctx.getArgument(argument1),
+    public RequiredTriArgumentBranch<S, T1, T2, T3, C, T> execute(@NotNull QuintConsumer<C, T1, T2, T3, S> action) {
+        super.execute((ctx, s) -> action.accept(ctx,
+                                                ctx.getArgument(argument1),
                                                 ctx.getArgument(argument2),
                                                 ctx.getArgument(argument3),
-                                                s,
-                                                ctx));
+                                                s));
         return this;
     }
 
-    public RequiredTriArgumentBranch<S, T1, T2, T3, C, T> executeAsync(@NotNull QuintFunction<T1, T2, T3, S, C, CompletionStage<?>> action) {
-        super.executeAsync((s, ctx) -> action.apply(ctx.getArgument(argument1),
+    public RequiredTriArgumentBranch<S, T1, T2, T3, C, T> executeAsync(@NotNull QuintFunction<C, T1, T2, T3, S, CompletionStage<?>> action) {
+        super.executeAsync((ctx, s) -> action.apply(ctx,
+                                                    ctx.getArgument(argument1),
                                                     ctx.getArgument(argument2),
                                                     ctx.getArgument(argument3),
-                                                    s,
-                                                    ctx));
+                                                    s));
         return this;
     }
 

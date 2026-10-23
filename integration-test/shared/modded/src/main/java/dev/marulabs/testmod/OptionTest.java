@@ -43,7 +43,7 @@ public final class OptionTest extends TestBase {
             CommandOption<Boolean, CommandContext> verbose = option(Options.flag("verbose", 'v'));
             CommandOption<Integer, CommandContext> limit = option(Options.integer("limit", 'n', 10, 1, 100));
 
-            argument(new StringArgument("target", StringArgument.Type.WORD)).execute((target, ctx) -> {
+            argument(new StringArgument("target", StringArgument.Type.WORD)).execute((ctx, target) -> {
                 putResult(key,
                           ctx.getOption(force) + ":" + ctx.getOption(verbose) + ":" + ctx.getOption(limit) + ":"
                                   + target,
@@ -64,7 +64,7 @@ public final class OptionTest extends TestBase {
             CommandOption<List<String>, CommandContext> tags = option(Options.string("tag", 't', "")
                                                                              .repeatable(3));
 
-            argument(new StringArgument("target", StringArgument.Type.WORD)).execute((target, ctx) -> {
+            argument(new StringArgument("target", StringArgument.Type.WORD)).execute((ctx, target) -> {
                 putResult(key, ctx.getOption(verbose) + ":" + ctx.getOption(tags) + ":" + target, "3:[a, b]:alex");
             });
         }});
@@ -84,7 +84,7 @@ public final class OptionTest extends TestBase {
                                                                                    'p',
                                                                                    new PlayerArgument("player")));
 
-            argument(new StringArgument("target", StringArgument.Type.WORD)).execute((target, ctx) -> {
+            argument(new StringArgument("target", StringArgument.Type.WORD)).execute((ctx, target) -> {
                 putResult(key,
                           ctx.getOption(force) + ":" + ctx.getOption(player)
                                                           .getName()
@@ -108,7 +108,7 @@ public final class OptionTest extends TestBase {
             CommandOption<Integer, CommandContext> days = option(Options.integer("days", 'd', 1));
 
             argument(new StringArgument("target", StringArgument.Type.WORD),
-                     new StringArgument("reason", StringArgument.Type.WORD)).execute((target, reason, ctx) -> {
+                     new StringArgument("reason", StringArgument.Type.WORD)).execute((ctx, target, reason) -> {
                          putResult(key,
                                    ctx.getOption(silent) + ":" + ctx.getOption(days) + ":" + target + ":" + reason,
                                    "true:3:alex:spam");
@@ -126,7 +126,7 @@ public final class OptionTest extends TestBase {
         putResult(new TestResult(key, TestStatus.FAILED, "Valid control input was not executed."));
         command.addChildren(new Command("visibleWhenRefresh") {{
             visibleWhen(ctx -> visible.get());
-            argument(new StringArgument("target", StringArgument.Type.WORD)).execute((target, ctx) -> {
+            argument(new StringArgument("target", StringArgument.Type.WORD)).execute((ctx, target) -> {
                 if (!"control".equals(target)) {
                     hiddenExecuted.set(true);
                     putResult(new TestResult(key, TestStatus.FAILED, "Hidden command was executed."));

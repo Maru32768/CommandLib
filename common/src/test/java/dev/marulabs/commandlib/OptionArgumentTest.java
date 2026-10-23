@@ -33,7 +33,7 @@ class OptionArgumentTest {
                                                                             new PointArgument("at").validator(x -> x.x >= 0)
                                                                                                    .optional(new Point(0,
                                                                                                                        0))));
-            argument(new CommonStringArgument<>("target")).execute((target, ctx) -> {
+            argument(new CommonStringArgument<>("target")).execute((ctx, target) -> {
                 ctx.sendMessage(target + " force=" + ctx.getOption(force) + " verbose=" + ctx.getOption(verbose)
                         + " mode=" + ctx.getOption(mode) + " at=" + ctx.getOption(at) + " given="
                         + ctx.hasOption(mode) + " inputs=" + ctx.getInputs());
@@ -131,7 +131,7 @@ class OptionArgumentTest {
             CommandOption<String, TestCommandContext> target = option(Options.of("target",
                                                                                  't',
                                                                                  new CommonStringArgument<>("target").optional("nobody")));
-            argument(new CommonStringArgument<>("target")).execute((positional, ctx) -> ctx.sendMessage(positional
+            argument(new CommonStringArgument<>("target")).execute((ctx, positional) -> ctx.sendMessage(positional
                     + " " + ctx.getOption(target)));
         }});
 

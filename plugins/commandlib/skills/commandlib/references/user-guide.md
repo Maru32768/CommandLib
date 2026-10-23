@@ -178,7 +178,7 @@ class HomeCommand extends Command {
     HomeCommand(Captions captions) {
         super("home");
         captions(captions);
-        argument(new StringArgument("name")).execute((name, ctx) -> ctx.sendSuccess(HOME_SET, Map.of("name", name)));
+        argument(new StringArgument("name")).execute((ctx, name) -> ctx.sendSuccess(HOME_SET, Map.of("name", name)));
     }
 }
 ```
@@ -196,7 +196,7 @@ false, or a permission, argument, or prerequisite check fails. `CommandTester#ex
 failure.
 
 ```java
-argument(new PlayersArgument("targets")).execute((targets, ctx) -> {
+argument(new PlayersArgument("targets")).execute((ctx, targets) -> {
     if (targets.isEmpty()) {
         throw ctx.fail("No player was found");
     }
@@ -256,13 +256,13 @@ class ConfigCommand extends Command {
     ConfigCommand() {
         super("config");
 
-        argument(new StringArgument("key")).execute((key, ctx) -> {
+        argument(new StringArgument("key")).execute((ctx, key) -> {
             ctx.sendMessage("config " + key);
         });
 
         // Override the generated node/default for this argument branch.
         argument(new StringArgument("secret")).permission(DefaultPermission.OP, "Access secret config keys")
-                                              .execute((secret, ctx) -> {
+                                              .execute((ctx, secret) -> {
                                                   ctx.sendMessage("secret " + secret);
                                               });
     }
@@ -342,7 +342,7 @@ class ConfigCommand extends Command {
                                                });
                                            }})
                                            .child(key -> new Command("set") {{
-                                               argument(new StringArgument("value")).execute((value, ctx) -> {
+                                               argument(new StringArgument("value")).execute((ctx, value) -> {
                                                    ctx.sendMessage("set " + key.get() + " to " + value);
                                                });
                                            }});

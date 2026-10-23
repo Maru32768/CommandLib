@@ -20,7 +20,7 @@ class EnumArgumentTest {
         FakeSender sender = FakeSender.player("Alice");
 
         try (CommandTester tester = new CommandTester(new Command("go") {{
-            argument(new EnumArgument<>("dir", Direction.class)).execute((dir, ctx) -> {
+            argument(new EnumArgument<>("dir", Direction.class)).execute((ctx, dir) -> {
                 ctx.sendMessage("going " + dir.name());
             });
         }}, "test.command")) {
@@ -35,7 +35,7 @@ class EnumArgumentTest {
         FakeSender sender = FakeSender.player("Alice");
 
         try (CommandTester tester = new CommandTester(new Command("go") {{
-            argument(new EnumArgument<>("dir", Direction.class)).execute((dir, ctx) -> {
+            argument(new EnumArgument<>("dir", Direction.class)).execute((ctx, dir) -> {
                 ctx.sendMessage("going " + dir.name());
             });
         }}, "test.command")) {

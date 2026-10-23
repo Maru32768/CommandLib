@@ -16,12 +16,12 @@ class RangeArgumentTest {
     private static CommandTester tester() {
         return CommandTester.builder()
                             .command(() -> new Command("ints") {{
-                                argument(new IntegerRangeArgument("range")).execute((range,
-                                                                                     ctx) -> ctx.sendMessage(range.toString()));
+                                argument(new IntegerRangeArgument("range")).execute((ctx,
+                                                                                     range) -> ctx.sendMessage(range.toString()));
                             }})
                             .command(() -> new Command("doubles") {{
-                                argument(new DoubleRangeArgument("range")).execute((range,
-                                                                                    ctx) -> ctx.sendMessage(range.toString()));
+                                argument(new DoubleRangeArgument("range")).execute((ctx,
+                                                                                    range) -> ctx.sendMessage(range.toString()));
                             }})
                             .permissionPrefix("test.command")
                             .build();

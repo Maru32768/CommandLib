@@ -117,8 +117,8 @@ fun <C : CommonCommandContext<*, *>, T : CommonCommand<C, T>> ArgumentBranch<C, 
  * Same as [CommonCommand.executeSuspend] for a `require(...)` branch, whose block also receives the extracted value.
  */
 fun <S, C : CommonCommandContext<*, *>, T : CommonCommand<C, T>> RequiredArgumentBranch<S, C, T>.executeSuspend(
-    action: suspend CoroutineScope.(S, C) -> Unit,
-): RequiredArgumentBranch<S, C, T> = executeAsync { value, ctx -> ctx.startCommand { action(value, it) } }
+    action: suspend CoroutineScope.(C, S) -> Unit,
+): RequiredArgumentBranch<S, C, T> = executeAsync { ctx, value -> ctx.startCommand { action(it, value) } }
 
 /**
  * Adds a suspending middleware, run like one added with [addMiddleware][CommonCommand.addMiddleware]. It starts on the

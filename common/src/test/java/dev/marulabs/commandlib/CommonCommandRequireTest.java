@@ -17,7 +17,7 @@ class CommonCommandRequireTest {
     @Test
     void require_on_command_runs_execute_with_extracted_value() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("cmd") {{
-            require(SUCCEEDING_EXTRACTOR).execute((s, ctx) -> ctx.sendMessage("got:" + s));
+            require(SUCCEEDING_EXTRACTOR).execute((ctx, s) -> ctx.sendMessage("got:" + s));
         }});
 
         TestCommandContext ctx = runner.execute("cmd");
@@ -28,7 +28,7 @@ class CommonCommandRequireTest {
     @Test
     void require_on_command_sends_error_when_extractor_throws() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("cmd") {{
-            require(FAILING_EXTRACTOR).execute((s, ctx) -> ctx.sendMessage("executed"));
+            require(FAILING_EXTRACTOR).execute((ctx, s) -> ctx.sendMessage("executed"));
         }});
 
         TestCommandContext ctx = runner.execute("cmd");
@@ -54,7 +54,7 @@ class CommonCommandRequireTest {
     void require_on_argument_runs_execute_with_arg_and_extracted_value() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("cmd") {{
             argument(new CommonStringArgument<>("name")).require(SUCCEEDING_EXTRACTOR)
-                                                        .execute((name, s, ctx) -> ctx.sendMessage(name + ":" + s));
+                                                        .execute((ctx, name, s) -> ctx.sendMessage(name + ":" + s));
         }});
 
         TestCommandContext ctx = runner.execute("cmd hello");
@@ -66,7 +66,7 @@ class CommonCommandRequireTest {
     void require_on_argument_sends_error_when_extractor_throws() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("cmd") {{
             argument(new CommonStringArgument<>("name")).require(FAILING_EXTRACTOR)
-                                                        .execute((name, s, ctx) -> ctx.sendMessage("executed"));
+                                                        .execute((ctx, name, s) -> ctx.sendMessage("executed"));
         }});
 
         TestCommandContext ctx = runner.execute("cmd hello");
@@ -79,10 +79,10 @@ class CommonCommandRequireTest {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("cmd") {{
             argument(new CommonStringArgument<>("a"),
                      new CommonIntegerArgument<>("b")).require(SUCCEEDING_EXTRACTOR)
-                                                      .execute((a,
+                                                      .execute((ctx,
+                                                                a,
                                                                 b,
-                                                                s,
-                                                                ctx) -> ctx.sendMessage(a + ":" + b + ":" + s));
+                                                                s) -> ctx.sendMessage(a + ":" + b + ":" + s));
         }});
 
         TestCommandContext ctx = runner.execute("cmd hello 42");

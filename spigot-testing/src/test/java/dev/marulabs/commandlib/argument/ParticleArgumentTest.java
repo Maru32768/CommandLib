@@ -41,7 +41,7 @@ class ParticleArgumentTest {
 
     private static Command particleCommand() {
         return new Command("particle") {{
-            argument(new ParticleArgument("type")).execute((particle, ctx) -> {
+            argument(new ParticleArgument("type")).execute((ctx, particle) -> {
                 ctx.sendMessage("particle=" + particle.name());
             });
         }};

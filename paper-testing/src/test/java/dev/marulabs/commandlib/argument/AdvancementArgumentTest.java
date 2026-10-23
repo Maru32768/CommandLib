@@ -20,7 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class AdvancementArgumentTest {
     private static Command command(AtomicReference<Advancement> received) {
         return new Command("advancement") {{
-            argument(new AdvancementArgument("value")).execute((value, ctx) -> received.set(value));
+            argument(new AdvancementArgument("value")).execute((ctx, value) -> received.set(value));
         }};
     }
 

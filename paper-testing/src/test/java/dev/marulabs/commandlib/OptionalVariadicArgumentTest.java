@@ -17,7 +17,7 @@ class OptionalVariadicArgumentTest {
         CommandTester tester = new CommandTester(() -> new Command("heal") {{
             argument(new IntegerArgument("amount").optional(20),
                      new PlayerArgument("targets").variadic()
-                                                  .optional(List.of())).execute((amount, targets, ctx) -> {
+                                                  .optional(List.of())).execute((ctx, amount, targets) -> {
                                                       ctx.sendMessage(amount + ":" + targets.stream()
                                                                                             .map(Player::getName)
                                                                                             .collect(Collectors.joining(",")));

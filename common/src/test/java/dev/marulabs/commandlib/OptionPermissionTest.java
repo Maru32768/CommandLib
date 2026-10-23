@@ -36,7 +36,7 @@ class OptionPermissionTest {
                                                                               .permission(DefaultPermission.OP));
             CommandOption<String, TestCommandContext> reason = option(Options.string("reason", 'r', "")
                                                                              .permission("myplugin.ban.reason"));
-            argument(new CommonStringArgument<>("target")).execute((target, ctx) -> ctx.sendMessage(target
+            argument(new CommonStringArgument<>("target")).execute((ctx, target) -> ctx.sendMessage(target
                     + " force=" + ctx.getOption(force) + " silent=" + ctx.getOption(silent) + " reason="
                     + ctx.getOption(reason)));
         }};

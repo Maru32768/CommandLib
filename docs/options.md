@@ -23,7 +23,7 @@ public final class ScanCommand extends Command {
         CommandOption<Boolean, CommandContext> yaml = option(Options.flag("yaml", 'y'));
         mutuallyExclusiveOptions(json, yaml);
 
-        argument(new PlayerArgument("target")).execute((target, ctx) -> {
+        argument(new PlayerArgument("target")).execute((ctx, target) -> {
             boolean isForce = ctx.getOption(force);
             int verbosity = ctx.getOption(verbose);
             int maxCount = ctx.getOption(limit);
@@ -118,7 +118,7 @@ public final class DeployCommand extends Command {
 
         CommandOption<String, CommandContext> env = option(Options.string("env", 'e', "")
                                                                   .required());
-        argument(new StringArgument("app")).execute((app, ctx) -> {
+        argument(new StringArgument("app")).execute((ctx, app) -> {
             String environment = ctx.getOption(env);    // always given
         });
     }
@@ -145,7 +145,7 @@ public final class BanCommand extends Command {
         optionsAnywhere();
 
         CommandOption<Boolean, CommandContext> silent = option(Options.flag("silent", 's'));
-        argument(new PlayerArgument("target"), new StringArgument("reason").optional("")).execute((target, reason, ctx) -> {
+        argument(new PlayerArgument("target"), new StringArgument("reason").optional("")).execute((ctx, target, reason) -> {
             boolean isSilent = ctx.getOption(silent);
         });
     }

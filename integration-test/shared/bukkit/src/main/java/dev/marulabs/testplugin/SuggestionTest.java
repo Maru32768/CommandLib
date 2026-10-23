@@ -31,7 +31,7 @@ public final class SuggestionTest extends TestBase {
             argument(new StringArgument("a").addSuggestionProvider(builder -> {
                 capturedLatestInput.set(builder.getLatestInput());
                 builder.suggest("result");
-            })).execute((a, ctx) -> {
+            })).execute((ctx, a) -> {
             });
         }});
 

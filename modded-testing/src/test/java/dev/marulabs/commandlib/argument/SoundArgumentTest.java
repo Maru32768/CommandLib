@@ -17,7 +17,7 @@ class SoundArgumentTest {
         List<String> suggestions;
 
         try (CommandTester tester = new CommandTester(() -> new Command("sound") {{
-            argument(new SoundArgument("sound")).execute((sound, ctx) -> {
+            argument(new SoundArgument("sound")).execute((ctx, sound) -> {
                 ctx.sendMessage(String.valueOf(sound == SoundEvents.PIG_AMBIENT));
             });
         }}, "test.command")) {

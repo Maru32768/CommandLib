@@ -51,7 +51,7 @@ public final class ScanCommand extends Command {
         CommandOption<Integer, CommandContext> limit =
             option(Options.integer("limit", 'n', 10, 1, 100).description("Max count"));
 
-        argument(new StringArgument("target")).execute((target, ctx) -> {
+        argument(new StringArgument("target")).execute((ctx, target) -> {
             boolean f = ctx.getOption(force);   // true if -f or --force was given
             int n     = ctx.getOption(limit);   // supplied value or default 10
         });
@@ -466,7 +466,7 @@ class CommandOptionTest {
     void option_after_argument_is_rejected() {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("scan") {{
             option(Options.flag("force", 'f'));
-            argument(new CommonStringArgument<>("target", CommonStringArgument.Type.WORD)).execute((target, ctx) -> {
+            argument(new CommonStringArgument<>("target", CommonStringArgument.Type.WORD)).execute((ctx, target) -> {
             });
         }});
 

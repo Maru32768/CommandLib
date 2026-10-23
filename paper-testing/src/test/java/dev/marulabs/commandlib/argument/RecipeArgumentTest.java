@@ -21,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class RecipeArgumentTest {
     private static Command command(AtomicReference<Recipe> received) {
         return new Command("recipe") {{
-            argument(new RecipeArgument("value")).execute((value, ctx) -> received.set(value));
+            argument(new RecipeArgument("value")).execute((ctx, value) -> received.set(value));
         }};
     }
 

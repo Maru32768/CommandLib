@@ -36,9 +36,9 @@ public abstract class CommonArgument<T, C extends CommonCommandContext<?, ?>, SE
     // Null until execute is called.
     private @Nullable AsyncCommandExecutor<C> executor;
     private final ArgumentType<?> type;
-    private ArgumentValidator<? super T, C> validator = (x, ctx) -> {
+    private ArgumentValidator<? super T, C> validator = (ctx, x) -> {
     };
-    private BiFunction<? super T, C, ? extends T> transformer = (x, ctx) -> x;
+    private BiFunction<C, ? super T, ? extends T> transformer = (ctx, x) -> x;
     private final List<UncaughtExceptionHandler<C>> uncaughtExceptionHandlers = new ArrayList<>();
     // Null unless optional is called; gives the value of the omitted argument.
     private @Nullable Extractor<C, ? extends T> defaultValue;
@@ -109,7 +109,7 @@ public abstract class CommonArgument<T, C extends CommonCommandContext<?, ?>, SE
      * and such a branch cannot have child commands; registering the command fails otherwise.
      *
      * <pre>{@code
-     * argument(new StringArgument("item"), new IntegerArgument("count").optional(1)).execute((item, count, ctx) -> {
+     * argument(new StringArgument("item"), new IntegerArgument("count").optional(1)).execute((ctx, item, count) -> {
      *     ctx.sendMessage(item + " x" + count);
      * });
      * }</pre>
@@ -229,7 +229,7 @@ public abstract class CommonArgument<T, C extends CommonCommandContext<?, ?>, SE
     @SuppressWarnings("unchecked")
     public final SELF validator(@NotNull Predicate<? super T> predicate) {
         Objects.requireNonNull(predicate);
-        this.validator = (x, ctx) -> {
+        this.validator = (ctx, x) -> {
             if (!predicate.test(x)) {
                 throw ArgumentValidationException.ofIncorrectInput(name(), ctx, ctx.getInput(name()));
             }
@@ -238,10 +238,10 @@ public abstract class CommonArgument<T, C extends CommonCommandContext<?, ?>, SE
     }
 
     @SuppressWarnings("unchecked")
-    public final SELF validator(@NotNull BiFunction<? super T, C, Boolean> predicate) {
+    public final SELF validator(@NotNull BiFunction<C, ? super T, Boolean> predicate) {
         Objects.requireNonNull(predicate);
-        this.validator = (x, ctx) -> {
-            if (!predicate.apply(x, ctx)) {
+        this.validator = (ctx, x) -> {
+            if (!predicate.apply(ctx, x)) {
                 throw ArgumentValidationException.ofIncorrectInput(name(), ctx, ctx.getInput(name()));
             }
         };
@@ -257,12 +257,12 @@ public abstract class CommonArgument<T, C extends CommonCommandContext<?, ?>, SE
     @SuppressWarnings("unchecked")
     public final SELF transformer(@NotNull Function<? super T, ? extends T> transformer) {
         Objects.requireNonNull(transformer);
-        this.transformer = (x, ctx) -> transformer.apply(x);
+        this.transformer = (ctx, x) -> transformer.apply(x);
         return (SELF) this;
     }
 
     @SuppressWarnings("unchecked")
-    public final SELF transformer(@NotNull BiFunction<? super T, C, ? extends T> transformer) {
+    public final SELF transformer(@NotNull BiFunction<C, ? super T, ? extends T> transformer) {
         this.transformer = Objects.requireNonNull(transformer);
         return (SELF) this;
     }
@@ -278,7 +278,7 @@ public abstract class CommonArgument<T, C extends CommonCommandContext<?, ?>, SE
         ArgumentValidator<? super T, C> validator = this.validator;
         return (x) -> {
             try {
-                validator.validate(x, ctx);
+                validator.validate(ctx, x);
                 return true;
             } catch (ArgumentParseException e) {
                 return false;
@@ -303,8 +303,8 @@ public abstract class CommonArgument<T, C extends CommonCommandContext<?, ?>, SE
             }
         }
 
-        validator.validate(t, ctx);
-        return transformer.apply(t, ctx);
+        validator.validate(ctx, t);
+        return transformer.apply(ctx, t);
     }
 
     /**

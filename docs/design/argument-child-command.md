@@ -36,7 +36,7 @@ API is expected to behave, and which internal boundaries are intentional.
 
           argument(new IntegerArgument("n"), new PlayerArgument("p"))
               .description("...")
-              .execute((nValue, pValue, ctx) -> {
+              .execute((ctx, nValue, pValue) -> {
               })
               .child((n, p) -> new Command("sub") {{
               }});
@@ -94,7 +94,7 @@ public final class ACommand extends Command {
         super("a");
 
         argument(new IntegerArgument("n"), new PlayerArgument("p"))
-            .execute((parsedN, parsedP, ctx) -> {
+            .execute((ctx, parsedN, parsedP) -> {
             })
             .child((n, p) -> new Command("sub") {{
                 execute(ctx -> {

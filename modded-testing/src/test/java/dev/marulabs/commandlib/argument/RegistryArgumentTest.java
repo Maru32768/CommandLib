@@ -21,9 +21,9 @@ class RegistryArgumentTest {
     private static CommandTester tester() {
         return new CommandTester(() -> new Command("give") {{
             //? if >=1.19.3 {
-            argument(new RegistryArgument<>("item", Registries.ITEM)).execute((item, ctx) -> {
+            argument(new RegistryArgument<>("item", Registries.ITEM)).execute((ctx, item) -> {
                 //?} else
-                /*argument(new RegistryArgument<>("item", Registry.ITEM_REGISTRY)).execute((item, ctx) -> {*/
+                /*argument(new RegistryArgument<>("item", Registry.ITEM_REGISTRY)).execute((ctx, item) -> {*/
                 ctx.sendMessage(String.valueOf(item == Items.DIAMOND));
             });
         }}, "test.command");

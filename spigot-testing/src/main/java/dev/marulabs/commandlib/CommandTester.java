@@ -118,7 +118,7 @@ public class CommandTester implements AutoCloseable {
      *
      * <pre>{@code
      * new CommandTester(() -> new Command("heal") {{
-     *     argument(new PlayerArgument("target")).execute((p, ctx) -> { ... });
+     *     argument(new PlayerArgument("target")).execute((ctx, p) -> { ... });
      * }}, "myplugin.command")
      * }</pre>
      */

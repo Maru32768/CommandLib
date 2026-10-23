@@ -14,7 +14,7 @@ public class SuggestCommand extends Command {
             sb.suggest("spawn", "Main spawn area");
             sb.suggest("arena", "PvP arena");
             sb.suggest("shop", "Server shop");
-        })).execute((name, ctx) -> {
+        })).execute((ctx, name) -> {
             ctx.sendSuccess("Selected topic: " + name);
         });
     }

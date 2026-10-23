@@ -17,7 +17,7 @@ class EntityArgumentTest {
         FakeSender admin = FakeSender.player("Admin");
 
         try (CommandTester tester = new CommandTester(() -> new Command("tag") {{
-            argument(new EntityArgument("target")).execute((target, ctx) -> {
+            argument(new EntityArgument("target")).execute((ctx, target) -> {
                 ctx.sendMessage("Tagged entity");
             });
         }}, "test.command")) {
@@ -34,7 +34,7 @@ class EntityArgumentTest {
         FakeSender admin = FakeSender.player("Admin");
 
         try (CommandTester tester = new CommandTester(() -> new Command("tag") {{
-            argument(new EntityArgument("target")).execute((target, ctx) -> {
+            argument(new EntityArgument("target")).execute((ctx, target) -> {
                 ctx.sendMessage("Tagged " + (target instanceof Player ? "player" : "entity"));
             });
         }}, "test.command")) {

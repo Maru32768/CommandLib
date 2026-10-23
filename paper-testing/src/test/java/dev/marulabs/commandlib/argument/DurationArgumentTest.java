@@ -13,8 +13,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 class DurationArgumentTest {
     private static CommandTester tester() {
         return new CommandTester(() -> new Command("wait") {{
-            argument(new DurationArgument("duration")).execute((duration,
-                                                                ctx) -> ctx.sendMessage(duration.toString()));
+            argument(new DurationArgument("duration")).execute((ctx,
+                                                                duration) -> ctx.sendMessage(duration.toString()));
         }}, "test.command");
     }
 

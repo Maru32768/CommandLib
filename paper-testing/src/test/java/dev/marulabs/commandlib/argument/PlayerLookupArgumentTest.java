@@ -102,26 +102,26 @@ class PlayerLookupArgumentTest {
         try (MockedStatic<Bukkit> bukkit = Mockito.mockStatic(Bukkit.class);
              CommandTester tester = CommandTester.builder()
                                                  .command(() -> new Command("players") {{
-                                                     argument(new OfflinePlayersArgument("targets")).execute((targets,
-                                                                                                              ctx) -> ctx.sendMessage(targets.size()
+                                                     argument(new OfflinePlayersArgument("targets")).execute((ctx,
+                                                                                                              targets) -> ctx.sendMessage(targets.size()
                                                                                                                       + ":"
                                                                                                                       + targets.stream()
                                                                                                                                .map(OfflinePlayer::getName)
                                                                                                                                .collect(Collectors.toList())));
                                                  }})
                                                  .command(() -> new Command("uuids") {{
-                                                     argument(new UUIDsArgument("targets")).execute((targets,
-                                                                                                     ctx) -> ctx.sendMessage(targets.size()
+                                                     argument(new UUIDsArgument("targets")).execute((ctx,
+                                                                                                     targets) -> ctx.sendMessage(targets.size()
                                                                                                              + ":"
                                                                                                              + targets));
                                                  }})
                                                  .command(() -> new Command("uuid") {{
-                                                     argument(new UUIDArgument("target")).execute((target,
-                                                                                                   ctx) -> ctx.sendMessage(target.toString()));
+                                                     argument(new UUIDArgument("target")).execute((ctx,
+                                                                                                   target) -> ctx.sendMessage(target.toString()));
                                                  }})
                                                  .command(() -> new Command("offline") {{
-                                                     argument(new OfflinePlayerArgument("target")).execute((target,
-                                                                                                            ctx) -> ctx.sendMessage(target.getName()));
+                                                     argument(new OfflinePlayerArgument("target")).execute((ctx,
+                                                                                                            target) -> ctx.sendMessage(target.getName()));
                                                  }})
                                                  .permissionPrefix("test.command")
                                                  .build()) {

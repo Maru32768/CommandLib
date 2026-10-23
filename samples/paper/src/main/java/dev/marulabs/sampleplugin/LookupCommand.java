@@ -22,7 +22,7 @@ public class LookupCommand extends Command {
         });
 
         // supplyAsync runs the work off the server thread and completes back on it, so thenAccept may send messages.
-        argument(new StringArgument("name", StringArgument.Type.WORD)).executeAsync((name, ctx) -> {
+        argument(new StringArgument("name", StringArgument.Type.WORD)).executeAsync((ctx, name) -> {
             return ctx.supplyAsync(() -> slowLookup(name))
                       .thenAccept(result -> ctx.sendSuccess(name + " -> " + result));
         });

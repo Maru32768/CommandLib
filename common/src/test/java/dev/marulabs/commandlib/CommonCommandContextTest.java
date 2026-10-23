@@ -14,7 +14,7 @@ class CommonCommandContextTest {
     void arguments_can_be_read_by_index_name_and_argument_instance() throws Exception {
         CommonIntegerArgument<TestCommandContext, ?> left = new CommonIntegerArgument<>("left");
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("sum") {{
-            argument(left, new CommonStringArgument<>("label")).execute((l, label, ctx) -> {
+            argument(left, new CommonStringArgument<>("label")).execute((ctx, l, label) -> {
                 ctx.sendMessage(ctx.getArgument(0, Integer.class));
                 ctx.sendMessage(ctx.getArgument(1));
                 ctx.sendMessage(ctx.getArgument("label", String.class));
@@ -30,7 +30,7 @@ class CommonCommandContextTest {
     @Test
     void argument_named_like_its_command_keeps_its_own_input() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("amount") {{
-            argument(new CommonIntegerArgument<>("amount")).execute((amount, ctx) -> {
+            argument(new CommonIntegerArgument<>("amount")).execute((ctx, amount) -> {
                 ctx.sendMessage(ctx.getInput("amount"));
             });
         }});
@@ -42,7 +42,7 @@ class CommonCommandContextTest {
     @Test
     void argument_keeps_its_input_when_a_later_literal_has_its_name() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("cmd") {{
-            argument(new WordArg("x").validator((value, ctx) -> {
+            argument(new WordArg("x").validator((ctx, value) -> {
                 ctx.sendMessage("validated " + ctx.getInput("x"));
                 return true;
             })).child(x -> new TestCommand("x") {{
@@ -57,15 +57,15 @@ class CommonCommandContextTest {
     @Test
     void a_variadic_element_and_an_option_value_are_the_only_input_of_their_name_while_parsed() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("tag") {{
-            option(Options.of("label", new WordArg("label").validator((value, ctx) -> {
+            option(Options.of("label", new WordArg("label").validator((ctx, value) -> {
                 ctx.sendMessage("label " + ctx.getInput("label") + " " + ctx.getInputs());
                 return true;
             })));
-            argument(new WordArg("names").validator((value, ctx) -> {
+            argument(new WordArg("names").validator((ctx, value) -> {
                 ctx.sendMessage("name " + ctx.getInput("names") + " " + ctx.getInput(1) + " " + ctx.getInputs());
                 return true;
             })
-                                         .variadic()).execute((names, ctx) -> ctx.sendMessage(ctx.getInputs()));
+                                         .variadic()).execute((ctx, names) -> ctx.sendMessage(ctx.getInputs()));
         }});
 
         assertThat(runner.execute("tag --label x a b")
@@ -78,7 +78,7 @@ class CommonCommandContextTest {
     @Test
     void missing_argument_lookups_fail_clearly() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("sum") {{
-            argument(new CommonIntegerArgument<>("value")).execute((value, ctx) -> {
+            argument(new CommonIntegerArgument<>("value")).execute((ctx, value) -> {
                 ctx.sendMessage(ctx.getInput("missing")
                                    .isEmpty());
                 try {
@@ -193,7 +193,7 @@ class CommonCommandContextTest {
                 }
                 ctx.sendMessage("branch");
             })
-                                          .execute((arena, ctx) -> ctx.sendMessage("join " + arena))
+                                          .execute((ctx, arena) -> ctx.sendMessage("join " + arena))
                                           .child(arena -> new TestCommand("info") {{
                                               execute(ctx -> ctx.sendMessage("info"));
                                           }})

@@ -62,11 +62,11 @@ class CommandBuilderTest {
             addAliases("h");
             CommandOption<Boolean, CommandContext> silent = option(Options.<CommandContext>flag("silent", 's')
                                                                           .description("Do not tell the target"));
-            require(Command.player()).execute((player, ctx) -> ctx.sendMessage("Healed " + player.getName()
+            require(Command.player()).execute((ctx, player) -> ctx.sendMessage("Healed " + player.getName()
                                                                                                  .getString()));
             argument(new PlayerArgument("target"), new IntegerArgument("amount")).description("Heal by an amount")
                                                                                  .permissionDescription("Heal others")
-                                                                                 .execute((target, amount, ctx) -> {
+                                                                                 .execute((ctx, target, amount) -> {
                                                                                      ctx.sendMessage("Healed "
                                                                                              + target.getName()
                                                                                                      .getString()
@@ -92,13 +92,13 @@ class CommandBuilderTest {
                       .addAliases("h")
                       .option(silent)
                       .require(Command.player(),
-                               branch -> branch.execute((player, ctx) -> ctx.sendMessage("Healed " + player.getName()
+                               branch -> branch.execute((ctx, player) -> ctx.sendMessage("Healed " + player.getName()
                                                                                                            .getString())))
                       .argument(new PlayerArgument("target"),
                                 new IntegerArgument("amount"),
                                 branch -> branch.description("Heal by an amount")
                                                 .permissionDescription("Heal others")
-                                                .execute((target, amount, ctx) -> {
+                                                .execute((ctx, target, amount) -> {
                                                     ctx.sendMessage("Healed " + target.getName()
                                                                                       .getString()
                                                             + " by " + amount

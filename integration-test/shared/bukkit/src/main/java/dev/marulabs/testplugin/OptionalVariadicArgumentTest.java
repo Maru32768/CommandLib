@@ -41,7 +41,7 @@ public final class OptionalVariadicArgumentTest extends TestBase {
 
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name) {{
-            argument(new IntegerArgument("a"), new IntegerArgument("b").optional(7)).execute((a, b, ctx) -> {
+            argument(new IntegerArgument("a"), new IntegerArgument("b").optional(7)).execute((ctx, a, b) -> {
                 putResult(key, a + "," + b, "1,7");
             });
         }});
@@ -55,7 +55,7 @@ public final class OptionalVariadicArgumentTest extends TestBase {
 
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name) {{
-            argument(new IntegerArgument("a"), new IntegerArgument("b").optional(7)).execute((a, b, ctx) -> {
+            argument(new IntegerArgument("a"), new IntegerArgument("b").optional(7)).execute((ctx, a, b) -> {
                 putResult(key, a + "," + b, "1,3");
             });
         }});
@@ -71,7 +71,7 @@ public final class OptionalVariadicArgumentTest extends TestBase {
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name) {{
             argument(new StringArgument("a").optional(ctx -> ctx.getSender()
-                                                                .getName())).execute((a, ctx) -> {
+                                                                .getName())).execute((ctx, a) -> {
                                                                     putResult(key, a, "CONSOLE");
                                                                 });
         }});
@@ -85,7 +85,7 @@ public final class OptionalVariadicArgumentTest extends TestBase {
 
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name) {{
-            argument(new StringArgument("a"), new IntegerArgument("b").variadic(3)).execute((a, b, ctx) -> {
+            argument(new StringArgument("a"), new IntegerArgument("b").variadic(3)).execute((ctx, a, b) -> {
                 putResult(key, a + ":" + b, "x:[3, 1, 2]");
             });
         }});
@@ -99,7 +99,7 @@ public final class OptionalVariadicArgumentTest extends TestBase {
 
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name) {{
-            argument(new PlayerArgument("a").variadic()).execute((a, ctx) -> {
+            argument(new PlayerArgument("a").variadic()).execute((ctx, a) -> {
                 putResult(key,
                           a.stream()
                            .map(Player::getName)
@@ -118,7 +118,7 @@ public final class OptionalVariadicArgumentTest extends TestBase {
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name) {{
             argument(new IntegerArgument("a").variadic()
-                                             .optional(List.of())).execute((a, ctx) -> {
+                                             .optional(List.of())).execute((ctx, a) -> {
                                                  putResult(key, String.valueOf(a), "[]");
                                              });
         }});

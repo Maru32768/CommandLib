@@ -58,7 +58,7 @@ class ItemStackArgumentTest {
 
     private static Command giveCommand() {
         return new Command("give") {{
-            argument(new ItemStackArgument("item")).execute((item, ctx) -> {
+            argument(new ItemStackArgument("item")).execute((ctx, item) -> {
                 ctx.sendMessage(item.getType()
                                     .name()
                         + " x" + item.getAmount());

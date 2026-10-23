@@ -14,7 +14,7 @@ public final class TeamCommand extends Command {
         addChildren(new Command("show") {{
             execute(ctx -> ctx.sendMessage(ctx.get(GamePlayer.class).team()));
         }}, new Command("join") {{
-            argument(new StringArgument("team")).execute((team, ctx) -> ctx.get(GamePlayer.class).join(team));
+            argument(new StringArgument("team")).execute((ctx, team) -> ctx.get(GamePlayer.class).join(team));
         }});
     }
 }
@@ -65,11 +65,11 @@ provide(GamePlayer.class, ctx -> games.of(player().extract(ctx)));
 
 - A `CommandPrerequisiteException` thrown by the provider fails the command with its message, here "This command can
   only be executed by a player." for the console. `ctx.get` throws it on although it does not declare it, so this
-  works in the typed executors (`(team, ctx) -> ...`), which cannot throw checked exceptions.
+  works in the typed executors (`(ctx, team) -> ...`), which cannot throw checked exceptions.
 - For an executor that takes the mapped sender as a typed parameter, read it with `require`:
 
   ```java
-  require(ctx -> ctx.get(GamePlayer.class)).execute((player, ctx) -> player.leave());
+  require(ctx -> ctx.get(GamePlayer.class)).execute((ctx, player) -> player.leave());
   ```
 
 - `player()` exists on every platform. It gives a `Player` on Spigot, Paper and Velocity, and a

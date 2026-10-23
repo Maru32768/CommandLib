@@ -11,7 +11,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class EntityTypeArgumentTest {
     private static Command command() {
         return new Command("entitytype") {{
-            argument(new EntityTypeArgument("value")).execute((type, ctx) -> ctx.sendMessage(type.name()));
+            argument(new EntityTypeArgument("value")).execute((ctx, type) -> ctx.sendMessage(type.name()));
         }};
     }
 

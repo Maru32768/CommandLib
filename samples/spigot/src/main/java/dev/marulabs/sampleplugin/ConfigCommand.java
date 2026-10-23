@@ -21,7 +21,7 @@ public class ConfigCommand extends Command {
 
         Command setCommand = new Command("set");
         setCommand.argument(new IntegerArgument("number"))
-                  .execute((number, ctx) -> {
+                  .execute((ctx, number) -> {
                       intValue = number;
                       ctx.sendSuccess("Changed intValue to " + intValue);
                   });

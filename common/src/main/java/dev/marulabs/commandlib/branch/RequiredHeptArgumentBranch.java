@@ -44,29 +44,29 @@ public final class RequiredHeptArgumentBranch<S, T1, T2, T3, T4, T5, T6, T7, C e
         this.argument7 = argument7;
     }
 
-    public RequiredHeptArgumentBranch<S, T1, T2, T3, T4, T5, T6, T7, C, T> execute(@NotNull NonaConsumer<T1, T2, T3, T4, T5, T6, T7, S, C> action) {
-        super.execute((s, ctx) -> action.accept(ctx.getArgument(argument1),
+    public RequiredHeptArgumentBranch<S, T1, T2, T3, T4, T5, T6, T7, C, T> execute(@NotNull NonaConsumer<C, T1, T2, T3, T4, T5, T6, T7, S> action) {
+        super.execute((ctx, s) -> action.accept(ctx,
+                                                ctx.getArgument(argument1),
                                                 ctx.getArgument(argument2),
                                                 ctx.getArgument(argument3),
                                                 ctx.getArgument(argument4),
                                                 ctx.getArgument(argument5),
                                                 ctx.getArgument(argument6),
                                                 ctx.getArgument(argument7),
-                                                s,
-                                                ctx));
+                                                s));
         return this;
     }
 
-    public RequiredHeptArgumentBranch<S, T1, T2, T3, T4, T5, T6, T7, C, T> executeAsync(@NotNull NonaFunction<T1, T2, T3, T4, T5, T6, T7, S, C, CompletionStage<?>> action) {
-        super.executeAsync((s, ctx) -> action.apply(ctx.getArgument(argument1),
+    public RequiredHeptArgumentBranch<S, T1, T2, T3, T4, T5, T6, T7, C, T> executeAsync(@NotNull NonaFunction<C, T1, T2, T3, T4, T5, T6, T7, S, CompletionStage<?>> action) {
+        super.executeAsync((ctx, s) -> action.apply(ctx,
+                                                    ctx.getArgument(argument1),
                                                     ctx.getArgument(argument2),
                                                     ctx.getArgument(argument3),
                                                     ctx.getArgument(argument4),
                                                     ctx.getArgument(argument5),
                                                     ctx.getArgument(argument6),
                                                     ctx.getArgument(argument7),
-                                                    s,
-                                                    ctx));
+                                                    s));
         return this;
     }
 

@@ -175,7 +175,7 @@ class CommandTesterTest {
     void execute_and_get_context_returns_executed_context() {
         CommandTester tester = new CommandTester(new TestCommand("sum") {{
             argument(new CommonIntegerArgument<>("left"),
-                     new CommonIntegerArgument<>("right")).execute((left, right, ctx) -> {
+                     new CommonIntegerArgument<>("right")).execute((ctx, left, right) -> {
                      });
         }});
 
@@ -260,7 +260,7 @@ class CommandTesterTest {
     @Test
     void suggestions_are_returned_for_argument() {
         CommandTester tester = new CommandTester(new TestCommand("pick") {{
-            argument(new CommonLiteralArgument<>("value", List.of("alpha", "beta"))).execute((value, ctx) -> {
+            argument(new CommonLiteralArgument<>("value", List.of("alpha", "beta"))).execute((ctx, value) -> {
             });
         }});
 

@@ -30,9 +30,9 @@ public class RequiredArgumentBranch<S, C extends CommonCommandContext<?, ?>, T e
         this.childrenAdder = Objects.requireNonNull(childrenAdder);
     }
 
-    public RequiredArgumentBranch<S, C, T> execute(@NotNull BiConsumer<S, C> action) {
+    public RequiredArgumentBranch<S, C, T> execute(@NotNull BiConsumer<C, S> action) {
         Objects.requireNonNull(action);
-        CommandExecutor<C> executor = ctx -> action.accept(extractor.extract(ctx), ctx);
+        CommandExecutor<C> executor = ctx -> action.accept(ctx, extractor.extract(ctx));
         executeRegistrar.accept(AsyncCommandExecutor.of(executor));
         return this;
     }
@@ -40,9 +40,9 @@ public class RequiredArgumentBranch<S, C extends CommonCommandContext<?, ?>, T e
     /**
      * Sets an executor whose work finishes later, like {@link CommonCommand#executeAsync(AsyncCommandExecutor)}.
      */
-    public RequiredArgumentBranch<S, C, T> executeAsync(@NotNull BiFunction<S, C, CompletionStage<?>> action) {
+    public RequiredArgumentBranch<S, C, T> executeAsync(@NotNull BiFunction<C, S, CompletionStage<?>> action) {
         Objects.requireNonNull(action);
-        executeRegistrar.accept(ctx -> action.apply(extractor.extract(ctx), ctx));
+        executeRegistrar.accept(ctx -> action.apply(ctx, extractor.extract(ctx)));
         return this;
     }
 

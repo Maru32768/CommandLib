@@ -13,9 +13,9 @@ class UUIDArgumentTest {
     private static CommandTester tester() {
         return new CommandTester(new Command("uuid") {{
             addChildren(new Command("one") {{
-                argument(new UUIDArgument("id")).execute((id, ctx) -> ctx.sendMessage(id.toString()));
+                argument(new UUIDArgument("id")).execute((ctx, id) -> ctx.sendMessage(id.toString()));
             }}, new Command("many") {{
-                argument(new UUIDsArgument("ids")).execute((ids, ctx) -> ctx.sendMessage(ids.toString()));
+                argument(new UUIDsArgument("ids")).execute((ctx, ids) -> ctx.sendMessage(ids.toString()));
             }});
         }}, "test");
     }

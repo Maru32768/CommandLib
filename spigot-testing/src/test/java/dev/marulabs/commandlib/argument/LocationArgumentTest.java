@@ -13,7 +13,7 @@ class LocationArgumentTest {
         FakeSender sender = FakeSender.player("Alice");
 
         try (CommandTester tester = new CommandTester(() -> new Command("tp") {{
-            argument(new LocationArgument("pos")).execute((pos, ctx) -> {
+            argument(new LocationArgument("pos")).execute((ctx, pos) -> {
                 ctx.sendMessage(pos.getX() + "," + pos.getY() + "," + pos.getZ());
             });
         }}, "test.command")) {
@@ -28,7 +28,7 @@ class LocationArgumentTest {
         FakeSender sender = FakeSender.player("Alice");
 
         try (CommandTester tester = new CommandTester(() -> new Command("tp") {{
-            argument(new LocationArgument("pos")).execute((pos, ctx) -> {
+            argument(new LocationArgument("pos")).execute((ctx, pos) -> {
                 ctx.sendMessage(pos.getX() + "," + pos.getY() + "," + pos.getZ());
             });
         }}, "test.command")) {
@@ -46,7 +46,7 @@ class LocationArgumentTest {
                            .thenReturn(world);
 
         try (CommandTester tester = new CommandTester(() -> new Command("tp") {{
-            argument(new LocationArgument("pos")).execute((pos, ctx) -> {
+            argument(new LocationArgument("pos")).execute((ctx, pos) -> {
                 ctx.sendMessage(pos.getWorld() == world ? "correct_world" : "wrong_world");
             });
         }}, "test.command")) {
@@ -61,7 +61,7 @@ class LocationArgumentTest {
         FakeSender sender = FakeSender.player("Alice");
 
         try (CommandTester tester = new CommandTester(() -> new Command("tp") {{
-            argument(new LocationArgument("pos")).execute((pos, ctx) -> {
+            argument(new LocationArgument("pos")).execute((ctx, pos) -> {
                 ctx.sendMessage(pos.getX() + "," + pos.getY() + "," + pos.getZ());
             });
         }}, "test.command")) {
@@ -77,7 +77,7 @@ class LocationArgumentTest {
         FakeSender sender = FakeSender.player("Alice");
 
         try (CommandTester tester = new CommandTester(() -> new Command("tp") {{
-            argument(new LocationArgument("pos", false)).execute((pos, ctx) -> {
+            argument(new LocationArgument("pos", false)).execute((ctx, pos) -> {
                 ctx.sendMessage(pos.getX() + "," + pos.getY() + "," + pos.getZ());
             });
         }}, "test.command")) {

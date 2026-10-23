@@ -13,7 +13,7 @@ class NamespacedKeyArgumentTest {
         FakeSender sender = FakeSender.player("Alice");
 
         try (CommandTester tester = new CommandTester(() -> new Command("key") {{
-            argument(new NamespacedKeyArgument("value")).execute((key, ctx) -> ctx.sendMessage(key.toString()));
+            argument(new NamespacedKeyArgument("value")).execute((ctx, key) -> ctx.sendMessage(key.toString()));
         }}, "test.command")) {
             tester.execute("key commandlib:example/path", sender);
         }
@@ -26,7 +26,7 @@ class NamespacedKeyArgumentTest {
         FakeSender sender = FakeSender.player("Alice");
 
         try (CommandTester tester = new CommandTester(() -> new Command("key") {{
-            argument(new NamespacedKeyArgument("value")).execute((key, ctx) -> ctx.sendMessage(key.toString()));
+            argument(new NamespacedKeyArgument("value")).execute((ctx, key) -> ctx.sendMessage(key.toString()));
         }}, "test.command")) {
             tester.execute("key stone", sender);
         }

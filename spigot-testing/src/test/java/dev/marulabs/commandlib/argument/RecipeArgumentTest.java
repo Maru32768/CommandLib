@@ -23,7 +23,7 @@ class RecipeArgumentTest {
             bukkit.when(() -> Bukkit.getRecipe(key))
                   .thenReturn(recipe);
             try (CommandTester tester = new CommandTester(() -> new Command("recipe") {{
-                argument(new RecipeArgument("value")).execute((value, ctx) -> ctx.sendMessage("ok"));
+                argument(new RecipeArgument("value")).execute((ctx, value) -> ctx.sendMessage("ok"));
             }}, "test.command")) {
                 tester.execute("recipe stick", sender);
             }
@@ -46,7 +46,7 @@ class RecipeArgumentTest {
                   .thenReturn(java.util.List.of(recipe)
                                             .iterator());
             try (CommandTester tester = new CommandTester(() -> new Command("recipe") {{
-                argument(new RecipeArgument("value")).execute((value, ctx) -> {
+                argument(new RecipeArgument("value")).execute((ctx, value) -> {
                 });
             }}, "test.command")) {
                 var suggestions = tester.suggestions("recipe sti", FakeSender.player("Alice"))

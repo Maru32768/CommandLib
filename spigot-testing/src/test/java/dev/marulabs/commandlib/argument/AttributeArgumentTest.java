@@ -13,7 +13,7 @@ class AttributeArgumentTest {
         FakeSender sender = FakeSender.player("Alice");
 
         try (CommandTester tester = new CommandTester(() -> new Command("attribute") {{
-            argument(new AttributeArgument("value")).execute((attribute, ctx) -> ctx.sendMessage(attribute.getKey()
+            argument(new AttributeArgument("value")).execute((ctx, attribute) -> ctx.sendMessage(attribute.getKey()
                                                                                                           .toString()));
         }}, "test.command")) {
             tester.execute("attribute generic.max_health", sender);

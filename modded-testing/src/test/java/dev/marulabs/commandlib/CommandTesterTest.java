@@ -353,7 +353,7 @@ class CommandTesterTest {
         private <T> T parse(CommonArgument<T, CommandContext, ?> argument, String input, FakeSender sender) {
             AtomicReference<T> result = new AtomicReference<>();
             try (CommandTester tester = new CommandTester(new Command("arg") {{
-                argument(argument).execute((a, ctx) -> result.set(a));
+                argument(argument).execute((ctx, a) -> result.set(a));
             }}, "test")) {
                 tester.execute("arg " + input, sender);
             }
@@ -420,7 +420,7 @@ class CommandTesterTest {
         void player_by_name() {
             AtomicReference<String> result = new AtomicReference<>();
             try (CommandTester tester = new CommandTester(new Command("arg") {{
-                argument(new PlayerArgument("a")).execute((a, ctx) -> result.set(a.getGameProfile()
+                argument(new PlayerArgument("a")).execute((ctx, a) -> result.set(a.getGameProfile()
                                                                                   .getName()));
             }}, "test").withPlayer(FakeSender.player("Alex"))) {
                 tester.execute("arg Alex",
@@ -435,7 +435,7 @@ class CommandTesterTest {
             FakeSender sender = FakeSender.player("Steve")
                                           .op(true);
             try (CommandTester tester = new CommandTester(new Command("arg") {{
-                argument(new PlayerArgument("a")).execute((a, ctx) -> ctx.sendMessage("unreachable"));
+                argument(new PlayerArgument("a")).execute((ctx, a) -> ctx.sendMessage("unreachable"));
             }}, "test")) {
                 // The selector parses, but no online player has the name, so resolving it fails.
                 tester.execute("arg Nobody", sender);
@@ -453,9 +453,9 @@ class CommandTesterTest {
                                           .op(true);
             try (CommandTester tester = new CommandTester(new Command("arg") {{
                 addChildren(new Command("players") {{
-                    argument(new PlayersArgument("p")).execute((p, ctx) -> ctx.sendMessage("unreachable"));
+                    argument(new PlayersArgument("p")).execute((ctx, p) -> ctx.sendMessage("unreachable"));
                 }}, new Command("entities") {{
-                    argument(new EntitiesArgument("e")).execute((e, ctx) -> ctx.sendMessage("unreachable"));
+                    argument(new EntitiesArgument("e")).execute((ctx, e) -> ctx.sendMessage("unreachable"));
                 }});
             }}, "test")) {
                 // A name selector parses, and vanilla's getPlayers / getEntities reject the empty result.
@@ -469,10 +469,10 @@ class CommandTesterTest {
         @Test
         void player_and_entities_arguments_cannot_share_a_node() {
             assertThatThrownBy(() -> new CommandTester(new Command("x") {{
-                argument(new PlayerArgument("target")).execute((target, ctx) -> {
+                argument(new PlayerArgument("target")).execute((ctx, target) -> {
                 });
                 argument(new EntitiesArgument("target"),
-                         new StringArgument("reason")).execute((target, reason, ctx) -> {
+                         new StringArgument("reason")).execute((ctx, target, reason) -> {
                          });
             }}, "test")).hasMessageContaining("parse differently");
         }
@@ -481,7 +481,7 @@ class CommandTesterTest {
         void syntax_exception_with_input_sends_the_context_line() {
             FakeSender sender = FakeSender.console();
             try (CommandTester tester = new CommandTester(new Command("check") {{
-                argument(new ResolvingArgument("value")).execute((value, ctx) -> ctx.sendMessage("unreachable"));
+                argument(new ResolvingArgument("value")).execute((ctx, value) -> ctx.sendMessage("unreachable"));
             }}, "test")) {
                 tester.execute("check bad", sender);
             }
@@ -515,7 +515,7 @@ class CommandTesterTest {
                 argument(new StringArgument("a").addSuggestionProvider(builder -> {
                     builder.suggest("alpha");
                     builder.suggest("beta");
-                })).execute((a, ctx) -> {
+                })).execute((ctx, a) -> {
                 });
             }}, "test")) {
                 assertThat(suggestionTexts(tester, "suggest ")).contains("alpha", "beta");
@@ -525,7 +525,7 @@ class CommandTesterTest {
         @Test
         void online_player_names_are_suggested_for_game_profiles() {
             try (CommandTester tester = new CommandTester(new Command("profile") {{
-                argument(new GameProfileArgument("a")).execute((a, ctx) -> {
+                argument(new GameProfileArgument("a")).execute((ctx, a) -> {
                 });
             }}, "test").withPlayer(FakeSender.player("Alex"))) {
                 assertThat(suggestionTexts(tester, "profile ")).contains("Alex", "Steve");

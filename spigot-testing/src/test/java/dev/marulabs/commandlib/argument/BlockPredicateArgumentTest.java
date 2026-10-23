@@ -14,7 +14,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class BlockPredicateArgumentTest {
     private static Command testCommand() {
         return new Command("test") {{
-            argument(new BlockPredicateArgument("block")).execute((predicate, ctx) -> {
+            argument(new BlockPredicateArgument("block")).execute((ctx, predicate) -> {
                 ctx.sendMessage(predicate.test(block(Material.STONE)) + "," + predicate.test(block(Material.DIRT)));
             });
         }};

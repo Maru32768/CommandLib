@@ -20,7 +20,7 @@ public final class FeedCommand {
                       .addAliases("eat")
                       // An omitted target is the sender, who then has to be a player.
                       .argument(new PlayerArgument("target").optional(Command.player()),
-                                branch -> branch.execute((target, ctx) -> {
+                                branch -> branch.execute((ctx, target) -> {
                                     target.setFoodLevel(20);
                                     ctx.sendSuccess("Fed " + target.getName());
                                 }))

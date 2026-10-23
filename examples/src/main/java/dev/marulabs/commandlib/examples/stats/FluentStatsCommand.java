@@ -12,7 +12,7 @@ public final class FluentStatsCommand extends Command {
         super("stats");
         description("Show a player's kills");
 
-        argument(new StringArgument("player")).executeAsync((player, ctx) -> ctx.supplyAsync(() -> store.kills(player))
+        argument(new StringArgument("player")).executeAsync((ctx, player) -> ctx.supplyAsync(() -> store.kills(player))
                                                                                 // Back on the server thread.
                                                                                 .thenAccept(kills -> ctx.sendSuccess(player
                                                                                         + " has " + kills + " kills")));

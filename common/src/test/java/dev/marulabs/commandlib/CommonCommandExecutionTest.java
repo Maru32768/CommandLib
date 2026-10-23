@@ -47,7 +47,7 @@ class CommonCommandExecutionTest {
     void alias_executes_same_command_tree() throws Exception {
         TestCommand command = new TestCommand("message") {{
             addAliases("msg");
-            argument(new CommonStringArgument<>("body")).execute((body, ctx) -> {
+            argument(new CommonStringArgument<>("body")).execute((ctx, body) -> {
                 ctx.sendMessage(body);
             });
         }};
@@ -78,7 +78,7 @@ class CommonCommandExecutionTest {
     void child_command_executes_with_its_own_arguments() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("game") {{
             addChildren(new TestCommand("start") {{
-                argument(new CommonStringArgument<>("target")).execute((target, ctx) -> {
+                argument(new CommonStringArgument<>("target")).execute((ctx, target) -> {
                     ctx.sendMessage("started:" + target);
                 });
             }});
@@ -108,7 +108,7 @@ class CommonCommandExecutionTest {
     void argument_child_command_can_have_its_own_arguments() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("config") {{
             argument(new CommonStringArgument<>("key")).child(key -> new TestCommand("set") {{
-                argument(new CommonStringArgument<>("value")).execute((value, ctx) -> {
+                argument(new CommonStringArgument<>("value")).execute((ctx, value) -> {
                     ctx.sendMessage(key.get() + "=" + value);
                 });
             }});
@@ -123,7 +123,7 @@ class CommonCommandExecutionTest {
     void argument_child_command_can_read_parent_argument_after_child_argument_is_parsed() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("counter") {{
             argument(new CommonIntegerArgument<>("count")).child(count -> new TestCommand("label") {{
-                argument(new CommonStringArgument<>("name")).execute((name, ctx) -> {
+                argument(new CommonStringArgument<>("name")).execute((ctx, name) -> {
                     ctx.sendMessage(count.get() + ":" + name);
                 });
             }});
@@ -170,11 +170,11 @@ class CommonCommandExecutionTest {
     @Test
     void longest_argument_chain_is_selected_first() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("set") {{
-            argument(new CommonStringArgument<>("key")).execute((key, ctx) -> {
+            argument(new CommonStringArgument<>("key")).execute((ctx, key) -> {
                 ctx.sendMessage("one:" + key);
             });
             argument(new CommonStringArgument<>("key"),
-                     new CommonStringArgument<>("value")).execute((key, value, ctx) -> {
+                     new CommonStringArgument<>("value")).execute((ctx, key, value) -> {
                          ctx.sendMessage("two:" + key + ":" + value);
                      });
         }});
@@ -273,7 +273,7 @@ class CommonCommandExecutionTest {
                 ctx.sendMessage("preprocess:" + ctx.getInput("target"));
                 return false;
             });
-            argument(new CommonStringArgument<>("target")).execute((target, ctx) -> {
+            argument(new CommonStringArgument<>("target")).execute((ctx, target) -> {
                 ctx.sendMessage("executed:" + target);
             });
         }});
@@ -337,7 +337,7 @@ class CommonCommandExecutionTest {
             argument(new CommonStringArgument<>("key")).child(key -> new TestCommand("set") {{
                 CommonArgument<String, TestCommandContext, ?> value = new CommonStringArgument<>("value");
                 value.addSuggestionProvider(sb -> sb.suggest(key.get() + "-value"));
-                argument(value).execute((v, ctx) -> ctx.sendMessage(v));
+                argument(value).execute((ctx, v) -> ctx.sendMessage(v));
             }});
         }});
 
@@ -353,7 +353,7 @@ class CommonCommandExecutionTest {
                                                             .equals("difficulty"));
                 CommonArgument<String, TestCommandContext, ?> value = new CommonStringArgument<>("value");
                 value.addSuggestionProvider(sb -> sb.suggest(sb.getArgument("field") + "-value"));
-                argument(field, value).execute((f, v, ctx) -> ctx.sendMessage(f + "=" + v));
+                argument(field, value).execute((ctx, f, v) -> ctx.sendMessage(f + "=" + v));
             }});
         }});
 

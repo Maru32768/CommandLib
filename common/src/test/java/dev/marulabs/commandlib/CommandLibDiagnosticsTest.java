@@ -13,7 +13,7 @@ class CommandLibDiagnosticsTest {
             addAliases("sp");
             execute(ctx -> {
             });
-            argument(new CommonStringArgument<>("target")).execute((target, ctx) -> {
+            argument(new CommonStringArgument<>("target")).execute((ctx, target) -> {
             });
         }};
         Registration live = new Registration("MyPlugin",

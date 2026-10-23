@@ -101,9 +101,9 @@ public final class ArgumentTest extends TestBase {
 
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name) {{
-            argument(new AdvancementArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
+            argument(new AdvancementArgument("a").addUncaughtExceptionHandler((ctx, e) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
-            })).execute((a, ctx) -> {
+            })).execute((ctx, a) -> {
                 putResult(key,
                           a.getKey()
                            .toString(),
@@ -122,9 +122,9 @@ public final class ArgumentTest extends TestBase {
 
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name) {{
-            argument(new AttributeArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
+            argument(new AttributeArgument("a").addUncaughtExceptionHandler((ctx, e) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
-            })).execute((a, ctx) -> {
+            })).execute((ctx, a) -> {
                 // Keyed, since Attribute is an enum before 1.21.3 and a registry interface from then.
                 putResult(key,
                           ((Keyed) a).getKey()
@@ -142,9 +142,9 @@ public final class ArgumentTest extends TestBase {
 
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name) {{
-            argument(new BlockDataArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
+            argument(new BlockDataArgument("a").addUncaughtExceptionHandler((ctx, e) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
-            })).execute((a, ctx) -> {
+            })).execute((ctx, a) -> {
                 putResult(key,
                           a.getMaterial()
                            .name(),
@@ -161,9 +161,9 @@ public final class ArgumentTest extends TestBase {
 
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name) {{
-            argument(new BlockPositionArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
+            argument(new BlockPositionArgument("a").addUncaughtExceptionHandler((ctx, e) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
-            })).execute((a, ctx) -> {
+            })).execute((ctx, a) -> {
                 putResult(key,
                           a.getX() + "," + a.getY() + "," + a.getZ() + "," + (a.getWorld() != null),
                           "1.0,2.0,3.0,true");
@@ -179,9 +179,9 @@ public final class ArgumentTest extends TestBase {
 
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name) {{
-            argument(new BlockPredicateArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
+            argument(new BlockPredicateArgument("a").addUncaughtExceptionHandler((ctx, e) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
-            })).execute((a, ctx) -> {
+            })).execute((ctx, a) -> {
                 Block block = Bukkit.getWorlds()
                                     .get(0)
                                     .getBlockAt(0, 200, 0);
@@ -201,9 +201,9 @@ public final class ArgumentTest extends TestBase {
 
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name) {{
-            argument(new BiomeArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
+            argument(new BiomeArgument("a").addUncaughtExceptionHandler((ctx, e) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
-            })).execute((a, ctx) -> {
+            })).execute((ctx, a) -> {
                 // Keyed, since Biome is an enum before 1.21.3 and a registry interface from then.
                 putResult(key,
                           ((Keyed) a).getKey()
@@ -221,9 +221,9 @@ public final class ArgumentTest extends TestBase {
 
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name) {{
-            argument(new BooleanArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
+            argument(new BooleanArgument("a").addUncaughtExceptionHandler((ctx, e) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
-            })).execute((a, ctx) -> {
+            })).execute((ctx, a) -> {
                 putResult(key, a.toString(), "true");
             });
         }});
@@ -237,9 +237,9 @@ public final class ArgumentTest extends TestBase {
 
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name) {{
-            argument(new ChatColorArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
+            argument(new ChatColorArgument("a").addUncaughtExceptionHandler((ctx, e) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
-            })).execute((a, ctx) -> {
+            })).execute((ctx, a) -> {
                 putResult(key, a.toString(), "dark_red");
             });
         }});
@@ -262,7 +262,7 @@ public final class ArgumentTest extends TestBase {
             putCommandNotExecutedResult(key);
         }
         command.addChildren(new Command(name) {{
-            argument(new ChatColorArgument("a")).execute((a, ctx) -> {
+            argument(new ChatColorArgument("a")).execute((ctx, a) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, "reset was parsed as " + a));
             });
             errorFormatter((ctx, error) -> putResult(key,
@@ -280,9 +280,9 @@ public final class ArgumentTest extends TestBase {
 
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name) {{
-            argument(new ComponentArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
+            argument(new ComponentArgument("a").addUncaughtExceptionHandler((ctx, e) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
-            })).execute((a, ctx) -> {
+            })).execute((ctx, a) -> {
                 putResult(key,
                           PlainTextComponentSerializer.plainText()
                                                       .serialize(a)
@@ -301,9 +301,9 @@ public final class ArgumentTest extends TestBase {
 
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name) {{
-            argument(new DoubleArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
+            argument(new DoubleArgument("a").addUncaughtExceptionHandler((ctx, e) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
-            })).execute((a, ctx) -> {
+            })).execute((ctx, a) -> {
                 putResult(key, a.toString(), "1.0");
             });
         }});
@@ -317,9 +317,9 @@ public final class ArgumentTest extends TestBase {
 
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name) {{
-            argument(new DoubleRangeArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
+            argument(new DoubleRangeArgument("a").addUncaughtExceptionHandler((ctx, e) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
-            })).execute((a, ctx) -> {
+            })).execute((ctx, a) -> {
                 putResult(key, a.toString(), "[0.5..10.0]");
             });
         }});
@@ -333,9 +333,9 @@ public final class ArgumentTest extends TestBase {
 
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name) {{
-            argument(new DurationArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
+            argument(new DurationArgument("a").addUncaughtExceptionHandler((ctx, e) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
-            })).execute((a, ctx) -> {
+            })).execute((ctx, a) -> {
                 putResult(key, a.toString(), "PT1H30M");
             });
         }});
@@ -349,9 +349,9 @@ public final class ArgumentTest extends TestBase {
 
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name) {{
-            argument(new IntegerRangeArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
+            argument(new IntegerRangeArgument("a").addUncaughtExceptionHandler((ctx, e) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
-            })).execute((a, ctx) -> {
+            })).execute((ctx, a) -> {
                 putResult(key, a.toString(), "[1..10]");
             });
         }});
@@ -365,9 +365,9 @@ public final class ArgumentTest extends TestBase {
 
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name) {{
-            argument(new EnchantmentArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
+            argument(new EnchantmentArgument("a").addUncaughtExceptionHandler((ctx, e) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
-            })).execute((a, ctx) -> {
+            })).execute((ctx, a) -> {
                 putResult(key,
                           a.getKey()
                            .toString(),
@@ -387,9 +387,9 @@ public final class ArgumentTest extends TestBase {
 
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name) {{
-            argument(new ParticleArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
+            argument(new ParticleArgument("a").addUncaughtExceptionHandler((ctx, e) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
-            })).execute((a, ctx) -> {
+            })).execute((ctx, a) -> {
                 putResult(key, String.valueOf(a.getDataType() == Particle.DustOptions.class), "true");
             });
         }});
@@ -403,9 +403,9 @@ public final class ArgumentTest extends TestBase {
 
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name) {{
-            argument(new EntitiesArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
+            argument(new EntitiesArgument("a").addUncaughtExceptionHandler((ctx, e) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
-            })).execute((a, ctx) -> {
+            })).execute((ctx, a) -> {
                 putResult(key, Integer.toString(a.size()), "1");
             });
         }});
@@ -419,9 +419,9 @@ public final class ArgumentTest extends TestBase {
 
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name) {{
-            argument(new EntityArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
+            argument(new EntityArgument("a").addUncaughtExceptionHandler((ctx, e) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
-            })).execute((a, ctx) -> {
+            })).execute((ctx, a) -> {
                 putResult(key, a.getName(), playerName);
             });
         }});
@@ -435,9 +435,9 @@ public final class ArgumentTest extends TestBase {
 
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name) {{
-            argument(new EntityTypeArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
+            argument(new EntityTypeArgument("a").addUncaughtExceptionHandler((ctx, e) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
-            })).execute((a, ctx) -> {
+            })).execute((ctx, a) -> {
                 putResult(key, a.toString(), "ZOMBIE");
             });
         }});
@@ -451,9 +451,9 @@ public final class ArgumentTest extends TestBase {
 
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name) {{
-            argument(new EnumArgument<>("a", Material.class).addUncaughtExceptionHandler((e, ctx) -> {
+            argument(new EnumArgument<>("a", Material.class).addUncaughtExceptionHandler((ctx, e) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
-            })).execute((a, ctx) -> {
+            })).execute((ctx, a) -> {
                 putResult(key, a.toString(), "AIR");
             });
         }});
@@ -467,9 +467,9 @@ public final class ArgumentTest extends TestBase {
 
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name) {{
-            argument(new FloatArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
+            argument(new FloatArgument("a").addUncaughtExceptionHandler((ctx, e) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
-            })).execute((a, ctx) -> {
+            })).execute((ctx, a) -> {
                 putResult(key, a.toString(), "1.0");
             });
         }});
@@ -483,9 +483,9 @@ public final class ArgumentTest extends TestBase {
 
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name) {{
-            argument(new GameModeArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
+            argument(new GameModeArgument("a").addUncaughtExceptionHandler((ctx, e) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
-            })).execute((a, ctx) -> {
+            })).execute((ctx, a) -> {
                 putResult(key, a.toString(), "CREATIVE");
             });
         }});
@@ -499,9 +499,9 @@ public final class ArgumentTest extends TestBase {
 
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name) {{
-            argument(new IntegerArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
+            argument(new IntegerArgument("a").addUncaughtExceptionHandler((ctx, e) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
-            })).execute((a, ctx) -> {
+            })).execute((ctx, a) -> {
                 putResult(key, a.toString(), "1");
             });
         }});
@@ -515,9 +515,9 @@ public final class ArgumentTest extends TestBase {
 
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name) {{
-            argument(new ItemPredicateArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
+            argument(new ItemPredicateArgument("a").addUncaughtExceptionHandler((ctx, e) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
-            })).execute((a, ctx) -> {
+            })).execute((ctx, a) -> {
                 putResult(key,
                           a.test(new ItemStack(Material.DIAMOND)) + "," + a.test(new ItemStack(Material.DIRT)),
                           "true,false");
@@ -533,9 +533,9 @@ public final class ArgumentTest extends TestBase {
 
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name) {{
-            argument(new ItemStackArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
+            argument(new ItemStackArgument("a").addUncaughtExceptionHandler((ctx, e) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
-            })).execute((a, ctx) -> {
+            })).execute((ctx, a) -> {
                 putResult(key,
                           a.getType()
                            .name() + " x" + a.getAmount(),
@@ -552,9 +552,9 @@ public final class ArgumentTest extends TestBase {
 
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name) {{
-            argument(new LiteralArgument("a", List.of("a")).addUncaughtExceptionHandler((e, ctx) -> {
+            argument(new LiteralArgument("a", List.of("a")).addUncaughtExceptionHandler((ctx, e) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
-            })).execute((a, ctx) -> {
+            })).execute((ctx, a) -> {
                 putResult(key, a, "a");
             });
         }});
@@ -568,9 +568,9 @@ public final class ArgumentTest extends TestBase {
 
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name) {{
-            argument(new LocationArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
+            argument(new LocationArgument("a").addUncaughtExceptionHandler((ctx, e) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
-            })).execute((a, ctx) -> {
+            })).execute((ctx, a) -> {
                 putResult(key,
                           a.getX() + "," + a.getY() + "," + a.getZ() + "," + (a.getWorld() != null),
                           "0.5,0.0,0.5,true");
@@ -586,9 +586,9 @@ public final class ArgumentTest extends TestBase {
 
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name) {{
-            argument(new LocationArgument("a", false).addUncaughtExceptionHandler((e, ctx) -> {
+            argument(new LocationArgument("a", false).addUncaughtExceptionHandler((ctx, e) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
-            })).execute((a, ctx) -> {
+            })).execute((ctx, a) -> {
                 putResult(key, a.getX() + "," + a.getY() + "," + a.getZ(), "1.0,2.0,3.0");
             });
         }});
@@ -602,9 +602,9 @@ public final class ArgumentTest extends TestBase {
 
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name) {{
-            argument(new LootTableArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
+            argument(new LootTableArgument("a").addUncaughtExceptionHandler((ctx, e) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
-            })).execute((a, ctx) -> {
+            })).execute((ctx, a) -> {
                 putResult(key,
                           a.getKey()
                            .toString(),
@@ -621,9 +621,9 @@ public final class ArgumentTest extends TestBase {
 
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name) {{
-            argument(new MessageArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
+            argument(new MessageArgument("a").addUncaughtExceptionHandler((ctx, e) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
-            })).execute((a, ctx) -> {
+            })).execute((ctx, a) -> {
                 putResult(key,
                           PlainTextComponentSerializer.plainText()
                                                       .serialize(a),
@@ -641,9 +641,9 @@ public final class ArgumentTest extends TestBase {
 
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name) {{
-            argument(new NBTCompoundArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
+            argument(new NBTCompoundArgument("a").addUncaughtExceptionHandler((ctx, e) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
-            })).execute((a, ctx) -> {
+            })).execute((ctx, a) -> {
                 putResult(key, a, "{a:1b}");
             });
         }});
@@ -657,9 +657,9 @@ public final class ArgumentTest extends TestBase {
 
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name) {{
-            argument(new LongArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
+            argument(new LongArgument("a").addUncaughtExceptionHandler((ctx, e) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
-            })).execute((a, ctx) -> {
+            })).execute((ctx, a) -> {
                 putResult(key, a.toString(), "1");
             });
         }});
@@ -703,9 +703,9 @@ public final class ArgumentTest extends TestBase {
 
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name) {{
-            argument(new NameableObjectArgument<>("a", List.of(() -> "a")).addUncaughtExceptionHandler((e, ctx) -> {
+            argument(new NameableObjectArgument<>("a", List.of(() -> "a")).addUncaughtExceptionHandler((ctx, e) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
-            })).execute((a, ctx) -> {
+            })).execute((ctx, a) -> {
                 putResult(key, a.tabCompleteName(), "a");
             });
         }});
@@ -719,9 +719,9 @@ public final class ArgumentTest extends TestBase {
 
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name) {{
-            argument(new NamespacedKeyArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
+            argument(new NamespacedKeyArgument("a").addUncaughtExceptionHandler((ctx, e) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
-            })).execute((a, ctx) -> {
+            })).execute((ctx, a) -> {
                 putResult(key, a.toString(), "commandlib:example/path");
             });
         }});
@@ -737,9 +737,9 @@ public final class ArgumentTest extends TestBase {
         map.put("a", 1);
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name) {{
-            argument(new ObjectArgument<>("a", map).addUncaughtExceptionHandler((e, ctx) -> {
+            argument(new ObjectArgument<>("a", map).addUncaughtExceptionHandler((ctx, e) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
-            })).execute((a, ctx) -> {
+            })).execute((ctx, a) -> {
                 putResult(key, a.toString(), "1");
             });
         }});
@@ -753,9 +753,9 @@ public final class ArgumentTest extends TestBase {
 
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name) {{
-            argument(new OfflinePlayerArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
+            argument(new OfflinePlayerArgument("a").addUncaughtExceptionHandler((ctx, e) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
-            })).execute((a, ctx) -> {
+            })).execute((ctx, a) -> {
                 putResult(key, a.getName(), playerName);
             });
         }});
@@ -769,9 +769,9 @@ public final class ArgumentTest extends TestBase {
 
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name) {{
-            argument(new OfflinePlayersArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
+            argument(new OfflinePlayersArgument("a").addUncaughtExceptionHandler((ctx, e) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
-            })).execute((a, ctx) -> {
+            })).execute((ctx, a) -> {
                 putResult(key,
                           a.stream()
                            .map(OfflinePlayer::getName)
@@ -796,9 +796,9 @@ public final class ArgumentTest extends TestBase {
 
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name) {{
-            argument(new ObjectiveArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
+            argument(new ObjectiveArgument("a").addUncaughtExceptionHandler((ctx, e) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
-            })).execute((a, ctx) -> {
+            })).execute((ctx, a) -> {
                 putResult(key, a.getName(), objectiveName);
             });
         }});
@@ -812,9 +812,9 @@ public final class ArgumentTest extends TestBase {
 
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name) {{
-            argument(new ParticleArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
+            argument(new ParticleArgument("a").addUncaughtExceptionHandler((ctx, e) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
-            })).execute((a, ctx) -> {
+            })).execute((ctx, a) -> {
                 putResult(key, a.name(), "FLAME");
             });
         }});
@@ -828,9 +828,9 @@ public final class ArgumentTest extends TestBase {
 
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name) {{
-            argument(new PlayerArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
+            argument(new PlayerArgument("a").addUncaughtExceptionHandler((ctx, e) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
-            })).execute((a, ctx) -> {
+            })).execute((ctx, a) -> {
                 putResult(key, a.getName(), playerName);
             });
         }});
@@ -844,9 +844,9 @@ public final class ArgumentTest extends TestBase {
 
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name) {{
-            argument(new PlayersArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
+            argument(new PlayersArgument("a").addUncaughtExceptionHandler((ctx, e) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
-            })).execute((a, ctx) -> {
+            })).execute((ctx, a) -> {
                 putResult(key,
                           a.stream()
                            .map(x -> x.getName())
@@ -864,9 +864,9 @@ public final class ArgumentTest extends TestBase {
 
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name) {{
-            argument(new PotionEffectArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
+            argument(new PotionEffectArgument("a").addUncaughtExceptionHandler((ctx, e) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
-            })).execute((a, ctx) -> {
+            })).execute((ctx, a) -> {
                 putResult(key,
                           a.getType()
                            .equals(PotionEffectType.SPEED) + ":" + a.getDuration() + ":" + a.getAmplifier(),
@@ -883,9 +883,9 @@ public final class ArgumentTest extends TestBase {
 
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name) {{
-            argument(new RecipeArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
+            argument(new RecipeArgument("a").addUncaughtExceptionHandler((ctx, e) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
-            })).execute((a, ctx) -> {
+            })).execute((ctx, a) -> {
                 putResult(key,
                           ((Keyed) a).getKey()
                                      .toString(),
@@ -902,9 +902,9 @@ public final class ArgumentTest extends TestBase {
 
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name) {{
-            argument(new RegistryArgument<>("a", RegistryKey.ENTITY_TYPE).addUncaughtExceptionHandler((e, ctx) -> {
+            argument(new RegistryArgument<>("a", RegistryKey.ENTITY_TYPE).addUncaughtExceptionHandler((ctx, e) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
-            })).execute((a, ctx) -> {
+            })).execute((ctx, a) -> {
                 putResult(key,
                           a.getKey()
                            .getKey(),
@@ -921,9 +921,9 @@ public final class ArgumentTest extends TestBase {
 
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name) {{
-            argument(new ScoreboardDisplaySlotArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
+            argument(new ScoreboardDisplaySlotArgument("a").addUncaughtExceptionHandler((ctx, e) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
-            })).execute((a, ctx) -> {
+            })).execute((ctx, a) -> {
                 putResult(key, a.name(), "SIDEBAR");
             });
         }});
@@ -937,9 +937,9 @@ public final class ArgumentTest extends TestBase {
 
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name) {{
-            argument(new SoundArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
+            argument(new SoundArgument("a").addUncaughtExceptionHandler((ctx, e) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
-            })).execute((a, ctx) -> {
+            })).execute((ctx, a) -> {
                 // Keyed, since Sound is an enum before 1.21.3 and a registry interface from then.
                 putResult(key,
                           ((Keyed) a).getKey()
@@ -957,9 +957,9 @@ public final class ArgumentTest extends TestBase {
 
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name) {{
-            argument(new TimeArgument("a", 1).addUncaughtExceptionHandler((e, ctx) -> {
+            argument(new TimeArgument("a", 1).addUncaughtExceptionHandler((ctx, e) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
-            })).execute((a, ctx) -> {
+            })).execute((ctx, a) -> {
                 putResult(key, a.toString(), "12000");
             });
         }});
@@ -973,9 +973,9 @@ public final class ArgumentTest extends TestBase {
 
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name) {{
-            argument(new StringArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
+            argument(new StringArgument("a").addUncaughtExceptionHandler((ctx, e) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
-            })).execute((a, ctx) -> {
+            })).execute((ctx, a) -> {
                 putResult(key, a, "a");
             });
         }});
@@ -990,9 +990,9 @@ public final class ArgumentTest extends TestBase {
         String teamName = "test";
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name) {{
-            argument(new TeamArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
+            argument(new TeamArgument("a").addUncaughtExceptionHandler((ctx, e) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
-            })).execute((a, ctx) -> {
+            })).execute((ctx, a) -> {
                 putResult(key, a.getName(), teamName);
             });
         }});
@@ -1006,9 +1006,9 @@ public final class ArgumentTest extends TestBase {
 
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name) {{
-            argument(new UnparsedArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
+            argument(new UnparsedArgument("a").addUncaughtExceptionHandler((ctx, e) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
-            })).execute((a, ctx) -> {
+            })).execute((ctx, a) -> {
                 putResult(key, a, "a");
             });
         }});
@@ -1023,9 +1023,9 @@ public final class ArgumentTest extends TestBase {
 
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name) {{
-            argument(new UUIDArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
+            argument(new UUIDArgument("a").addUncaughtExceptionHandler((ctx, e) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
-            })).execute((a, ctx) -> {
+            })).execute((ctx, a) -> {
                 putResult(key, a.toString(), uuid.toString());
             });
         }});
@@ -1039,9 +1039,9 @@ public final class ArgumentTest extends TestBase {
 
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name) {{
-            argument(new WorldArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
+            argument(new WorldArgument("a").addUncaughtExceptionHandler((ctx, e) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
-            })).execute((a, ctx) -> {
+            })).execute((ctx, a) -> {
                 putResult(key, a.getName(), "world");
             });
         }});
@@ -1057,9 +1057,9 @@ public final class ArgumentTest extends TestBase {
 
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name) {{
-            argument(new UUIDsArgument("a").addUncaughtExceptionHandler((e, ctx) -> {
+            argument(new UUIDsArgument("a").addUncaughtExceptionHandler((ctx, e) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
-            })).execute((a, ctx) -> {
+            })).execute((ctx, a) -> {
                 putResult(key,
                           a.toString(),
                           List.of(uuid)

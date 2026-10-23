@@ -22,7 +22,7 @@ class UUIDArgumentTest {
 
         try (MockedStatic<Bukkit> bukkit = Mockito.mockStatic(Bukkit.class);
              CommandTester tester = new CommandTester(new Command("id") {{
-                 argument(new UUIDArgument("uuid")).execute((uuid, ctx) -> {
+                 argument(new UUIDArgument("uuid")).execute((ctx, uuid) -> {
                      ctx.sendMessage(uuid.toString());
                  });
              }}, "test.command")) {
@@ -45,7 +45,7 @@ class UUIDArgumentTest {
 
         try (MockedStatic<Bukkit> bukkit = Mockito.mockStatic(Bukkit.class);
              CommandTester tester = new CommandTester(new Command("id") {{
-                 argument(new UUIDArgument("uuid")).execute((uuid, ctx) -> {
+                 argument(new UUIDArgument("uuid")).execute((ctx, uuid) -> {
                      ctx.sendMessage(uuid.toString());
                  });
              }}, "test.command")) {

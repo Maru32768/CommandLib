@@ -24,7 +24,7 @@ class OptionRedirectTest {
             CommandOption<Integer, TestCommandContext> limit = option(Options.integer("limit", 'n', 10, 1, 100));
             CommandOption<List<String>, TestCommandContext> tags = option(Options.string("tag", 't', "")
                                                                                  .repeatable(3));
-            argument(new CommonStringArgument<>("target")).execute((target, ctx) -> {
+            argument(new CommonStringArgument<>("target")).execute((ctx, target) -> {
                 ctx.sendMessage(target + " force=" + ctx.getOption(force) + " verbose=" + ctx.getOption(verbose)
                         + " limit=" + ctx.getOption(limit) + " tags=" + ctx.getOption(tags) + " inputs="
                         + ctx.getInputs());
@@ -156,7 +156,7 @@ class OptionRedirectTest {
             addChildren(new TestCommand("start") {{
                 CommandOption<Boolean, TestCommandContext> force = option(Options.flag("force", 'f'));
                 CommandOption<Boolean, TestCommandContext> quiet = option(Options.flag("quiet", 'q'));
-                argument(new CommonStringArgument<>("arena")).execute((arena, ctx) -> ctx.sendMessage(arena
+                argument(new CommonStringArgument<>("arena")).execute((ctx, arena) -> ctx.sendMessage(arena
                         + " " + ctx.getOption(force) + " " + ctx.getOption(quiet) + " " + ctx.getInputs()));
             }});
         }});
@@ -184,7 +184,7 @@ class OptionRedirectTest {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("scan") {{
             option(Options.flag("force", 'f'));
             option(Options.flag("quiet", 'q'));
-            argument(new Word("target").addSuggestionProvider(sb -> sb.suggest("Alex"))).execute((target, ctx) -> {
+            argument(new Word("target").addSuggestionProvider(sb -> sb.suggest("Alex"))).execute((ctx, target) -> {
             });
         }});
 

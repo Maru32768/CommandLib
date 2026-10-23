@@ -48,15 +48,15 @@ public class CommandSyntaxExceptionTest extends TestBase {
                                                                             result == null
                                                                                     ? "Succeeded converting CommandSyntaxException"
                                                                                     : result)),
-                                         (e,
-                                          ctx) -> putResult(new TestResult(key,
-                                                                           TestStatus.FAILED,
-                                                                           ExceptionUtil.stackTraceToString(e))))).execute((a,
-                                                                                                                            ctx) -> {
-                                                                               putResult(new TestResult(key,
-                                                                                                        TestStatus.FAILED,
-                                                                                                        "CommandSyntaxException was not thrown."));
-                                                                           });
+                                         (ctx,
+                                          e) -> putResult(new TestResult(key,
+                                                                         TestStatus.FAILED,
+                                                                         ExceptionUtil.stackTraceToString(e))))).execute((ctx,
+                                                                                                                          a) -> {
+                                                                             putResult(new TestResult(key,
+                                                                                                      TestStatus.FAILED,
+                                                                                                      "CommandSyntaxException was not thrown."));
+                                                                         });
         }});
 
         return List.of(buildCommand(command, name + " true"));

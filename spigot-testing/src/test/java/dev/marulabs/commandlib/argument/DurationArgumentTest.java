@@ -13,8 +13,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 class DurationArgumentTest {
     private static Command waitCommand() {
         return new Command("wait") {{
-            argument(new DurationArgument("duration")).execute((duration,
-                                                                ctx) -> ctx.sendMessage(String.valueOf(duration.toMillis())));
+            argument(new DurationArgument("duration")).execute((ctx,
+                                                                duration) -> ctx.sendMessage(String.valueOf(duration.toMillis())));
         }};
     }
 
@@ -63,8 +63,8 @@ class DurationArgumentTest {
         FakeSender sender = FakeSender.player("Alice");
 
         try (CommandTester tester = new CommandTester(() -> new Command("wait") {{
-            argument(new DurationArgument("duration").validator(x -> x.compareTo(Duration.ofHours(1)) <= 0)).execute((duration,
-                                                                                                                      ctx) -> ctx.sendMessage("ok"));
+            argument(new DurationArgument("duration").validator(x -> x.compareTo(Duration.ofHours(1)) <= 0)).execute((ctx,
+                                                                                                                      duration) -> ctx.sendMessage("ok"));
         }}, "test.command")) {
             tester.execute("wait 59m", sender);
             tester.execute("wait 2h", sender);

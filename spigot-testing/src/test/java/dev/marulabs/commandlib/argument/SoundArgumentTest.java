@@ -13,7 +13,7 @@ class SoundArgumentTest {
         FakeSender sender = FakeSender.player("Alice");
 
         try (CommandTester tester = new CommandTester(() -> new Command("sound") {{
-            argument(new SoundArgument("value")).execute((sound, ctx) -> ctx.sendMessage(sound.getKey()
+            argument(new SoundArgument("value")).execute((ctx, sound) -> ctx.sendMessage(sound.getKey()
                                                                                               .toString()));
         }}, "test.command")) {
             tester.execute("sound minecraft:block.anvil.land", sender);
@@ -27,7 +27,7 @@ class SoundArgumentTest {
         FakeSender sender = FakeSender.player("Alice");
 
         try (CommandTester tester = new CommandTester(() -> new Command("sound") {{
-            argument(new SoundArgument("value")).execute((sound, ctx) -> ctx.sendMessage("unreachable"));
+            argument(new SoundArgument("value")).execute((ctx, sound) -> ctx.sendMessage("unreachable"));
         }}, "test.command")) {
             tester.execute("sound commandlib:missing", sender);
         }

@@ -43,23 +43,23 @@ public final class QuintArgumentBranch<T1, T2, T3, T4, T5, C extends CommonComma
         this.argument5 = argument5;
     }
 
-    public QuintArgumentBranch<T1, T2, T3, T4, T5, C, T> execute(@NotNull HexaConsumer<T1, T2, T3, T4, T5, C> action) {
-        super.execute(ctx -> action.accept(ctx.getArgument(argument1),
+    public QuintArgumentBranch<T1, T2, T3, T4, T5, C, T> execute(@NotNull HexaConsumer<C, T1, T2, T3, T4, T5> action) {
+        super.execute(ctx -> action.accept(ctx,
+                                           ctx.getArgument(argument1),
                                            ctx.getArgument(argument2),
                                            ctx.getArgument(argument3),
                                            ctx.getArgument(argument4),
-                                           ctx.getArgument(argument5),
-                                           ctx));
+                                           ctx.getArgument(argument5)));
         return this;
     }
 
-    public QuintArgumentBranch<T1, T2, T3, T4, T5, C, T> executeAsync(@NotNull HexaFunction<T1, T2, T3, T4, T5, C, CompletionStage<?>> action) {
-        super.executeAsync(ctx -> action.apply(ctx.getArgument(argument1),
+    public QuintArgumentBranch<T1, T2, T3, T4, T5, C, T> executeAsync(@NotNull HexaFunction<C, T1, T2, T3, T4, T5, CompletionStage<?>> action) {
+        super.executeAsync(ctx -> action.apply(ctx,
+                                               ctx.getArgument(argument1),
                                                ctx.getArgument(argument2),
                                                ctx.getArgument(argument3),
                                                ctx.getArgument(argument4),
-                                               ctx.getArgument(argument5),
-                                               ctx));
+                                               ctx.getArgument(argument5)));
         return this;
     }
 

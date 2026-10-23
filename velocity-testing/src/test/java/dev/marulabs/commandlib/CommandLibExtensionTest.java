@@ -70,7 +70,7 @@ class CommandLibExtensionTest {
 
     private static Command healCommand() {
         return new Command("heal") {{
-            argument(new PlayerArgument("target"), new IntegerArgument("amount")).execute((target, amount, ctx) -> {
+            argument(new PlayerArgument("target"), new IntegerArgument("amount")).execute((ctx, target, amount) -> {
                 ctx.sendMessage("Healed " + target.getUsername() + " by " + amount);
             });
         }};

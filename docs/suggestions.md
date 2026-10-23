@@ -33,7 +33,7 @@ class WarpCommand extends Command {
                  .stream()
                  .filter(name -> name.startsWith(typed))
                  .forEach(sb::suggest);
-        })).execute((name, ctx) -> ctx.sendMessage("Warping to " + name));
+        })).execute((ctx, name) -> ctx.sendMessage("Warping to " + name));
     }
 }
 ```
@@ -76,7 +76,7 @@ argument(new WorldArgument("world"), new StringArgument("region", StringArgument
     }
     regions.namesIn(world)
            .forEach(sb::suggest);
-})).execute((world, region, ctx) -> ctx.sendMessage(world.getName() + "/" + region));
+})).execute((ctx, world, region) -> ctx.sendMessage(world.getName() + "/" + region));
 ```
 
 `regions` stands for your own code.
@@ -95,7 +95,7 @@ validator accepts it:
 
 ```java
 argument(new EnumArgument<>("block", Material.class).validator(Material::isBlock))
-        .execute((material, ctx) -> ctx.sendMessage(material.name()));
+        .execute((ctx, material) -> ctx.sendMessage(material.name()));
 ```
 
 Only block materials are suggested, and other materials are rejected when the command runs.
@@ -116,7 +116,7 @@ For a styled tooltip, pass a Brigadier `Message` that the platform can send:
 // Paper
 argument(new StringArgument("key", StringArgument.Type.WORD).addSuggestionProvider(sb -> sb.suggest("difficulty",
         PaperMessages.toMessage(Component.text("The world difficulty", NamedTextColor.GRAY)))))
-        .execute((key, ctx) -> ctx.sendMessage(key));
+        .execute((ctx, key) -> ctx.sendMessage(key));
 ```
 
 How each client version renders tooltips has not been checked per platform.
@@ -143,7 +143,7 @@ For slow lookups, start the work, add the suggestions when it finishes, and pass
 argument(new StringArgument("player", StringArgument.Type.WORD).setSuggestionProvider(sb -> {
     sb.await(database.findNamesAsync(sb.getLatestInput())
                      .thenAccept(names -> names.forEach(sb::suggest)));
-})).execute((player, ctx) -> ctx.sendMessage(player));
+})).execute((ctx, player) -> ctx.sendMessage(player));
 ```
 
 `database.findNamesAsync` stands for your own code returning a `CompletionStage<List<String>>`. `SuggestionBuilder`

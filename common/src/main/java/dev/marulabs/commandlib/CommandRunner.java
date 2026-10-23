@@ -369,7 +369,7 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
         // which would notify every handler again with the handler's own exception.
         for (UncaughtExceptionHandler<C> handler : uncaughtExceptionHandlers) {
             try {
-                handler.uncaughtException(e, ctx);
+                handler.uncaughtException(ctx, e);
             } catch (Throwable t) {
                 platformAdapter.logError("An uncaught exception handler of " + describe(ctx) + " failed", t);
             }

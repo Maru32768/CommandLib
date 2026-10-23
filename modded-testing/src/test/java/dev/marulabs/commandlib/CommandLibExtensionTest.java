@@ -65,7 +65,7 @@ class CommandLibExtensionTest {
         return new Command("heal") {{
             addAliases("h");
             option(Options.flag("silent", 's'));
-            argument(new PlayerArgument("target"), new IntegerArgument("amount")).execute((target, amount, ctx) -> {
+            argument(new PlayerArgument("target"), new IntegerArgument("amount")).execute((ctx, target, amount) -> {
                 ctx.sendMessage("Healed " + target.getName()
                                                   .getString()
                         + " by " + amount);

@@ -371,7 +371,7 @@ public abstract class CommonCommandContext<S, C> {
 
     /**
      * Fails the command with {@code message} and each of {@code additionalMessages} in red, as throwing
-     * {@link CommandPrerequisiteException} does, also from a typed executor ({@code (target, ctx) -> ...}) or another
+     * {@link CommandPrerequisiteException} does, also from a typed executor ({@code (ctx, target) -> ...}) or another
      * lambda that cannot throw it. It never returns; write {@code throw ctx.fail(...)} to end a branch.
      */
     @NotNull

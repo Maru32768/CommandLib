@@ -18,7 +18,7 @@ class WorldArgumentTest {
                .thenReturn("world");
 
         try (CommandTester tester = new CommandTester(() -> new Command("tp") {{
-            argument(new WorldArgument("world")).execute((world, ctx) -> ctx.sendMessage(world.getName()));
+            argument(new WorldArgument("world")).execute((ctx, world) -> ctx.sendMessage(world.getName()));
         }}, "test.command").withFakeWorld("minecraft:overworld", mockWorld)
                            .withFakeWorld("the_nether", mockWorld)) {
             tester.execute("tp minecraft:overworld", sender);
@@ -39,7 +39,7 @@ class WorldArgumentTest {
         FakeSender sender = FakeSender.player("Alice");
 
         try (CommandTester tester = new CommandTester(() -> new Command("tp") {{
-            argument(new WorldArgument("world")).execute((world, ctx) -> ctx.sendMessage(world.getName()));
+            argument(new WorldArgument("world")).execute((ctx, world) -> ctx.sendMessage(world.getName()));
         }}, "test.command")) {
             tester.execute("tp commandlib:missing", sender);
         }

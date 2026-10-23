@@ -46,7 +46,7 @@ class ContextValueTest {
                                            .name());
                 return next.proceed();
             });
-            argument(new Word("arena")).execute((arena, ctx) -> log.add(ctx.get(GamePlayer.class)
+            argument(new Word("arena")).execute((ctx, arena) -> log.add(ctx.get(GamePlayer.class)
                                                                            .name()
                     + " joins " + arena));
         }});
@@ -158,11 +158,11 @@ class ContextValueTest {
                 throw new CommandPrerequisiteException("You are not in a game.");
             });
             // The typed executor cannot throw the checked exception, but the provider's still fails the command.
-            argument(new Word("arena")).execute((arena, ctx) -> ctx.sendMessage(ctx.get(GamePlayer.class)
+            argument(new Word("arena")).execute((ctx, arena) -> ctx.sendMessage(ctx.get(GamePlayer.class)
                                                                                    .name()));
             addChildren(new TestCommand("leave") {{
-                require(ctx -> ctx.get(GamePlayer.class)).execute((player,
-                                                                   ctx) -> ctx.sendMessage(player.name()));
+                require(ctx -> ctx.get(GamePlayer.class)).execute((ctx,
+                                                                   player) -> ctx.sendMessage(player.name()));
             }});
         }});
 
@@ -213,8 +213,8 @@ class ContextValueTest {
                                                           .name())
                                       .setSuggestionProvider(sb -> sb.suggest(sb.getContext()
                                                                                 .get(GamePlayer.class)
-                                                                                .name()))).execute((owner,
-                                                                                                    ctx) -> ctx.sendMessage("owner "
+                                                                                .name()))).execute((ctx,
+                                                                                                    owner) -> ctx.sendMessage("owner "
                                                                                                             + owner));
         }});
 

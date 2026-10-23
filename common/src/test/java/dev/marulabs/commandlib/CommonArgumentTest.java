@@ -23,7 +23,7 @@ class CommonArgumentTest {
                      new CommonIntegerArgument<>("amount"),
                      new CommonLongArgument<>("ticks"),
                      new CommonFloatArgument<>("speed"),
-                     new CommonDoubleArgument<>("ratio")).execute((enabled, amount, ticks, speed, ratio, ctx) -> {
+                     new CommonDoubleArgument<>("ratio")).execute((ctx, enabled, amount, ticks, speed, ratio) -> {
                          ctx.sendMessage(enabled + ":" + amount + ":" + ticks + ":" + speed + ":" + ratio);
                      });
         }});
@@ -39,10 +39,10 @@ class CommonArgumentTest {
             argument(new CommonStringArgument<>("word", CommonStringArgument.Type.WORD),
                      new CommonStringArgument<>("quoted", CommonStringArgument.Type.PHRASE_QUOTED),
                      new CommonStringArgument<>("rest", CommonStringArgument.Type.PHRASE))
-                                                                                          .execute((word,
+                                                                                          .execute((ctx,
+                                                                                                    word,
                                                                                                     quoted,
-                                                                                                    rest,
-                                                                                                    ctx) -> {
+                                                                                                    rest) -> {
                                                                                               ctx.sendMessage(word
                                                                                                       + "|" + quoted
                                                                                                       + "|" + rest);
@@ -57,7 +57,7 @@ class CommonArgumentTest {
     @Test
     void enum_argument_resolves_case_insensitively_and_rejects_unknown_value() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("go") {{
-            argument(new CommonEnumArgument<>("dir", Direction.class)).execute((dir, ctx) -> {
+            argument(new CommonEnumArgument<>("dir", Direction.class)).execute((ctx, dir) -> {
                 ctx.sendMessage("going " + dir.name());
             });
         }});
@@ -74,7 +74,7 @@ class CommonArgumentTest {
     void object_argument_resolves_by_name_and_rejects_unknown_value() throws Exception {
         Map<String, Integer> items = Map.of("sword", 1, "bow", 2);
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("give") {{
-            argument(new CommonObjectArgument<>("item", items)).execute((item, ctx) -> {
+            argument(new CommonObjectArgument<>("item", items)).execute((ctx, item) -> {
                 ctx.sendMessage("item=" + item);
             });
         }});
@@ -91,7 +91,7 @@ class CommonArgumentTest {
     void nameable_object_argument_resolves_by_tab_complete_name() throws Exception {
         List<Item> items = List.of(new Item("sword", 1), new Item("bow", 2));
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("equip") {{
-            argument(new CommonNameableObjectArgument<>("item", items)).execute((item, ctx) -> {
+            argument(new CommonNameableObjectArgument<>("item", items)).execute((ctx, item) -> {
                 ctx.sendMessage("equipped id=" + item.id);
             });
         }});
@@ -104,7 +104,7 @@ class CommonArgumentTest {
     @Test
     void literal_argument_accepts_only_listed_values() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("mode") {{
-            argument(new CommonLiteralArgument<>("value", List.of("on", "off"))).execute((value, ctx) -> {
+            argument(new CommonLiteralArgument<>("value", List.of("on", "off"))).execute((ctx, value) -> {
                 ctx.sendMessage("mode=" + value);
             });
         }});
@@ -121,7 +121,7 @@ class CommonArgumentTest {
     void validator_and_transformer_are_applied_after_parsing() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("set") {{
             argument(new IntArg("amount").validator(value -> value >= 0)
-                                         .transformer(value -> value * 2)).execute((amount, ctx) -> {
+                                         .transformer(value -> value * 2)).execute((ctx, amount) -> {
                                              ctx.sendMessage("amount=" + amount);
                                          });
         }});
@@ -138,7 +138,7 @@ class CommonArgumentTest {
     void additional_parser_can_recover_from_library_parse_failure() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("set") {{
             argument(new ObjArg<>("item", Map.of("sword", 1)).additionalParser((ctx, input) -> input.equals("axe")
-                    ? 2 : null)).execute((item, ctx) -> {
+                    ? 2 : null)).execute((ctx, item) -> {
                         ctx.sendMessage("item=" + item);
                     });
         }});
@@ -152,7 +152,7 @@ class CommonArgumentTest {
     void context_exposes_raw_and_parsed_arguments() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("sum") {{
             argument(new CommonIntegerArgument<>("left"),
-                     new CommonIntegerArgument<>("right")).execute((left, right, ctx) -> {
+                     new CommonIntegerArgument<>("right")).execute((ctx, left, right) -> {
                          ctx.sendMessage(ctx.getInput("left") + ":" + ctx.getInput("right"));
                          ctx.sendMessage(ctx.getInputs()
                                             .toString());
@@ -170,11 +170,11 @@ class CommonArgumentTest {
     @Test
     void suggestions_include_custom_object_and_literal_candidates() {
         TestCommandRunner objectRunner = new TestCommandRunner(new TestCommand("give") {{
-            argument(new CommonObjectArgument<>("item", Map.of("sword", 1, "bow", 2))).execute((item, ctx) -> {
+            argument(new CommonObjectArgument<>("item", Map.of("sword", 1, "bow", 2))).execute((ctx, item) -> {
             });
         }});
         TestCommandRunner literalRunner = new TestCommandRunner(new TestCommand("mode") {{
-            argument(new CommonLiteralArgument<>("value", List.of("on", "off"))).execute((value, ctx) -> {
+            argument(new CommonLiteralArgument<>("value", List.of("on", "off"))).execute((ctx, value) -> {
             });
         }});
 
@@ -188,7 +188,7 @@ class CommonArgumentTest {
             argument(new StrArg("word").addSuggestionProvider(sb -> sb.await(CompletableFuture.runAsync(() -> {
                 sb.suggest("alpha");
                 sb.suggest("beta");
-            })))).execute((word, ctx) -> {
+            })))).execute((ctx, word) -> {
             });
         }});
 
@@ -201,8 +201,8 @@ class CommonArgumentTest {
     void a_failed_async_suggestion_stage_still_completes_the_suggestions() {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("search") {{
             argument(new StrArg("word").addSuggestionProvider(sb -> sb.suggest("alpha")
-                                                                      .await(CompletableFuture.failedFuture(new IllegalStateException("broken"))))).execute((word,
-                                                                                                                                                             ctx) -> {
+                                                                      .await(CompletableFuture.failedFuture(new IllegalStateException("broken"))))).execute((ctx,
+                                                                                                                                                             word) -> {
                                                                       });
         }});
 
@@ -215,7 +215,7 @@ class CommonArgumentTest {
             argument(new StrArg("key")).child(new TestCommand("set") {{
                 argument(new StrArg("value").addSuggestionProvider(sb -> sb.suggest(sb.getContext()
                                                                                       .getArgument("key")
-                        + "-default"))).execute((value, ctx) -> {
+                        + "-default"))).execute((ctx, value) -> {
                         });
             }});
         }});
@@ -229,17 +229,17 @@ class CommonArgumentTest {
     @Test
     void default_suggestions_can_be_cleared_and_restored() {
         TestCommandRunner addedRunner = new TestCommandRunner(new TestCommand("pick") {{
-            argument(new DefaultSuggestingArg("value").addSuggestionProvider(sb -> sb.suggest("custom"))).execute((value,
-                                                                                                                   ctx) -> {
+            argument(new DefaultSuggestingArg("value").addSuggestionProvider(sb -> sb.suggest("custom"))).execute((ctx,
+                                                                                                                   value) -> {
             });
         }});
         TestCommandRunner clearedRunner = new TestCommandRunner(new TestCommand("pick") {{
-            argument(new DefaultSuggestingArg("value").clearSuggestionProviders()).execute((value, ctx) -> {
+            argument(new DefaultSuggestingArg("value").clearSuggestionProviders()).execute((ctx, value) -> {
             });
         }});
         TestCommandRunner restoredRunner = new TestCommandRunner(new TestCommand("pick") {{
             argument(new DefaultSuggestingArg("value").clearSuggestionProviders()
-                                                      .useDefaultSuggestions()).execute((value, ctx) -> {
+                                                      .useDefaultSuggestions()).execute((ctx, value) -> {
                                                       });
         }});
 
@@ -252,7 +252,7 @@ class CommonArgumentTest {
     void default_suggestions_built_on_another_builder_are_kept() {
         // Vanilla parsers such as the item and entity selector arguments suggest through builder.createOffset(...).
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("pick") {{
-            argument(new DefaultSuggestingArg("value", new OffsetSuggestingType())).execute((value, ctx) -> {
+            argument(new DefaultSuggestingArg("value", new OffsetSuggestingType())).execute((ctx, value) -> {
             });
         }});
 

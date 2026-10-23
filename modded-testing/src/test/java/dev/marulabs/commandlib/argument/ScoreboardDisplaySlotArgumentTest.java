@@ -19,7 +19,7 @@ class ScoreboardDisplaySlotArgumentTest {
         List<String> messages;
 
         try (CommandTester tester = new CommandTester(() -> new Command("slot") {{
-            argument(new ScoreboardDisplaySlotArgument("slot")).execute((slot, ctx) -> {
+            argument(new ScoreboardDisplaySlotArgument("slot")).execute((ctx, slot) -> {
                 //? if >=1.20.2 {
                 /*ctx.sendMessage(slot.getSerializedName());
                 *///?} else

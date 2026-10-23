@@ -37,19 +37,19 @@ public final class TriArgumentBranch<T1, T2, T3, C extends CommonCommandContext<
         this.argument3 = argument3;
     }
 
-    public TriArgumentBranch<T1, T2, T3, C, T> execute(@NotNull TetraConsumer<T1, T2, T3, C> action) {
-        super.execute(ctx -> action.accept(ctx.getArgument(argument1),
+    public TriArgumentBranch<T1, T2, T3, C, T> execute(@NotNull TetraConsumer<C, T1, T2, T3> action) {
+        super.execute(ctx -> action.accept(ctx,
+                                           ctx.getArgument(argument1),
                                            ctx.getArgument(argument2),
-                                           ctx.getArgument(argument3),
-                                           ctx));
+                                           ctx.getArgument(argument3)));
         return this;
     }
 
-    public TriArgumentBranch<T1, T2, T3, C, T> executeAsync(@NotNull TetraFunction<T1, T2, T3, C, CompletionStage<?>> action) {
-        super.executeAsync(ctx -> action.apply(ctx.getArgument(argument1),
+    public TriArgumentBranch<T1, T2, T3, C, T> executeAsync(@NotNull TetraFunction<C, T1, T2, T3, CompletionStage<?>> action) {
+        super.executeAsync(ctx -> action.apply(ctx,
+                                               ctx.getArgument(argument1),
                                                ctx.getArgument(argument2),
-                                               ctx.getArgument(argument3),
-                                               ctx));
+                                               ctx.getArgument(argument3)));
         return this;
     }
 

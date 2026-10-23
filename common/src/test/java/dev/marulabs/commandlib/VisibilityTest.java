@@ -31,8 +31,8 @@ class VisibilityTest {
             }}, new TestCommand("kick") {{
                 argument(new CommonStringArgument<>("player")).visibleWhen(ctx -> ctx.getActor()
                                                                                      .isOperator())
-                                                              .execute((player,
-                                                                        ctx) -> ctx.sendMessage("kicked "
+                                                              .execute((ctx,
+                                                                        player) -> ctx.sendMessage("kicked "
                                                                                 + player));
                 execute(ctx -> ctx.sendMessage("kick menu"));
             }});
@@ -132,8 +132,8 @@ class VisibilityTest {
         TestCommand game = new TestCommand("game") {{
             addChildren(new TestCommand("kick") {{
                 argument(new CommonStringArgument<>("player")).visibleWhen(ctx -> !hidden.get())
-                                                              .execute((player,
-                                                                        ctx) -> ctx.sendMessage("kicked "
+                                                              .execute((ctx,
+                                                                        player) -> ctx.sendMessage("kicked "
                                                                                 + player));
             }}, new TestCommand("admin") {{
                 visibleWhen(ctx -> !hidden.get());
@@ -196,8 +196,8 @@ class VisibilityTest {
             }}, new TestCommand("kick") {{
                 provide(Integer.class, ctx -> 1);
                 argument(new CommonStringArgument<>("player")).visibleWhen(ctx -> ctx.get(Integer.class) == 1)
-                                                              .execute((player,
-                                                                        ctx) -> ctx.sendMessage(player));
+                                                              .execute((ctx,
+                                                                        player) -> ctx.sendMessage(player));
             }});
         }}, player(false));
 
@@ -214,11 +214,11 @@ class VisibilityTest {
             argument(new CommonStringArgument<>("key")).child(new TestCommand("set") {{
                 provide(Integer.class, ctx -> 1);
                 argument(new CommonStringArgument<>("value")).visibleWhen(ctx -> ctx.get(Integer.class) == 1)
-                                                             .execute((value, ctx) -> ctx.sendMessage(value));
+                                                             .execute((ctx, value) -> ctx.sendMessage(value));
             }}, new TestCommand("unset") {{
                 provide(Integer.class, ctx -> 2);
                 argument(new CommonStringArgument<>("old")).visibleWhen(ctx -> ctx.get(Integer.class) == 1)
-                                                           .execute((old, ctx) -> ctx.sendMessage(old));
+                                                           .execute((ctx, old) -> ctx.sendMessage(old));
             }});
         }}, player(false));
 

@@ -23,7 +23,7 @@ class AttributeArgumentTest {
         List<String> suggestions;
 
         try (CommandTester tester = new CommandTester(() -> new Command("attribute") {{
-            argument(new AttributeArgument("attribute")).execute((attribute, ctx) -> {
+            argument(new AttributeArgument("attribute")).execute((ctx, attribute) -> {
                 //? if >=1.20.5 {
                 /*ctx.sendMessage(String.valueOf(attribute.value() == Attributes.MAX_HEALTH.value()));
                 *///?} else

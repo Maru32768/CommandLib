@@ -14,10 +14,10 @@ public final class BuilderStatsCommand {
         return Command.builder("stats")
                       .description("Show a player's kills")
                       .argument(new StringArgument("player"),
-                                branch -> branch.executeAsync((player,
-                                                               ctx) -> ctx.supplyAsync(() -> store.kills(player))
-                                                                          .thenAccept(kills -> ctx.sendSuccess(player
-                                                                                  + " has " + kills + " kills"))))
+                                branch -> branch.executeAsync((ctx,
+                                                               player) -> ctx.supplyAsync(() -> store.kills(player))
+                                                                             .thenAccept(kills -> ctx.sendSuccess(player
+                                                                                     + " has " + kills + " kills"))))
                       .build();
     }
 }

@@ -34,13 +34,13 @@ public final class BiArgumentBranch<T1, T2, C extends CommonCommandContext<?, ?>
         this.argument2 = argument2;
     }
 
-    public BiArgumentBranch<T1, T2, C, T> execute(@NotNull TriConsumer<T1, T2, C> action) {
-        super.execute(ctx -> action.accept(ctx.getArgument(argument1), ctx.getArgument(argument2), ctx));
+    public BiArgumentBranch<T1, T2, C, T> execute(@NotNull TriConsumer<C, T1, T2> action) {
+        super.execute(ctx -> action.accept(ctx, ctx.getArgument(argument1), ctx.getArgument(argument2)));
         return this;
     }
 
-    public BiArgumentBranch<T1, T2, C, T> executeAsync(@NotNull TriFunction<T1, T2, C, CompletionStage<?>> action) {
-        super.executeAsync(ctx -> action.apply(ctx.getArgument(argument1), ctx.getArgument(argument2), ctx));
+    public BiArgumentBranch<T1, T2, C, T> executeAsync(@NotNull TriFunction<C, T1, T2, CompletionStage<?>> action) {
+        super.executeAsync(ctx -> action.apply(ctx, ctx.getArgument(argument1), ctx.getArgument(argument2)));
         return this;
     }
 

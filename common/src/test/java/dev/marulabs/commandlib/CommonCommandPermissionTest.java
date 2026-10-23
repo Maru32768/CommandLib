@@ -155,7 +155,7 @@ class CommonCommandPermissionTest {
     @Test
     void argument_branch_default_permission_blocks_execution_when_generated_node_is_missing() {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("config") {{
-            argument(new CommonStringArgument<>("key")).execute((key, ctx) -> ctx.sendMessage(key));
+            argument(new CommonStringArgument<>("key")).execute((ctx, key) -> ctx.sendMessage(key));
         }}, new TestCommandSource("test.command.config"));
 
         assertThatThrownBy(() -> runner.execute("config difficulty")).isInstanceOf(CommandSyntaxException.class);
@@ -164,7 +164,7 @@ class CommonCommandPermissionTest {
     @Test
     void argument_branch_default_permission_allows_execution_when_generated_node_is_granted() {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("config") {{
-            argument(new CommonStringArgument<>("key")).execute((key, ctx) -> ctx.sendMessage(key));
+            argument(new CommonStringArgument<>("key")).execute((ctx, key) -> ctx.sendMessage(key));
         }}, new TestCommandSource("test.command.config", "test.command.config.key"));
 
         TestCommandContext ctx = execute(runner, "config difficulty");
@@ -176,7 +176,7 @@ class CommonCommandPermissionTest {
     void argument_branch_permission_blocks_execution_and_suggestions() {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("config") {{
             argument(suggestingStringArgument()).permission("custom.config.key")
-                                                .execute((key, ctx) -> ctx.sendMessage(key));
+                                                .execute((ctx, key) -> ctx.sendMessage(key));
         }}, new TestCommandSource("test.command.config"));
 
         assertThatThrownBy(() -> runner.execute("config difficulty")).isInstanceOf(CommandSyntaxException.class);
@@ -187,7 +187,7 @@ class CommonCommandPermissionTest {
     void argument_branch_permission_allows_execution_and_suggestions_when_granted() {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("config") {{
             argument(suggestingStringArgument()).permission("custom.config.key")
-                                                .execute((key, ctx) -> ctx.sendMessage(key));
+                                                .execute((ctx, key) -> ctx.sendMessage(key));
         }}, new TestCommandSource("test.command.config", "custom.config.key"));
 
         TestCommandContext ctx = execute(runner, "config difficulty");
@@ -215,7 +215,7 @@ class CommonCommandPermissionTest {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("config") {{
             execute(ctx -> ctx.sendMessage("bare"));
             argument(new CommonStringArgument<>("key")).permission("custom.config.key")
-                                                       .execute((key, ctx) -> ctx.sendMessage(key));
+                                                       .execute((ctx, key) -> ctx.sendMessage(key));
         }}, new TestCommandSource("test.command.config"));
 
         TestCommandContext ctx = execute(runner, "config");
@@ -228,10 +228,10 @@ class CommonCommandPermissionTest {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("config") {{
             execute(ctx -> ctx.sendMessage("bare"));
             argument(new CommonStringArgument<>("key")).permission("custom.config.key")
-                                                       .execute((key, ctx) -> ctx.sendMessage(key));
+                                                       .execute((ctx, key) -> ctx.sendMessage(key));
             argument(new CommonStringArgument<>("key"),
                      new CommonStringArgument<>("value")).permission("custom.config.key.value")
-                                                         .execute((key, value, ctx) -> ctx.sendMessage(value));
+                                                         .execute((ctx, key, value) -> ctx.sendMessage(value));
         }}, new TestCommandSource("test.command.config"));
 
         TestCommandContext ctx = execute(runner, "config");
@@ -245,7 +245,7 @@ class CommonCommandPermissionTest {
             CommandOption<Boolean, TestCommandContext> force = option(Options.flag("force", 'f'));
             execute(ctx -> ctx.sendMessage("force=" + ctx.getOption(force)));
             argument(new CommonStringArgument<>("key")).permission("custom.config.key")
-                                                       .execute((key, ctx) -> ctx.sendMessage(key));
+                                                       .execute((ctx, key) -> ctx.sendMessage(key));
         }}, new TestCommandSource("test.command.config"));
 
         TestCommandContext ctx = execute(runner, "config -f");

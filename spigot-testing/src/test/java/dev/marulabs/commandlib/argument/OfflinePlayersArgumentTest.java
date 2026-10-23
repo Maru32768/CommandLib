@@ -21,7 +21,7 @@ class OfflinePlayersArgumentTest {
 
         try (MockedStatic<Bukkit> bukkit = Mockito.mockStatic(Bukkit.class);
              CommandTester tester = new CommandTester(() -> new Command("heal") {{
-                 argument(new OfflinePlayersArgument("targets")).execute((targets, ctx) -> {
+                 argument(new OfflinePlayersArgument("targets")).execute((ctx, targets) -> {
                      ctx.sendMessage(targets.size() + ":" + targets.get(0)
                                                                    .getName());
                  });
@@ -46,7 +46,7 @@ class OfflinePlayersArgumentTest {
 
         try (MockedStatic<Bukkit> bukkit = Mockito.mockStatic(Bukkit.class);
              CommandTester tester = new CommandTester(() -> new Command("heal") {{
-                 argument(new OfflinePlayersArgument("targets")).execute((targets, ctx) -> {
+                 argument(new OfflinePlayersArgument("targets")).execute((ctx, targets) -> {
                      ctx.sendMessage(String.valueOf(targets.size()));
                  });
              }}, "test.command")) {

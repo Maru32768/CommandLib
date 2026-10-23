@@ -45,7 +45,7 @@ class HelpErrorFormatterTest {
             addChildren(new TestCommand("create") {{
                 description("Create an arena");
                 argument(new CommonStringArgument<>("name"),
-                         new IntArg("size").optional(16)).execute((name, size, ctx) -> {
+                         new IntArg("size").optional(16)).execute((ctx, name, size) -> {
                          });
             }}, new TestCommand("hidden") {{
                 permission("hidden.node");
@@ -116,10 +116,10 @@ class HelpErrorFormatterTest {
                 error.sendDefault();
             });
             addChildren(new TestCommand("mode") {{
-                argument(new CommonEnumArgument<>("mode", Mode.class)).execute((mode, ctx) -> {
+                argument(new CommonEnumArgument<>("mode", Mode.class)).execute((ctx, mode) -> {
                 });
             }}, new TestCommand("bet") {{
-                argument(new IntArg("amount").validator(x -> x > 0)).execute((amount, ctx) -> {
+                argument(new IntArg("amount").validator(x -> x > 0)).execute((ctx, amount) -> {
                 });
             }}, new TestCommand("tag") {{
                 option(Options.string("tag", 't', "")
@@ -162,7 +162,7 @@ class HelpErrorFormatterTest {
             helpFormatter((ctx, help) -> help.usages()
                                              .forEach(x -> ctx.sendMessage(x.plainText())));
             argument(new CommonStringArgument<>("key")).child(key -> new TestCommand("mode") {{
-                argument(new CommonStringArgument<>("value")).execute((value, ctx) -> {
+                argument(new CommonStringArgument<>("value")).execute((ctx, value) -> {
                 })
                                                              .child(value -> new TestCommand("reset") {{
                                                                  execute(ctx -> {
@@ -184,7 +184,7 @@ class HelpErrorFormatterTest {
                           .permission(DefaultPermission.OP));
             errorFormatter((ctx, error) -> ctx.sendFailure(error.usage()
                                                                 .plainText()));
-            argument(new IntArg("count").validator(x -> x > 0)).execute((target, ctx) -> {
+            argument(new IntArg("count").validator(x -> x > 0)).execute((ctx, target) -> {
             });
         }};
         String silent = "test.command.scan.option.silent";
@@ -254,7 +254,7 @@ class HelpErrorFormatterTest {
                 execute(ctx -> {
                 });
             }});
-            argument(new IntArg("rounds").validator(x -> x > 0)).execute((rounds, ctx) -> {
+            argument(new IntArg("rounds").validator(x -> x > 0)).execute((ctx, rounds) -> {
             });
         }});
         runner.redirectToRoot("run");
@@ -306,7 +306,7 @@ class HelpErrorFormatterTest {
             errorFormatter((ctx, error) -> {
                 throw new IllegalStateException("formatter broke");
             });
-            addUncaughtExceptionHandler((e, ctx) -> handled.add(e.getMessage()));
+            addUncaughtExceptionHandler((ctx, e) -> handled.add(e.getMessage()));
             execute(ctx -> {
                 throw new IllegalStateException("executor broke");
             });
@@ -324,7 +324,7 @@ class HelpErrorFormatterTest {
                                              .forEach(x -> ctx.sendMessage(x.plainText())));
             option(Options.flag("silent", 's')
                           .permission("secret.silent"));
-            argument(new CommonStringArgument<>("target")).execute((target, ctx) -> {
+            argument(new CommonStringArgument<>("target")).execute((ctx, target) -> {
             });
         }}, new TestCommandSource("test.command.ban", "test.command.ban.target"));
 
@@ -340,7 +340,7 @@ class HelpErrorFormatterTest {
             addChildren(new TestCommand("mode") {{
                 option(Options.flag("force", 'f'));
                 argument(new CommonEnumArgument<>("mode", Mode.class),
-                         new CommonIntegerArgument<>("rounds")).execute((mode, rounds, ctx) -> {
+                         new CommonIntegerArgument<>("rounds")).execute((ctx, mode, rounds) -> {
                          });
             }}, new TestCommand("locked") {{
                 addPrerequisite(ctx -> {

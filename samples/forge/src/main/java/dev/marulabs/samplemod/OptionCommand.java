@@ -18,7 +18,7 @@ public class OptionCommand extends Command {
         CommandOption<Integer, CommandContext> repeat = option(Options.integer("repeat", 'r', 1, 1, 5)
                                                                       .description("Number of times to send"));
 
-        argument(new StringArgument("message", StringArgument.Type.PHRASE)).execute((message, ctx) -> {
+        argument(new StringArgument("message", StringArgument.Type.PHRASE)).execute((ctx, message) -> {
             if (ctx.getOption(silent)) {
                 ctx.sendWarn("Broadcast skipped: " + message);
                 return;

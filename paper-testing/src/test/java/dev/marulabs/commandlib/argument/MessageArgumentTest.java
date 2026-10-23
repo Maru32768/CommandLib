@@ -44,7 +44,7 @@ class MessageArgumentTest {
     private static Command command() {
         return new Command("shout") {{
             argument(new IntegerArgument("times"),
-                     new MessageArgument("message")).execute((times, message, ctx) -> {
+                     new MessageArgument("message")).execute((ctx, times, message) -> {
                          ctx.sendMessage(times + ": " + PlainTextComponentSerializer.plainText()
                                                                                     .serialize(message));
                      });

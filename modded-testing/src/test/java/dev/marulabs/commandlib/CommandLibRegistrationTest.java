@@ -89,7 +89,7 @@ class CommandLibRegistrationTest {
         Command broken = new Command("broken") {{
             permission(DefaultPermission.ALL);
             argument(new IntegerArgument("count").optional(1),
-                     new IntegerArgument("amount")).execute((count, amount, ctx) -> {
+                     new IntegerArgument("amount")).execute((ctx, count, amount) -> {
                      });
         }};
 

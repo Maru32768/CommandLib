@@ -16,7 +16,7 @@ public class MathCommand extends Command {
                     operation("multiply", (left, right) -> left * right),
                     new Command("sum") {{
                         // A variadic argument takes one or more values as a List.
-                        argument(new IntegerArgument("numbers").variadic()).execute((numbers, ctx) -> {
+                        argument(new IntegerArgument("numbers").variadic()).execute((ctx, numbers) -> {
                             ctx.sendSuccess(numbers.stream()
                                                    .mapToInt(Integer::intValue)
                                                    .sum());
@@ -26,7 +26,7 @@ public class MathCommand extends Command {
 
     private Command operation(String name, IntOperation operation) {
         return new Command(name) {{
-            argument(new IntegerArgument("left"), new IntegerArgument("right")).execute((left, right, ctx) -> {
+            argument(new IntegerArgument("left"), new IntegerArgument("right")).execute((ctx, left, right) -> {
                 ctx.sendSuccess(operation.apply(left, right));
             });
         }};

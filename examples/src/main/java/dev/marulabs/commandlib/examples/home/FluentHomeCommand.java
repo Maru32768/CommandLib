@@ -30,7 +30,7 @@ public final class FluentHomeCommand extends Command {
                 ctx.sendSuccess(HomeCaptions.TELEPORTED, Map.of("name", ctx.getArgument(name)));
             });
         }}, new Command("set") {{
-            argument(new StringArgument("name")).execute((name, ctx) -> {
+            argument(new StringArgument("name")).execute((ctx, name) -> {
                 homes.add(name);
                 ctx.sendSuccess(HomeCaptions.SET, Map.of("name", name));
             });

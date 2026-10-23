@@ -17,7 +17,7 @@ class EntityTypeArgumentTest {
         List<String> suggestions;
 
         try (CommandTester tester = new CommandTester(() -> new Command("type") {{
-            argument(new EntityTypeArgument("type")).execute((type, ctx) -> {
+            argument(new EntityTypeArgument("type")).execute((ctx, type) -> {
                 ctx.sendMessage(String.valueOf(EntityType.getKey(type)));
             });
         }}, "test.command")) {

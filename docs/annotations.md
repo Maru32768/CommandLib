@@ -80,20 +80,20 @@ public final class ArenaCommand extends Command {
             permission(DefaultPermission.ALL, "Create arenas");
             CommandOption<Boolean, CommandContext> force = option(Options.flag("force", 'f')
                                                                          .description("Replace an existing arena"));
-            argument(new StringArgument("name"), new IntegerArgument("size", 1, 64).optional(16)).execute((name, size, ctx) -> {});
+            argument(new StringArgument("name"), new IntegerArgument("size", 1, 64).optional(16)).execute((ctx, name, size) -> {});
         }}, new Command("delete") {{
             confirm();
-            argument(new StringArgument("name").setSuggestionProvider(sb -> arenas.forEach(sb::suggest))).execute((name, ctx) -> {});
+            argument(new StringArgument("name").setSuggestionProvider(sb -> arenas.forEach(sb::suggest))).execute((ctx, name) -> {});
         }}, new Command("invite") {{
-            argument(new StringArgument("arena"), new PlayerArgument("players").variadic()).execute((arena, players, ctx) -> {});
+            argument(new StringArgument("arena"), new PlayerArgument("players").variadic()).execute((ctx, arena, players) -> {});
         }}, new Command("join") {{
-            argument(new StringArgument("arena"), new PlayerArgument("player").optional(player())).execute((arena, player, ctx) -> {});
+            argument(new StringArgument("arena"), new PlayerArgument("player").optional(player())).execute((ctx, arena, player) -> {});
         }}, new Command("list") {{
             cooldown(Duration.ofMinutes(1));
             CommandOption<Integer, CommandContext> limit = option(Options.integer("limit", 'n', 10, 1, 100));
             execute(ctx -> {});
         }}, new Command("stats") {{
-            argument(new StringArgument("arena")).executeAsync((arena, ctx) -> ...);
+            argument(new StringArgument("arena")).executeAsync((ctx, arena) -> ...);
         }});
     }
 }
@@ -200,12 +200,12 @@ public final class TeamCommand {
 // The same command, fluently.
 execute(ctx -> {});
 argument(new TeamArgument("team")).description("Show a team")
-                                  .execute((team, ctx) -> {})
+                                  .execute((ctx, team) -> {})
                                   .child(team -> new Command("add") {{
-                                      argument(new PlayerArgument("player")).execute((player, ctx) -> {});
+                                      argument(new PlayerArgument("player")).execute((ctx, player) -> {});
                                   }})
                                   .child(team -> new Command("remove") {{
-                                      argument(new PlayerArgument("player")).execute((player, ctx) -> {});
+                                      argument(new PlayerArgument("player")).execute((ctx, player) -> {});
                                   }});
 ```
 

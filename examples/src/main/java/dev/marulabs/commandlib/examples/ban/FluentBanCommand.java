@@ -20,7 +20,7 @@ public final class FluentBanCommand extends Command {
                                                                       .description("Do not announce the ban"));
         CommandOption<String, CommandContext> reason = option(Options.string("reason", 'r', "No reason")
                                                                      .description("Why the player is banned"));
-        argument(new PlayerArgument("target")).execute((target, ctx) -> {
+        argument(new PlayerArgument("target")).execute((ctx, target) -> {
             ctx.sendSuccess("Banned " + target.getName() + ": " + ctx.getOption(reason)
                     + (ctx.getOption(silent) ? " (silent)" : ""));
         });

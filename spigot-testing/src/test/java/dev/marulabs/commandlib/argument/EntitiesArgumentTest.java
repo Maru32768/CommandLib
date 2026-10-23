@@ -17,7 +17,7 @@ class EntitiesArgumentTest {
         FakeSender admin = FakeSender.player("Admin");
 
         try (CommandTester tester = new CommandTester(() -> new Command("select") {{
-            argument(new EntitiesArgument("targets")).execute((targets, ctx) -> {
+            argument(new EntitiesArgument("targets")).execute((ctx, targets) -> {
                 ctx.sendMessage("count=" + targets.size());
             });
         }}, "test.command")) {
@@ -34,7 +34,7 @@ class EntitiesArgumentTest {
         FakeSender admin = FakeSender.player("Admin");
 
         try (CommandTester tester = new CommandTester(() -> new Command("select") {{
-            argument(new EntitiesArgument("targets")).execute((targets, ctx) -> {
+            argument(new EntitiesArgument("targets")).execute((ctx, targets) -> {
                 ctx.sendMessage((targets.get(0) instanceof Player ? "player" : "entity") + " selected");
             });
         }}, "test.command")) {

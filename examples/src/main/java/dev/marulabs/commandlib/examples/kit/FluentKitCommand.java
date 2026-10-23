@@ -19,12 +19,12 @@ public final class FluentKitCommand extends Command {
         addChildren(new Command("give") {{
             description("Give yourself a kit");
             argument(new StringArgument("name"),
-                     new IntegerArgument("count", 1, 64).optional(1)).execute((name, count, ctx) -> {
+                     new IntegerArgument("count", 1, 64).optional(1)).execute((ctx, name, count) -> {
                          ctx.sendSuccess("Gave " + count + " x " + name);
                      });
         }}, new Command("send") {{
             description("Send the starter kit to players");
-            argument(new PlayerArgument("players").variadic()).execute((players, ctx) -> {
+            argument(new PlayerArgument("players").variadic()).execute((ctx, players) -> {
                 ctx.sendSuccess("Sent the starter kit to " + players.stream()
                                                                     .map(Player::getName)
                                                                     .collect(Collectors.joining(", ")));

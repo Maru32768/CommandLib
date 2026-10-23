@@ -53,7 +53,7 @@ class CommandTesterTest {
     @Test
     void primitive_arguments_parse_and_messages_are_recorded() {
         CommandTester tester = new CommandTester(new Command("add") {{
-            argument(new IntegerArgument("a"), new IntegerArgument("b")).execute((a, b, ctx) -> {
+            argument(new IntegerArgument("a"), new IntegerArgument("b")).execute((ctx, a, b) -> {
                 ctx.sendSuccess(a + b);
                 ctx.setResult(a + b);
             });
@@ -87,7 +87,7 @@ class CommandTesterTest {
     void player_argument_finds_online_players_ignoring_case_and_suggests_them() {
         List<Player> targets = new ArrayList<>();
         CommandTester tester = new CommandTester(new Command("find") {{
-            argument(new PlayerArgument("target")).execute((target, ctx) -> targets.add(target));
+            argument(new PlayerArgument("target")).execute((ctx, target) -> targets.add(target));
         }}, "proxy.command");
         FakeSender alice = FakeSender.player("Alice");
         tester.withFakePlayer(alice)
@@ -104,7 +104,7 @@ class CommandTesterTest {
     @Test
     void unknown_player_fails_with_incorrect_argument() {
         CommandTester tester = new CommandTester(new Command("find") {{
-            argument(new PlayerArgument("target")).execute((target, ctx) -> ctx.sendMessage("found"));
+            argument(new PlayerArgument("target")).execute((ctx, target) -> ctx.sendMessage("found"));
         }}, "proxy.command");
         FakeSender sender = FakeSender.console();
 
@@ -117,7 +117,7 @@ class CommandTesterTest {
     void server_argument_finds_registered_servers() {
         List<RegisteredServer> targets = new ArrayList<>();
         CommandTester tester = new CommandTester(new Command("send") {{
-            argument(new ServerArgument("server")).execute((server, ctx) -> targets.add(server));
+            argument(new ServerArgument("server")).execute((ctx, server) -> targets.add(server));
         }}, "proxy.command");
         RegisteredServer lobby = tester.withFakeServer("lobby");
         tester.withFakeServer("survival");
@@ -133,7 +133,7 @@ class CommandTesterTest {
     void server_argument_suggests_a_name_that_needs_quotes_quoted() {
         List<RegisteredServer> targets = new ArrayList<>();
         CommandTester tester = new CommandTester(new Command("send") {{
-            argument(new ServerArgument("server")).execute((server, ctx) -> targets.add(server));
+            argument(new ServerArgument("server")).execute((ctx, server) -> targets.add(server));
         }}, "proxy.command");
         RegisteredServer myLobby = tester.withFakeServer("my lobby");
         tester.withFakeServer("lobby");
@@ -154,7 +154,7 @@ class CommandTesterTest {
         List<String> chosen = new ArrayList<>();
         List<String> drinks = List.of("red wine", "beer");
         CommandTester tester = new CommandTester(new Command("pick") {{
-            argument(new LiteralArgument("choice", drinks)).execute((choice, ctx) -> chosen.add(choice));
+            argument(new LiteralArgument("choice", drinks)).execute((ctx, choice) -> chosen.add(choice));
         }}, "proxy.command");
         FakeSender sender = FakeSender.player("Alice");
 
@@ -168,7 +168,7 @@ class CommandTesterTest {
     @Test
     void routes_need_the_permission_of_every_step() {
         CommandTester tester = new CommandTester(new Command("config") {{
-            argument(new StringArgument("key")).execute((key, ctx) -> ctx.sendMessage(key));
+            argument(new StringArgument("key")).execute((ctx, key) -> ctx.sendMessage(key));
         }}, "proxy.command");
 
         FakeSender allowed = FakeSender.player("Alice")

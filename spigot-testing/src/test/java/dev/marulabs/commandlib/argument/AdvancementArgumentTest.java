@@ -23,7 +23,7 @@ class AdvancementArgumentTest {
             bukkit.when(() -> Bukkit.getAdvancement(key))
                   .thenReturn(advancement);
             try (CommandTester tester = new CommandTester(() -> new Command("advancement") {{
-                argument(new AdvancementArgument("value")).execute((value, ctx) -> ctx.sendMessage("ok"));
+                argument(new AdvancementArgument("value")).execute((ctx, value) -> ctx.sendMessage("ok"));
             }}, "test.command")) {
                 tester.execute("advancement story/mine_stone", sender);
             }
@@ -44,7 +44,7 @@ class AdvancementArgumentTest {
                   .thenReturn(java.util.List.of(advancement)
                                             .iterator());
             try (CommandTester tester = new CommandTester(() -> new Command("advancement") {{
-                argument(new AdvancementArgument("value")).execute((value, ctx) -> {
+                argument(new AdvancementArgument("value")).execute((ctx, value) -> {
                 });
             }}, "test.command")) {
                 var suggestions = tester.suggestions("advancement story", FakeSender.player("Alice"))

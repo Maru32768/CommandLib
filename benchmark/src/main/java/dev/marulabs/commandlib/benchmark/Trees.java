@@ -49,12 +49,12 @@ final class Trees {
                 sb.suggest(player);
             }
         }), new IntArg("count").optional(1))
-               .execute((target, count, ctx) -> sink = ctx.getOption(force) || ctx.getOption(verbose) ? target
+               .execute((ctx, target, count) -> sink = ctx.getOption(force) || ctx.getOption(verbose) ? target
                        : count + ctx.getOption(limit));
 
         TestCommand list = new TestCommand("list");
         list.argument(new WordArg("words").variadic(4))
-            .execute((words, ctx) -> sink = words);
+            .execute((ctx, words) -> sink = words);
         TestCommand admin = new TestCommand("admin");
         admin.permission(PERMISSION_PREFIX + ".admin");
         admin.execute(ctx -> sink = ctx);
@@ -69,7 +69,7 @@ final class Trees {
             command.option(Options.flag("flag" + i, (char) ('a' + i)));
         }
         command.argument(new WordArg("target"))
-               .execute((target, ctx) -> sink = target);
+               .execute((ctx, target) -> sink = target);
         return command;
     }
 

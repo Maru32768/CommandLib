@@ -12,7 +12,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class ChatColorArgumentTest {
     private static Command command() {
         return new Command("color") {{
-            argument(new ChatColorArgument("value")).execute((color, ctx) -> ctx.sendMessage(color.name()));
+            argument(new ChatColorArgument("value")).execute((ctx, color) -> ctx.sendMessage(color.name()));
         }};
     }
 

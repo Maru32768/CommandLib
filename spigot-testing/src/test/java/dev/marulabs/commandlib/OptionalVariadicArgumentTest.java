@@ -21,7 +21,7 @@ class OptionalVariadicArgumentTest {
         FakeSender admin = FakeSender.player("Admin");
 
         try (CommandTester tester = new CommandTester(() -> new Command("heal") {{
-            argument(new PlayerArgument("targets").variadic()).execute((targets, ctx) -> {
+            argument(new PlayerArgument("targets").variadic()).execute((ctx, targets) -> {
                 List<Player> players = targets;
                 ctx.sendMessage("Healed " + players.stream()
                                                    .map(Player::getName)
@@ -43,7 +43,7 @@ class OptionalVariadicArgumentTest {
         FakeSender console = FakeSender.console();
 
         try (CommandTester tester = new CommandTester(() -> new Command("heal") {{
-            argument(new PlayerArgument("target").optional(player())).execute((target, ctx) -> {
+            argument(new PlayerArgument("target").optional(player())).execute((ctx, target) -> {
                 ctx.sendMessage("Healed " + target.getName());
             });
         }}, "test.command")) {
@@ -63,7 +63,7 @@ class OptionalVariadicArgumentTest {
 
         try (CommandTester tester = new CommandTester(() -> new Command("give") {{
             argument(new StringArgument("item"),
-                     new IntegerArgument("count").optional(1)).execute((item, count, ctx) -> {
+                     new IntegerArgument("count").optional(1)).execute((ctx, item, count) -> {
                          ctx.sendMessage(item + "x" + count);
                      });
         }}, "test.command")) {
@@ -82,7 +82,7 @@ class OptionalVariadicArgumentTest {
                                       .denyPermissions("test.command.say.words");
 
         try (CommandTester tester = new CommandTester(() -> new Command("say") {{
-            argument(new StringArgument("words").variadic()).execute((words, ctx) -> ctx.sendMessage(words));
+            argument(new StringArgument("words").variadic()).execute((ctx, words) -> ctx.sendMessage(words));
         }}, "test.command")) {
             assertThatThrownBy(() -> tester.execute("say hi there",
                                                     sender)).hasCauseInstanceOf(CommandSyntaxException.class);

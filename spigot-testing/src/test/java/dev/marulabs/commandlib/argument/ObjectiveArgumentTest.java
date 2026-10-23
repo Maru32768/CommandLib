@@ -29,7 +29,7 @@ class ObjectiveArgumentTest {
             bukkit.when(Bukkit::getScoreboardManager)
                   .thenReturn(scoreboardManager);
             try (CommandTester tester = new CommandTester(new Command("objective") {{
-                argument(new ObjectiveArgument("value")).execute((value, ctx) -> ctx.sendMessage("ok"));
+                argument(new ObjectiveArgument("value")).execute((ctx, value) -> ctx.sendMessage("ok"));
             }}, "test.command")) {
                 tester.execute("objective kills", sender);
             }
@@ -57,7 +57,7 @@ class ObjectiveArgumentTest {
             bukkit.when(Bukkit::getScoreboardManager)
                   .thenReturn(scoreboardManager);
             try (CommandTester tester = new CommandTester(new Command("objective") {{
-                argument(new ObjectiveArgument("value")).execute((value, ctx) -> {
+                argument(new ObjectiveArgument("value")).execute((ctx, value) -> {
                 });
             }}, "test.command")) {
                 var suggestions = tester.suggestions("objective ki", FakeSender.player("Alice"))
@@ -83,8 +83,8 @@ class ObjectiveArgumentTest {
                .thenReturn(java.util.Set.of(objective));
 
         try (CommandTester tester = new CommandTester(new Command("objective") {{
-            argument(new ObjectiveArgument("value").scoreboard(() -> scoreboard)).execute((value,
-                                                                                           ctx) -> ctx.sendMessage(value.getName()));
+            argument(new ObjectiveArgument("value").scoreboard(() -> scoreboard)).execute((ctx,
+                                                                                           value) -> ctx.sendMessage(value.getName()));
         }}, "test.command")) {
             tester.execute("objective arena_kills", sender);
             var suggestions = tester.suggestions("objective arena", FakeSender.player("Bob"))

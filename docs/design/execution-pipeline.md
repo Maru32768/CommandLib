@@ -228,7 +228,7 @@ Alternatives considered:
 - **A platform-wide registry**, shared by every registration of a plugin: `CommandDefaults` on each
   `CommandLib.register` gives the same scope without global state, and the testers take the same object.
 
-`get` does not declare `CommandPrerequisiteException`, since the typed executors (`(team, ctx) -> ...`) cannot throw
+`get` does not declare `CommandPrerequisiteException`, since the typed executors (`(ctx, team) -> ...`) cannot throw
 checked exceptions and the main use, a sender mapper, has to refuse some senders. The provider's exception is rethrown
 unchecked and reaches the runner as if the executor, prerequisite or parser had thrown it, so its message is reported
 as usual. `find` is empty only when nothing gives the key; a failing provider still fails, rather than hiding the

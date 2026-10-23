@@ -52,7 +52,7 @@ class CommandMiddlewareTest {
         List<String> log = new ArrayList<>();
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("say") {{
             addMiddleware(around(log, "m"));
-            argument(new CommonStringArgument<>("word")).execute((word, ctx) -> log.add(word));
+            argument(new CommonStringArgument<>("word")).execute((ctx, word) -> log.add(word));
         }});
 
         runner.dispatch("say hi");
@@ -142,7 +142,7 @@ class CommandMiddlewareTest {
                                              .exceptionally(e -> {
                                                  throw new CompletionException(new CommandPrerequisiteException("The database is down."));
                                              }));
-            addUncaughtExceptionHandler((e, ctx) -> uncaught.add(e));
+            addUncaughtExceptionHandler((ctx, e) -> uncaught.add(e));
             execute(ctx -> {
                 throw new IllegalStateException("connection refused");
             });
@@ -160,7 +160,7 @@ class CommandMiddlewareTest {
             addMiddleware((ctx, next) -> {
                 throw new IllegalStateException("broken");
             });
-            addUncaughtExceptionHandler((e, ctx) -> uncaught.add(e));
+            addUncaughtExceptionHandler((ctx, e) -> uncaught.add(e));
             execute(ctx -> {
             });
         }});

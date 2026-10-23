@@ -55,12 +55,12 @@ public final class TestPlugin {
         }};
         main.addChildren(new Command("echo") {{
             permission(DefaultPermission.ALL);
-            argument(new StringArgument("text")).execute((text, ctx) -> ctx.sendSuccess("echo " + text));
+            argument(new StringArgument("text")).execute((ctx, text) -> ctx.sendSuccess("echo " + text));
         }});
         main.addChildren(new Command("server") {{
             permission(DefaultPermission.ALL);
-            argument(new ServerArgument("target")).execute((target,
-                                                            ctx) -> ctx.sendSuccess("server "
+            argument(new ServerArgument("target")).execute((ctx,
+                                                            target) -> ctx.sendSuccess("server "
                                                                     + target.getServerInfo()
                                                                             .getName()));
         }});
@@ -71,7 +71,7 @@ public final class TestPlugin {
         }});
         main.addChildren(new Command("find") {{
             permission(DefaultPermission.ALL);
-            argument(new PlayerArgument("player")).execute((player, ctx) -> ctx.sendSuccess("find "
+            argument(new PlayerArgument("player")).execute((ctx, player) -> ctx.sendSuccess("find "
                     + player.getUsername()));
         }});
         main.addChildren(new Command("denied") {{
@@ -107,7 +107,7 @@ public final class TestPlugin {
     private static <T> Command value(String name, CommonArgument<T, CommandContext, ?> argument) {
         return new Command(name) {{
             permission(DefaultPermission.ALL);
-            argument(argument).execute((value, ctx) -> ctx.sendSuccess("value " + name + "=" + value));
+            argument(argument).execute((ctx, value) -> ctx.sendSuccess("value " + name + "=" + value));
         }};
     }
 

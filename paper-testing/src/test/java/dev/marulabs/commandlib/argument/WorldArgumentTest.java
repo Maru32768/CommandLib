@@ -19,7 +19,7 @@ class WorldArgumentTest {
                .thenReturn("world");
 
         try (CommandTester tester = new CommandTester(() -> new Command("tp") {{
-            argument(new WorldArgument("world")).execute((world, ctx) -> ctx.sendMessage(world.getName()));
+            argument(new WorldArgument("world")).execute((ctx, world) -> ctx.sendMessage(world.getName()));
         }}, "test.command").withFakeWorld("minecraft:overworld", mockWorld)) {
             tester.execute("tp minecraft:overworld", sender);
             // A key without a namespace is in minecraft, and the world's name is not its key.

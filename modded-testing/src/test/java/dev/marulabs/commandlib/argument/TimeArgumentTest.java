@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class TimeArgumentTest {
     private static CommandTester tester(int minimum) {
         return new CommandTester(() -> new Command("wait") {{
-            argument(new TimeArgument("ticks", minimum)).execute((ticks, ctx) -> {
+            argument(new TimeArgument("ticks", minimum)).execute((ctx, ticks) -> {
                 ctx.sendMessage(String.valueOf(ticks));
             });
         }}, "test.command");

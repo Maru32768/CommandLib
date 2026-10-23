@@ -18,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class AttributeArgumentTest {
     private static CommandTester tester(AtomicReference<Attribute> received, Attribute value) {
         return new CommandTester(() -> new Command("attribute") {{
-            argument(new AttributeArgument("value")).execute((parsed, ctx) -> received.set(parsed));
+            argument(new AttributeArgument("value")).execute((ctx, parsed) -> received.set(parsed));
         }}, "test.command").withFakeRegistryValue(RegistryKey.ATTRIBUTE, "minecraft:max_health", value);
     }
 

@@ -13,7 +13,7 @@ class GameModeArgumentTest {
         FakeSender sender = FakeSender.player("Alice");
 
         try (CommandTester tester = new CommandTester(new Command("gamemode") {{
-            argument(new GameModeArgument("mode")).execute((mode, ctx) -> ctx.sendMessage(mode.name()));
+            argument(new GameModeArgument("mode")).execute((ctx, mode) -> ctx.sendMessage(mode.name()));
         }}, "test.command")) {
             tester.execute("gamemode creative", sender);
         }
@@ -26,7 +26,7 @@ class GameModeArgumentTest {
         FakeSender sender = FakeSender.player("Alice");
 
         try (CommandTester tester = new CommandTester(new Command("gamemode") {{
-            argument(new GameModeArgument("mode")).execute((mode, ctx) -> ctx.sendMessage(mode.name()));
+            argument(new GameModeArgument("mode")).execute((ctx, mode) -> ctx.sendMessage(mode.name()));
         }}, "test.command")) {
             tester.execute("gamemode unknown", sender);
         }
@@ -42,7 +42,7 @@ class GameModeArgumentTest {
     @Test
     void suggestions_include_all_game_modes() throws Exception {
         try (CommandTester tester = new CommandTester(new Command("gamemode") {{
-            argument(new GameModeArgument("mode")).execute((mode, ctx) -> {
+            argument(new GameModeArgument("mode")).execute((ctx, mode) -> {
             });
         }}, "test.command")) {
             FakeSender sender = FakeSender.player("Steve");

@@ -55,7 +55,7 @@ class ResidenceCommand extends Command {
 
         execute(ctx -> ctx.sendMessage("Residence"));
         addChildren(new Command("list") {{
-            argument(new PlayerArgument("target").optional(Command.player())).execute((target, ctx) -> {
+            argument(new PlayerArgument("target").optional(Command.player())).execute((ctx, target) -> {
                 ctx.sendMessage("Residences of " + target.getName());
             });
         }});
@@ -134,7 +134,7 @@ class JoinCommand extends Command {
         super("join");
 
         addPrerequisite(Command.player());
-        argument(new ObjectArgument<Arena>("arena", arenas::byName)).execute((arena, ctx) -> arena.join(ctx.getPlayer()));
+        argument(new ObjectArgument<Arena>("arena", arenas::byName)).execute((ctx, arena) -> arena.join(ctx.getPlayer()));
     }
 }
 ```
@@ -166,7 +166,7 @@ class HomeCommand extends Command {
     HomeCommand() {
         super("home");
 
-        require(Command.player()).execute((player, ctx) -> player.teleport(player.getWorld()
+        require(Command.player()).execute((ctx, player) -> player.teleport(player.getWorld()
                                                                                          .getSpawnLocation()));
     }
 }
@@ -201,7 +201,7 @@ CommandLib registers a Bukkit permission for every node, with its default and de
 // CommandLib
 argument(new StringArgument("warp", StringArgument.Type.WORD).setSuggestionProvider(sb -> warps.names()
                                                                                       .forEach(sb::suggest)))
-        .execute((warp, ctx) -> ctx.sendMessage("Warping to " + warp));
+        .execute((ctx, warp) -> ctx.sendMessage("Warping to " + warp));
 ```
 
 CommandLib does not filter what a provider adds; filter by `sb.getLatestInput()` yourself. See
@@ -252,7 +252,7 @@ class ScanCommand extends Command {
         super("scan");
 
         CommandOption<Boolean, CommandContext> force = option(Options.flag("force", 'f'));
-        argument(new PlayerArgument("target")).execute((target, ctx) -> {
+        argument(new PlayerArgument("target")).execute((ctx, target) -> {
             boolean isForce = ctx.getOption(force);
         });
     }
@@ -286,7 +286,7 @@ keeps a player from running it again too soon. See [confirmation and cooldown](.
 | `usePerIssuerLocale(true)` | Always on: captions follow `ctx.getLocale()`, the sender's client locale, and the JVM's default locale for the console |
 | `{@@key}` in `@Description` | `description(Caption.of("key", "English text"))`; annotated commands use `@Description(value = "English text", caption = "key")` |
 | `setFormat(MessageType.ERROR, ...)` | `Captions#sender((ctx, caption, message, send) -> ...)` formats every caption; otherwise failures are red, `sendSuccess` green, `sendWarn` yellow |
-| `setDefaultExceptionHandler(...)` | `errorFormatter((ctx, error) -> ...)` on each top-level command for what the sender gets; `addUncaughtExceptionHandler((e, ctx) -> ...)` on a command or argument for unexpected exceptions |
+| `setDefaultExceptionHandler(...)` | `errorFormatter((ctx, error) -> ...)` on each top-level command for what the sender gets; `addUncaughtExceptionHandler((ctx, e) -> ...)` on a command or argument for unexpected exceptions |
 
 ```java
 class HelloCommand extends Command {
