@@ -49,9 +49,8 @@ public final class CommandOption<T, C extends CommonCommandContext<?, ?>> {
     // The options requires(option) names, which must be given; a value requirement can be met by a default value.
     private final List<CommandOption<?, ?>> optionsToGive = new ArrayList<>();
     private String description = "";
+    // Whether required() was called; an option of an argument that is not optional is required without it.
     private boolean required;
-    // Whether required() was called, as opposed to an option of an argument that is not optional.
-    private boolean requiredByCall;
     // Whether the option needs a permission; the node is generated unless permissionNode is set.
     private boolean restricted;
     // Set when a command registers the option; getOption rejects an option no command has, such as a repeatable copy.
@@ -120,7 +119,6 @@ public final class CommandOption<T, C extends CommonCommandContext<?, ?>> {
                                                          1,
                                                          (ctx, names) -> argument.parseNode(ctx, names.get(0)));
         option.argument = argument;
-        option.required = !argument.isOptional();
         return option;
     }
 
@@ -218,12 +216,12 @@ public final class CommandOption<T, C extends CommonCommandContext<?, ?>> {
      */
     public CommandOption<T, C> required() {
         this.required = true;
-        this.requiredByCall = true;
         return this;
     }
 
     public boolean isRequired() {
-        return required;
+        CommonArgument<T, C, ?> argument = this.argument;
+        return required || (argument != null && !argument.isOptional());
     }
 
     /**
@@ -317,9 +315,8 @@ public final class CommandOption<T, C extends CommonCommandContext<?, ?>> {
         option.defaultPermission = defaultPermission;
         option.aliases.addAll(aliases);
         option.description = description;
-        // A repeatable option of a required argument gives an empty list when it is not given; required() is kept.
-        option.required = requiredByCall;
-        option.requiredByCall = requiredByCall;
+        // The copy has no argument, so an option of a required argument becomes optional; required() is kept.
+        option.required = required;
         option.validators.addAll(validators);
         option.requiredOptions.addAll(requiredOptions);
         option.optionsToGive.addAll(optionsToGive);
@@ -442,7 +439,7 @@ public final class CommandOption<T, C extends CommonCommandContext<?, ?>> {
 
     void validate(C ctx, boolean checkRequired) throws OptionParseException {
         if (!ctx.hasOption(this)) {
-            if (checkRequired && required) {
+            if (checkRequired && isRequired()) {
                 throw new OptionParseException(Caption.OPTION_MISSING, Map.of("option", formatName()));
             }
             return;
