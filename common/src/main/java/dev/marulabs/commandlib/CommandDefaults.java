@@ -18,7 +18,7 @@ import java.util.Objects;
  * <pre>{@code
  * CommandDefaults<CommandContext> defaults = CommandDefaults.of(CommandContext.class)
  *         .addMiddleware(audit)
- *         .provide(GamePlayer.class, ctx -> games.of(Command.playerRequirer().extract(ctx)));
+ *         .provide(GamePlayer.class, ctx -> games.of(Command.player().extract(ctx)));
  * CommandLib.register(this, defaults, List.of(new TeamCommand(), new ArenaCommand()));
  * }</pre>
  *

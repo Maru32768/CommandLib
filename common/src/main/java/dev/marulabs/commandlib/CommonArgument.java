@@ -121,7 +121,7 @@ public abstract class CommonArgument<T, C extends CommonCommandContext<?, ?>, SE
 
     /**
      * Same as {@link #optional(Object)}, and computes the default from the context each time the argument is omitted,
-     * for example {@code optional(Command.playerRequirer())} to target the sender. A
+     * for example {@code optional(Command.player())} to target the sender. A
      * {@link CommandPrerequisiteException} thrown by the extractor is sent to the sender and stops the command. The
      * extractor must not return null.
      */

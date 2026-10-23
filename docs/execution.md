@@ -9,7 +9,7 @@ executors, whose work finishes after the command has returned to the server. The
 A command input that reaches an executor goes through these steps (see [errors](errors.md) for each failure):
 
 1. The permission of the command node, the options, each argument branch's permission and arguments, and the
-   prerequisites (`addPrerequisite`, `require(...)`, `requirePlayer()`). These also run before the generated help.
+   prerequisites (`addPrerequisite`, `require(...)`, such as `addPrerequisite(Command.player())`). These also run before the generated help.
 2. The middlewares, outermost first: those of the registration (`CommandDefaults`), the cooldown check, the
    confirmation, the middlewares and preprocesses of the command and its parents in the order they were added, and the
    start of the cooldown. The generated help skips them.
@@ -79,7 +79,7 @@ testers' builder with `defaults(...)`, so the tests run the same chain:
 ```java
 CommandDefaults<CommandContext> defaults = CommandDefaults.of(CommandContext.class)
         .addMiddleware(new AuditMiddleware(getLogger()))
-        .provide(GamePlayer.class, ctx -> games.of(Command.playerRequirer().extract(ctx)));
+        .provide(GamePlayer.class, ctx -> games.of(Command.player().extract(ctx)));
 
 CommandLib.register(this, defaults, List.of(new TeamCommand(), new ArenaCommand()));
 

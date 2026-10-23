@@ -2,6 +2,7 @@ package dev.marulabs.commandlib;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import dev.marulabs.commandlib.command.AsyncCommandExecutor;
+import dev.marulabs.commandlib.command.Prerequisite;
 import dev.marulabs.commandlib.exception.ArgumentParseException;
 import dev.marulabs.commandlib.exception.CommandPrerequisiteException;
 import dev.marulabs.commandlib.internal.ContextState;
@@ -31,6 +32,8 @@ final class Arguments<C extends CommonCommandContext<?, ?>> {
     private @Nullable AsyncCommandExecutor<C> executor = null;
     // Null unless visibleWhen is called.
     private @Nullable Predicate<? super C> visibility = null;
+    private Prerequisite<C> prerequisite = ctx -> {
+    };
 
     Arguments(CommonCommand<C, ?> owner,
               List<? extends CommonArgument<?, C, ?>> arguments,
@@ -228,6 +231,14 @@ final class Arguments<C extends CommonCommandContext<?, ?>> {
      */
     boolean isVisibleTo(Function<ContextState, C> contextFor) {
         return isVisible(contextFor.apply(owner.sourceState()));
+    }
+
+    void addPrerequisite(Prerequisite<C> prerequisite) {
+        this.prerequisite = this.prerequisite.and(Objects.requireNonNull(prerequisite));
+    }
+
+    Prerequisite<C> prerequisite() {
+        return prerequisite;
     }
 
     boolean hasVisibility() {

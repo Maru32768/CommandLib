@@ -84,7 +84,7 @@ class HealCommandTest {
   granted and denied permissions in one place; denied nodes win over granted ones.
 - `getSentMessages()` returns Bungee `BaseComponent` values. Use `getSentMessageTexts()` for plain-text assertions and
   `getSentMessageLegacyTexts()` when color codes matter.
-- `requirePlayer()` and `requireConsole()` work with `FakeSender`; `FakeSender.player()` passes `instanceof Player`
+- `Command.player()` and `Command.console()` work with `FakeSender`; `FakeSender.player()` passes `instanceof Player`
   checks.
 - Use `CommandTester.builder().mockNmsClass(...)` when a test needs an NMS mock that is not built into
   `spigot-testing` yet:

@@ -142,7 +142,7 @@ module:
   `DefaultPermission.OP` node, and that `ServerArgument` and `PlayerArgument` suggestions reach the bot. It checks that
   the bot receives the messages of a child command with an argument, of a `ServerArgument` and a `PlayerArgument`
   command, of a command for each other argument type (`ArgumentIntegrationCoverageTest` keeps the list complete), of an
-  unknown server, of a `requireConsole` command and of an `executeAsync` command. It also checks that the `OP` command
+  unknown server, of a command with the `Command.console()` prerequisite and of an `executeAsync` command. It also checks that the `OP` command
   is refused and does not run: Velocity has no operators, and no permission plugin is installed. The plugin runs that
   command as the console at startup, so the test knows it is registered. The proxy log must not contain an exception.
   Options, permission plugins and Velocity 4.x are not covered.

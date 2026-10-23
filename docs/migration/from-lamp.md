@@ -97,7 +97,7 @@ does not have.
 | Lamp | CommandLib |
 |---|---|
 | `@Default("1") int amount` | `new IntegerArgument("amount").optional(1)` |
-| `@Default("me") Player target`, Kotlin `@Optional target: Player = actor.requirePlayer()` | `new PlayerArgument("target").optional(Command.playerRequirer())` |
+| `@Default("me") Player target`, Kotlin `@Optional target: Player = actor.requirePlayer()` | `new PlayerArgument("target").optional(Command.player())` |
 | `@Optional Player target` (`null` when omitted) | **Not available** as `null`; give a default, or declare a second branch without the argument |
 
 ```java
@@ -105,7 +105,7 @@ class HealCommand extends Command {
     HealCommand() {
         super("heal");
 
-        argument(new PlayerArgument("target").optional(Command.playerRequirer())).execute((target, ctx) -> {
+        argument(new PlayerArgument("target").optional(Command.player())).execute((target, ctx) -> {
             target.setHealth(20);
         });
     }
@@ -150,9 +150,9 @@ factory method that returns a configured argument. To refine a built-in type, us
 |---|---|
 | `BukkitCommandActor actor` parameter | The `ctx` parameter: `ctx.getSender()`, `ctx.sendMessage(...)` |
 | `actor.reply("...")`, `actor.error("...")` | `ctx.sendMessage`, `sendSuccess` (green), `sendWarn` (yellow), `sendFailure` (red) |
-| `Player sender` as the first parameter (player only) | `requirePlayer()` on the command, then `ctx.getPlayer()`; or `require(Command.playerRequirer())` for a typed player |
-| `ConsoleCommandSender sender` | `requireConsole()`, then `ctx.getConsole()` |
-| `actor.requirePlayer()` | `Command.playerRequirer()` |
+| `Player sender` as the first parameter (player only) | `addPrerequisite(Command.player())` on the command, then `ctx.getPlayer()`; or `require(Command.player())` for a typed player |
+| `ConsoleCommandSender sender` | `addPrerequisite(Command.console())`, then `ctx.getConsole()` |
+| `actor.requirePlayer()` | `Command.player()` |
 | A custom actor type or `ContextParameter` | `provide(GameActor.class, ctx -> ...)` on the command maps the sender once per execution for its subtree; `ctx.get(GameActor.class)` reads it, and annotated methods take it as a parameter after `registerContextValue(GameActor.class, ctx -> ...)`. See [context values](../context-values.md) |
 
 ```java
@@ -161,7 +161,7 @@ class HomeCommand extends Command {
     HomeCommand() {
         super("home");
 
-        require(Command.playerRequirer()).execute((player, ctx) -> player.teleport(player.getWorld()
+        require(Command.player()).execute((player, ctx) -> player.teleport(player.getWorld()
                                                                                          .getSpawnLocation()));
     }
 }

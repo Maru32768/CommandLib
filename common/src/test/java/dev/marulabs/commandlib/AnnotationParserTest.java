@@ -240,7 +240,7 @@ class AnnotationParserTest {
     }
 
     @Command("arena")
-    @Condition("open")
+    @Prerequisites("open")
     static final class ConditionCommand {
         @Subcommand("join")
         void join(TestCommandContext ctx) {
@@ -248,7 +248,7 @@ class AnnotationParserTest {
         }
 
         @Subcommand("start")
-        @Condition({"open", "staff"})
+        @Prerequisites({"open", "staff"})
         void start(TestCommandContext ctx) {
             ctx.sendMessage("started");
         }
@@ -257,7 +257,7 @@ class AnnotationParserTest {
     @Command("arena")
     static final class UnknownCondition {
         @Subcommand("join")
-        @Condition("closed")
+        @Prerequisites("closed")
         void join() {
         }
     }
@@ -265,12 +265,12 @@ class AnnotationParserTest {
     @Test
     void conditions_add_the_registered_prerequisites() throws Exception {
         boolean[] open = {false};
-        TestCommand command = parser().registerCondition("open", ctx -> {
+        TestCommand command = parser().registerPrerequisite("open", ctx -> {
             if (!open[0]) {
                 throw new CommandPrerequisiteException("The arena is closed.");
             }
         })
-                                      .registerCondition("staff", ctx -> {
+                                      .registerPrerequisite("staff", ctx -> {
                                           throw new CommandPrerequisiteException("Staff only.");
                                       })
                                       .parse(new ConditionCommand());
@@ -283,7 +283,7 @@ class AnnotationParserTest {
                          .messages()).containsExactly("joined");
         assertThat(runner.execute("arena start")
                          .messages()).containsExactly("Staff only.");
-        assertThatThrownBy(() -> parser().parse(new UnknownCondition())).hasMessageContaining("@Condition(\"closed\")");
+        assertThatThrownBy(() -> parser().parse(new UnknownCondition())).hasMessageContaining("@Prerequisites(\"closed\")");
     }
 
     @Retention(RetentionPolicy.RUNTIME)

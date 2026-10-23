@@ -65,7 +65,7 @@ class CommandOptionTest {
         try (CommandTester tester = new CommandTester(() -> new Command("heal") {{
             CommandOption<Player, CommandContext> target = option(Options.of("target",
                                                                              't',
-                                                                             new PlayerArgument("target").optional(playerRequirer())));
+                                                                             new PlayerArgument("target").optional(player())));
             CommandOption<Boolean, CommandContext> force = option(Options.flag("force", 'f'));
             argument(new IntegerArgument("amount")).execute((amount, ctx) -> {
                 ctx.sendMessage(ctx.getOption(target)

@@ -66,7 +66,7 @@ Consequences of reflection:
 | method without argument parameters | `execute` / `executeAsync` on its command (at most one per command) |
 | method with argument parameters | one `argument(...)` branch on its command |
 | `@Subcommand` path ending in placeholders | `executeAsync` on the placeholders' branch (at most one method) |
-| `@Description`, `@Permission`, `@VisibleWhen`, `@Confirm`, `@Cooldown`, `@Condition`, `@Middleware`, `@OptionsAnywhere`, `@MutuallyExclusiveOptions`, `@Examples`, `@CaptionBundle`, `aliases` | on the command: from the class for the root, from one `@Subcommand` method for a subcommand |
+| `@Description`, `@Permission`, `@VisibleWhen`, `@Confirm`, `@Cooldown`, `@Prerequisites`, `@Middleware`, `@OptionsAnywhere`, `@MutuallyExclusiveOptions`, `@Examples`, `@CaptionBundle`, `aliases` | on the command: from the class for the root, from one `@Subcommand` method for a subcommand |
 | `@Description`, `@Permission`, `@VisibleWhen` on an `@Execute` method, or a path ending in placeholders | on its argument branch |
 | `@Description(caption = "key")` | `description(Caption.of(key, value))` |
 | `@Flag` / `@Option` parameter | `Options.flag` / `count` / `bool` / `integer` / `longValue` / `floatValue` / `doubleValue` / `string`, or `Options.of(name, argument)` for any other type, `aliases`, `description`, `permission`, `repeatable`, `required`, registered on the method's command; `@Requires` → `requires(other[, value])` |
@@ -105,13 +105,13 @@ type and annotations, the rule options follow, since one argument object serves 
 one branch, as `argument(a, b).child(...)` does. A path that ends in a placeholder executes that branch and takes no
 other arguments, because more arguments would make a second branch starting with the same argument.
 
-Named registries (`registerCondition`, `registerMiddleware`, `registerVisibility`) hold the objects an annotation cannot
+Named registries (`registerPrerequisite`, `registerMiddleware`, `registerVisibility`) hold the objects an annotation cannot
 hold, so `@Middleware("audit")` and `@VisibleWhen("open")` add the same instances a fluent command adds. A name nobody
 registered fails parsing.
 
 `@Default` values are converted when the class is parsed (string, numbers, booleans, enum constants), so a bad default
 fails at startup. An `@Optional` argument without `@Default` takes the context value registered for its type, which
-maps `@Optional Player` to `optional(playerRequirer())`, the documented "defaults to the sender" pattern, or the empty
+maps `@Optional Player` to `optional(player())`, the documented "defaults to the sender" pattern, or the empty
 value of the type.
 
 `@Range` is read by the platform's numeric factories, since the bounds belong to the Brigadier `ArgumentType` (and the
@@ -147,7 +147,7 @@ return a `CompletionStage` that returns null fails with a clear message.
 - `requires(option, predicate, description)`, captions other than one properties bundle, and
   `disableParentMiddleware()` / `disableParentPrerequisite()`. The parsed command is an ordinary `Command`, so these
   can be added fluently after parsing.
-- Prerequisites per argument branch: the core has prerequisites per command only, so `@Condition` stays on the class
+- Prerequisites per argument branch: the core has prerequisites per command only, so `@Prerequisites` stays on the class
   and `@Subcommand` methods.
 - `java.util.Optional<T>` parameters: the core requires an optional argument's default to be non-null, so an absent
   value has no representation without a change to the core.

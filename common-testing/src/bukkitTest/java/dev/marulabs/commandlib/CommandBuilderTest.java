@@ -104,8 +104,7 @@ class CommandBuilderTest {
             addAliases("h");
             CommandOption<Boolean, CommandContext> silent = option(Options.<CommandContext>flag("silent", 's')
                                                                           .description("Do not tell the target"));
-            require(Command.playerRequirer()).execute((player,
-                                                       ctx) -> ctx.sendMessage("Healed " + player.getName()));
+            require(Command.player()).execute((player, ctx) -> ctx.sendMessage("Healed " + player.getName()));
             argument(new PlayerArgument("target"), new IntegerArgument("amount")).description("Heal by an amount")
                                                                                  .permissionDescription("Heal others")
                                                                                  .execute((target, amount, ctx) -> {
@@ -132,7 +131,7 @@ class CommandBuilderTest {
                       .permission(DefaultPermission.OP, "Heal players")
                       .addAliases("h")
                       .option(silent)
-                      .require(Command.playerRequirer(),
+                      .require(Command.player(),
                                branch -> branch.execute((player, ctx) -> ctx.sendMessage("Healed " + player.getName())))
                       .argument(new PlayerArgument("target"),
                                 new IntegerArgument("amount"),

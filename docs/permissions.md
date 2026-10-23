@@ -268,7 +268,7 @@ The tree lists every command on the server, not only CommandLib's, so one call c
 Velocity has no API to send the tree again and no `CommandLib.refresh`. It adds the proxy's commands to the tree the
 backend server sends, so a player sees a permission change when the backend next sends it, such as on a server switch.
 
-Prerequisites (`addPrerequisite`, `require`, `playerRequirer`) run when the command runs and do not hide it. To show a
+Prerequisites (`addPrerequisite`, `require`, `Command.player()`) run when the command runs and do not hide it. To show a
 command or an argument branch only in some plugin state, such as `/game start` only before a game starts, give it a
 `visibleWhen` predicate and refresh the players it affects when the state changes:
 

@@ -66,7 +66,7 @@ public final class TestPlugin {
         }});
         main.addChildren(new Command("consoleOnly") {{
             permission(DefaultPermission.ALL);
-            requireConsole();
+            addPrerequisite(Command.console());
             execute(ctx -> ctx.sendSuccess("consoleOnly executed"));
         }});
         main.addChildren(new Command("find") {{

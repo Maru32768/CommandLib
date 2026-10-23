@@ -50,7 +50,7 @@ public final class FluentArenaCommand extends Command {
                      });
         }}, new Command("join") {{
             argument(new StringArgument("arena"),
-                     new PlayerArgument("player").optional(playerRequirer())).execute((arena, player, ctx) -> {
+                     new PlayerArgument("player").optional(player())).execute((arena, player, ctx) -> {
                          ctx.sendSuccess(player.getName()
                                                .getString()
                                  + " joined " + arena);

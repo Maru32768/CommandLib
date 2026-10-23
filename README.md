@@ -486,7 +486,7 @@ val heal = command("heal") {
 CommandLib.register(this, heal)
 ```
 
-The block's receiver is the `Command`, so every fluent method (`permission`, `requirePlayer()`, `cooldown`, ...) works
+The block's receiver is the `Command`, so every fluent method (`permission`, `addPrerequisite(...)`, `cooldown`, ...) works
 in it, and the tree, permissions, and help are the same as the fluent API's. See [Kotlin DSL](docs/kotlin.md).
 
 ## Java Builder
@@ -499,7 +499,7 @@ Command heal = Command.builder("heal")
                       .description("Heal a player")
                       .permission(DefaultPermission.OP)
                       .addAliases("h")
-                      .configure(Command::requirePlayer)
+                      .addPrerequisite(Command.player())
                       .argument(new PlayerArgument("target"), new IntegerArgument("amount"),
                                 branch -> branch.execute((target, amount, ctx) -> {
                                     target.setHealth(Math.min(20, target.getHealth() + amount));
@@ -511,9 +511,9 @@ CommandLib.register(this, heal);
 ```
 
 The builder has the `Command` methods under the same names; `argument(...)` and `require(...)` take a callback that
-configures the branch, and `configure(...)` reaches platform methods such as `requirePlayer()`. A branch of eight or
-more arguments, which the typed callbacks do not cover, reads each value with `ctx.getArgument(argument)`:
-`argument(x1, y1, z1, x2, y2, z2, world, name).execute(ctx -> ctx.getArgument(world)...)`. See
+configures the branch, and `configure(...)` reaches platform methods such as `permission(PermissionDefault)`. A branch
+of eight or more arguments, which the typed callbacks do not cover, reads each value with `ctx.getArgument(argument)`:
+`argument(List.of(x1, y1, z1, x2, y2, z2, world, name)).execute(ctx -> ctx.getArgument(world)...)`. See
 [Java builder](docs/java-builder.md).
 
 ## Testing Commands
@@ -915,7 +915,7 @@ public final class TestPlugin extends JavaPlugin {
 <summary>Defining Optional and Variadic Arguments</summary>
 
 `optional(defaultValue)` lets the sender omit an argument, and the callback receives the default. Pass an extractor
-instead to compute the default, such as `Command.playerRequirer()` to target the sender. `variadic()` takes an argument
+instead to compute the default, such as `Command.player()` to target the sender. `variadic()` takes an argument
 one or more times and gives the values as a `List`; it accepts up to 16 values, or the count given to
 `variadic(maxCount)`. Make it optional with `variadic().optional(List.of())`.
 
@@ -929,7 +929,7 @@ public final class TestPlugin extends JavaPlugin {
             });
         }}, new Command("heal") {{
             // /heal [target]: heals the sender when omitted
-            argument(new PlayerArgument("target").optional(Command.playerRequirer())).execute((target, ctx) -> {
+            argument(new PlayerArgument("target").optional(Command.player())).execute((target, ctx) -> {
                 target.setHealth(20);
             });
         }}, new Command("kick") {{
@@ -1144,7 +1144,7 @@ public final class TeamCommand extends Command {
     public TeamCommand(Games games, Accounts accounts) {
         super("team");
 
-        provide(GamePlayer.class, ctx -> games.of(playerRequirer().extract(ctx)));    // once per execution
+        provide(GamePlayer.class, ctx -> games.of(player().extract(ctx)));    // once per execution
         addMiddleware((ctx, next) -> {
             ctx.put(Account.class, accounts.load(ctx.getSender()));
             return next.proceed();

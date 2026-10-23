@@ -171,6 +171,12 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
             }
             try {
                 prerequisite.check(ctx);
+                for (Arguments<C> arguments : argumentsList) {
+                    if (command.inheritsPrerequisitesOf(arguments.owner())) {
+                        arguments.prerequisite()
+                                 .check(ctx);
+                    }
+                }
             } catch (CommandPrerequisiteException e) {
                 return fail(ctx, CommandError.Kind.PREREQUISITE, e, null, () -> e.sendMessage(ctx));
             }

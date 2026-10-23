@@ -113,7 +113,7 @@ public final class RuntimeFeatureTest extends TestBase {
             captions(Captions.create()
                              .set(Caption.REQUIRE_CONSOLE, "captionProbe root text")
                              .set(Locale.ENGLISH, Caption.REQUIRE_CONSOLE, CAPTION_PROBE_TEXT));
-            requireConsole();
+            addPrerequisite(Command.console());
             execute(ctx -> ctx.sendFailure(CAPTION_PROBE + " executed"));
         }});
     }

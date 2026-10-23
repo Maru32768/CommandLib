@@ -48,7 +48,7 @@ public final class FluentGuildCommand extends Command {
                                                                                                                       ""));
                                                  CommandOption<Player, CommandContext> by = option(Options.of("by",
                                                                                                               'b',
-                                                                                                              new PlayerArgument("by").optional(playerRequirer())));
+                                                                                                              new PlayerArgument("by").optional(player())));
                                                  reason.requires(by);
                                                  mutuallyExclusiveOptions(silent, loud);
                                                  argument(new PlayerArgument("target")).execute((target, ctx) -> {

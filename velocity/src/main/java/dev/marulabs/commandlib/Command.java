@@ -19,7 +19,7 @@ public class Command extends CommonCommand<CommandContext, Command> {
         return CommandBuilder.of(new Command(name));
     }
 
-    public static Extractor<CommandContext, Player> playerRequirer() {
+    public static Extractor<CommandContext, Player> player() {
         return ctx -> {
             if (!(ctx.getSender() instanceof Player)) {
                 throw new CommandPrerequisiteException(Caption.REQUIRE_PLAYER);
@@ -28,20 +28,12 @@ public class Command extends CommonCommand<CommandContext, Command> {
         };
     }
 
-    public static Extractor<CommandContext, ConsoleCommandSource> consoleRequirer() {
+    public static Extractor<CommandContext, ConsoleCommandSource> console() {
         return ctx -> {
             if (!(ctx.getSender() instanceof ConsoleCommandSource)) {
                 throw new CommandPrerequisiteException(Caption.REQUIRE_CONSOLE);
             }
             return (ConsoleCommandSource) ctx.getSender();
         };
-    }
-
-    public final void requirePlayer() {
-        addPrerequisite(playerRequirer()::extract);
-    }
-
-    public final void requireConsole() {
-        addPrerequisite(consoleRequirer()::extract);
     }
 }

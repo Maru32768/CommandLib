@@ -95,7 +95,7 @@ class ForgeCommandActorTest {
         FakeSender console = FakeSender.console();
         FakeSender steve = FakeSender.player("Steve");
         try (CommandTester tester = new CommandTester(new Command("stop") {{
-            requireConsole();
+            addPrerequisite(Command.console());
             execute(ctx -> ctx.sendMessage("stopped"));
         }}, "actortest")) {
             tester.execute("stop", console);

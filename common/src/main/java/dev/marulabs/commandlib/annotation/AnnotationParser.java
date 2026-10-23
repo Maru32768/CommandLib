@@ -92,7 +92,7 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
     // The annotations that configure a command, and those that describe an argument branch on an @Execute method.
     private static final List<Class<? extends Annotation>> COMMAND_ANNOTATIONS = List.of(Confirm.class,
                                                                                          Cooldown.class,
-                                                                                         Condition.class,
+                                                                                         Prerequisites.class,
                                                                                          Middleware.class,
                                                                                          OptionsAnywhere.class,
                                                                                          MutuallyExclusiveOptions.class,
@@ -126,7 +126,7 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
     private final Set<Class<?>> contextTypes = new HashSet<>();
     private final Map<Class<?>, Extractor<C, ?>> contextValues = new LinkedHashMap<>();
     private final Map<Class<?>, Object> dependencies = new HashMap<>();
-    private final Map<String, Prerequisite<C>> conditions = new HashMap<>();
+    private final Map<String, Prerequisite<C>> prerequisites = new HashMap<>();
     private final Map<String, Predicate<? super C>> visibilities = new HashMap<>();
     private final Map<String, CommandMiddleware<? super C>> middlewares = new HashMap<>();
     // In registration order, which is the order the handlers apply in.
@@ -259,12 +259,12 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
     }
 
     /**
-     * Registers {@code prerequisite} under {@code name}, so that {@link Condition @Condition("name")} on a class or a
-     * subcommand method adds it to the command, replacing the one registered before under the name. A fluent command
+     * Registers {@code prerequisite} under {@code name}, so that {@link Prerequisites @Prerequisites("name")} on a class
+     * or a subcommand method adds it to the command, replacing the one registered before under the name. A fluent command
      * adds the same {@code Prerequisite} constant with {@code addPrerequisite(...)}.
      */
-    public AnnotationParser<C, T> registerCondition(@NotNull String name, @NotNull Prerequisite<C> prerequisite) {
-        conditions.put(Objects.requireNonNull(name), Objects.requireNonNull(prerequisite));
+    public AnnotationParser<C, T> registerPrerequisite(@NotNull String name, @NotNull Prerequisite<C> prerequisite) {
+        prerequisites.put(Objects.requireNonNull(name), Objects.requireNonNull(prerequisite));
         return this;
     }
 
@@ -777,7 +777,7 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
             Permission permission = element.getAnnotation(Permission.class);
             Confirm confirm = element.getAnnotation(Confirm.class);
             Cooldown cooldown = element.getAnnotation(Cooldown.class);
-            Condition condition = element.getAnnotation(Condition.class);
+            Prerequisites prerequisiteNames = element.getAnnotation(Prerequisites.class);
             VisibleWhen visibleWhen = element.getAnnotation(VisibleWhen.class);
             Middleware middleware = element.getAnnotation(Middleware.class);
             Examples examples = element.getAnnotation(Examples.class);
@@ -840,14 +840,14 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
                                              cooldown.unit()
                                                      .toChronoUnit()));
             }
-            if (condition != null) {
-                for (String name : condition.value()) {
-                    command.addPrerequisite(named(conditions,
+            if (prerequisiteNames != null) {
+                for (String name : prerequisiteNames.value()) {
+                    command.addPrerequisite(named(prerequisites,
                                                   name,
                                                   source,
-                                                  "@Condition",
-                                                  "condition",
-                                                  "registerCondition"));
+                                                  "@Prerequisites",
+                                                  "prerequisite",
+                                                  "registerPrerequisite"));
                 }
             }
         }

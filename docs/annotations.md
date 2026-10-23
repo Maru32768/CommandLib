@@ -87,7 +87,7 @@ public final class ArenaCommand extends Command {
         }}, new Command("invite") {{
             argument(new StringArgument("arena"), new PlayerArgument("players").variadic()).execute((arena, players, ctx) -> {});
         }}, new Command("join") {{
-            argument(new StringArgument("arena"), new PlayerArgument("player").optional(playerRequirer())).execute((arena, player, ctx) -> {});
+            argument(new StringArgument("arena"), new PlayerArgument("player").optional(player())).execute((arena, player, ctx) -> {});
         }}, new Command("list") {{
             cooldown(Duration.ofMinutes(1));
             CommandOption<Integer, CommandContext> limit = option(Options.integer("limit", 'n', 10, 1, 100));
@@ -147,7 +147,7 @@ executors can suspend.
 | `@VisibleWhen("running")` | class, method | `visibleWhen(...)` of the command, the subcommand, or the branch of an `@Execute` method, with the predicate registered under the name with `registerVisibility` ([permissions](permissions.md#refreshing-the-command-tree)) |
 | `@Confirm(seconds = 10)` | class, `@Subcommand` method | `confirm(Confirmation.within(...))` |
 | `@Cooldown(value, unit)` | class, `@Subcommand` method | `cooldown(Duration)` |
-| `@Condition({"daytime", ...})` | class, `@Subcommand` method | `addPrerequisite(...)` with each prerequisite registered under the name with `registerCondition` |
+| `@Prerequisites({"daytime", ...})` | class, `@Subcommand` method | `addPrerequisite(...)` with each prerequisite registered under the name with `registerPrerequisite` |
 | `@Middleware({"audit", ...})` | class, `@Subcommand` method | `addMiddleware(...)` with each middleware registered under the name with `registerMiddleware`, in this order ([execution](execution.md#middleware)) |
 | `@OptionsAnywhere` | class, `@Subcommand` method | `optionsAnywhere()`: the options may follow the arguments ([options](options.md#options-after-the-arguments)) |
 | `@MutuallyExclusiveOptions({"json", "yaml"})` | class, `@Subcommand` method, repeatable | `mutuallyExclusiveOptions(json, yaml)` of the command's options with these names |
@@ -259,7 +259,7 @@ Context values: `CommandSender`, `ConsoleCommandSender` and `Player` on Spigot a
 |---|---|
 | `@Name("target")` | The argument name, used in help and in the branch's permission node |
 | `@Default("16")` | Makes the argument optional with this value: a string, a number, `true` / `false`, or an enum constant name |
-| `@Optional` | Makes the argument optional; an omitted value is the context value of the type (a `Player` defaults to the sender, as `optional(playerRequirer())`), or else `0`, `false`, `""`, or an empty list for a `List` |
+| `@Optional` | Makes the argument optional; an omitted value is the context value of the type (a `Player` defaults to the sender, as `optional(player())`), or else `0`, `false`, `""`, or an empty list for a `List` |
 | `@Range(min, max)` | Bounds of a numeric argument; whole numbers for an integer type, within the range of the type, and `min` not above `max`. The default, `@Default` or the `0` of `@Optional` or of an `@Option` without `@Default`, must be within them |
 | `@Suggest({"a", "b"})`, `@Suggest(method = "names")` | Replaces the suggestions with fixed values and / or the values of a method of the class, which returns an `Iterable<String>` or takes the `SuggestionBuilder` |
 | `@Greedy` | A string argument that takes the rest of the input |
@@ -281,7 +281,7 @@ otherwise, as for fluent commands ([optional and variadic arguments](design/opti
 | `@Option(value = "tag", repeatable = 3) List<String> tags` | `Options.string("tag", "").repeatable(3)` |
 | `@Option(value = "env", required = true) String env` | `Options.string("env", "").required()` |
 | `@Option("world") World world` | `Options.of("world", new WorldArgument("world"))`, required |
-| `@Option(value = "target", shortName = 't') @Optional Player target` | `Options.of("target", 't', new PlayerArgument("target").optional(playerRequirer()))` |
+| `@Option(value = "target", shortName = 't') @Optional Player target` | `Options.of("target", 't', new PlayerArgument("target").optional(player()))` |
 | `@Option("mode") @Default("creative") GameMode mode` | `Options.of("mode", new GameModeArgument("mode").optional(GameMode.CREATIVE))` |
 | `@Flag("silent") @Permission(defaultPermission = DefaultPermission.OP) boolean silent` | `Options.flag("silent").permission(DefaultPermission.OP)` |
 | `@Option("reason") @Permission("myplugin.ban.reason") String reason` | `Options.string("reason", "").permission("myplugin.ban.reason")` |
@@ -323,15 +323,15 @@ Command command = AnnotatedCommands.parser()
         // A type of your own, or a replacement for a built-in one.
         .registerArgument(Arena.class, p -> new ObjectArgument<>(p.name(), arenas.byName()))
         // A value the method gets from the context, such as the sender as your own type.
-        .registerContextValue(GamePlayer.class, ctx -> games.of(Command.playerRequirer().extract(ctx)))
+        .registerContextValue(GamePlayer.class, ctx -> games.of(Command.player().extract(ctx)))
         // A value a middleware puts, or a command the parsed one is added to provides.
         .registerContextValue(Account.class)
         // A service: a parameter of the type, and the fields annotated @Dependency.
         .registerDependency(Economy.class, economy)
         // A custom annotation that configures the argument of a parameter.
         .registerAnnotation(Online.class, Player.class, (online, argument) -> argument.validator(Player::isOnline))
-        // A named prerequisite for @Condition("daytime").
-        .registerCondition("daytime", Conditions.DAYTIME)
+        // A named prerequisite for @Prerequisites("daytime").
+        .registerPrerequisite("daytime", Conditions.DAYTIME)
         // A named middleware for @Middleware("audit").
         .registerMiddleware("audit", new AuditMiddleware(getLogger()))
         // A named predicate for @VisibleWhen("open").
@@ -346,7 +346,7 @@ Command command = AnnotatedCommands.parser()
   and before the argument is made variadic or optional, so on a `List` parameter it configures each value. It returns
   the argument to use, which keeps the parameter's name. Parsing fails for the annotation on a parameter that is not
   an argument: the context, a `@Sender` or context value, a `@Flag`, or an `@Option` of a built-in value type.
-- `registerCondition(name, prerequisite)` names a `Prerequisite` for `@Condition`. Parsing fails for a name nobody
+- `registerPrerequisite(name, prerequisite)` names a `Prerequisite` for `@Prerequisites`. Parsing fails for a name nobody
   registered. Fluent commands add the same constant with `addPrerequisite`, see
   [errors](errors.md#reusable-conditions).
 - `registerMiddleware(name, middleware)` and `registerVisibility(name, predicate)` name a `CommandMiddleware` for

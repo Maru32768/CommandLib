@@ -105,7 +105,7 @@ public final class AnnotatedCommands {
               .registerArgument(Objective.class, p -> new ObjectiveArgument(p.name()))
               .registerArgument(ChatFormatting.class, p -> new ChatColorArgument(p.name()))
               .registerContextValue(CommandSourceStack.class, CommandContext::getSender)
-              .registerContextValue(ServerPlayer.class, Command.playerRequirer());
+              .registerContextValue(ServerPlayer.class, Command.player());
         //? if >=1.20.5 {
         /*parser.registerArgument(Holder.class, AnnotatedCommands::holderArgument);
         *///?} else {

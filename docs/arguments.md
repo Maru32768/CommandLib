@@ -276,7 +276,7 @@ Notes:
   `additionalParser`. A new `ArgumentType` class must be known to the client, which CommandLib does not register for
   you (only the internal raw word type of `UnparsedArgument` is), so it is `partial`.
 - Optional and variadic arguments: `optional(defaultValue)` lets the sender omit the last arguments of a branch, and
-  `optional(extractor)` computes the default, e.g. `optional(Command.playerRequirer())` for the sender. `variadic()`
+  `optional(extractor)` computes the default, e.g. `optional(Command.player())` for the sender. `variadic()`
   takes the last argument one or more times (up to 16, or `variadic(maxCount)`) and gives a `List<T>`. Only the last
   arguments of a branch can be optional or variadic, and such a branch cannot have child commands; registration fails
   otherwise. Help shows `[count]` and `<targets...>`. Each value of a variadic argument is a separate token parsed by the

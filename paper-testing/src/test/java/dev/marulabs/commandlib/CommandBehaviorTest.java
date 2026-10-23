@@ -28,9 +28,9 @@ class CommandBehaviorTest {
     }
 
     @Test
-    void requirePlayerAllowsPlayersAndRejectsConsole() {
+    void playerPrerequisiteAllowsPlayersAndRejectsConsole() {
         Command command = new Command("playeronly") {{
-            requirePlayer();
+            addPrerequisite(Command.player());
             execute(ctx -> ctx.sendSuccess("player"));
         }};
         CommandTester tester = new CommandTester(command, "test.command");
@@ -45,9 +45,9 @@ class CommandBehaviorTest {
     }
 
     @Test
-    void playerRequirerPassesThePlayerToTheExecutor() {
+    void playerExtractorPassesThePlayerToTheExecutor() {
         Command command = new Command("whoami") {{
-            require(Command.playerRequirer()).execute((player, ctx) -> ctx.sendSuccess(player.getName()));
+            require(Command.player()).execute((player, ctx) -> ctx.sendSuccess(player.getName()));
         }};
         CommandTester tester = new CommandTester(command, "test.command");
         FakeSender player = FakeSender.player("Steve");
@@ -61,9 +61,9 @@ class CommandBehaviorTest {
     }
 
     @Test
-    void requireConsoleAllowsConsoleAndRejectsPlayers() {
+    void consolePrerequisiteAllowsConsoleAndRejectsPlayers() {
         Command command = new Command("consoleonly") {{
-            requireConsole();
+            addPrerequisite(Command.console());
             execute(ctx -> ctx.sendSuccess("console"));
         }};
         CommandTester tester = new CommandTester(command, "test.command");

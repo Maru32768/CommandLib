@@ -114,8 +114,8 @@ public final class AnnotatedCommands {
                                                                           .registerContextValue(CommandSender.class,
                                                                                                 CommandContext::getSender)
                                                                           .registerContextValue(Player.class,
-                                                                                                Command.playerRequirer())
+                                                                                                Command.player())
                                                                           .registerContextValue(ConsoleCommandSender.class,
-                                                                                                Command.consoleRequirer());
+                                                                                                Command.console());
     }
 }

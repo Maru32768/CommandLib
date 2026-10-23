@@ -55,8 +55,8 @@ public final class AnnotatedCommands {
                                                                           .registerContextValue(CommandSource.class,
                                                                                                 CommandContext::getSender)
                                                                           .registerContextValue(Player.class,
-                                                                                                Command.playerRequirer())
+                                                                                                Command.player())
                                                                           .registerContextValue(ConsoleCommandSource.class,
-                                                                                                Command.consoleRequirer());
+                                                                                                Command.console());
     }
 }

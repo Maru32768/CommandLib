@@ -32,7 +32,7 @@ class PlayerArgumentTest {
         FakeSender admin = FakeSender.player("Admin");
 
         try (CommandTester tester = new CommandTester(() -> new Command("info") {{
-            requirePlayer();
+            addPrerequisite(Command.player());
             argument(new PlayerArgument("target")).execute((target, ctx) -> {
                 ctx.sendMessage(ctx.getPlayer()
                                    .getName()

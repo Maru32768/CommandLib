@@ -9,7 +9,7 @@ public final class TeamCommand extends Command {
         super("team");
 
         // The sender as the plugin's own type, mapped once per execution.
-        provide(GamePlayer.class, ctx -> games.of(playerRequirer().extract(ctx)));
+        provide(GamePlayer.class, ctx -> games.of(player().extract(ctx)));
 
         addChildren(new Command("show") {{
             execute(ctx -> ctx.sendMessage(ctx.get(GamePlayer.class).team()));
@@ -60,7 +60,7 @@ that middleware on; suggestion and help contexts run no middleware, so they have
 Map the platform's sender to your own type with a provider on the top-level command:
 
 ```java
-provide(GamePlayer.class, ctx -> games.of(playerRequirer().extract(ctx)));
+provide(GamePlayer.class, ctx -> games.of(player().extract(ctx)));
 ```
 
 - A `CommandPrerequisiteException` thrown by the provider fails the command with its message, here "This command can
@@ -72,7 +72,7 @@ provide(GamePlayer.class, ctx -> games.of(playerRequirer().extract(ctx)));
   require(ctx -> ctx.get(GamePlayer.class)).execute((player, ctx) -> player.leave());
   ```
 
-- `playerRequirer()` exists on every platform. It gives a `Player` on Spigot, Paper and Velocity, and a
+- `player()` exists on every platform. It gives a `Player` on Spigot, Paper and Velocity, and a
   `ServerPlayer` on Forge, NeoForge and Fabric.
 
 ## Values from middlewares
@@ -130,7 +130,7 @@ public final class TeamCommand {
 
 Command team = AnnotatedCommands.parser()
         .registerDependency(Games.class, games)
-        .registerContextValue(GamePlayer.class, ctx -> games.of(Command.playerRequirer().extract(ctx)))
+        .registerContextValue(GamePlayer.class, ctx -> games.of(Command.player().extract(ctx)))
         .registerContextValue(Account.class)
         .parse(new TeamCommand());
 team.addMiddleware((ctx, next) -> {
@@ -164,7 +164,7 @@ services that executions read to `registerContextValue`, `registerDependency` or
 // Guice: a command class with an @Inject constructor that takes its services.
 Games games = injector.getInstance(Games.class);
 Command team = AnnotatedCommands.parser()
-        .registerContextValue(GamePlayer.class, ctx -> games.of(Command.playerRequirer().extract(ctx)))
+        .registerContextValue(GamePlayer.class, ctx -> games.of(Command.player().extract(ctx)))
         .parse(injector.getInstance(GuiceTeamCommand.class));
 
 // Or hand a binding to a fluent command tree.
@@ -182,7 +182,7 @@ registration with `CommandDefaults`, which also holds registration-wide middlewa
 
 ```java
 CommandDefaults<CommandContext> defaults = CommandDefaults.of(CommandContext.class)
-        .provide(GamePlayer.class, ctx -> games.of(Command.playerRequirer().extract(ctx)));
+        .provide(GamePlayer.class, ctx -> games.of(Command.player().extract(ctx)));
 CommandLib.register(this, defaults, List.of(new TeamCommand(games), new ArenaCommand(arenas)));
 ```
 

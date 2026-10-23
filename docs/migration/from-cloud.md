@@ -75,7 +75,7 @@ typed with `ctx.getArgument(a)` (see [Java builder](../java-builder.md#eight-or-
 |---|---|
 | `required(name, parser)` | An argument instance in `argument(...)` |
 | `optional(name, parser, DefaultValue.constant(v))` | `.optional(v)` on the argument |
-| `optional(name, parser, DefaultValue.dynamic(ctx -> ...))` | `.optional(ctx -> ...)` (an `Extractor`), such as `optional(Command.playerRequirer())` |
+| `optional(name, parser, DefaultValue.dynamic(ctx -> ...))` | `.optional(ctx -> ...)` (an `Extractor`), such as `optional(Command.player())` |
 | `optional(name, parser)` + `ctx.optional(name)` | **Not available** as an empty value; give a default, or declare a second branch without the argument |
 | `ctx.get(name)`, `ctx.getOrDefault(name, v)` | Typed executor parameters; `ctx.getArgument(argument)` for a branch of eight or more arguments |
 | `literal("start", "s")` | A child command: `addChildren(new Command("start") {{ addAliases("s"); ... }})` |
@@ -129,7 +129,7 @@ class JoinCommand extends Command {
     JoinCommand(ArenaManager arenas) {
         super("join");
 
-        requirePlayer();
+        addPrerequisite(Command.player());
         argument(new ObjectArgument<Arena>("arena", arenas::byName)).execute((arena, ctx) -> arena.join(ctx.getPlayer()));
     }
 }
@@ -143,8 +143,8 @@ stand for your own code.
 | Cloud | CommandLib |
 |---|---|
 | `ctx.sender()` | `ctx.getSender()` (`CommandSender`) |
-| `senderType(Player.class)` | `requirePlayer()` on the command, then `ctx.getPlayer()`; or `require(Command.playerRequirer())` for a typed player |
-| `senderType(ConsoleCommandSender.class)` | `requireConsole()`, then `ctx.getConsole()` |
+| `senderType(Player.class)` | `addPrerequisite(Command.player())` on the command, then `ctx.getPlayer()`; or `require(Command.player())` for a typed player |
+| `senderType(ConsoleCommandSender.class)` | `addPrerequisite(Command.console())`, then `ctx.getConsole()` |
 | `SenderMapper` / custom sender type for the whole manager | `CommandDefaults.of(CommandContext.class).provide(GamePlayer.class, ctx -> ...)` passed to `CommandLib.register` maps the sender once per execution for every command; read it with `ctx.get(GamePlayer.class)`, or as a typed executor parameter with `require(ctx -> ctx.get(GamePlayer.class))`. See [context values](../context-values.md) |
 | `PaperSimpleSenderMapper`, `CommandSourceStack` | The `paper` artifact reads the `CommandSourceStack` itself; use `ctx.getSender()`, or `ctx.getHandle().getSource()` for the stack |
 

@@ -69,7 +69,7 @@ class MyCommand extends Command {
 }
 ```
 
-`optional(Command.playerRequirer())` defaults a player argument to the sender.
+`optional(Command.player())` defaults a player argument to the sender.
 Only the last arguments of a branch can be optional or variadic, and such a
 branch cannot have child commands.
 

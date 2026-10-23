@@ -16,7 +16,7 @@ Command heal = Command.builder("heal")
                       .permission(DefaultPermission.OP, "Heal players")
                       .addAliases("h")
                       .option(silent)
-                      .require(Command.playerRequirer(),
+                      .require(Command.player(),
                                branch -> branch.execute((player, ctx) -> player.setHealth(20)))
                       .argument(new PlayerArgument("target"), new IntegerArgument("amount"),
                                 branch -> branch.description("Heal by an amount")
@@ -43,7 +43,7 @@ Command heal = new Command("heal") {{
     addAliases("h");
     CommandOption<Boolean, CommandContext> silent = option(Options.<CommandContext>flag("silent", 's')
                                                                   .description("Do not tell the target"));
-    require(Command.playerRequirer()).execute((player, ctx) -> player.setHealth(20));
+    require(Command.player()).execute((player, ctx) -> player.setHealth(20));
     argument(new PlayerArgument("target"), new IntegerArgument("amount")).description("Heal by an amount")
                                                                          .execute((target, amount, ctx) -> { ... });
     addChildren(new Command("all") {{ ... }});
@@ -81,12 +81,12 @@ Command config = Command.builder("config")
                         .build();
 ```
 
-Platform methods that are not on the common command, such as `requirePlayer()`, `requireConsole()` or
-`permission(PermissionDefault)` on Spigot and Paper, go through `configure`:
+Platform methods that are not on the common command, such as `permission(PermissionDefault)` on Spigot and Paper, go
+through `configure`:
 
 ```java
 Command.builder("fly")
-       .configure(Command::requirePlayer)
+       .addPrerequisite(Command.player())
        .configure(c -> c.permission(PermissionDefault.TRUE))
        .execute(ctx -> ...)
        .build();

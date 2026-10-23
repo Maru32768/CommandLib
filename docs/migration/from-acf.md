@@ -55,7 +55,7 @@ class ResidenceCommand extends Command {
 
         execute(ctx -> ctx.sendMessage("Residence"));
         addChildren(new Command("list") {{
-            argument(new PlayerArgument("target").optional(Command.playerRequirer())).execute((target, ctx) -> {
+            argument(new PlayerArgument("target").optional(Command.player())).execute((target, ctx) -> {
                 ctx.sendMessage("Residences of " + target.getName());
             });
         }});
@@ -109,7 +109,7 @@ See the [argument catalog](../arguments.md) for every built-in argument.
 | ACF | CommandLib |
 |---|---|
 | `@Default("7") Integer number` | `new IntegerArgument("number").optional(7)` |
-| `@Optional OnlinePlayer target` (`null` when omitted) | **Not available** as `null`; `optional(Command.playerRequirer())` defaults to the sender, or declare a second branch without it |
+| `@Optional OnlinePlayer target` (`null` when omitted) | **Not available** as `null`; `optional(Command.player())` defaults to the sender, or declare a second branch without it |
 
 Only the last arguments of a branch can be optional, as in ACF.
 
@@ -133,7 +133,7 @@ class JoinCommand extends Command {
     JoinCommand(ArenaManager arenas) {
         super("join");
 
-        requirePlayer();
+        addPrerequisite(Command.player());
         argument(new ObjectArgument<Arena>("arena", arenas::byName)).execute((arena, ctx) -> arena.join(ctx.getPlayer()));
     }
 }
@@ -155,8 +155,8 @@ configured argument.
 | ACF | CommandLib |
 |---|---|
 | `CommandSender sender` as the first parameter | `ctx.getSender()` |
-| `Player player` as the first parameter (player only) | `requirePlayer()` on the command, then `ctx.getPlayer()`; or `require(Command.playerRequirer())` for a typed player |
-| `ConsoleCommandSender` | `requireConsole()`, then `ctx.getConsole()` |
+| `Player player` as the first parameter (player only) | `addPrerequisite(Command.player())` on the command, then `ctx.getPlayer()`; or `require(Command.player())` for a typed player |
+| `ConsoleCommandSender` | `addPrerequisite(Command.console())`, then `ctx.getConsole()` |
 | `BukkitCommandIssuer` | `ctx` itself: `ctx.getSender()`, `ctx.sendMessage(...)` |
 | `sender.sendMessage(...)` | `ctx.sendMessage`, `sendSuccess` (green), `sendWarn` (yellow), `sendFailure` (red) |
 
@@ -166,7 +166,7 @@ class HomeCommand extends Command {
     HomeCommand() {
         super("home");
 
-        require(Command.playerRequirer()).execute((player, ctx) -> player.teleport(player.getWorld()
+        require(Command.player()).execute((player, ctx) -> player.teleport(player.getWorld()
                                                                                          .getSpawnLocation()));
     }
 }
@@ -211,7 +211,7 @@ CommandLib does not filter what a provider adds; filter by `sb.getLatestInput()`
 
 | ACF | CommandLib |
 |---|---|
-| `addCondition("daytime", c -> ...)` + `@Conditions("daytime")` | A `Prerequisite<CommandContext>` added with `addPrerequisite(...)`; annotated commands use `registerCondition("daytime", ...)` + `@Condition("daytime")` |
+| `addCondition("daytime", c -> ...)` + `@Conditions("daytime")` | A `Prerequisite<CommandContext>` added with `addPrerequisite(...)`; annotated commands use `registerPrerequisite("daytime", ...)` + `@Prerequisites("daytime")` |
 | Parameter conditions `@Conditions("limits:min=5,max=10")` | `validator(...)` on the argument, or `new IntegerArgument(name, 5, 10)` |
 | `throw new ConditionFailedException("...")` | `throw new CommandPrerequisiteException("...")` in a prerequisite, `ArgumentValidationException("...")` in a validator |
 
@@ -232,7 +232,7 @@ class DarkenCommand extends Command {
     DarkenCommand() {
         super("darken");
 
-        requirePlayer();
+        addPrerequisite(Command.player());
         addPrerequisite(Conditions.DAYTIME);
         execute(ctx -> ctx.sendSuccess("Darkened"));
     }
@@ -322,7 +322,7 @@ fields of `JoinCommand` annotated `@Dependency` (from `dev.marulabs.commandlib.a
 ## Not available
 
 Catch-unknown handlers, hidden commands, root aliases for subcommands, and global contexts and completions by type.
-Reusable named conditions for fluent commands are tracked in the roadmap (annotated commands have `@Condition`, see
+Reusable named conditions for fluent commands are tracked in the roadmap (annotated commands have `@Prerequisites`, see
 [conditions](#conditions)). Asynchronous execution is `executeAsync(...)`, see
 [execution](../execution.md#async-executors).
 

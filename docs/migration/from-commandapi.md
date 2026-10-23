@@ -119,7 +119,7 @@ class HealCommand extends Command {
     HealCommand() {
         super("heal");
 
-        argument(new PlayerArgument("target").optional(playerRequirer())).execute((target, ctx) -> {
+        argument(new PlayerArgument("target").optional(player())).execute((target, ctx) -> {
             target.setHealth(20);
         });
     }
@@ -136,8 +136,8 @@ becomes `variadic()` on the element argument, such as `new PlayerArgument("targe
 | CommandAPI | CommandLib |
 |---|---|
 | `executes((sender, args) -> ...)` | `execute(ctx -> ...)` or the typed `execute((a, b, ctx) -> ...)`; the sender is `ctx.getSender()` |
-| `executesPlayer((player, args) -> ...)` | `requirePlayer()` on the command, then `ctx.getPlayer()`; or `require(Command.playerRequirer())` for a typed player |
-| `executesConsole(...)` | `requireConsole()`, then `ctx.getConsole()` |
+| `executesPlayer((player, args) -> ...)` | `addPrerequisite(Command.player())` on the command, then `ctx.getPlayer()`; or `require(Command.player())` for a typed player |
+| `executesConsole(...)` | `addPrerequisite(Command.console())`, then `ctx.getConsole()` |
 | `executesCommandBlock`, `executesProxy`, `executesNative`, `executesEntity` | **Not available** as separate executors; check `ctx.getSender()` (`BlockCommandSender`, ...) yourself |
 | Resulting executors (`return n`), `/execute store` | `ctx.setResult(n)` in the executor; `1` unless set, `0` for a failure. See [errors](../errors.md#results-and-failures) |
 | `throw CommandAPI.failWithString("...")` | `throw new CommandPrerequisiteException("...")` from `execute(ctx -> ...)`, `throw ctx.fail("...")` from any executor, or `ctx.sendFailure("..."); return;` |
@@ -149,13 +149,13 @@ class HomeCommand extends Command {
     HomeCommand() {
         super("home");
 
-        require(Command.playerRequirer()).execute((player, ctx) -> player.teleport(player.getWorld()
+        require(Command.player()).execute((player, ctx) -> player.teleport(player.getWorld()
                                                                                          .getSpawnLocation()));
     }
 }
 ```
 
-`Command.playerRequirer()`, `consoleRequirer()`, `requirePlayer()` and `requireConsole()` exist on every platform. On Forge, NeoForge and Fabric, `playerRequirer()` gives a `ServerPlayer`.
+`Command.player()` and `Command.console()` exist on every platform. On Forge, NeoForge and Fabric, `player()` gives a `ServerPlayer`.
 
 ## Subcommands
 

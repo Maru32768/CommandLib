@@ -22,7 +22,7 @@ annotation class CommandLibDsl
 
 /**
  * The block of a command: the command itself is the receiver, so every method of the fluent API, such as
- * `permission(...)`, `requirePlayer()` or `cooldown(...)`, can be called in it.
+ * `permission(...)`, `addPrerequisite(...)` or `cooldown(...)`, can be called in it.
  */
 typealias CommandBlock<T> = (@CommandLibDsl T).() -> Unit
 
@@ -191,7 +191,7 @@ private fun <C : CommonCommandContext<*, *>, T : CommonCommand<C, T>> T.branch(
  * again from its context:
  *
  * ```kotlin
- * require(Command.playerRequirer()) {
+ * require(Command.player()) {
  *     execute { player, ctx -> player.health = 20.0 }
  *     subcommand("food") { execute { ctx -> ctx.player.foodLevel = 20 } }
  * }

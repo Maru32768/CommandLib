@@ -5,6 +5,7 @@ import dev.marulabs.commandlib.CommonCommand;
 import dev.marulabs.commandlib.CommonCommandContext;
 import dev.marulabs.commandlib.DefaultPermission;
 import dev.marulabs.commandlib.command.AsyncCommandExecutor;
+import dev.marulabs.commandlib.command.Prerequisite;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
@@ -41,4 +42,6 @@ public interface ArgumentBranchDelegate<C extends CommonCommandContext<?, ?>, T 
     void permissionDescription(@NotNull String description);
 
     void visibleWhen(@NotNull Predicate<? super C> predicate);
+
+    void addPrerequisite(@NotNull Prerequisite<C> prerequisite);
 }

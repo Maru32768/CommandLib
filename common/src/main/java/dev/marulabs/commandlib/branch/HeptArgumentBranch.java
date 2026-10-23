@@ -9,6 +9,7 @@ import dev.marulabs.commandlib.DefaultPermission;
 import dev.marulabs.commandlib.command.AsyncCommandExecutor;
 import dev.marulabs.commandlib.command.CommandExecutor;
 import dev.marulabs.commandlib.command.Extractor;
+import dev.marulabs.commandlib.command.Prerequisite;
 import dev.marulabs.commandlib.internal.ArgumentBranchDelegate;
 import dev.marulabs.commandlib.util.function.HeptFunction;
 import dev.marulabs.commandlib.util.function.OctoConsumer;
@@ -145,6 +146,12 @@ public final class HeptArgumentBranch<T1, T2, T3, T4, T5, T6, T7, C extends Comm
     @Override
     public HeptArgumentBranch<T1, T2, T3, T4, T5, T6, T7, C, T> visibleWhen(@NotNull Predicate<? super C> predicate) {
         super.visibleWhen(predicate);
+        return this;
+    }
+
+    @Override
+    public HeptArgumentBranch<T1, T2, T3, T4, T5, T6, T7, C, T> addPrerequisite(@NotNull Prerequisite<C> prerequisite) {
+        super.addPrerequisite(prerequisite);
         return this;
     }
 

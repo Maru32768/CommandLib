@@ -495,6 +495,11 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
             public void visibleWhen(@NotNull Predicate<? super C> predicate) {
                 arguments.visibleWhen(predicate);
             }
+
+            @Override
+            public void addPrerequisite(@NotNull Prerequisite<C> prerequisite) {
+                arguments.addPrerequisite(prerequisite);
+            }
         };
     }
 
@@ -787,6 +792,20 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
 
     final List<T> children() {
         return List.copyOf(children);
+    }
+
+    /**
+     * Whether the prerequisites of {@code ancestor}, this command or one of its parents, and those of its argument
+     * branches apply to this command, which they do unless this command or a command between them calls
+     * {@link #disableParentPrerequisite()}.
+     */
+    final boolean inheritsPrerequisitesOf(CommonCommand<?, ?> ancestor) {
+        for (CommonCommand<?, ?> current = this; current != ancestor; current = current.parent) {
+            if (current == null || !current.inheritParentPrerequisite) {
+                return false;
+            }
+        }
+        return true;
     }
 
     final Prerequisite<C> prerequisite() {

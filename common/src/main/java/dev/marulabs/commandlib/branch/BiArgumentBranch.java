@@ -9,6 +9,7 @@ import dev.marulabs.commandlib.DefaultPermission;
 import dev.marulabs.commandlib.command.AsyncCommandExecutor;
 import dev.marulabs.commandlib.command.CommandExecutor;
 import dev.marulabs.commandlib.command.Extractor;
+import dev.marulabs.commandlib.command.Prerequisite;
 import dev.marulabs.commandlib.internal.ArgumentBranchDelegate;
 import dev.marulabs.commandlib.util.function.TriConsumer;
 import dev.marulabs.commandlib.util.function.TriFunction;
@@ -116,6 +117,12 @@ public final class BiArgumentBranch<T1, T2, C extends CommonCommandContext<?, ?>
     @Override
     public BiArgumentBranch<T1, T2, C, T> visibleWhen(@NotNull Predicate<? super C> predicate) {
         super.visibleWhen(predicate);
+        return this;
+    }
+
+    @Override
+    public BiArgumentBranch<T1, T2, C, T> addPrerequisite(@NotNull Prerequisite<C> prerequisite) {
+        super.addPrerequisite(prerequisite);
         return this;
     }
 

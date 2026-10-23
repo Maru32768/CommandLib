@@ -28,7 +28,7 @@ class MyPlugin : JavaPlugin() {
                 }
             }
             subcommand("self") {
-                requirePlayer()
+                addPrerequisite(Command.player())
                 argument(IntegerArgument("amount").optional(20)) { amount ->
                     execute { ctx -> ctx.player.health = minOf(ctx.player.health + amount.get(), 20.0) }
                 }
@@ -83,7 +83,7 @@ dependencies {
 
 `command(name) { ... }` creates a command and runs the block with the command as its receiver. Every method of the
 fluent API can be called in it: `description`, `permission(...)` (including Bukkit's `PermissionDefault` overloads),
-`addAliases`, `requirePlayer()`, `confirm()`, `cooldown(...)`, `addMiddleware(...)`, `option(...)`, `execute { ctx -> }`
+`addAliases`, `addPrerequisite(...)`, `confirm()`, `cooldown(...)`, `addMiddleware(...)`, `option(...)`, `execute { ctx -> }`
 and `executeAsync { ctx -> }`.
 
 `subcommand(name) { ... }` adds a child command (`/heal stats`). Inside an `argument(...)` block it adds a child
@@ -162,7 +162,7 @@ when the extractor gives a value and receives the value. A command has one execu
 command as well throws `IllegalStateException`. A `subcommand` of it is checked by the extractor too:
 
 ```kotlin
-require(Command.playerRequirer()) {
+require(Command.player()) {
     execute { player, ctx -> player.health = 20.0 }
     subcommand("food") { execute { ctx -> ctx.player.foodLevel = 20 } }
 }

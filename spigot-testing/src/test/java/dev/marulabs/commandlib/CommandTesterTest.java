@@ -341,7 +341,7 @@ class CommandTesterTest {
         @Test
         void require_player_passes_for_player_sender() {
             try (CommandTester tester = new CommandTester(new Command("playeronly") {{
-                requirePlayer();
+                addPrerequisite(Command.player());
                 execute(ctx -> ctx.sendMessage("ok"));
             }}, "test.command")) {
                 FakeSender sender = FakeSender.player("Steve");
@@ -353,7 +353,7 @@ class CommandTesterTest {
         @Test
         void require_player_blocks_console_sender() {
             try (CommandTester tester = new CommandTester(new Command("playeronly") {{
-                requirePlayer();
+                addPrerequisite(Command.player());
                 execute(ctx -> ctx.sendMessage("ok"));
             }}, "test.command")) {
                 FakeSender sender = FakeSender.console();
@@ -365,7 +365,7 @@ class CommandTesterTest {
         @Test
         void require_console_passes_for_console_sender() {
             try (CommandTester tester = new CommandTester(new Command("consoleonly") {{
-                requireConsole();
+                addPrerequisite(Command.console());
                 execute(ctx -> ctx.sendMessage("ok"));
             }}, "test.command")) {
                 FakeSender sender = FakeSender.console();

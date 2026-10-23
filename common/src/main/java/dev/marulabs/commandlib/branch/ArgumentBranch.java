@@ -7,6 +7,7 @@ import dev.marulabs.commandlib.DefaultPermission;
 import dev.marulabs.commandlib.command.AsyncCommandExecutor;
 import dev.marulabs.commandlib.command.CommandExecutor;
 import dev.marulabs.commandlib.command.Extractor;
+import dev.marulabs.commandlib.command.Prerequisite;
 import dev.marulabs.commandlib.internal.ArgumentBranchDelegate;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -98,6 +99,17 @@ public class ArgumentBranch<C extends CommonCommandContext<?, ?>, T extends Comm
      */
     public ArgumentBranch<C, T> visibleWhen(@NotNull Predicate<? super C> predicate) {
         delegate.visibleWhen(Objects.requireNonNull(predicate));
+        return this;
+    }
+
+    /**
+     * Adds a check that runs before this branch executes, after those of the command, like
+     * {@link CommonCommand#addPrerequisite(Prerequisite)}. It applies to the child commands of the branch too, unless
+     * they call {@link CommonCommand#disableParentPrerequisite()}. An {@link Extractor} checks what it would read, so
+     * {@code addPrerequisite(Command.player())} lets only players run the branch.
+     */
+    public ArgumentBranch<C, T> addPrerequisite(@NotNull Prerequisite<C> prerequisite) {
+        delegate.addPrerequisite(Objects.requireNonNull(prerequisite));
         return this;
     }
 

@@ -9,6 +9,7 @@ import dev.marulabs.commandlib.DefaultPermission;
 import dev.marulabs.commandlib.command.AsyncCommandExecutor;
 import dev.marulabs.commandlib.command.CommandExecutor;
 import dev.marulabs.commandlib.command.Extractor;
+import dev.marulabs.commandlib.command.Prerequisite;
 import dev.marulabs.commandlib.internal.ArgumentBranchDelegate;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -111,6 +112,12 @@ public final class UnaryArgumentBranch<T1, C extends CommonCommandContext<?, ?>,
     @Override
     public UnaryArgumentBranch<T1, C, T> visibleWhen(@NotNull Predicate<? super C> predicate) {
         super.visibleWhen(predicate);
+        return this;
+    }
+
+    @Override
+    public UnaryArgumentBranch<T1, C, T> addPrerequisite(@NotNull Prerequisite<C> prerequisite) {
+        super.addPrerequisite(prerequisite);
         return this;
     }
 

@@ -34,7 +34,7 @@ import java.util.function.Predicate;
  * <p>Each method of {@link CommonCommand} that configures the command has a method of the same name here that returns
  * the builder. The methods that return a branch there, {@code argument(...)} and {@code require(...)}, take a callback
  * that configures the branch here. {@link #configure(Consumer)} calls any other method of the platform's command, such
- * as {@code requirePlayer()}.
+ * as Spigot's {@code permission(PermissionDefault)}.
  *
  * <p>The builder configures its command as it goes: {@link #build()} returns that command, and the builder is not used
  * after it.
@@ -59,8 +59,8 @@ public final class CommandBuilder<C extends CommonCommandContext<?, ?>, T extend
     }
 
     /**
-     * Calls {@code configuration} with the command, for a method this builder does not have, such as a platform's
-     * {@code requirePlayer()}: {@code .configure(Command::requirePlayer)}.
+     * Calls {@code configuration} with the command, for a method this builder does not have, such as Spigot's
+     * {@code permission(PermissionDefault)}: {@code .configure(c -> c.permission(PermissionDefault.TRUE))}.
      */
     public CommandBuilder<C, T> configure(@NotNull Consumer<? super T> configuration) {
         configuration.accept(command);

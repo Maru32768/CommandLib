@@ -168,6 +168,55 @@ class CommonCommandContextTest {
     }
 
     @Test
+    void an_extractor_is_a_prerequisite_that_ignores_its_value() throws Exception {
+        dev.marulabs.commandlib.command.Extractor<TestCommandContext, String> name = ctx -> {
+            ctx.sendMessage("extracted");
+            return "ignored";
+        };
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("run") {{
+            addPrerequisite(name);
+            execute(ctx -> ctx.sendMessage("executed"));
+        }});
+
+        assertThat(runner.execute("run")
+                         .messages()).containsExactly("extracted", "executed");
+    }
+
+    @Test
+    void a_branch_prerequisite_applies_to_the_branch_and_its_children_after_the_command() throws Exception {
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("game") {{
+            addPrerequisite(ctx -> ctx.sendMessage("command"));
+            argument(new WordArg("arena")).addPrerequisite(ctx -> {
+                if (ctx.getArgument("arena")
+                       .equals("closed")) {
+                    throw new dev.marulabs.commandlib.exception.CommandPrerequisiteException("closed");
+                }
+                ctx.sendMessage("branch");
+            })
+                                          .execute((arena, ctx) -> ctx.sendMessage("join " + arena))
+                                          .child(arena -> new TestCommand("info") {{
+                                              execute(ctx -> ctx.sendMessage("info"));
+                                          }})
+                                          .child(arena -> new TestCommand("free") {{
+                                              disableParentPrerequisite();
+                                              execute(ctx -> ctx.sendMessage("free"));
+                                          }});
+            execute(ctx -> ctx.sendMessage("list"));
+        }});
+
+        assertThat(runner.execute("game a")
+                         .messages()).containsExactly("command", "branch", "join a");
+        assertThat(runner.execute("game closed")
+                         .messages()).containsExactly("command", "closed");
+        assertThat(runner.execute("game a info")
+                         .messages()).containsExactly("command", "branch", "info");
+        assertThat(runner.execute("game closed free")
+                         .messages()).containsExactly("free");
+        assertThat(runner.execute("game")
+                         .messages()).containsExactly("command", "list");
+    }
+
+    @Test
     void preprocess_returning_true_runs_before_executor() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("run") {{
             addPreprocess(ctx -> {

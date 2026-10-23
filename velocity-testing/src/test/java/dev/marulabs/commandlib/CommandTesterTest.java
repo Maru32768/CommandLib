@@ -260,7 +260,7 @@ class CommandTesterTest {
     @Test
     void require_player_rejects_the_console() {
         CommandTester tester = new CommandTester(new Command("hub") {{
-            requirePlayer();
+            addPrerequisite(Command.player());
             execute(ctx -> ctx.sendMessage("sent"));
         }}, "proxy.command");
         FakeSender console = FakeSender.console();

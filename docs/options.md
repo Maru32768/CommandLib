@@ -64,7 +64,7 @@ public final class HealCommand extends Command {
         super("heal");
 
         CommandOption<Player, CommandContext> target = option(Options.of("target", 't',
-                                                                         new PlayerArgument("target").optional(playerRequirer())));
+                                                                         new PlayerArgument("target").optional(player())));
         CommandOption<World, CommandContext> world = option(Options.of("world", new WorldArgument("world")));
         execute(ctx -> {
             Player player = ctx.getOption(target);    // the sender when -t is not given
@@ -75,7 +75,7 @@ public final class HealCommand extends Command {
 ```
 
 When the option is not given, the default of an `optional(...)` argument applies (computed for each execution, so
-`playerRequirer()` works); the option of an argument that is not optional is `required()`. A value the argument rejects
+`player()` works); the option of an argument that is not optional is `required()`. A value the argument rejects
 fails like a positional argument. A variadic argument is rejected; use `repeatable(max)`.
 
 - A value option takes one value token after its name: `--limit 20` or `-n 20`. `--limit=20` and `-n20` are not

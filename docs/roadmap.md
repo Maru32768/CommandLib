@@ -48,7 +48,7 @@
 | Generated usage / help              | `[x]` | 生成 help / usage に `HelpFormatter` / `UsageFormatter` と `examples(...)` があり、command ごとに継承される（[`docs/help.md`](help.md)）。`serverHelp(...)` は Bukkit 系の `/help` index に載る。 | usage line の RichText 化（hover / click）。 |
 | Error taxonomy                      | `[~]` | parse / validation / prerequisite / option 系の例外があり、各 error で sender に見える message を [`docs/errors.md`](errors.md) で公開仕様化した。 | unknown subcommand の専用 error（Brigadier が CommandLib より先に報告するため `ErrorFormatter` に届かず、platform の hook が要る）、cooldown / confirmation / preprocess message の error formatter 経由化。missing argument は help を送る。 |
 | Exception handling                  | `[x]` | uncaught exception handler と、middleware での exception mapping / result handling がある。 | global な exception handler。 |
-| Preprocess / prerequisite           | `[~]` | `addPreprocess(...)`（middleware 化済み）、`addPrerequisite(...)`、`requirePlayer()` 等がある。名前付きの condition は annotation の `@Condition`（`AnnotationParser#registerCondition`）だけ。 | fluent / builder / Kotlin の reusable condition registry（現在は `Prerequisite` の値を使い回すだけ）、diagnostics。 |
+| Preprocess / prerequisite           | `[~]` | `addPreprocess(...)`（middleware 化済み）、`addPrerequisite(...)`（argument branch にも）、`require(Command.player())` 等がある。名前付きの condition は annotation の `@Prerequisites`（`AnnotationParser#registerPrerequisite`）だけ。 | fluent / builder / Kotlin の reusable condition registry（現在は `Prerequisite` の値を使い回すだけ）、diagnostics。 |
 | Middleware / interceptor            | `[x]` | `addMiddleware(CommandMiddleware)` で pre / post hook、exception mapping、result handling を合成でき、child と argument branch に継承される。`confirm()` / `cooldown()` / preprocess も middleware 上にある。 | — |
 | Sender abstraction                  | `[x]` | `provide(Type, ctx -> ...)` で sender を plugin の型に変換し、`ctx.get(Type)` で cast なしに読める。middleware は `ctx.put` で値を足せる。登録単位の provider は `CommandDefaults`（[`docs/context-values.md`](context-values.md)）。この行の sender は「plugin の型への変換」の意味で、P5 の sender / message abstraction（platform 間の sender 型の差の吸収）とは別。 | — |
 | Dependency injection                | `[x]` | context value の provider、登録単位の `CommandDefaults`、annotation API の `registerDependency` / `@Dependency` field がある。DI framework 非依存。 | `require(Class)` の短縮形。 |
@@ -140,7 +140,7 @@
 - `[?]` modded では command block（level 2）が `OP` default の node に level 4 を要する（vanilla の command は 2）。level を
   vanilla に合わせるか（R2-E-13）。
 - `[?]` console の扱いが platform で違う: modded / Velocity の console は `NONE` の node も通るが Spigot / Paper は通らない、modded の
-  `requireConsole` は RCON を受理し Spigot / Paper は拒否する。揃えるか docs に書くか（R2-R2C-4）。
+  `Command.console()` は RCON を受理し Spigot / Paper は拒否する。揃えるか docs に書くか（R2-R2C-4）。
 - `[?]` cooldown の予約中に弾かれた実行に、残り時間として cooldown の全期間を伝えている。専用 caption にするか、予約からの経過で
   計算するか（R2-D-27）。
 - `[?]` Spigot / Paper は `plugin.yml` で宣言済みの command / option / argument の permission を置き換え、default・children・
@@ -172,7 +172,7 @@
   Paper 1.21.3〜26.x で動くことを integration test（`CommandSyntaxExceptionTest`）で確認する。
 - `[ ]` optional / variadic argument の command tree の大きさ（`maxCount` × option の展開）を確認する。実サーバーでの parse と実行は
   `OptionalVariadicArgumentTest`（Spigot / Paper / modded fixture）で確認済み。
-- `[ ]` cooldown の永続化（restart 後に復元する hook）、argument branch 単位の confirm / cooldown / `@Condition`。
+- `[ ]` cooldown の永続化（restart 後に復元する hook）、argument branch 単位の confirm / cooldown / `@Prerequisites`。
 - `[~]` option の redirect 化（`OptionGraph`）を実サーバーで検証する。Spigot / Paper / Mohist / Forge / NeoForge は 2026-10-16 に検証済み、Velocity が残り。
   argument child（argument の下の command）は redirect を使わない tree のままで、同じ state の path が子 node を共有する。
   option が多すぎて tree が大きくなる command は登録時に `IllegalStateException` で拒否する。
@@ -187,7 +187,7 @@
 - `[ ]` `sendSuccess` が `sendCommandFeedback` gamerule と silent source（function 等）を vanilla と同じに扱うことを integration test で
   確認する。Paper は `sendSuccess` を reflection で呼び、見つからないと通常の message に
   切り替わるため、実サーバーで vanilla の経路を通ることも確かめる。
-- `[?]` fluent / builder / Kotlin にも名前付きの reusable condition registry を用意するか決める。現在は annotation の `@Condition` だけ。
+- `[?]` fluent / builder / Kotlin にも名前付きの reusable condition registry を用意するか決める。現在は annotation の `@Prerequisites` だけ。
 - `[ ]` rich help（hover / click の usage line）と MiniMessage を追加する。
 - `[?]` 構文エラー時の usage 表示（`ErrorFormatter.SYNTAX_ADVICE`）を既定にするか決める。現在は opt-in で、既定にすると全 module の
   argument error の出力が変わる。

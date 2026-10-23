@@ -5,7 +5,6 @@ import dev.marulabs.commandlib.CommonCommandContext;
 import dev.marulabs.commandlib.command.AsyncCommandExecutor;
 import dev.marulabs.commandlib.command.CommandExecutor;
 import dev.marulabs.commandlib.command.Extractor;
-import dev.marulabs.commandlib.command.Prerequisite;
 import dev.marulabs.commandlib.internal.ArgumentBranchDelegate;
 import org.jetbrains.annotations.NotNull;
 
@@ -54,8 +53,7 @@ public class RequiredArgumentBranch<S, C extends CommonCommandContext<?, ?>, T e
         list.addAll(Arrays.asList(children));
         // Added first, so that a rejected child keeps no prerequisite.
         childrenAdder.accept(list);
-        Prerequisite<C> prerequisite = extractor::extract;
-        list.forEach(c -> c.addPrerequisite(prerequisite));
+        list.forEach(c -> c.addPrerequisite(extractor));
         return this;
     }
 }

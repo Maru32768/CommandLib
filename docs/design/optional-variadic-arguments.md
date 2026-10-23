@@ -8,7 +8,7 @@ argument's own type.
 
 ```java
 argument(new StringArgument("item"), new IntegerArgument("count").optional(1)).execute((item, count, ctx) -> {});
-argument(new PlayerArgument("target").optional(Command.playerRequirer())).execute((target, ctx) -> {});
+argument(new PlayerArgument("target").optional(Command.player())).execute((target, ctx) -> {});
 argument(new StringArgument("reason"), new PlayerArgument("targets").variadic()).execute((reason, targets, ctx) -> {});
 ```
 

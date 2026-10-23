@@ -23,7 +23,7 @@ The runner works in this order and stops at the first failure:
 | 1 | Permission of the command node | `You do not have permission to execute this command.` |
 | 2 | Option values, the permission of each given option, and option dependencies (`requires(...)`) | The option message, see [Option errors](#option-errors), or the permission message |
 | 3 | For each argument branch on the path: branch permission, then each argument's parse → `validator` → `transformer`, or the default of an omitted optional argument | The permission message, the argument's `ArgumentParseException`, or the `CommandPrerequisiteException` of an `optional(extractor)` default |
-| 4 | Prerequisites (`addPrerequisite`, `require(...)`, `requirePlayer()`, `requireConsole()`) | The `CommandPrerequisiteException` message |
+| 4 | Prerequisites (`addPrerequisite`, `require(...)`, such as `require(Command.player())`) | The `CommandPrerequisiteException` message |
 | 5 | No executor on this node: the generated help is sent instead | (help text, not an error) |
 | 6 | The middlewares: those of the registration (`CommandDefaults`), then `cooldown(...)`, then `confirm(...)`, then the middlewares and preprocesses (`addMiddleware`, `addPreprocess`) in the order they were added | The cooldown message, the confirmation request, the messages a preprocess sent before returning `false`, a middleware's `CommandPrerequisiteException` message, or the generic unexpected-error message |
 | 7 | The executor (`execute` or `executeAsync`) | A `CommandPrerequisiteException` message, `The command timed out.` for a `TimeoutException`, or the generic unexpected-error message |
@@ -206,8 +206,8 @@ raised with `ctx.fail(...)`. The message is sent in red and the command [fails](
 | `new CommandPrerequisiteException(caption[, placeholders])` | the [caption](localization.md) in the sender's locale, in red |
 | `new CommandPrerequisiteException(ctx -> ...)` | whatever the consumer sends |
 | `ctx.fail("message", "more lines"...)`, `ctx.fail(caption[, placeholders])` | the same as the constructor with those arguments |
-| `requirePlayer()`, `Command.playerRequirer()` | `This command can only be executed by a player.` |
-| `requireConsole()`, `Command.consoleRequirer()` | `This command can only be executed from the console.` |
+| `Command.player()` | `This command can only be executed by a player.` |
+| `Command.console()` | `This command can only be executed from the console.` |
 
 Prerequisites of a parent command apply to its children unless the child calls `disableParentPrerequisite()`.
 
@@ -219,7 +219,7 @@ without casts, and `and` combines two:
 ```java
 public final class Conditions {
     public static final Prerequisite<CommandContext> DAYTIME = ctx -> {
-        if (Command.playerRequirer().extract(ctx).getWorld().getTime() >= 12000) {
+        if (Command.player().extract(ctx).getWorld().getTime() >= 12000) {
             throw new CommandPrerequisiteException("This command works only by day.");
         }
     };
@@ -229,8 +229,8 @@ public final class Conditions {
 addPrerequisite(Conditions.DAYTIME);
 ```
 
-Annotated commands name it: `AnnotationParser#registerCondition("daytime", Conditions.DAYTIME)` and
-`@Condition("daytime")` on the class or a `@Subcommand` method ([annotations](annotations.md#customizing-the-parser)).
+Annotated commands name it: `AnnotationParser#registerPrerequisite("daytime", Conditions.DAYTIME)` and
+`@Prerequisites("daytime")` on the class or a `@Subcommand` method ([annotations](annotations.md#customizing-the-parser)).
 
 The typed executors (`execute((a, b, ctx) -> ...)`) take `java.util.function` style consumers that cannot throw
 checked exceptions. `ctx.fail(...)` throws the `CommandPrerequisiteException` without declaring it, so it fails them

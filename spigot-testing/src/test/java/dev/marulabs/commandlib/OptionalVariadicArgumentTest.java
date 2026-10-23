@@ -43,7 +43,7 @@ class OptionalVariadicArgumentTest {
         FakeSender console = FakeSender.console();
 
         try (CommandTester tester = new CommandTester(() -> new Command("heal") {{
-            argument(new PlayerArgument("target").optional(playerRequirer())).execute((target, ctx) -> {
+            argument(new PlayerArgument("target").optional(player())).execute((target, ctx) -> {
                 ctx.sendMessage("Healed " + target.getName());
             });
         }}, "test.command")) {

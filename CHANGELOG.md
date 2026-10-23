@@ -158,7 +158,7 @@ suggestions) and a command for each argument type. Options, permission plugins a
 
 #### Ways to define commands
 
-- An annotation API: `@Command`, `@Subcommand`, `@Flag`, `@Option`, `@Condition` and more, registered through each
+- An annotation API: `@Command`, `@Subcommand`, `@Flag`, `@Option`, `@Prerequisites` and more, registered through each
   platform's `AnnotatedCommands` ([annotated commands](docs/annotations.md)). Parsing rejects a definition that would
   fail later or behave differently from what it says: an argument parameter named like a placeholder of its
   `@Subcommand` path, a placeholder repeated in the path, a `@Range` bound outside the range of an `int`, `long` or
@@ -174,7 +174,9 @@ suggestions) and a command for each argument type. Options, permission plugins a
   ([options](docs/options.md)).
 - Optional and variadic trailing arguments: `optional(...)` and `variadic(...)`.
 - Child commands on argument branches. `child(ref -> ...)` passes an `ArgRef` whose `get()` reads the parent's value.
-- `require(Extractor)` with `playerRequirer()` and `consoleRequirer()`, and `requirePlayer()` / `requireConsole()`.
+- `require(Extractor)` with `Command.player()` and `Command.console()`, which give the executor the sender typed. An
+  `Extractor` is also a `Prerequisite`, so `addPrerequisite(Command.player())` lets only players run a command, and
+  argument branches take `addPrerequisite(...)` too.
 - `executeAsync`, `ctx.supplyAsync` and `ctx.runAsync`, which return to the server thread
   ([async executors](docs/execution.md#async-executors)).
 - Middlewares (`addMiddleware`), and middlewares and providers for a whole registration.

@@ -42,7 +42,7 @@ public class Command extends CommonCommand<CommandContext, Command> {
      * Returns the player executing the command, and fails the command with {@link Caption#REQUIRE_PLAYER} for any
      * other source.
      */
-    public static Extractor<CommandContext, ServerPlayer> playerRequirer() {
+    public static Extractor<CommandContext, ServerPlayer> player() {
         return ctx -> {
             if (!(ctx.getEntity() instanceof ServerPlayer)) {
                 throw new CommandPrerequisiteException(Caption.REQUIRE_PLAYER);
@@ -55,7 +55,7 @@ public class Command extends CommonCommand<CommandContext, Command> {
      * Returns the source of a command the console or a remote console executes, and fails the command with
      * {@link Caption#REQUIRE_CONSOLE} for any other source.
      */
-    public static Extractor<CommandContext, CommandSourceStack> consoleRequirer() {
+    public static Extractor<CommandContext, CommandSourceStack> console() {
         return ctx -> {
             if (!ctx.getActor()
                     .isConsole()) {
@@ -63,14 +63,6 @@ public class Command extends CommonCommand<CommandContext, Command> {
             }
             return ctx.getSender();
         };
-    }
-
-    public final void requirePlayer() {
-        addPrerequisite(playerRequirer()::extract);
-    }
-
-    public final void requireConsole() {
-        addPrerequisite(consoleRequirer()::extract);
     }
 
     //? if >=1.18 {

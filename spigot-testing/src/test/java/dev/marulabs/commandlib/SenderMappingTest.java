@@ -48,7 +48,7 @@ class SenderMappingTest {
 
     private static Command fluent(Games games) {
         return new Command("team") {{
-            provide(GamePlayer.class, ctx -> games.of(playerRequirer().extract(ctx)));
+            provide(GamePlayer.class, ctx -> games.of(player().extract(ctx)));
             addChildren(new Command("show") {{
                 execute(ctx -> ctx.sendMessage(ctx.get(GamePlayer.class)
                                                   .describe()));
@@ -67,7 +67,7 @@ class SenderMappingTest {
     private static Command builder(Games games) {
         return Command.builder("team")
                       .provide(GamePlayer.class,
-                               ctx -> games.of(Command.playerRequirer()
+                               ctx -> games.of(Command.player()
                                                       .extract(ctx)))
                       .addChild(Command.builder("show")
                                        .execute(ctx -> ctx.sendMessage(ctx.get(GamePlayer.class)
@@ -106,7 +106,7 @@ class SenderMappingTest {
         return AnnotatedCommands.parser()
                                 .registerDependency(Games.class, games)
                                 .registerContextValue(GamePlayer.class,
-                                                      ctx -> games.of(Command.playerRequirer()
+                                                      ctx -> games.of(Command.player()
                                                                              .extract(ctx)))
                                 .parse(new AnnotatedTeamCommand());
     }
