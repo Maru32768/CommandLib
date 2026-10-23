@@ -43,6 +43,8 @@ val includedTypedNmsModules = when (typedNmsSelection) {
 }
 includedTypedNmsModules.forEach { include("nms:$it") }
 include("common")
+// The repository's own Error Prone checks, which run with the stock ones.
+include("errorprone-checks")
 include("common-testing", "spigot-testing", "paper-testing", "velocity-testing")
 // JMH benchmarks, run only by :benchmark:jmh (docs/benchmarks.md).
 include("benchmark")

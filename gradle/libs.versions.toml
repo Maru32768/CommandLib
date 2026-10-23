@@ -48,6 +48,8 @@ mockito-inline-legacy = { module = "org.mockito:mockito-inline", version.ref = "
 objenesis = { module = "org.objenesis:objenesis", version.ref = "objenesis" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
 errorprone-core = { module = "com.google.errorprone:error_prone_core", version.ref = "errorprone" }
+errorprone-check-api = { module = "com.google.errorprone:error_prone_check_api", version.ref = "errorprone" }
+errorprone-test-helpers = { module = "com.google.errorprone:error_prone_test_helpers", version.ref = "errorprone" }
 nullaway = { module = "com.uber.nullaway:nullaway", version.ref = "nullaway" }
 jmh-core = { module = "org.openjdk.jmh:jmh-core", version.ref = "jmh" }
 jmh-generator-annprocess = { module = "org.openjdk.jmh:jmh-generator-annprocess", version.ref = "jmh" }

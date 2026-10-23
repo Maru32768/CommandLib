@@ -275,6 +275,7 @@ configure(subprojects.filter { it.path in publishedProjectPaths || it.path.start
     dependencies {
         "errorprone"(rootLibs.errorprone.core)
         "errorprone"(rootLibs.nullaway)
+        "errorprone"(project(":errorprone-checks"))
     }
 
     val typedNms = path.startsWith(":nms:")

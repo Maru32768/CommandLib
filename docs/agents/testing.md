@@ -86,6 +86,12 @@ only at a site that does it on purpose. The checks disabled for the whole build 
 root `build.gradle.kts`. A Stonecutter node checks only the code of its own version, so compile every modded node. Fix a
 finding in the typed NMS modules in `tools/nms-codegen` and regenerate.
 
+The repository's own checks live in `errorprone-checks` and run with the stock ones. `DefaultInEnumSwitch` rejects a
+`default` in a switch on an enum: list every constant and, after a switch statement, `throw new AssertionError(value)`.
+Error Prone's `MissingCasesInEnumSwitch` (a warning, so an error under `-Werror`) then reports a constant added later,
+which a `default` would have swallowed. A constant the switch does not support gets its own `case` that breaks to the
+throw. Test a new check with Error Prone's `CompilationTestHelper` (`./gradlew :errorprone-checks:test`).
+
 NullAway runs with Error Prone on the main sources of the same modules and treats code in `dev.marulabs.commandlib` as
 non-null unless annotated `@Nullable` (`org.jetbrains.annotations.Nullable`), and fails the build on a possible null
 dereference. Annotate a field, parameter or return value `@Nullable` when null is a legitimate value, and put the

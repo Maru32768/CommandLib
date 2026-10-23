@@ -103,9 +103,10 @@ public class Command extends CommonCommand<CommandContext, Command> {
                 return true;
             case NONE:
                 return false;
-            default:
+            case OP:
                 return player != null && player.hasPermissions(4);
         }
+        throw new AssertionError(common);
     }
     //?} else {
     /*public final void permission(@NotNull DefaultPermissionLevel level) {
@@ -143,9 +144,10 @@ public class Command extends CommonCommand<CommandContext, Command> {
                 return DefaultPermission.ALL;
             case NONE:
                 return DefaultPermission.NONE;
-            default:
+            case OP:
                 return DefaultPermission.OP;
         }
+        throw new AssertionError(forge);
     }
 
     private static DefaultPermissionLevel toForgeDefault(@NotNull DefaultPermission common) {
@@ -154,9 +156,10 @@ public class Command extends CommonCommand<CommandContext, Command> {
                 return DefaultPermissionLevel.ALL;
             case NONE:
                 return DefaultPermissionLevel.NONE;
-            default:
+            case OP:
                 return DefaultPermissionLevel.OP;
         }
+        throw new AssertionError(common);
     }
     *///?}
 }

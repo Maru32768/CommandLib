@@ -231,9 +231,10 @@ public final class CommandLib {
                 return true;
             case NONE:
                 return false;
-            default:
+            case OP:
                 return source.hasPermission(4);
         }
+        throw new AssertionError(defaultPermission);
     }
 
     /**

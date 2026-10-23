@@ -90,9 +90,10 @@ public class Command extends CommonCommand<CommandContext, Command> {
                 return DefaultPermission.NONE;
             case OP:
                 return DefaultPermission.OP;
-            default:
-                throw new IllegalArgumentException("Unsupported PermissionDefault: " + bukkit);
+            case NOT_OP:
+                break;
         }
+        throw new IllegalArgumentException("Unsupported PermissionDefault: " + bukkit + " (use TRUE, FALSE or OP)");
     }
 
     private static PermissionDefault toBukkitDefault(@NotNull DefaultPermission common) {
@@ -101,8 +102,9 @@ public class Command extends CommonCommand<CommandContext, Command> {
                 return PermissionDefault.TRUE;
             case NONE:
                 return PermissionDefault.FALSE;
-            default:
+            case OP:
                 return PermissionDefault.OP;
         }
+        throw new AssertionError(common);
     }
 }

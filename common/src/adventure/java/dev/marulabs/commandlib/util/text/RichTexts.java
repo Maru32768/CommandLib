@@ -72,8 +72,7 @@ public final class RichTexts {
                 return ClickEvent.copyToClipboard(click.value());
             case OPEN_URL:
                 return ClickEvent.openUrl(click.value());
-            default:
-                throw new IllegalArgumentException("Unknown click action: " + click.type());
         }
+        throw new AssertionError(click.type());
     }
 }
