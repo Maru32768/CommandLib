@@ -50,7 +50,7 @@ public final class FluentGuildCommand extends Command {
                                                                                                               'b',
                                                                                                               new PlayerArgument("by").optional(playerRequirer())));
                                                  reason.requires(by);
-                                                 mutuallyExclusive(silent, loud);
+                                                 mutuallyExclusiveOptions(silent, loud);
                                                  argument(new PlayerArgument("target")).execute((target, ctx) -> {
                                                      ctx.sendSuccess("Kicked " + target.getName() + " from "
                                                              + guild.get() + " by " + ctx.getOption(by)

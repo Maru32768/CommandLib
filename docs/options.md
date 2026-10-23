@@ -21,7 +21,7 @@ public final class ScanCommand extends Command {
                                                                          .description("Tag to match."));
         CommandOption<Boolean, CommandContext> json = option(Options.flag("json", 'j'));
         CommandOption<Boolean, CommandContext> yaml = option(Options.flag("yaml", 'y'));
-        mutuallyExclusive(json, yaml);
+        mutuallyExclusiveOptions(json, yaml);
 
         argument(new PlayerArgument("target")).execute((target, ctx) -> {
             boolean isForce = ctx.getOption(force);
@@ -191,7 +191,7 @@ public final class BanCommand extends Command {
 
 ## Mutually Exclusive Options
 
-`mutuallyExclusive(a, b, ...)` on the command allows at most one of the options in one input. Once one is given, the
+`mutuallyExclusiveOptions(a, b, ...)` on the command allows at most one of the options in one input. Once one is given, the
 command tree stops offering the others, so they are neither suggested nor accepted, also inside combined short flags
 such as `-jy`. All options must be registered on the command first. A command can declare several groups. Every input
 must be able to give the options that are `required()` and those they `requires(option)`, also transitively, so at most

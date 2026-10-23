@@ -38,7 +38,7 @@ class CommandOptionTest {
             CommandOption<Boolean, CommandContext> json = option(Options.flag("json", 'j')
                                                                         .aliases("machine"));
             CommandOption<Boolean, CommandContext> yaml = option(Options.flag("yaml", 'y'));
-            mutuallyExclusive(json, yaml);
+            mutuallyExclusiveOptions(json, yaml);
             argument(new StringArgument("target")).execute((target, ctx) -> {
                 ctx.sendMessage(target + ":" + ctx.getOption(verbose) + ":" + ctx.getOption(tags) + ":"
                         + ctx.getOption(json));

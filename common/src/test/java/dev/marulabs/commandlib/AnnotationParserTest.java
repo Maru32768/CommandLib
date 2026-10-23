@@ -938,7 +938,7 @@ class AnnotationParserTest {
 
     @Command("export")
     @Examples("/export -j data")
-    @MutuallyExclusive({"json", "yaml"})
+    @MutuallyExclusiveOptions({"json", "yaml"})
     static final class AnnotatedExport {
         @Execute
         void export(TestCommandContext ctx,
@@ -973,7 +973,7 @@ class AnnotationParserTest {
                                                                                .requires(mode, Mode.CREATIVE));
             CommandOption<Boolean, TestCommandContext> json = option(Options.flag("json", 'j'));
             CommandOption<Boolean, TestCommandContext> yaml = option(Options.flag("yaml", 'y'));
-            mutuallyExclusive(json, yaml);
+            mutuallyExclusiveOptions(json, yaml);
             argument(new StrArg("file")).execute((file, ctx) -> ctx.sendMessage(file + " " + ctx.getOption(force)
                     + " " + ctx.getOption(reason) + " " + ctx.getOption(mode) + " " + ctx.getOption(threads) + " "
                     + ctx.getOption(json) + " " + ctx.getOption(yaml)));
@@ -1156,7 +1156,7 @@ class AnnotationParserTest {
     }
 
     @Command("x")
-    @MutuallyExclusive({"json", "yaml"})
+    @MutuallyExclusiveOptions({"json", "yaml"})
     static final class UnknownExclusiveOption {
         @Execute
         void run(@Flag("json") boolean json) {
@@ -1231,7 +1231,7 @@ class AnnotationParserTest {
         assertThatThrownBy(() -> parser.parse(new UnknownMiddleware())).hasMessageContaining("@Middleware(\"audit\"), but no middleware of that name is registered; register one with registerMiddleware");
         assertThatThrownBy(() -> parser.parse(new UnknownVisibility())).hasMessageContaining("@VisibleWhen(\"open\"), but no visibility predicate");
         assertThatThrownBy(() -> parser.parse(new UnknownRequiredOption())).hasMessageContaining("has @Requires(\"yes\"), but 'x' has no option of that name");
-        assertThatThrownBy(() -> parser.parse(new UnknownExclusiveOption())).hasMessageContaining("@MutuallyExclusive with --yaml");
+        assertThatThrownBy(() -> parser.parse(new UnknownExclusiveOption())).hasMessageContaining("@MutuallyExclusiveOptions with --yaml");
         assertThatThrownBy(() -> parser.parse(new MissingPlaceholder())).hasMessageContaining("has <team> in its @Subcommand path, but no argument parameter named team");
         assertThatThrownBy(() -> parser.parse(new DifferentPlaceholders())).hasMessageContaining("declares the arguments of '<team>' differently");
         assertThatThrownBy(() -> parser.parse(new ArgumentsAfterPlaceholder())).hasMessageContaining("takes arguments after the placeholders of its path");

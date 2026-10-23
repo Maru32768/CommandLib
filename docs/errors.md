@@ -268,7 +268,7 @@ replace them. The cooldown starts only when the confirmation and the preprocesse
 |---|---|---|
 | Option after a regular argument (`/scan Steve -f`), unknown option token, or a value option without a value | Brigadier | Vanilla "Incorrect argument for command" or the argument type's error, with the context line |
 | Invalid option value (`--limit abc`, out of the option's range) | Brigadier | The value type's vanilla error |
-| Option of a mutually exclusive group given after another of the group (`mutuallyExclusive(...)`) | Brigadier | Vanilla "Incorrect argument for command", since the rest of the group is removed from the tree |
+| Option of a mutually exclusive group given after another of the group (`mutuallyExclusiveOptions(...)`) | Brigadier | Vanilla "Incorrect argument for command", since the rest of the group is removed from the tree |
 | `required()` option missing | CommandLib (`OptionParseException`) | `Missing required option --tag.` in red, or the help when no executor is at the end of the input |
 | `requires(other)` not met | CommandLib (`OptionParseException`) | `--reason requires --force.` in red |
 | `requires(other, value)` not met | CommandLib (`OptionParseException`) | `--threads requires --mode to be parallel.` in red |

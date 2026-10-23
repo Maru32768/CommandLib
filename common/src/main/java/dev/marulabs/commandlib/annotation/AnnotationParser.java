@@ -95,7 +95,7 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
                                                                                          Condition.class,
                                                                                          Middleware.class,
                                                                                          OptionsAnywhere.class,
-                                                                                         MutuallyExclusive.class,
+                                                                                         MutuallyExclusiveOptions.class,
                                                                                          Examples.class,
                                                                                          CaptionBundle.class);
     private static final List<Class<? extends Annotation>> BRANCH_ANNOTATIONS = List.of(Description.class,
@@ -325,7 +325,7 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
         // The argument branches of path placeholders by their path, such as "<team>".
         private final Map<String, PathBranch> branches = new HashMap<>();
         private final IdentityHashMap<T, CommandState> states = new IdentityHashMap<>();
-        // What needs every option of the commands: @Requires and @MutuallyExclusive.
+        // What needs every option of the commands: @Requires and @MutuallyExclusiveOptions.
         private final List<Runnable> deferred = new ArrayList<>();
 
         Parse(Object instance) {
@@ -822,8 +822,8 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
                                                 "registerMiddleware"));
                 }
             }
-            for (MutuallyExclusive group : element.getAnnotationsByType(MutuallyExclusive.class)) {
-                deferred.add(() -> at(source, () -> mutuallyExclusive(command, source, group.value())));
+            for (MutuallyExclusiveOptions group : element.getAnnotationsByType(MutuallyExclusiveOptions.class)) {
+                deferred.add(() -> at(source, () -> mutuallyExclusiveOptions(command, source, group.value())));
             }
             if (permission != null) {
                 applyPermission(source,
@@ -879,17 +879,17 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
         }
 
         @SuppressWarnings({"unchecked", "rawtypes"})
-        private void mutuallyExclusive(T command, String source, String[] names) {
+        private void mutuallyExclusiveOptions(T command, String source, String[] names) {
             List<CommandOption<?, C>> group = new ArrayList<>();
             for (String name : names) {
                 RegisteredOption option = state(command).options.get(name);
                 if (option == null) {
-                    throw new ParseException(source + " has @MutuallyExclusive with --" + name + ", but '"
+                    throw new ParseException(source + " has @MutuallyExclusiveOptions with --" + name + ", but '"
                             + command.name() + "' has no option of that name");
                 }
                 group.add(option.option);
             }
-            command.mutuallyExclusive(group.toArray(new CommandOption[0]));
+            command.mutuallyExclusiveOptions(group.toArray(new CommandOption[0]));
         }
 
         private void applyPermission(String source,

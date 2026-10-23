@@ -6,7 +6,7 @@ import dev.marulabs.commandlib.annotation.Examples;
 import dev.marulabs.commandlib.annotation.Execute;
 import dev.marulabs.commandlib.annotation.Flag;
 import dev.marulabs.commandlib.annotation.Middleware;
-import dev.marulabs.commandlib.annotation.MutuallyExclusive;
+import dev.marulabs.commandlib.annotation.MutuallyExclusiveOptions;
 import dev.marulabs.commandlib.annotation.Option;
 import dev.marulabs.commandlib.annotation.Optional;
 import dev.marulabs.commandlib.annotation.OptionsAnywhere;
@@ -46,7 +46,7 @@ public final class AnnotatedGuildCommand {
 
     @Subcommand("<guild> kick")
     @OptionsAnywhere
-    @MutuallyExclusive({"silent", "loud"})
+    @MutuallyExclusiveOptions({"silent", "loud"})
     @VisibleWhen("players")
     public void kick(CommandContext ctx,
                      @Flag(value = "silent", shortName = 's') boolean silent,

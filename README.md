@@ -872,7 +872,7 @@ public final class TagCommand extends Command {
                                                                          .required());
         CommandOption<Boolean, CommandContext> json = option(Options.flag("json", 'j'));
         CommandOption<Boolean, CommandContext> yaml = option(Options.flag("yaml", 'y'));
-        mutuallyExclusive(json, yaml);
+        mutuallyExclusiveOptions(json, yaml);
 
         argument(new PlayerArgument("target")).execute((target, ctx) -> {
             boolean isForce = ctx.getOption(force);     // --force or --yes
@@ -1186,7 +1186,7 @@ CommandLib.register(this, AnnotatedCommands.parse(new BanCommand()));
 Parameters map by type to the built-in arguments (`Player` to `PlayerArgument`, `int` to `IntegerArgument`, ...), a
 last `List<T>` parameter is variadic, `@Optional` / `@Default` make arguments optional, and a method returning a
 `CompletionStage` runs as `executeAsync`. `@Subcommand("<team> add")` puts a subcommand after an argument, and
-`@Middleware`, `@VisibleWhen`, `@Requires`, `@MutuallyExclusive`, `@OptionsAnywhere`, `@Examples` and
+`@Middleware`, `@VisibleWhen`, `@Requires`, `@MutuallyExclusiveOptions`, `@OptionsAnywhere`, `@Examples` and
 `@Description(caption = ...)` match the fluent settings of the same names. Argument names come from the parameter
 names, so compile with `-parameters` (`-java-parameters` in Kotlin) or use `@Name`. See [annotated commands](docs/annotations.md) for every annotation, custom types and annotations, and
 the fluent equivalent.

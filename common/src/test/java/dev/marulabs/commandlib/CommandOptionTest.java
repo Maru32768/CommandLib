@@ -666,7 +666,7 @@ class CommandOptionTest {
             CommandOption<Boolean, TestCommandContext> yaml = option(Options.flag("yaml", 'y'));
             CommandOption<String, TestCommandContext> format = option(Options.string("format", 'F', "text"));
             CommandOption<Boolean, TestCommandContext> force = option(Options.flag("force", 'f'));
-            mutuallyExclusive(json, yaml, format);
+            mutuallyExclusiveOptions(json, yaml, format);
             execute(ctx -> ctx.sendMessage(ctx.getOption(json) + ":" + ctx.getOption(yaml) + ":"
                     + ctx.getOption(format) + ":" + ctx.getOption(force)));
         }});
@@ -685,12 +685,12 @@ class CommandOptionTest {
     void mutually_exclusive_needs_registered_options() {
         assertThatThrownBy(() -> new TestCommand("export") {{
             CommandOption<Boolean, TestCommandContext> json = option(Options.flag("json"));
-            mutuallyExclusive(json, Options.flag("yaml"));
+            mutuallyExclusiveOptions(json, Options.flag("yaml"));
         }}).isInstanceOf(IllegalArgumentException.class)
            .hasMessageContaining("--yaml");
         assertThatThrownBy(() -> new TestCommand("export") {{
             CommandOption<Boolean, TestCommandContext> json = option(Options.flag("json"));
-            mutuallyExclusive(json);
+            mutuallyExclusiveOptions(json);
         }}).isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -700,7 +700,7 @@ class CommandOptionTest {
             CommandOption<String, TestCommandContext> to = option(Options.string("to", 't', ""));
             CommandOption<String, TestCommandContext> format = option(Options.string("format", 'F', "text"));
             option(Options.flag("force", 'f'));
-            mutuallyExclusive(to, format);
+            mutuallyExclusiveOptions(to, format);
             // Made required after the group is declared, as the command checks it when it is built.
             to.required();
             format.required();
@@ -711,7 +711,7 @@ class CommandOptionTest {
             CommandOption<String, TestCommandContext> to = option(Options.string("to", 't', "")
                                                                          .required());
             CommandOption<String, TestCommandContext> format = option(Options.string("format", 'F', "text"));
-            mutuallyExclusive(to, format);
+            mutuallyExclusiveOptions(to, format);
             execute(ctx -> {
             });
         }};
@@ -730,7 +730,7 @@ class CommandOptionTest {
             CommandOption<Boolean, TestCommandContext> force = option(Options.flag("force", 'f'));
             force.required()
                  .requires(dryRun);
-            mutuallyExclusive(force, dryRun);
+            mutuallyExclusiveOptions(force, dryRun);
             execute(ctx -> {
             });
         }};
@@ -742,7 +742,7 @@ class CommandOptionTest {
                                               .requires(dryRun);
             dryRun.requires(verbose);
             quiet.required();
-            mutuallyExclusive(verbose, quiet);
+            mutuallyExclusiveOptions(verbose, quiet);
             execute(ctx -> {
             });
         }};
@@ -750,7 +750,7 @@ class CommandOptionTest {
             CommandOption<Boolean, TestCommandContext> dryRun = option(Options.flag("dry-run", 'n'));
             CommandOption<Boolean, TestCommandContext> force = option(Options.flag("force", 'f'));
             force.requires(dryRun);
-            mutuallyExclusive(force, dryRun);
+            mutuallyExclusiveOptions(force, dryRun);
             execute(ctx -> {
             });
         }};
@@ -771,7 +771,7 @@ class CommandOptionTest {
             CommandOption<Boolean, TestCommandContext> force = option(Options.flag("force", 'f'));
             force.required()
                  .requires(dryRun, false);
-            mutuallyExclusive(force, dryRun);
+            mutuallyExclusiveOptions(force, dryRun);
             execute(ctx -> ctx.sendMessage("deployed"));
         }});
 

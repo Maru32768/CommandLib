@@ -10,7 +10,7 @@ options, suggestions, execution and tests. User documentation: [annotations.md](
 
 `AnnotationParser<C, T>` in `common` reads a class and calls the public fluent API of `CommonCommand`:
 `new Command(name)`, `addAliases`, `addChildren`, `option`, `argument(List)`, `execute`/`executeAsync`,
-`permission`, `description`, `confirm`, `cooldown`, `child`, `addMiddleware`, `visibleWhen`, `mutuallyExclusive` and
+`permission`, `description`, `confirm`, `cooldown`, `child`, `addMiddleware`, `visibleWhen`, `mutuallyExclusiveOptions` and
 the others named below. The result is an ordinary platform `Command`; nothing below it knows
 it came from annotations. That gives the equivalence by construction: the command tree, the help, the permission
 configs and the docs exports are computed from the same objects as for a fluent command, and every rule of the core
@@ -66,7 +66,7 @@ Consequences of reflection:
 | method without argument parameters | `execute` / `executeAsync` on its command (at most one per command) |
 | method with argument parameters | one `argument(...)` branch on its command |
 | `@Subcommand` path ending in placeholders | `executeAsync` on the placeholders' branch (at most one method) |
-| `@Description`, `@Permission`, `@VisibleWhen`, `@Confirm`, `@Cooldown`, `@Condition`, `@Middleware`, `@OptionsAnywhere`, `@MutuallyExclusive`, `@Examples`, `@CaptionBundle`, `aliases` | on the command: from the class for the root, from one `@Subcommand` method for a subcommand |
+| `@Description`, `@Permission`, `@VisibleWhen`, `@Confirm`, `@Cooldown`, `@Condition`, `@Middleware`, `@OptionsAnywhere`, `@MutuallyExclusiveOptions`, `@Examples`, `@CaptionBundle`, `aliases` | on the command: from the class for the root, from one `@Subcommand` method for a subcommand |
 | `@Description`, `@Permission`, `@VisibleWhen` on an `@Execute` method, or a path ending in placeholders | on its argument branch |
 | `@Description(caption = "key")` | `description(ctx -> ctx.caption(Caption.of(key, value)))` |
 | `@Flag` / `@Option` parameter | `Options.flag` / `count` / `bool` / `integer` / `longValue` / `floatValue` / `doubleValue` / `string`, or `Options.of(name, argument)` for any other type, `aliases`, `description`, `permission`, `repeatable`, `required`, registered on the method's command; `@Requires` → `requires(other[, value])` |
@@ -82,7 +82,7 @@ the result depend on the method order, and two different `@Description`s have no
 
 Options are per command in the core, so all methods of a command share them. A second method declaring an option of the
 same name gets the same `CommandOption` when its annotations and type are equal, and a parse error otherwise.
-`@Requires` and `@MutuallyExclusive` name options by their long name, which another parameter or another method of the
+`@Requires` and `@MutuallyExclusiveOptions` name options by their long name, which another parameter or another method of the
 command may declare, so the parser applies them after every method is added. The core reads both only when a command
 runs or its tree is built, so applying them after registering the options gives the same command.
 

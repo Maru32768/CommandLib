@@ -163,7 +163,7 @@ runtime. CommandAPI has no flags argument in a release; one is proposed in an op
 Cloud adds greedy flag values; CommandLib takes the options **before** the positional arguments (`/ban Steve -s` is
 rejected) unless the command calls `optionsAnywhere()` (`@OptionsAnywhere`), and also has permissions per option and
 any argument as an option's value (`Options.of`). CommandLib's options are typed (`ctx.getOption(option)`, a delegated property in Kotlin) and come with
-`required()`, `requires(...)`, `mutuallyExclusive(...)` and generated help, which the builder styles of Cloud and the
+`required()`, `requires(...)`, `mutuallyExclusiveOptions(...)` and generated help, which the builder styles of Cloud and the
 others do with string keys or not at all.
 
 ## 2. Optional and variadic arguments

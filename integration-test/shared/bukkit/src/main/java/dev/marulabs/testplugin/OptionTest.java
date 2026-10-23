@@ -291,7 +291,7 @@ public final class OptionTest extends TestBase {
             CommandOption<Boolean, CommandContext> quiet = option(Options.flag("quiet", 'q')
                                                                          .aliases("silent"));
             CommandOption<Boolean, CommandContext> loud = option(Options.flag("loud", 'l'));
-            mutuallyExclusive(quiet, loud);
+            mutuallyExclusiveOptions(quiet, loud);
 
             argument(new StringArgument("target", StringArgument.Type.WORD)).execute((target, ctx) -> {
                 if (!ctx.getOption(quiet)) {

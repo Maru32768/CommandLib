@@ -140,11 +140,11 @@ public final class CommandBuilder<C extends CommonCommandContext<?, ?>, T extend
     }
 
     /**
-     * See {@link CommonCommand#mutuallyExclusive(CommandOption[])}.
+     * See {@link CommonCommand#mutuallyExclusiveOptions(CommandOption[])}.
      */
     @SafeVarargs
-    public final CommandBuilder<C, T> mutuallyExclusive(@NotNull CommandOption<?, ? super C>... options) {
-        command.mutuallyExclusive(options);
+    public final CommandBuilder<C, T> mutuallyExclusiveOptions(@NotNull CommandOption<?, ? super C>... options) {
+        command.mutuallyExclusiveOptions(options);
         return this;
     }
 

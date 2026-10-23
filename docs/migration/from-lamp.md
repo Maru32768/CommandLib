@@ -242,7 +242,7 @@ class ScanCommand extends Command {
 | `@Flag` with a primitive or `String` | `Options.bool`, `integer`, `longValue`, `floatValue`, `doubleValue`, `string` |
 | `@Flag` with another type (`Player`, an enum) | `Options.of(name[, short], argument)` |
 | `@Flag` without `@Default` / `@Optional` (required) | `.required()` |
-| — | `Options.count`, `repeatable(max)`, `requires(...)`, `mutuallyExclusive(...)` |
+| — | `Options.count`, `repeatable(max)`, `requires(...)`, `mutuallyExclusiveOptions(...)` |
 
 See [options](../options.md).
 

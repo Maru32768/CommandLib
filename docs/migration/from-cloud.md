@@ -265,7 +265,7 @@ class ScanCommand extends Command {
 | Value flag (`withComponent(parser)`) | `Options.bool`, `integer`, `longValue`, `floatValue`, `doubleValue`, `string`, or `Options.of(name[, short], argument)` for any argument, such as a player or an enum |
 | `asRepeatable()` + `ctx.flags().count(...)` | `Options.count(name, short, max)` |
 | `asRepeatable()` + `getAll(...)` | `valueOption.repeatable(max)` (`List<T>`) |
-| — | `required()`, `requires(other)`, `mutuallyExclusive(...)` |
+| — | `required()`, `requires(other)`, `mutuallyExclusiveOptions(...)` |
 
 See [options](../options.md).
 

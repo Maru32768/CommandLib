@@ -97,7 +97,7 @@ Two more shapes build on these:
 | `valueOption.repeatable(max)`   | `List<T>`  | Values of up to `max` occurrences; `[]`     |
 
 Further modifiers: `aliases(String...)` adds long names, `required()` makes a
-missing option fail, and `CommonCommand#mutuallyExclusive(...)` allows at most
+missing option fail, and `CommonCommand#mutuallyExclusiveOptions(...)` allows at most
 one option of a group. The user-facing reference is `docs/options.md`.
 
 ### Command Syntax
@@ -251,13 +251,13 @@ Stateless utility class. Each factory method creates a `CommandOption` with the
 appropriate Brigadier `ArgumentType` and the matching `getBool`/`getInteger`/…
 extractor as the parser function.
 
-### `CommonCommand#option(...)` and `mutuallyExclusive(...)`
+### `CommonCommand#option(...)` and `mutuallyExclusiveOptions(...)`
 
 `option(...)` validates that no long name, alias or short name is used by
 another option of the command, then adds the option to an internal
 `List<CommandOption<?, C>>`. Duplicates throw `IllegalArgumentException`.
 
-`mutuallyExclusive(...)` stores a group of registered options;
+`mutuallyExclusiveOptions(...)` stores a group of registered options;
 `excludes(a, b)` tells the node creator whether two options share a group.
 
 ### `CommonCommandContext` — option storage

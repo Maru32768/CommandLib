@@ -267,7 +267,7 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
      *                                  command
      */
     @SafeVarargs
-    public final void mutuallyExclusive(@NotNull CommandOption<?, ? super C>... options) {
+    public final void mutuallyExclusiveOptions(@NotNull CommandOption<?, ? super C>... options) {
         Set<CommandOption<?, ?>> group = new LinkedHashSet<>(Arrays.asList(options));
         if (group.size() < 2) {
             throw new IllegalArgumentException("A mutually exclusive group needs at least two options.");

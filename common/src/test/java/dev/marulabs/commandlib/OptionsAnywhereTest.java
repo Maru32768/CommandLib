@@ -23,7 +23,7 @@ class OptionsAnywhereTest {
             CommandOption<Integer, TestCommandContext> days = option(Options.integer("days", 'd', 0));
             CommandOption<Boolean, TestCommandContext> json = option(Options.flag("json", 'j'));
             CommandOption<Boolean, TestCommandContext> yaml = option(Options.flag("yaml", 'y'));
-            mutuallyExclusive(json, yaml);
+            mutuallyExclusiveOptions(json, yaml);
             argument(new Word("target"), new Word("reason").optional("none")).execute((target, reason, ctx) -> {
                 ctx.sendMessage(target + " reason=" + reason + " force=" + ctx.getOption(force) + " silent="
                         + ctx.getOption(silent) + " days=" + ctx.getOption(days) + " inputs=" + ctx.getInputs());

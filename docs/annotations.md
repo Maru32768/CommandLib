@@ -150,7 +150,7 @@ executors can suspend.
 | `@Condition({"daytime", ...})` | class, `@Subcommand` method | `addPrerequisite(...)` with each prerequisite registered under the name with `registerCondition` |
 | `@Middleware({"audit", ...})` | class, `@Subcommand` method | `addMiddleware(...)` with each middleware registered under the name with `registerMiddleware`, in this order ([execution](execution.md#middleware)) |
 | `@OptionsAnywhere` | class, `@Subcommand` method | `optionsAnywhere()`: the options may follow the arguments ([options](options.md#options-after-the-arguments)) |
-| `@MutuallyExclusive({"json", "yaml"})` | class, `@Subcommand` method, repeatable | `mutuallyExclusive(json, yaml)` of the command's options with these names |
+| `@MutuallyExclusiveOptions({"json", "yaml"})` | class, `@Subcommand` method, repeatable | `mutuallyExclusiveOptions(json, yaml)` of the command's options with these names |
 | `@Examples({"/arena create lobby 16"})` | class, `@Subcommand` method | `examples(...)` ([help](help.md)) |
 | `@CaptionBundle("lang/homes")` | class, `@Subcommand` method | `captions(Captions.create().bundle("lang/homes", classLoader))` with the class loader of the parsed class |
 
@@ -299,7 +299,7 @@ type as the option's value, with `@Suggest` and the registered annotations, as `
   `<command node>.option.<name>` with `defaultPermission`; at least one of them, and no description.
 - `@Requires` names another option of the command by its long name: `requires(other)` needs it to be given, and
   `equalTo` (converted like `@Default`) `requires(other, value)`. Repeat it for several requirements.
-- `@MutuallyExclusive` on the class or a `@Subcommand` method names the options of its command.
+- `@MutuallyExclusiveOptions` on the class or a `@Subcommand` method names the options of its command.
 - Options belong to the command of the method; methods of one command that declare the same option must declare it
   identically.
 

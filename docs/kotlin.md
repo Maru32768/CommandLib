@@ -193,7 +193,7 @@ command("scan") {
 
 Reading `force` outside a callback, for example in the command block itself, throws `IllegalStateException`.
 `ctx[option]` reads an option from a context. Everything else about options (kinds, `repeatable`, `required`,
-`mutuallyExclusive`, `requires`) is the Java API, described in [options](options.md).
+`mutuallyExclusiveOptions`, `requires`) is the Java API, described in [options](options.md).
 
 ## Context values
 
