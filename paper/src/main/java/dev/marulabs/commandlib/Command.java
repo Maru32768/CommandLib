@@ -93,7 +93,7 @@ public class Command extends CommonCommand<CommandContext, Command> {
             case NOT_OP:
                 break;
         }
-        throw new IllegalArgumentException("Unsupported PermissionDefault: " + bukkit + " (use TRUE, FALSE or OP)");
+        throw new IllegalArgumentException("Unsupported PermissionDefault: " + bukkit.name() + " (use TRUE, FALSE or OP)");
     }
 
     private static PermissionDefault toBukkitDefault(@NotNull DefaultPermission common) {
