@@ -20,7 +20,7 @@ public interface UsageFormatter {
      * CommandLib's line: the usage in colors, indented by two spaces, and the description after a colon, such as
      * {@code   /scan [options] <target>: Scan the target}.
      */
-    UsageFormatter DEFAULT = DefaultHelpFormatter::usage;
+    UsageFormatter DEFAULT = new DefaultUsageFormatter();
 
     /**
      * Returns the line for {@code usage}, a text that may hold {@code §} color codes.

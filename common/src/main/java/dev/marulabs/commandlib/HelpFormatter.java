@@ -19,7 +19,7 @@ public interface HelpFormatter {
      * CommandLib's help: a border, the description, the {@link Caption#HELP_USAGE} heading with the usage lines, the
      * options under {@link Caption#HELP_OPTIONS} and the examples under {@link Caption#HELP_EXAMPLES}.
      */
-    HelpFormatter DEFAULT = DefaultHelpFormatter::help;
+    HelpFormatter DEFAULT = new DefaultHelpFormatter();
 
     /**
      * Sends {@code help} to {@code ctx}.
