@@ -1,5 +1,6 @@
 package dev.marulabs.commandlib.internal;
 
+import dev.marulabs.commandlib.Caption;
 import dev.marulabs.commandlib.CommonCommand;
 import dev.marulabs.commandlib.CommonCommandContext;
 import dev.marulabs.commandlib.DefaultPermission;
@@ -20,6 +21,8 @@ public interface ArgumentBranchDelegate<C extends CommonCommandContext<?, ?>, T 
     void description(@NotNull String description);
 
     void description(@NotNull Function<C, String> description);
+
+    void description(@NotNull Caption caption);
 
     void execute(@NotNull AsyncCommandExecutor<C> action);
 

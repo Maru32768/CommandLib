@@ -1,6 +1,7 @@
 package dev.marulabs.commandlib.branch;
 
 import dev.marulabs.commandlib.ArgRef;
+import dev.marulabs.commandlib.Caption;
 import dev.marulabs.commandlib.CommonArgument;
 import dev.marulabs.commandlib.CommonCommand;
 import dev.marulabs.commandlib.CommonCommandContext;
@@ -72,6 +73,12 @@ public final class TriArgumentBranch<T1, T2, T3, C extends CommonCommandContext<
     @Override
     public TriArgumentBranch<T1, T2, T3, C, T> description(@NotNull Function<C, String> description) {
         super.description(description);
+        return this;
+    }
+
+    @Override
+    public TriArgumentBranch<T1, T2, T3, C, T> description(@NotNull Caption caption) {
+        super.description(caption);
         return this;
     }
 

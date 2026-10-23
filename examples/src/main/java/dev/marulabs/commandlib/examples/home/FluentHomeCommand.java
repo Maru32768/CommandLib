@@ -16,7 +16,7 @@ public final class FluentHomeCommand extends Command {
     public FluentHomeCommand() {
         super("home");
         captions(HomeCaptions.create());
-        description(ctx -> ctx.caption(HomeCaptions.DESCRIPTION));
+        description(HomeCaptions.DESCRIPTION);
         Set<String> homes = new HashSet<>();
 
         addChildren(new Command("go") {{

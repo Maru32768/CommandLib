@@ -68,7 +68,7 @@ Consequences of reflection:
 | `@Subcommand` path ending in placeholders | `executeAsync` on the placeholders' branch (at most one method) |
 | `@Description`, `@Permission`, `@VisibleWhen`, `@Confirm`, `@Cooldown`, `@Condition`, `@Middleware`, `@OptionsAnywhere`, `@MutuallyExclusiveOptions`, `@Examples`, `@CaptionBundle`, `aliases` | on the command: from the class for the root, from one `@Subcommand` method for a subcommand |
 | `@Description`, `@Permission`, `@VisibleWhen` on an `@Execute` method, or a path ending in placeholders | on its argument branch |
-| `@Description(caption = "key")` | `description(ctx -> ctx.caption(Caption.of(key, value)))` |
+| `@Description(caption = "key")` | `description(Caption.of(key, value))` |
 | `@Flag` / `@Option` parameter | `Options.flag` / `count` / `bool` / `integer` / `longValue` / `floatValue` / `doubleValue` / `string`, or `Options.of(name, argument)` for any other type, `aliases`, `description`, `permission`, `repeatable`, `required`, registered on the method's command; `@Requires` → `requires(other[, value])` |
 | other parameter | an argument from the factory of its type; `List<T>` → `variadic()`, or `variadic(max)` with `@Variadic`; `@Default` → `optional(value)`; `@Optional` → `optional(contextValue)` or the empty value of the type |
 | return `int` / `CompletionStage` | `ctx.setResult` / the stage of `executeAsync` |

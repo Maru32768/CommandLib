@@ -1,5 +1,6 @@
 package dev.marulabs.commandlib.branch;
 
+import dev.marulabs.commandlib.Caption;
 import dev.marulabs.commandlib.CommonCommand;
 import dev.marulabs.commandlib.CommonCommandContext;
 import dev.marulabs.commandlib.DefaultPermission;
@@ -32,6 +33,14 @@ public class ArgumentBranch<C extends CommonCommandContext<?, ?>, T extends Comm
 
     public ArgumentBranch<C, T> description(@NotNull Function<C, String> description) {
         delegate.description(Objects.requireNonNull(description));
+        return this;
+    }
+
+    /**
+     * Same as {@link CommonCommand#description(Caption)} for this branch.
+     */
+    public ArgumentBranch<C, T> description(@NotNull Caption caption) {
+        delegate.description(Objects.requireNonNull(caption));
         return this;
     }
 

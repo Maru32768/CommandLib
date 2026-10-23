@@ -50,6 +50,24 @@ class CommandDocsTest {
     }
 
     @Test
+    void caption_descriptions_show_the_default_text_in_the_docs_and_the_caption_in_help() throws Exception {
+        Caption description = Caption.of("test.motd.description", "Show the message of the day");
+        TestCommand command = new TestCommand("motd") {{
+            captions(Captions.create()
+                             .set(description, "Show today's message"));
+            description(description);
+            argument(new CommonIntegerArgument<>("day")).description(description);
+        }};
+
+        assertThat(CommandDocs.of("p", command)
+                              .json()).contains("\"description\": \"Show the message of the day\"")
+                                      .doesNotContain("\"description\": null");
+        assertThat(new TestCommandRunner(command).execute("motd")
+                                                 .messages()).contains("Show today's message")
+                                                             .anyMatch(x -> x.endsWith(": Show today's message"));
+    }
+
+    @Test
     void markdown_escapes_table_cells_and_strips_color_codes() {
         TestCommand command = new TestCommand("pipe") {{
             argument(new CommonStringArgument<>("a")).description("§ea | b")

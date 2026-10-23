@@ -215,7 +215,8 @@ suggestions) and a command for each argument type. Options, permission plugins a
 - `RichText` with colors, styles, hover and click actions on every platform. `colorIfAbsent(rgb)` colors a text that
   has no color of its own.
 - Captions: per-key and per-locale texts, `ResourceBundle` and properties bundles, a `CaptionSender`, and
-  `captions(...)` on a command ([localization](docs/localization.md)).
+  `captions(...)` on a command ([localization](docs/localization.md)). `description(caption)` describes a command or an
+  argument branch in the sender's locale, and the generated docs show the caption's default text.
 - A resolve error whose exception carries its input shows vanilla's context line under it
   ([errors](docs/errors.md)).
 - Paper sends resolve errors and empty selectors as vanilla's translatable errors.

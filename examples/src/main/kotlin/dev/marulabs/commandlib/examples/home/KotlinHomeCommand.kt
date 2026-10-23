@@ -11,7 +11,7 @@ import dev.marulabs.commandlib.kotlin.subcommand
 fun kotlinHomeCommand(): Command =
     command("home") {
         captions(HomeCaptions.create())
-        description { ctx -> ctx.caption(HomeCaptions.DESCRIPTION) }
+        description(HomeCaptions.DESCRIPTION)
         val homes = mutableSetOf<String>()
         subcommand("go") {
             argument(StringArgument("name")) { name ->

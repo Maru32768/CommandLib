@@ -80,6 +80,11 @@ public final class CommandBuilder<C extends CommonCommandContext<?, ?>, T extend
         return this;
     }
 
+    public CommandBuilder<C, T> description(@NotNull Caption caption) {
+        command.description(caption);
+        return this;
+    }
+
     public CommandBuilder<C, T> description(@NotNull Function<C, String> description) {
         command.description(description);
         return this;

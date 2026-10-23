@@ -1056,7 +1056,7 @@ class AnnotationParserTest {
         return new TestCommand("team") {{
             addMiddleware(audit);
             execute(ctx -> ctx.sendMessage("teams"));
-            argument(new StrArg("team")).description(ctx -> ctx.caption(show))
+            argument(new StrArg("team")).description(show)
                                         .execute((team, ctx) -> ctx.sendMessage("team " + team))
                                         .child(team -> new TestCommand("add") {{
                                             description("Add players");

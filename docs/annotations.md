@@ -142,7 +142,7 @@ executors can suspend.
 | `@Subcommand("start")`, `@Subcommand("arena create")` | a method | `addChildren(new Command("start") ...)`; the path creates missing commands |
 | `@Subcommand("<team> add")` | a method | `argument(team).child(team -> new Command("add") ...)`; see [argument-first paths](#argument-first-paths) |
 | `@Description("...")` | class, method, option parameter | `description(...)` of the command, the subcommand, the branch of an `@Execute` method, or the option |
-| `@Description(value = "Manage homes", caption = "myplugin.home.description")` | class, method | `description(ctx -> ctx.caption(Caption.of(caption, value)))`, the description in the sender's locale ([localization](localization.md)) |
+| `@Description(value = "Manage homes", caption = "myplugin.home.description")` | class, method | `description(Caption.of(caption, value))`, the description in the sender's locale ([localization](localization.md)) |
 | `@Permission(value, defaultPermission, description)` | class, method, option parameter | `permission(...)` of the command, the subcommand, the branch of an `@Execute` method, or the option; attributes left out keep the generated node and the inherited default |
 | `@VisibleWhen("running")` | class, method | `visibleWhen(...)` of the command, the subcommand, or the branch of an `@Execute` method, with the predicate registered under the name with `registerVisibility` ([permissions](permissions.md#refreshing-the-command-tree)) |
 | `@Confirm(seconds = 10)` | class, `@Subcommand` method | `confirm(Confirmation.within(...))` |

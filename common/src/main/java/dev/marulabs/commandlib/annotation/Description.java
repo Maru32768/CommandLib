@@ -20,7 +20,7 @@ public @interface Description {
 
     /**
      * The key of a caption that gives the text in the sender's locale, as
-     * {@code description(ctx -> ctx.caption(Caption.of(caption, value)))} does, or empty for the fixed text. Options
+     * {@code description(Caption.of(caption, value))} does, or empty for the fixed text. Options
      * have no localized description.
      */
     String caption() default "";

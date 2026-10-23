@@ -475,7 +475,7 @@ public static Captions create() {
 
 // CommandLib, fluent (examples/.../home/FluentHomeCommand.java)
 captions(HomeCaptions.create());
-description(ctx -> ctx.caption(HomeCaptions.DESCRIPTION));
+description(HomeCaptions.DESCRIPTION);
 argument(new StringArgument("name")).execute((name, ctx) -> ctx.sendSuccess(HomeCaptions.SET, Map.of("name", name)));
 ```
 

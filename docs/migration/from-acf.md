@@ -284,7 +284,7 @@ keeps a player from running it again too soon. See [confirmation and cooldown](.
 | `loadYamlLanguageFile(...)` | **Not available**; read the YAML yourself and `set(...)` each text, or use a properties file |
 | `{name}` replacements in `sendMessage(MessageKey, "{name}", value)` | `ctx.sendFailure(caption, Map.of("name", value))` |
 | `usePerIssuerLocale(true)` | Always on: captions follow `ctx.getLocale()`, the sender's client locale, and the JVM's default locale for the console |
-| `{@@key}` in `@Description` | `description(ctx -> ctx.caption(Caption.of("key", "English text")))`; annotated commands use `@Description(value = "English text", caption = "key")` |
+| `{@@key}` in `@Description` | `description(Caption.of("key", "English text"))`; annotated commands use `@Description(value = "English text", caption = "key")` |
 | `setFormat(MessageType.ERROR, ...)` | `Captions#sender((ctx, caption, message, send) -> ...)` formats every caption; otherwise failures are red, `sendSuccess` green, `sendWarn` yellow |
 | `setDefaultExceptionHandler(...)` | `errorFormatter((ctx, error) -> ...)` on each top-level command for what the sender gets; `addUncaughtExceptionHandler((e, ctx) -> ...)` on a command or argument for unexpected exceptions |
 
@@ -297,7 +297,7 @@ class HelloCommand extends Command {
         super("hello");
 
         captions(captions);
-        description(ctx -> ctx.caption(DESCRIPTION));
+        description(DESCRIPTION);
         execute(ctx -> ctx.sendMessage(REPLY, Map.of("name", ctx.getActor()
                                                                  .getName())));
     }

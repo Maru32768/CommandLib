@@ -33,6 +33,7 @@ execute(ctx -> ctx.sendSuccess(HOME_SET, Map.of("name", "base")));
 | `new CommandPrerequisiteException(caption[, placeholders])` | Fails the command with the caption |
 | `new ArgumentParseException(caption, placeholders)`, `new ArgumentValidationException(caption, placeholders)` | Rejects the argument with the caption |
 | `new OptionParseException(caption, placeholders)` | Rejects the options with the caption |
+| `description(caption)` on a command or argument branch | Describes it in the sender's locale; the [generated docs](diagnostics.md) show the default text |
 
 ## The sender's locale
 

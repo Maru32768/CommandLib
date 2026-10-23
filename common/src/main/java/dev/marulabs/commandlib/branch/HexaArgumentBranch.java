@@ -1,6 +1,7 @@
 package dev.marulabs.commandlib.branch;
 
 import dev.marulabs.commandlib.ArgRef;
+import dev.marulabs.commandlib.Caption;
 import dev.marulabs.commandlib.CommonArgument;
 import dev.marulabs.commandlib.CommonCommand;
 import dev.marulabs.commandlib.CommonCommandContext;
@@ -87,6 +88,12 @@ public final class HexaArgumentBranch<T1, T2, T3, T4, T5, T6, C extends CommonCo
     @Override
     public HexaArgumentBranch<T1, T2, T3, T4, T5, T6, C, T> description(@NotNull Function<C, String> description) {
         super.description(description);
+        return this;
+    }
+
+    @Override
+    public HexaArgumentBranch<T1, T2, T3, T4, T5, T6, C, T> description(@NotNull Caption caption) {
+        super.description(caption);
         return this;
     }
 

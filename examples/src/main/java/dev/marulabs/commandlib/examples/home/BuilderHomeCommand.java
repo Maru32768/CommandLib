@@ -20,7 +20,7 @@ public final class BuilderHomeCommand {
         StringArgument goName = new StringArgument("name");
         return Command.builder("home")
                       .captions(HomeCaptions.create())
-                      .description(ctx -> ctx.caption(HomeCaptions.DESCRIPTION))
+                      .description(HomeCaptions.DESCRIPTION)
                       .addChild(Command.builder("go")
                                        .argument(goName, branch -> branch.execute(ctx -> {
                                            if (!homes.contains(ctx.getArgument(goName))) {

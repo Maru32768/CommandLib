@@ -86,8 +86,19 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
     }
 
     /**
-     * The text set with {@link #description(String)}, or null when {@link #description(Function)} set a function,
-     * whose text depends on the sender.
+     * Sets the description to the text of {@code caption} in the sender's locale. The documentation of the commands,
+     * which has no sender, shows the caption's {@link Caption#defaultText() default text}.
+     */
+    public final void description(@NotNull Caption caption) {
+        Objects.requireNonNull(caption);
+        this.description = ctx -> ctx.caption(caption);
+        this.staticDescription = caption.defaultText();
+    }
+
+    /**
+     * The text set with {@link #description(String)} or the default text of the caption set with
+     * {@link #description(Caption)}, or null when {@link #description(Function)} set a function, whose text depends on
+     * the sender.
      */
     @Nullable
     final String staticDescription() {
@@ -423,6 +434,11 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
             @Override
             public void description(@NotNull Function<C, String> description) {
                 arguments.description(description);
+            }
+
+            @Override
+            public void description(@NotNull Caption caption) {
+                arguments.description(caption);
             }
 
             @Override

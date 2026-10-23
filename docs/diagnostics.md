@@ -32,8 +32,9 @@ Files.writeString(Path.of("permissions.json"), docs.permissionsJson());
 
 Each call reads the commands again. Arguments are shown as `<name>`, optional ones as `[name]` and variadic ones as
 `<name...>`; argument types are the simple class names, so an anonymous subclass shows the class it extends. A command
-that has no executor of its own shows its help, so it lists no usage of itself. Descriptions set with
-`description(ctx -> ...)` depend on the sender and are left out (`null` in JSON). Color codes are removed.
+that has no executor of its own shows its help, so it lists no usage of itself. A description set with
+`description(caption)` shows the caption's default text. Descriptions set with `description(ctx -> ...)` depend on the
+sender and are left out (`null` in JSON). Color codes are removed.
 
 For this command:
 

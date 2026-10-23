@@ -168,6 +168,12 @@ final class Arguments<C extends CommonCommandContext<?, ?>> {
         this.staticDescription = null;
     }
 
+    void description(Caption caption) {
+        Objects.requireNonNull(caption);
+        this.description = ctx -> ctx.caption(caption);
+        this.staticDescription = caption.defaultText();
+    }
+
     @Nullable
     String staticDescription() {
         return staticDescription;

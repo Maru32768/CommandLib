@@ -866,16 +866,13 @@ public final class AnnotationParser<C extends CommonCommandContext<?, ?>, T exte
             return value;
         }
 
-        private void applyDescription(Description description,
-                                      Consumer<Function<C, String>> localized,
-                                      Consumer<String> text) {
+        private void applyDescription(Description description, Consumer<Caption> localized, Consumer<String> text) {
             if (description.caption()
                            .isEmpty()) {
                 text.accept(description.value());
                 return;
             }
-            Caption caption = Caption.of(description.caption(), description.value());
-            localized.accept(ctx -> ctx.caption(caption));
+            localized.accept(Caption.of(description.caption(), description.value()));
         }
 
         @SuppressWarnings({"unchecked", "rawtypes"})

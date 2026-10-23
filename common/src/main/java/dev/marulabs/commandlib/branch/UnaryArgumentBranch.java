@@ -1,6 +1,7 @@
 package dev.marulabs.commandlib.branch;
 
 import dev.marulabs.commandlib.ArgRef;
+import dev.marulabs.commandlib.Caption;
 import dev.marulabs.commandlib.CommonArgument;
 import dev.marulabs.commandlib.CommonCommand;
 import dev.marulabs.commandlib.CommonCommandContext;
@@ -58,6 +59,12 @@ public final class UnaryArgumentBranch<T1, C extends CommonCommandContext<?, ?>,
     @Override
     public UnaryArgumentBranch<T1, C, T> description(@NotNull Function<C, String> description) {
         super.description(description);
+        return this;
+    }
+
+    @Override
+    public UnaryArgumentBranch<T1, C, T> description(@NotNull Caption caption) {
+        super.description(caption);
         return this;
     }
 

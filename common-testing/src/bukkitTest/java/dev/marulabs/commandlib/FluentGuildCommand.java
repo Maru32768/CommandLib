@@ -21,7 +21,7 @@ public final class FluentGuildCommand extends Command {
 
     public FluentGuildCommand() {
         super("guild");
-        description(ctx -> ctx.caption(DESCRIPTION));
+        description(DESCRIPTION);
         examples("/guild red invite Steve", "/guild red kick -s Steve");
         addMiddleware(AUDIT);
 
