@@ -45,8 +45,9 @@ public final class RichTexts {
         }
 
         Style style = Style.EMPTY;
-        if (text.color() != null) {
-            style = style.withColor(color(text.color()));
+        Integer color = text.color();
+        if (color != null) {
+            style = style.withColor(color(color));
         }
         style = style.withBold(text.isBold())
                      .withItalic(text.isItalic());
@@ -66,15 +67,15 @@ public final class RichTexts {
             style = style.applyFormat(ChatFormatting.OBFUSCATED);
         }
         *///?}
-        if (text.hover() != null) {
-            style = style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, toVanilla(text.hover())));
+        RichText hover = text.hover();
+        if (hover != null) {
+            style = style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, toVanilla(hover)));
         }
-        if (text.click() != null) {
-            style = style.withClickEvent(new ClickEvent(ClickEvent.Action.valueOf(text.click()
-                                                                                      .type()
-                                                                                      .name()),
-                                                        text.click()
-                                                            .value()));
+        ClickAction click = text.click();
+        if (click != null) {
+            style = style.withClickEvent(new ClickEvent(ClickEvent.Action.valueOf(click.type()
+                                                                                       .name()),
+                                                        click.value()));
         }
         component.setStyle(style);
 

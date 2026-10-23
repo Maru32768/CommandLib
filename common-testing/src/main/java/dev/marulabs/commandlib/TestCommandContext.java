@@ -64,7 +64,7 @@ public final class TestCommandContext extends CommonCommandContext<FakeSender, S
      */
     @Override
     public void sendSuccess(@NotNull RichText text) {
-        sendMessage(text.color() != null ? text : text.color(Objects.requireNonNull(ChatColorUtil.GREEN.getRGB())));
+        sendMessage(text.colorIfAbsent(Objects.requireNonNull(ChatColorUtil.GREEN.getRGB())));
     }
 
     @Override
@@ -137,7 +137,8 @@ public final class TestCommandContext extends CommonCommandContext<FakeSender, S
     // shortcut: hover and click are dropped and translatables render as their key, since legacy text has neither;
     // assert richMessages() when they matter.
     private static String legacyText(RichText text, int parentColor, boolean[] parentDecorations) {
-        int color = text.color() != null ? text.color() : parentColor;
+        Integer ownColor = text.color();
+        int color = ownColor != null ? ownColor : parentColor;
         Boolean[] own = {text.isBold(), text.isItalic(), text.isUnderlined(), text.isStrikethrough(), text.isObfuscated()};
         boolean[] decorations = new boolean[own.length];
         StringBuilder builder = new StringBuilder(legacyColor(color));

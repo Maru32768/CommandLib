@@ -212,7 +212,8 @@ suggestions) and a command for each argument type. Options, permission plugins a
 
 - A generated `help` subcommand and usage lines, `examples(...)`, and `helpFormatter`, `usageFormatter` and
   `errorFormatter` ([help](docs/help.md)).
-- `RichText` with colors, styles, hover and click actions on every platform.
+- `RichText` with colors, styles, hover and click actions on every platform. `colorIfAbsent(rgb)` colors a text that
+  has no color of its own.
 - Captions: per-key and per-locale texts, `ResourceBundle` and properties bundles, a `CaptionSender`, and
   `captions(...)` on a command ([localization](docs/localization.md)).
 - A resolve error whose exception carries its input shows vanilla's context line under it

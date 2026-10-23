@@ -36,24 +36,25 @@ public final class RichTexts {
                                                               .map(RichTexts::toBungee)
                                                               .toArray());
         }
-        if (text.color() != null) {
-            component.setColor(color(text.color()));
+        Integer color = text.color();
+        if (color != null) {
+            component.setColor(color(color));
         }
         component.setBold(text.isBold());
         component.setItalic(text.isItalic());
         component.setUnderlined(text.isUnderlined());
         component.setStrikethrough(text.isStrikethrough());
         component.setObfuscated(text.isObfuscated());
-        if (text.hover() != null) {
+        RichText hover = text.hover();
+        if (hover != null) {
             component.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                                                   new Text(new BaseComponent[]{toBungee(text.hover())})));
+                                                   new Text(new BaseComponent[]{toBungee(hover)})));
         }
-        if (text.click() != null) {
-            component.setClickEvent(new ClickEvent(ClickEvent.Action.valueOf(text.click()
-                                                                                 .type()
-                                                                                 .name()),
-                                                   text.click()
-                                                       .value()));
+        ClickAction click = text.click();
+        if (click != null) {
+            component.setClickEvent(new ClickEvent(ClickEvent.Action.valueOf(click.type()
+                                                                                  .name()),
+                                                   click.value()));
         }
         text.children()
             .forEach(child -> component.addExtra(toBungee(child)));

@@ -70,6 +70,14 @@ public abstract class RichText {
         return with(style.color(rgb), children);
     }
 
+    /**
+     * Sets the color as {@link #color(int)} does unless this text has its own.
+     */
+    @NotNull
+    public RichText colorIfAbsent(int rgb) {
+        return style.color != null ? this : color(rgb);
+    }
+
     @NotNull
     public RichText bold() {
         return bold(true);

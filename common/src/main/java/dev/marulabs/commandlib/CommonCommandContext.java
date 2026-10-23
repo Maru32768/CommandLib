@@ -269,7 +269,7 @@ public abstract class CommonCommandContext<S, C> {
     }
 
     private static RichText withDefaultColor(@NotNull RichText text, @NotNull ChatColorUtil.ChatColor color) {
-        return text.color() != null ? text : text.color(Objects.requireNonNull(color.getRGB()));
+        return text.colorIfAbsent(Objects.requireNonNull(color.getRGB()));
     }
 
     /**

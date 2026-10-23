@@ -34,9 +34,10 @@ public final class RichTexts {
                                                            .map(RichTexts::toAdventure)
                                                            .collect(Collectors.toList()));
         }
-        if (text.color() != null) {
-            NamedTextColor named = NamedTextColor.namedColor(text.color());
-            component = component.color(named != null ? named : TextColor.color(text.color()));
+        Integer color = text.color();
+        if (color != null) {
+            NamedTextColor named = NamedTextColor.namedColor(color);
+            component = component.color(named != null ? named : TextColor.color(color));
         }
         component = component.decoration(TextDecoration.BOLD, TextDecoration.State.byBoolean(text.isBold()))
                              .decoration(TextDecoration.ITALIC, TextDecoration.State.byBoolean(text.isItalic()))
@@ -45,8 +46,9 @@ public final class RichTexts {
                                          TextDecoration.State.byBoolean(text.isStrikethrough()))
                              .decoration(TextDecoration.OBFUSCATED,
                                          TextDecoration.State.byBoolean(text.isObfuscated()));
-        if (text.hover() != null) {
-            component = component.hoverEvent(HoverEvent.showText(toAdventure(text.hover())));
+        RichText hover = text.hover();
+        if (hover != null) {
+            component = component.hoverEvent(HoverEvent.showText(toAdventure(hover)));
         }
         ClickAction click = text.click();
         if (click != null) {
