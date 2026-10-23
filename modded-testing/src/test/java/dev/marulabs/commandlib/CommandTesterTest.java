@@ -126,7 +126,7 @@ class CommandTesterTest {
         @Test
         void rich_success_is_sent_as_feedback() {
             try (CommandTester tester = new CommandTester(new Command("hello") {{
-                execute(ctx -> ctx.sendSuccess(RichText.text("done"), true));
+                execute(ctx -> ctx.sendSuccess(RichText.text("done")));
             }}, "test")) {
                 FakeSender sender = FakeSender.console();
                 tester.execute("hello", sender);

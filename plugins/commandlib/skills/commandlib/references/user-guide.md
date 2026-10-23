@@ -200,7 +200,7 @@ argument(new PlayersArgument("targets")).execute((targets, ctx) -> {
     if (targets.isEmpty()) {
         throw ctx.fail("No player was found");
     }
-    ctx.sendSuccess("Counted " + targets.size() + " players", true);
+    ctx.sendSuccess("Counted " + targets.size() + " players");
     ctx.setResult(targets.size());
 });
 ```

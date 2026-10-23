@@ -23,10 +23,10 @@ class MyCommand extends Command {
 ```
 
 The typed callbacks take one to seven arguments. For eight or more, pass them
-all to `argument(...)` and read each value typed from its argument instance:
+as a list to `argument(List)` and read each value typed from its argument instance:
 
 ```java
-argument(x1, y1, z1, x2, y2, z2, world, name).execute(ctx -> {
+argument(List.of(x1, y1, z1, x2, y2, z2, world, name)).execute(ctx -> {
     double width = ctx.getArgument(x2) - ctx.getArgument(x1);
 });
 ```
