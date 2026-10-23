@@ -905,6 +905,46 @@ class CommandStructureTest {
     }
 
     @Test
+    void an_unexpected_exception_is_logged_with_the_input() throws Exception {
+        java.util.logging.Logger logger = java.util.logging.Logger.getLogger("dev.marulabs.commandlib");
+        List<java.util.logging.LogRecord> records = new ArrayList<>();
+        java.util.logging.Handler handler = new java.util.logging.Handler() {
+            @Override
+            public void publish(java.util.logging.LogRecord record) {
+                records.add(record);
+            }
+
+            @Override
+            public void flush() {
+            }
+
+            @Override
+            public void close() {
+            }
+        };
+        IllegalStateException thrown = new IllegalStateException("bare");
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("boom") {{
+            argument(new IntArg("value")).execute((value, ctx) -> {
+                throw thrown;
+            });
+        }});
+
+        logger.addHandler(handler);
+        try {
+            runner.execute("boom 3");
+        } finally {
+            logger.removeHandler(handler);
+        }
+
+        assertThat(records).singleElement()
+                           .satisfies(x -> {
+                               assertThat(x.getLevel()).isEqualTo(java.util.logging.Level.SEVERE);
+                               assertThat(x.getMessage()).startsWith("Unexpected exception while executing /boom 3 by ");
+                               assertThat(x.getThrown()).isSameAs(thrown);
+                           });
+    }
+
+    @Test
     void command_and_argument_uncaught_exception_handlers_receive_argument_executor_exception() throws Exception {
         List<String> handled = new ArrayList<>();
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("boom") {{

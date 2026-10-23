@@ -113,8 +113,8 @@ Failure mapping (`CommandRunner#toFailure`), the same for both paths:
 | `CommandFailure` (preprocess, confirmation, cooldown) | its collected messages |
 | `CommandPrerequisiteException` | its message |
 | `CancellationException` | nothing; the work was cancelled on purpose |
-| `TimeoutException` | "The command timed out."; the uncaught exception handlers are called, no stack trace |
-| anything else | stack trace, the generic error lines, the uncaught exception handlers |
+| `TimeoutException` | "The command timed out."; the uncaught exception handlers are called, nothing is logged |
+| anything else | logged with the input and the sender, the generic error lines, the uncaught exception handlers |
 
 `CommandFailure#toString()` does not resolve the platform message, since `CompletionException` builds its message from
 the cause's `toString()` and the testers have no server to resolve it.

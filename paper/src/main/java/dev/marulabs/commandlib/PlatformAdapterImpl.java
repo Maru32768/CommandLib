@@ -31,4 +31,9 @@ final class PlatformAdapterImpl implements PlatformAdapter<CommandSourceStack, C
                                             .deserialize(message);
         return new ArgumentParseException(ctx -> ((CommandContext) ctx).sendFailure(component));
     }
+
+    @Override
+    public void logError(String message, Throwable error) {
+        PluginLogger.error(message, error);
+    }
 }

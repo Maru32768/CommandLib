@@ -201,7 +201,7 @@ final class ArgumentCommandNodeCreator<S, T, C extends CommonCommandContext<S, T
                                                            .listSuggestions(context, sb)
                                                            .toCompletableFuture()
                                                            .exceptionally(e -> {
-                                                               reportSuggestionFailure(e);
+                                                               reportSuggestionFailure(platformAdapter, e);
                                                                return Suggestions.empty()
                                                                                  .join();
                                                            }));
@@ -209,7 +209,7 @@ final class ArgumentCommandNodeCreator<S, T, C extends CommonCommandContext<S, T
                                 action.accept(suggestionBuilder);
                             }
                         } catch (Exception e) {
-                            reportSuggestionFailure(e);
+                            reportSuggestionFailure(platformAdapter, e);
                         }
                     }
                 });
@@ -220,7 +220,8 @@ final class ArgumentCommandNodeCreator<S, T, C extends CommonCommandContext<S, T
                                                                         .toCompletableFuture()
                                                                         .handle((ignored, e) -> {
                                                                             if (e != null) {
-                                                                                reportSuggestionFailure(e);
+                                                                                reportSuggestionFailure(platformAdapter,
+                                                                                                        e);
                                                                             }
                                                                             suggestionBuilder.build()
                                                                                              .forEach(s -> s.suggest(sb));
@@ -238,16 +239,15 @@ final class ArgumentCommandNodeCreator<S, T, C extends CommonCommandContext<S, T
                 });
             } catch (Exception e) {
                 // Brigadier would drop the suggestions of every other node.
-                reportSuggestionFailure(e);
+                reportSuggestionFailure(platformAdapter, e);
                 return Suggestions.empty();
             }
         };
     }
 
-    // common has no logger, so a stack trace on the console is how it reports, as CommandRunner does.
-    @SuppressWarnings("CatchAndPrintStackTrace")
-    private static void reportSuggestionFailure(Throwable e) {
-        (e instanceof CompletionException && e.getCause() != null ? e.getCause() : e).printStackTrace();
+    private static void reportSuggestionFailure(PlatformAdapter<?, ?, ?> platformAdapter, Throwable e) {
+        Throwable cause = e instanceof CompletionException && e.getCause() != null ? e.getCause() : e;
+        platformAdapter.logError("A suggestion provider failed", cause);
     }
 
     /**

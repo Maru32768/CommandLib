@@ -6,6 +6,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.marulabs.commandlib.exception.ArgumentParseException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
+import org.apache.logging.log4j.LogManager;
 
 final class PlatformAdapterImpl implements PlatformAdapter<CommandSourceStack, Component, CommandContext> {
     @Override
@@ -30,5 +31,11 @@ final class PlatformAdapterImpl implements PlatformAdapter<CommandSourceStack, C
                 ctx.sendFailure(message.getString());
             }
         });
+    }
+
+    @Override
+    public void logError(String message, Throwable error) {
+        LogManager.getLogger("CommandLib")
+                  .error(message, error);
     }
 }

@@ -253,6 +253,8 @@ suggestions) and a command for each argument type. Options, permission plugins a
 - The permission check at execution covers the parent commands too, so input parsed before the sender lost the
   permission of a parent command, such as a function's, no longer runs.
 - `UncaughtExceptionHandler` receives exceptions thrown by executors.
+- An unexpected exception of an executor, a suggestion provider or a `visibleWhen` predicate is logged with the input
+  and the sender through the platform's logger (the plugin's on Spigot and Paper) instead of printed to `System.err`.
 - Spigot: commands work after Bukkit `/reload`, because CommandLib adds them to the vanilla dispatcher.
 - Spigot: commands appear under the plugin's `/help` index with their permission and description, instead of as "A
   Mojang provided command", and lose the stray `minecraft:` label.

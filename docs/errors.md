@@ -281,7 +281,9 @@ An exception thrown by the executor or a middleware, or a failed stage of an asy
 `CommandPrerequisiteException`, `CancellationException` (reports nothing) and `TimeoutException` (sends
 `The command timed out.` and calls the handlers):
 
-- its stack trace is printed to the server console;
+- it is logged with the input and the sender, through the logger of the plugin that ships CommandLib on Spigot and
+  Paper, the `CommandLib` SLF4J logger on Velocity and the `CommandLib` Log4j logger on Forge, NeoForge and Fabric. The
+  server itself does not log an exception of a command;
 - the sender gets `An unexpected error occurred trying to execute that command` (vanilla's translatable
   `command.failed`, unless `Caption.UNEXPECTED_ERROR` is given a text) and `Check the console for details.` in red;
 - every `UncaughtExceptionHandler` added with `addUncaughtExceptionHandler` on the command (and, for an argument node,
@@ -290,11 +292,11 @@ An exception thrown by the executor or a middleware, or a failed stage of an asy
   returned, sends them to the sender directly; the handlers then run on the sync thread.
 
 An unchecked exception thrown before the middlewares (in a parser, validator, transformer, or prerequisite) is
-printed, passed to the uncaught exception handlers, and rethrown to Brigadier. The platform then reports it with its
+logged, passed to the uncaught exception handlers, and rethrown to Brigadier. The platform then reports it with its
 own generic error (vanilla: `An unexpected error occurred trying to execute that command`, with the exception message
 on hover for operators).
 
-An exception thrown by a suggestion provider, or by a stage it awaits, is printed. The client still gets the suggestions
+An exception thrown by a suggestion provider, or by a stage it awaits, is logged. The client still gets the suggestions
 of the other providers.
 
 ## Languages

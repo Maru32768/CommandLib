@@ -64,7 +64,7 @@ public final class AuditedCommand extends Command {
   ```
 
   What reaches the outermost stage is reported as in [errors](errors.md): a `CommandPrerequisiteException` sends its
-  message, any other exception is printed, sends the generic error, and reaches the `UncaughtExceptionHandler`s.
+  message, any other exception is logged, sends the generic error, and reaches the `UncaughtExceptionHandler`s.
 
 A command's middlewares apply to its argument branches and its child commands, the parent's before the child's. A child
 that calls `disableParentMiddleware()` inherits none of them, nor the parent's confirmation and cooldown. A middleware
@@ -187,7 +187,7 @@ work there:
   1. Setting the result later has no effect.
 - A failure after that point cannot change what was stored. Its message goes to the sender directly, as
   `ctx.sendFailure` sends it: a `CommandPrerequisiteException` sends its message, any other exception the generic
-  error, after the stack trace is printed and the `UncaughtExceptionHandler`s are called on the sync thread.
+  error, after the exception is logged and the `UncaughtExceptionHandler`s are called on the sync thread.
 - When the stage has already completed as the dispatch returns, for example with the testers' default executors or
   when the work found its answer in a cache, the command behaves exactly like a synchronous one: its failure stores 0
   and its result is the one set at the end.
@@ -205,7 +205,7 @@ executeAsync(ctx -> ctx.supplyAsync(() -> api.fetch(...))
                        .thenAccept(result -> ctx.sendSuccess(result)));
 ```
 
-A stage that fails with a `TimeoutException` sends "The command timed out." in red, does not print a stack trace, and
+A stage that fails with a `TimeoutException` sends "The command timed out." in red, logs nothing, and
 reaches the `UncaughtExceptionHandler`s. A stage that is cancelled (`CancellationException`) reports nothing: cancel
 it when the work is no longer wanted. Cancelling a `CompletableFuture` does not interrupt the thread doing the work.
 CommandLib does not cancel a command when its sender leaves; messages to a player who has left are dropped by the

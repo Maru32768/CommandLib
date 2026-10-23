@@ -9,6 +9,8 @@ import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * What {@code common} needs from the platform module. Each platform implements it in the package-private
@@ -51,4 +53,14 @@ public interface PlatformAdapter<S, T, C extends CommonCommandContext<S, T>> {
     }
 
     ArgumentParseException convertCommandSyntaxException(CommandSyntaxException e);
+
+    /**
+     * Logs an exception CommandLib caught and does not rethrow, such as one of an executor, which the server would not
+     * log, or one of a suggestion provider. A platform logs it as its plugins and mods log; this default logs it through
+     * {@code java.util.logging}.
+     */
+    default void logError(String message, Throwable error) {
+        Logger.getLogger("dev.marulabs.commandlib")
+              .log(Level.SEVERE, message, error);
+    }
 }

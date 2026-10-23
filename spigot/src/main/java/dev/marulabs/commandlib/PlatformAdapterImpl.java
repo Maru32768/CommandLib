@@ -69,6 +69,11 @@ final class PlatformAdapterImpl implements PlatformAdapter<Object, BaseComponent
         }
     }
 
+    @Override
+    public void logError(String message, Throwable error) {
+        PluginLogger.error(message, error);
+    }
+
     private static boolean hasCause(Throwable throwable, Class<? extends Throwable> causeClass) {
         for (Throwable t = throwable; t != null; t = t.getCause()) {
             if (causeClass.isInstance(t)) {

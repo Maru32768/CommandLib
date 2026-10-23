@@ -146,7 +146,7 @@ errorFormatter((ctx, error) -> {
 
 What the formatter sends is the failure's message, as `ctx.sendFailure` in a failing command is: the platform reports
 it in red, a silent source does not get it, and `/execute store success` stores 0. A formatter that sends nothing makes
-the failure only return 0, so `store success` stores 1 (see [errors](errors.md#results-and-failures)). The stack trace of an unexpected exception is printed and the `UncaughtExceptionHandler`s
+the failure only return 0, so `store success` stores 1 (see [errors](errors.md#results-and-failures)). An unexpected exception is logged and the `UncaughtExceptionHandler`s
 are called whatever the formatter does. A failure of an async command after the dispatch returned also goes through it,
 and its messages go to the sender directly.
 

@@ -83,10 +83,10 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
         } catch (CommandSyntaxException e) {
             throw e;
         } catch (Throwable e) {
-            e.printStackTrace();
+            platformAdapter.logError("Could not set up the execution of /" + context.getInput(), e);
             throw e;
         }
-        // runInContext prints and reports what it does not send to the sender itself.
+        // runInContext logs and reports what it does not send to the sender itself.
         return CurrentCommandContext.call(ctx, () -> runInContext(ctx));
     }
 
@@ -196,8 +196,8 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
             throw e;
         } catch (Throwable e) {
             // Exceptions escaping parsing or prerequisites are not reported to the sender, so the handlers get them
-            // before Brigadier propagates them to the platform.
-            e.printStackTrace();
+            // before Brigadier propagates them to the platform, which does not log them.
+            logUnexpected(ctx, e);
             notifyUncaughtExceptionHandlers(e, ctx);
             throw e;
         }
@@ -249,14 +249,12 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
         }, scheduler.sync(ctx));
     }
 
-    // common has no logger, so a stack trace on the console is how it reports, as in run.
-    @SuppressWarnings("CatchAndPrintStackTrace")
     private void reportLateFailure(C ctx, Throwable e) {
         try {
             // The dispatch has returned, so the messages go to the sender directly.
             CurrentCommandContext.run(ctx, () -> toFailure(ctx, e).sendMessages());
         } catch (RuntimeException t) {
-            t.printStackTrace();
+            platformAdapter.logError("Could not report the failure of " + describe(ctx), t);
         }
     }
 
@@ -304,7 +302,7 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
             notifyUncaughtExceptionHandlers(e, ctx);
             return capture(ctx, CommandError.Kind.TIMEOUT, e, null, () -> ctx.sendFailure(Caption.TIMEOUT));
         }
-        e.printStackTrace();
+        logUnexpected(ctx, e);
         notifyUncaughtExceptionHandlers(e, ctx);
         return capture(ctx, CommandError.Kind.UNEXPECTED, e, null, () -> {
             ctx.sendFailure(Caption.UNEXPECTED_ERROR);
@@ -343,7 +341,7 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
                        .format(ctx, error);
             } catch (RuntimeException e) {
                 // A broken formatter must not hide the failure it reports.
-                e.printStackTrace();
+                platformAdapter.logError("The error formatter of " + describe(ctx) + " failed", e);
                 sendDefault.run();
             }
         });
@@ -358,8 +356,6 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
         throw failure;
     }
 
-    // common has no logger, so a stack trace on the console is how it reports, as in run.
-    @SuppressWarnings("CatchAndPrintStackTrace")
     private void notifyUncaughtExceptionHandlers(Throwable e, C ctx) {
         // A failing handler must neither keep the remaining handlers from running nor escape to the outer catch,
         // which would notify every handler again with the handler's own exception.
@@ -367,9 +363,21 @@ final class CommandRunner<S, C extends CommonCommandContext<S, ?>> implements Co
             try {
                 handler.uncaughtException(e, ctx);
             } catch (Throwable t) {
-                t.printStackTrace();
+                platformAdapter.logError("An uncaught exception handler of " + describe(ctx) + " failed", t);
             }
         }
+    }
+
+    private void logUnexpected(C ctx, Throwable e) {
+        platformAdapter.logError("Unexpected exception while executing " + describe(ctx), e);
+    }
+
+    // The input with the sender, such as "/ban Steve by Alex".
+    private static String describe(CommonCommandContext<?, ?> ctx) {
+        return "/" + ctx.getHandle()
+                        .getInput()
+                + " by " + ctx.getActor()
+                              .getName();
     }
 
     private void parseOptions(C ctx) throws ArgumentParseException, CommandPrerequisiteException {

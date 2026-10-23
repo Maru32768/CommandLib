@@ -295,7 +295,7 @@ Both complete as the client does from its command tree: a command, literal or ar
 permission or a failing `visibleWhen`) is left out. Brigadier's server-side `getCompletionSuggestions` would still list
 such a literal ([permissions](permissions.md#where-permissions-are-checked)).
 
-A provider that throws an exception does not fail `suggest` or `suggestions`, as on a server: the exception is printed
+A provider that throws an exception does not fail `suggest` or `suggestions`, as on a server: the exception is logged
 and only that provider's suggestions are missing. Assert the expected suggestions to catch it.
 
 ### Command tree snapshots

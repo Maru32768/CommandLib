@@ -7,6 +7,7 @@ import dev.marulabs.commandlib.exception.ArgumentParseException;
 import dev.marulabs.commandlib.internal.PlatformAdapter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
+import org.slf4j.LoggerFactory;
 
 final class PlatformAdapterImpl implements PlatformAdapter<CommandSource, Component, CommandContext> {
     @Override
@@ -26,5 +27,11 @@ final class PlatformAdapterImpl implements PlatformAdapter<CommandSource, Compon
         Component component = message instanceof ComponentLike ? ((ComponentLike) message).asComponent()
                 : Component.text(message.getString());
         return new ArgumentParseException(ctx -> ((CommandContext) ctx).sendFailure(component));
+    }
+
+    @Override
+    public void logError(String message, Throwable error) {
+        LoggerFactory.getLogger("CommandLib")
+                     .error(message, error);
     }
 }

@@ -7,6 +7,7 @@ import dev.marulabs.commandlib.command.CommandMiddleware;
 import dev.marulabs.commandlib.command.Extractor;
 import dev.marulabs.commandlib.command.Prerequisite;
 import dev.marulabs.commandlib.internal.ArgumentBranchDelegate;
+import dev.marulabs.commandlib.internal.PlatformAdapter;
 import dev.marulabs.commandlib.util.UncaughtExceptionHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -946,16 +947,15 @@ public abstract class CommonCommand<C extends CommonCommandContext<?, ?>, T exte
     }
 
     /**
-     * Whether {@code visibility} of a command or branch shows it; a predicate that throws hides it, after printing the
+     * Whether {@code visibility} of a command or branch shows it; a predicate that throws hides it, after logging the
      * exception, so that the tree, the help and the execution agree.
      */
-    // common has no logger, so a stack trace on the console is how it reports, as CommandRunner does.
-    @SuppressWarnings("CatchAndPrintStackTrace")
     static <C> boolean isVisible(@Nullable Predicate<? super C> visibility, C ctx) {
         try {
             return visibility == null || visibility.test(ctx);
         } catch (Exception e) {
-            e.printStackTrace();
+            PlatformAdapter.get()
+                           .logError("A visibleWhen predicate failed, so its command or branch is hidden", e);
             return false;
         }
     }

@@ -155,7 +155,7 @@ Do not use Bukkit or Minecraft APIs that require the server thread inside the as
 
 ## Exceptions
 
-An exception thrown by a provider, or by a stage it awaits, is printed to the console and that provider is skipped. The
+An exception thrown by a provider, or by a stage it awaits, is logged and that provider is skipped. The
 client still gets the suggestions of the other providers. An `Error` that a provider throws directly still propagates.
 
 ## Testing suggestions
