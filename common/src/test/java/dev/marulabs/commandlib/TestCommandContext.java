@@ -34,7 +34,7 @@ final class TestCommandContext extends CommonCommandContext<TestCommandSource, S
     }
 
     @Override
-    public void sendSuccess(String message, boolean broadcastToOps) {
+    public void sendSuccess(String message) {
         add(String.valueOf(message));
     }
 
@@ -54,7 +54,7 @@ final class TestCommandContext extends CommonCommandContext<TestCommandSource, S
     }
 
     @Override
-    public void sendSuccess(RichText text, boolean broadcastToOps) {
+    public void sendSuccess(RichText text) {
         add(text.plainText());
     }
 

@@ -48,8 +48,7 @@ both store `0`. A failure that sent no message, such as a preprocess returning `
 since the platform would send an empty line for it; `store success` then stores `1`.
 
 Messages the executor sent before throwing still reach the sender directly. `ctx.sendSuccess(...)` is vanilla command
-feedback (see the README): a player does not get it while the `sendCommandFeedback` gamerule is off, and
-`sendSuccess(message, true)` also goes to the other operators and, with `logAdminCommands`, the server log.
+feedback (see the README): a player does not get it while the `sendCommandFeedback` gamerule is off.
 
 ## Error catalog
 

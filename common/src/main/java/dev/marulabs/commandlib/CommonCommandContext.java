@@ -13,8 +13,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
-import java.util.function.Function;
-import java.util.function.IntFunction;
 import java.util.function.Supplier;
 
 /**
@@ -228,46 +226,11 @@ public abstract class CommonCommandContext<S, C> {
     }
 
     /**
-     * Sends {@code message} in green as command feedback, like {@link #sendSuccess(String, boolean)} without
-     * broadcasting it.
-     */
-    public final void sendSuccess(@Nullable String message) {
-        sendSuccess(message, false);
-    }
-
-    /**
      * Sends {@code message} in green as command feedback, the way vanilla commands report success: the sender gets it
      * unless the {@code sendCommandFeedback} gamerule is off for a player or the source is silent, such as a function.
-     * With {@code broadcastToOps}, the other operators also get it in gray italics, and the server log gets it when
-     * the {@code logAdminCommands} gamerule is on, as for {@code /gamemode}. A platform or source without vanilla
-     * feedback, such as a test sender, gets it as a plain message.
+     * A platform or source without vanilla feedback, such as a test sender, gets it as a plain message.
      */
-    public abstract void sendSuccess(@Nullable String message, boolean broadcastToOps);
-
-    /**
-     * Sends the feedback of a command that acted on {@code targets} the way vanilla commands word it, such as
-     * "Applied effect Speed to Steve" and "Applied effect Speed to 3 targets": {@code single} with the target when
-     * there is exactly one, else {@code multiple} with their number. Same as
-     * {@link #sendSuccessFor(Collection, Function, IntFunction, boolean)} without broadcasting it.
-     */
-    public final <T> void sendSuccessFor(@NotNull Collection<? extends T> targets,
-                                         @NotNull Function<? super T, String> single,
-                                         @NotNull IntFunction<String> multiple) {
-        sendSuccessFor(targets, single, multiple, false);
-    }
-
-    /**
-     * Same as {@link #sendSuccessFor(Collection, Function, IntFunction)}, sent as {@link #sendSuccess(String, boolean)}
-     * does. Use {@link #caption(Caption, Map)} in the functions for a localized text.
-     */
-    public final <T> void sendSuccessFor(@NotNull Collection<? extends T> targets,
-                                         @NotNull Function<? super T, String> single,
-                                         @NotNull IntFunction<String> multiple,
-                                         boolean broadcastToOps) {
-        sendSuccess(targets.size() == 1 ? single.apply(targets.iterator()
-                                                              .next())
-                : multiple.apply(targets.size()), broadcastToOps);
-    }
+    public abstract void sendSuccess(@Nullable String message);
 
     public final void sendWarn(@Nullable Object obj) {
         sendWarn(Objects.toString(obj));
@@ -287,18 +250,9 @@ public abstract class CommonCommandContext<S, C> {
     public abstract void sendMessage(@NotNull RichText text);
 
     /**
-     * Sends {@code text} in green unless it has its own color, as command feedback like
-     * {@link #sendSuccess(String, boolean)} without broadcasting it.
+     * Sends {@code text} in green unless it has its own color, as command feedback like {@link #sendSuccess(String)}.
      */
-    public final void sendSuccess(@NotNull RichText text) {
-        sendSuccess(text, false);
-    }
-
-    /**
-     * Sends {@code text} in green unless it has its own color, as command feedback like
-     * {@link #sendSuccess(String, boolean)}.
-     */
-    public abstract void sendSuccess(@NotNull RichText text, boolean broadcastToOps);
+    public abstract void sendSuccess(@NotNull RichText text);
 
     /**
      * Sends {@code text} in yellow unless it has its own color.

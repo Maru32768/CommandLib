@@ -52,7 +52,7 @@
 | R3B-1 の続き | plugin.yml で宣言済みの command/option/argument permission node を上書きする現挙動（bypass node は修正済み） |
 | CME の続き | Paper 1.21.4+ で実行時登録の label に plugin metadata を付けるか |
 
-解消した Pending: B-2（vanilla 自体が 26.2 で reset を廃止したため Paper は reset を拒否のまま）、E-21（全 testing artifact の FakeSender を grant/deny 別保持・deny 優先に統一）。
+解消した Pending: B-5（2026-10-24 に `sendSuccess` の `broadcastToOps` 自体を削除。operator への broadcast は呼び出し側の責務とした）、B-2（vanilla 自体が 26.2 で reset を廃止したため Paper は reset を拒否のまま）、E-21（全 testing artifact の FakeSender を grant/deny 別保持・deny 優先に統一）。
 
 ## 見送り（ROI 低）
 

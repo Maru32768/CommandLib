@@ -344,7 +344,7 @@ COMMANDLIB_UPDATE_SNAPSHOTS=true ./gradlew test
 - `DefaultPermission` defaults (except in `velocity-testing`), permission plugin behavior, client command trees.
 - Real registries and tags (Spigot, Paper), worlds, scoreboards (except through `scoreboard(Supplier)`), selector
   filters such as `@e[type=zombie]` (Spigot, Paper).
-- `/execute`, command blocks, and functions. `execute` returns the result, but gamerules, silent sources, and the
-  operator broadcast of `sendSuccess(message, true)` are not modeled.
+- `/execute`, command blocks, and functions. `execute` returns the result, but gamerules and silent sources of
+  `sendSuccess` are not modeled.
 
 CommandLib's own coverage of these lives in the repository's `integration-test` module, which runs real servers.

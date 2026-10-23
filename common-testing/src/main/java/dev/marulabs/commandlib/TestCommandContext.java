@@ -55,15 +55,15 @@ public final class TestCommandContext extends CommonCommandContext<FakeSender, S
     }
 
     @Override
-    public void sendSuccess(@Nullable String message, boolean broadcastToOps) {
-        sendSuccess(RichText.text(String.valueOf(message)), broadcastToOps);
+    public void sendSuccess(@Nullable String message) {
+        sendSuccess(RichText.text(String.valueOf(message)));
     }
 
     /**
-     * Sends {@code text} in green unless it has its own color. This test platform has no operators to broadcast to.
+     * Sends {@code text} in green unless it has its own color.
      */
     @Override
-    public void sendSuccess(@NotNull RichText text, boolean broadcastToOps) {
+    public void sendSuccess(@NotNull RichText text) {
         sendMessage(text.color() != null ? text : text.color(Objects.requireNonNull(ChatColorUtil.GREEN.getRGB())));
     }
 

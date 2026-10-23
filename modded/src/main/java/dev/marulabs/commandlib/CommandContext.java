@@ -91,41 +91,33 @@ public final class CommandContext extends CommonCommandContext<CommandSourceStac
      * {@code sendCommandFeedback} gamerule.
      */
     public void sendMessage(@NotNull Component component) {
-        sendFeedback(component, false);
+        sendFeedback(component);
     }
 
-    private void sendFeedback(@NotNull Component component, boolean broadcastToOps) {
+    private void sendFeedback(@NotNull Component component) {
         Objects.requireNonNull(component);
         //? if >=1.20 {
-        deliver(component, () -> getSender().sendSuccess(() -> component, broadcastToOps));
+        deliver(component, () -> getSender().sendSuccess(() -> component, false));
         //?} else
-        /*deliver(component, () -> getSender().sendSuccess(component, broadcastToOps));*/
+        /*deliver(component, () -> getSender().sendSuccess(component, false));*/
     }
 
     @Override
-    public void sendSuccess(@Nullable String message, boolean broadcastToOps) {
-        sendSuccess(literal(message), broadcastToOps);
+    public void sendSuccess(@Nullable String message) {
+        sendSuccess(literal(message));
     }
 
     /**
      * Sends {@code component} in green unless it has its own color, as command feedback like
-     * {@link #sendSuccess(String, boolean)} without broadcasting it.
+     * {@link #sendSuccess(String)}.
      */
     public void sendSuccess(@NotNull Component component) {
-        sendSuccess(component, false);
-    }
-
-    /**
-     * Sends {@code component} in green unless it has its own color, as command feedback like
-     * {@link #sendSuccess(String, boolean)}.
-     */
-    public void sendSuccess(@NotNull Component component, boolean broadcastToOps) {
-        sendFeedback(withDefaultColor(component, ChatFormatting.GREEN), broadcastToOps);
+        sendFeedback(withDefaultColor(component, ChatFormatting.GREEN));
     }
 
     @Override
-    public void sendSuccess(@NotNull RichText text, boolean broadcastToOps) {
-        sendSuccess(RichTexts.toVanilla(text), broadcastToOps);
+    public void sendSuccess(@NotNull RichText text) {
+        sendSuccess(RichTexts.toVanilla(text));
     }
 
     @Override

@@ -124,33 +124,25 @@ public final class CommandContext extends CommonCommandContext<CommandSourceStac
     }
 
     @Override
-    public void sendSuccess(@Nullable String message, boolean broadcastToOps) {
-        sendSuccess(Component.text(String.valueOf(message)), broadcastToOps);
+    public void sendSuccess(@Nullable String message) {
+        sendSuccess(Component.text(String.valueOf(message)));
     }
 
     /**
      * Sends {@code component} in green unless it has its own color, as command feedback like
-     * {@link #sendSuccess(String, boolean)} without broadcasting it.
+     * {@link #sendSuccess(String)}.
      */
     public void sendSuccess(@NotNull Component component) {
-        sendSuccess(component, false);
-    }
-
-    /**
-     * Sends {@code component} in green unless it has its own color, as command feedback like
-     * {@link #sendSuccess(String, boolean)}.
-     */
-    public void sendSuccess(@NotNull Component component, boolean broadcastToOps) {
         Component colored = component.colorIfAbsent(NamedTextColor.GREEN);
-        deliver(colored, () -> sendFeedback(colored, broadcastToOps));
+        deliver(colored, () -> sendFeedback(colored));
     }
 
     @Override
-    public void sendSuccess(@NotNull RichText text, boolean broadcastToOps) {
-        sendSuccess(RichTexts.toAdventure(text), broadcastToOps);
+    public void sendSuccess(@NotNull RichText text) {
+        sendSuccess(RichTexts.toAdventure(text));
     }
 
-    private void sendFeedback(Component component, boolean broadcastToOps) {
+    private void sendFeedback(Component component) {
         CommandSourceStack source = handle.getSource();
         Method sendSuccess = SEND_SUCCESS.get(source.getClass())
                                          .orElse(null);
@@ -163,7 +155,7 @@ public final class CommandContext extends CommonCommandContext<CommandSourceStac
         Message message = PaperMessages.toMessage(component);
         Supplier<Message> supplier = () -> message;
         try {
-            sendSuccess.invoke(source, supplier, broadcastToOps);
+            sendSuccess.invoke(source, supplier, false);
         } catch (IllegalAccessException e) {
             throw new IllegalStateException("Could not send command feedback", e);
         } catch (InvocationTargetException e) {

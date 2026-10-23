@@ -23,7 +23,7 @@
 | Execution result                    | `[x]` | `ctx.setResult(int)` が `/execute store result` に、message のある失敗（例外・権限・prerequisite 等）が `store success 0` に反映される（message のない失敗は 0 を返すだけで、`store success` は 1）。spigot-1.16.5 / paper-26.3 の integration test あり。 | Forge / NeoForge の実サーバー検証。 |
 | Async execution                     | `[x]` | `executeAsync(...)`（全 typed branch）と `ctx.supplyAsync` / `runAsync`、platform 別の `CommandScheduler` で sync thread へ復帰する（[`docs/execution.md`](execution.md)）。 | Folia の command block（region scheduler）経路の実サーバー検証（Bukkit / Forge / NeoForge と、Folia の player / console は 2026-10-16 に検証済み）。 |
 | Dynamic command tree refresh        | `[x]` | `CommandLib.refresh(player)` / `refreshAll()` が Spigot / Paper / Forge / NeoForge / Fabric にあり、state による表示切替は `visibleWhen(...)` で書ける（[`docs/permissions.md`](permissions.md)）。Velocity は tree を再送する API が無いため `refresh` も無い。 | 実 client での検証。 |
-| Vanilla-style feedback              | `[~]` | `ctx.sendSuccess(message, broadcastToOps)` が Spigot / Paper / Forge / NeoForge / Fabric で vanilla の `CommandSourceStack#sendSuccess` を通り、gamerule と silent source を尊重する。Paper は reflection で呼び、その method がない source（test の mock 等）には通常の message で送る。Velocity には gamerule も operator もないため、`broadcastToOps` を無視して sender に送る。selector の target 数に応じた message は `ctx.sendSuccessFor(...)`。 | `sendCommandFeedback` / `logAdminCommands` gamerule、silent source、operator への broadcast の tests（unit / integration とも無い）。 |
+| Vanilla-style feedback              | `[~]` | `ctx.sendSuccess(message)` が Spigot / Paper / Forge / NeoForge / Fabric で vanilla の `CommandSourceStack#sendSuccess` を通り、gamerule と silent source を尊重する。Paper は reflection で呼び、その method がない source（test の mock 等）には通常の message で送る。Velocity には gamerule がないため、常に sender に送る。operator への broadcast と target 数に応じた文言は呼び出し側の責務とし、提供しない。 | `sendCommandFeedback` gamerule と silent source の tests（unit / integration とも無い）。 |
 | Bukkit / Spigot / Paper support     | `[~]` | `spigot` module（Spigot 1.16.5〜26.3 を Tested）と `paper` module（Paper 1.21〜26.3 を Tested、Folia は best effort）がある。 | Folia は smoke target `folia-26.3` のみで、Paper の suite は Folia で走らない。 |
 | Paper 1.20.6+ registration          | `[x]` | `LifecycleEvents.COMMANDS` + `Commands registrar` + `CommandSourceStack` を使った公式 API 登録が実装済み。Adventure component を標準 message path として利用。 | bootstrap 登録の互換性保証・docs / tests の拡充（`CommandLib.bootstrap(BootstrapContext, ...)` は実装済み）。                                                   |
 | Spigot / Paper module split         | `[x]` | `bukkit` を `spigot` へ rename / move し、`paper` module を新設済み。                                                                               | —                                                                          |
@@ -137,8 +137,6 @@
   annotation の `@Range` option は int だけ。typed factory を削除するか、long / float / double の範囲付きを足すか（R2-A-20）。
 - `[?]` `addPreprocess(Predicate)` が `addMiddleware` / `addPrerequisite` と役割で重なる。GA 前に削除するか、役割を明記して残すか
   （R2-A-21）。
-- `[?]` `sendSuccess(message, true)` の operator への broadcast は呼び出し thread で player list を走査する。sync thread 限定の
-  契約を Javadoc に書くだけか、自動で sync thread に移すか（R2-B-5）。
 - `[?]` modded では command block（level 2）が `OP` default の node に level 4 を要する（vanilla の command は 2）。level を
   vanilla に合わせるか（R2-E-13）。
 - `[?]` console の扱いが platform で違う: modded / Velocity の console は `NONE` の node も通るが Spigot / Paper は通らない、modded の
@@ -186,8 +184,8 @@
   command を作る形を追加する。
 - `[~]` options の継承と配置拡張（subcommand への継承、固定 arity の multi-value）を実装する。
   repeatable / count / aliases / required / 排他と、positional argument の後の option（opt-in の `optionsAnywhere()`）は実装済み。
-- `[ ]` `sendSuccess` が `sendCommandFeedback` / `logAdminCommands` gamerule、silent source（function 等）、operator への broadcast を
-  vanilla と同じに扱うことを integration test で確認する。Paper は `sendSuccess` を reflection で呼び、見つからないと通常の message に
+- `[ ]` `sendSuccess` が `sendCommandFeedback` gamerule と silent source（function 等）を vanilla と同じに扱うことを integration test で
+  確認する。Paper は `sendSuccess` を reflection で呼び、見つからないと通常の message に
   切り替わるため、実サーバーで vanilla の経路を通ることも確かめる。
 - `[?]` fluent / builder / Kotlin にも名前付きの reusable condition registry を用意するか決める。現在は annotation の `@Condition` だけ。
 - `[ ]` rich help（hover / click の usage line）と MiniMessage を追加する。
@@ -216,9 +214,6 @@
 
 ### P6: Ecosystem と tooling
 
-- `[ ]` Context の `sendSuccessFor(...)` を廃止する方向で整理する。target 数に応じた message の組み立てを
-  汎用 Context が担う必要性を見直し、CLI 対応とも整合する責務にする。利用箇所、代替の書き方、非推奨化から削除までの
-  互換性方針を確認し、関連する docs / tests / examples を更新する。
 - `[?]` `CommonCommandContext` の可変状態と変更経路を棚卸しし、責務を分割する。解析済みの入力・引数などの読み取り用データと、
   実行結果・失敗・出力などの実行中の状態を分離し、初期化後の変更を減らす。option 復元時の handle 差し替え、遅延解決の cache、
   非同期実行で共有される状態を含めて検討し、既存 API への影響と段階的な移行方法を設計する。

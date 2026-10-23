@@ -94,10 +94,10 @@ public final class CommandContext extends CommonCommandContext<CommandSource, Co
     }
 
     /**
-     * Sends {@code message} in green. The proxy has no operators, so {@code broadcastToOps} is ignored.
+     * Sends {@code message} in green. The proxy has no gamerules, so the sender always gets it.
      */
     @Override
-    public void sendSuccess(@Nullable String message, boolean broadcastToOps) {
+    public void sendSuccess(@Nullable String message) {
         sendSuccess(Component.text(String.valueOf(message)));
     }
 
@@ -109,11 +109,10 @@ public final class CommandContext extends CommonCommandContext<CommandSource, Co
     }
 
     /**
-     * Sends {@code text} in green unless it has its own color. The proxy has no operators, so {@code broadcastToOps}
-     * is ignored.
+     * Sends {@code text} in green unless it has its own color.
      */
     @Override
-    public void sendSuccess(@NotNull RichText text, boolean broadcastToOps) {
+    public void sendSuccess(@NotNull RichText text) {
         sendSuccess(RichTexts.toAdventure(text));
     }
 

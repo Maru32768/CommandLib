@@ -179,7 +179,7 @@ it has none:
 |---|---|
 | spigot | `sendMessage/sendSuccess/sendWarn/sendFailure(BaseComponent)` (existed; no longer overwrite or mutate the color) |
 | paper | `sendMessage/sendSuccess/sendWarn/sendFailure(Component)` (new, Adventure) |
-| modded | `sendMessage/sendSuccess/sendWarn/sendFailure(Component)`, `sendSuccess(Component, boolean broadcastToOps)` (new except `sendMessage`, vanilla) |
+| modded | `sendMessage/sendSuccess/sendWarn/sendFailure(Component)` (new except `sendMessage`, vanilla) |
 
 Example (ConfigLib's list):
 
@@ -245,10 +245,9 @@ API breaks were accepted, so the replaced APIs were removed instead of deprecate
 | `TestTextComponentBuilder` / `TestTranslatableComponentBuilder` (common-testing, common/src/test) | `TestCommandContext#sendMessage(RichText)` |
 | `CommonCommandContext#sendMessageWithOption(String / Object, Consumer<MessageOption>)`, `MessageOption` | `sendMessage(RichText.text(msg).color(rgb).hover(RichText.text(hover)))` |
 | `CommonCommandContext#sendComponent(C)` | `sendMessage(C)` |
-| modded's `sendMessage(String / Component, boolean allowLogging)`, `sendWarn(.., boolean)`, `sendFailure(.., boolean)` | the overloads without the `boolean`; `sendSuccess(.., boolean broadcastToOps)` to inform operators |
+| modded's `sendMessage(String / Component, boolean allowLogging)`, `sendWarn(.., boolean)`, `sendFailure(.., boolean)` | the overloads without the `boolean` |
 
-Kept: Spigot's `send*(BaseComponent)`, Paper's and Velocity's `send*(Component)`, modded's `send*(Component)` and
-`sendSuccess(Component, boolean broadcastToOps)`, as the escape hatch for native features (item hover, MiniMessage, ...). `String` `send*` methods and the `§` strings of help and
+Kept: Spigot's `send*(BaseComponent)`, Paper's and Velocity's `send*(Component)`, and modded's `send*(Component)`, as the escape hatch for native features (item hover, MiniMessage, ...). `String` `send*` methods and the `§` strings of help and
 errors are unchanged; rich help belongs to the formatter API (Pillar 6).
 
 `ArgumentParseException` is rewritten on `RichText` without raw types. Its output is the same: two translatables

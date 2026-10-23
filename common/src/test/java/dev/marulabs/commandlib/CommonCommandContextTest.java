@@ -28,22 +28,6 @@ class CommonCommandContextTest {
     }
 
     @Test
-    void success_for_targets_names_a_single_target_and_counts_several() throws Exception {
-        TestCommandRunner runner = new TestCommandRunner(new TestCommand("heal") {{
-            argument(new WordArg("names").variadic()).execute((names,
-                                                               ctx) -> ctx.sendSuccessFor(names,
-                                                                                          name -> "Healed " + name,
-                                                                                          count -> "Healed " + count
-                                                                                                  + " players"));
-        }});
-
-        assertThat(runner.execute("heal Steve")
-                         .messages()).containsExactly("Healed Steve");
-        assertThat(runner.execute("heal Steve Alex")
-                         .messages()).containsExactly("Healed 2 players");
-    }
-
-    @Test
     void argument_named_like_its_command_keeps_its_own_input() throws Exception {
         TestCommandRunner runner = new TestCommandRunner(new TestCommand("amount") {{
             argument(new CommonIntegerArgument<>("amount")).execute((amount, ctx) -> {

@@ -127,7 +127,7 @@ public final class ScenarioTest extends TestBase {
         command.addChildren(new Command(name + "Result") {{
             execute(ctx -> {
                 // Feedback goes through the server's source; a failure there would fail the command and store 0.
-                ctx.sendSuccess("stored", true);
+                ctx.sendSuccess("stored");
                 ctx.setResult(42);
             });
         }}, new Command(name + "Failure") {{

@@ -190,8 +190,7 @@ class HomeCommand extends Command {
 ### Feedback And Results
 
 `sendSuccess` is vanilla command feedback: hidden while the `sendCommandFeedback` gamerule is off and for silent
-sources such as functions. `sendSuccess(message, true)` also broadcasts to operators and, with `logAdminCommands`, the
-server log. `ctx.setResult(int)` sets what `/execute store result` stores (1 unless set). A command fails, storing 0
+sources such as functions. `ctx.setResult(int)` sets what `/execute store result` stores (1 unless set). A command fails, storing 0
 for `store result` and `store success`, when its executor throws `CommandPrerequisiteException`, its preprocess returns
 false, or a permission, argument, or prerequisite check fails. `CommandTester#execute` returns the result, 0 for a
 failure.

@@ -103,32 +103,24 @@ public final class CommandContext extends CommonCommandContext<Object, BaseCompo
     }
 
     @Override
-    public void sendSuccess(@Nullable String message, boolean broadcastToOps) {
-        sendSuccess(new TextComponent(String.valueOf(message)), broadcastToOps);
+    public void sendSuccess(@Nullable String message) {
+        sendSuccess(new TextComponent(String.valueOf(message)));
     }
 
     /**
      * Sends {@code component} in green unless it has its own color, as command feedback like
-     * {@link #sendSuccess(String, boolean)} without broadcasting it.
+     * {@link #sendSuccess(String)}.
      */
     public void sendSuccess(@NotNull BaseComponent component) {
-        sendSuccess(component, false);
-    }
-
-    /**
-     * Sends {@code component} in green unless it has its own color, as command feedback like
-     * {@link #sendSuccess(String, boolean)}.
-     */
-    public void sendSuccess(@NotNull BaseComponent component, boolean broadcastToOps) {
         BaseComponent colored = withDefaultColor(component, ChatColor.GREEN);
         deliver(colored,
                 () -> NMSCommandListenerWrapper.create(handle.getSource())
-                                               .sendSuccess(colored, broadcastToOps));
+                                               .sendSuccess(colored, false));
     }
 
     @Override
-    public void sendSuccess(@NotNull RichText text, boolean broadcastToOps) {
-        sendSuccess(RichTexts.toBungee(text), broadcastToOps);
+    public void sendSuccess(@NotNull RichText text) {
+        sendSuccess(RichTexts.toBungee(text));
     }
 
     @Override

@@ -238,19 +238,6 @@ class CommandTesterTest {
         }
 
         @Test
-        void broadcast_success_is_sent_to_the_sender() {
-            CommandTester tester = new CommandTester(new Command("hello") {{
-                execute(ctx -> ctx.sendSuccess("done", true));
-            }}, "test.command");
-            FakeSender sender = FakeSender.player("Steve");
-
-            tester.execute("hello", sender);
-
-            assertThat(sender.getSentMessages()).extracting(net.kyori.adventure.text.Component::color)
-                                                .containsExactly(NamedTextColor.GREEN);
-        }
-
-        @Test
         void send_failure_has_red_color() {
             CommandTester tester = new CommandTester(new Command("hello") {{
                 execute(ctx -> ctx.sendFailure("error"));

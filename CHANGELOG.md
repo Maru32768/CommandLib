@@ -77,8 +77,8 @@ This file lists the changes in each CommandLib release that affect plugin and mo
   generic over `CommonCommandContext`, build a `RichText` instead: there the component resolves to
   `sendMessage(Object)`, which sends its `toString()`.
 - Forge / NeoForge / Fabric: the `boolean allowLogging` overloads of `sendMessage` (with a `String` or a component),
-  `sendWarn` and `sendFailure` are removed. Drop the flag; to broadcast a message to operators, call
-  `sendSuccess(message, true)`.
+  `sendWarn` and `sendFailure` are removed. Drop the flag. CommandLib no longer broadcasts to operators; send the
+  message to them yourself.
 - CommandLib's own messages are now captions in the sender's locale, with English and Japanese built in. Several
   English texts are reworded. For example, the prerequisite failure says "You do not have permission". Where vanilla
   has a message with the same meaning, such as "No player was found", CommandLib sends vanilla's translatable message.
@@ -188,8 +188,8 @@ suggestions) and a command for each argument type. Options, permission plugins a
   ([permissions](docs/permissions.md)).
 - `CommandLib.refresh(player)` and `CommandLib.refreshAll()` resend the command tree.
 - `getLocale()`, `getLanguage()` and the platform-independent `getActor()` on the context.
-- `ctx.setResult(...)` sets what `/execute store result` stores, and `sendSuccess(message, true)` broadcasts to
-  operators like vanilla.
+- `ctx.setResult(...)` sets what `/execute store result` stores, and `sendSuccess(message)` is vanilla command
+  feedback, which respects the `sendCommandFeedback` gamerule and silent sources.
 - Spigot: commands also get the `<plugin>:<command>` label.
 
 #### New arguments
@@ -217,7 +217,6 @@ suggestions) and a command for each argument type. Options, permission plugins a
   `captions(...)` on a command ([localization](docs/localization.md)).
 - A resolve error whose exception carries its input shows vanilla's context line under it
   ([errors](docs/errors.md)).
-- `sendSuccessFor(targets, single, multiple)` sends the singular text for one target and the counted text otherwise.
 - Paper sends resolve errors and empty selectors as vanilla's translatable errors.
 
 #### Documentation and diagnostics
