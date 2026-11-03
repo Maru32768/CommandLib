@@ -1029,7 +1029,7 @@ public final class CountCommand extends Command {
             if (targets.isEmpty()) {
                 throw ctx.fail("No player was found");
             }
-            ctx.sendSuccess("Counted " + targets.size() + " players", true);
+            ctx.sendSuccess("Counted " + targets.size() + " players");
             ctx.setResult(targets.size());
         });
     }
