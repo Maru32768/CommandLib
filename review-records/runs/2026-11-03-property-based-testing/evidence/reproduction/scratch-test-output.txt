@@ -1,0 +1,121 @@
+# dev.marulabs.commandlib.PbtAuditScratchTest tests=12 failures=8 timestamp=2026-11-02T18:18:54.540Z
+== h7_every_suggested_enum_constant_can_be_typed() time=0.485s FAIL (observation recorded below)
+java.lang.AssertionError: [H7 observed] 
+Expecting actual:
+  ["help -> no executor",
+    "normal -> NORMAL",
+    "高速 -> syntax error: Expected whitespace to end one argument, but found trailing data at position 6: speed <--[HERE]"]
+to contain exactly in any order:
+  ["normal -> NORMAL", "高速 -> 高速"]
+elements not found:
+  ["高速 -> 高速"]
+and elements not expected:
+  ["help -> no executor",
+    "高速 -> syntax error: Expected whitespace to end one argument, but found trailing data at position 6: speed <--[HERE]"]
+
+== p4_duration_matches_its_documented_grammar() time=1.135s FAIL (observation recorded below)
+java.lang.AssertionError: [P4 counterexamples] 
+Expecting empty but was: ["99999999999999999999t: expected PT1388888888888888H53M19.95S, actual null"]
+
+== h2_options_after_the_first_argument_of_a_branch_that_shares_it_with_a_variadic_branch() time=0.078s FAIL (observation recorded below)
+org.opentest4j.AssertionFailedError: [H2 observed] 
+Expecting actual:
+  ["tp bob 5 -f -> [who=[bob, 5, -f] f=false]",
+    "tp bob -f 5 -> [who=[bob, -f, 5] f=false]",
+    "tp -f bob 5 -> [who=bob level=5 f=true]"]
+to contain exactly (and in same order):
+  ["tp bob 5 -f -> [who=bob level=5 f=true]",
+    "tp bob -f 5 -> [who=bob level=5 f=true]",
+    "tp -f bob 5 -> [who=bob level=5 f=true]"]
+but some elements were not found:
+  ["tp bob 5 -f -> [who=bob level=5 f=true]",
+    "tp bob -f 5 -> [who=bob level=5 f=true]"]
+and others were not expected:
+  ["tp bob 5 -f -> [who=[bob, 5, -f] f=false]",
+    "tp bob -f 5 -> [who=[bob, -f, 5] f=false]"]
+
+== h4_inputs_of_a_literal_named_like_an_argument_before_it() time=0.017s FAIL (observation recorded below)
+org.opentest4j.AssertionFailedError: [H4 observed] 
+Expecting actual:
+  ["key=motd input=motd inputs=[config, key]"]
+to contain exactly (and in same order):
+  ["key=motd input=motd inputs=[config, motd, key]"]
+but some elements were not found:
+  ["key=motd input=motd inputs=[config, motd, key]"]
+and others were not expected:
+  ["key=motd input=motd inputs=[config, key]"]
+
+== p1_options_round_trip_in_any_order_and_spelling() time=0.896s PASS
+
+== h1_the_value_help_of_a_first_argument_depends_on_the_options_before_it() time=0.027s FAIL (observation recorded below)
+org.opentest4j.AssertionFailedError: [H1 observed] 
+Expecting actual:
+  ["msg bob hi -> target=bob text=hi f=false",
+    "msg -f bob hi -> target=bob text=hi f=true",
+    "msg -f help hi -> target=help text=hi f=true",
+    "msg help hi -> syntax error: Incorrect argument for command at position 9: msg help <--[HERE]",
+    "msg help -> help shown: [§7--------------------------------------------------, §cUsage:, §b  /msg §7[§eoptions§7] §7<§etarget§7> §7<§etext§7>, , §cOptions:, §e  -f§7, §e--force, §7--------------------------------------------------]"]
+to contain exactly (and in same order):
+  ["msg bob hi -> target=bob text=hi f=false",
+    "msg -f bob hi -> target=bob text=hi f=true",
+    "msg -f help hi -> target=help text=hi f=true",
+    "msg help hi -> target=help text=hi f=false",
+    "msg help -> help shown or target=help"]
+but some elements were not found:
+  ["msg help hi -> target=help text=hi f=false",
+    "msg help -> help shown or target=help"]
+and others were not expected:
+  ["msg help hi -> syntax error: Incorrect argument for command at position 9: msg help <--[HERE]",
+    "msg help -> help shown: [§7--------------------------------------------------, §cUsage:, §b  /msg §7[§eoptions§7] §7<§etarget§7> §7<§etext§7>, , §cOptions:, §e  -f§7, §e--force, §7--------------------------------------------------]"]
+
+== p2_every_typed_option_token_is_suggested_and_every_suggestion_parses() time=1.019s PASS
+
+== p3_variadic_values_round_trip_with_options_before_them() time=0.463s PASS
+
+== p1b_options_of_a_command_and_of_its_argument_child_in_any_order() time=0.24s PASS
+
+== h6_inputs_under_a_paper_style_label_redirect_depend_on_how_options_are_spelled() time=0.012s FAIL (observation recorded below)
+org.opentest4j.AssertionFailedError: [H6 observed] 
+Expecting actual:
+  ["game x -> [inputs=[x]]",
+    "game --alpha --beta x -> [inputs=[x]]",
+    "game -b -a x -> [inputs=[game, x]]",
+    "plugin:game x -> [inputs=[plugin:game, x]]"]
+to contain exactly (and in same order):
+  ["game x -> [inputs=[game, x]]",
+    "game --alpha --beta x -> [inputs=[game, x]]",
+    "game -b -a x -> [inputs=[game, x]]",
+    "plugin:game x -> [inputs=[plugin:game, x]]"]
+but some elements were not found:
+  ["game x -> [inputs=[game, x]]", "game --alpha --beta x -> [inputs=[game, x]]"]
+and others were not expected:
+  ["game x -> [inputs=[x]]", "game --alpha --beta x -> [inputs=[x]]"]
+
+== p5_object_suggestions_parse_back_to_their_key() time=0.072s FAIL (observation recorded below)
+java.lang.AssertionError: [P5 counterexamples] 
+Expecting empty but was: ["completeness: 'pick "b\"' does not suggest ""b" of [""b"], got []",
+    "soundness: suggestion '-f' for key '-f' runs as no executor",
+    "soundness: suggestion '--force' for key '--force' runs as no executor",
+    "completeness: 'pick "b\\' does not suggest Zb\  of [Zb\ , -,  ,   éba], got []",
+    "completeness: 'pick "\"' does not suggest "_ of [aZé_, "_], got []",
+    "completeness: 'pick "\"' does not suggest -\é" of [a+\0+, -\é", .+"-], got []",
+    "completeness: 'pick "\"' does not suggest .+"- of [a+\0+, -\é", .+"-], got []",
+    "completeness: 'pick "_b\\' does not suggest _b\' of [Z-Z"+,  , --, _b\'], got []",
+    "completeness: 'pick "\"' does not suggest _"Z of [_"Z], got []",
+    "completeness: 'pick "\\' does not suggest -.\ of [-.\, féf+], got []",
+    "completeness: 'pick "\"0f' does not suggest "0f\ of ["0f\], got []",
+    "completeness: 'pick "b\"a' does not suggest  b"a of [f_', '-b.,  b"a], got []"]
+
+== h3_a_top_level_name_with_a_colon_and_redirected_options() time=0.072s FAIL (observation recorded below)
+org.opentest4j.AssertionFailedError: [H3 observed] 
+Expecting actual:
+  ["ns:scan -a -b x -> java.lang.IllegalStateException: Cannot read the options before position 14 of 'ns:scan -a -b x'",
+    "ns:scan -b -a x -> java.lang.IllegalStateException: Cannot read the options before position 14 of 'ns:scan -b -a x'"]
+to contain exactly (and in same order):
+  ["ns:scan -a -b x -> [x a=true b=true]", "ns:scan -b -a x -> [x a=true b=true]"]
+but some elements were not found:
+  ["ns:scan -a -b x -> [x a=true b=true]", "ns:scan -b -a x -> [x a=true b=true]"]
+and others were not expected:
+  ["ns:scan -a -b x -> java.lang.IllegalStateException: Cannot read the options before position 14 of 'ns:scan -a -b x'",
+    "ns:scan -b -a x -> java.lang.IllegalStateException: Cannot read the options before position 14 of 'ns:scan -b -a x'"]
+

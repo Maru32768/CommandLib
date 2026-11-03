@@ -1,0 +1,20 @@
+# dev.marulabs.commandlib.argument.PbtAuditPaperScratchTest tests=1 failures=1 timestamp=2026-11-02T18:06:45.274Z
+== h5_selector_without_the_selector_permission() time=6.957s FAIL (observation recorded below)
+org.opentest4j.AssertionFailedError: [H5 observed] 
+
+Expecting actual:
+
+  ["players:1", "uuids:1"]
+
+to contain exactly (and in same order):
+
+  ["H5-EXPECTED-TO-FAIL"]
+
+but some elements were not found:
+
+  ["H5-EXPECTED-TO-FAIL"]
+
+and others were not expected:
+
+  ["players:1", "uuids:1"]
+

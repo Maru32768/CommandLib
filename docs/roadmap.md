@@ -69,11 +69,13 @@
 
 ### P0: GA 前の欠陥と契約（レビュー由来）
 
-2026-10-18 / 2026-10-19 / 2026-10-20 のレビューで見つかり、未対応だった指摘をまとめる。ID は各レビュー記録の ID
+2026-10-18 / 2026-10-19 / 2026-10-20 / 2026-11-03 のレビューで見つかり、未対応だった指摘をまとめる。ID は各レビュー記録の ID
 （`18-F01` は [2026-10-18 GA 監査](../review-records/runs/2026-10-18-ga-audit/reviews/agents/architecture-api.md)、
 `20-F01` は [2026-10-20 GA 監査](../review-records/runs/2026-10-20-ga-audit/reviews/agents/ga-architecture-api-1.md)、
 `R1-` / `R2-` は [import-review-1](../review-records/runs/2026-10-19-import-review-1/triage/findings.md) /
-[import-review-2](../review-records/runs/2026-10-19-import-review-2/triage.md) の triage ID）。
+[import-review-2](../review-records/runs/2026-10-19-import-review-2/triage.md) の triage ID、`PBT-` は
+[2026-11-03 property-based testing](../review-records/runs/2026-11-03-property-based-testing/reviews/agents/claude-opus-5.5-pbt-1.md)
+の ID）。
 「仕様判断不要」は正しい修正が一つに決まるもの、「要判断」は互換性のない選択肢から選ぶ必要があるもの。
 
 #### 仕様判断不要
@@ -84,9 +86,24 @@
   （non-modded は移行済み。R1-C-12 の残り）。
 - `[ ]` 同じ revision の typed NMS module（`spigot-1.20.3` と `spigot-1.20.4` は package 名だけが違う）をまとめられるか
   `TypedNmsTest` で確かめる（R1-C-10 の残り。`generate.py --check` は実装済み）。
+- `[ ]` `optionsAnywhere()` で variadic branch と第 1 引数の名前を共有する branch では、その引数の後の option が variadic の値に
+  なる（`tp bob 5 -f` が `who=[bob, 5, -f]`）。`OptionGraph.isVariadic` が同名の子を持つ共有 node を variadic と誤認する（PBT-F2）。
+- `[ ]` `:` を含む top-level command 名で redirect する option を使うと `OptionGraph.findRegion` が `IllegalStateException` を
+  投げる。名前を拒否するか、platform が付ける namespace だけを外す（PBT-F3）。
+- `[ ]` `QuotableSuggestions` が option token と同じ key（`-f`）を quote せずに補完し、適用すると flag になる。quoted 入力の
+  escape（`"b\"`）を解かずに照合するので補完が消える（PBT-F5）。
+- `[ ]` `EnumArgument` が word で読めない定数名（`高速`、`$` を含む名前）を補完する。登録時に拒否するか quote できる型にする
+  （PBT-F7）。
+- `[ ]` `CommonDurationArgument.parse` のコメントは「Duration を超えたら null」だが、実際は long を超える数で null になる
+  （`99999999999999999999t`）。コメントを直す（PBT-F8）。
 
 #### 要判断
 
+- `[?]` 生成される `help` literal が第 1 引数の値 `help` を奪う。`/msg help hi` は構文エラー、`/msg -f help hi` は通り、player
+  名 `help` や enum 定数 `HELP` を指定できない。第 1 引数がある command では literal を付けない、または値が失われることを
+  docs に書く（PBT-F1）。
+- `[?]` `OfflinePlayersArgument` / `UUIDsArgument` が自前で実装する `@a` / `@r` に selector 権限の契約が無い。Paper では
+  `minecraft.command.selector` の無い非 op も使え、Spigot は vanilla の version 次第と推定される（PBT-F9）。
 - `[?]` Spigot / Paper で最後の登録を実行時に `unregister()` し、同じ tick に plugin が disable されると、data pack function の
   再 compile が行われず function が外した command を呼び続ける（以前からの挙動。`unregister()` が disable listener も外すため）。
   案: plugin ごとに登録より長く生きる disable listener を持つ、または command 実行中でなければ `unregister()` 内で同期 compile する
@@ -109,6 +126,9 @@
   command の複数登録、`CommandDefaults` の上書き、tester 間の共有も併せて決める（18-C01、20-F02、20-F07）。
 - `[?]` index ベースの `getInput(int)` / `getArgument(int)` の意味。`getInputs()` は literal を含み `getArguments()` は含まないため
   index が揃わず、Paper 1.21+ は root literal を含まない。案: index API を削除、または `getInputs()` を引数だけにする（20-F05）。
+  `getInputs()` は node 名で key を取るので、同名の親子 command（`scan scan a` が `[scan, a]`）や引数と同名の literal 子で token
+  が消える（PBT-F4）。Paper の label redirect 下では、option が redirect したときだけ label が戻り、`game -b -a x` と
+  `game --alpha --beta x` で結果が違う（PBT-F6、Paper の登録形のモデルで再現）。
 - `[?]` `CommonArgument#execute` で引数 instance に付けた executor は branch の途中を実行点にするが、help / docs / tree に出ない。
   案: positional 引数の instance executor を削除して branch だけにする、または help / docs に出す（20-F04）。
 - `[?]` 失敗の `/execute store success` が message の有無で変わる（message の無い失敗は 0 を返すだけで success 1）。失敗状態・表示・

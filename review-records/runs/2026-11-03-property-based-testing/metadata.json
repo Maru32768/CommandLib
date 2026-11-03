@@ -1,0 +1,21 @@
+{
+  "id": "2026-11-03-property-based-testing",
+  "created_at": "2026-11-03",
+  "repository": "CommandLib_2",
+  "base_commit": null,
+  "reviewed_commit": "3385089598b1bfdf484597ebf83d977f183647e4",
+  "execution_commit": "3385089598b1bfdf484597ebf83d977f183647e4",
+  "working_tree_patch": null,
+  "working_tree_state": "Uncommitted user changes to README.md and mkdocs.yml and an untracked docs/use-cases/ were present and not reviewed. The two temporary test files added for the audit were removed from the source tree and are kept in evidence/reproduction/.",
+  "untracked_inputs": [],
+  "reviewers": [
+    {
+      "author": "Claude Opus 5.5 (Claude Code)",
+      "model": "claude-opus-5-5",
+      "prompt": "request.md (user request, Japanese, pasted)",
+      "source": "reviews/agents/claude-opus-5.5-pbt-1.md",
+      "tools": "Source reading; temporary JUnit 5 property-based tests in :common and one probe in :paper-testing, run with Gradle 9.5.0 / daemon JDK 21 (-Pcommandlib.typedNms=false --offline). Two read-only subagents (Sonnet: existing-test inventory; Opus: platform differences) supplied leads; every claim used in the report was re-checked in the sources or by a test."
+    }
+  ],
+  "status": "draft"
+}
