@@ -86,9 +86,13 @@ class FabricPermissionTest {
 
             ServerLifecycleEvents.SERVER_STARTING.invoker()
                                                  .onServerStarting(server);
-            assertThat(CurrentServer.get()).isSameAs(server);
-            ServerLifecycleEvents.SERVER_STOPPED.invoker()
-                                                .onServerStopped(server);
+            // The server stays in a static field that the other test classes in this JVM read.
+            try {
+                assertThat(CurrentServer.get()).isSameAs(server);
+            } finally {
+                ServerLifecycleEvents.SERVER_STOPPED.invoker()
+                                                    .onServerStopped(server);
+            }
             assertThat(CurrentServer.get()).isNull();
         }
     }
