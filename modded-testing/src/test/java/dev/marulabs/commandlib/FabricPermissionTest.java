@@ -121,8 +121,12 @@ class FabricPermissionTest {
     // classpath has them, so only the class files can show which class needs them.
     @Test
     void only_the_nested_client_class_refers_to_client_classes() throws IOException {
-        assertThat(classFile("CurrentServer")).doesNotContain("net/minecraft/client/");
-        assertThat(classFile("CurrentServer$Client")).contains("net/minecraft/client/");
+        boolean server = classFile("CurrentServer").contains("net/minecraft/client/");
+        boolean client = classFile("CurrentServer$Client").contains("net/minecraft/client/");
+        assertThat(server).as("CurrentServer refers to a client class")
+                          .isFalse();
+        assertThat(client).as("CurrentServer$Client refers to a client class")
+                          .isTrue();
     }
 
     private static String classFile(String name) throws IOException {
