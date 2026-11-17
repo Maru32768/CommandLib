@@ -242,8 +242,9 @@ tasks.named<RemapJarTask>("remapJar") {
 }
 ```
 
-Declare `fabric-command-api-v2` and `fabric-lifecycle-events-v1` (or `fabric-api`) in your `depends`, since the
-shaded copy uses them. The [Fabric sample](../samples/fabric) builds this way.
+Declare `fabric-command-api-v2` and `fabric-lifecycle-events-v1` (or `fabric-api`) in your `depends`, since
+CommandLib uses them and its jar declares no dependencies, shaded or nested. The [Fabric sample](../samples/fabric)
+builds this way.
 
 The alternative, `include()`, nests the CommandLib jar and `common`:
 
