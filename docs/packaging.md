@@ -213,8 +213,7 @@ tasks.named<ShadowJar>("shadowJar") {
 ## Fabric
 
 Loom remaps a `modImplementation` dependency to the development names, so shade CommandLib from the runtime classpath
-and remap the shadow jar to intermediary together with your mod. CommandLib's jar is not a mod and has no
-`fabric.mod.json`, so the shadow jar keeps only yours.
+and remap the shadow jar to intermediary together with your mod.
 
 ```kotlin
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
