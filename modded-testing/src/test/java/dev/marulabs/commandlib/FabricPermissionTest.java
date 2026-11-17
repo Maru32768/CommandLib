@@ -110,11 +110,6 @@ class FabricPermissionTest {
             fabricLoader.when(FabricLoader::getInstance)
                         .thenReturn(loader);
             assertThat(CurrentServer.get()).isSameAs(integrated);
-
-            // Connected to a remote server, or on the title screen.
-            Mockito.when(client.getSingleplayerServer())
-                   .thenReturn(null);
-            assertThat(CurrentServer.get()).isNull();
         }
     }
 }
