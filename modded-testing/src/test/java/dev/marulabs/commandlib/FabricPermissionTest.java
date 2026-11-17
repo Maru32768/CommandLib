@@ -71,6 +71,9 @@ class FabricPermissionTest {
     void the_server_is_followed_from_starting_to_stopped() {
         MinecraftServer server = Mockito.mock(MinecraftServer.class);
         FabricLoader loader = Mockito.mock(FabricLoader.class);
+        // On a client the server thread runs SERVER_STARTING before Minecraft holds the integrated server.
+        Mockito.when(loader.getGameInstance())
+               .thenReturn(Mockito.mock(Minecraft.class));
 
         try (MockedStatic<FabricLoader> fabricLoader = Mockito.mockStatic(FabricLoader.class)) {
             fabricLoader.when(FabricLoader::getInstance)
