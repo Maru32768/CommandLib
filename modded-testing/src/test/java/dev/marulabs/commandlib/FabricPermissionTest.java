@@ -16,7 +16,6 @@ import org.mockito.Mockito;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -128,21 +127,47 @@ class FabricPermissionTest {
         }
     }
 
-    // A dedicated server has no client classes, and the verifier loads the classes a method's types need. The test
-    // classpath has them, so only the class files can show which class needs them.
+    // The test classpath has the client classes, so CurrentServer is loaded again without the packages that the
+    // server jars lack. The verifier loads the classes a method's types need, so a reference anywhere on the dedicated
+    // path fails here as it does on a server.
     @Test
-    void current_server_refers_to_client_classes_only_from_its_nested_class() throws IOException {
-        boolean server = classFile("CurrentServer").contains("net/minecraft/client/");
-        boolean client = classFile("CurrentServer$Client").contains("net/minecraft/client/");
-        assertThat(server).as("CurrentServer refers to a client class")
-                          .isFalse();
-        assertThat(client).as("CurrentServer$Client refers to a client class")
-                          .isTrue();
-    }
+    void a_dedicated_server_loads_no_client_class() throws Exception {
+        MinecraftServer dedicated = Mockito.mock(MinecraftServer.class);
+        FabricLoader loader = Mockito.mock(FabricLoader.class);
+        Mockito.when(loader.getGameInstance())
+               .thenReturn(dedicated);
+        ClassLoader withoutClient = new ClassLoader(FabricPermissionTest.class.getClassLoader()) {
+            @Override
+            protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+                if (name.startsWith("net.minecraft.client.") || name.startsWith("net.minecraft.realms.")
+                    || name.startsWith("com.mojang.blaze3d.") || name.startsWith("com.mojang.realmsclient.")) {
+                    throw new ClassNotFoundException(name);
+                }
+                if (!name.startsWith(CurrentServer.class.getName())) {
+                    return super.loadClass(name, resolve);
+                }
+                synchronized (getClassLoadingLock(name)) {
+                    Class<?> loaded = findLoadedClass(name);
+                    if (loaded != null) {
+                        return loaded;
+                    }
+                    try (InputStream in = getParent().getResourceAsStream(name.replace('.', '/') + ".class")) {
+                        byte[] bytes = in.readAllBytes();
+                        return defineClass(name, bytes, 0, bytes.length);
+                    } catch (IOException e) {
+                        throw new ClassNotFoundException(name, e);
+                    }
+                }
+            }
+        };
 
-    private static String classFile(String name) throws IOException {
-        try (InputStream in = CurrentServer.class.getResourceAsStream(name + ".class")) {
-            return new String(in.readAllBytes(), StandardCharsets.ISO_8859_1);
+        try (MockedStatic<FabricLoader> fabricLoader = Mockito.mockStatic(FabricLoader.class)) {
+            fabricLoader.when(FabricLoader::getInstance)
+                        .thenReturn(loader);
+            Object server = Class.forName(CurrentServer.class.getName(), true, withoutClient)
+                                 .getMethod("get")
+                                 .invoke(null);
+            assertThat(server).isSameAs(dedicated);
         }
     }
 }
