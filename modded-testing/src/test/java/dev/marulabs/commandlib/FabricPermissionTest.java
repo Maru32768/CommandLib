@@ -22,6 +22,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 // CommandTester answers permissions from the FakeSender, so check CommandLib's own Fabric lookup here.
 class FabricPermissionTest {
+    FabricPermissionTest() {
+        CommandTester.MinecraftBootstrap.ensureBootstrapped();
+    }
+
     @Test
     void defaults_decide_without_fabric_permissions_api() {
         CommandLib.register("fabrictest", new Command("open") {{
