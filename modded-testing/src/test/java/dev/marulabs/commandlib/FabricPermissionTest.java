@@ -14,6 +14,10 @@ import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 // CommandTester answers permissions from the FakeSender, so check CommandLib's own Fabric lookup here.
@@ -110,6 +114,20 @@ class FabricPermissionTest {
             fabricLoader.when(FabricLoader::getInstance)
                         .thenReturn(loader);
             assertThat(CurrentServer.get()).isSameAs(integrated);
+        }
+    }
+
+    // A dedicated server has no client classes, and the verifier loads the classes a method's types need. The test
+    // classpath has them, so only the class files can show which class needs them.
+    @Test
+    void only_the_nested_client_class_refers_to_client_classes() throws IOException {
+        assertThat(classFile("CurrentServer")).doesNotContain("net/minecraft/client/");
+        assertThat(classFile("CurrentServer$Client")).contains("net/minecraft/client/");
+    }
+
+    private static String classFile(String name) throws IOException {
+        try (InputStream in = CurrentServer.class.getResourceAsStream(name + ".class")) {
+            return new String(in.readAllBytes(), StandardCharsets.ISO_8859_1);
         }
     }
 }
