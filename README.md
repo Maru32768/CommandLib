@@ -399,9 +399,9 @@ public final class MyMod implements ModInitializer {
 ```
 
 > **Note:** Declare `fabric-command-api-v2` and `fabric-lifecycle-events-v1` (or `fabric-api`) in your
-> `fabric.mod.json`. `include()` can also nest the jar, but only the newest nested copy is loaded; see
-> [packaging](docs/packaging.md#fabric). Without fabric-permissions-api, permission checks use each
-> node's default and the vanilla permission level.
+> `fabric.mod.json`. You can nest CommandLib with `include()` instead of shading it, but Fabric Loader loads
+> only the newest nested copy. See [packaging](docs/packaging.md#fabric). Without fabric-permissions-api,
+> permission checks use each node's default and the vanilla permission level.
 
 </details>
 

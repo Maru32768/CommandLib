@@ -47,11 +47,11 @@ Forge 1.16.5, 1.18.2, 1.19.2 and 1.20.1, NeoForge 1.21.1 and 1.21.4, and Fabric
   fabric-permissions-api (`Permissions.check(player, node, default)`) when a
   mod ships it, and otherwise resolve the node's `DefaultPermission` against
   the vanilla permission level. The node names have no `commandlib.` prefix.
-  The jar is not a mod: it has no `fabric.mod.json`, and its manifest sets
+  The jar is not a mod: it has no `fabric.mod.json`. Its manifest sets
   `Fabric-Loom-Remap: true` so that Loom remaps it as a `modImplementation`
-  dependency. `CurrentServer` registers the lifecycle events when its class
-  initializes. A copy that missed them uses Fabric Loader's game instance: the
-  dedicated server, or on a client the integrated server of `Minecraft`.
+  dependency. `CurrentServer` registers its lifecycle listeners when the class
+  initializes. A copy that missed the events uses Fabric Loader's game instance:
+  the dedicated server, or, on a client, the integrated server of `Minecraft`.
   The argument set is the same as on Forge / NeoForge of the same Minecraft
   version. Loom remaps the jars to intermediary.
 - Public API still exposes each Minecraft version's native types. The 1.16.5

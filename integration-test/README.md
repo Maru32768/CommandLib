@@ -176,8 +176,8 @@ Docker image flow, and MCProtocolLib bot, but prepare the server differently:
   `docs/agents/modded.md`.
 - `testModJar` bundles the published `:modded:<node>` jar (SRG-remapped for Forge, Mojang names for NeoForge) together with `common` and `shared/core`.
   On Fabric it nests the published, intermediary-remapped `:modded:<node>` jar and `common` as jar-in-jar (Loom
-  `include`), as a downstream mod that uses `include()` does, with the `fabric.mod.json` that Loom generates for each
-  nested jar, and merges only `shared/core`. The Fabric test mod's entrypoint is a `ModInitializer` declared in its `fabric.mod.json`.
+  `include`), as a downstream mod that uses `include()` does, and merges only `shared/core`. Loom generates a
+  `fabric.mod.json` for each nested jar. The Fabric test mod's entrypoint is a `ModInitializer` declared in its `fabric.mod.json`.
   The tests therefore run the same artifact downstream mods use, which catches bugs that only appear with production
   names.
 - `integration-test/gradle/forge-integration-target.gradle.kts` registers `prepareTestPlugin`. It downloads the Forge,

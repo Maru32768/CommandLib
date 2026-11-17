@@ -221,5 +221,5 @@ main thread.
 - Should `mohist` stay tested under `spigot`, or become its own artifact if its differences grow?
 - Should message APIs expose CommandLib's own abstraction, Adventure, or platform-native components?
 - Should `modded` be split into a Minecraft-version module and loader modules (see `docs/roadmap.md`)? Fabric was added as
-  a loader of the same tree without the split: the loader-specific code is command registration, permissions and the
-  running server lookup (`internal.CurrentServer`).
+  a loader of the same tree without the split: the loader-specific code is command registration, permissions, and the
+  running-server lookup (`internal.CurrentServer`).

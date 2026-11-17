@@ -30,10 +30,10 @@ CommandLib is still 0.x. A minor release (0.17 to 0.18) may break the binary API
 1.0 promises binary compatibility, the version picked under Jar-in-Jar can be one your mod was not built for.
 A relocated copy cannot be replaced by another mod's: each mod runs the version it was built and tested with.
 
-If you still use `include()` on Fabric, pin the minor version in your `fabric.mod.json`, so an incompatible
-combination fails at startup with a clear message instead of failing later. CommandLib's jar is not a mod, so the id
-is the one Loom generates for the nested jar from its group, name and classifier, with `.` replaced by `_` and in
-lower case:
+If you still use `include()` on Fabric, pin the minor version in your `fabric.mod.json`. An incompatible combination
+then fails at startup with a clear message instead of failing later. CommandLib's jar is not a mod, so refer to it by
+the id that Loom generates for the nested jar. Loom builds the id from the jar's group, name and classifier, replacing
+`.` with `_` and converting the result to lower case:
 
 ```json
 "depends": {
@@ -212,8 +212,8 @@ tasks.named<ShadowJar>("shadowJar") {
 
 ## Fabric
 
-Loom remaps a `modImplementation` dependency to the development names, so shade CommandLib from the runtime classpath
-and remap the shadow jar to intermediary together with your mod.
+Loom remaps a `modImplementation` dependency to the development names, so shade CommandLib from the runtime classpath,
+then remap the shadow jar to intermediary together with your mod.
 
 ```kotlin
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
