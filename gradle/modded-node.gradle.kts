@@ -43,7 +43,6 @@ val javaVersion = when {
 }
 
 extra["modded.loader"] = loader
-extra["modded.minecraftVersion"] = minecraftVersion
 
 configure<JavaPluginExtension> {
     toolchain.languageVersion.set(JavaLanguageVersion.of(javaVersion))
