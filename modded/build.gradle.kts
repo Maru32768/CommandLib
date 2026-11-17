@@ -4,7 +4,6 @@ plugins {
 
 apply(from = rootProject.file("gradle/modded-node.gradle.kts"))
 val loader = extra["modded.loader"].toString()
-val minecraftVersion = extra["modded.minecraftVersion"].toString()
 
 stonecutter {
     constants.match(loader, "forge", "neoforge", "fabric")
@@ -18,17 +17,11 @@ dependencies {
     }
 }
 
-tasks.processResources {
-    if (loader == "fabric") {
-        val properties = mapOf(
-            "version" to project.version.toString(),
-            "minecraft" to minecraftVersion,
-        )
-        inputs.properties(properties)
-        filesMatching("fabric.mod.json") {
-            expand(properties)
+if (loader == "fabric") {
+    tasks.jar {
+        manifest {
+            // The jar is not a mod, and Loom remaps a modImplementation dependency only when it is one or opts in.
+            attributes("Fabric-Loom-Remap" to "true")
         }
-    } else {
-        exclude("fabric.mod.json")
     }
 }

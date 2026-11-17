@@ -27,8 +27,8 @@ dependencies {
     compileOnly(project(":integration-test:shared:core"))
 
     if (loader == "fabric") {
-        // The CommandLib jar is a Fabric mod with its own fabric.mod.json and entrypoint, so it is nested (jar-in-jar)
-        // as a downstream mod ships it, together with common, instead of being merged into the test mod.
+        // Nested (jar-in-jar) with common, as a downstream mod using include() ships it, instead of merged into the
+        // test mod. Loom generates the fabric.mod.json of each nested jar.
         "include"(project(":modded:${sc.current.project}"))
         "include"(project(":common"))
     } else {

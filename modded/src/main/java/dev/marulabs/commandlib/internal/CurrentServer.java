@@ -6,6 +6,7 @@ import org.jetbrains.annotations.Nullable;
 //? if fabric {
 /*import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.Minecraft;
 *///?} elif neoforge {
 /*import net.neoforged.neoforge.server.ServerLifecycleHooks;
 *///?} elif >=1.17 {
@@ -19,9 +20,8 @@ import net.minecraftforge.server.ServerLifecycleHooks;
 @ApiStatus.Internal
 public final class CurrentServer {
     //? if fabric {
-    /*// Fabric has no global server accessor, so remember the server from the lifecycle events. They are registered
-    // when this class initializes: from CommandLib's mod entrypoint, or from CommandLib.register when the jar is not
-    // loaded as a mod.
+    /*// Fabric has no global server accessor. The events are registered when this class initializes, which can be after
+    // the server started, so get() falls back to the game instance.
     @Nullable
     private static volatile MinecraftServer server;
 
@@ -44,20 +44,23 @@ public final class CurrentServer {
         if (current != null) {
             return current;
         }
-        // A shaded copy first used after the server started missed the event. A dedicated server is the game
-        // instance; the integrated server of a client is not, so a shaded copy there must be used from onInitialize.
         Object game = FabricLoader.getInstance()
                                   .getGameInstance();
-        return game instanceof MinecraftServer ? (MinecraftServer) game : null;
+        if (game == null || game instanceof MinecraftServer) {
+            return (MinecraftServer) game;
+        }
+        return Client.integratedServer(game);
         *///?} else
         return ServerLifecycleHooks.getCurrentServer();
     }
 
-    /**
-     * Starts following the server on Fabric. It is the entrypoint of CommandLib's {@code fabric.mod.json}, and does
-     * nothing on Forge and NeoForge.
-     */
-    public static void listen() {
-        // Calling a static method initializes the class, which registers the Fabric listeners.
+    //? if fabric {
+    /*// A dedicated server has no Minecraft class, so it is referenced only from here, which loads on a client alone.
+    private static final class Client {
+        @Nullable
+        static MinecraftServer integratedServer(Object game) {
+            return ((Minecraft) game).getSingleplayerServer();
+        }
     }
+    *///?}
 }

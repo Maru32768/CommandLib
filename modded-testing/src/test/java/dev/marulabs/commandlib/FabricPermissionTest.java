@@ -5,6 +5,8 @@ package dev.marulabs.commandlib;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -62,27 +64,57 @@ class FabricPermissionTest {
     }
 
     @Test
-    void the_server_is_followed_from_starting_to_stopped_with_the_game_instance_as_fallback() {
+    void the_server_is_followed_from_starting_to_stopped() {
         MinecraftServer server = Mockito.mock(MinecraftServer.class);
-        MinecraftServer dedicated = Mockito.mock(MinecraftServer.class);
         FabricLoader loader = Mockito.mock(FabricLoader.class);
-        CurrentServer.listen();
-
-        ServerLifecycleEvents.SERVER_STARTING.invoker()
-                                             .onServerStarting(server);
-        assertThat(CurrentServer.get()).isSameAs(server);
-        ServerLifecycleEvents.SERVER_STOPPED.invoker()
-                                            .onServerStopped(server);
 
         try (MockedStatic<FabricLoader> fabricLoader = Mockito.mockStatic(FabricLoader.class)) {
             fabricLoader.when(FabricLoader::getInstance)
                         .thenReturn(loader);
             assertThat(CurrentServer.get()).isNull();
 
-            // A copy that missed the event finds a dedicated server as the game instance.
-            Mockito.when(loader.getGameInstance())
-                   .thenReturn(dedicated);
+            ServerLifecycleEvents.SERVER_STARTING.invoker()
+                                                 .onServerStarting(server);
+            assertThat(CurrentServer.get()).isSameAs(server);
+            ServerLifecycleEvents.SERVER_STOPPED.invoker()
+                                                .onServerStopped(server);
+            assertThat(CurrentServer.get()).isNull();
+        }
+    }
+
+    @Test
+    void a_copy_that_missed_the_events_finds_a_dedicated_server_as_the_game_instance() {
+        MinecraftServer dedicated = Mockito.mock(MinecraftServer.class);
+        FabricLoader loader = Mockito.mock(FabricLoader.class);
+        Mockito.when(loader.getGameInstance())
+               .thenReturn(dedicated);
+
+        try (MockedStatic<FabricLoader> fabricLoader = Mockito.mockStatic(FabricLoader.class)) {
+            fabricLoader.when(FabricLoader::getInstance)
+                        .thenReturn(loader);
             assertThat(CurrentServer.get()).isSameAs(dedicated);
+        }
+    }
+
+    @Test
+    void a_copy_that_missed_the_events_finds_the_integrated_server_of_a_client() {
+        IntegratedServer integrated = Mockito.mock(IntegratedServer.class);
+        Minecraft client = Mockito.mock(Minecraft.class);
+        Mockito.when(client.getSingleplayerServer())
+               .thenReturn(integrated);
+        FabricLoader loader = Mockito.mock(FabricLoader.class);
+        Mockito.when(loader.getGameInstance())
+               .thenReturn(client);
+
+        try (MockedStatic<FabricLoader> fabricLoader = Mockito.mockStatic(FabricLoader.class)) {
+            fabricLoader.when(FabricLoader::getInstance)
+                        .thenReturn(loader);
+            assertThat(CurrentServer.get()).isSameAs(integrated);
+
+            // Connected to a remote server, or on the title screen.
+            Mockito.when(client.getSingleplayerServer())
+                   .thenReturn(null);
+            assertThat(CurrentServer.get()).isNull();
         }
     }
 }

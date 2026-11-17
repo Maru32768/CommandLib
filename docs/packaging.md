@@ -12,7 +12,7 @@ on each platform and why. The [sample projects](../samples) build with the setup
 | Velocity | Shadow + relocate | Same as Bukkit: Velocity's plugin class loaders also look up classes in other plugins. |
 | Forge 1.16.5 | Shadow + relocate, then `reobfShadowJar` | Forge 1.16.5 has no Jar-in-Jar. |
 | Forge 1.18.2, 1.19.2 and 1.20.1, NeoForge | Shadow + relocate | Mods are Java modules there, and two mods that contain the same package fail to load, so relocation is required. The `forge-*` / `neoforge-*` jars are plain libraries (no `mods.toml`, no `FMLModType` manifest entry) and are not tested as Jar-in-Jar entries. See [version conflicts](#jar-in-jar-and-version-conflicts). |
-| Fabric | Shadow + relocate, then `remapJar` | `include()` works (the jar is a Fabric mod), but only the newest nested CommandLib is loaded. See [version conflicts](#jar-in-jar-and-version-conflicts). |
+| Fabric | Shadow + relocate, then `remapJar` | `include()` works (Loom generates a `fabric.mod.json` for the nested jar), but only the newest nested CommandLib is loaded. See [version conflicts](#jar-in-jar-and-version-conflicts). |
 
 In short: **shade and relocate on every platform.** CommandLib is designed for it: several relocated copies in one
 server are expected. They share data pack function compilation through system properties whose names relocation
@@ -31,11 +31,13 @@ CommandLib is still 0.x. A minor release (0.17 to 0.18) may break the binary API
 A relocated copy cannot be replaced by another mod's: each mod runs the version it was built and tested with.
 
 If you still use `include()` on Fabric, pin the minor version in your `fabric.mod.json`, so an incompatible
-combination fails at startup with a clear message instead of failing later:
+combination fails at startup with a clear message instead of failing later. CommandLib's jar is not a mod, so the id
+is the one Loom generates for the nested jar from its group, name and classifier, with `.` replaced by `_` and in
+lower case:
 
 ```json
 "depends": {
-  "commandlib": ">=0.18.0 <0.19.0"
+  "com_github_maru32768_commandlib_fabric-1_21_1": ">=0.18.0 <0.19.0"
 }
 ```
 
@@ -211,10 +213,8 @@ tasks.named<ShadowJar>("shadowJar") {
 ## Fabric
 
 Loom remaps a `modImplementation` dependency to the development names, so shade CommandLib from the runtime classpath
-and remap the shadow jar to intermediary together with your mod. CommandLib's own `fabric.mod.json` is left out: the
-relocated copy is not a mod, and starts following the server when you register commands. Register from
-`onInitialize`: a copy first used later finds a dedicated server through Fabric Loader, but not the integrated server
-of a client (singleplayer), whose commands then appear only after `/reload`.
+and remap the shadow jar to intermediary together with your mod. CommandLib's jar is not a mod and has no
+`fabric.mod.json`, so the shadow jar keeps only yours.
 
 ```kotlin
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
@@ -235,8 +235,6 @@ val shadowJar = tasks.named<ShadowJar>("shadowJar") {
         // Loom puts the remapped artifact in the group remapped.<group>
         include { it.moduleGroup.endsWith("com.github.Maru32768.CommandLib") }
     }
-    // Keep your fabric.mod.json, not CommandLib's.
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     relocate("dev.marulabs.commandlib", "com.example.mymod.libs.commandlib")
 }
 
@@ -248,7 +246,7 @@ tasks.named<RemapJarTask>("remapJar") {
 Declare `fabric-command-api-v2` and `fabric-lifecycle-events-v1` (or `fabric-api`) in your `depends`, since the
 shaded copy uses them. The [Fabric sample](../samples/fabric) builds this way.
 
-The alternative, `include()`, nests the CommandLib mod and `common`:
+The alternative, `include()`, nests the CommandLib jar and `common`:
 
 ```kotlin
 dependencies {

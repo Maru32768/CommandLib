@@ -58,8 +58,6 @@ val shadowJar = tasks.named<ShadowJar>("shadowJar") {
         // remapped platform artifact in the group remapped.<group>, so match the end of the group.
         include { it.moduleGroup.endsWith(commandLibGroup) }
     }
-    // The copy is not a mod of its own: keep this mod's fabric.mod.json and leave CommandLib's out.
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     relocate("dev.marulabs.commandlib", "$projectGroup.$projectNameLower.commandlib")
 }
 
