@@ -131,7 +131,7 @@ class FabricPermissionTest {
     // A dedicated server has no client classes, and the verifier loads the classes a method's types need. The test
     // classpath has them, so only the class files can show which class needs them.
     @Test
-    void only_the_nested_client_class_refers_to_client_classes() throws IOException {
+    void current_server_refers_to_client_classes_only_from_its_nested_class() throws IOException {
         boolean server = classFile("CurrentServer").contains("net/minecraft/client/");
         boolean client = classFile("CurrentServer$Client").contains("net/minecraft/client/");
         assertThat(server).as("CurrentServer refers to a client class")
