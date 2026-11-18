@@ -184,13 +184,15 @@ class FabricPermissionTest {
             assertThat(copy.getClassLoader()).isSameAs(withoutClient);
             Method get = copy.getMethod("get");
             assertThat(get.invoke(null)).isSameAs(dedicated);
+            // Not the game instance, so get() can return it only from what the copy's listener holds.
+            MinecraftServer started = Mockito.mock(MinecraftServer.class);
             try {
                 ServerLifecycleEvents.SERVER_STARTING.invoker()
-                                                     .onServerStarting(dedicated);
-                assertThat(get.invoke(null)).isSameAs(dedicated);
+                                                     .onServerStarting(started);
+                assertThat(get.invoke(null)).isSameAs(started);
             } finally {
                 ServerLifecycleEvents.SERVER_STOPPED.invoker()
-                                                    .onServerStopped(dedicated);
+                                                    .onServerStopped(started);
             }
         }
     }
