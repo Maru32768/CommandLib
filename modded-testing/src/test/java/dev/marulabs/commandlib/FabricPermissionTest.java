@@ -168,8 +168,9 @@ class FabricPermissionTest {
         try (MockedStatic<FabricLoader> fabricLoader = Mockito.mockStatic(FabricLoader.class)) {
             fabricLoader.when(FabricLoader::getInstance)
                         .thenReturn(loader);
-            Method get = Class.forName(CurrentServer.class.getName(), true, withoutClient)
-                              .getMethod("get");
+            Class<?> copy = Class.forName(CurrentServer.class.getName(), true, withoutClient);
+            assertThat(copy.getClassLoader()).isSameAs(withoutClient);
+            Method get = copy.getMethod("get");
             assertThat(get.invoke(null)).isSameAs(dedicated);
             try {
                 ServerLifecycleEvents.SERVER_STARTING.invoker()
