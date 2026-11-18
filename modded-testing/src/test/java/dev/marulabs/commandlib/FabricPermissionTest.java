@@ -16,6 +16,7 @@ import org.mockito.Mockito;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Method;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -128,8 +129,8 @@ class FabricPermissionTest {
     }
 
     // The test classpath has the client classes, so CommandLib's classes are loaded again without Minecraft's client
-    // packages. A client class that their verification, static initializers or get() need on a dedicated server then
-    // fails here as it does on a server.
+    // packages. A client class that their verification, static initializers, get() or lifecycle listeners need on a
+    // dedicated server then fails here as it does on a server.
     @Test
     void a_dedicated_server_loads_no_client_class() throws Exception {
         MinecraftServer dedicated = Mockito.mock(MinecraftServer.class);
@@ -167,10 +168,17 @@ class FabricPermissionTest {
         try (MockedStatic<FabricLoader> fabricLoader = Mockito.mockStatic(FabricLoader.class)) {
             fabricLoader.when(FabricLoader::getInstance)
                         .thenReturn(loader);
-            Object server = Class.forName(CurrentServer.class.getName(), true, withoutClient)
-                                 .getMethod("get")
-                                 .invoke(null);
-            assertThat(server).isSameAs(dedicated);
+            Method get = Class.forName(CurrentServer.class.getName(), true, withoutClient)
+                              .getMethod("get");
+            assertThat(get.invoke(null)).isSameAs(dedicated);
+            try {
+                ServerLifecycleEvents.SERVER_STARTING.invoker()
+                                                     .onServerStarting(dedicated);
+                assertThat(get.invoke(null)).isSameAs(dedicated);
+            } finally {
+                ServerLifecycleEvents.SERVER_STOPPED.invoker()
+                                                    .onServerStopped(dedicated);
+            }
         }
     }
 }
