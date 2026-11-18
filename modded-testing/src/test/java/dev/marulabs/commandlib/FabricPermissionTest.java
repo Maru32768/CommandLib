@@ -3,8 +3,10 @@ package dev.marulabs.commandlib;
 //? if fabric {
 /*import dev.marulabs.commandlib.internal.CurrentServer;
 import me.lucko.fabric.api.permissions.v0.Permissions;
+import net.fabricmc.api.EnvType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.impl.transformer.EnvironmentStrippingData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.commands.CommandSourceStack;
@@ -13,6 +15,8 @@ import net.minecraft.server.level.ServerPlayer;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.Opcodes;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -128,9 +132,10 @@ class FabricPermissionTest {
         }
     }
 
-    // The test classpath has the client classes, so CommandLib's classes are loaded again without Minecraft's client
-    // packages. A client class that their verification, static initializers, get() or lifecycle listeners need on a
-    // dedicated server then fails here as it does on a server.
+    // The test classpath has the client classes, so CurrentServer and the CommandLib classes it reaches are loaded
+    // again without what a dedicated server lacks: Minecraft's client packages, which the server jar does not have,
+    // and the classes that Fabric Loader refuses to load there. A client class that their verification, static
+    // initializers, get() or lifecycle listeners need then fails here as it does on a server.
     @Test
     void a_dedicated_server_loads_no_client_class() throws Exception {
         MinecraftServer dedicated = Mockito.mock(MinecraftServer.class);
@@ -144,23 +149,30 @@ class FabricPermissionTest {
                     || name.startsWith("com.mojang.blaze3d.") || name.startsWith("com.mojang.realmsclient.")) {
                     throw new ClassNotFoundException(name);
                 }
-                if (!name.startsWith("dev.marulabs.commandlib.")) {
-                    return super.loadClass(name, resolve);
-                }
                 synchronized (getClassLoadingLock(name)) {
                     Class<?> loaded = findLoadedClass(name);
                     if (loaded != null) {
                         return loaded;
                     }
+                    byte[] bytes;
                     try (InputStream in = getParent().getResourceAsStream(name.replace('.', '/') + ".class")) {
                         if (in == null) {
                             throw new ClassNotFoundException(name);
                         }
-                        byte[] bytes = in.readAllBytes();
-                        return defineClass(name, bytes, 0, bytes.length);
+                        bytes = in.readAllBytes();
                     } catch (IOException e) {
                         throw new ClassNotFoundException(name, e);
                     }
+                    EnvironmentStrippingData stripping =
+                        new EnvironmentStrippingData(Opcodes.ASM9, EnvType.SERVER.name());
+                    new ClassReader(bytes).accept(stripping, ClassReader.SKIP_CODE | ClassReader.SKIP_FRAMES);
+                    if (stripping.stripEntireClass()) {
+                        throw new ClassNotFoundException(name);
+                    }
+                    if (!name.startsWith("dev.marulabs.commandlib.")) {
+                        return super.loadClass(name, resolve);
+                    }
+                    return defineClass(name, bytes, 0, bytes.length);
                 }
             }
         };
