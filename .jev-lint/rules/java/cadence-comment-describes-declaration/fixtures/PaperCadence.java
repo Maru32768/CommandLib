@@ -1,4 +1,4 @@
-package dev.marulabs.commandlib;
+package dev.marulabs.cadence;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.tree.CommandNode;
@@ -34,7 +34,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
 /**
- * Entry point for registering CommandLib commands on Paper 1.21.0+.
+ * Entry point for registering Cadence commands on Paper 1.21.0+.
  *
  * <p>Call {@link #register} during plugin initialization, such as from your plugin's
  * constructor, {@code onLoad()}, or {@code onEnable()}, so the lifecycle event handler
@@ -43,7 +43,7 @@ import java.util.logging.Level;
  * <pre>{@code
  * public class MyPlugin extends JavaPlugin {
  *     public MyPlugin() {
- *         CommandLib.register(this, new MyCommand());
+ *         Cadence.register(this, new MyCommand());
  *     }
  * }
  * }</pre>
@@ -52,7 +52,7 @@ import java.util.logging.Level;
  * {@link #bootstrap}, because functions are compiled before plugins are enabled.
  */
 @SuppressWarnings("UnstableApiUsage")
-public final class CommandLib implements Listener {
+public final class Cadence implements Listener {
     private static final VarHandle CHILDREN;
     private static final VarHandle LITERALS;
     private static final VarHandle ARGUMENTS;
@@ -85,26 +85,26 @@ public final class CommandLib implements Listener {
     private boolean unregistered;
     private boolean missedCommandsEventCheckScheduled;
 
-    private CommandLib(Plugin plugin, PluginRegistrationState registrationState) {
+    private Cadence(Plugin plugin, PluginRegistrationState registrationState) {
         this.plugin = plugin;
         this.registrationState = registrationState;
     }
 
-    public static CommandLib register(@NotNull Plugin plugin, @NotNull Command command, @NotNull Command... commands) {
+    public static Cadence register(@NotNull Plugin plugin, @NotNull Command command, @NotNull Command... commands) {
         List<Command> list = new ArrayList<>();
         list.add(command);
         Collections.addAll(list, commands);
         return register(plugin, list);
     }
 
-    public static CommandLib register(@NotNull Plugin plugin, @NotNull Collection<? extends Command> commands) {
+    public static Cadence register(@NotNull Plugin plugin, @NotNull Collection<? extends Command> commands) {
         return register(plugin,
                         plugin.getName()
                               .toLowerCase(Locale.ROOT) + ".command",
                         commands);
     }
 
-    public static CommandLib register(@NotNull Plugin plugin,
+    public static Cadence register(@NotNull Plugin plugin,
                                       @NotNull String permissionPrefix,
                                       @NotNull Command command,
                                       @NotNull Command... commands) {
@@ -114,7 +114,7 @@ public final class CommandLib implements Listener {
         return register(plugin, permissionPrefix, list);
     }
 
-    public static CommandLib register(@NotNull Plugin plugin,
+    public static Cadence register(@NotNull Plugin plugin,
                                       @NotNull String permissionPrefix,
                                       @NotNull Collection<? extends Command> commands) {
         Objects.requireNonNull(plugin);
@@ -126,7 +126,7 @@ public final class CommandLib implements Listener {
         commands.forEach(Objects::requireNonNull);
         CommandNameValidator.validateTopLevel(commands);
 
-        CommandLib instance = new CommandLib(plugin,
+        Cadence instance = new Cadence(plugin,
                                              REGISTRATION_STATES.computeIfAbsent(plugin,
                                                                                  ignored -> new PluginRegistrationState()));
         instance.registerPluginListener();
@@ -151,14 +151,14 @@ public final class CommandLib implements Listener {
      * <p>The commands stay registered for the lifetime of the server and are added again on every
      * {@code /minecraft:reload}; there is no way to unregister them. Paper refuses {@code /reload} while a bootstrapper
      * handles the commands event. The server does not exist yet during bootstrap, so the command permissions are not
-     * registered with Bukkit's plugin manager; CommandLib applies their defaults itself unless a permission plugin sets
+     * registered with Bukkit's plugin manager; Cadence applies their defaults itself unless a permission plugin sets
      * the permission or it is declared in {@code paper-plugin.yml}.
      *
      * <pre>{@code
      * public class MyBootstrap implements PluginBootstrap {
      *     @Override
      *     public void bootstrap(BootstrapContext context) {
-     *         CommandLib.bootstrap(context, new MyCommand());
+     *         Cadence.bootstrap(context, new MyCommand());
      *     }
      * }
      * }</pre>
@@ -258,7 +258,7 @@ public final class CommandLib implements Listener {
             // handler can no longer be installed. Fall back to direct dispatcher manipulation.
             CommandDispatcher<CommandSourceStack> dispatcher = serverDispatcher;
             if (dispatcher == null) {
-                throw new IllegalStateException("CommandLib.register() was called after Paper's command registration phase, " + "but no dispatcher is cached yet. Ensure at least one CommandLib.register() call " + "is made during plugin initialization.",
+                throw new IllegalStateException("Cadence.register() was called after Paper's command registration phase, " + "but no dispatcher is cached yet. Ensure at least one Cadence.register() call " + "is made during plugin initialization.",
                                                 registrationState.registrationFailure);
             }
             registrationState.dispatcher = dispatcher;
@@ -563,11 +563,11 @@ public final class CommandLib implements Listener {
     }
 
     private static final class PendingRegistration {
-        private final CommandLib instance;
+        private final Cadence instance;
         private final Collection<? extends Command> commands;
         private final String permissionPrefix;
 
-        private PendingRegistration(CommandLib instance,
+        private PendingRegistration(Cadence instance,
                                     Collection<? extends Command> commands,
                                     String permissionPrefix) {
             this.instance = instance;
@@ -576,7 +576,7 @@ public final class CommandLib implements Listener {
         }
 
         private List<LiteralCommandNode<CommandSourceStack>> buildNodes() {
-            return CommandLib.buildNodes(commands, permissionPrefix);
+            return Cadence.buildNodes(commands, permissionPrefix);
         }
     }
 }

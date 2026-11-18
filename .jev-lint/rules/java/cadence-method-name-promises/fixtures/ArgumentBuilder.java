@@ -1,6 +1,6 @@
-package dev.marulabs.commandlib;
+package dev.marulabs.cadence;
 
-import dev.marulabs.commandlib.command.CommandExecutor;
+import dev.marulabs.cadence.command.CommandExecutor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

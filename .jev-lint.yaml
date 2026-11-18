@@ -17,8 +17,8 @@ files:
 exclude:
   - "**/MockNMS*.java"
 rules:
-  java/commandlib-comment-describes-declaration: on
-  java/commandlib-method-name-promises: on
+  java/cadence-comment-describes-declaration: on
+  java/cadence-method-name-promises: on
   # `jev-lint commits --base master`: each commit message against its diff, and each change against AGENTS.md.
   git/commit-message-describes-diff: on
   git/diff-follows-instructions: on

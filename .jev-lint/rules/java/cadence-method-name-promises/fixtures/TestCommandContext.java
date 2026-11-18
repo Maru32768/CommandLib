@@ -1,7 +1,7 @@
-package dev.marulabs.commandlib;
+package dev.marulabs.cadence;
 
-import dev.marulabs.commandlib.util.ChatColorUtil;
-import dev.marulabs.commandlib.util.text.RichText;
+import dev.marulabs.cadence.util.ChatColorUtil;
+import dev.marulabs.cadence.util.text.RichText;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

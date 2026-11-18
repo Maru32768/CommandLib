@@ -1,8 +1,8 @@
-package dev.marulabs.commandlib.util.nms;
+package dev.marulabs.cadence.util.nms;
 
-import dev.marulabs.commandlib.util.bukkit.BukkitUtil;
-import dev.marulabs.commandlib.util.bukkit.MinecraftVersion;
-import dev.marulabs.commandlib.util.nms.exception.NMSClassNotFoundException;
+import dev.marulabs.cadence.util.bukkit.BukkitUtil;
+import dev.marulabs.cadence.util.bukkit.MinecraftVersion;
+import dev.marulabs.cadence.util.nms.exception.NMSClassNotFoundException;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.InvocationTargetException;
@@ -21,7 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * mappings and whose class links on the server provides the implementation.
  */
 public final class NMSClassRegistry {
-    private static final String TYPED_PACKAGE_PREFIX = "dev.marulabs.commandlib.nms.";
+    private static final String TYPED_PACKAGE_PREFIX = "dev.marulabs.cadence.nms.";
     private static final NMSClassRegistry DEFAULT = new NMSClassRegistry(TypedNmsModules.MODULES);
 
     private final List<TypedModule> modules;
@@ -196,7 +196,7 @@ public final class NMSClassRegistry {
     }
 
     /**
-     * A typed NMS module: the package under {@code dev.marulabs.commandlib.nms} and the Minecraft versions its server
+     * A typed NMS module: the package under {@code dev.marulabs.cadence.nms} and the Minecraft versions its server
      * jar matches. {@link TypedNmsModules} lists them.
      */
     static final class TypedModule {

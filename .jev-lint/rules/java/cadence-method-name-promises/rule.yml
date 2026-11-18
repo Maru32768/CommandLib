@@ -1,5 +1,5 @@
 # Ported from jev-lint's rust/fn-name-promises: the same question over Java methods.
-id: commandlib-method-name-promises
+id: cadence-method-name-promises
 language: Java
 kind: noul
 subject: node

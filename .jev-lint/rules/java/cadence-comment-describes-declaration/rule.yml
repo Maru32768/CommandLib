@@ -1,11 +1,11 @@
 # Ported from jev-lint's rust/comment-describes-declaration: the same question over Java declarations.
-id: commandlib-comment-describes-declaration
+id: cadence-comment-describes-declaration
 language: Java
 kind: noul
 subject: node
 state: located
 # 0.74, refitted 2026-10-12 (jev-1.13.0, 3 passes) after a review of real code flagged four sound comments at
-# 0.34-0.46. fixtures/ now also holds copies of CommandRunner, paper's CommandLib, NMSClassRegistry and
+# 0.34-0.46. fixtures/ now also holds copies of CommandRunner, paper's Cadence, NMSClassRegistry and
 # NMSArgumentTypeRegistrar, whose long Javadoc about class loading, NMS and Brigadier the subject alone cannot fully
 # confirm; their comments answer up to 0.50-0.57 (paper's replaceChild). `protectionTime`, which says seconds over ticks
 # times 50, answers 0.51-0.64 across runs, inside that clean band, so it is kept labelled as a defect under the cutoff:

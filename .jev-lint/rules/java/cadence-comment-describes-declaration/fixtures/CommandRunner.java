@@ -1,12 +1,12 @@
-package dev.marulabs.commandlib;
+package dev.marulabs.cadence;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.context.CommandContext;
-import dev.marulabs.commandlib.command.CommandExecutor;
-import dev.marulabs.commandlib.command.Prerequisite;
-import dev.marulabs.commandlib.exception.ArgumentParseException;
-import dev.marulabs.commandlib.exception.CommandPrerequisiteException;
-import dev.marulabs.commandlib.util.UncaughtExceptionHandler;
+import dev.marulabs.cadence.command.CommandExecutor;
+import dev.marulabs.cadence.command.Prerequisite;
+import dev.marulabs.cadence.exception.ArgumentParseException;
+import dev.marulabs.cadence.exception.CommandPrerequisiteException;
+import dev.marulabs.cadence.util.UncaughtExceptionHandler;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;

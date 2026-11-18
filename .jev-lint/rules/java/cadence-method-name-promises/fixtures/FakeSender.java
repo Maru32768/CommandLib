@@ -1,4 +1,4 @@
-package dev.marulabs.commandlib;
+package dev.marulabs.cadence;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

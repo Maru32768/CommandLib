@@ -1,4 +1,4 @@
-# CommandLib Roadmap History
+# Cadence Roadmap History
 
 完了済み roadmap エントリのアーカイブ。現在進行中の項目は `roadmap.md` を参照。
 
@@ -15,7 +15,7 @@
     `ApiStatus` を含まないため、version を上げる。
   - README に、IntelliJ IDEA の Settings → Editor → General → Auto Import → Exclude from import and completion に
     登録する package を書く。
-  2026-10-21 に実施: 利用者が除外するのは `dev.marulabs.commandlib.internal` の 1 つ。tree 生成など package-private の class は
+  2026-10-21 に実施: 利用者が除外するのは `dev.marulabs.cadence.internal` の 1 つ。tree 生成など package-private の class は
   公開 API の class の member を広げないため root package に残した（`docs/design/module-structure.md` の
   "Packages And Visibility"）。testing artifact は同じ package から package-private class を使い続ける。
 
@@ -89,7 +89,7 @@ paper-testing が `mockStatic` で差し替える factory 呼び出しで、約 
 ### P0: 方針を固定する（完了）
 
 - `[x]` `docs/compatibility.md` を追加し、supported / tested / best-effort / unsupported を分ける。
-- `[x]` `docs/design/argument-catalog.md` を追加し、CommandLib / CommandAPI / Paper の argument 対応表を作る（2026-10-15 に behavior 別の `docs/arguments.md` へ置き換え）。
+- `[x]` `docs/design/argument-catalog.md` を追加し、Cadence / CommandAPI / Paper の argument 対応表を作る（2026-10-15 に behavior 別の `docs/arguments.md` へ置き換え）。
 - `[x]` 現行 `bukkit` module は Spigot 互換実装として扱う方針に決める。
 - `[x]` GA 前 module split plan を作り、`bukkit` artifact は削除する方針に決める。
 - `[x]` spigot / paper 向け test module と integration-test の整理方針を決める。
@@ -159,7 +159,7 @@ paper-testing が `mockStatic` で差し替える factory 呼び出しで、約 
   section を実装する（`docs/options.md`、2026-10-15）。
 - `[x]` 末尾の optional argument（`optional(default)`）と variadic argument（`variadic()` で `List<T>`）を追加し、
   配置違反を登録時の runtime error にする（`docs/design/optional-variadic-arguments.md`、2026-10-15）。
-- `[x]` testing artifact に JUnit 5 の `CommandLibExtension` / `@Sender`、`CommandTester#suggest`、command tree snapshot
+- `[x]` testing artifact に JUnit 5 の `CadenceExtension` / `@Sender`、`CommandTester#suggest`、command tree snapshot
   （`assertCommandTreeMatchesSnapshot`）を追加する（common / spigot / paper、2026-10-15）。
 - `[x]` confirmation / cooldown を標準機能として追加する（`confirm()`、`cooldown(Duration)`、bypass permission、
   差し替え可能な message と clock、2026-10-15）。
@@ -175,7 +175,7 @@ paper-testing が `mockStatic` で差し替える factory 呼び出しで、約 
   計測。`OptionTreeSizeTest` は 6,000 未満であることだけを確認）、argument node を共有（`docs/design/command-options.md`、2026-10-16、
   実サーバー未検証）。
 - `[x]` modded に Bukkit 側の argument（World / Sound / Biome / Attribute / EntityType / Advancement / Recipe / LootTable / Objective /
-  ScoreboardDisplaySlot / GameMode / ChatColor）、`AnnotatedCommands`、modded-testing の `CommandLibExtension` を追加する（2026-10-16）。
+  ScoreboardDisplaySlot / GameMode / ChatColor）、`AnnotatedCommands`、modded-testing の `CadenceExtension` を追加する（2026-10-16）。
 - `[x]` registration 全体の middleware / provider（`CommandDefaults`）、cooldown の `remaining` / `reset`、typed executor からの
   `ctx.fail(...)`、annotation の `@Condition` による名前付き prerequisite、selector 向けの `ctx.sendSuccessFor(...)` を追加する（2026-10-16）。
 - `[x]` middleware / interceptor API（`addMiddleware`）と async execution（`executeAsync`、`CommandScheduler` による sync thread
@@ -186,7 +186,7 @@ paper-testing が `mockStatic` で差し替える factory 呼び出しで、約 
 - `[x]` annotation API を設計・実装する（reflection で fluent model に変換、Spigot / Paper / Velocity、`docs/annotations.md`、
   2026-10-16）。
 - `[x]` Kotlin DSL を設計・実装する（Spigot / Paper / Velocity、coroutine の `executeSuspend`、`docs/kotlin.md`、2026-10-16）。
-- `[x]` dynamic command tree refresh を追加する。`CommandLib.refresh(player)` / `refreshAll()`（Spigot / Paper / Forge /
+- `[x]` dynamic command tree refresh を追加する。`Cadence.refresh(player)` / `refreshAll()`（Spigot / Paper / Forge /
   NeoForge、2026-10-15）。
 
 ### P5: Platform expansion（完了分）
@@ -201,7 +201,7 @@ paper-testing が `mockStatic` で差し替える factory 呼び出しで、約 
 - `[x]` modded の version matrix に forge-1.18.2 / forge-1.19.2 / neoforge-1.21.4 / fabric-1.21.4 を追加する（2026-10-16、追加時点では
   実サーバー未検証。forge-1.18.2 / forge-1.19.2 / neoforge-1.21.4 は同日の 29 target の integration test で検証、fabric-1.21.4 は target なし）。
 - `[x]` Fabric の integration target `fabric-1.20.1` / `fabric-1.21.1` を追加する。Forge / NeoForge と同じ test mod を Fabric
-  Loader 0.16.14 と Fabric API の実サーバーで動かし、intermediary に remap した CommandLib jar を jar-in-jar で読み込む。
+  Loader 0.16.14 と Fabric API の実サーバーで動かし、intermediary に remap した Cadence jar を jar-in-jar で読み込む。
   2 target とも 65 case が全て通った（2026-10-17）。fabric-permissions-api と `fabric-1.21.4` は対象外（command block は直後の commit
   `41bc1954` で suite に加わった）。
 - `[x]` Folia support 方針を決め、実装する。`paper` artifact で Folia を検出して entity / region / global scheduler を使い、
@@ -212,7 +212,7 @@ paper-testing が `mockStatic` で差し替える factory 呼び出しで、約 
   （2026-10-16）。command block、`/execute as`、`spigot` artifact の拒否は対象外。
 - `[x]` Velocity の integration target `velocity-3.4.0`（Velocity 3.4.0 build 566、Paper 1.21.4 の backend）を追加する。
   `VelocityIntegrationTest` が proxy と backend の container を起動し、bot は proxy 経由で接続する。bot が受け取る command tree の
-  CommandLib の node（`DefaultPermission.OP` の node は除かれる）、`ServerArgument` の補完、子 command と argument の実行 message、
+  Cadence の node（`DefaultPermission.OP` の node は除かれる）、`ServerArgument` の補完、子 command と argument の実行 message、
   失敗 message、`OP` の command の拒否、`executeAsync` の message を確認する（2026-10-17）。option、`PlayerArgument`、
   permission plugin、Velocity 4.x は対象外。
 

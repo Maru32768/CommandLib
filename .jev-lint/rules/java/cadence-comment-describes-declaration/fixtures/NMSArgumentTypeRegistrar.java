@@ -1,11 +1,11 @@
-package dev.marulabs.commandlib.util.nms.argument;
+package dev.marulabs.cadence.util.nms.argument;
 
 import com.google.gson.JsonObject;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
-import dev.marulabs.commandlib.util.nms.NMSClass;
-import dev.marulabs.commandlib.util.nms.NMSClassRegistry;
-import dev.marulabs.commandlib.util.reflection.ReflectionUtil;
+import dev.marulabs.cadence.util.nms.NMSClass;
+import dev.marulabs.cadence.util.nms.NMSClassRegistry;
+import dev.marulabs.cadence.util.reflection.ReflectionUtil;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Constructor;

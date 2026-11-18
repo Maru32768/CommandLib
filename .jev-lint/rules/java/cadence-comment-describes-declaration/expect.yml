@@ -17,7 +17,7 @@ fixtures/TeamDirectory.java:
 # Javadoc about class loading, NMS and Brigadier that the subject alone cannot fully confirm.
 fixtures/CommandRunner.java:
   - { line: 132, label: clean, window: 0, reason: "run and executeWithStackTrace do print stack traces, and common has no logger" }
-fixtures/PaperCommandLib.java:
+fixtures/PaperCadence.java:
   - { line: 209, label: clean, window: 0, reason: "applies the bootstrap default only when nothing registered the permission" }
 fixtures/NMSClassRegistry.java:
   - { line: 149, label: clean, window: 0, reason: "the listed classes are loaded through the list, not linked or initialized" }
