@@ -11,8 +11,8 @@ This file lists the changes in each Cadence release that affect plugin and mod a
 
 #### Artifacts, packages and Java
 
-- CommandLib is renamed Cadence. The `CommandLib` class is now `Cadence`, so `CommandLib.register(...)` becomes
-  `Cadence.register(...)`.
+- The library is renamed from CommandLib to Cadence. The `CommandLib` class is now `Cadence`, so
+  `CommandLib.register(...)` becomes `Cadence.register(...)`.
 - The packages move from `net.kunmc.lab.commandlib` to `dev.marulabs.cadence`. Change your imports and your Shadow
   `relocate(...)` source package.
 - The JitPack coordinates move from `com.github.TeamKun.CommandLib` to `com.github.Maru32768.Cadence`. See
