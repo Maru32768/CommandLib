@@ -137,7 +137,7 @@ class FabricPermissionTest {
     // and the classes that Fabric Loader refuses to load there. A client class that their verification, static
     // initializers, get() or lifecycle listeners need then fails here as it does on a server.
     @Test
-    void a_dedicated_server_loads_no_client_class() throws Exception {
+    void current_server_loads_no_client_class_on_a_dedicated_server() throws Exception {
         MinecraftServer dedicated = Mockito.mock(MinecraftServer.class);
         FabricLoader loader = Mockito.mock(FabricLoader.class);
         Mockito.when(loader.getGameInstance())
