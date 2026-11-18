@@ -1,6 +1,6 @@
-# CommandLib Roadmap
+# Cadence Roadmap
 
-この Roadmap は、CommandLib を Spigot、Paper、Folia、Mohist、Velocity、Forge、NeoForge、Fabric を含む Minecraft
+この Roadmap は、Cadence を Spigot、Paper、Folia、Mohist、Velocity、Forge、NeoForge、Fabric を含む Minecraft
 コマンドライブラリとして、CommandAPI、Cloud、Lamp、ACF と Paper 公式 API を利用する開発体験を凌駕するために、
 不足機能、実装順、競合を上回ったと判断するための証拠を整理する。機能の同等化は途中の到達点であり、最終目標ではない。
 
@@ -22,10 +22,10 @@
 | Variadic / optional arguments       | `[x]` | 末尾の `optional(default)` / `optional(Extractor)` と `variadic([max])`（`List<T>`）がある。配置違反は登録時に `IllegalStateException`（[`docs/design/optional-variadic-arguments.md`](design/optional-variadic-arguments.md)）。実サーバーでは Spigot / Paper / modded fixture の `OptionalVariadicArgumentTest` が console から、省略時の default、指定値での上書き、`optional(Extractor)`、`variadic(3)` の順序、player 名と `@p` の variadic、空の optional variadic を確認する（spigot-1.21.8、paper-1.21.4、forge-1.20.1、fabric-1.21.1 で実行済み）。 | 上限なしの variadic、`Optional<T>` 形式、player からの実行、command tree の大きさ（`maxCount` × option の展開）の測定。 |
 | Execution result                    | `[x]` | `ctx.setResult(int)` が `/execute store result` に、message のある失敗（例外・権限・prerequisite 等）が `store success 0` に反映される（message のない失敗は 0 を返すだけで、`store success` は 1）。spigot-1.16.5 / paper-26.3 の integration test あり。 | Forge / NeoForge の実サーバー検証。 |
 | Async execution                     | `[x]` | `executeAsync(...)`（全 typed branch）と `ctx.supplyAsync` / `runAsync`、platform 別の `CommandScheduler` で sync thread へ復帰する（[`docs/execution.md`](execution.md)）。 | Folia の command block（region scheduler）経路の実サーバー検証（Bukkit / Forge / NeoForge と、Folia の player / console は 2026-10-16 に検証済み）。 |
-| Dynamic command tree refresh        | `[x]` | `CommandLib.refresh(player)` / `refreshAll()` が Spigot / Paper / Forge / NeoForge / Fabric にあり、state による表示切替は `visibleWhen(...)` で書ける（[`docs/permissions.md`](permissions.md)）。Velocity は tree を再送する API が無いため `refresh` も無い。 | 実 client での検証。 |
+| Dynamic command tree refresh        | `[x]` | `Cadence.refresh(player)` / `refreshAll()` が Spigot / Paper / Forge / NeoForge / Fabric にあり、state による表示切替は `visibleWhen(...)` で書ける（[`docs/permissions.md`](permissions.md)）。Velocity は tree を再送する API が無いため `refresh` も無い。 | 実 client での検証。 |
 | Vanilla-style feedback              | `[~]` | `ctx.sendSuccess(message)` が Spigot / Paper / Forge / NeoForge / Fabric で vanilla の `CommandSourceStack#sendSuccess` を通り、gamerule と silent source を尊重する。Paper は reflection で呼び、その method がない source（test の mock 等）には通常の message で送る。Velocity には gamerule がないため、常に sender に送る。operator への broadcast と target 数に応じた文言は呼び出し側の責務とし、提供しない。 | `sendCommandFeedback` gamerule と silent source の tests（unit / integration とも無い）。 |
 | Bukkit / Spigot / Paper support     | `[~]` | `spigot` module（Spigot 1.16.5〜26.3 を Tested）と `paper` module（Paper 1.21〜26.3 を Tested、Folia は best effort）がある。 | Folia は smoke target `folia-26.3` のみで、Paper の suite は Folia で走らない。 |
-| Paper 1.20.6+ registration          | `[x]` | `LifecycleEvents.COMMANDS` + `Commands registrar` + `CommandSourceStack` を使った公式 API 登録が実装済み。Adventure component を標準 message path として利用。 | bootstrap 登録の互換性保証・docs / tests の拡充（`CommandLib.bootstrap(BootstrapContext, ...)` は実装済み）。                                                   |
+| Paper 1.20.6+ registration          | `[x]` | `LifecycleEvents.COMMANDS` + `Commands registrar` + `CommandSourceStack` を使った公式 API 登録が実装済み。Adventure component を標準 message path として利用。 | bootstrap 登録の互換性保証・docs / tests の拡充（`Cadence.bootstrap(BootstrapContext, ...)` は実装済み）。                                                   |
 | Spigot / Paper module split         | `[x]` | `bukkit` を `spigot` へ rename / move し、`paper` module を新設済み。                                                                               | —                                                                          |
 | Forge support                       | `[~]` | Forge 1.16.5 / 1.18.2 / 1.19.2 / 1.20.1 を `modded` の Stonecutter 単一ソースから build。 | loader 非依存層の分離（`[?]`）。4 version とも実サーバーで検証済み（2026-10-16）。 |
 | Mohist support                      | `[~]` | README 上で tested version が記載されている。                                                                                                      | 1.20.1 で失敗 message が player に届かない件。1.16.5 / 1.20.1 は integration test 済み（2026-10-16）。                                           |
@@ -46,7 +46,7 @@
 | Permission-aware help / suggestions | `[~]` | argument branch permission を help / tab completion に反映する設計がある。                                                                          | 網羅 tests と docs。                                                           |
 | Typed command options               | `[~]` | flag / value / count option、任意の argument を値にする `Options.of(...)`、default、dependency、repeatable、alias、required、`mutuallyExclusiveOptions(...)`、option 単位の permission、opt-in の `optionsAnywhere()`、`OptionParseException`、help の option section がある（[`docs/options.md`](options.md)）。 | subcommand への継承、固定 arity の multi-value（Pillar 4 の Required）、排他 group の専用 error message。annotation は `@Flag` / `@Option` / `@MutuallyExclusiveOptions` で対応済み。 |
 | Generated usage / help              | `[x]` | 生成 help / usage に `HelpFormatter` / `UsageFormatter` と `examples(...)` があり、command ごとに継承される（[`docs/help.md`](help.md)）。`serverHelp(...)` は Bukkit 系の `/help` index に載る。 | usage line の RichText 化（hover / click）。 |
-| Error taxonomy                      | `[~]` | parse / validation / prerequisite / option 系の例外があり、各 error で sender に見える message を [`docs/errors.md`](errors.md) で公開仕様化した。 | unknown subcommand の専用 error（Brigadier が CommandLib より先に報告するため `ErrorFormatter` に届かず、platform の hook が要る）、cooldown / confirmation / preprocess message の error formatter 経由化。missing argument は help を送る。 |
+| Error taxonomy                      | `[~]` | parse / validation / prerequisite / option 系の例外があり、各 error で sender に見える message を [`docs/errors.md`](errors.md) で公開仕様化した。 | unknown subcommand の専用 error（Brigadier が Cadence より先に報告するため `ErrorFormatter` に届かず、platform の hook が要る）、cooldown / confirmation / preprocess message の error formatter 経由化。missing argument は help を送る。 |
 | Exception handling                  | `[x]` | uncaught exception handler と、middleware での exception mapping / result handling がある。 | global な exception handler。 |
 | Preprocess / prerequisite           | `[~]` | `addPreprocess(...)`（middleware 化済み）、`addPrerequisite(...)`（argument branch にも）、`require(Command.player())` 等がある。名前付きの condition は annotation の `@Prerequisites`（`AnnotationParser#registerPrerequisite`）だけ。 | fluent / builder / Kotlin の reusable condition registry（現在は `Prerequisite` の値を使い回すだけ）、diagnostics。 |
 | Middleware / interceptor            | `[x]` | `addMiddleware(CommandMiddleware)` で pre / post hook、exception mapping、result handling を合成でき、child と argument branch に継承される。`confirm()` / `cooldown()` / preprocess も middleware 上にある。 | — |
@@ -56,13 +56,13 @@
 | Kotlin DSL                          | `[~]` | `common-kotlin` + `spigot-kotlin` / `paper-kotlin` / `velocity-kotlin` に型推論の効く builder、delegated option、`executeSuspend`、suspend suggestions がある（[`docs/kotlin.md`](kotlin.md)）。 | Forge / NeoForge 版、Kotlin 関数の default 引数から command を作る形。 |
 | Java builder API                    | `[x]` | `Command.builder(name)`（common の `CommandBuilder`）が全 platform にあり、fluent と同じ command tree / permission / 結果を snapshot で確認（[`docs/java-builder.md`](java-builder.md)）。 | — |
 | Localization / captions             | `[~]` | `Caption` / `Captions` で組み込み message を key 化し、sender の locale で解決する（en / ja 同梱、override、ResourceBundle、`CaptionSender`。[`docs/localization.md`](localization.md)）。 | diagnostics / `CommandDocs` の文言、Fabric node での locale 取得の確認。 |
-| Public testing framework            | `[~]` | `common-testing` / `spigot-testing` / `paper-testing` / `velocity-testing` / loader 別 `modded-testing` がある。`CommandTester`（`suggest()`、int を返す `execute`、`assertCommandTreeMatchesSnapshot`）、`FakeSender`、NMS mock、JUnit 5 の `CommandLibExtension` + `@Sender`（全 testing artifact）と downstream guide（[`docs/testing.md`](testing.md)）がある。 | testing artifact 間の共通化、gamerule / silent source の模擬。 |
+| Public testing framework            | `[~]` | `common-testing` / `spigot-testing` / `paper-testing` / `velocity-testing` / loader 別 `modded-testing` がある。`CommandTester`（`suggest()`、int を返す `execute`、`assertCommandTreeMatchesSnapshot`）、`FakeSender`、NMS mock、JUnit 5 の `CadenceExtension` + `@Sender`（全 testing artifact）と downstream guide（[`docs/testing.md`](testing.md)）がある。 | testing artifact 間の共通化、gamerule / silent source の模擬。 |
 | Adventure / MiniMessage             | `[~]` | platform 非依存の rich text 値型 `RichText`（色、装飾、hover text、click、translatable 引数）を全 platform で送れる（Phase 1 完了）。Paper / modded は native component の `sendSuccess/Warn/Failure` もある。 | rich help、rich suggestion tooltip の統一、MiniMessage。設計: [`docs/design/rich-text-messages.md`](design/rich-text-messages.md)。 |
 | Multi-version integration tests     | `[~]` | `integration-test` aggregator と Spigot（1.16.5〜26.3 の全 release）/ Paper / Mohist / Forge / NeoForge fixtures がある。                                                             | CI matrix、`IntegrationTarget` への platform フィールド追加、result docs、test kit 化。  |
 | NMS Reflection test strategy        | `[~]` | `CommandTester` が `Mockito.mockStatic` で `NMSClassRegistry` をスタブし、軽量な Mock 実装クラス方式で NMS なしテストを実現している。                 | Builder / mock 差し込みの保証拡充、新引数の Mock + Test ルールの継続適用。              |
-| Documentation                       | `[~]` | README（Why CommandLib、比較表）、`docs/compatibility.md`、`arguments` / `errors` / `options` / `suggestions` / `permissions` / `testing` / `troubleshooting` と design docs がある。 | compatibility の結果公開・更新、documentation site。 |
+| Documentation                       | `[~]` | README（Why Cadence、比較表）、`docs/compatibility.md`、`arguments` / `errors` / `options` / `suggestions` / `permissions` / `testing` / `troubleshooting` と design docs がある。 | compatibility の結果公開・更新、documentation site。 |
 | Migration guides                    | `[x]` | CommandAPI、Cloud、Lamp、ACF からの移行 guide が `docs/migration/` にある。 | 未実装機能（annotation、Kotlin、DI、locale 等）の実装に合わせた更新。 |
-| Runtime diagnostics                 | `[x]` | `CommandLib.diagnostics()` と opt-in の `CommandLibDiagnosticsCommand` が Spigot / Paper / Forge / NeoForge にある（[`docs/diagnostics.md`](diagnostics.md)）。 | plugin 別 filter（実サーバー検証は 2026-10-16 に済み）。 |
+| Runtime diagnostics                 | `[x]` | `Cadence.diagnostics()` と opt-in の `CadenceDiagnosticsCommand` が Spigot / Paper / Forge / NeoForge にある（[`docs/diagnostics.md`](diagnostics.md)）。 | plugin 別 filter（実サーバー検証は 2026-10-16 に済み）。 |
 | Generated docs / exports            | `[x]` | `CommandDocs` が command docs と permission tree を Markdown / JSON で出力する。 | 排他 option group と option の `requires` の出力、sender 依存の description（examples は出力済み）。 |
 
 ## 優先度別バックログ
@@ -80,7 +80,7 @@
 
 #### 仕様判断不要
 
-- `[ ]` modded の relocate した CommandLib jar を Forge / NeoForge / Fabric の実サーバーで読み込む integration target を足す
+- `[ ]` modded の relocate した Cadence jar を Forge / NeoForge / Fabric の実サーバーで読み込む integration target を足す
   （R1-D-11）。
 - `[ ]` modded / modded-testing / buildSrc / test plugin の build script の依存 version も version catalog に移す
   （non-modded は移行済み。R1-C-12 の残り）。
@@ -111,7 +111,7 @@
 - `[?]` permission node の所有者を登録時に記録する設計（現在は解除時に identity 比較と全登録の再走査で決める）。下の「複数の登録が
   同じ node を宣言したときの規則」と併せて決める（2026-10-21 review の CR2-8）。
 - `[?]` `spigot-testing` の `CommandTester.Builder.mockNmsClass(Class<T extends NMSClass>, ...)` は docs に載る公開 API だが、
-  引数の型は内部 package（`dev.marulabs.commandlib.internal.nms`）に移った。公開 API として残すか、内部扱いにするか
+  引数の型は内部 package（`dev.marulabs.cadence.internal.nms`）に移った。公開 API として残すか、内部扱いにするか
   （2026-10-21 の package 整理で判明）。
 - `[?]` `ctx.getOption(option)` / `hasOption` が実行中の command に無い option（他 command、親 command の option）を黙って
   default / false で返す。Kotlin DSL の delegated property では親の option を子の `execute` で自然に読めてしまう。ただし
@@ -169,7 +169,7 @@
 - `[?]` Paper 1.21.4+ で実行時に登録した label は plugin の metadata の無い plain node になり、`/help` の分類と `dispatchCommand`
   の permission（`minecraft.command.<label>`）が変わる。reflection で metadata を付けるか docs に書くか（R2-CME）。
 - `[?]` testing artifact の API を揃える: `with*` の命名（modded-testing は `withPlayer` / `withLevel` / `withServer`、他は
-  `withFakePlayer` / ...）、common の main にある `Snapshots` の置き場所、`CommandLibExtension` の共通化（R1-C-06）。
+  `withFakePlayer` / ...）、common の main にある `Snapshots` の置き場所、`CadenceExtension` の共通化（R1-C-06）。
 - `[?]` `FakeSender` は既定で全 permission を持ち `DefaultPermission` を適用しない（velocity-testing を除く）。登録の default と
   `isOp` を適用する opt-in mode を足すか。integration test の bot も常に operator で、`OP` default が非 op player を拒否することは
   実サーバーで未検証（R1-B1-08、R1-B2-09）。
@@ -196,9 +196,9 @@
 - `[~]` option の redirect 化（`OptionGraph`）を実サーバーで検証する。Spigot / Paper / Mohist / Forge / NeoForge は 2026-10-16 に検証済み、Velocity が残り。
   argument child（argument の下の command）は redirect を使わない tree のままで、同じ state の path が子 node を共有する。
   option が多すぎて tree が大きくなる command は登録時に `IllegalStateException` で拒否する。
-- `[ ]` Mohist 1.20.1 は player の構文エラーを Bukkit の "Unknown command" で返すため、CommandLib の失敗 message（caption を含む）が player に届かない。回避できるか調べる。
+- `[ ]` Mohist 1.20.1 は player の構文エラーを Bukkit の "Unknown command" で返すため、Cadence の失敗 message（caption を含む）が player に届かない。回避できるか調べる。
 - `[ ]` caption の locale を実サーバーで確かめる test が bot の既定 `en_us` だけなので、他 locale の bot を追加する。
-- `[ ]` CommandLib 組み込み message の他言語 bundle を増やす（現在は en / ja）。annotation の `java.util.Optional<T>` 引数（core が null default を許さない）。
+- `[ ]` Cadence 組み込み message の他言語 bundle を増やす（現在は en / ja）。annotation の `java.util.Optional<T>` 引数（core が null default を許さない）。
 - `[ ]` option の redirect 復元の変更後に `ExecuteBenchmark` を idle な環境で baseline と比較する。
 - `[ ]` Kotlin DSL を Forge / NeoForge に広げ（module 化には Stonecutter の Loom node 5 つ分が必要）、Kotlin 関数の default 引数から
   command を作る形を追加する。
@@ -246,12 +246,12 @@
   CI / 配布方針が決まるまで保留。JitPack の javadoc URL が実際に表示されるかは未確認。
 - `[ ]` CI を整備する。typed NMS module（`nms/*`）は初回 build で BuildTools を version ごとに実行し（1 version あたり
   10 分前後）、paperweight の dev bundle も取得するため、`~/.m2` の Spigot artifact と paperweight cache を CI 間で
-  保持する方法を決める。cache がない job や PR では `-Pcommandlib.typedNms=false` で module を外して unit test だけを
+  保持する方法を決める。cache がない job や PR では `-Pcadence.typedNms=false` で module を外して unit test だけを
   実行することも検討する（その spigot jar は NMS 実装を持たないので配布しない）。integration test の CI matrix もここで扱う。
   CI では `check`（Spotless、compile 時の Error Prone / NullAway、doclint）と japicmp を実行する。jev-lint を CI で
   使う場合は、verdict cache（`.jev-lint/baseline.json`）を commit して key なしで lint する運用に切り替える。
   生成済み typed NMS source の手編集や再生成漏れを検出するため、`tools/nms-codegen` で `uv run generate.py --all` を実行し、
-  `git status --porcelain -- nms spigot/src/main/java/dev/marulabs/commandlib/internal/nms/TypedNmsModules.java` が空でなければ
+  `git status --porcelain -- nms spigot/src/main/java/dev/marulabs/cadence/internal/nms/TypedNmsModules.java` が空でなければ
   失敗させる step も入れる（`git diff --exit-code` は新規の未追跡ファイルを検出しないため）。
 - `[?]` （候補）compile 用の API jar を build で自動生成する。公開 class だけを抜き出した jar を `compileOnly`、
   全 class を含む jar を runtime / shade 用に配布すれば、内部 API は補完に出ず compile も通らない。両 jar に同じ
@@ -271,14 +271,14 @@
   token 境界・空文字・引用符、stdout / stderr、終了コード、help、補完、非同期処理の完了待ちを検討する。
   `CommonXXXArgument` は Brigadier の入力・context に結び付いた共通実装なので、その流用や追加の抽象化を前提にしない。
   CLI 独自の argument model を含む小さな PoC で共有可能な範囲を判断する。Minecraft 対応を優先する既存方針は維持する。
-- `[?]` 一般的な Unix / Linux の command line 定義・慣習と CommandLib の差分を調査する。POSIX の規約と GNU の拡張・慣習を
+- `[?]` 一般的な Unix / Linux の command line 定義・慣習と Cadence の差分を調査する。POSIX の規約と GNU の拡張・慣習を
   区別し、短縮 option の結合、`--name=value`、`--`、option と operand の順序、負数、繰り返し・複数値、subcommand、
   help / usage、終了コード・標準入出力などを比較表にする。shell が処理する引用符・展開・pipe とライブラリの責務も分け、
   Minecraft 内でも改善できる項目と CLI 固有の項目、互換性への影響を整理する。
 
 ## 目標
 
-CommandLib は、plugin / mod 開発者が 1 つの型安全なコマンドモデルでコマンドを定義でき、platform、Minecraft
+Cadence は、plugin / mod 開発者が 1 つの型安全なコマンドモデルでコマンドを定義でき、platform、Minecraft
 version、Brigadier、NMS の差分を意識しなくて済む状態を目指す。
 
 最終的な目標は次の状態である。
@@ -297,7 +297,7 @@ version、Brigadier、NMS の差分を意識しなくて済む状態を目指す
 比較基準は 2026-10-14 に確認した公式資料と現行ソース。競合の更新に合わせて release ごとに再確認する。
 「未確認」は「非対応」と区別し、競合が型安全な API、複数 platform、testing を持つことも前提に比較する。
 
-| 対象 | 競合の強み | 現行 CommandLib | 上回るための到達条件 |
+| 対象 | 競合の強み | 現行 Cadence | 上回るための到達条件 |
 |---|---|---|---|
 | CommandAPI | vanilla arguments、result executors、functions / tags、tooltips、annotation / Kotlin、test toolkit | typed callback、options、広い Spigot / Paper matrix、公開 testing、tooltip と bootstrap の基礎あり | 引数を名前でなく parse / suggestion / error / registry semantics で比較し、主要カテゴリの同等性と型付き callback・options・test coverage の優位性を示す。result / success、feedback、reload、command block / function / tag を実サーバーで保証する。 |
 | Cloud | execution coordinators、future handlers、pipeline、sender mapping、DI、captions、複数 API / platform | `executeAsync` と platform 別の `CommandScheduler`、middleware、sender mapping（`provide`）、context value の DI、caption がある | 非同期・thread 復帰・例外処理・DI・sender mapping を合成でき、同じ Minecraft ユースケースを少ない設定と型付き API で実装・検証できる。 |
@@ -343,7 +343,7 @@ fixture の存在、設計方針の決定、compile 成功だけでは全挙動�
 
 ### 1. Compatibility First
 
-CommandLib は、複数の Minecraft version と platform をまたいで 1 つの command model を使いたい利用者に選ばれるべきである。
+Cadence は、複数の Minecraft version と platform をまたいで 1 つの command model を使いたい利用者に選ばれるべきである。
 
 Required:
 
@@ -363,11 +363,11 @@ Required platform expansion（Phase 4）:
 
 ### 2. Argument Supremacy
 
-CommandLib は、利用者が Brigadier や platform internals に降りなくても必要な引数を標準で扱える状態にする。
+Cadence は、利用者が Brigadier や platform internals に降りなくても必要な引数を標準で扱える状態にする。
 
 Required:
 
-- CommandLib、CommandAPI、Paper の argument 対応表を追加する。
+- Cadence、CommandAPI、Paper の argument 対応表を追加する。
 - missing arguments を実際の plugin 需要と parity gap に基づいて優先付けする。
 - すべての argument に parse、suggestion、validation、error のテストを追加する。
 - range、optional、default、list、map、greedy、quoted string、namespaced key、registry value、enum alias の挙動を標準化する。
@@ -417,7 +417,7 @@ Stretch:
 
 ### 4. Command Options And Flags
 
-CommandLib には typed command options がある。これは二次的な機能ではなく、主力機能として伸ばす。
+Cadence には typed command options がある。これは二次的な機能ではなく、主力機能として伸ばす。
 
 Required:
 
@@ -438,7 +438,7 @@ Stretch:
 
 ### 5. Permissions And Visibility
 
-permission-aware command tree は CommandLib の強い差別化要素である。root command、subcommand、argument branch、option の
+permission-aware command tree は Cadence の強い差別化要素である。root command、subcommand、argument branch、option の
 permission を予測可能で可視化しやすいものにする。
 
 Required:
@@ -458,7 +458,7 @@ Required tooling（Phase 5）:
 
 ### 6. Help, Usage, And Errors
 
-CommandLib は、初期設定でも有用な help と正確な error を出し、plugin 側が style を合わせられる formatter hooks を持つべきである。
+Cadence は、初期設定でも有用な help と正確な error を出し、plugin 側が style を合わせられる formatter hooks を持つべきである。
 
 Required:
 
@@ -514,7 +514,7 @@ Kotlin DSL goals:
 
 ### 8. Execution Pipeline
 
-Cloud の大きな強みは pipeline customization である。CommandLib は同等の拡張性を備え、型安全性・thread 安全性・テスト容易性で上回る。
+Cloud の大きな強みは pipeline customization である。Cadence は同等の拡張性を備え、型安全性・thread 安全性・テスト容易性で上回る。
 
 Required:
 
@@ -538,7 +538,7 @@ Stretch:
 
 ### 9. Testing Framework
 
-CommandLib は、この repository 自体だけでなく downstream plugin authors にとっても command behavior をテストしやすい状態にする。
+Cadence は、この repository 自体だけでなく downstream plugin authors にとっても command behavior をテストしやすい状態にする。
 
 詳細は `docs/design/testing-strategy.md` を参照。
 
@@ -565,7 +565,7 @@ Required:
 
 Required downstream testing（Phase 5）:
 
-- JUnit extension（`CommandLibExtension`。common / spigot / paper / velocity / modded の testing artifact で実装済み）。
+- JUnit extension（`CadenceExtension`。common / spigot / paper / velocity / modded の testing artifact で実装済み）。
 - golden command tree snapshots。
 - downstream plugin authors 向け compatibility test kit。
 - Paper 公式 test-framework（`io.papermc:paper-api-test-framework`）の利用調査。
@@ -590,7 +590,7 @@ Required docs:
 
 Required README additions:
 
-- Why CommandLib。
+- Why Cadence。
 - comparison table。
 - Bukkit / Paper quick start。
 - Forge quick start。
@@ -644,7 +644,7 @@ MC 依存層と loader 依存層の分離である。以下の module 分割は�
   1.20.5（item components による `ItemStackArgument` への影響、Java 21）、1.21.x の各 drop。
 - 互換性のある patch version（例: 1.21 / 1.21.1）は metadata の version range で 1 jar にまとめる。まとめられる範囲は
   integration test で裏付ける。
-- artifact 名は `commandlib-<loader>-<mcVersion>` 形式を基本とし、公開前に確定する。
+- artifact 名は `cadence-<loader>-<mcVersion>` 形式を基本とし、公開前に確定する。
 
 #### 安定 API 型（Velocity など）
 
@@ -657,7 +657,7 @@ Velocity:
 - Spigot / Paper 間の argument parity 方針は Velocity には適用しない。platform ごとの argument 提供範囲を
   `docs/compatibility.md` で明文化する。
 
-Brigadier を持たない環境（BungeeCord、Minestom など）を対応する場合は、CommandLib 内部に `CommandDispatcher` を持ち、
+Brigadier を持たない環境（BungeeCord、Minestom など）を対応する場合は、Cadence 内部に `CommandDispatcher` を持ち、
 文字列入力を自前で dispatch する adapter を用意して `common` を変更せずに済ませる。
 
 Sender / message abstraction は Velocity 着手前に設計する。Velocity と Paper は Adventure、Forge / NeoForge / Fabric は
@@ -674,9 +674,9 @@ Forge 系で「マイナーアップデートで mod が動かなくなる」原
 3. **loader 自身の API 変更**: 同一 MC version 内の loader build 更新でも API が変わることがある
    （`[?]` Forge 1.21.6+ の EventBus 刷新による listener 登録方法の変更を要確認）。loader 依存層を最小化し、
    CI で各 MC version の最古・最新 loader build の両方をテストする。
-4. **JarJar / `include()` による CommandLib の version 衝突**（library として最重要）: Forge / NeoForge の JarJar と
-   Fabric の `include()` は、複数 mod が異なる CommandLib version を同梱した場合に最新の 1 つだけを load する。
-   古い CommandLib 向けに compile された mod が新しい CommandLib 上で動くため、`NoSuchMethodError` などが起きうる。
+4. **JarJar / `include()` による Cadence の version 衝突**（library として最重要）: Forge / NeoForge の JarJar と
+   Fabric の `include()` は、複数 mod が異なる Cadence version を同梱した場合に最新の 1 つだけを load する。
+   古い Cadence 向けに compile された mod が新しい Cadence 上で動くため、`NoSuchMethodError` などが起きうる。
    - public API の binary compatibility を維持し、japicmp 等で CI チェックする。
    - downstream 向けに JarJar / `include()` と shade + relocate のどちらを推奨するかを決めて docs に書く。
 
@@ -754,7 +754,7 @@ Exit criteria:
 
 ### Phase 5: Ecosystem And Tooling
 
-目的: CommandLib を command registration library だけでなく、開発と運用の ecosystem にする。
+目的: Cadence を command registration library だけでなく、開発と運用の ecosystem にする。
 
 - command tree documentation generator。
 - permission tree exporter。
@@ -786,7 +786,7 @@ Exit criteria:
 
 最終目標の達成は機能数だけで判定せず、競合ベースラインの各勝利条件を証拠付きで満たすことを必要とする。
 
-- README だけで、新規 plugin が CommandLib を選ぶ理由を説明できる。
+- README だけで、新規 plugin が Cadence を選ぶ理由を説明できる。
 - CommandAPI、Cloud、Lamp、ACF からの migration guides がある。
 - supported Minecraft versions が focused tests または integration tests で裏付けられている。
 - breaking changes が release notes で管理されている。

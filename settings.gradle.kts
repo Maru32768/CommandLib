@@ -12,11 +12,11 @@ plugins {
     id("dev.kikugie.stonecutter") version "0.9.8"
 }
 
-rootProject.name = "CommandLib"
+rootProject.name = "Cadence"
 include("spigot", "paper", "velocity")
 // Typed NMS modules bundled into :spigot, one per directory under nms/. They need BuildTools or a paperweight dev
-// bundle, so -Pcommandlib.typedNms=false leaves them out for work that does not need the spigot jar, which then has
-// no NMS implementations, and -Pcommandlib.typedNms=spigot-1.20.4,paper-1.20.6 includes only the listed modules.
+// bundle, so -Pcadence.typedNms=false leaves them out for work that does not need the spigot jar, which then has
+// no NMS implementations, and -Pcadence.typedNms=spigot-1.20.4,paper-1.20.6 includes only the listed modules.
 val typedNmsModules = file("nms").listFiles()
     .orEmpty()
     .filter { it.resolve("build.gradle.kts").isFile }
@@ -24,7 +24,7 @@ val typedNmsModules = file("nms").listFiles()
     .sorted()
 // NMSClassRegistry only looks up modules listed in the table that tools/nms-codegen/generate.py writes.
 val typedNmsTable = Regex("""new NMSClassRegistry\.TypedModule\("([^"]+)"""")
-    .findAll(file("spigot/src/main/java/dev/marulabs/commandlib/internal/nms/TypedNmsModules.java").readText())
+    .findAll(file("spigot/src/main/java/dev/marulabs/cadence/internal/nms/TypedNmsModules.java").readText())
     .map { it.groupValues[1] }
     .toSet()
 typedNmsModules.forEach {
@@ -33,12 +33,12 @@ typedNmsModules.forEach {
         "nms/$it is missing from TypedNmsModules. Add it to MODULES in tools/nms-codegen/generate.py and regenerate."
     }
 }
-val typedNmsSelection = providers.gradleProperty("commandlib.typedNms").orNull
+val typedNmsSelection = providers.gradleProperty("cadence.typedNms").orNull
 val includedTypedNmsModules = when (typedNmsSelection) {
     null, "true" -> typedNmsModules
     "false" -> emptyList()
     else -> typedNmsSelection.split(",").map(String::trim).onEach {
-        require(it in typedNmsModules) { "Unknown typed NMS module in commandlib.typedNms: $it" }
+        require(it in typedNmsModules) { "Unknown typed NMS module in cadence.typedNms: $it" }
     }
 }
 includedTypedNmsModules.forEach { include("nms:$it") }

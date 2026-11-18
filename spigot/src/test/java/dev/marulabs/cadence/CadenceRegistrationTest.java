@@ -1,0 +1,315 @@
+package dev.marulabs.cadence;
+
+import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.tree.CommandNode;
+import com.mojang.brigadier.tree.LiteralCommandNode;
+import com.mojang.brigadier.tree.RootCommandNode;
+import dev.marulabs.cadence.MinecraftNamespacedCommandRemovalTest.FakeVanillaCommandWrapper;
+import dev.marulabs.cadence.internal.nms.command.NMSCommandDispatcher;
+import dev.marulabs.cadence.internal.nms.command.NMSVanillaCommandWrapper;
+import dev.marulabs.cadence.internal.nms.server.NMSCraftServer;
+import dev.marulabs.cadence.internal.nms.server.NMSDedicatedServer;
+import net.bytebuddy.ByteBuddy;
+import org.bukkit.Bukkit;
+import org.bukkit.Server;
+import org.bukkit.command.SimpleCommandMap;
+import org.bukkit.event.server.PluginDisableEvent;
+import org.bukkit.help.HelpMap;
+import org.bukkit.permissions.Permission;
+import org.bukkit.permissions.PermissionDefault;
+import org.bukkit.plugin.IllegalPluginAccessException;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.SimplePluginManager;
+import org.bukkit.scheduler.BukkitScheduler;
+import org.bukkit.scheduler.BukkitTask;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
+import java.util.logging.Logger;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.*;
+
+// A registration on the vanilla dispatcher of a Spigot server, whose NMS classes are mocked.
+@SuppressWarnings({"unchecked", "rawtypes"})
+class CadenceRegistrationTest {
+    private final Server server = mock(Server.class);
+    private final Plugin plugin = mock(Plugin.class);
+    // Bukkit's own permission registry, in which a permission is replaced and removed by its name.
+    private final SimplePluginManager pluginManager = spy(new SimplePluginManager(server, null));
+    private final BukkitScheduler scheduler = mock(BukkitScheduler.class);
+    private final NMSDedicatedServer dedicatedServer = mock(NMSDedicatedServer.class);
+    // The dispatcher players see, and the vanilla one that "execute run" and functions use.
+    private final RootCommandNode<Object> root = new RootCommandNode<>();
+    private final RootCommandNode<Object> vanillaRoot = new RootCommandNode<>();
+    private final SimpleCommandMap commandMap = new SimpleCommandMap(server);
+    private final List<BukkitTask> timers = new ArrayList<>();
+    private final List<Runnable> timerTasks = new ArrayList<>();
+    private final List<Cadence> registrations = new ArrayList<>();
+    private MockedStatic<Bukkit> bukkit;
+    private MockedStatic<NMSCraftServer> craftServers;
+    private MockedStatic<NMSVanillaCommandWrapper> wrappers;
+
+    @BeforeEach
+    void setUp() {
+        when(server.getPluginManager()).thenReturn(pluginManager);
+        doNothing().when(pluginManager)
+                   .registerEvents(any(), any());
+        when(plugin.getName()).thenReturn("Test");
+        when(plugin.getServer()).thenReturn(server);
+        when(plugin.getLogger()).thenReturn(Logger.getLogger("Test"));
+        bukkit = mockStatic(Bukkit.class);
+        bukkit.when(Bukkit::getServer)
+              .thenReturn(server);
+        bukkit.when(Bukkit::getPluginManager)
+              .thenReturn(pluginManager);
+        bukkit.when(Bukkit::isPrimaryThread)
+              .thenReturn(true);
+        bukkit.when(Bukkit::getOnlinePlayers)
+              .thenReturn(List.of());
+        bukkit.when(Bukkit::getBukkitVersion)
+              .thenReturn("1.16.5-R0.1-SNAPSHOT");
+        bukkit.when(Bukkit::getScheduler)
+              .thenReturn(scheduler);
+        bukkit.when(Bukkit::getHelpMap)
+              .thenReturn(mock(HelpMap.class));
+        when(scheduler.runTask(any(Plugin.class), any(Runnable.class))).thenReturn(mock(BukkitTask.class));
+        when(scheduler.runTaskTimer(any(Plugin.class), any(Runnable.class), anyLong(), anyLong())).thenAnswer(x -> {
+            BukkitTask task = mock(BukkitTask.class);
+            timers.add(task);
+            timerTasks.add(x.getArgument(1));
+            return task;
+        });
+
+        NMSCommandDispatcher dispatcher = mock(NMSCommandDispatcher.class);
+        doReturn(new CommandDispatcher<>(root)).when(dispatcher)
+                                               .getBrigadier();
+        NMSCommandDispatcher vanillaDispatcher = mock(NMSCommandDispatcher.class);
+        doReturn(new CommandDispatcher<>(vanillaRoot)).when(vanillaDispatcher)
+                                                      .getBrigadier();
+        when(dedicatedServer.getCommandDispatcher()).thenReturn(dispatcher);
+        when(dedicatedServer.getVanillaCommandDispatcher()).thenReturn(vanillaDispatcher);
+        when(dedicatedServer.getDataPackResourcesHandle()).thenReturn(new Object());
+        NMSCraftServer craftServer = mock(NMSCraftServer.class);
+        when(craftServer.getServer()).thenReturn(dedicatedServer);
+        when(craftServer.getCommandMap()).thenReturn(commandMap);
+        craftServers = mockStatic(NMSCraftServer.class, x -> craftServer);
+        NMSVanillaCommandWrapper wrapperFactory = mock(NMSVanillaCommandWrapper.class);
+        when(wrapperFactory.createInstance(any(),
+                                           any())).thenAnswer(x -> new FakeVanillaCommandWrapper(x.getArgument(1)));
+        wrappers = mockStatic(NMSVanillaCommandWrapper.class, x -> wrapperFactory);
+    }
+
+    @AfterEach
+    void tearDown() {
+        // The registrations and the function compiler task are static, so none is left for other tests.
+        registrations.forEach(Cadence::unregister);
+        // With no registration left, the task stops at its next run.
+        timerTasks.forEach(Runnable::run);
+        wrappers.close();
+        craftServers.close();
+        bukkit.close();
+    }
+
+    @Test
+    void the_function_compiler_runs_only_while_a_registration_is_left() {
+        Cadence spawn = register("spawn");
+        Cadence home = register("home");
+        assertThat(timers).hasSize(1);
+
+        spawn.unregister();
+        verify(timers.get(0), never()).cancel();
+
+        home.unregister();
+        // A command or function may be running, so the task compiles the functions without the commands on its next
+        // run, and then stops.
+        verify(dedicatedServer, never()).recompileFunctions(any(), anyBoolean());
+        verify(timers.get(0), never()).cancel();
+        timerTasks.get(0)
+                  .run();
+        verify(dedicatedServer).recompileFunctions(any(), anyBoolean());
+        verify(timers.get(0)).cancel();
+
+        register("spawn");
+        assertThat(timers).hasSize(2);
+    }
+
+    @Test
+    void the_functions_are_compiled_when_the_plugin_is_disabled_before_the_task_runs() throws Exception {
+        Cadence registration = register("spawn");
+        when(dedicatedServer.isRunning()).thenReturn(true);
+        // The plugin unregisters from its own disable listener, ahead of Cadence's, which Bukkit still calls in
+        // this dispatch. Bukkit then cancels the plugin's tasks, so the task never runs.
+        registration.unregister();
+        Method onPluginDisable = Cadence.class.getDeclaredMethod("onPluginDisable", PluginDisableEvent.class);
+        onPluginDisable.setAccessible(true);
+        onPluginDisable.invoke(registration, new PluginDisableEvent(plugin));
+
+        verify(dedicatedServer).recompileFunctions(any(), anyBoolean());
+    }
+
+    @Test
+    void a_failure_to_remove_the_commands_is_not_hidden_by_the_cleanup() {
+        Cadence registration = register("spawn");
+        // As after a failed compilation, so the cleanup creates the task again, which needs the server too.
+        when(timers.get(0)
+                   .isCancelled()).thenReturn(true);
+        IllegalStateException failure = new IllegalStateException("No server");
+        NMSCraftServer craftServer = NMSCraftServer.create(server);
+        when(craftServer.getServer()).thenThrow(failure);
+
+        // The function compilation logs its failure, so the registration's removal fails only with its own.
+        assertThatThrownBy(registration::unregister).hasCause(failure)
+                                                    .satisfies(x -> assertThat(x.getSuppressed()).isEmpty());
+        assertThat(commandMap.getCommand("spawn")).isNotNull();
+    }
+
+    @Test
+    void a_failing_cleanup_step_neither_hides_the_root_cause_nor_skips_the_others() {
+        Cadence registration = register("spawn");
+        IllegalStateException failure = new IllegalStateException("No server");
+        NMSCraftServer craftServer = NMSCraftServer.create(server);
+        when(craftServer.getServer()).thenThrow(failure);
+        IllegalPluginAccessException refused = new IllegalPluginAccessException("Plugin attempted to register task");
+        when(scheduler.runTask(any(Plugin.class), any(Runnable.class))).thenThrow(refused);
+
+        assertThatThrownBy(registration::unregister).hasCause(failure)
+                                                    .satisfies(x -> assertThat(x.getSuppressed()).containsExactly(refused));
+        assertThat(pluginManager.getPermission("test.command.spawn")).isNull();
+    }
+
+    @Test
+    void unregister_leaves_the_labels_and_the_vanilla_node_a_later_registration_took() {
+        Cadence first = register("spawn");
+        CommandNode<Object> firstNode = vanillaRoot.getChild("spawn");
+        Cadence second = register("spawn");
+        CommandNode<Object> secondNode = vanillaRoot.getChild("spawn");
+        org.bukkit.command.Command wrapper = commandMap.getCommand("spawn");
+
+        first.unregister();
+
+        assertThat(secondNode).isNotSameAs(firstNode);
+        assertThat(vanillaRoot.getChild("spawn")).isSameAs(secondNode);
+        assertThat(root.getChild("spawn")).isSameAs(secondNode);
+        assertThat(root.getChild("test:spawn")).isNotNull();
+        assertThat(commandMap.getCommand("spawn")).isSameAs(wrapper);
+        assertThat(commandMap.getCommand("test:spawn")).isSameAs(wrapper);
+
+        second.unregister();
+
+        assertThat(vanillaRoot.getChild("spawn")).isNull();
+        assertThat(root.getChild("spawn")).isNull();
+        assertThat(root.getChild("test:spawn")).isNull();
+        assertThat(commandMap.getCommand("spawn")).isNull();
+        assertThat(commandMap.getCommand("test:spawn")).isNull();
+    }
+
+    @Test
+    void unregistering_the_newer_of_two_registrations_of_a_node_gives_it_back_to_the_older_one() {
+        Cadence older = register(new Command("spawn") {{
+            permission(PermissionDefault.TRUE);
+            execute(ctx -> {
+            });
+        }});
+        Cadence newer = register(new Command("spawn") {{
+            permission(PermissionDefault.OP);
+            execute(ctx -> {
+            });
+        }});
+
+        newer.unregister();
+
+        Permission restored = pluginManager.getPermission("test.command.spawn");
+        assertThat(restored).isNotNull();
+        assertThat(restored.getDefault()).isEqualTo(PermissionDefault.TRUE);
+        assertThat(pluginManager.getDefaultPermissions(false)).containsExactly(restored);
+
+        older.unregister();
+
+        assertThat(pluginManager.getPermission("test.command.spawn")).isNull();
+        assertThat(pluginManager.getDefaultPermissions(false)).isEmpty();
+    }
+
+    @Test
+    void unregister_leaves_a_node_that_replaced_the_command_in_the_vanilla_dispatcher() {
+        Cadence registration = register("spawn");
+        LiteralCommandNode<Object> other = LiteralArgumentBuilder.literal("spawn")
+                                                                 .build();
+        CommandNodeChildren.replace(vanillaRoot, List.of("spawn"), List.of(other));
+
+        registration.unregister();
+
+        assertThat(vanillaRoot.getChild("spawn")).isSameAs(other);
+        assertThat(root.getChild("spawn")).isNull();
+        assertThat(commandMap.getCommand("spawn")).isNull();
+    }
+
+    @Test
+    void the_spigot_artifact_refuses_folia_before_anything_is_registered() throws Exception {
+        // Cadence looks for Folia's RegionizedServer through its own class loader, which here also defines one.
+        ClassLoader parent = Cadence.class.getClassLoader();
+        ClassLoader folia = new ClassLoader(parent) {
+            @Override
+            protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+                byte[] bytes;
+                if (name.equals("io.papermc.paper.threadedregions.RegionizedServer")) {
+                    bytes = new ByteBuddy().subclass(Object.class)
+                                           .name(name)
+                                           .make()
+                                           .getBytes();
+                } else if (name.equals(Cadence.class.getName())) {
+                    try (InputStream in = parent.getResourceAsStream(name.replace('.', '/') + ".class")) {
+                        bytes = Objects.requireNonNull(in)
+                                       .readAllBytes();
+                    } catch (IOException e) {
+                        throw new ClassNotFoundException(name, e);
+                    }
+                } else {
+                    return super.loadClass(name, resolve);
+                }
+                synchronized (getClassLoadingLock(name)) {
+                    Class<?> loaded = findLoadedClass(name);
+                    return loaded != null ? loaded : defineClass(name, bytes, 0, bytes.length);
+                }
+            }
+        };
+        // The constructor, since the other copy of the class is in another runtime package than the commands.
+        Constructor<?> constructor = folia.loadClass(Cadence.class.getName())
+                                          .getDeclaredConstructor(Plugin.class, Collection.class, String.class);
+        constructor.setAccessible(true);
+
+        assertThatThrownBy(() -> constructor.newInstance(plugin,
+                                                         List.of(),
+                                                         "test")).hasCauseInstanceOf(UnsupportedOperationException.class);
+        bukkit.verify(Bukkit::isPrimaryThread, never());
+        verifyNoInteractions(pluginManager);
+    }
+
+    private Cadence register(String name) {
+        return register(new Command(name) {{
+            execute(ctx -> {
+            });
+        }});
+    }
+
+    private Cadence register(Command command) {
+        Cadence registration = Cadence.register(plugin, command);
+        registrations.add(registration);
+        return registration;
+    }
+}

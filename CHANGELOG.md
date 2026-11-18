@@ -1,7 +1,7 @@
 # Changelog
 
-This file lists the changes in each CommandLib release that affect plugin and mod authors. The format follows
-[Keep a Changelog](https://keepachangelog.com/en/1.1.0/). CommandLib is 0.x, so a minor release can break the API.
+This file lists the changes in each Cadence release that affect plugin and mod authors. The format follows
+[Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Cadence is 0.x, so a minor release can break the API.
 
 ## [0.18.0] - Unreleased
 
@@ -11,28 +11,30 @@ This file lists the changes in each CommandLib release that affect plugin and mo
 
 #### Artifacts, packages and Java
 
-- The packages move from `net.kunmc.lab.commandlib` to `dev.marulabs.commandlib`. Change your imports and your Shadow
+- CommandLib is renamed Cadence. The `CommandLib` class is now `Cadence`, so `CommandLib.register(...)` becomes
+  `Cadence.register(...)`.
+- The packages move from `net.kunmc.lab.commandlib` to `dev.marulabs.cadence`. Change your imports and your Shadow
   `relocate(...)` source package.
-- The JitPack coordinates move from `com.github.TeamKun.CommandLib` to `com.github.Maru32768.CommandLib`. See
+- The JitPack coordinates move from `com.github.TeamKun.CommandLib` to `com.github.Maru32768.Cadence`. See
   [Packaging](docs/packaging.md#artifacts) for every artifact.
 - The `bukkit` artifact is removed. Use `spigot` for Spigot, Mohist, and Paper up to 1.21.1, or `paper` for Paper 1.21+.
 - On Paper newer than 1.21.1, the `spigot` artifact fails at registration with an `NMSClassNotFoundException` that names
   the `paper` artifact. Switch to `paper` there.
 - The `forge` artifact is now `forge-1.16.5`. Each modded artifact is named `<loader>-<minecraft version>`.
-- CommandLib needs Java 11 or later. 0.17.2 targeted Java 8. The `paper` artifact needs Java 21 and `velocity` needs
+- Cadence needs Java 11 or later. 0.17.2 targeted Java 8. The `paper` artifact needs Java 21 and `velocity` needs
   Java 17.
 - The `spigot` artifact reaches the server only through typed NMS modules. A server version without one fails at
   registration with `NMSClassNotFoundException`. The modules cover Spigot 1.16.4 to 26.3
   ([compatibility](docs/compatibility.md)).
-- The unused NMS wrapper `dev.marulabs.commandlib.util.nms.world.NMSEntity` and `NMSClass#getServerClass` are removed.
-- CommandLib's implementation moves to `dev.marulabs.commandlib.internal`, marked `@ApiStatus.Internal` and not API
+- The unused NMS wrapper `dev.marulabs.cadence.util.nms.world.NMSEntity` and `NMSClass#getServerClass` are removed.
+- Cadence's implementation moves to `dev.marulabs.cadence.internal`, marked `@ApiStatus.Internal` and not API
   ([hiding it in IntelliJ IDEA](README.md#hiding-internal-classes-in-intellij-idea)). Moved: `PlatformAdapter`,
   `util.StringUtil`, `branch.ArgumentBranchDelegate`, the NMS wrappers (`util.nms` to `internal.nms`, including
   `NMSClassRegistry` and the `NMS*` classes that `spigot-testing`'s `mockNmsClass` takes), `util.reflection`,
   `util.bukkit` (`BukkitUtil`, `MinecraftVersion`), Paper's `util.brigadier.VanillaArgumentTypes` and modded
-  `util.CurrentServer`. The typed NMS classes move from `dev.marulabs.commandlib.nms` to `internal.nms.typed`, and
+  `util.CurrentServer`. The typed NMS classes move from `dev.marulabs.cadence.nms` to `internal.nms.typed`, and
   `spigot-testing`'s NMS mocks to `internal.nms.mock`. Each platform's `PlatformAdapterImpl` is no longer public. The
-  `relocate("dev.marulabs.commandlib", ...)` of [packaging](docs/packaging.md) covers the new packages.
+  `relocate("dev.marulabs.cadence", ...)` of [packaging](docs/packaging.md) covers the new packages.
 
 #### Commands and arguments
 
@@ -51,9 +53,9 @@ This file lists the changes in each CommandLib release that affect plugin and mo
   `useDefaultSuggestions`, and the argument's `contextAction` is now `execute`.
 - Custom arguments take a self type: `Argument<T>` becomes `Argument<T, SELF>`, and `CommonArgument<T, C>` becomes
   `CommonArgument<T, C, SELF>`.
-- `SuggestionAction` is now `SuggestionProvider` in `dev.marulabs.commandlib.suggestion`. The setters are
+- `SuggestionAction` is now `SuggestionProvider` in `dev.marulabs.cadence.suggestion`. The setters are
   `setSuggestionProvider`, `addSuggestionProvider` and `clearSuggestionProviders`, and they reject `null`.
-- `ContextAction` is now `CommandExecutor` in `dev.marulabs.commandlib.command`.
+- `ContextAction` is now `CommandExecutor` in `dev.marulabs.cadence.command`.
 - `AbstractCommandContext` is now `CommonCommandContext`.
 - Some types move to subpackages: `Prerequisite` to `command`, `Suggestion` and `SuggestionBuilder` to `suggestion`,
   and `ArgumentValidator` and `Nameable` to `argument`.
@@ -67,7 +69,7 @@ This file lists the changes in each CommandLib release that affect plugin and mo
   ([execution](docs/execution.md#middleware)). `addPreprocess(Consumer)` is removed, because an expression lambda
   matched both overloads; return `true` from the preprocess or use `addMiddleware`.
 - Forge 1.16.5: `BlockPosArgument` is now `BlockPositionArgument`.
-- The public `CommandContext(CommandContext)` constructor of each platform is removed. CommandLib makes the
+- The public `CommandContext(CommandContext)` constructor of each platform is removed. Cadence makes the
   contexts; tests get them from the testers.
 - A command, argument branch or argument takes one executor: a second `execute`, `executeAsync` or
   `require(...).execute(...)` throws `IllegalStateException` instead of replacing the first. `require(...)` sets the
@@ -83,11 +85,11 @@ This file lists the changes in each CommandLib release that affect plugin and mo
   generic over `CommonCommandContext`, build a `RichText` instead: there the component resolves to
   `sendMessage(Object)`, which sends its `toString()`.
 - Forge / NeoForge / Fabric: the `boolean allowLogging` overloads of `sendMessage` (with a `String` or a component),
-  `sendWarn` and `sendFailure` are removed. Drop the flag. CommandLib no longer broadcasts to operators; send the
+  `sendWarn` and `sendFailure` are removed. Drop the flag. Cadence no longer broadcasts to operators; send the
   message to them yourself.
-- CommandLib's own messages are now captions in the sender's locale, with English and Japanese built in. Several
+- Cadence's own messages are now captions in the sender's locale, with English and Japanese built in. Several
   English texts are reworded. For example, the prerequisite failure says "You do not have permission". Where vanilla
-  has a message with the same meaning, such as "No player was found", CommandLib sends vanilla's translatable message.
+  has a message with the same meaning, such as "No player was found", Cadence sends vanilla's translatable message.
   Update tests that compare message text ([localization](docs/localization.md#built-in-captions)).
 - On Spigot, Paper and the modded artifacts, `sendSuccess` goes through vanilla's `CommandSourceStack#sendSuccess`.
   The `sendCommandFeedback` game rule and silent sources now suppress it.
@@ -104,17 +106,17 @@ This file lists the changes in each CommandLib release that affect plugin and mo
   `ALL` lets everyone in, so a command can no longer be opened to command blocks (level 2) while staying closed to
   players. A command block runs only `ALL` commands; a source that `/execute as` changes keeps the permission level of
   whoever ran `/execute`. The console, RCON, data pack functions that run as the server (tick, load, `/function` from
-  the console) and the compiling of functions pass every CommandLib check; when a player runs `/function`, that player's
+  the console) and the compiling of functions pass every Cadence check; when a player runs `/function`, that player's
   nodes are checked. The function permission level still guards vanilla's own commands in a function
   ([permissions](docs/permissions.md)).
-- Forge: `CommandLib.register(commands...)` is now `CommandLib.register(permissionPrefix, commands...)`, and
+- Forge: `Cadence.register(commands...)` is now `Cadence.register(permissionPrefix, commands...)`, and
   `permissionLevel(int)` is replaced by `permission(DefaultPermission)` (or `permission(DefaultPermissionLevel)` on
   1.16.5).
 - Spigot: `Command#permissionName()` is now `permissionName(String prefix)`.
 
 #### Registration
 
-- Spigot and Paper: `CommandLib.register` and `unregister` throw `IllegalStateException` off the main thread. On Folia,
+- Spigot and Paper: `Cadence.register` and `unregister` throw `IllegalStateException` off the main thread. On Folia,
   call them from `onEnable` / `onDisable` or the global region thread; region threads are refused.
 - Registration rejects trees it used to accept:
   - two argument branches that both run for the same input (`IllegalStateException`)
@@ -142,7 +144,7 @@ This file lists the changes in each CommandLib release that affect plugin and mo
 #### Platforms
 
 - The `paper` artifact for Paper 1.21+. It registers through Paper's command API and lifecycle events, and can also
-  register from a plugin bootstrapper with `CommandLib.bootstrap(...)`.
+  register from a plugin bootstrapper with `Cadence.bootstrap(...)`.
 - Folia support in the `paper` artifact. Async commands return to the entity, region or global region thread
   ([Folia](docs/execution.md#folia)). The `spigot` artifact refuses Folia with an `UnsupportedOperationException`.
 - The `velocity` artifact for Velocity 3.4+, with proxy arguments such as `PlayerArgument` and `ServerArgument`
@@ -155,7 +157,7 @@ This file lists the changes in each CommandLib release that affect plugin and mo
 Velocity, Fabric and Folia are new in this release. Folia has a smoke integration target (`folia-26.3`). Fabric 1.20.1
 and 1.21.1 run the Forge / NeoForge integration suite on a real Fabric server (`fabric-1.20.1`, `fabric-1.21.1`), but
 `fabric-1.21.4` and fabric-permissions-api are not verified there. Velocity 3.4.0 has a smoke
-integration target (`velocity-3.4.0`): a bot joins a Paper backend through a real proxy and receives CommandLib's
+integration target (`velocity-3.4.0`): a bot joins a Paper backend through a real proxy and receives Cadence's
 command tree, the messages and failure messages of its commands, the refusal of a command whose default is not `ALL`,
 `ServerArgument` suggestions, an `executeAsync` message, `PlayerArgument` (the proxy's player lookup and its
 suggestions) and a command for each argument type. Options, permission plugins and Velocity 4.x are not verified there.
@@ -194,7 +196,7 @@ suggestions) and a command for each argument type. Options, permission plugins a
   of the server's `/help`.
 - Permission nodes for every command, child and argument branch, with a configurable prefix and per-node overrides
   ([permissions](docs/permissions.md)).
-- `CommandLib.refresh(player)` and `CommandLib.refreshAll()` resend the command tree.
+- `Cadence.refresh(player)` and `Cadence.refreshAll()` resend the command tree.
 - `getLocale()`, `getLanguage()` and the platform-independent `getActor()` on the context.
 - `ctx.setResult(...)` sets what `/execute store result` stores, and `sendSuccess(message)` is vanilla command
   feedback, which respects the `sendCommandFeedback` gamerule and silent sources.
@@ -232,7 +234,7 @@ suggestions) and a command for each argument type. Options, permission plugins a
 #### Documentation and diagnostics
 
 - `CommandDocs` exports the commands, their examples and every permission node as Markdown or JSON.
-- `CommandLib.diagnostics()` reports the platform and the registrations, and an opt-in diagnostics command shows it
+- `Cadence.diagnostics()` reports the platform and the registrations, and an opt-in diagnostics command shows it
   in game ([diagnostics](docs/diagnostics.md)).
 
 #### Testing
@@ -247,7 +249,7 @@ suggestions) and a command for each argument type. Options, permission plugins a
   locale `en_us`, so caption assertions no longer depend on the JVM's default locale.
 - `spigot-testing` and `paper-testing` parse `LocationArgument` like the server: an integer x or z moves to the center
   of its block unless the argument is created with `centerIntegers` false.
-- A JUnit 5 extension, `CommandLibExtension`, creates a tester per test and injects `CommandTester` and `@Sender`
+- A JUnit 5 extension, `CadenceExtension`, creates a tester per test and injects `CommandTester` and `@Sender`
   `FakeSender` parameters.
 
 ### Fixed
@@ -263,10 +265,10 @@ suggestions) and a command for each argument type. Options, permission plugins a
 - `UncaughtExceptionHandler` receives exceptions thrown by executors.
 - An unexpected exception of an executor, a suggestion provider or a `visibleWhen` predicate is logged with the input
   and the sender through the platform's logger (the plugin's on Spigot and Paper) instead of printed to `System.err`.
-- Spigot: commands work after Bukkit `/reload`, because CommandLib adds them to the vanilla dispatcher.
+- Spigot: commands work after Bukkit `/reload`, because Cadence adds them to the vanilla dispatcher.
 - Spigot: commands appear under the plugin's `/help` index with their permission and description, instead of as "A
   Mojang provided command", and lose the stray `minecraft:` label.
-- Spigot: data pack functions that use CommandLib commands keep working after `/minecraft:reload`, `/datapack` and
+- Spigot: data pack functions that use Cadence commands keep working after `/minecraft:reload`, `/datapack` and
   `Bukkit#reloadData`, and on Mohist. Registration no longer reruns `#minecraft:load`, and the server no longer logs
   "Failed to load function" for those functions.
 - Spigot: `ParticleArgument` accepts particles with options, such as `dust`, from 1.20.4.

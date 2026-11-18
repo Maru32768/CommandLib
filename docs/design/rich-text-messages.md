@@ -1,10 +1,10 @@
 # Rich Text Messages
 
-This document describes how CommandLib's message API (formerly `TextComponentBuilder` and friends,
+This document describes how Cadence's message API (formerly `TextComponentBuilder` and friends,
 `sendMessageWithOption`, and `sendComponent`) was rebuilt as an official rich text API that works on every platform.
 
 Status: Phase 1 is implemented. The decisions taken on the former open questions are listed in
-[Decisions](#decisions). Package names use `dev.marulabs.commandlib`.
+[Decisions](#decisions). Package names use `dev.marulabs.cadence`.
 
 ## Background
 
@@ -17,7 +17,7 @@ Related roadmap items:
 - P5 "design the sender / message abstraction (bridging Adventure and vanilla `Component`) before starting Velocity".
 - Pillar 6 Stretch "MiniMessage / Adventure component support" and "rich help with hover / click".
 - The open question in `docs/compatibility.md` / `docs/design/module-structure.md`: "should the message API standardize
-  on Adventure or put a CommandLib abstraction in between?" Answer: a small CommandLib value type for code that spans
+  on Adventure or put a Cadence abstraction in between?" Answer: a small Cadence value type for code that spans
   platforms, plus native components for platform-specific code.
 
 ## State before Phase 1
@@ -39,7 +39,7 @@ Related roadmap items:
 ### Problems
 
 1. Code in `common` could not send a rich message type-safely. The builders had the platform component type as a type
-   parameter, so code holding a `CommonCommandContext<?, ?>` (CommandLib's exceptions, ConfigLib) needed raw types.
+   parameter, so code holding a `CommonCommandContext<?, ?>` (Cadence's exceptions, ConfigLib) needed raw types.
    ConfigLib could not use the builders at all: `build()` returned a capture type that another
    `CommonCommandContext<?, ?>`'s `sendComponent` did not accept.
 2. Missing features: decorations such as bold, click, translatable arguments, rich hover text.
@@ -69,7 +69,7 @@ MiniMessage.
 
 - **No Adventure re-implementation.** Paper-only plugins should use Adventure / MiniMessage directly and send with
   the native `sendMessage/sendSuccess/...(Component)` overloads; the README says so.
-  `RichText` is for code that spans platforms (CommandLib itself, the common layer of libraries such as ConfigLib).
+  `RichText` is for code that spans platforms (Cadence itself, the common layer of libraries such as ConfigLib).
 - Adventure is not shaded into Spigot / modded (it would need `adventure-platform-*` and conflict with relocation).
 - No MiniMessage or legacy `§` parser / serializer. Existing strings with `§` codes are sent as text (rendered by the
   client, as before).
@@ -80,7 +80,7 @@ MiniMessage.
 
 ## API
 
-### Value type `RichText` (common, `dev.marulabs.commandlib.util.text`)
+### Value type `RichText` (common, `dev.marulabs.cadence.util.text`)
 
 ```java
 public abstract class RichText {   // package-private constructor: the kinds are the two below
@@ -292,7 +292,7 @@ calls `sendMessage(RichText)`.
 
 ## Phases
 
-1. **Phase 1 (done, inside CommandLib)**: `RichText` / `ClickAction`, `sendMessage/Success/Warn/Failure(RichText)`,
+1. **Phase 1 (done, inside Cadence)**: `RichText` / `ClickAction`, `sendMessage/Success/Warn/Failure(RichText)`,
    the three platform converters, common-testing support, native `sendSuccess/Warn/Failure` on Paper and modded.
    `ArgumentParseException` migrated. Builders and `sendMessageWithOption` removed. Empty hover fixed.
 2. **Phase 2 (ConfigLib)**: migrate ConfigLib's five call sites to `RichText` and, if useful, add click (copy a value,

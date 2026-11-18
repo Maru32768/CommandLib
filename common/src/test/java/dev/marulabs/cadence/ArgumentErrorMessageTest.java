@@ -1,0 +1,180 @@
+package dev.marulabs.cadence;
+
+import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import dev.marulabs.cadence.argument.CommonEnumArgument;
+import dev.marulabs.cadence.argument.CommonStringArgument;
+import dev.marulabs.cadence.exception.ArgumentParseException;
+import dev.marulabs.cadence.exception.ArgumentValidationException;
+import dev.marulabs.cadence.exception.CommandPrerequisiteException;
+import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+class ArgumentErrorMessageTest {
+    private static final String HERE = "command.context.here";
+
+    @Test
+    void incorrect_input_message_points_at_invalid_token() throws Exception {
+        TestCommandRunner runner = new TestCommandRunner(directionCommand());
+
+        TestCommandContext ctx = runner.execute("go up");
+
+        assertThat(ctx.messages()).containsExactly("command.unknown.argument", "§7go §c§nup§r" + HERE);
+    }
+
+    @Test
+    void incorrect_input_message_strips_leading_slash_of_player_input() throws Exception {
+        TestCommandRunner runner = new TestCommandRunner(directionCommand());
+
+        TestCommandContext ctx = runner.executeWithLeadingSlash("/go up");
+
+        assertThat(ctx.messages()).containsExactly("command.unknown.argument", "§7go §c§nup§r" + HERE);
+    }
+
+    @Test
+    void incorrect_input_message_truncates_long_prefix() throws Exception {
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("go") {{
+            argument(new CommonStringArgument<>("label"),
+                     new CommonEnumArgument<>("dir", Direction.class)).execute((ctx, label, dir) -> {
+                         ctx.sendMessage("unreachable");
+                     });
+        }});
+
+        TestCommandContext ctx = runner.execute("go abcdefghijkl up");
+
+        assertThat(ctx.messages()).containsExactly("command.unknown.argument", "§7...defghijkl §c§nup§r" + HERE);
+    }
+
+    @Test
+    void validator_failure_uses_incorrect_input_message() throws Exception {
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("go") {{
+            argument(new DirArg("dir").validator(x -> x != Direction.NORTH)).execute((ctx, dir) -> {
+                ctx.sendMessage("unreachable");
+            });
+        }});
+
+        TestCommandContext ctx = runner.execute("go north");
+
+        assertThat(ctx.messages()).containsExactly("command.unknown.argument", "§7go §c§nnorth§r" + HERE);
+    }
+
+    @Test
+    void validator_filters_enum_suggestions_without_failing() {
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("go") {{
+            argument(new DirArg("dir").validator(x -> x != Direction.NORTH)).execute((ctx, dir) -> {
+            });
+        }});
+
+        assertThat(runner.suggest("go ")).containsExactlyInAnyOrder("south", "east", "west", "help");
+        // Enum suggestions match by substring, so "s" also matches east and west.
+        assertThat(runner.suggest("go s")).containsExactlyInAnyOrder("south", "east", "west");
+        assertThat(runner.suggest("go n")).isEmpty();
+    }
+
+    @Test
+    void context_aware_validator_filters_enum_suggestions_without_failing() {
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("go") {{
+            argument(new DirArg("dir").validator((ctx, x) -> x == Direction.EAST)).execute((ctx, dir) -> {
+            });
+        }});
+
+        assertThat(runner.suggest("go ")).containsExactlyInAnyOrder("east", "help");
+    }
+
+    private static TestCommand directionCommand() {
+        return new TestCommand("go") {{
+            argument(new CommonEnumArgument<>("dir", Direction.class)).execute((ctx, dir) -> {
+                ctx.sendMessage("unreachable");
+            });
+        }};
+    }
+
+    enum Direction {
+        NORTH,
+        SOUTH,
+        EAST,
+        WEST
+    }
+
+    private static final class DirArg extends CommonEnumArgument<Direction, TestCommandContext, DirArg> {
+        DirArg(String name) {
+            super(name, Direction.class);
+        }
+    }
+
+    private static final class StrArg extends CommonStringArgument<TestCommandContext, StrArg> {
+        StrArg(String name) {
+            super(name);
+        }
+    }
+
+    @Test
+    void incorrect_input_message_uses_argument_node_when_command_has_same_name() throws Exception {
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("dir") {{
+            argument(new CommonEnumArgument<>("dir", Direction.class)).execute((ctx, dir) -> {
+                ctx.sendMessage("unreachable");
+            });
+        }});
+
+        TestCommandContext ctx = runner.execute("dir up");
+
+        assertThat(ctx.messages()).containsExactly("command.unknown.argument", "§7dir §c§nup§r" + HERE);
+    }
+
+    @Test
+    void incorrect_input_message_without_matching_node_shows_token_once() throws Exception {
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("go") {{
+            argument(new CommonStringArgument<>("label")).execute((ctx, label) -> {
+                ArgumentParseException.ofIncorrectInput("missing", ctx, label)
+                                      .sendMessage(ctx);
+            });
+        }});
+
+        TestCommandContext ctx = runner.execute("go bad");
+
+        assertThat(ctx.messages()).containsExactly("command.unknown.argument", "§7go §c§nbad§r" + HERE);
+    }
+
+    @Test
+    void rejected_option_value_message_points_at_the_value_not_a_later_token_with_the_same_text() throws Exception {
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("go") {{
+            option(Options.of("n", new StrArg("n").validator(x -> !x.equals("bad"))));
+            argument(new CommonStringArgument<>("label")).execute((ctx, label) -> {
+                ctx.sendMessage("unreachable");
+            });
+        }});
+
+        TestCommandContext ctx = runner.execute("go --n bad bad");
+
+        assertThat(ctx.messages()).containsExactly("command.unknown.argument", "§7go --n §c§nbad§r" + HERE);
+    }
+
+    @Test
+    void text_and_caption_exceptions_have_a_message() {
+        assertThat(new ArgumentParseException("bad", "worse").getMessage()).isEqualTo("bad");
+        assertThat(new ArgumentValidationException().getMessage()).startsWith(Caption.INVALID_VALUE.key());
+        assertThat(new CommandPrerequisiteException().getMessage()).startsWith(Caption.PERMISSION_DENIED.key());
+    }
+
+    @Test
+    void validator_and_syntax_exceptions_have_a_message() throws Exception {
+        TestCommandRunner runner = new TestCommandRunner(new TestCommand("go") {{
+            errorFormatter((ctx, error) -> ctx.sendFailure(String.valueOf(error.exception()
+                                                                               .getMessage())));
+            argument(new StrArg("dir").validator(x -> false)).execute((ctx, dir) -> {
+            });
+        }});
+        CommandSyntaxException syntax = CommandSyntaxException.BUILT_IN_EXCEPTIONS.integerTooLow()
+                                                                                  .createWithContext(new StringReader("x 0"),
+                                                                                                     1,
+                                                                                                     0);
+
+        assertThat(runner.execute("go up")
+                         .messages()).containsExactly("Incorrect input for <dir>: 'up'");
+        assertThat(ArgumentParseException.ofCommandSyntaxException(syntax)
+                                         .getMessage()).isEqualTo(syntax.getMessage());
+        assertThat(ArgumentParseException.ofCommandSyntaxException(syntax)
+                                         .getCause()).isSameAs(syntax);
+    }
+}

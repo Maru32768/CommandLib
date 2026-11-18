@@ -2,7 +2,7 @@
 
 ## Context
 
-CommandLib originally modeled command trees as either command children or a
+Cadence originally modeled command trees as either command children or a
 linear argument chain:
 
 ```text
@@ -21,7 +21,7 @@ node:
 /root <argument> child <argument>
 ```
 
-This design note records how CommandLib represents that shape, how the fluent
+This design note records how Cadence represents that shape, how the fluent
 API is expected to behave, and which internal boundaries are intentional.
 
 ## Goals
@@ -119,7 +119,7 @@ existing `addChildren(...)` and `children()` vocabulary.
 
 `command(...)` was considered, but it is less precise in this API because
 `Command` is both a type and a root/subcommand concept. `child(...)` reads as a
-tree operation and keeps the DSL aligned with the rest of CommandLib.
+tree operation and keeps the DSL aligned with the rest of Cadence.
 
 ## Internal Model
 
@@ -188,7 +188,7 @@ becoming public just because branch classes live in their own package.
 
 ### `ArgumentBranchDelegate`
 
-`ArgumentBranchDelegate` (in `dev.marulabs.commandlib.internal`, `@ApiStatus.Internal`) is a narrow bridge from the
+`ArgumentBranchDelegate` (in `dev.marulabs.cadence.internal`, `@ApiStatus.Internal`) is a narrow bridge from the
 public `branch` package back to the internal `CommonCommand`/`Arguments` model. It is public only because the branch
 classes are in another package; the branch constructors that take it are `@ApiStatus.Internal` too.
 
@@ -209,8 +209,8 @@ public interface ArgumentBranchDelegate<C extends CommonCommandContext<?, ?>, T 
 `CommonCommand` creates the delegate for a specific `Arguments` instance. This
 keeps the package split clean:
 
-- `dev.marulabs.commandlib.branch`: public branch API
-- `dev.marulabs.commandlib`: internal command model and tree mutation
+- `dev.marulabs.cadence.branch`: public branch API
+- `dev.marulabs.cadence`: internal command model and tree mutation
 
 ## Child Addition Flow
 
@@ -466,7 +466,7 @@ use a real Brigadier command tree shape that fails without that fallback.
 ## Design Constraints
 
 - Keep `Arguments` package-private unless there is a strong reason to expose it.
-- Keep branch classes in `dev.marulabs.commandlib.branch` to avoid crowding the
+- Keep branch classes in `dev.marulabs.cadence.branch` to avoid crowding the
   root package.
 - Prefer arity-prefix names (`BiArgumentBranch`, `TriArgumentBranch`) over
   numbered names (`ArgumentBranch2`, `ArgumentBranch3`).

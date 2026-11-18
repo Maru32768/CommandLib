@@ -1,8 +1,8 @@
 val mcProtocol by configurations.creating
 
-extra["commandlib.integration.platform"] = "paper"
-extra["commandlib.integration.minecraftVersion"] = "1.21.1"
-extra["commandlib.integration.javaVersion"] = "21"
+extra["cadence.integration.platform"] = "paper"
+extra["cadence.integration.minecraftVersion"] = "1.21.1"
+extra["cadence.integration.javaVersion"] = "21"
 
 dependencies {
     // 1.21 and 1.21.1 share their protocol.

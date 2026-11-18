@@ -1,8 +1,8 @@
 val mcProtocol by configurations.creating
 
-extra["commandlib.integration.platform"] = "paper"
-extra["commandlib.integration.minecraftVersion"] = "26.1.1"
-extra["commandlib.integration.javaVersion"] = "25"
+extra["cadence.integration.platform"] = "paper"
+extra["cadence.integration.minecraftVersion"] = "26.1.1"
+extra["cadence.integration.javaVersion"] = "25"
 
 dependencies {
     mcProtocol("org.geysermc.mcprotocollib:protocol:26.1-1")

@@ -1,10 +1,10 @@
 rootProject.name = "SampleSpigotPlugin"
 
-val commandLibRoot = file("../..")
-if (commandLibRoot.resolve("settings.gradle.kts").isFile) {
-    includeBuild(commandLibRoot) {
+val cadenceRoot = file("../..")
+if (cadenceRoot.resolve("settings.gradle.kts").isFile) {
+    includeBuild(cadenceRoot) {
         dependencySubstitution {
-            substitute(module("com.github.Maru32768.CommandLib:spigot"))
+            substitute(module("com.github.Maru32768.Cadence:spigot"))
                 .using(project(":spigot"))
         }
     }

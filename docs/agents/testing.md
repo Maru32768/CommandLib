@@ -25,7 +25,7 @@ set up the paperweight dev bundle (see `docs/agents/nms-build.md`):
 ./gradlew :nms:spigot-1.16.5:assemble :nms:spigot-1.20.4:assemble :nms:paper-1.20.6:assemble
 ```
 
-Pass `-Pcommandlib.typedNms=false` to leave them out when the change does not
+Pass `-Pcadence.typedNms=false` to leave them out when the change does not
 need the spigot jar, such as `:spigot:test` or `spigot-testing`. The jar then
 has no NMS implementations, so it does not work on a server.
 
@@ -51,14 +51,14 @@ parallel Loom builds share a cache:
 (cd samples/velocity && ./gradlew build)
 # ForgeGradle 6 does not run on Gradle 9, and Loom remaps mod dependencies from
 # a Maven artifact, so the Forge and Fabric samples read mavenLocal.
-./gradlew -Pcommandlib.typedNms=false :common:publishToMavenLocal :modded:forge-1.16.5:publishToMavenLocal :modded:fabric-1.21.1:publishToMavenLocal
-(cd samples/forge && ./gradlew build -PcommandlibLocal=true)
-(cd samples/fabric && ./gradlew build -PcommandlibLocal=true)
+./gradlew -Pcadence.typedNms=false :common:publishToMavenLocal :modded:forge-1.16.5:publishToMavenLocal :modded:fabric-1.21.1:publishToMavenLocal
+(cd samples/forge && ./gradlew build -PcadenceLocal=true)
+(cd samples/fabric && ./gradlew build -PcadenceLocal=true)
 ```
 
-Every sample shades and relocates CommandLib; check the jar in `build/libs`
+Every sample shades and relocates Cadence; check the jar in `build/libs`
 (Fabric: the `remapJar` output without a classifier) has no
-`dev/marulabs/commandlib` entries after a packaging change.
+`dev/marulabs/cadence` entries after a packaging change.
 
 Integration tests may require Docker or a local Minecraft server environment.
 Run them only when the touched behavior requires it or the user asks for it:
@@ -92,7 +92,7 @@ Error Prone's `MissingCasesInEnumSwitch` (a warning, so an error under `-Werror`
 which a `default` would have swallowed. A constant the switch does not support gets its own `case` that breaks to the
 throw. Test a new check with Error Prone's `CompilationTestHelper` (`./gradlew :errorprone-checks:test`).
 
-NullAway runs with Error Prone on the main sources of the same modules and treats code in `dev.marulabs.commandlib` as
+NullAway runs with Error Prone on the main sources of the same modules and treats code in `dev.marulabs.cadence` as
 non-null unless annotated `@Nullable` (`org.jetbrains.annotations.Nullable`), and fails the build on a possible null
 dereference. Annotate a field, parameter or return value `@Nullable` when null is a legitimate value, and put the
 annotation of a method on the line above it, as the existing code does.

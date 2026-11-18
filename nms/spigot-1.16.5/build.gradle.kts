@@ -1,5 +1,5 @@
 plugins {
-    id("commandlib.spigot-nms")
+    id("cadence.spigot-nms")
 }
 
 // 1.16.5 is the last version whose Spigot-mapped server jar names members readably, so it compiles against the

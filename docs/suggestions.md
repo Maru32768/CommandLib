@@ -1,7 +1,7 @@
 # Suggestions
 
-Suggestions are the completions a player sees while typing an argument. Every CommandLib argument keeps an ordered list
-of suggestion providers; when the client asks for completions, CommandLib runs them all and sends the combined result.
+Suggestions are the completions a player sees while typing an argument. Every Cadence argument keeps an ordered list
+of suggestion providers; when the client asks for completions, Cadence runs them all and sends the combined result.
 
 ## Sources of suggestions
 
@@ -55,13 +55,13 @@ A provider is a `SuggestionProvider<C>`, a `Consumer<SuggestionBuilder<C>>`.
 | `suggest(text, message)` | Adds a completion with a Brigadier `Message` tooltip. |
 | `await(stage)` | Delays the response until the `CompletionStage` completes; see [Asynchronous suggestions](#asynchronous-suggestions). |
 
-CommandLib does not filter what a provider adds: suggestions reach the client as given. Filter by `getLatestInput()`
+Cadence does not filter what a provider adds: suggestions reach the client as given. Filter by `getLatestInput()`
 yourself. The built-in providers use case-insensitive "contains" matching, while vanilla suggestions use prefix
 matching.
 
 ### Reading earlier arguments
 
-Before the providers run, CommandLib parses the arguments that come before the one being completed: earlier arguments
+Before the providers run, Cadence parses the arguments that come before the one being completed: earlier arguments
 of the same branch and the arguments of parent branches for [argument child commands](../README.md). This is
 best-effort: an argument that fails to parse is left out, and `getArgument(name)` then throws
 `IllegalArgumentException`. Catch it when an earlier value may be invalid (`getInput(name)` returns `""` instead).
@@ -88,7 +88,7 @@ even when the option was typed earlier in the input.
 
 ### Validators filter suggestions
 
-For arguments whose suggestions CommandLib builds from candidates (`EnumArgument`, `ObjectArgument`,
+For arguments whose suggestions Cadence builds from candidates (`EnumArgument`, `ObjectArgument`,
 `NameableObjectArgument`, `OfflinePlayerArgument`, `OfflinePlayersArgument`, `UUIDArgument`, `UUIDsArgument`, Paper's
 `TeamArgument`, and Spigot's `TeamArgument` with a custom scoreboard), a candidate is suggested only if the argument's
 validator accepts it:

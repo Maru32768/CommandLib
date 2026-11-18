@@ -1,6 +1,6 @@
 # Module Structure
 
-This document describes CommandLib's module / artifact layout and the rules that keep it stable. The pre-GA split of the old `bukkit` module into `spigot` and `paper` is done; this document records the result and what is still open.
+This document describes Cadence's module / artifact layout and the rules that keep it stable. The pre-GA split of the old `bukkit` module into `spigot` and `paper` is done; this document records the result and what is still open.
 
 ## Principles
 
@@ -112,15 +112,15 @@ integration-test -> platform modules
 
 ## Packages And Visibility
 
-Everything outside `dev.marulabs.commandlib.internal` is API. Implementation that another package or module must reach
+Everything outside `dev.marulabs.cadence.internal` is API. Implementation that another package or module must reach
 is public in `internal` or one of its sub-packages. Each Java package there is annotated `@ApiStatus.Internal` in its
 `package-info.java`, and so is each hand-written public class; the generated typed NMS classes rely on the annotation of
 their generated `package-info.java`. The Kotlin package `internal.kotlin` of `common-kotlin` has no annotation, as
 Kotlin has no package annotation: its functions are `internal` to Kotlin code, but they and their file class are public
-on the JVM, so only the package hides them from Java. A user who excludes `dev.marulabs.commandlib.internal` from
+on the JVM, so only the package hides them from Java. A user who excludes `dev.marulabs.cadence.internal` from
 completion, as the README describes, sees only API. The rule is to hide by package, not to make the internals
 unreachable: Java has no visibility between "package" and "public" that spans packages, and the JPMS cannot be used
-because CommandLib is shaded into plugins and mods.
+because Cadence is shaded into plugins and mods.
 
 - `common`: `internal` holds `PlatformAdapter` and its holder, `CurrentCommandContext`, `ArgumentBranchDelegate` and
   `StringUtil`. `spigot`: the NMS bridge (`internal.nms`, typed modules in `internal.nms.typed.<module>`), reflection
@@ -142,7 +142,7 @@ because CommandLib is shaded into plugins and mods.
 
 ### Spigot
 
-The `spigot` artifact exposes `dev.marulabs.commandlib.Command`, `CommandContext`, `CommandLib`, and the Bukkit/Spigot argument classes.
+The `spigot` artifact exposes `dev.marulabs.cadence.Command`, `CommandContext`, `Cadence`, and the Bukkit/Spigot argument classes.
 
 Responsibilities:
 
@@ -166,7 +166,7 @@ Responsibilities:
 
 ### Velocity
 
-The `velocity` artifact exposes the same `Command` / `CommandContext` / `CommandLib` shape on a proxy. Velocity's
+The `velocity` artifact exposes the same `Command` / `CommandContext` / `Cadence` shape on a proxy. Velocity's
 `BrigadierCommand` takes Brigadier nodes, so `CommandNodeCreator` builds them unchanged, and every top-level node
 (command or alias) is registered as its own `BrigadierCommand` of the plugin.
 
@@ -174,7 +174,7 @@ Responsibilities:
 
 - Registration through `CommandManager` and removal by `CommandMeta`.
 - Sender bridge for `CommandSource`, `Player`, and `ConsoleCommandSource`.
-- Permission checks through `PermissionSubject#getPermissionValue`, applying CommandLib's defaults to unset nodes,
+- Permission checks through `PermissionSubject#getPermissionValue`, applying Cadence's defaults to unset nodes,
   since Velocity has no permission registry and no operators.
 - Adventure messages. Paper and Velocity both compile the `RichText` converter from `common/src/adventure`. It is
   written against the click-event factories so that it links against Adventure 4 (Velocity 3) and Adventure 5
@@ -191,7 +191,7 @@ run on Velocity 3.4.0 and 4.2.0 proxies.
 The DSL is extension functions over the fluent model (`CommonCommand`, `ArgumentBranch`, `CommandOption`), so it
 adds no command semantics of its own. Platform types stay out of `common-kotlin`; the only platform-specific code is
 `command` / `subcommand`, which must create the platform's `Command`. Every platform names that class
-`dev.marulabs.commandlib.Command`, so the platform modules compile one shared source directory
+`dev.marulabs.cadence.Command`, so the platform modules compile one shared source directory
 (`common-kotlin/src/platform`) and one shared test directory (`common-kotlin/src/platformTest`) instead of each having
 its own copy. Forge / NeoForge / Fabric have no Kotlin module yet, since a Loom build per node would be needed for three
 functions.
@@ -219,7 +219,7 @@ main thread.
 
 - Should `paper` share any source with `spigot`, or should duplication be accepted until a true neutral abstraction appears?
 - Should `mohist` stay tested under `spigot`, or become its own artifact if its differences grow?
-- Should message APIs expose CommandLib's own abstraction, Adventure, or platform-native components?
+- Should message APIs expose Cadence's own abstraction, Adventure, or platform-native components?
 - Should `modded` be split into a Minecraft-version module and loader modules (see `docs/roadmap.md`)? Fabric was added as
   a loader of the same tree without the split: the loader-specific code is command registration, permissions, and the
   running-server lookup (`internal.CurrentServer`).

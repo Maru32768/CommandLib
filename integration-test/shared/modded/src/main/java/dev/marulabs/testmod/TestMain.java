@@ -1,8 +1,8 @@
 package dev.marulabs.testmod;
 
-import dev.marulabs.commandlib.Command;
-import dev.marulabs.commandlib.CommandLib;
-import dev.marulabs.commandlib.DefaultPermission;
+import dev.marulabs.cadence.Command;
+import dev.marulabs.cadence.Cadence;
+import dev.marulabs.cadence.DefaultPermission;
 import dev.marulabs.integration.core.ExceptionUtil;
 import dev.marulabs.integration.core.JUnitXmlReport;
 import dev.marulabs.integration.core.TestResult;
@@ -62,9 +62,9 @@ public final class TestMain {
             mainCommand.addChildren(new Command("runTests") {{
                 permission(DefaultPermission.ALL);
                 execute(ctx -> {
-                    LOGGER.info("Received CommandLib test run request.");
+                    LOGGER.info("Received Cadence test run request.");
                     if (!running.compareAndSet(false, true)) {
-                        LOGGER.info("CommandLib test cases are already running.");
+                        LOGGER.info("Cadence test cases are already running.");
                         return;
                     }
                     try {
@@ -85,7 +85,7 @@ public final class TestMain {
                 permission(DefaultPermission.ALL);
                 execute(ctx -> {
                     if (!running.get()) {
-                        LOGGER.info("No CommandLib test run to report.");
+                        LOGGER.info("No Cadence test run to report.");
                         return;
                     }
                     MinecraftServer server = ctx.getSender()
@@ -103,9 +103,9 @@ public final class TestMain {
                 });
             }});
 
-            CommandLib.register(TestMod.MOD_ID, mainCommand);
+            Cadence.register(TestMod.MOD_ID, mainCommand);
         } catch (Throwable e) {
-            LOGGER.error("COMMANDLIB_TEST_PLUGIN_ENABLE_FAILED", e);
+            LOGGER.error("CADENCE_TEST_PLUGIN_ENABLE_FAILED", e);
             throw e;
         }
     }
@@ -136,7 +136,7 @@ public final class TestMain {
             //?}
         }
 
-        LOGGER.info("Executing CommandLib test cases.");
+        LOGGER.info("Executing Cadence test cases.");
         CommandSourceStack console = server.createCommandSourceStack();
         for (String command : commands) {
             LOGGER.info("Dispatching test command: " + command);
@@ -228,8 +228,8 @@ public final class TestMain {
     }
 
     private static void writeReport(List<TestResult> results) {
-        String reportName = System.getProperty("commandlib.testReportName", "TEST-commandlib-forge.xml");
-        Path reportDir = Paths.get(System.getProperty("commandlib.testReportDir", "test-results"));
+        String reportName = System.getProperty("cadence.testReportName", "TEST-cadence-forge.xml");
+        Path reportDir = Paths.get(System.getProperty("cadence.testReportDir", "test-results"));
         Path path = reportDir.resolve(reportName);
         try {
             Files.createDirectories(path.getParent());

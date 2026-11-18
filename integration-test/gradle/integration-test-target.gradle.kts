@@ -1,8 +1,8 @@
-import commandlib.nms.registerBuildTools
+import cadence.nms.registerBuildTools
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 
-abstract class CommandLibIntegrationSlot : BuildService<BuildServiceParameters.None>
+abstract class CadenceIntegrationSlot : BuildService<BuildServiceParameters.None>
 
 repositories {
     mavenCentral()
@@ -34,26 +34,26 @@ repositories {
 group = "dev.marulabs.integration.target"
 
 val targetName = project.name
-val targetPlatform = extra["commandlib.integration.platform"].toString()
-val minecraftVersion = extra["commandlib.integration.minecraftVersion"].toString()
-val minecraftJavaVersion = extra["commandlib.integration.javaVersion"].toString().toInt()
-val serverDirectory = if (extra.has("commandlib.integration.serverDirectory")) {
-    extra["commandlib.integration.serverDirectory"].toString()
+val targetPlatform = extra["cadence.integration.platform"].toString()
+val minecraftVersion = extra["cadence.integration.minecraftVersion"].toString()
+val minecraftJavaVersion = extra["cadence.integration.javaVersion"].toString().toInt()
+val serverDirectory = if (extra.has("cadence.integration.serverDirectory")) {
+    extra["cadence.integration.serverDirectory"].toString()
 } else {
     "server"
 }
-val serverJarName = if (extra.has("commandlib.integration.serverJarName")) {
-    extra["commandlib.integration.serverJarName"].toString()
+val serverJarName = if (extra.has("cadence.integration.serverJarName")) {
+    extra["cadence.integration.serverJarName"].toString()
 } else {
     "server.jar"
 }
-val bootstrapServerPort = if (extra.has("commandlib.integration.bootstrapServerPort")) {
-    extra["commandlib.integration.bootstrapServerPort"].toString().toInt()
+val bootstrapServerPort = if (extra.has("cadence.integration.bootstrapServerPort")) {
+    extra["cadence.integration.bootstrapServerPort"].toString().toInt()
 } else {
     25565
 }
-val requiresMohistBootstrap = if (extra.has("commandlib.integration.requiresMohistBootstrap")) {
-    extra["commandlib.integration.requiresMohistBootstrap"].toString()
+val requiresMohistBootstrap = if (extra.has("cadence.integration.requiresMohistBootstrap")) {
+    extra["cadence.integration.requiresMohistBootstrap"].toString()
 } else {
     "false"
 }
@@ -61,61 +61,61 @@ val requiresMohistBootstrap = if (extra.has("commandlib.integration.requiresMohi
     ?: false
 // Arguments that make Mohist install its libraries and exit. When set, the bootstrap installs with them first and then
 // starts the server without the library check, as the Docker run does.
-val mohistInstallArgs = if (extra.has("commandlib.integration.mohistInstallArgs")) {
-    extra["commandlib.integration.mohistInstallArgs"].toString().split(" ")
+val mohistInstallArgs = if (extra.has("cadence.integration.mohistInstallArgs")) {
+    extra["cadence.integration.mohistInstallArgs"].toString().split(" ")
 } else {
     null
 }
 // Directory under the target project that holds the server directory. Bukkit-family targets use their nested
 // test-plugin Gradle project; other platforms only need a work directory.
-val workDirectory = if (extra.has("commandlib.integration.workDirectory")) {
-    extra["commandlib.integration.workDirectory"].toString()
+val workDirectory = if (extra.has("cadence.integration.workDirectory")) {
+    extra["cadence.integration.workDirectory"].toString()
 } else {
     "test-plugin"
 }
 // Directory inside the server directory that receives the test plugin or mod jar.
-val testPluginSubdirectory = if (extra.has("commandlib.integration.testPluginSubdirectory")) {
-    extra["commandlib.integration.testPluginSubdirectory"].toString()
+val testPluginSubdirectory = if (extra.has("cadence.integration.testPluginSubdirectory")) {
+    extra["cadence.integration.testPluginSubdirectory"].toString()
 } else {
     "plugins"
 }
-val testPluginJarPattern = if (extra.has("commandlib.integration.testPluginJarPattern")) {
-    extra["commandlib.integration.testPluginJarPattern"].toString()
+val testPluginJarPattern = if (extra.has("cadence.integration.testPluginJarPattern")) {
+    extra["cadence.integration.testPluginJarPattern"].toString()
 } else {
     "TestPlugin.*\\.jar"
 }
 // Java arguments that start the server, such as "-jar server.jar" or an @argument file.
-val serverLaunchArgs = if (extra.has("commandlib.integration.serverLaunchArgs")) {
-    extra["commandlib.integration.serverLaunchArgs"].toString()
+val serverLaunchArgs = if (extra.has("cadence.integration.serverLaunchArgs")) {
+    extra["cadence.integration.serverLaunchArgs"].toString()
 } else {
     "-jar $serverJarName"
 }
 val isBukkitPlatform = targetPlatform == "paper" || targetPlatform == "mohist" || targetPlatform == "spigot"
-val reportFileName = "TEST-commandlib-$minecraftVersion-$targetPlatform.xml"
+val reportFileName = "TEST-cadence-$minecraftVersion-$targetPlatform.xml"
 
 val mcProtocol = configurations.named("mcProtocol")
 val testRuntimeClasspath = configurations.named("testRuntimeClasspath")
 // The reflective runner is Java 17 bytecode for every protocol. Only its runtime dependencies and JVM vary.
 evaluationDependsOn(":integration-test")
 val sharedTestOutput = project(":integration-test").extensions.getByType<SourceSetContainer>()["test"].output
-val minecraftIntegrationMaxParallel = providers.gradleProperty("commandlib.minecraftIntegrationMaxParallel")
+val minecraftIntegrationMaxParallel = providers.gradleProperty("cadence.minecraftIntegrationMaxParallel")
     .map(String::toInt)
     .orElse(4)
-val mohistBootstrapMaxParallel = providers.gradleProperty("commandlib.mohistBootstrapMaxParallel")
+val mohistBootstrapMaxParallel = providers.gradleProperty("cadence.mohistBootstrapMaxParallel")
     .map(String::toInt)
     .orElse(4)
-val containerCpuLimit = providers.gradleProperty("commandlib.containerCpuLimit")
+val containerCpuLimit = providers.gradleProperty("cadence.containerCpuLimit")
     .map(String::toDouble)
     .orElse(2.0)
 val minecraftIntegrationSlot = gradle.sharedServices.registerIfAbsent(
-    "commandlibMinecraftIntegrationSlot",
-    CommandLibIntegrationSlot::class,
+    "cadenceMinecraftIntegrationSlot",
+    CadenceIntegrationSlot::class,
 ) {
     maxParallelUsages.set(minecraftIntegrationMaxParallel)
 }
 val mohistBootstrapSlot = gradle.sharedServices.registerIfAbsent(
-    "commandlibMohistBootstrapSlot",
-    CommandLibIntegrationSlot::class,
+    "cadenceMohistBootstrapSlot",
+    CadenceIntegrationSlot::class,
 ) {
     maxParallelUsages.set(mohistBootstrapMaxParallel)
 }
@@ -137,24 +137,24 @@ dependencies {
 }
 
 // Java release of the test JVM, which runs the MCProtocolLib bot. MCProtocolLib needs Java 21 from 26.2.
-val botJavaVersion = if (extra.has("commandlib.integration.botJavaVersion")) {
-    extra["commandlib.integration.botJavaVersion"].toString().toInt()
+val botJavaVersion = if (extra.has("cadence.integration.botJavaVersion")) {
+    extra["cadence.integration.botJavaVersion"].toString().toInt()
 } else {
     17
 }
 
 // Test class that drives the target. A target whose servers the shared runner cannot start, such as a proxy with a
 // backend, sets its own.
-val integrationTestClass = if (extra.has("commandlib.integration.testClass")) {
-    extra["commandlib.integration.testClass"].toString()
+val integrationTestClass = if (extra.has("cadence.integration.testClass")) {
+    extra["cadence.integration.testClass"].toString()
 } else {
-    "dev.marulabs.commandlib.integration.IntegrationTest"
+    "dev.marulabs.cadence.integration.IntegrationTest"
 }
 
 // Set by a target whose plugin the server must refuse: the text its enable failure has to log. Such a target starts
 // no bot.
-val expectedEnableFailure = if (extra.has("commandlib.integration.expectedEnableFailure")) {
-    extra["commandlib.integration.expectedEnableFailure"].toString()
+val expectedEnableFailure = if (extra.has("cadence.integration.expectedEnableFailure")) {
+    extra["cadence.integration.expectedEnableFailure"].toString()
 } else {
     null
 }
@@ -169,7 +169,7 @@ tasks.named<Test>("test") {
 
 // The nested test-plugin builds share this build's Gradle user home by default, so a fresh checkout or worktree
 // reuses the Gradle distribution, dependencies and toolchains that are already downloaded.
-val nestedGradleUserHome = providers.gradleProperty("commandlib.integrationGradleUserHome")
+val nestedGradleUserHome = providers.gradleProperty("cadence.integrationGradleUserHome")
     .map { rootProject.file(it) }
     .getOrElse(gradle.gradleUserHomeDir)
 val integrationTestDir = rootProject.file("integration-test")
@@ -179,7 +179,7 @@ val stagedDockerServerDir = layout.buildDirectory.dir("docker-server")
 // Image reference tagged with a hash of the staged server directory, written when the directory is staged. Checkouts
 // and worktrees with the same server base share the image, and one with a different base cannot replace it.
 val dockerImageTagFile = layout.buildDirectory.file("docker-server-image/tag.txt")
-val dockerImageRepository = "commandlib-it-${targetName.lowercase()}"
+val dockerImageRepository = "cadence-it-${targetName.lowercase()}"
 
 fun dockerImageExists(image: String): Boolean =
     providers.exec {
@@ -210,19 +210,19 @@ fun hashDirectory(dir: File): String {
 val isWindows = System.getProperty("os.name").startsWith("Windows", ignoreCase = true)
 val javaToolchains = extensions.getByType<JavaToolchainService>()
 
-// CommandLib module that the nested test-plugin build inlines. That build also runs on its own, so it keeps the
+// Cadence module that the nested test-plugin build inlines. That build also runs on its own, so it keeps the
 // setting and this build reads it from there.
 val fixtureBuildScript = testPluginDir.resolve("build.gradle.kts")
     .takeIf { it.isFile }
     ?.readText()
-val commandlibModule = fixtureBuildScript
-    ?.let { Regex("""extra\["commandlibModule"]\s*=\s*"([^"]+)"""").find(it)?.groupValues?.get(1) }
+val cadenceModule = fixtureBuildScript
+    ?.let { Regex("""extra\["cadenceModule"]\s*=\s*"([^"]+)"""").find(it)?.groupValues?.get(1) }
 
 // A target can register its own prepareTestPlugin task before applying this script, for example to install a
 // Forge server and copy the test mod built in this Gradle build. Otherwise the nested test-plugin build runs.
 val prepareTask = if ("prepareTestPlugin" in tasks.names) tasks.named("prepareTestPlugin") else tasks.register<Exec>("prepareTestPlugin") {
-    requireNotNull(commandlibModule) { "${testPluginDir.resolve("build.gradle.kts")} does not set commandlibModule" }
-    if (commandlibModule == "spigot") {
+    requireNotNull(cadenceModule) { "${testPluginDir.resolve("build.gradle.kts")} does not set cadenceModule" }
+    if (cadenceModule == "spigot") {
         // The nested build bundles the typed NMS jars from spigot/build/typed-nms.
         dependsOn(":spigot:collectTypedNms")
         inputs.files(rootProject.fileTree("spigot/build/typed-nms") { include("*.jar") })
@@ -233,14 +233,14 @@ val prepareTask = if ("prepareTestPlugin" in tasks.names) tasks.named("prepareTe
     inputs.file(sharedDir.resolve("integration-test.gradle.kts"))
     val fixtureSuite = fixtureBuildScript
         ?.let { Regex("""extra\["testPluginSuite"]\s*=\s*"([^"]+)"""").find(it)?.groupValues?.get(1) }
-        ?: if (commandlibModule == "paper") "paper" else "spigot"
-    for (source in listOf("common/src/main", "$commandlibModule/src/main", "integration-test/shared/core/src/main",
+        ?: if (cadenceModule == "paper") "paper" else "spigot"
+    for (source in listOf("common/src/main", "$cadenceModule/src/main", "integration-test/shared/core/src/main",
         "integration-test/shared/$fixtureSuite/src/main")) {
         inputs.files(rootProject.fileTree(source))
     }
     if (fixtureSuite != "folia") inputs.files(rootProject.fileTree("integration-test/shared/bukkit/src/main"))
-    if (commandlibModule == "paper") inputs.files(rootProject.fileTree("common/src/adventure"))
-    if (commandlibModule == "spigot" || commandlibModule == "paper") inputs.files(rootProject.fileTree("common/src/bukkit"))
+    if (cadenceModule == "paper") inputs.files(rootProject.fileTree("common/src/adventure"))
+    if (cadenceModule == "spigot" || cadenceModule == "paper") inputs.files(rootProject.fileTree("common/src/bukkit"))
     outputs.file(testPluginDir.resolve("$serverDirectory/$serverJarName"))
     outputs.files(fileTree(testPluginDir.resolve("$serverDirectory/$testPluginSubdirectory")) {
         include("TestPlugin*.jar")
@@ -286,11 +286,11 @@ val prepareTask = if ("prepareTestPlugin" in tasks.names) tasks.named("prepareTe
 // same version exists, the run also installs the remapped artifacts it compiles against; a target without one, such as
 // spigot-1.21, needs only the server jar.
 // A target for a release that BuildTools now resolves to a later build, such as 1.21, sets the Spigot build number in
-// commandlib.integration.buildToolsRevision.
+// cadence.integration.buildToolsRevision.
 if (targetPlatform == "spigot") {
     val spigotVersion = minecraftVersion
-    val buildToolsRevision = if (extra.has("commandlib.integration.buildToolsRevision")) {
-        extra["commandlib.integration.buildToolsRevision"].toString()
+    val buildToolsRevision = if (extra.has("cadence.integration.buildToolsRevision")) {
+        extra["cadence.integration.buildToolsRevision"].toString()
     } else {
         spigotVersion
     }
@@ -317,7 +317,7 @@ fun writeServerProperties(serverDir: File, port: Int) {
         online-mode=false
         server-port=$port
         enforce-secure-profile=false
-        motd=CommandLib IT
+        motd=Cadence IT
         gamemode=creative
         force-gamemode=true
         difficulty=peaceful
@@ -467,7 +467,7 @@ val stageDockerServerDirectory = tasks.register<Sync>("stageDockerServerDirector
         // their first start, depending on the platform. Starting the server once while building the image keeps
         // that work, and its network access, out of every test run; Docker caches the layer until the staged
         // directory changes.
-        stagedDir.resolve("commandlib-warmup.sh").writeText(
+        stagedDir.resolve("cadence-warmup.sh").writeText(
             """
             set -e
             printf 'eula=true\n' > eula.txt
@@ -502,7 +502,7 @@ val stageDockerServerDirectory = tasks.register<Sync>("stageDockerServerDirector
               echo 'The server failed while warming up the image.'
               exit 1
             fi
-            rm -rf logs crash-reports world/session.lock commandlib-warmup.sh
+            rm -rf logs crash-reports world/session.lock cadence-warmup.sh
             """.trimIndent() + "\n"
         )
         stagedDir.resolve("Dockerfile").writeText(
@@ -510,7 +510,7 @@ val stageDockerServerDirectory = tasks.register<Sync>("stageDockerServerDirector
             FROM eclipse-temurin:$minecraftJavaVersion-jre
             WORKDIR /workspace/server
             COPY . /workspace/server
-            RUN sh commandlib-warmup.sh
+            RUN sh cadence-warmup.sh
             """.trimIndent() + "\n"
         )
         dockerImageTagFile.get().asFile.apply {
@@ -720,23 +720,23 @@ tasks.register<Test>("minecraftIntegrationTest") {
     if (requiresMohistBootstrap) {
         dependsOn(mohistBootstrapTask)
     }
-    systemProperty("commandlib.rootDir", rootProject.projectDir.absolutePath)
-    systemProperty("commandlib.integrationTestDir", integrationTestDir.absolutePath)
-    systemProperty("commandlib.testPluginDir", testPluginDir.absolutePath)
+    systemProperty("cadence.rootDir", rootProject.projectDir.absolutePath)
+    systemProperty("cadence.integrationTestDir", integrationTestDir.absolutePath)
+    systemProperty("cadence.testPluginDir", testPluginDir.absolutePath)
     doFirst {
-        systemProperty("commandlib.dockerImageName", dockerImageTagFile.get().asFile.readText().trim())
+        systemProperty("cadence.dockerImageName", dockerImageTagFile.get().asFile.readText().trim())
     }
-    systemProperty("commandlib.sharedDir", sharedDir.absolutePath)
-    systemProperty("commandlib.runMinecraftIntegration", "true")
-    systemProperty("commandlib.targetName", targetName)
-    expectedEnableFailure?.let { systemProperty("commandlib.expectedEnableFailure", it) }
-    systemProperty("commandlib.platform", targetPlatform)
-    systemProperty("commandlib.reportFileName", reportFileName)
-    systemProperty("commandlib.serverDirectory", serverDirectory)
-    systemProperty("commandlib.serverJarName", serverJarName)
-    systemProperty("commandlib.serverLaunchArgs", serverLaunchArgs)
-    systemProperty("commandlib.testPluginSubdirectory", testPluginSubdirectory)
-    systemProperty("commandlib.testPluginJarPattern", testPluginJarPattern)
-    systemProperty("commandlib.minecraftJavaVersion", minecraftJavaVersion.toString())
-    systemProperty("commandlib.containerCpuLimit", containerCpuLimit.get().toString())
+    systemProperty("cadence.sharedDir", sharedDir.absolutePath)
+    systemProperty("cadence.runMinecraftIntegration", "true")
+    systemProperty("cadence.targetName", targetName)
+    expectedEnableFailure?.let { systemProperty("cadence.expectedEnableFailure", it) }
+    systemProperty("cadence.platform", targetPlatform)
+    systemProperty("cadence.reportFileName", reportFileName)
+    systemProperty("cadence.serverDirectory", serverDirectory)
+    systemProperty("cadence.serverJarName", serverJarName)
+    systemProperty("cadence.serverLaunchArgs", serverLaunchArgs)
+    systemProperty("cadence.testPluginSubdirectory", testPluginSubdirectory)
+    systemProperty("cadence.testPluginJarPattern", testPluginJarPattern)
+    systemProperty("cadence.minecraftJavaVersion", minecraftJavaVersion.toString())
+    systemProperty("cadence.containerCpuLimit", containerCpuLimit.get().toString())
 }

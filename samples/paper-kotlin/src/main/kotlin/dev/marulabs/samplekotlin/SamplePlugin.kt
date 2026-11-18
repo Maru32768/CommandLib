@@ -1,22 +1,22 @@
 package dev.marulabs.samplekotlin
 
-import dev.marulabs.commandlib.CommandLib
-import dev.marulabs.commandlib.CommandLibDiagnosticsCommand
-import dev.marulabs.commandlib.argument.IntegerArgument
-import dev.marulabs.commandlib.argument.PlayerArgument
-import dev.marulabs.commandlib.argument.StringArgument
-import dev.marulabs.commandlib.kotlin.argument
-import dev.marulabs.commandlib.kotlin.command
-import dev.marulabs.commandlib.kotlin.flag
-import dev.marulabs.commandlib.kotlin.getValue
-import dev.marulabs.commandlib.kotlin.subcommand
+import dev.marulabs.cadence.Cadence
+import dev.marulabs.cadence.CadenceDiagnosticsCommand
+import dev.marulabs.cadence.argument.IntegerArgument
+import dev.marulabs.cadence.argument.PlayerArgument
+import dev.marulabs.cadence.argument.StringArgument
+import dev.marulabs.cadence.kotlin.argument
+import dev.marulabs.cadence.kotlin.command
+import dev.marulabs.cadence.kotlin.flag
+import dev.marulabs.cadence.kotlin.getValue
+import dev.marulabs.cadence.kotlin.subcommand
 import org.bukkit.plugin.java.JavaPlugin
 
 class SamplePlugin : JavaPlugin() {
     private val notes = mutableListOf<String>()
 
     override fun onEnable() {
-        CommandLib.register(this, feedCommand(), notesCommand(), CommandLibDiagnosticsCommand("samplekotlin-diagnostics"))
+        Cadence.register(this, feedCommand(), notesCommand(), CadenceDiagnosticsCommand("samplekotlin-diagnostics"))
     }
 
     /**

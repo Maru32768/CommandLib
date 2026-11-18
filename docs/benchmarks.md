@@ -1,6 +1,6 @@
 # Benchmarks
 
-The `benchmark` module measures CommandLib's own cost with [JMH](https://github.com/openjdk/jmh): registering
+The `benchmark` module measures Cadence's own cost with [JMH](https://github.com/openjdk/jmh): registering
 commands, parsing and executing input, and suggesting. It drives `common` through the `common-testing`
 `CommandTester`, which builds the same Brigadier tree as a platform registration, so no server is needed. The module is
 not published, and `check` only compiles it; the benchmarks run only through the tasks below.
@@ -8,8 +8,8 @@ not published, and `check` only compiles it; the benchmarks run only through the
 ## Running
 
 ```bash
-./gradlew -Pcommandlib.typedNms=false --configure-on-demand :benchmark:jmh
-./gradlew -Pcommandlib.typedNms=false --configure-on-demand :benchmark:jmhCompare
+./gradlew -Pcadence.typedNms=false --configure-on-demand :benchmark:jmh
+./gradlew -Pcadence.typedNms=false --configure-on-demand :benchmark:jmhCompare
 ```
 
 `jmh` runs every benchmark with `-f 1 -wi 3 -w 1s -i 5 -r 1s -prof gc` (one fork, three 1 s warmup iterations, five
@@ -17,7 +17,7 @@ not published, and `check` only compiles it; the benchmarks run only through the
 about nine minutes. `--args` replaces these options, for example to run one benchmark:
 
 ```bash
-./gradlew -Pcommandlib.typedNms=false :benchmark:jmh --args="-f 1 -wi 3 -i 5 -prof gc -rf json -rff build/results/jmh/results.json SuggestBenchmark"
+./gradlew -Pcadence.typedNms=false :benchmark:jmh --args="-f 1 -wi 3 -i 5 -prof gc -rf json -rff build/results/jmh/results.json SuggestBenchmark"
 ```
 
 `jmhCompare` compares `results.json` with `benchmark/baseline.json` (another file with `-Pbenchmark.baseline=<path>`),
@@ -44,7 +44,7 @@ Every command of a tree has the same shape (`Trees.command`), so a tree of N com
 
 The sender is `FakeSender.player("bench")`, which has every permission, so each permission check runs but passes.
 Executors run synchronously (the tester's default scheduler) and write their result to a volatile field; they send no
-messages. There is no cache between calls beyond what CommandLib and Brigadier keep themselves.
+messages. There is no cache between calls beyond what Cadence and Brigadier keep themselves.
 
 | Benchmark | Mode | Parameters | Measures |
 |---|---|---|---|
@@ -84,7 +84,7 @@ is recorded on an idle machine, only the allocation fails `jmhCompare`.
 
 The baseline in `benchmark/baseline.json`, recorded with the default `jmh` options:
 
-- CommandLib: library code of `647ca7c4`, Brigadier 1.0.18, `common-testing`
+- Cadence: library code of `647ca7c4`, Brigadier 1.0.18, `common-testing`
   `CommandTester` (no platform tester)
 - JDK: Temurin 21.0.3 (OpenJDK 64-Bit Server VM 21.0.3+9-LTS), default JVM options and heap, JMH 1.37
 - OS / CPU: Windows 11 Home 10.0.26200, AMD Ryzen 5 3600 (6 cores, 12 threads), 64 GB
@@ -155,7 +155,7 @@ The option states now redirect to one node per state, and the argument nodes are
 `docs/design/command-options.md`). `OptionTreeSizeTest` in `common` keeps the sizes below limits. Recorded with the
 default `jmh` options on the same machine and JDK as the baseline, which `baseline.json` still holds:
 
-- CommandLib: the option redirect commits on top of `e5eefc70`, so the comparison with the baseline (`647ca7c4`)
+- Cadence: the option redirect commits on top of `e5eefc70`, so the comparison with the baseline (`647ca7c4`)
   also includes the commits between them.
 - Load: the parallel Gradle builds of other agents kept the CPU at about 97% with a dozen JVMs during the run, more
   than during the baseline. The time metrics are noisier still: `jmhCompare` reports regressions only for metrics

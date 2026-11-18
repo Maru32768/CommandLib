@@ -1,26 +1,26 @@
 # Migrating from ACF
 
 This guide maps [Aikar's Annotation Command Framework](https://github.com/aikar/commands)
-([wiki](https://github.com/aikar/commands/wiki)) concepts to CommandLib for Spigot and Paper plugins. The examples use
-`acf-paper` names on the left and CommandLib's `spigot` / `paper` artifacts on the right.
+([wiki](https://github.com/aikar/commands/wiki)) concepts to Cadence for Spigot and Paper plugins. The examples use
+`acf-paper` names on the left and Cadence's `spigot` / `paper` artifacts on the right.
 
 The main difference in style: ACF reads annotated methods of a `BaseCommand` and resolves each parameter through a
-context registered by type. CommandLib's core is fluent: a command is a `Command` subclass whose arguments are
+context registered by type. Cadence's core is fluent: a command is a `Command` subclass whose arguments are
 objects, and the executor gets their values as typed lambda parameters. Its [annotation API](../annotations.md), with a
-type registry, builds the same fluent commands from annotated methods; this guide maps to the fluent API. CommandLib commands are always
+type registry, builds the same fluent commands from annotated methods; this guide maps to the fluent API. Cadence commands are always
 Brigadier nodes, so the client validates and colors the input while the player types.
 
-Features CommandLib does not have yet are marked **Not available**.
+Features Cadence does not have yet are marked **Not available**.
 
 ## Setup
 
-| ACF | CommandLib |
+| ACF | Cadence |
 |---|---|
-| `new PaperCommandManager(plugin)` / `BukkitCommandManager` | No manager: shade the `spigot` or `paper` artifact and relocate `dev.marulabs.commandlib` |
-| `manager.registerCommand(new MyCommand())` | `CommandLib.register(plugin, commands...)` in `onEnable` |
-| `manager.unregisterCommand(...)` | `CommandLib#unregister()`; plugin disable does it automatically |
+| `new PaperCommandManager(plugin)` / `BukkitCommandManager` | No manager: shade the `spigot` or `paper` artifact and relocate `dev.marulabs.cadence` |
+| `manager.registerCommand(new MyCommand())` | `Cadence.register(plugin, commands...)` in `onEnable` |
+| `manager.unregisterCommand(...)` | `Cadence#unregister()`; plugin disable does it automatically |
 | `manager.enableUnstableAPI("brigadier")` | Not needed; commands are always Brigadier nodes |
-| — | `CommandLib.bootstrap(context, commands...)` in `PluginBootstrap#bootstrap` (Paper) |
+| — | `Cadence.bootstrap(context, commands...)` in `PluginBootstrap#bootstrap` (Paper) |
 
 ```java
 // ACF
@@ -46,7 +46,7 @@ manager.registerCommand(new ResidenceCommand());
 ```
 
 ```java
-// CommandLib
+// Cadence
 class ResidenceCommand extends Command {
     ResidenceCommand() {
         super("res");
@@ -63,7 +63,7 @@ class ResidenceCommand extends Command {
 }
 
 // onEnable
-CommandLib.register(this, new ResidenceCommand());
+Cadence.register(this, new ResidenceCommand());
 ```
 
 `PlayerArgument` suggests players by default, so `@CommandCompletion("@players")` needs no counterpart. Without a
@@ -71,7 +71,7 @@ target, the console gets the requirer's failure message.
 
 ## Command structure
 
-| ACF | CommandLib |
+| ACF | Cadence |
 |---|---|
 | `extends BaseCommand` + `@CommandAlias("res\|residence")` | `extends Command`, `super("res")`, `addAliases("residence")` |
 | `@Default` method | `execute(...)` on the command |
@@ -87,7 +87,7 @@ target, the console gets the requirer's failure message.
 
 ## Parameters and contexts
 
-| ACF parameter | CommandLib argument |
+| ACF parameter | Cadence argument |
 |---|---|
 | `int`, `long`, `float`, `double`, `boolean`, wrapper types | `IntegerArgument`, `LongArgument`, `FloatArgument`, `DoubleArgument`, `BooleanArgument`, optionally with `min, max` |
 | `String` as the last parameter (rest of the input) | `new StringArgument(name, StringArgument.Type.PHRASE)` |
@@ -106,7 +106,7 @@ See the [argument catalog](../arguments.md) for every built-in argument.
 
 ### `@Optional` and `@Default`
 
-| ACF | CommandLib |
+| ACF | Cadence |
 |---|---|
 | `@Default("7") Integer number` | `new IntegerArgument("number").optional(7)` |
 | `@Optional OnlinePlayer target` (`null` when omitted) | **Not available** as `null`; `optional(Command.player())` defaults to the sender, or declare a second branch without it |
@@ -128,7 +128,7 @@ manager.getCommandContexts().registerContext(Arena.class, c -> {
 ```
 
 ```java
-// CommandLib
+// Cadence
 class JoinCommand extends Command {
     JoinCommand(ArenaManager arenas) {
         super("join");
@@ -143,7 +143,7 @@ class JoinCommand extends Command {
 code. There is no registry of types: build the argument where it is used, or write a factory method that returns a
 configured argument.
 
-| ACF context kind | CommandLib |
+| ACF context kind | Cadence |
 |---|---|
 | `registerContext` (consumes input) | An argument: `ObjectArgument`, `NameableObjectArgument`, `EnumArgument`, or a subclass of `Argument` |
 | `registerIssuerOnlyContext` (from the sender only) | `provide(Type.class, ctx -> ...)` on the command, read with `ctx.get(Type.class)` or as an annotated parameter after `registerContextValue`; or `require(ctx -> ...)`, which hands the value to one executor ([context values](../context-values.md#sender-mapping)) |
@@ -152,7 +152,7 @@ configured argument.
 
 ## Issuers
 
-| ACF | CommandLib |
+| ACF | Cadence |
 |---|---|
 | `CommandSender sender` as the first parameter | `ctx.getSender()` |
 | `Player player` as the first parameter (player only) | `addPrerequisite(Command.player())` on the command, then `ctx.getPlayer()`; or `require(Command.player())` for a typed player |
@@ -161,7 +161,7 @@ configured argument.
 | `sender.sendMessage(...)` | `ctx.sendMessage`, `sendSuccess` (green), `sendWarn` (yellow), `sendFailure` (red) |
 
 ```java
-// CommandLib: a typed player value
+// Cadence: a typed player value
 class HomeCommand extends Command {
     HomeCommand() {
         super("home");
@@ -174,19 +174,19 @@ class HomeCommand extends Command {
 
 ## Permissions
 
-| ACF | CommandLib |
+| ACF | Cadence |
 |---|---|
 | `@CommandPermission("res.use")` | `permission("res.use")` |
 | No annotation (anyone) | `permission(DefaultPermission.ALL)`; root commands default to OP |
 | `@CommandPermission` on the class | `permission(...)` on the root command; children get generated nodes and inherit the default |
 | Completions hidden without the permission | Commands, subcommands, and argument branches a sender lacks are left out of the sender's command tree |
 
-CommandLib registers a Bukkit permission for every node, with its default and description. See
+Cadence registers a Bukkit permission for every node, with its default and description. See
 [permissions](../permissions.md).
 
 ## Completions
 
-| ACF | CommandLib |
+| ACF | Cadence |
 |---|---|
 | `@CommandCompletion("@players")`, `@worlds`, `@mobs`, `@chatcolors` | The default suggestions of `PlayerArgument`, `WorldArgument`, `EntityTypeArgument`, `ChatColorArgument` |
 | `@CommandCompletion("a\|b\|c")` | `addSuggestionProvider(sb -> sb.suggest("a").suggest("b").suggest("c"))`, or `LiteralArgument` |
@@ -198,25 +198,25 @@ CommandLib registers a Bukkit permission for every node, with its default and de
 | Completion configs (`@foo:key=value`) | Parameters of your own provider method |
 
 ```java
-// CommandLib
+// Cadence
 argument(new StringArgument("warp", StringArgument.Type.WORD).setSuggestionProvider(sb -> warps.names()
                                                                                       .forEach(sb::suggest)))
         .execute((ctx, warp) -> ctx.sendMessage("Warping to " + warp));
 ```
 
-CommandLib does not filter what a provider adds; filter by `sb.getLatestInput()` yourself. See
+Cadence does not filter what a provider adds; filter by `sb.getLatestInput()` yourself. See
 [suggestions](../suggestions.md).
 
 ## Conditions
 
-| ACF | CommandLib |
+| ACF | Cadence |
 |---|---|
 | `addCondition("daytime", c -> ...)` + `@Conditions("daytime")` | A `Prerequisite<CommandContext>` added with `addPrerequisite(...)`; annotated commands use `registerPrerequisite("daytime", ...)` + `@Prerequisites("daytime")` |
 | Parameter conditions `@Conditions("limits:min=5,max=10")` | `validator(...)` on the argument, or `new IntegerArgument(name, 5, 10)` |
 | `throw new ConditionFailedException("...")` | `throw new CommandPrerequisiteException("...")` in a prerequisite, `ArgumentValidationException("...")` in a validator |
 
 ```java
-// CommandLib: a reusable condition
+// Cadence: a reusable condition
 final class Conditions {
     static final Prerequisite<CommandContext> DAYTIME = ctx -> {
         long time = ctx.getPlayer()
@@ -244,7 +244,7 @@ calls `disableParentPrerequisite()`.
 
 ## Options
 
-**Not in ACF.** CommandLib has typed flags and value options placed after the command name:
+**Not in ACF.** Cadence has typed flags and value options placed after the command name:
 
 ```java
 class ScanCommand extends Command {
@@ -266,17 +266,17 @@ keeps a player from running it again too soon. See [confirmation and cooldown](.
 
 ## Help
 
-| ACF | CommandLib |
+| ACF | Cadence |
 |---|---|
 | `@HelpCommand` + `CommandHelp help` + `help.showHelp()`, `enableUnstableAPI("help")` | Built in: `/<command> help`; a command without an executor sends its usage |
 | `@Description` | `description(...)`; it appears in the generated usage |
-| Syntax advice on wrong input | Brigadier's vanilla error with the `...<--[HERE]` context line; see [errors](../errors.md). For a value CommandLib rejects, `errorFormatter(ErrorFormatter.SYNTAX_ADVICE)` adds the usage line of the branch; see [help](../help.md#syntax-advice) |
+| Syntax advice on wrong input | Brigadier's vanilla error with the `...<--[HERE]` context line; see [errors](../errors.md). For a value Cadence rejects, `errorFormatter(ErrorFormatter.SYNTAX_ADVICE)` adds the usage line of the branch; see [help](../help.md#syntax-advice) |
 | `CommandHelpFormatter`, `setHelpFormatter(...)` | `helpFormatter(...)` and `usageFormatter(...)` on a command; see [help](../help.md) |
 | Bukkit `/help` entry | `serverHelp(shortText[, fullText])` |
 
 ## Locales and messages
 
-| ACF | CommandLib |
+| ACF | Cadence |
 |---|---|
 | `MessageKeys` | `Caption` constants, such as `Caption.PERMISSION_DENIED`; your own keys with `Caption.of(key, englishDefault)`. See [localization](../localization.md) |
 | `getLocales().addMessage(locale, key, text)` | `Captions.create().set(locale, caption, text)`, given to the command with `captions(...)` |
@@ -308,9 +308,9 @@ class HelloCommand extends Command {
 
 `manager.registerDependency(Type.class, instance)` and `@Dependency` fields map to the annotation parser:
 `AnnotatedCommands.parser().registerDependency(ArenaManager.class, arenaManager).parse(new JoinCommand())` sets the
-fields of `JoinCommand` annotated `@Dependency` (from `dev.marulabs.commandlib.annotation`) and lets its methods take an
+fields of `JoinCommand` annotated `@Dependency` (from `dev.marulabs.cadence.annotation`) and lets its methods take an
 `ArenaManager` parameter. Fluent commands get their services through the constructor,
-`CommandLib.register(this, new JoinCommand(arenaManager))`, or read a value a parent command provides with
+`Cadence.register(this, new JoinCommand(arenaManager))`, or read a value a parent command provides with
 `ctx.get(ArenaManager.class)` ([context values](../context-values.md#dependencies)).
 
 ## Testing

@@ -1,9 +1,9 @@
 package dev.marulabs.testmod;
 
-import dev.marulabs.commandlib.Command;
-import dev.marulabs.commandlib.CommandActor;
-import dev.marulabs.commandlib.CommandActorType;
-import dev.marulabs.commandlib.util.Location;
+import dev.marulabs.cadence.Command;
+import dev.marulabs.cadence.CommandActor;
+import dev.marulabs.cadence.CommandActorType;
+import dev.marulabs.cadence.util.Location;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.Entity;
 

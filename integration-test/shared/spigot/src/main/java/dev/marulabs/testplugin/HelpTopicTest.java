@@ -1,6 +1,6 @@
 package dev.marulabs.testplugin;
 
-import dev.marulabs.commandlib.Command;
+import dev.marulabs.cadence.Command;
 import dev.marulabs.integration.core.TestResult;
 import dev.marulabs.integration.core.TestStatus;
 import org.bukkit.Bukkit;
@@ -22,8 +22,8 @@ import java.util.Locale;
  * after it.
  */
 public final class HelpTopicTest extends TestBase {
-    public static final String SHORT_TEXT = "CommandLib integration test command";
-    public static final String FULL_TEXT = "The CommandLib integration test command runs the test cases.";
+    public static final String SHORT_TEXT = "Cadence integration test command";
+    public static final String FULL_TEXT = "The Cadence integration test command runs the test cases.";
     public static final String AFTER_RELOAD = "helpTopicAfterReload";
 
     private final Plugin plugin;

@@ -1,10 +1,10 @@
-# CommandLib - A Feature-Rich Minecraft Command API for Spigot, Paper, Velocity, Forge, NeoForge and Fabric
+# Cadence - A Feature-Rich Minecraft Command API for Spigot, Paper, Velocity, Forge, NeoForge and Fabric
 
-[![](https://jitpack.io/v/Maru32768/CommandLib.svg)](https://jitpack.io/#Maru32768/CommandLib)
+[![](https://jitpack.io/v/Maru32768/Cadence.svg)](https://jitpack.io/#Maru32768/Cadence)
 
-CommandLib is an advanced, type-safe Command API for Spigot, Paper, Velocity, Forge, NeoForge and Fabric developers.
+Cadence is an advanced, type-safe Command API for Spigot, Paper, Velocity, Forge, NeoForge and Fabric developers.
 It abstracts and enhances the Minecraft 1.16.5+ command APIs, simplifying command implementation. With features like
-customizable argument suggestions, seamless validation, improved usability, and extensibility, CommandLib empowers
+customizable argument suggestions, seamless validation, improved usability, and extensibility, Cadence empowers
 developers to build better commands with ease.
 
 #### Supported Versions
@@ -51,13 +51,13 @@ developers to build better commands with ease.
     Write a command as a class with `@Command`, `@Subcommand`, `@Flag` and `@Option` methods; it builds the same
     command as the fluent API, with the same help, permissions and tests ([docs](docs/annotations.md)).
 11. **Localized Messages**  
-    CommandLib's own messages are captions sent in each sender's locale, in English and Japanese out of the box, and a
+    Cadence's own messages are captions sent in each sender's locale, in English and Japanese out of the box, and a
     plugin can replace them per key and locale or load its own properties files ([docs](docs/localization.md)).
 12. **Sender Mapping and Context Values**  
     Map the sender to your own type once, attach values from middlewares, and give commands their services; executors,
     annotated methods and the Kotlin DSL read them by type without casts ([docs](docs/context-values.md)).
 
-## Why CommandLib
+## Why Cadence
 
 - **One command model for Spigot, Paper, Velocity, Forge, NeoForge, and Fabric.** The same `Command` / `argument(...)`
   code compiles against each platform artifact: Spigot from Minecraft 1.16.5 to 26.3, Paper from 1.21, Velocity 3.4+,
@@ -74,7 +74,7 @@ developers to build better commands with ease.
   ([permissions](docs/permissions.md#refreshing-the-command-tree)).
 - **Options, generated help, and test utilities built in.**
 
-| | CommandLib | CommandAPI | Paper command API |
+| | Cadence | CommandAPI | Paper command API |
 |---|---|---|---|
 | Platforms | Spigot, Paper, Forge, NeoForge, Fabric, Velocity | Spigot, Paper (others: see its docs) | Paper |
 | Executor arguments | typed parameters | `args.get("name")` + cast | `ctx.getArgument("name", Type.class)` |
@@ -84,7 +84,7 @@ developers to build better commands with ease.
 | Server-free test utilities | `spigot-testing`, `paper-testing`, `velocity-testing`, `forge-` / `neoforge-` / `fabric-testing` | test toolkit (MockBukkit) | — |
 | Chat / NBT arguments | text component, message, NBT compound (SNBT string on Bukkit) | yes | component, signed message; no NBT |
 
-See the [comparison](docs/comparison.md) for seven use cases written with CommandLib, CommandAPI, Cloud, Lamp, ACF
+See the [comparison](docs/comparison.md) for seven use cases written with Cadence, CommandAPI, Cloud, Lamp, ACF
 and Paper's command API, including where the others are better, the [argument catalog](docs/arguments.md) for an
 argument-by-argument comparison and [compatibility](docs/compatibility.md) for the tested server versions.
 
@@ -108,24 +108,24 @@ argument-by-argument comparison and [compatibility](docs/compatibility.md) for t
   and a runtime report of the platform and the registrations.
 - [Troubleshooting](docs/troubleshooting.md).
 - [Javadoc](docs/javadoc.md): where to browse the Javadoc of each module.
-- [Comparison](docs/comparison.md): seven use cases in CommandLib, CommandAPI, Cloud, Lamp, ACF and Paper, with the
-  CommandLib side compiled and tested in [`examples`](examples).
+- [Comparison](docs/comparison.md): seven use cases in Cadence, CommandAPI, Cloud, Lamp, ACF and Paper, with the
+  Cadence side compiled and tested in [`examples`](examples).
 - [Migrating from CommandAPI](docs/migration/from-commandapi.md).
 - [Migrating from Cloud](docs/migration/from-cloud.md).
 - [Migrating from Lamp](docs/migration/from-lamp.md).
 - [Migrating from ACF](docs/migration/from-acf.md).
 - [Compatibility](docs/compatibility.md): tested platforms and versions.
-- [Packaging](docs/packaging.md): shading and relocating CommandLib per platform, Jar-in-Jar, and the artifacts.
+- [Packaging](docs/packaging.md): shading and relocating Cadence per platform, Jar-in-Jar, and the artifacts.
 - [Sample projects](samples): buildable plugins and mods for each platform.
 
 ## Installation
 
 To ensure stability, we recommend replacing `latest.release` with a specific version such as `0.18.0`.  
-You can find the latest version on the [releases page](https://github.com/Maru32768/CommandLib/releases).
+You can find the latest version on the [releases page](https://github.com/Maru32768/Cadence/releases).
 
-Shade CommandLib into your plugin or mod and relocate `dev.marulabs.commandlib` on every platform, as below. See
+Shade Cadence into your plugin or mod and relocate `dev.marulabs.cadence` on every platform, as below. See
 [packaging](docs/packaging.md) for the reasons, Maven Shade, Kotlin, and why Jar-in-Jar and Fabric's `include()` are
-not recommended while CommandLib is 0.x. The [sample projects](samples) build this way.
+not recommended while Cadence is 0.x. The [sample projects](samples) build this way.
 
 <details>
 <summary>Spigot (Groovy DSL)</summary>
@@ -140,13 +140,13 @@ repositories {
 }
 
 dependencies {
-    implementation "com.github.Maru32768.CommandLib:spigot:latest.release"
+    implementation "com.github.Maru32768.Cadence:spigot:latest.release"
 }
 
 shadowJar {
     archiveFileName = "${rootProject.name}-${project.version}.jar"
     // Avoid package conflicts
-    relocate "dev.marulabs.commandlib", "${project.group}.${project.name.toLowerCase()}.commandlib"
+    relocate "dev.marulabs.cadence", "${project.group}.${project.name.toLowerCase()}.cadence"
 }
 tasks.build.dependsOn tasks.shadowJar
 ```
@@ -168,7 +168,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.github.Maru32768.CommandLib:spigot:latest.release")
+    implementation("com.github.Maru32768.Cadence:spigot:latest.release")
 }
 
 val projectGroup = project.group.toString()
@@ -176,7 +176,7 @@ val projectNameLower = project.name.lowercase()
 tasks.named<ShadowJar>("shadowJar") {
     archiveFileName.set("${rootProject.name}-${project.version}.jar")
     // Avoid package conflicts
-    relocate("dev.marulabs.commandlib", "$projectGroup.$projectNameLower.commandlib")
+    relocate("dev.marulabs.cadence", "$projectGroup.$projectNameLower.cadence")
 }
 tasks.named("build") { dependsOn(tasks.named("shadowJar")) }
 ```
@@ -196,13 +196,13 @@ repositories {
 }
 
 dependencies {
-    implementation "com.github.Maru32768.CommandLib:paper:latest.release"
+    implementation "com.github.Maru32768.Cadence:paper:latest.release"
 }
 
 shadowJar {
     archiveFileName = "${rootProject.name}-${project.version}.jar"
     // Avoid package conflicts
-    relocate "dev.marulabs.commandlib", "${project.group}.${project.name.toLowerCase()}.commandlib"
+    relocate "dev.marulabs.cadence", "${project.group}.${project.name.toLowerCase()}.cadence"
 }
 tasks.build.dependsOn tasks.shadowJar
 ```
@@ -226,7 +226,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.github.Maru32768.CommandLib:paper:latest.release")
+    implementation("com.github.Maru32768.Cadence:paper:latest.release")
 }
 
 val projectGroup = project.group.toString()
@@ -234,7 +234,7 @@ val projectNameLower = project.name.lowercase()
 tasks.named<ShadowJar>("shadowJar") {
     archiveFileName.set("${rootProject.name}-${project.version}.jar")
     // Avoid package conflicts
-    relocate("dev.marulabs.commandlib", "$projectGroup.$projectNameLower.commandlib")
+    relocate("dev.marulabs.cadence", "$projectGroup.$projectNameLower.cadence")
 }
 tasks.named("build") { dependsOn(tasks.named("shadowJar")) }
 ```
@@ -256,16 +256,16 @@ repositories {
 }
 
 dependencies {
-    implementation "com.github.Maru32768.CommandLib:forge-1.20.1:latest.release"
+    implementation "com.github.Maru32768.Cadence:forge-1.20.1:latest.release"
 }
 
 shadowJar {
     dependencies {
         // The platform artifact and the common artifact it depends on
-        include(dependency("com.github.Maru32768.CommandLib:.*:.*"))
+        include(dependency("com.github.Maru32768.Cadence:.*:.*"))
     }
     // Avoid package conflicts
-    relocate "dev.marulabs.commandlib", "${project.group}.${project.name.toLowerCase()}.commandlib"
+    relocate "dev.marulabs.cadence", "${project.group}.${project.name.toLowerCase()}.cadence"
     finalizedBy("reobfShadowJar")
 }
 
@@ -292,7 +292,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.github.Maru32768.CommandLib:forge-1.20.1:latest.release")
+    implementation("com.github.Maru32768.Cadence:forge-1.20.1:latest.release")
 }
 
 val projectGroup = project.group.toString()
@@ -300,10 +300,10 @@ val projectNameLower = project.name.lowercase()
 tasks.named<ShadowJar>("shadowJar") {
     dependencies {
         // The platform artifact and the common artifact it depends on
-        include(dependency("com.github.Maru32768.CommandLib:.*:.*"))
+        include(dependency("com.github.Maru32768.Cadence:.*:.*"))
     }
     // Avoid package conflicts
-    relocate("dev.marulabs.commandlib", "$projectGroup.$projectNameLower.commandlib")
+    relocate("dev.marulabs.cadence", "$projectGroup.$projectNameLower.cadence")
     finalizedBy("reobfShadowJar")
 }
 
@@ -328,7 +328,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.github.Maru32768.CommandLib:neoforge-1.21.1:latest.release")
+    implementation("com.github.Maru32768.Cadence:neoforge-1.21.1:latest.release")
 }
 
 val projectGroup = project.group.toString()
@@ -337,10 +337,10 @@ tasks.named<ShadowJar>("shadowJar") {
     archiveFileName.set("${rootProject.name}-${project.version}.jar")
     dependencies {
         // The platform artifact and the common artifact it depends on
-        include(dependency("com.github.Maru32768.CommandLib:.*:.*"))
+        include(dependency("com.github.Maru32768.Cadence:.*:.*"))
     }
     // Avoid package conflicts
-    relocate("dev.marulabs.commandlib", "$projectGroup.$projectNameLower.commandlib")
+    relocate("dev.marulabs.cadence", "$projectGroup.$projectNameLower.cadence")
 }
 ```
 
@@ -365,8 +365,8 @@ repositories {
 
 dependencies {
     // Fabric API is required.
-    modImplementation("com.github.Maru32768.CommandLib:fabric-1.21.1:latest.release")
-    // Optional: lets permission mods such as LuckPerms answer CommandLib's permission checks.
+    modImplementation("com.github.Maru32768.Cadence:fabric-1.21.1:latest.release")
+    // Optional: lets permission mods such as LuckPerms answer Cadence's permission checks.
     modImplementation("me.lucko:fabric-permissions-api:0.3.3")
     include("me.lucko:fabric-permissions-api:0.3.3")
 }
@@ -378,12 +378,12 @@ val shadowJar = tasks.named<ShadowJar>("shadowJar") {
     dependencies {
         // The platform artifact and the common artifact it depends on. Loom puts the remapped one in the group
         // remapped.<group>.
-        include { it.moduleGroup.endsWith("com.github.Maru32768.CommandLib") }
+        include { it.moduleGroup.endsWith("com.github.Maru32768.Cadence") }
     }
     // Avoid package conflicts
-    relocate("dev.marulabs.commandlib", "$projectGroup.$projectNameLower.commandlib")
+    relocate("dev.marulabs.cadence", "$projectGroup.$projectNameLower.cadence")
 }
-// Remap your mod and the relocated CommandLib to intermediary together
+// Remap your mod and the relocated Cadence to intermediary together
 tasks.named<RemapJarTask>("remapJar") {
     inputFile.set(shadowJar.flatMap { it.archiveFile })
 }
@@ -393,13 +393,13 @@ tasks.named<RemapJarTask>("remapJar") {
 public final class MyMod implements ModInitializer {
     @Override
     public void onInitialize() {
-        CommandLib.register("mymod.command", new SpawnCommand());
+        Cadence.register("mymod.command", new SpawnCommand());
     }
 }
 ```
 
 > **Note:** Declare `fabric-command-api-v2` and `fabric-lifecycle-events-v1` (or `fabric-api`) in your
-> `fabric.mod.json`. You can nest CommandLib with `include()` instead of shading it, but Fabric Loader loads
+> `fabric.mod.json`. You can nest Cadence with `include()` instead of shading it, but Fabric Loader loads
 > only the newest nested copy. See [packaging](docs/packaging.md#fabric). Without fabric-permissions-api,
 > permission checks use each node's default and the vanilla permission level.
 
@@ -423,7 +423,7 @@ repositories {
 dependencies {
     compileOnly("com.velocitypowered:velocity-api:3.4.0")
     annotationProcessor("com.velocitypowered:velocity-api:3.4.0")
-    implementation("com.github.Maru32768.CommandLib:velocity:latest.release")
+    implementation("com.github.Maru32768.Cadence:velocity:latest.release")
 }
 
 val projectGroup = project.group.toString()
@@ -431,7 +431,7 @@ val projectNameLower = project.name.lowercase()
 tasks.named<ShadowJar>("shadowJar") {
     archiveFileName.set("${rootProject.name}-${project.version}.jar")
     // Avoid package conflicts
-    relocate("dev.marulabs.commandlib", "$projectGroup.$projectNameLower.commandlib")
+    relocate("dev.marulabs.cadence", "$projectGroup.$projectNameLower.cadence")
 }
 tasks.named("build") { dependsOn(tasks.named("shadowJar")) }
 ```
@@ -440,13 +440,13 @@ tasks.named("build") { dependsOn(tasks.named("shadowJar")) }
 
 ### Hiding Internal Classes In IntelliJ IDEA
 
-CommandLib's implementation lives in `dev.marulabs.commandlib.internal` and its sub-packages, marked
+Cadence's implementation lives in `dev.marulabs.cadence.internal` and its sub-packages, marked
 `@ApiStatus.Internal`. It is not API: it changes without notice, and only the code outside it is supported. To keep it
 out of completion and auto-import, open **Settings → Editor → General → Auto Import**, and under **Exclude from import
 and completion** add:
 
 ```text
-dev.marulabs.commandlib.internal
+dev.marulabs.cadence.internal
 ```
 
 The entry covers the sub-packages too.
@@ -458,7 +458,7 @@ them in place of the platform artifact, which they bring along:
 
 ```kotlin
 dependencies {
-    implementation("com.github.Maru32768.CommandLib:spigot-kotlin:latest.release")
+    implementation("com.github.Maru32768.Cadence:spigot-kotlin:latest.release")
     // Only for executeSuspend and the other coroutine functions.
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
 }
@@ -481,7 +481,7 @@ val heal = command("heal") {
         }
     }
 }
-CommandLib.register(this, heal)
+Cadence.register(this, heal)
 ```
 
 The block's receiver is the `Command`, so every fluent method (`permission`, `addPrerequisite(...)`, `cooldown`, ...) works
@@ -505,7 +505,7 @@ Command heal = Command.builder("heal")
                       .addChild(Command.builder("all")
                                        .execute(ctx -> Bukkit.getOnlinePlayers().forEach(p -> p.setHealth(20))))
                       .build();
-CommandLib.register(this, heal);
+Cadence.register(this, heal);
 ```
 
 The builder has the `Command` methods under the same names; `argument(...)` and `require(...)` take a callback that
@@ -516,18 +516,18 @@ of eight or more arguments, which the typed callbacks do not cover, reads each v
 
 ## Testing Commands
 
-CommandLib provides command-level test utilities for downstream plugins.
+Cadence provides command-level test utilities for downstream plugins.
 
 ```kotlin
 dependencies {
     // Pick the one line that matches your platform artifact.
-    testImplementation("com.github.Maru32768.CommandLib:common-testing:latest.release")
-    testImplementation("com.github.Maru32768.CommandLib:spigot-testing:latest.release")
-    testImplementation("com.github.Maru32768.CommandLib:paper-testing:latest.release")
-    testImplementation("com.github.Maru32768.CommandLib:velocity-testing:latest.release")
-    testImplementation("com.github.Maru32768.CommandLib:forge-testing-1.20.1:latest.release")
-    testImplementation("com.github.Maru32768.CommandLib:neoforge-testing-1.21.1:latest.release")
-    testImplementation("com.github.Maru32768.CommandLib:fabric-testing-1.21.1:latest.release")
+    testImplementation("com.github.Maru32768.Cadence:common-testing:latest.release")
+    testImplementation("com.github.Maru32768.Cadence:spigot-testing:latest.release")
+    testImplementation("com.github.Maru32768.Cadence:paper-testing:latest.release")
+    testImplementation("com.github.Maru32768.Cadence:velocity-testing:latest.release")
+    testImplementation("com.github.Maru32768.Cadence:forge-testing-1.20.1:latest.release")
+    testImplementation("com.github.Maru32768.Cadence:neoforge-testing-1.21.1:latest.release")
+    testImplementation("com.github.Maru32768.Cadence:fabric-testing-1.21.1:latest.release")
 }
 ```
 
@@ -596,7 +596,7 @@ public final class MyProxyPlugin {
                                                                               .getName());
         });
         // Permission nodes are myproxy.command.send and myproxy.command.send.player.server
-        CommandLib.register(this, proxy, send);
+        Cadence.register(this, proxy, send);
     }
 }
 ```
@@ -621,7 +621,7 @@ public final class TestPlugin extends JavaPlugin {
             // 'target' is inferred as 'org.bukkit.entity.Player'. No need to cast.
             target.sendMessage(messageText);
         });
-        CommandLib.register(this, message);
+        Cadence.register(this, message);
     }
 }
 ```
@@ -639,7 +639,7 @@ public final class MessageCommand extends Command {
 
 public final class TestPlugin extends JavaPlugin {
     public void onEnable() {
-        CommandLib.register(this, new MessageCommand());
+        Cadence.register(this, new MessageCommand());
     }
 }
 ```
@@ -662,7 +662,7 @@ public final class TestPlugin extends JavaPlugin {
             // Stops game
         });
         game.addChildren(start, stop);
-        CommandLib.register(this, game);
+        Cadence.register(this, game);
     }
 }
 ```
@@ -672,7 +672,7 @@ public final class TestPlugin extends JavaPlugin {
 <details>
 <summary>Appending Subcommands After Arguments</summary>
 
-CommandLib also supports Brigadier-style command trees where an argument is followed by a literal subcommand.
+Cadence also supports Brigadier-style command trees where an argument is followed by a literal subcommand.
 Use this for vanilla-like command shapes such as `/config <key> get` or `/config <key> set <value>`.
 
 For most plugin commands, prefer the simpler literal-first shape, such as `/config get <key>` and
@@ -898,7 +898,7 @@ output and the limits.
 ```java
 public final class TestPlugin extends JavaPlugin {
     public void onEnable() {
-        CommandLib.register(this, new Command("test") {{
+        Cadence.register(this, new Command("test") {{
             argument(new EnumArgument<>("block", Material.class).validator(Material::isBlock)).execute((ctx, m) -> {
                 // Do something
             });
@@ -920,7 +920,7 @@ one or more times and gives the values as a `List`; it accepts up to 16 values, 
 ```java
 public final class TestPlugin extends JavaPlugin {
     public void onEnable() {
-        CommandLib.register(this, new Command("give") {{
+        Cadence.register(this, new Command("give") {{
             // /give <item> [count]
             argument(new StringArgument("item"), new IntegerArgument("count").optional(1)).execute((ctx, item, count) -> {
                 // count is 1 when omitted
@@ -955,8 +955,8 @@ Paper, Velocity, and Forge / NeoForge / Fabric, so code shared between platforms
 actions:
 
 ```java
-import dev.marulabs.commandlib.util.text.ClickAction;
-import dev.marulabs.commandlib.util.text.RichText;
+import dev.marulabs.cadence.util.text.ClickAction;
+import dev.marulabs.cadence.util.text.RichText;
 
 public final class DifficultyCommand extends Command {
     public DifficultyCommand() {
@@ -982,7 +982,7 @@ be used directly: `ctx.sendMessage(MiniMessage.miniMessage().deserialize("<red>H
 
 ### Translated Messages
 
-CommandLib's own messages, such as "You do not have permission to execute this command." or the help headings, are
+Cadence's own messages, such as "You do not have permission to execute this command." or the help headings, are
 captions sent in the sender's locale, with English and Japanese built in. Replace them, and translate your own, with
 `Captions`:
 
@@ -1010,7 +1010,7 @@ See [localization](docs/localization.md) for the lookup order, the keys, and `Ca
 `sendSuccess` sends command feedback the way vanilla commands do: a player does not get it while the
 `sendCommandFeedback` gamerule is off, and a silent source such as a function gets nothing. `sendMessage`, `sendWarn`,
 and `sendFailure` always reach the sender. The Velocity proxy has no gamerules, so there `sendSuccess` always reaches the
-sender. A source without vanilla feedback, such as a test sender, gets `sendSuccess` as a plain message. CommandLib does
+sender. A source without vanilla feedback, such as a test sender, gets `sendSuccess` as a plain message. Cadence does
 not broadcast feedback to operators; send it to them yourself when a command needs that.
 
 `ctx.setResult(int)` sets the value that `/execute store result` stores (1 unless set). A command fails, storing 0 for
@@ -1113,7 +1113,7 @@ public final class AdminCommand extends Command {
 ```
 
 `CommandDefaults` applies middlewares and context value providers to every command of a registration. Pass it to
-`CommandLib.register(this, defaults, commands)` on Spigot and Paper, `register(this, proxy, defaults, commands)` on
+`Cadence.register(this, defaults, commands)` on Spigot and Paper, `register(this, proxy, defaults, commands)` on
 Velocity and `register(permissionPrefix, defaults, commands)` on Forge, NeoForge and Fabric, where `commands` is a
 `Collection`, and to the testers' builder as `defaults(...)`. See
 [execution](docs/execution.md#registration-wide-middlewares-and-providers).
@@ -1178,7 +1178,7 @@ public final class BanCommand {
     }
 }
 
-CommandLib.register(this, AnnotatedCommands.parse(new BanCommand()));
+Cadence.register(this, AnnotatedCommands.parse(new BanCommand()));
 ```
 
 Parameters map by type to the built-in arguments (`Player` to `PlayerArgument`, `int` to `IntegerArgument`, ...), a
@@ -1192,7 +1192,7 @@ the fluent equivalent.
 ## Help and Error Formatting
 
 The generated help can list examples, and three formatters replace how the help, each usage line and each failure
-CommandLib reports look. Like captions, they apply to the child commands that set none of their own:
+Cadence reports look. Like captions, they apply to the child commands that set none of their own:
 
 ```java
 public final class ArenaCommand extends Command {
@@ -1237,7 +1237,7 @@ Forge, NeoForge, Fabric and Velocity have no server help and ignore it.
 
 ## Permissions
 
-CommandLib automatically generates and registers permission nodes for each command, subcommand, and argument branch.
+Cadence automatically generates and registers permission nodes for each command, subcommand, and argument branch.
 Bukkit uses Bukkit permissions. Forge and NeoForge use their permission node APIs. Fabric uses fabric-permissions-api
 when a mod ships it. Velocity uses the proxy's permission subjects.
 
@@ -1245,11 +1245,11 @@ when a mod ships it. Velocity uses the proxy's permission subjects.
 
 Permission nodes are generated from the registration prefix and command path.
 
-For Bukkit, if you use `CommandLib.register(plugin, commands...)`, the prefix defaults to
+For Bukkit, if you use `Cadence.register(plugin, commands...)`, the prefix defaults to
 `<plugin name in lowercase>.command`. For example, a plugin named `MyPlugin` generates
 `myplugin.command.spawn`.
 
-Pass a custom prefix to `CommandLib.register()` when you want to use a different namespace.
+Pass a custom prefix to `Cadence.register()` when you want to use a different namespace.
 
 Bukkit:
 
@@ -1258,7 +1258,7 @@ public final class TestPlugin extends JavaPlugin {
     @Override
     public void onEnable() {
         // Generates "myplugin.command.spawn", "myplugin.command.game.start", etc.
-        CommandLib.register(this, "myplugin.command", new SpawnCommand(), new GameCommand());
+        Cadence.register(this, "myplugin.command", new SpawnCommand(), new GameCommand());
     }
 }
 ```
@@ -1269,7 +1269,7 @@ Forge:
 public final class MyMod {
     public MyMod() {
         // Generates "mymod.command.spawn", "mymod.command.game.start", etc.
-        CommandLib.register("mymod.command", new SpawnCommand(), new GameCommand());
+        Cadence.register("mymod.command", new SpawnCommand(), new GameCommand());
     }
 }
 ```
@@ -1294,11 +1294,11 @@ public final class SpawnCommand extends Command {
 
 ### Permission Default
 
-Control who has the permission by default with CommandLib's `DefaultPermission` enum. Root commands default to OP.
+Control who has the permission by default with Cadence's `DefaultPermission` enum. Root commands default to OP.
 Subcommands inherit their parent command's default unless you override them.
 
 ```java
-import dev.marulabs.commandlib.DefaultPermission;
+import dev.marulabs.cadence.DefaultPermission;
 
 public final class TestCommand extends Command {
     public TestCommand() {
@@ -1331,7 +1331,7 @@ attached under an argument branch inherits that argument branch's default permis
 
 ### Argument Branch Permissions
 
-CommandLib also generates permission nodes for argument branches. With prefix `myplugin.command`, this command
+Cadence also generates permission nodes for argument branches. With prefix `myplugin.command`, this command
 registers and checks both `myplugin.command.config` and `myplugin.command.config.key`:
 
 ```java
@@ -1367,11 +1367,11 @@ public final class ConfigCommand extends Command {
 }
 ```
 
-Use CommandLib's common `DefaultPermission` enum to control the default for an argument branch. If you omit it, the
+Use Cadence's common `DefaultPermission` enum to control the default for an argument branch. If you omit it, the
 argument branch inherits the parent command's default:
 
 ```java
-import dev.marulabs.commandlib.DefaultPermission;
+import dev.marulabs.cadence.DefaultPermission;
 
 public final class ConfigCommand extends Command {
     public ConfigCommand() {
@@ -1410,7 +1410,7 @@ public final class ConfigCommand extends Command {
 
 ### LuckPerms Compatibility
 
-CommandLib delegates permission checks to the platform permission system:
+Cadence delegates permission checks to the platform permission system:
 
 - Bukkit: `CommandSender#hasPermission(permissionNode)`
 - Forge / NeoForge: `PermissionAPI.getPermission(player, permissionNode)` (Forge 1.16.5:
@@ -1420,19 +1420,19 @@ CommandLib delegates permission checks to the platform permission system:
   `DefaultPermission.ALL`
 
 LuckPerms can provide those platform permissions. Configure the same generated or custom permission nodes in LuckPerms;
-CommandLib does not need additional LuckPerms-specific integration. On Forge 1.18+ and NeoForge the nodes are in the
-`commandlib` namespace, so grant `commandlib.<node>` there. See [permissions](docs/permissions.md).
+Cadence does not need additional LuckPerms-specific integration. On Forge 1.18+ and NeoForge the nodes are in the
+`cadence` namespace, so grant `cadence.<node>` there. See [permissions](docs/permissions.md).
 
 ### Refreshing Command Trees
 
 Players see only the commands and branches they have permission for, but the server does not resend the command tree
-when a permission changes. Call `CommandLib.refresh(player)` (or `CommandLib.refreshAll()`) after granting or revoking
+when a permission changes. Call `Cadence.refresh(player)` (or `Cadence.refreshAll()`) after granting or revoking
 one, so the change shows without a rejoin. See [refreshing the command tree](docs/permissions.md#refreshing-the-command-tree).
 
 ## Claude Code Skill
 
-A Claude Code skill is available as the `commandlib` plugin in this repository's plugin marketplace
-(`plugins/commandlib/`). It loads the CommandLib API from your Gradle source cache and generates or explains code on
+A Claude Code skill is available as the `cadence` plugin in this repository's plugin marketplace
+(`plugins/cadence/`). It loads the Cadence API from your Gradle source cache and generates or explains code on
 demand.
 
 ### Setup
@@ -1440,41 +1440,41 @@ demand.
 1. Add this repository as a plugin marketplace and install the plugin, inside Claude Code:
 
 ```
-/plugin marketplace add Maru32768/CommandLib
-/plugin install commandlib@commandlib
+/plugin marketplace add Maru32768/Cadence
+/plugin install cadence@cadence
 ```
 
 Or from your shell:
 
 ```bash
-claude plugin marketplace add Maru32768/CommandLib
-claude plugin install commandlib@commandlib
+claude plugin marketplace add Maru32768/Cadence
+claude plugin install cadence@cadence
 ```
 
-Run `/plugin marketplace update commandlib` to pick up newer versions of the skill.
+Run `/plugin marketplace update cadence` to pick up newer versions of the skill.
 
-To pin the skill to the CommandLib version your project uses, add the marketplace at that release tag
+To pin the skill to the Cadence version your project uses, add the marketplace at that release tag
 (releases from the one after 0.17.2 onward include the plugin):
 
 ```
-/plugin marketplace add Maru32768/CommandLib#<version>
+/plugin marketplace add Maru32768/Cadence#<version>
 ```
 
-To switch versions, run `/plugin marketplace remove commandlib` and add it again with another tag.
+To switch versions, run `/plugin marketplace remove cadence` and add it again with another tag.
 
-2. Download the CommandLib sources jars into the Gradle cache so the skill has something to read. In IntelliJ:
+2. Download the Cadence sources jars into the Gradle cache so the skill has something to read. In IntelliJ:
    **View > Tool Windows > Gradle > Download Sources**. Or with Gradle, add a task that resolves them and run
-   `./gradlew downloadCommandLibSources`:
+   `./gradlew downloadCadenceSources`:
 
 ```kotlin
-val commandlibSources by configurations.creating { isTransitive = false }
+val cadenceSources by configurations.creating { isTransitive = false }
 dependencies {
     // Your platform artifact and common, at the version you depend on.
-    commandlibSources("com.github.Maru32768.CommandLib:spigot:<version>:sources")
-    commandlibSources("com.github.Maru32768.CommandLib:common:<version>:sources")
+    cadenceSources("com.github.Maru32768.Cadence:spigot:<version>:sources")
+    cadenceSources("com.github.Maru32768.Cadence:common:<version>:sources")
 }
-tasks.register("downloadCommandLibSources") {
-    val files: FileCollection = commandlibSources
+tasks.register("downloadCadenceSources") {
+    val files: FileCollection = cadenceSources
     doLast { files.files }
 }
 ```
@@ -1482,12 +1482,12 @@ tasks.register("downloadCommandLibSources") {
 ### Usage
 
 ```
-/commandlib:commandlib <request>
+/cadence:cadence <request>
 ```
 
 ```
-/commandlib:commandlib I want a command that sends a message to a player. Args: player and string. Permission: myplugin.message
-/commandlib:commandlib プレイヤーにメッセージを送るコマンドを作りたい。引数はプレイヤーと文字列、権限は myplugin.message
+/cadence:cadence I want a command that sends a message to a player. Args: player and string. Permission: myplugin.message
+/cadence:cadence プレイヤーにメッセージを送るコマンドを作りたい。引数はプレイヤーと文字列、権限は myplugin.message
 ```
 
 ## Sample Projects
@@ -1502,15 +1502,15 @@ what.
 - [Velocity](samples/velocity): proxy player and server arguments.
 - [Forge](samples/forge) (1.16.5) and [Fabric](samples/fabric) (1.21.1): the platform-neutral commands in a mod.
 
-Each one shades and relocates CommandLib as described in [packaging](docs/packaging.md).
+Each one shades and relocates Cadence as described in [packaging](docs/packaging.md).
 
 ## License
 
-CommandLib is licensed under the MIT License. See [LICENSE](./LICENSE).
+Cadence is licensed under the MIT License. See [LICENSE](./LICENSE).
 
 Spigot, Paper, Bukkit, Minecraft, Brigadier, Forge, and other platform APIs or runtimes are separate projects and may
-be governed by their own license terms. They are not bundled with CommandLib unless explicitly stated otherwise.
+be governed by their own license terms. They are not bundled with Cadence unless explicitly stated otherwise.
 
 See [third-party dependencies and distribution policy](./THIRD_PARTY_NOTICES.md) for dependency licenses,
 GPL platform integration, shading obligations, and Minecraft/mapping distribution restrictions.
-The MIT license for CommandLib's original code does not override upstream terms for a combined distribution.
+The MIT license for Cadence's original code does not override upstream terms for a combined distribution.

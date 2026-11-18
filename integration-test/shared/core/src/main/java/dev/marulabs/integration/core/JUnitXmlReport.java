@@ -13,7 +13,7 @@ public final class JUnitXmlReport {
                                   .sorted(Comparator.comparing(TestResult::key))
                                   .map(JUnitXmlReport::buildTestCaseXml)
                                   .collect(Collectors.joining());
-        return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + "<testsuite name=\"CommandLib Test Plugin\" tests=\""
+        return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + "<testsuite name=\"Cadence Test Plugin\" tests=\""
                 + results.size() + "\" failures=\"" + failedCount + "\" errors=\"0\" skipped=\"0\">\n" + testCases
                 + "</testsuite>\n";
     }
@@ -31,7 +31,7 @@ public final class JUnitXmlReport {
 
     private static String testClassName(String key) {
         int separator = key.lastIndexOf('.');
-        return separator == -1 ? "CommandLibTest" : key.substring(0, separator);
+        return separator == -1 ? "CadenceTest" : key.substring(0, separator);
     }
 
     private static String testMethodName(String key) {

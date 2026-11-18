@@ -1,9 +1,9 @@
 package dev.marulabs.testplugin;
 
-import dev.marulabs.commandlib.Command;
-import dev.marulabs.commandlib.argument.IntegerArgument;
-import dev.marulabs.commandlib.argument.PlayerArgument;
-import dev.marulabs.commandlib.argument.StringArgument;
+import dev.marulabs.cadence.Command;
+import dev.marulabs.cadence.argument.IntegerArgument;
+import dev.marulabs.cadence.argument.PlayerArgument;
+import dev.marulabs.cadence.argument.StringArgument;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;

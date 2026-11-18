@@ -1,8 +1,8 @@
 package dev.marulabs.sampleplugin;
 
-import dev.marulabs.commandlib.CommandTester;
-import dev.marulabs.commandlib.FakeSender;
-import dev.marulabs.commandlib.annotation.AnnotatedCommands;
+import dev.marulabs.cadence.CommandTester;
+import dev.marulabs.cadence.FakeSender;
+import dev.marulabs.cadence.annotation.AnnotatedCommands;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;

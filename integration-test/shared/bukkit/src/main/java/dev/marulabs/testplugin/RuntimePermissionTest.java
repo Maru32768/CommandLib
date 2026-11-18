@@ -1,8 +1,8 @@
 package dev.marulabs.testplugin;
 
-import dev.marulabs.commandlib.Command;
-import dev.marulabs.commandlib.CommandLib;
-import dev.marulabs.commandlib.DefaultPermission;
+import dev.marulabs.cadence.Cadence;
+import dev.marulabs.cadence.Command;
+import dev.marulabs.cadence.DefaultPermission;
 import dev.marulabs.integration.core.ExceptionUtil;
 import dev.marulabs.integration.core.TestResult;
 import dev.marulabs.integration.core.TestStatus;
@@ -35,14 +35,14 @@ public final class RuntimePermissionTest extends TestBase {
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name) {{
             execute(ctx -> {
-                CommandLib allRegistration = null;
-                CommandLib noneRegistration = null;
+                Cadence allRegistration = null;
+                Cadence noneRegistration = null;
                 String commandName = "runtimepermissioncleanup";
                 String node = plugin.getName()
                                     .toLowerCase()
                         + ".command." + commandName;
                 try {
-                    allRegistration = CommandLib.register(plugin, new Command(commandName) {{
+                    allRegistration = Cadence.register(plugin, new Command(commandName) {{
                         permission(DefaultPermission.ALL);
                     }});
                     assertPermission(node, PermissionDefault.TRUE);
@@ -53,7 +53,7 @@ public final class RuntimePermissionTest extends TestBase {
                     allRegistration = null;
                     assertPermissionRemoved(node);
 
-                    noneRegistration = CommandLib.register(plugin, new Command(commandName) {{
+                    noneRegistration = Cadence.register(plugin, new Command(commandName) {{
                         permission(DefaultPermission.NONE);
                     }});
                     assertPermission(node, PermissionDefault.FALSE);
@@ -121,7 +121,7 @@ public final class RuntimePermissionTest extends TestBase {
                      .collect(Collectors.toSet());
     }
 
-    private void unregisterQuietly(CommandLib registration) {
+    private void unregisterQuietly(Cadence registration) {
         if (registration == null) {
             return;
         }

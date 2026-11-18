@@ -1,11 +1,11 @@
 val mcProtocol by configurations.creating
 
-extra["commandlib.integration.platform"] = "forge"
-extra["commandlib.integration.minecraftVersion"] = "1.18.2"
-extra["commandlib.integration.javaVersion"] = "17"
-extra["commandlib.integration.workDirectory"] = "work"
-extra["commandlib.integration.testPluginSubdirectory"] = "mods"
-extra["commandlib.integration.testPluginJarPattern"] = "TestMod.*\\.jar"
+extra["cadence.integration.platform"] = "forge"
+extra["cadence.integration.minecraftVersion"] = "1.18.2"
+extra["cadence.integration.javaVersion"] = "17"
+extra["cadence.integration.workDirectory"] = "work"
+extra["cadence.integration.testPluginSubdirectory"] = "mods"
+extra["cadence.integration.testPluginJarPattern"] = "TestMod.*\\.jar"
 
 dependencies {
     mcProtocol("com.github.steveice10:mcprotocollib:1.18.2-1")

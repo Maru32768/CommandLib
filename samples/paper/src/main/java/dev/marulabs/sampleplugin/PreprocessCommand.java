@@ -1,6 +1,6 @@
 package dev.marulabs.sampleplugin;
 
-import dev.marulabs.commandlib.Command;
+import dev.marulabs.cadence.Command;
 import org.bukkit.entity.Player;
 
 public class PreprocessCommand extends Command {

@@ -1,6 +1,6 @@
 package dev.marulabs.testplugin;
 
-import dev.marulabs.commandlib.Command;
+import dev.marulabs.cadence.Command;
 import org.bukkit.permissions.PermissionDefault;
 
 /**

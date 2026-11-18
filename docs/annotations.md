@@ -10,7 +10,7 @@ your own, create an `AnnotationParser` yourself (see [Other contexts](#other-con
 ## Example
 
 ```java
-import dev.marulabs.commandlib.annotation.*;
+import dev.marulabs.cadence.annotation.*;
 
 @Command(value = "arena", aliases = "ar")
 @Description("Manage arenas")
@@ -63,7 +63,7 @@ public final class ArenaCommand {
 
 ```java
 // In onEnable, as for any command.
-CommandLib.register(this, AnnotatedCommands.parse(new ArenaCommand()));
+Cadence.register(this, AnnotatedCommands.parse(new ArenaCommand()));
 ```
 
 This is the same command as:
@@ -247,7 +247,7 @@ a middleware's value are all parameters this way; see [context values](context-v
 | `UUID` | `UUIDArgument` (Spigot, Paper, Forge, NeoForge, Fabric; Velocity has none) |
 | `Player`, `OfflinePlayer`, `Entity`, `World`, `Location`, `GameMode`, `EntityType`, `Biome`, `Sound`, `Attribute`, `Enchantment`, `Particle`, `PotionEffect`, `ItemStack`, `BlockData`, `NamespacedKey`, `Advancement`, `LootTable`, `Recipe`, `Team`, `Objective`, `DisplaySlot`, `ChatColor` (Paper: `NamedTextColor`) | the argument of the same name (Spigot, Paper) |
 | `Player`, `RegisteredServer` | `PlayerArgument`, `ServerArgument` (Velocity) |
-| `ServerPlayer`, `GameProfile`, `Entity`, `ServerLevel`, `Location` (CommandLib's), `BlockPos`, `GameType`, `EntityType`, `Biome`, `SoundEvent`, `ParticleOptions`, `ItemStack`, `BlockInput`, `CompoundTag`, `ResourceLocation`, `LootTable`, `PlayerTeam`, `Objective`, `ChatFormatting` | `PlayerArgument`, `GameProfileArgument`, `EntityArgument`, `WorldArgument`, `LocationArgument`, `BlockPositionArgument`, `GameModeArgument`, `EntityTypeArgument`, `BiomeArgument`, `SoundArgument`, `ParticleArgument`, `ItemStackArgument`, `BlockStateArgument`, `NBTCompoundArgument`, `ResourceLocationArgument`, `LootTableArgument`, `TeamArgument`, `ObjectiveArgument`, `ChatColorArgument` (Forge, NeoForge, Fabric) |
+| `ServerPlayer`, `GameProfile`, `Entity`, `ServerLevel`, `Location` (Cadence's), `BlockPos`, `GameType`, `EntityType`, `Biome`, `SoundEvent`, `ParticleOptions`, `ItemStack`, `BlockInput`, `CompoundTag`, `ResourceLocation`, `LootTable`, `PlayerTeam`, `Objective`, `ChatFormatting` | `PlayerArgument`, `GameProfileArgument`, `EntityArgument`, `WorldArgument`, `LocationArgument`, `BlockPositionArgument`, `GameModeArgument`, `EntityTypeArgument`, `BiomeArgument`, `SoundArgument`, `ParticleArgument`, `ItemStackArgument`, `BlockStateArgument`, `NBTCompoundArgument`, `ResourceLocationArgument`, `LootTableArgument`, `TeamArgument`, `ObjectiveArgument`, `ChatColorArgument` (Forge, NeoForge, Fabric) |
 | `Enchantment`, `MobEffect`, `Attribute` (`Holder<Enchantment>`, `Holder<MobEffect>`, `Holder<Attribute>` on 1.20.5+), `Advancement`, `Recipe` (`AdvancementHolder`, `RecipeHolder`, `DisplaySlot` on 1.20.2+) | `EnchantmentArgument`, `EffectArgument`, `AttributeArgument`, `AdvancementArgument`, `RecipeArgument`, `ScoreboardDisplaySlotArgument` (Forge, NeoForge, Fabric) |
 
 Context values: `CommandSender`, `ConsoleCommandSender` and `Player` on Spigot and Paper; `CommandSource`,

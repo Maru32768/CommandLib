@@ -1,6 +1,6 @@
 # Third-party dependencies and distribution
 
-CommandLib's original code is licensed under the [MIT License](LICENSE). This document is an inventory and distribution policy, not a replacement for upstream licenses or a grant of rights to upstream code. Listing a dependency here does not mean that it is bundled. Versions below are the declared versions; dependency conflict resolution may select other versions in a consumer's build.
+Cadence's original code is licensed under the [MIT License](LICENSE). This document is an inventory and distribution policy, not a replacement for upstream licenses or a grant of rights to upstream code. Listing a dependency here does not mean that it is bundled. Versions below are the declared versions; dependency conflict resolution may select other versions in a consumer's build.
 
 ## Published library dependencies
 
@@ -25,7 +25,7 @@ CommandLib's original code is licensed under the [MIT License](LICENSE). This do
 
 Paper and Velocity modules also reference Adventure (MIT), and NMS/modded code references platform-provided Gson (Apache-2.0). These arrive through platform classpaths rather than standalone embedded library dependencies. Their selected versions must be read from the resolved classpath for the target server.
 
-The spigot artifact embeds only CommandLib's own typed NMS adapter classes from `dev/marulabs/commandlib/internal/nms/typed/**`. The typed NMS configuration is non-transitive. Compiling or remapping those adapters does not authorize redistribution of upstream server code or mappings.
+The spigot artifact embeds only Cadence's own typed NMS adapter classes from `dev/marulabs/cadence/internal/nms/typed/**`. The typed NMS configuration is non-transitive. Compiling or remapping those adapters does not authorize redistribution of upstream server code or mappings.
 
 ## Repository-only tools and tests
 
@@ -40,13 +40,13 @@ These are not runtime dependencies of the published library solely because they 
 - Gradle, Kotlin, Spotless, the Eclipse formatter, japicmp, Stonecutter, Architectury Loom, paperweight, SpecialSource, BuildTools and the sample Shadow/ForgeGradle plugins are build tooling. This inventory does not certify all tooling transitives. Inspect each tool's own license before redistributing the tool, its caches or a development image.
 - Sample and integration-test artifacts are separate applications; their resolved/shaded dependencies require a separate distribution review.
 
-Using an unmodified test/build tool does not itself relicense CommandLib's output. Copying tool code, generated third-party code, runtime components or resources into an output requires a separate check.
+Using an unmodified test/build tool does not itself relicense Cadence's output. Copying tool code, generated third-party code, runtime components or resources into an output requires a separate check.
 
 ## GPL platform integration
 
-MIT is GPL-compatible, but `compileOnly` and the absence of bundled GPL classes do not establish that every linked distribution is outside the GPL. CommandLib does not promise an exemption from Bukkit, Spigot or Paper licensing. The MIT permission covers the authors' original CommandLib code; it does not relicense a combined work or override upstream obligations.
+MIT is GPL-compatible, but `compileOnly` and the absence of bundled GPL classes do not establish that every linked distribution is outside the GPL. Cadence does not promise an exemption from Bukkit, Spigot or Paper licensing. The MIT permission covers the authors' original Cadence code; it does not relicense a combined work or override upstream obligations.
 
-For a distribution treated as a GPL-covered combined work, comply with the applicable GPL version, including notices, the license text and corresponding-source requirements for that work. Retain MIT notices for CommandLib's original code. Do not describe such a combined distribution as exclusively MIT. A source jar containing only CommandLib sources must not be represented as necessarily satisfying all corresponding-source obligations of a larger work.
+For a distribution treated as a GPL-covered combined work, comply with the applicable GPL version, including notices, the license text and corresponding-source requirements for that work. Retain MIT notices for Cadence's original code. Do not describe such a combined distribution as exclusively MIT. A source jar containing only Cadence sources must not be represented as necessarily satisfying all corresponding-source obligations of a larger work.
 
 Whether a particular plugin/library distribution constitutes a combined work, and whether an upstream exception applies, depends on its code, linkage, exact upstream terms and applicable law. Obtain a qualified review or permission from the relevant rightsholders before making a claim that a proprietary or MIT-only combined distribution is exempt. Documentation here does not resolve that legal determination. See the [GNU linking FAQ](https://www.gnu.org/licenses/gpl-faq.en.html#GPLStaticVsDynamic).
 
@@ -54,22 +54,22 @@ Forge explicitly explains that ordinary Java references to its libraries do not 
 
 ## Redistributing or shading dependencies
 
-The normal library jars contain CommandLib code, LICENSE and this inventory. External Maven dependencies remain separate; their original archives carry their own licenses. This file is not a substitute for those licenses.
+The normal library jars contain Cadence code, LICENSE and this inventory. External Maven dependencies remain separate; their original archives carry their own licenses. This file is not a substitute for those licenses.
 
 If a downstream build embeds Brigadier or Mockito, preserve their actual copyright and MIT permission notices. If it embeds Apache-licensed components, include the Apache-2.0 license and applicable upstream NOTICE/attribution files, and identify modifications as required. Byte Buddy's embedded ASM notices must also survive shading. Preserve separate filenames under META-INF/licenses/<component>/ so that duplicate LICENSE or NOTICE entries are not silently dropped. Do not embed server/platform jars as a shortcut.
 
-Do not redistribute Minecraft game/server classes, assets, development bundles, mapping files, patched server jars or build caches as part of CommandLib releases. Consult the exact upstream terms before any separate redistribution. Permission to use mappings for a build is not a blanket permission to redistribute the mapping dataset. Minecraft's EULA and usage guidelines also apply independently of the library's MIT license, including to monetization decisions.
+Do not redistribute Minecraft game/server classes, assets, development bundles, mapping files, patched server jars or build caches as part of Cadence releases. Consult the exact upstream terms before any separate redistribution. Permission to use mappings for a build is not a blanket permission to redistribute the mapping dataset. Minecraft's EULA and usage guidelines also apply independently of the library's MIT license, including to monetization decisions.
 
 ## Resolved dependency inventory
 
-Run `./gradlew -I tools/license-audit.init.gradle licenseDependencyReport` to write `build/reports/licenses/dependencies.json`. It records selected external module versions and unresolved dependencies for each published project's compile/runtime configuration. The task fails when any dependency is unresolved. Review licenses against these selected versions; this metadata report does not infer licenses from names or certify them. NMS build classpaths, tooling and separate sample builds are outside its scope. For a focused inventory without configuring typed NMS projects, add `-Pcommandlib.typedNms=false`; do not use that switch to produce a spigot release.
+Run `./gradlew -I tools/license-audit.init.gradle licenseDependencyReport` to write `build/reports/licenses/dependencies.json`. It records selected external module versions and unresolved dependencies for each published project's compile/runtime configuration. The task fails when any dependency is unresolved. Review licenses against these selected versions; this metadata report does not infer licenses from names or certify them. NMS build classpaths, tooling and separate sample builds are outside its scope. For a focused inventory without configuring typed NMS projects, add `-Pcadence.typedNms=false`; do not use that switch to produce a spigot release.
 
 ## Release verification
 
 1. Resolve compileClasspath and runtimeClasspath for every published module and supported loader node. Record selected versions and configuration names, including transitives; review new or changed components against their actual versioned license/NOTICE files.
-2. Build all publishable jars with every typed NMS module enabled. A build using `-Pcommandlib.typedNms=false` is a focused check only, not a releasable spigot artifact.
+2. Build all publishable jars with every typed NMS module enabled. A build using `-Pcadence.typedNms=false` is a focused check only, not a releasable spigot artifact.
 3. Inspect binary, sources, javadoc and remapped jars: LICENSE must match the root MIT text, and THIRD_PARTY_NOTICES.md must be included. Verify the contents, not only the POM license metadata.
-4. Verify that binaries contain only CommandLib classes and intended resources, with no upstream server classes, mapping datasets, nested platform jars or game assets. Review adapters for copied upstream implementation code as well; a package-name check alone cannot establish provenance.
+4. Verify that binaries contain only Cadence classes and intended resources, with no upstream server classes, mapping datasets, nested platform jars or game assets. Review adapters for copied upstream implementation code as well; a package-name check alone cannot establish provenance.
 5. Review any fat jars separately and preserve all upstream notices. Publish source/build instructions matching the release and satisfy any applicable corresponding-source requirements.
 
-The initial audit inspected build declarations, locally cached POMs and existing six Bukkit-side module jars. Some existing testing jars used the old CommandLib package, so they were not evidence of a complete current release. This inventory is not a complete SBOM of every platform, build-tool transitive or server dependency, and it does not claim that a legal determination about GPL linkage has been obtained.
+The initial audit inspected build declarations, locally cached POMs and existing six Bukkit-side module jars. Some existing testing jars used the library's old package, so they were not evidence of a complete current release. This inventory is not a complete SBOM of every platform, build-tool transitive or server dependency, and it does not claim that a legal determination about GPL linkage has been obtained.

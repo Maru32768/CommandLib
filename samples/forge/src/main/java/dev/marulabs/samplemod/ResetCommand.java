@@ -1,6 +1,6 @@
 package dev.marulabs.samplemod;
 
-import dev.marulabs.commandlib.Command;
+import dev.marulabs.cadence.Command;
 
 import java.time.Duration;
 

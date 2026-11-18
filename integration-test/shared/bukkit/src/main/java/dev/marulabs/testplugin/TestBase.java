@@ -1,6 +1,6 @@
 package dev.marulabs.testplugin;
 
-import dev.marulabs.commandlib.Command;
+import dev.marulabs.cadence.Command;
 import dev.marulabs.integration.core.TestResult;
 import dev.marulabs.integration.core.TestStatus;
 
@@ -114,7 +114,7 @@ public abstract class TestBase {
         hooks.forEach(hook -> hook.onCommandDispatchError(commandLine, dispatchResult));
     }
 
-    // The word after the test command, also in "execute ... run commandlibtest <sub command>".
+    // The word after the test command, also in "execute ... run cadencetest <sub command>".
     private String extractSubCommand(String commandLine) {
         String[] parts = commandLine.trim()
                                     .split("\\s+");

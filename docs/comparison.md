@@ -1,18 +1,18 @@
 # Comparison with Other Command Libraries
 
-This page compares CommandLib with [CommandAPI](https://docs.commandapi.dev/), [Cloud](https://cloud.incendo.org/),
+This page compares Cadence with [CommandAPI](https://docs.commandapi.dev/), [Cloud](https://cloud.incendo.org/),
 [Lamp](https://github.com/Revxrsal/Lamp), [ACF](https://github.com/aikar/commands) and
 [Paper's Brigadier command API](https://docs.papermc.io/paper/dev/command-api/basics/registration/) on seven fixed use
-cases. For each one it shows the CommandLib definition, the closest equivalent in each library, and compares the
+cases. For each one it shows the Cadence definition, the closest equivalent in each library, and compares the
 amount of definition, the string keys and casts the executor needs, the setup, how far it can be extended, and what
 can be tested without a server. It also lists where the other libraries are better.
 
-The CommandLib side is code that compiles and runs: the [`examples`](../examples) module of this repository writes each
+The Cadence side is code that compiles and runs: the [`examples`](../examples) module of this repository writes each
 use case with the fluent API, the [Java builder](java-builder.md), [annotations](annotations.md) and the
 [Kotlin DSL](kotlin.md), and its tests run the four through `CommandTester`, check that they give the same command tree,
 help, messages and results, and compare that transcript with a snapshot in
 [`examples/src/test/resources/snapshots`](../examples/src/test/resources/snapshots). Run them with
-`./gradlew -Pcommandlib.typedNms=false :examples:test`.
+`./gradlew -Pcadence.typedNms=false :examples:test`.
 
 The other libraries' snippets are **not compiled**. They were written from the official documentation and, where the
 documentation is silent, from the official source, checked in October 2026 against CommandAPI 12.1.0, Cloud 2.0.1
@@ -26,7 +26,7 @@ Corrections and newer versions are welcome; this page is only as good as the evi
 
 ## Summary
 
-| Use case | CommandLib | CommandAPI | Cloud | Lamp | ACF | Paper |
+| Use case | Cadence | CommandAPI | Cloud | Lamp | ACF | Paper |
 |---|---|---|---|---|---|---|
 | 1. Admin options (`-s`, `--reason`) | Typed options, before the arguments or also after them (`optionsAnywhere()`) | No flags; optional literals, order-dependent | Flags, any order | `@Flag` / `@Switch`, any order | No flags; parse `String[]` yourself | No flags; a branch per combination |
 | 2. Optional and variadic arguments | `optional(v)`, `variadic()` (space-separated values) | `withOptionalArguments`, `ListArgument` | `optional(..., DefaultValue)`; no generic variadic | `@Default`, greedy `List<T>` | `@Default`, comma-separated arrays | A branch per optional argument |
@@ -40,17 +40,17 @@ Corrections and newer versions are welcome; this page is only as good as the evi
 
 The sections below give the detail and the sources.
 
-## How the CommandLib side was measured
+## How the Cadence side was measured
 
 | Use case | Fluent | Builder | Annotation | Kotlin | Executor keys / casts |
 |---|---|---|---|---|---|
-| 1. [`ban`](../examples/src/main/java/dev/marulabs/commandlib/examples/ban) | 15 | 20 | 12 | 10 | none |
-| 2. [`kit`](../examples/src/main/java/dev/marulabs/commandlib/examples/kit) | 20 | 24 | 16 | 16 | none |
-| 3. [`team`](../examples/src/main/java/dev/marulabs/commandlib/examples/team) | 27 | 33 | 31 | 25 | none |
-| 4. [`stats`](../examples/src/main/java/dev/marulabs/commandlib/examples/stats) | 9 | 14 | 13 | 10 | none |
-| 5. [`balance`](../examples/src/main/java/dev/marulabs/commandlib/examples/balance) | 20 | 23 | 25 | 16 | none; the account is read by type, `ctx.get(Economy.Account.class)` |
-| 6. [`home`](../examples/src/main/java/dev/marulabs/commandlib/examples/home) | 23 | 27 | 18 | 22 | none |
-| 7. [`score`](../examples/src/main/java/dev/marulabs/commandlib/examples/score) | 16 | 18 | 13 | 11 | none (the untyped executor reads `ctx.getArgument(argument)`) |
+| 1. [`ban`](../examples/src/main/java/dev/marulabs/cadence/examples/ban) | 15 | 20 | 12 | 10 | none |
+| 2. [`kit`](../examples/src/main/java/dev/marulabs/cadence/examples/kit) | 20 | 24 | 16 | 16 | none |
+| 3. [`team`](../examples/src/main/java/dev/marulabs/cadence/examples/team) | 27 | 33 | 31 | 25 | none |
+| 4. [`stats`](../examples/src/main/java/dev/marulabs/cadence/examples/stats) | 9 | 14 | 13 | 10 | none |
+| 5. [`balance`](../examples/src/main/java/dev/marulabs/cadence/examples/balance) | 20 | 23 | 25 | 16 | none; the account is read by type, `ctx.get(Economy.Account.class)` |
+| 6. [`home`](../examples/src/main/java/dev/marulabs/cadence/examples/home) | 23 | 27 | 18 | 22 | none |
+| 7. [`score`](../examples/src/main/java/dev/marulabs/cadence/examples/score) | 16 | 18 | 13 | 11 | none (the untyped executor reads `ctx.getArgument(argument)`) |
 
 The numbers count the lines of each file that are not blank, comments, imports or the package line, including the
 class declaration and constructor, formatted by the repository's formatter, which breaks Java chains into aligned lines.
@@ -58,7 +58,7 @@ Shared services (`Teams`, `StatsStore`, `Economy`, `HomeCaptions`) are not count
 below are of the snippets on this page, which are written compactly and not formatted, so compare them by order of
 magnitude only.
 
-Every CommandLib variant is registered the same way, `CommandLib.register(plugin, command)` in `onEnable`, and tested
+Every Cadence variant is registered the same way, `Cadence.register(plugin, command)` in `onEnable`, and tested
 the same way, `new CommandTester(() -> command, "example.command")`. The annotated variants are parsed first with
 `AnnotatedCommands.parse(new AnnotatedBanCommand())` and need `-parameters`, or `@Name` on each argument.
 
@@ -67,7 +67,7 @@ the same way, `new CommandTester(() -> command, "example.command")`. The annotat
 `/ban [-s|--silent] [-r|--reason <reason>] <target>`, for operators.
 
 ```kotlin
-// CommandLib, Kotlin DSL (examples/.../ban/KotlinBanCommand.kt)
+// Cadence, Kotlin DSL (examples/.../ban/KotlinBanCommand.kt)
 command("ban") {
     description("Ban a player")
     permission(DefaultPermission.OP, "Ban players")
@@ -80,7 +80,7 @@ command("ban") {
 ```
 
 ```java
-// CommandLib, annotations (examples/.../ban/AnnotatedBanCommand.java)
+// Cadence, annotations (examples/.../ban/AnnotatedBanCommand.java)
 @Command("ban")
 @Description("Ban a player")
 @Permission(defaultPermission = DefaultPermission.OP, description = "Ban players")
@@ -160,9 +160,9 @@ runtime. CommandAPI has no flags argument in a release; one is proposed in an op
   [arguments and literals](https://docs.papermc.io/paper/dev/command-api/basics/arguments-and-literals/)).
 
 **Compared.** Lamp and Cloud's annotations are the shortest. Cloud and Lamp accept the flags anywhere in the input and
-Cloud adds greedy flag values; CommandLib takes the options **before** the positional arguments (`/ban Steve -s` is
+Cloud adds greedy flag values; Cadence takes the options **before** the positional arguments (`/ban Steve -s` is
 rejected) unless the command calls `optionsAnywhere()` (`@OptionsAnywhere`), and also has permissions per option and
-any argument as an option's value (`Options.of`). CommandLib's options are typed (`ctx.getOption(option)`, a delegated property in Kotlin) and come with
+any argument as an option's value (`Options.of`). Cadence's options are typed (`ctx.getOption(option)`, a delegated property in Kotlin) and come with
 `required()`, `requires(...)`, `mutuallyExclusiveOptions(...)` and generated help, which the builder styles of Cloud and the
 others do with string keys or not at all.
 
@@ -171,7 +171,7 @@ others do with string keys or not at all.
 `/kit give <name> [count=1]` and `/kit send <players...>`.
 
 ```java
-// CommandLib, fluent (examples/.../kit/FluentKitCommand.java)
+// Cadence, fluent (examples/.../kit/FluentKitCommand.java)
 addChildren(new Command("give") {{
     description("Give yourself a kit");
     argument(new StringArgument("name"),
@@ -236,7 +236,7 @@ verified).
   [argument suggestions](https://docs.papermc.io/paper/dev/command-api/basics/argument-suggestions/),
   [entities and players](https://docs.papermc.io/paper/dev/command-api/arguments/entity-player/)).
 
-**Compared.** Lamp, Cloud's annotations and ACF are as short as CommandLib's annotations. CommandLib's variadic
+**Compared.** Lamp, Cloud's annotations and ACF are as short as Cadence's annotations. Cadence's variadic
 argument is a space-separated list of any argument's values with typed results, which none of the others has as a
 general feature; Lamp's greedy `List<T>` is the closest. Only the last arguments of a branch can be optional or
 variadic, as in CommandAPI and Cloud.
@@ -246,7 +246,7 @@ variadic, as in CommandAPI and Cloud.
 `/team <team> add <player>` and `/team <team> remove <player>`, the team looked up once.
 
 ```kotlin
-// CommandLib, Kotlin DSL (examples/.../team/KotlinTeamCommand.kt)
+// Cadence, Kotlin DSL (examples/.../team/KotlinTeamCommand.kt)
 argument(ObjectArgument<MutableSet<String>>("team") { teams.byName() }) { team ->
     subcommand("add") {
         argument(PlayerArgument("player")) { player ->
@@ -262,7 +262,7 @@ Each child reads the team through its `ArgRef`, `team.get()`, and gets its own p
 (`example.command.team.add`) and help line ([snapshot](../examples/src/test/resources/snapshots/team.snap)).
 With annotations, a placeholder in the path is the argument the child follows, and each method takes its value as the
 parameter of the same name
-([`AnnotatedTeamCommand`](../examples/src/main/java/dev/marulabs/commandlib/examples/team/AnnotatedTeamCommand.java),
+([`AnnotatedTeamCommand`](../examples/src/main/java/dev/marulabs/cadence/examples/team/AnnotatedTeamCommand.java),
 which registers the `ObjectArgument` for `Set` parameters):
 
 ```java
@@ -308,7 +308,7 @@ Partly verified: [command trees](https://docs.commandapi.dev/create-commands/com
   [command tree](https://docs.papermc.io/paper/dev/command-api/basics/command-tree/)), with
   `getArgument("name", String.class)` in each executor.
 
-**Compared.** Lamp's path placeholders are the shortest; CommandLib's annotations use the same syntax. CommandLib's
+**Compared.** Lamp's path placeholders are the shortest; Cadence's annotations use the same syntax. Cadence's
 tree parses the team once, as a typed value shared by the children, where the others look up the name in each
 handler.
 
@@ -317,14 +317,14 @@ handler.
 `/stats <player>` loads the kills from a blocking store and replies on the server thread.
 
 ```java
-// CommandLib, fluent (examples/.../stats/FluentStatsCommand.java)
+// Cadence, fluent (examples/.../stats/FluentStatsCommand.java)
 argument(new StringArgument("player")).executeAsync((ctx, player) -> ctx.supplyAsync(() -> store.kills(player))
                                                                         // Back on the server thread.
                                                                         .thenAccept(kills -> ctx.sendSuccess(player + " has " + kills + " kills")));
 ```
 
 ```kotlin
-// CommandLib, Kotlin DSL
+// Cadence, Kotlin DSL
 argument(StringArgument("player")) { player ->
     executeSuspend { ctx ->
         val kills = withContext(ctx.asyncDispatcher) { store.kills(player.get()) }
@@ -367,9 +367,9 @@ Verified: `CompletionStageResponseHandler.java` in Lamp v4; v4 has no `@Async`.
   [executors](https://docs.papermc.io/paper/dev/command-api/basics/executors/); ACF: unverified). All three have async
   suggestions.
 
-**Compared.** CommandLib is the only one of these that returns to the server thread by itself, through a scheduler the
+**Compared.** Cadence is the only one of these that returns to the server thread by itself, through a scheduler the
 tests can replace, and its middlewares wrap the whole async execution. Cloud chooses the thread for parsing and
-execution with coordinators, which CommandLib does not have: CommandLib always parses on the server thread. With every
+execution with coordinators, which Cadence does not have: Cadence always parses on the server thread. With every
 library, `/execute store` sees the result set before the work finished.
 
 ## 5. Dependency injection
@@ -378,7 +378,7 @@ library, `/execute store` sees the result set before the work finished.
 an account is refused.
 
 ```java
-// CommandLib, fluent (examples/.../balance/FluentBalanceCommand.java)
+// Cadence, fluent (examples/.../balance/FluentBalanceCommand.java)
 public FluentBalanceCommand(Economy economy) {
     super("balance");
     // The sender's account, mapped once per execution for this command and its children.
@@ -393,7 +393,7 @@ public FluentBalanceCommand(Economy economy) {
 ```
 
 ```java
-// CommandLib, annotations (examples/.../balance/AnnotatedBalanceCommand.java)
+// Cadence, annotations (examples/.../balance/AnnotatedBalanceCommand.java)
 AnnotatedCommands.parser()
                  .registerDependency(Economy.class, economy)    // sets @Dependency fields
                  .registerContextValue(Economy.Account.class, ctx -> economy.account(ctx.getSender()))
@@ -413,7 +413,7 @@ In Kotlin, `provide { ctx -> economy.account(ctx.sender) }` keys the value by th
 message, also from a typed executor ("You have no account." in the
 [snapshot](../examples/src/test/resources/snapshots/balance.snap)). Middlewares can `put` values for the executor too
 ([context values](context-values.md)). A provider belongs to a command tree; values for every command of a plugin go
-in a `CommandDefaults` passed to `CommandLib.register`.
+in a `CommandDefaults` passed to `Cadence.register`.
 
 ```java
 // Cloud: about 3 lines
@@ -455,7 +455,7 @@ Partly verified: `registerDependency`, `@Dependency` and the issuer-only context
   (verified by absence).
 
 **Compared.** Lamp, Cloud and ACF register a service or a sender type once for every command of the manager, and
-Cloud's `SenderMapper` changes the sender type itself, so handlers take `Payer` instead of `CommandSender`. CommandLib's
+Cloud's `SenderMapper` changes the sender type itself, so handlers take `Payer` instead of `CommandSender`. Cadence's
 values are typed, mapped once per execution, readable from middlewares, prerequisites and suggestions as well, and
 scoped to a command tree, which is one call per top-level command in a plugin with many; the sender type stays the
 platform's.
@@ -466,20 +466,20 @@ platform's.
 the generated help.
 
 ```java
-// CommandLib (examples/.../home/HomeCaptions.java)
+// Cadence (examples/.../home/HomeCaptions.java)
 public static final Caption SET = Caption.of("example.home.set", "Home {name} set.");
 
 public static Captions create() {
     return Captions.create().bundle("lang/homes", HomeCaptions.class.getClassLoader());    // lang/homes_ja.properties
 }
 
-// CommandLib, fluent (examples/.../home/FluentHomeCommand.java)
+// Cadence, fluent (examples/.../home/FluentHomeCommand.java)
 captions(HomeCaptions.create());
 description(HomeCaptions.DESCRIPTION);
 argument(new StringArgument("name")).execute((ctx, name) -> ctx.sendSuccess(HomeCaptions.SET, Map.of("name", name)));
 ```
 
-A player whose client is Japanese gets `ホーム base を設定しました。` and the help heading `使い方:`; CommandLib's own
+A player whose client is Japanese gets `ホーム base を設定しました。` and the help heading `使い方:`; Cadence's own
 messages, such as the cooldown, the options' errors and the permission message, come in English and Japanese
 ([snapshot](../examples/src/test/resources/snapshots/home.snap)). With annotations, `@CaptionBundle("lang/homes")` and
 `@Description(value = "Manage your homes", caption = "example.home.description")` on the class do the same.
@@ -513,8 +513,8 @@ Partly verified: the calls are on [locales](https://github.com/aikar/commands/wi
   or send Adventure `Component.translatable(...)` with a `GlobalTranslator` (unverified as a pattern; failures on
   [handle failures](https://docs.commandapi.dev/create-commands/executors/handle-failures), verified).
 
-**Compared.** Cloud and ACF have localization as complete as CommandLib's, with more languages for their own messages
-(Cloud's translations; ACF's message keys and formats). CommandLib ships English and Japanese, resolves the locale
+**Compared.** Cloud and ACF have localization as complete as Cadence's, with more languages for their own messages
+(Cloud's translations; ACF's message keys and formats). Cadence ships English and Japanese, resolves the locale
 without setup, and localizes the generated help headings; CommandAPI, Lamp and Paper leave it to the plugin.
 
 ## 7. Vanilla result
@@ -522,7 +522,7 @@ without setup, and localizes the generated help headings; CommandAPI, Lamp and P
 `/execute store result score ... run score <player>` stores the player's score; an unknown player stores 0.
 
 ```java
-// CommandLib, annotations (examples/.../score/AnnotatedScoreCommand.java)
+// Cadence, annotations (examples/.../score/AnnotatedScoreCommand.java)
 @Execute
 public int score(CommandContext ctx, String player) throws CommandPrerequisiteException {
     Integer score = SCORES.get(player);
@@ -567,28 +567,28 @@ a failure throws a `CommandSyntaxException`.
 - **ACF** returns Bukkit's `boolean`; its Brigadier support builds the client tree only (`BukkitRootCommand.java`,
   `PaperBrigadierManager.java`, verified).
 
-**Compared.** CommandLib, CommandAPI and Paper give a real result; CommandAPI's and Paper's are a plain `return`, and
-CommandLib's needs `ctx.setResult(n)`, or an annotated method returning `int`.
+**Compared.** Cadence, CommandAPI and Paper give a real result; CommandAPI's and Paper's are a plain `return`, and
+Cadence's needs `ctx.setResult(n)`, or an annotated method returning `int`.
 
 ## Setup
 
 | Library | Dependency and packaging | Registration |
 |---|---|---|
-| CommandLib | `spigot`, `paper`, `velocity`, a Forge / NeoForge / Fabric artifact, or a `-kotlin` artifact (JitPack today); shade and relocate `dev.marulabs.commandlib` ([packaging](packaging.md)) | `CommandLib.register(plugin, commands...)` in `onEnable`; annotations need `-parameters` |
+| Cadence | `spigot`, `paper`, `velocity`, a Forge / NeoForge / Fabric artifact, or a `-kotlin` artifact (JitPack today); shade and relocate `dev.marulabs.cadence` ([packaging](packaging.md)) | `Cadence.register(plugin, commands...)` in `onEnable`; annotations need `-parameters` |
 | CommandAPI | `commandapi-paper-shade` / `-spigot-shade`, relocation recommended; or the CommandAPI plugin as a dependency | `CommandAPI.onLoad(config)`, `onEnable()`, `onDisable()` when shaded, then `.register()` per command ([setup](https://docs.commandapi.dev/dev-setup/setup), verified) |
 | Cloud | `cloud-paper` and modules such as `cloud-annotations`, `cloud-minecraft-extras`; relocation advised by the official example | Build a `PaperCommandManager` (or `LegacyPaperCommandManager` with `registerBrigadier()`), then `manager.command(...)` ([Paper](https://cloud.incendo.org/minecraft/paper/), verified) |
 | Lamp | `lamp.common`, `lamp.bukkit` (and `lamp.brigadier`) from Maven Central; `-parameters` required | `BukkitLamp.builder(plugin).build().register(new Commands())` ([readme](https://foxhut.gitbook.io/lamp-docs), verified) |
 | ACF | `acf-paper` 0.5.1-SNAPSHOT from Aikar's repository; shading and relocating `co.aikar.commands` and `co.aikar.locales` required; `-parameters` | `new PaperCommandManager(plugin).registerCommand(new Command())` ([Gradle setup](https://github.com/aikar/commands/wiki/Gradle-Setup), verified) |
 | Paper | `paper-api` only | A `LifecycleEvents.COMMANDS` handler in `onEnable` or a bootstrapper ([registration](https://docs.papermc.io/paper/dev/command-api/basics/registration/), verified) |
 
-Paper needs no dependency at all and is the only one without shading. CommandLib's setup is one call, without a manager
+Paper needs no dependency at all and is the only one without shading. Cadence's setup is one call, without a manager
 object, but it is not on Maven Central yet.
 
 ## Testing without a server
 
 | Library | Official support | Covers |
 |---|---|---|
-| CommandLib | `common-testing`, `spigot-testing`, `paper-testing`, `velocity-testing`, Forge / NeoForge / Fabric testing artifacts | Tree snapshots, help, permissions, options, suggestions, results, sender locale, async with a controllable scheduler, `CommandLibExtension` for JUnit 5 ([testing](testing.md)) |
+| Cadence | `common-testing`, `spigot-testing`, `paper-testing`, `velocity-testing`, Forge / NeoForge / Fabric testing artifacts | Tree snapshots, help, permissions, options, suggestions, results, sender locale, async with a controllable scheduler, `CadenceExtension` for JUnit 5 ([testing](testing.md)) |
 | CommandAPI | `commandapi-paper-test-toolkit` with MockBukkit | `assertCommandSucceeds` / `Fails`, the parsed argument values (`assertCommandSucceedsWithArguments`), suggestions and tooltips ([testing](https://docs.commandapi.dev/test/intro), verified) |
 | Cloud | None; a `CommandManager` subclass and `commandExecutor().executeCommand(...)` work in plain tests | Parsing and handlers, without the platform (unverified as a downstream pattern) |
 | Lamp | None; `Lamp.builder().build()` with a fake actor works, as Lamp's own tests do | Dispatch and completion (verified: `AutocompleteFlagsTest.java`) |
@@ -597,23 +597,23 @@ object, but it is not on Maven Central yet.
 
 Every snapshot of the `examples` module is made by the testing artifacts alone. What they do not cover is the
 platform: registration in Bukkit's command map or Paper's lifecycle, `DefaultPermission` defaults (except Velocity's,
-which CommandLib applies itself), `/execute` itself and
+which Cadence applies itself), `/execute` itself and
 real registries; the repository's integration tests run those on real servers. CommandAPI's toolkit runs on MockBukkit,
-which models more of the server (players, worlds) than CommandLib's testers do, and can assert the parsed argument
+which models more of the server (players, worlds) than Cadence's testers do, and can assert the parsed argument
 values directly.
 
 ## Extensibility
 
 | Library | Custom argument types | Hooks |
 |---|---|---|
-| CommandLib | Subclass `Argument`; `ObjectArgument` / `EnumArgument` for lookups; `validator`, `transformer`, `additionalParser` to refine a built-in type; `registerArgument` and `registerAnnotation` for annotations | Middlewares (sync and async), prerequisites, preprocesses, confirmation, cooldown, `Captions#sender`, uncaught exception handlers |
+| Cadence | Subclass `Argument`; `ObjectArgument` / `EnumArgument` for lookups; `validator`, `transformer`, `additionalParser` to refine a built-in type; `registerArgument` and `registerAnnotation` for annotations | Middlewares (sync and async), prerequisites, preprocesses, confirmation, cooldown, `Captions#sender`, uncaught exception handlers |
 | CommandAPI | `CustomArgument` around a built-in base argument; about 60 built-in vanilla argument types | Requirements, failure messages ([custom arguments](https://docs.commandapi.dev/create-commands/arguments/types/custom-arguments), verified) |
 | Cloud | `ArgumentParser` (and `FutureArgumentParser`), registered by type; `firstOf`, aggregate parsers; Brigadier mappings | Pre- and postprocessors, exception controller, confirmation, cooldown and requirement modules ([core](https://cloud.incendo.org/core/), verified) |
 | Lamp | `ParameterType` and factories; Brigadier types with `@BType` | Conditions, parameter validators, annotation replacers, response handlers, permission factory ([custom parameter types](https://foxhut.gitbook.io/lamp-docs/how-to/custom-parameter-types), verified) |
 | ACF | Context resolvers (input, issuer-aware, issuer-only) | Conditions, completions, replacements ([command contexts](https://github.com/aikar/commands/wiki/Command-Contexts), verified) |
 | Paper | `CustomArgumentType` over a native type | Requirements ([custom arguments](https://docs.papermc.io/paper/dev/command-api/basics/custom-arguments/), verified) |
 
-CommandLib registers nothing globally: an argument is an object in the branch, and an annotation parser's
+Cadence registers nothing globally: an argument is an object in the branch, and an annotation parser's
 registrations apply to the commands it parses. Cloud, Lamp and ACF register a type once for every command, which is
 less code in a large plugin.
 
@@ -628,7 +628,7 @@ less code in a large plugin.
   test toolkit on MockBukkit that asserts the parsed values.
 - **Paper** needs no dependency and no shading, follows vanilla exactly, and is the reference for what Brigadier can do.
 
-## CommandLib's constraints in these use cases
+## Cadence's constraints in these use cases
 
 - Options come before the positional arguments unless the command calls `optionsAnywhere()`, and never follow the
   values of a variadic argument.
@@ -638,7 +638,7 @@ less code in a large plugin.
   the sender type stays the platform's.
 - Help is a child of commands only: `/team red help` is rejected, while `/team red` shows the help of `/team`.
 - Parsing always runs on the server thread; there is no coordinator to move it.
-- CommandLib's own messages are translated into English and Japanese only.
+- Cadence's own messages are translated into English and Japanese only.
 - Java line counts are higher than Lamp's or ACF's for the same command, and the builder style is the longest.
 
 ## Sources

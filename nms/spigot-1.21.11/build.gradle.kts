@@ -1,5 +1,5 @@
 plugins {
-    id("commandlib.spigot-nms")
+    id("cadence.spigot-nms")
 }
 
 // Compiled with Mojang names and remapped to the Spigot names that Spigot 1.21.11 runs with. Paper runs with Mojang

@@ -3,7 +3,7 @@ loaderVersion="[${forgeLoader},)"
 license="MIT"
 
 [[mods]]
-modId="commandlibtest"
+modId="cadencetest"
 version="1.0.0"
-displayName="CommandLib Test Mod"
-description="Runs CommandLib integration test cases on a real NeoForge server."
+displayName="Cadence Test Mod"
+description="Runs Cadence integration test cases on a real NeoForge server."

@@ -1,10 +1,10 @@
 package dev.marulabs.testplugin;
 
-import dev.marulabs.commandlib.Command;
-import dev.marulabs.commandlib.CommandLib;
-import dev.marulabs.commandlib.argument.StringArgument;
-import dev.marulabs.commandlib.exception.CommandPrerequisiteException;
-import dev.marulabs.commandlib.internal.bukkit.BukkitUtil;
+import dev.marulabs.cadence.Cadence;
+import dev.marulabs.cadence.Command;
+import dev.marulabs.cadence.argument.StringArgument;
+import dev.marulabs.cadence.exception.CommandPrerequisiteException;
+import dev.marulabs.cadence.internal.bukkit.BukkitUtil;
 import dev.marulabs.integration.core.TestResult;
 import dev.marulabs.integration.core.TestStatus;
 import org.bukkit.Bukkit;
@@ -39,18 +39,18 @@ public final class ScenarioTest extends TestBase {
      * spigot module on Paper 1.20.6+ has no such handler, so it is added again after the reload has sent players their
      * trees.
      */
-    public static final String LATE_COMMAND = "commandliblate";
+    public static final String LATE_COMMAND = "cadencelate";
     /**
-     * Name of the data pack function, in the {@code commandlibtest} namespace, that stores the success of a command the
+     * Name of the data pack function, in the {@code cadencetest} namespace, that stores the success of a command the
      * console is denied when the function runs. The platform's {@code DataPackFunctionTest} writes it with
      * {@link #DENIED_STORE_FUNCTION_BODY}.
      */
     public static final String DENIED_STORE_FUNCTION = "store_denied";
-    private static final String STORE_OBJECTIVE = "commandlibstore";
+    private static final String STORE_OBJECTIVE = "cadencestore";
     private static final String DENIED_STORE = "executeStoreSuccessWhenDenied";
     public static final String DENIED_STORE_FUNCTION_BODY = "execute store success score #denied " + STORE_OBJECTIVE
             + " run " + MainCommand.NAME + " " + DENIED_STORE + "Target\n";
-    private static final String DENIED_STORE_NODE = "commandlibtest.storedenied";
+    private static final String DENIED_STORE_NODE = "cadencetest.storedenied";
 
     private final Plugin plugin;
     private final String playerName;
@@ -200,7 +200,7 @@ public final class ScenarioTest extends TestBase {
         }});
         afterReloadCommands.addAll(List.of("scoreboard players set #denied " + STORE_OBJECTIVE + " 7",
                                            buildCommand(command, DENIED_STORE + "Deny"),
-                                           "function commandlibtest:" + DENIED_STORE_FUNCTION,
+                                           "function cadencetest:" + DENIED_STORE_FUNCTION,
                                            buildCommand(command, DENIED_STORE)));
     }
 
@@ -218,11 +218,11 @@ public final class ScenarioTest extends TestBase {
                 + ":" + commandName;
         AtomicInteger executions = new AtomicInteger();
         List<String> executedInputs = Collections.synchronizedList(new ArrayList<>());
-        AtomicReference<CommandLib> registration = new AtomicReference<>();
+        AtomicReference<Cadence> registration = new AtomicReference<>();
 
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name + "Register") {{
-            execute(ctx -> registration.set(CommandLib.register(plugin, new Command(commandName) {{
+            execute(ctx -> registration.set(Cadence.register(plugin, new Command(commandName) {{
                 permission(PermissionDefault.TRUE);
                 execute(inner -> {
                     executions.incrementAndGet();
@@ -238,7 +238,7 @@ public final class ScenarioTest extends TestBase {
                                              "Registered command was not executed under both labels: executions="
                                                      + executions.get() + ": " + executedInputs));
                 }
-                CommandLib current = registration.getAndSet(null);
+                Cadence current = registration.getAndSet(null);
                 if (current != null) {
                     current.unregister();
                 }
@@ -274,18 +274,18 @@ public final class ScenarioTest extends TestBase {
     public List<String> unregisteringKeepsALabelTakenSince() {
         String name = getMethodName();
         String key = getKey();
-        String label = "commandlibowned";
+        String label = "cadenceowned";
         String namespacedLabel = namespacedLabel(label);
         List<String> executions = Collections.synchronizedList(new ArrayList<>());
 
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name + "Register") {{
             execute(ctx -> {
-                CommandLib first = CommandLib.register(plugin, new Command(label) {{
+                Cadence first = Cadence.register(plugin, new Command(label) {{
                     permission(PermissionDefault.TRUE);
                     execute(inner -> executions.add("unregistered"));
                 }});
-                CommandLib.register(plugin, new Command(label) {{
+                Cadence.register(plugin, new Command(label) {{
                     permission(PermissionDefault.TRUE);
                     execute(inner -> executions.add("later"));
                 }});
@@ -306,10 +306,10 @@ public final class ScenarioTest extends TestBase {
     public List<String> enableRegisteredCommandIsRemovedByUnregister() {
         String name = getMethodName();
         String key = getKey();
-        String label = "commandlibenabled";
+        String label = "cadenceenabled";
         String namespacedLabel = namespacedLabel(label);
         AtomicInteger executions = new AtomicInteger();
-        CommandLib registration = CommandLib.register(plugin, new Command(label) {{
+        Cadence registration = Cadence.register(plugin, new Command(label) {{
             permission(PermissionDefault.TRUE);
             execute(inner -> executions.incrementAndGet());
         }});
@@ -343,7 +343,7 @@ public final class ScenarioTest extends TestBase {
 
         putResult(new TestResult(key, TestStatus.FAILED, LATE_COMMAND + " was not executed after /minecraft:reload."));
         command.addChildren(new Command(name) {{
-            execute(ctx -> CommandLib.register(plugin, new Command(LATE_COMMAND) {{
+            execute(ctx -> Cadence.register(plugin, new Command(LATE_COMMAND) {{
                 permission(PermissionDefault.TRUE);
                 execute(inner -> putResult(new TestResult(key,
                                                           TestStatus.SUCCEEDED,

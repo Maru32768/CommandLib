@@ -1,0 +1,70 @@
+package dev.marulabs.cadence.internal;
+
+import com.mojang.brigadier.context.StringRange;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.tree.RootCommandNode;
+import dev.marulabs.cadence.CommonCommandContext;
+import dev.marulabs.cadence.exception.ArgumentParseException;
+import org.jetbrains.annotations.ApiStatus;
+
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+/**
+ * What {@code common} needs from the platform module. Each platform implements it in the package-private
+ * {@code dev.marulabs.cadence.PlatformAdapterImpl}.
+ */
+@ApiStatus.Internal
+public interface PlatformAdapter<S, T, C extends CommonCommandContext<S, T>> {
+    /**
+     * The platform's adapter. Its class is looked up once.
+     */
+    @SuppressWarnings("unchecked")
+    static <S, T, C extends CommonCommandContext<S, T>> PlatformAdapter<S, T, C> get() {
+        return (PlatformAdapter<S, T, C>) PlatformAdapterHolder.get();
+    }
+
+    /**
+     * The platform's context of {@code ctx}, with what {@code state} gives from the command.
+     */
+    C createCommandContext(com.mojang.brigadier.context.CommandContext<S> ctx, ContextState state);
+
+    /**
+     * A context of the source alone, without input or arguments, for a predicate that decides what the source sees.
+     */
+    default C createSourceContext(S source, ContextState state) {
+        return createCommandContext(new com.mojang.brigadier.context.CommandContext<>(source,
+                                                                                      "",
+                                                                                      Map.of(),
+                                                                                      null,
+                                                                                      new RootCommandNode<>(),
+                                                                                      List.of(),
+                                                                                      StringRange.at(0),
+                                                                                      null,
+                                                                                      null,
+                                                                                      false),
+                                    state);
+    }
+
+    boolean hasPermission(S commandSource, String permissionNode);
+
+    default boolean hasPermission(C ctx, String permissionNode) {
+        return hasPermission(ctx.getHandle()
+                                .getSource(),
+                             permissionNode);
+    }
+
+    ArgumentParseException convertCommandSyntaxException(CommandSyntaxException e);
+
+    /**
+     * Logs an exception Cadence caught and does not rethrow, such as one of an executor, which the server would not
+     * log, or one of a suggestion provider. A platform logs it as its plugins and mods log; this default logs it through
+     * {@code java.util.logging}.
+     */
+    default void logError(String message, Throwable error) {
+        Logger.getLogger("dev.marulabs.cadence")
+              .log(Level.SEVERE, message, error);
+    }
+}

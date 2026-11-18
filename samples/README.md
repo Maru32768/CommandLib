@@ -1,6 +1,6 @@
-# CommandLib Sample Projects
+# Cadence Sample Projects
 
-Small, buildable plugins and mods, one per platform. Each one shades and relocates CommandLib as described in
+Small, buildable plugins and mods, one per platform. Each one shades and relocates Cadence as described in
 [packaging](../docs/packaging.md).
 
 | Sample | Platform | Language | Build |
@@ -9,13 +9,13 @@ Small, buildable plugins and mods, one per platform. Each one shades and relocat
 | [paper](./paper) | Paper 1.21+ | Java | composite build |
 | [paper-kotlin](./paper-kotlin) | Paper 1.21+ | Kotlin DSL | composite build |
 | [velocity](./velocity) | Velocity 3.4+ | Java | composite build |
-| [forge](./forge) | Forge 1.16.5 (ForgeGradle 6) | Java | `-PcommandlibLocal=true` |
-| [fabric](./fabric) | Fabric 1.21.1 (Loom) | Java | `-PcommandlibLocal=true` |
+| [forge](./forge) | Forge 1.16.5 (ForgeGradle 6) | Java | `-PcadenceLocal=true` |
+| [fabric](./fabric) | Fabric 1.21.1 (Loom) | Java | `-PcadenceLocal=true` |
 
 ## Building
 
 The composite-build samples include the repository build with `includeBuild` and dependency substitution, so they
-compile against the local CommandLib source:
+compile against the local Cadence source:
 
 ```bash
 cd samples/paper
@@ -28,24 +28,24 @@ included build:
 
 ```bash
 cd samples/spigot
-./gradlew build -Pcommandlib.typedNms=false
+./gradlew build -Pcadence.typedNms=false
 ```
 
 That jar has no NMS implementations and throws `NMSClassNotFoundException` on a server, so use it to compile only.
 
-Copied outside the repository, they resolve `com.github.Maru32768.CommandLib:*:latest.release` from JitPack like a
+Copied outside the repository, they resolve `com.github.Maru32768.Cadence:*:latest.release` from JitPack like a
 downstream project. Replace `latest.release` with a release tag in your own project.
 
 The Forge and Fabric samples do not include the repository build: ForgeGradle 6 does not run on the Gradle 9 the
 repository needs, and Loom remaps mod dependencies from a Maven artifact. To build them against the local source,
-publish the artifacts they use at the repository root and pass `-PcommandlibLocal=true`:
+publish the artifacts they use at the repository root and pass `-PcadenceLocal=true`:
 
 ```bash
-./gradlew -Pcommandlib.typedNms=false :common:publishToMavenLocal :modded:forge-1.16.5:publishToMavenLocal
-(cd samples/forge && ./gradlew build -PcommandlibLocal=true)
+./gradlew -Pcadence.typedNms=false :common:publishToMavenLocal :modded:forge-1.16.5:publishToMavenLocal
+(cd samples/forge && ./gradlew build -PcadenceLocal=true)
 
-./gradlew -Pcommandlib.typedNms=false :common:publishToMavenLocal :modded:fabric-1.21.1:publishToMavenLocal
-(cd samples/fabric && ./gradlew build -PcommandlibLocal=true)
+./gradlew -Pcadence.typedNms=false :common:publishToMavenLocal :modded:fabric-1.21.1:publishToMavenLocal
+(cd samples/fabric && ./gradlew build -PcadenceLocal=true)
 ```
 
 Without the property they resolve the JitPack release like a downstream mod.
@@ -70,7 +70,7 @@ Without the property they resolve the JitPack release like a downstream mod.
 | `/feed [target]` | The Java builder (`Command.builder`) and a player argument defaulting to the sender. | spigot, paper |
 | `/feed [-s] <targets...>`, `/notes add\|list [page]` | The Kotlin DSL: delegated flags, typed references, optional arguments. | paper-kotlin |
 | `/send <player> <server>`, `/find <players...>` | Velocity's proxy `PlayerArgument` and `ServerArgument`. | velocity |
-| `/<sample>-diagnostics` | `CommandLibDiagnosticsCommand`: the platform, the relocated package and the registrations. | all |
+| `/<sample>-diagnostics` | `CadenceDiagnosticsCommand`: the platform, the relocated package and the registrations. | all |
 
 ## Notes
 

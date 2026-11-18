@@ -1,20 +1,20 @@
 # Migrating from CommandAPI
 
-This guide maps [CommandAPI](https://docs.commandapi.dev/) concepts to CommandLib for Spigot and Paper plugins. The
-examples use CommandAPI 9.x/10.x names on the left and CommandLib's `spigot` / `paper` artifacts on the right. Both
+This guide maps [CommandAPI](https://docs.commandapi.dev/) concepts to Cadence for Spigot and Paper plugins. The
+examples use CommandAPI 9.x/10.x names on the left and Cadence's `spigot` / `paper` artifacts on the right. Both
 libraries register Brigadier commands, so command syntax, selectors, and vanilla argument behavior carry over.
 
-Features CommandLib does not have yet are marked **Not available**.
+Features Cadence does not have yet are marked **Not available**.
 
 ## Setup
 
-| CommandAPI | CommandLib |
+| CommandAPI | Cadence |
 |---|---|
-| Depend on the CommandAPI plugin, or shade it and call `CommandAPI.onLoad(...)`, `onEnable()`, `onDisable()` | Shade the `spigot` or `paper` artifact and relocate `dev.marulabs.commandlib`; no lifecycle calls |
-| `command.register()` | `CommandLib.register(plugin, commands...)` in `onEnable` |
+| Depend on the CommandAPI plugin, or shade it and call `CommandAPI.onLoad(...)`, `onEnable()`, `onDisable()` | Shade the `spigot` or `paper` artifact and relocate `dev.marulabs.cadence`; no lifecycle calls |
+| `command.register()` | `Cadence.register(plugin, commands...)` in `onEnable` |
 | `register("namespace")` | The plugin name is the namespace: `/<plugin>:<label>` |
-| Paper bootstrap registration | `CommandLib.bootstrap(context, commands...)` in `PluginBootstrap#bootstrap` (Paper) |
-| `CommandAPI.unregister("name")` | `CommandLib#unregister()` removes everything that registration added; plugin disable does it automatically |
+| Paper bootstrap registration | `Cadence.bootstrap(context, commands...)` in `PluginBootstrap#bootstrap` (Paper) |
+| `CommandAPI.unregister("name")` | `Cadence#unregister()` removes everything that registration added; plugin disable does it automatically |
 
 ```java
 // CommandAPI
@@ -27,10 +27,10 @@ public void onEnable() {
 ```
 
 ```java
-// CommandLib
+// Cadence
 @Override
 public void onEnable() {
-    CommandLib.register(this, new Command("ping") {{
+    Cadence.register(this, new Command("ping") {{
         execute(ctx -> ctx.sendMessage("pong"));
     }});
 }
@@ -38,7 +38,7 @@ public void onEnable() {
 
 ## Commands and arguments
 
-CommandAPI lists arguments and reads them back by name or index from `CommandArguments`. CommandLib passes typed values
+CommandAPI lists arguments and reads them back by name or index from `CommandArguments`. Cadence passes typed values
 to the executor, so there is no lookup and no cast.
 
 ```java
@@ -54,7 +54,7 @@ new CommandAPICommand("message")
 ```
 
 ```java
-// CommandLib
+// Cadence
 class MessageCommand extends Command {
     MessageCommand() {
         super("message");
@@ -71,7 +71,7 @@ typed with `ctx.getArgument(a)` (see [Java builder](../java-builder.md#eight-or-
 
 ### Argument names
 
-| CommandAPI | CommandLib |
+| CommandAPI | Cadence |
 |---|---|
 | `IntegerArgument`, `LongArgument`, `FloatArgument`, `DoubleArgument`, `BooleanArgument` (with min / max) | Same names, `new IntegerArgument(name, min, max)` |
 | `StringArgument` (one word) | `new StringArgument(name, StringArgument.Type.WORD)` |
@@ -90,7 +90,7 @@ typed with `ctx.getArgument(a)` (see [Java builder](../java-builder.md#eight-or-
 | `BlockStateArgument` | `BlockDataArgument` (`BlockData`) |
 | `PotionEffectArgument` | `PotionEffectArgument` (returns a `PotionEffect`; use `getType()`) |
 | `ScoreboardSlotArgument` | `ScoreboardDisplaySlotArgument` |
-| Registry-backed arguments without a CommandLib class | `RegistryArgument<>(name, registry)` over a Bukkit `Registry` (Spigot) or a Paper `RegistryKey` (Paper) |
+| Registry-backed arguments without a Cadence class | `RegistryArgument<>(name, registry)` over a Bukkit `Registry` (Spigot) or a Paper `RegistryKey` (Paper) |
 | `CustomArgument` | `ObjectArgument`, `NameableObjectArgument`, `EnumArgument`, or a subclass of `Argument` |
 | `ListArgument` | `variadic()` on the element argument (see [optional arguments](#optional-arguments)) |
 | `IntegerRangeArgument` / `DoubleRangeArgument` | Same names; they return Guava `Range<Integer>` / `Range<Double>` instead of `IntegerRange` / `DoubleRange` |
@@ -114,7 +114,7 @@ new CommandAPICommand("heal")
 ```
 
 ```java
-// CommandLib
+// Cadence
 class HealCommand extends Command {
     HealCommand() {
         super("heal");
@@ -133,7 +133,7 @@ becomes `variadic()` on the element argument, such as `new PlayerArgument("targe
 
 ## Executors
 
-| CommandAPI | CommandLib |
+| CommandAPI | Cadence |
 |---|---|
 | `executes((sender, args) -> ...)` | `execute(ctx -> ...)` or the typed `execute((ctx, a, b) -> ...)`; the sender is `ctx.getSender()` |
 | `executesPlayer((player, args) -> ...)` | `addPrerequisite(Command.player())` on the command, then `ctx.getPlayer()`; or `require(Command.player())` for a typed player |
@@ -144,7 +144,7 @@ becomes `variadic()` on the element argument, such as `new PlayerArgument("targe
 | Message helpers | `ctx.sendMessage`, `sendSuccess` (green), `sendWarn` (yellow), `sendFailure` (red), with `String`, a native component, or `RichText` |
 
 ```java
-// CommandLib: a typed player value
+// Cadence: a typed player value
 class HomeCommand extends Command {
     HomeCommand() {
         super("home");
@@ -168,7 +168,7 @@ new CommandAPICommand("game")
 ```
 
 ```java
-// CommandLib
+// Cadence
 class GameCommand extends Command {
     GameCommand() {
         super("game");
@@ -201,7 +201,7 @@ Aliases: `withAliases("g")` → `addAliases("g")`.
 
 ## Permissions and requirements
 
-| CommandAPI | CommandLib |
+| CommandAPI | Cadence |
 |---|---|
 | `withPermission("myplugin.game")` | `permission("myplugin.game")`, or the generated `<prefix>.game` |
 | `withPermission(CommandPermission.OP)` | `permission(DefaultPermission.OP)` (the default for root commands) |
@@ -209,13 +209,13 @@ Aliases: `withAliases("g")` → `addAliases("g")`.
 | `withoutPermission(...)` | **Not available** |
 | `argument.withPermission(...)` | `argument(...).permission(...)` on the branch; every branch also gets a generated node |
 | `withRequirement(sender -> ...)` (hides the command) | `visibleWhen(ctx -> ...)` on the command or the branch ([permissions](../permissions.md#refreshing-the-command-tree)) |
-| `CommandAPI.updateRequirements(player)` | `CommandLib.refresh(player)` |
+| `CommandAPI.updateRequirements(player)` | `Cadence.refresh(player)` |
 
-CommandLib registers a Bukkit permission for each node with its default and description. See
+Cadence registers a Bukkit permission for each node with its default and description. See
 [permissions](../permissions.md) for node names and the LuckPerms setup.
 
 ```java
-// CommandLib: prerequisite with a message
+// Cadence: prerequisite with a message
 class ArenaCommand extends Command {
     ArenaCommand(ArenaManager arenas) {
         super("arena");
@@ -234,7 +234,7 @@ class ArenaCommand extends Command {
 
 ## Suggestions
 
-| CommandAPI | CommandLib |
+| CommandAPI | Cadence |
 |---|---|
 | `replaceSuggestions(ArgumentSuggestions.strings(...))` | `setSuggestionProvider(sb -> sb.suggest(...))` |
 | `includeSuggestions(...)` | `addSuggestionProvider(...)` |
@@ -250,7 +250,7 @@ new StringArgument("warp").replaceSuggestions(ArgumentSuggestions.strings(info -
 ```
 
 ```java
-// CommandLib
+// Cadence
 new StringArgument("warp", StringArgument.Type.WORD).setSuggestionProvider(sb -> warps.names()
                                                                                       .forEach(sb::suggest));
 ```
@@ -259,7 +259,7 @@ See [suggestions](../suggestions.md).
 
 ## Validation
 
-CommandAPI validates inside a `CustomArgument` parser or the executor. CommandLib adds validators to any argument;
+CommandAPI validates inside a `CustomArgument` parser or the executor. Cadence adds validators to any argument;
 a rejected value gets vanilla's "Incorrect argument for command" message, and the validator also filters suggestions.
 
 ```java
@@ -272,7 +272,7 @@ argument(new IntegerArgument("amount", 1, 64).validator(amount -> amount % 2 == 
 
 ## Options
 
-**Not in CommandAPI.** CommandLib has typed flags and value options placed after the command name:
+**Not in CommandAPI.** Cadence has typed flags and value options placed after the command name:
 
 ```java
 class ScanCommand extends Command {
@@ -291,7 +291,7 @@ class ScanCommand extends Command {
 
 ## Help
 
-| CommandAPI | CommandLib |
+| CommandAPI | Cadence |
 |---|---|
 | `withShortDescription`, `withFullDescription` | `serverHelp(shortText[, fullText])` for the server's `/help` |
 | `withUsage(...)` | Usage is generated from the tree: `/<command> help`, and sent automatically when arguments are missing |
@@ -299,12 +299,12 @@ class ScanCommand extends Command {
 
 ## Testing
 
-| CommandAPI | CommandLib |
+| CommandAPI | Cadence |
 |---|---|
 | `commandapi-spigot-test-toolkit` / `commandapi-paper-test-toolkit` with MockBukkit | `spigot-testing` / `paper-testing`; MockBukkit is optional |
 | `MockCommandAPIPlugin.load()` | Not needed: `new CommandTester(MyCommand::new, "myplugin.command")` |
 | `assertCommandSucceeds(player, "cmd")` | `tester.execute("cmd", sender)` and assert on `sender.getSentMessageTexts()` |
-| `assertCommandFails(...)` (syntax error) | `assertThatThrownBy(() -> tester.execute(...))`; CommandLib's own failures are sent messages |
+| `assertCommandFails(...)` (syntax error) | `assertThatThrownBy(() -> tester.execute(...))`; Cadence's own failures are sent messages |
 | Suggestion assertions | `tester.suggestions("cmd pa", sender).join().getList()` |
 | Selector arguments not implemented | `spigot-testing` mocks names, `@s`, `@p`, `@r`, `@a`, `@e`; Forge / NeoForge testing parses real selectors |
 

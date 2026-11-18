@@ -2,12 +2,12 @@
 
 ## Context
 
-CommandLib argument declarations describe positional parameters — values that
+Cadence argument declarations describe positional parameters — values that
 appear in a fixed sequence after the command name. Some commands need optional
 modifier flags that the caller may omit, providing defaults when absent. These
 cannot be cleanly expressed as positional arguments.
 
-This design note records how CommandLib models those optional modifiers, how the
+This design note records how Cadence models those optional modifiers, how the
 public API is expected to behave, and which internal boundaries are intentional.
 
 ## Goals
@@ -242,7 +242,7 @@ Stores:
 - `required` and `validators`: checked after parsing.
 
 `hasValue()` returns `true` when `type != null`. `internalName(i)` is
-`"__commandlib_option_" + name` for the first occurrence and appends `#n` for
+`"__cadence_option_" + name` for the first occurrence and appends `#n` for
 the n-th, since Brigadier keeps one parsed value per argument name.
 
 ### `Options` (factory)
@@ -310,15 +310,15 @@ parser.
 
 ```
 --limit                      → literal node, no direct executor
-  __commandlib_option_limit  → required argument node (IntegerArgumentType), executes
+  __cadence_option_limit  → required argument node (IntegerArgumentType), executes
     <argument nodes>
     <remaining option tokens>
 ```
 
 A second `--limit` on the same path, when the option is repeatable, leads to
-`__commandlib_option_limit#2`.
+`__cadence_option_limit#2`.
 
-The internal name prefix `__commandlib_option_` prevents the argument node name
+The internal name prefix `__cadence_option_` prevents the argument node name
 from appearing in `argumentNameToInputArgMap`, which is filtered in
 `CommonCommandContext.collectInputs`.
 

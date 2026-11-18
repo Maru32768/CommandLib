@@ -1,25 +1,25 @@
 # Migrating from Lamp
 
 This guide maps [Lamp](https://github.com/Revxrsal/Lamp) 4.x ([docs](https://foxhut.gitbook.io/lamp-docs)) concepts
-to CommandLib for Spigot and Paper plugins. The examples use `lamp.bukkit` names on the left and CommandLib's `spigot` /
+to Cadence for Spigot and Paper plugins. The examples use `lamp.bukkit` names on the left and Cadence's `spigot` /
 `paper` artifacts on the right.
 
-The main difference in style: Lamp reads annotated methods and turns each parameter into an argument. CommandLib's core
+The main difference in style: Lamp reads annotated methods and turns each parameter into an argument. Cadence's core
 is fluent: a command is a `Command` subclass whose arguments are objects, and the executor gets their values as typed
 lambda parameters. Its [annotation API](../annotations.md) (`@Command`, `@Subcommand`, `@Flag`, `@Optional`, ...) is
 close to Lamp's and builds the same fluent commands; this guide maps to the fluent API. The command tree is real Brigadier on Spigot as well as Paper, from 1.16.5 to 26.x.
 
-Features CommandLib does not have yet are marked **Not available**.
+Features Cadence does not have yet are marked **Not available**.
 
 ## Setup
 
-| Lamp | CommandLib |
+| Lamp | Cadence |
 |---|---|
-| `BukkitLamp.builder(plugin)...build()` | No builder: shade the `spigot` or `paper` artifact and relocate `dev.marulabs.commandlib` |
-| `lamp.register(new MyCommands())` | `CommandLib.register(plugin, commands...)` in `onEnable` |
+| `BukkitLamp.builder(plugin)...build()` | No builder: shade the `spigot` or `paper` artifact and relocate `dev.marulabs.cadence` |
+| `lamp.register(new MyCommands())` | `Cadence.register(plugin, commands...)` in `onEnable` |
 | Compile with `-parameters` for parameter names | Not needed: each argument is named in its constructor |
 | `lamp.brigadier` module, Brigadier on Paper only after 1.19.1 | Always Brigadier, on Spigot and Paper |
-| — | `CommandLib.bootstrap(context, commands...)` in `PluginBootstrap#bootstrap` (Paper) |
+| — | `Cadence.bootstrap(context, commands...)` in `PluginBootstrap#bootstrap` (Paper) |
 
 ```java
 // Lamp
@@ -38,10 +38,10 @@ public void onEnable() {
 ```
 
 ```java
-// CommandLib
+// Cadence
 @Override
 public void onEnable() {
-    CommandLib.register(this, new Command("ping") {{
+    Cadence.register(this, new Command("ping") {{
         execute(ctx -> ctx.sendMessage("pong"));
     }});
 }
@@ -58,7 +58,7 @@ public void give(BukkitCommandActor actor, Player target, @Default("1") @Range(m
 ```
 
 ```java
-// CommandLib
+// Cadence
 class GiveCommand extends Command {
     GiveCommand() {
         super("give");
@@ -75,7 +75,7 @@ typed with `ctx.getArgument(a)` (see [Java builder](../java-builder.md#eight-or-
 
 ### Parameter types
 
-| Lamp parameter | CommandLib argument |
+| Lamp parameter | Cadence argument |
 |---|---|
 | `int`, `long`, `float`, `double`, `boolean` with `@Range(min, max)` | `IntegerArgument(name, min, max)`, `LongArgument`, `FloatArgument`, `DoubleArgument`, `BooleanArgument` |
 | `String` as the last parameter (rest of the input) | `new StringArgument(name, StringArgument.Type.PHRASE)` |
@@ -94,7 +94,7 @@ does not have.
 
 ### `@Optional` and `@Default`
 
-| Lamp | CommandLib |
+| Lamp | Cadence |
 |---|---|
 | `@Default("1") int amount` | `new IntegerArgument("amount").optional(1)` |
 | `@Default("me") Player target`, Kotlin `@Optional target: Player = actor.requirePlayer()` | `new PlayerArgument("target").optional(Command.player())` |
@@ -135,7 +135,7 @@ public final class QuestParameterType implements ParameterType<BukkitCommandActo
 ```
 
 ```java
-// CommandLib
+// Cadence
 argument(new ObjectArgument<Quest>("quest", questManager::byName)).execute((ctx, quest) -> ctx.sendMessage(quest.name()));
 ```
 
@@ -146,7 +146,7 @@ factory method that returns a configured argument. To refine a built-in type, us
 
 ## Actors and senders
 
-| Lamp | CommandLib |
+| Lamp | Cadence |
 |---|---|
 | `BukkitCommandActor actor` parameter | The `ctx` parameter: `ctx.getSender()`, `ctx.sendMessage(...)` |
 | `actor.reply("...")`, `actor.error("...")` | `ctx.sendMessage`, `sendSuccess` (green), `sendWarn` (yellow), `sendFailure` (red) |
@@ -156,7 +156,7 @@ factory method that returns a configured argument. To refine a built-in type, us
 | A custom actor type or `ContextParameter` | `provide(GameActor.class, ctx -> ...)` on the command maps the sender once per execution for its subtree; `ctx.get(GameActor.class)` reads it, and annotated methods take it as a parameter after `registerContextValue(GameActor.class, ctx -> ...)`. See [context values](../context-values.md) |
 
 ```java
-// CommandLib: a typed player value
+// Cadence: a typed player value
 class HomeCommand extends Command {
     HomeCommand() {
         super("home");
@@ -169,7 +169,7 @@ class HomeCommand extends Command {
 
 ## Subcommands
 
-| Lamp | CommandLib |
+| Lamp | Cadence |
 |---|---|
 | `@Command("quest")` on the class, `@Subcommand("create")` on a method | `super("quest")` and `addChildren(new Command("create") {{ ... }})` |
 | `@Command("quest create")` | The same child command |
@@ -197,19 +197,19 @@ class QuestCommand extends Command {
 
 ## Permissions
 
-| Lamp | CommandLib |
+| Lamp | Cadence |
 |---|---|
 | `@CommandPermission("quests.command")` | `permission("quests.command")` |
 | No annotation (anyone) | `permission(DefaultPermission.ALL)`; root commands default to OP |
 | `@CommandPermission` on the class | `permission(...)` on the root command; children get generated nodes and inherit the default |
 | Custom permission annotations (`@RequiresGroup`) | **Not available**; use a prerequisite |
 
-CommandLib registers a Bukkit permission for every command, subcommand, and argument branch, and running a route needs
+Cadence registers a Bukkit permission for every command, subcommand, and argument branch, and running a route needs
 the node of every step on it. See [permissions](../permissions.md).
 
 ## Flags and switches
 
-Lamp flags become CommandLib options. They are typed keys, and they are written right after the command name, before
+Lamp flags become Cadence options. They are typed keys, and they are written right after the command name, before
 the positional arguments, unless the command calls `optionsAnywhere()`, which lets them follow each argument too.
 
 ```java
@@ -221,7 +221,7 @@ public void scan(BukkitCommandActor actor, Player target, @Switch("force") boole
 ```
 
 ```java
-// CommandLib: /scan [options] <target>
+// Cadence: /scan [options] <target>
 class ScanCommand extends Command {
     ScanCommand() {
         super("scan");
@@ -236,7 +236,7 @@ class ScanCommand extends Command {
 }
 ```
 
-| Lamp | CommandLib |
+| Lamp | Cadence |
 |---|---|
 | `@Switch boolean` | `Options.flag(name[, short])` |
 | `@Flag` with a primitive or `String` | `Options.bool`, `integer`, `longValue`, `floatValue`, `doubleValue`, `string` |
@@ -248,7 +248,7 @@ See [options](../options.md).
 
 ## Suggestions
 
-| Lamp | CommandLib |
+| Lamp | Cadence |
 |---|---|
 | `@Suggest({"100", "200"})` | `addSuggestionProvider(sb -> sb.suggest("100").suggest("200"))` on the argument |
 | `@SuggestWith(DefaultWorlds.class)` | `setSuggestionProvider(sb -> ...)` on the argument |
@@ -257,7 +257,7 @@ See [options](../options.md).
 | `context` in the provider | `sb.getContext()`, `sb.getArgument("earlier")`, `sb.getLatestInput()` |
 
 ```java
-// CommandLib
+// Cadence
 argument(new WorldArgument("world").setSuggestionProvider(sb -> Bukkit.getWorlds()
                                                                       .stream()
                                                                       .map(World::getName)
@@ -273,7 +273,7 @@ argument(new WorldArgument("world").setSuggestionProvider(sb -> Bukkit.getWorlds
 
 ## Validators and conditions
 
-| Lamp | CommandLib |
+| Lamp | Cadence |
 |---|---|
 | Parameter validators | `validator(...)` on the argument; throw `ArgumentValidationException("...")` for your own message |
 | `CommandCondition` + a custom annotation | A `Prerequisite<CommandContext>` added with `addPrerequisite(...)` |
@@ -282,7 +282,7 @@ argument(new WorldArgument("world").setSuggestionProvider(sb -> Bukkit.getWorlds
 | Hooks | `addMiddleware((ctx, next) -> ...)` on a command also covers its children; see [execution](../execution.md#middleware) |
 
 ```java
-// CommandLib: a reusable condition
+// Cadence: a reusable condition
 final class Conditions {
     static final Prerequisite<CommandContext> OPPED = ctx -> {
         if (!ctx.getSender()
@@ -321,7 +321,7 @@ public final class ArenaCommand {
 }
 
 // onEnable
-CommandLib.register(this, AnnotatedCommands.parser()
+Cadence.register(this, AnnotatedCommands.parser()
                                            .registerDependency(ArenaManager.class, arenaManager)
                                            .parse(new ArenaCommand()));
 ```
@@ -344,16 +344,16 @@ class ArenaCommand extends Command {
     }
 }
 
-// onEnable: CommandLib.register(this, new ArenaCommand(arenaManager));
+// onEnable: Cadence.register(this, new ArenaCommand(arenaManager));
 ```
 
 ## Responses, errors, and help
 
-| Lamp | CommandLib |
+| Lamp | Cadence |
 |---|---|
 | Response handlers (a returned value is sent) | **Not available**; send it with `ctx.sendMessage(...)`. `ctx.setResult(int)` sets the value `/execute store result` stores |
-| `ExceptionHandler`, `@HandleException` | `errorFormatter((ctx, error) -> ...)` on a command decides what the sender gets for each failure CommandLib reports (see [help](../help.md#error-formatter)); `addUncaughtExceptionHandler((ctx, e) -> ...)` on a command or argument handles unexpected exceptions |
-| Lamp's built-in error messages, `Translator` / `LocaleReader` | CommandLib's messages are captions in the sender's locale, replaceable with `Captions`; see [localization](../localization.md) and [errors](../errors.md) |
+| `ExceptionHandler`, `@HandleException` | `errorFormatter((ctx, error) -> ...)` on a command decides what the sender gets for each failure Cadence reports (see [help](../help.md#error-formatter)); `addUncaughtExceptionHandler((ctx, e) -> ...)` on a command or argument handles unexpected exceptions |
+| Lamp's built-in error messages, `Translator` / `LocaleReader` | Cadence's messages are captions in the sender's locale, replaceable with `Captions`; see [localization](../localization.md) and [errors](../errors.md) |
 | `Help.ChildrenCommands` / `Help.RelatedCommands` parameter | Built in: `/<command> help`, and the usage is sent when a node has no executor |
 | `@Description("...")` | `description("...")` on commands and branches |
 | `@Usage("...")` | Generated from the tree |
@@ -361,7 +361,7 @@ class ArenaCommand extends Command {
 ## Kotlin
 
 Lamp reads Kotlin default arguments as optional parameters. A Kotlin lambda cannot declare default values, so
-CommandLib's [Kotlin DSL](../kotlin.md) keeps the default on the argument with `optional(...)`, and the block
+Cadence's [Kotlin DSL](../kotlin.md) keeps the default on the argument with `optional(...)`, and the block
 receives typed references:
 
 ```kotlin

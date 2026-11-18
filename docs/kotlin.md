@@ -5,18 +5,18 @@ tree, permission nodes, help, options and test support. It adds blocks with type
 delegated properties and `suspend` executors and suggestion providers.
 
 ```kotlin
-import dev.marulabs.commandlib.CommandLib
-import dev.marulabs.commandlib.Options
-import dev.marulabs.commandlib.argument.IntegerArgument
-import dev.marulabs.commandlib.argument.PlayerArgument
-import dev.marulabs.commandlib.kotlin.*
+import dev.marulabs.cadence.Cadence
+import dev.marulabs.cadence.Options
+import dev.marulabs.cadence.argument.IntegerArgument
+import dev.marulabs.cadence.argument.PlayerArgument
+import dev.marulabs.cadence.kotlin.*
 import kotlinx.coroutines.withContext
 import org.bukkit.permissions.PermissionDefault
 import org.bukkit.plugin.java.JavaPlugin
 
 class MyPlugin : JavaPlugin() {
     override fun onEnable() {
-        CommandLib.register(this, command("heal") {
+        Cadence.register(this, command("heal") {
             description("Heal players")
             permission(PermissionDefault.OP)
             val silent by flag("silent", 's', "Do not tell the players")
@@ -62,7 +62,7 @@ class MyPlugin : JavaPlugin() {
 
 ```kotlin
 dependencies {
-    implementation("com.github.Maru32768.CommandLib:spigot-kotlin:latest.release")
+    implementation("com.github.Maru32768.Cadence:spigot-kotlin:latest.release")
     // Only for executeSuspend, addMiddlewareSuspend, addSuggestionProviderSuspend and the dispatchers.
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
 }
@@ -72,12 +72,12 @@ dependencies {
   `kotlin-stdlib` 2.1.21, so the plugin has to ship the standard library, as every Kotlin plugin does.
 - `kotlinx-coroutines-core` is a `compileOnly` dependency: the coroutine functions live in their own class, so a
   plugin that never calls them does not need the library at runtime. A plugin that calls them must ship it.
-- Shade `common-kotlin` together with `common` (the platform artifact): the DSL reads CommandLib's current command
+- Shade `common-kotlin` together with `common` (the platform artifact): the DSL reads Cadence's current command
   context through a package-private class, so both must be loaded by the same class loader. Relocating
-  `dev.marulabs.commandlib` relocates both.
+  `dev.marulabs.cadence` relocates both.
 - Forge, NeoForge and Fabric have no Kotlin artifact yet. `common-kotlin` is platform-neutral; the platform part is the three
-  functions in `common-kotlin/src/platform/kotlin/dev/marulabs/commandlib/kotlin/Commands.kt`, written against
-  `dev.marulabs.commandlib.Command`, the class name every platform uses, so a mod can copy them.
+  functions in `common-kotlin/src/platform/kotlin/dev/marulabs/cadence/kotlin/Commands.kt`, written against
+  `dev.marulabs.cadence.Command`, the class name every platform uses, so a mod can copy them.
 
 ## Commands
 

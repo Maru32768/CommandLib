@@ -1,11 +1,11 @@
 val mcProtocol by configurations.creating
 
-extra["commandlib.integration.platform"] = "mohist"
-extra["commandlib.integration.minecraftVersion"] = "1.20.1"
-extra["commandlib.integration.javaVersion"] = "17"
-extra["commandlib.integration.serverJarName"] = "mohist.jar"
-extra["commandlib.integration.requiresMohistBootstrap"] = "true"
-extra["commandlib.integration.bootstrapServerPort"] = "25567"
+extra["cadence.integration.platform"] = "mohist"
+extra["cadence.integration.minecraftVersion"] = "1.20.1"
+extra["cadence.integration.javaVersion"] = "17"
+extra["cadence.integration.serverJarName"] = "mohist.jar"
+extra["cadence.integration.requiresMohistBootstrap"] = "true"
+extra["cadence.integration.bootstrapServerPort"] = "25567"
 
 dependencies {
     mcProtocol("com.github.steveice10:mcprotocollib:1.20-1")

@@ -15,7 +15,7 @@ stonecutter {
 dependencies {
     api(project(":common"))
     if (loader == "fabric") {
-        // Optional at runtime: CommandLib asks it only when a mod ships it (see CommandLib.hasPermission).
+        // Optional at runtime: Cadence asks it only when a mod ships it (see Cadence.hasPermission).
         "modCompileOnly"("me.lucko:fabric-permissions-api:0.3.1") { isTransitive = false }
     }
 }

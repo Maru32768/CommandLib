@@ -374,7 +374,7 @@ w("NMSDedicatedServer", '''    public NMSDedicatedServer_SUFFIX(Object handle) {
                                                         case "hashCode":
                                                             return System.identityHashCode(proxy);
                                                         case "toString":
-                                                            return "CommandLib function recompilation";
+                                                            return "Cadence function recompilation";
                                                         default:
                                                             return CompletableFuture.completedFuture(args[0]);
                                                     }

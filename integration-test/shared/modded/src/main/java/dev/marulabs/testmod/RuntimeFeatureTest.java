@@ -1,8 +1,8 @@
 package dev.marulabs.testmod;
 
-import dev.marulabs.commandlib.Command;
-import dev.marulabs.commandlib.CommandLib;
-import dev.marulabs.commandlib.internal.CurrentServer;
+import dev.marulabs.cadence.Command;
+import dev.marulabs.cadence.Cadence;
+import dev.marulabs.cadence.internal.CurrentServer;
 import dev.marulabs.integration.core.TestResult;
 import dev.marulabs.integration.core.TestStatus;
 
@@ -59,8 +59,8 @@ public final class RuntimeFeatureTest extends TestBase {
         putCommandNotExecutedResult(key);
         command.addChildren(new Command(name) {{
             execute(ctx -> {
-                String report = CommandLib.diagnostics()
-                                          .report();
+                String report = Cadence.diagnostics()
+                                       .report();
                 putResult(report.contains(MainCommand.NAME)
                         ? new TestResult(key, TestStatus.SUCCEEDED, "Diagnostics work.")
                         : new TestResult(key,

@@ -1,8 +1,8 @@
 package dev.marulabs.samplefabric;
 
-import dev.marulabs.commandlib.Command;
-import dev.marulabs.commandlib.argument.IntegerArgument;
-import dev.marulabs.commandlib.argument.StringArgument;
+import dev.marulabs.cadence.Command;
+import dev.marulabs.cadence.argument.IntegerArgument;
+import dev.marulabs.cadence.argument.StringArgument;
 
 import java.util.HashMap;
 import java.util.Map;

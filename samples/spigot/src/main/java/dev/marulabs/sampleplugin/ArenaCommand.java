@@ -1,14 +1,14 @@
 package dev.marulabs.sampleplugin;
 
-import dev.marulabs.commandlib.CommandContext;
-import dev.marulabs.commandlib.annotation.Command;
-import dev.marulabs.commandlib.annotation.Confirm;
-import dev.marulabs.commandlib.annotation.Default;
-import dev.marulabs.commandlib.annotation.Description;
-import dev.marulabs.commandlib.annotation.Flag;
-import dev.marulabs.commandlib.annotation.Range;
-import dev.marulabs.commandlib.annotation.Subcommand;
-import dev.marulabs.commandlib.annotation.Suggest;
+import dev.marulabs.cadence.CommandContext;
+import dev.marulabs.cadence.annotation.Command;
+import dev.marulabs.cadence.annotation.Confirm;
+import dev.marulabs.cadence.annotation.Default;
+import dev.marulabs.cadence.annotation.Description;
+import dev.marulabs.cadence.annotation.Flag;
+import dev.marulabs.cadence.annotation.Range;
+import dev.marulabs.cadence.annotation.Subcommand;
+import dev.marulabs.cadence.annotation.Suggest;
 
 import java.util.Map;
 import java.util.TreeMap;

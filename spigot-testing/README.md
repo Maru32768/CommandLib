@@ -1,6 +1,6 @@
-# CommandLib spigot-testing
+# Cadence spigot-testing
 
-`spigot-testing` provides lightweight test utilities for CommandLib's Spigot API.
+`spigot-testing` provides lightweight test utilities for Cadence's Spigot API.
 Use it for tests built on `Command`, `CommandContext`, Bukkit-backed arguments, and Spigot/Bungee components.
 
 It does not depend on a running Minecraft server.
@@ -15,7 +15,7 @@ repositories {
 }
 
 dependencies {
-    testImplementation "com.github.Maru32768.CommandLib:spigot-testing:latest.release"
+    testImplementation "com.github.Maru32768.Cadence:spigot-testing:latest.release"
 }
 ```
 

@@ -1,8 +1,8 @@
 package dev.marulabs.testplugin;
 
-import dev.marulabs.commandlib.Command;
-import dev.marulabs.commandlib.argument.*;
-import dev.marulabs.commandlib.internal.bukkit.BukkitUtil;
+import dev.marulabs.cadence.Command;
+import dev.marulabs.cadence.argument.*;
+import dev.marulabs.cadence.internal.bukkit.BukkitUtil;
 import dev.marulabs.integration.core.ExceptionUtil;
 import dev.marulabs.integration.core.TestResult;
 import dev.marulabs.integration.core.TestStatus;
@@ -713,11 +713,11 @@ public final class ArgumentTest extends TestBase {
             argument(new NamespacedKeyArgument("a").addUncaughtExceptionHandler((ctx, e) -> {
                 putResult(new TestResult(key, TestStatus.FAILED, ExceptionUtil.stackTraceToString(e)));
             })).execute((ctx, a) -> {
-                putResult(key, a.toString(), "commandlib:example/path");
+                putResult(key, a.toString(), "cadence:example/path");
             });
         }});
 
-        return List.of(buildCommand(command, name + " commandlib:example/path"));
+        return List.of(buildCommand(command, name + " cadence:example/path"));
     }
 
     public List<String> objectArgument() {
@@ -777,7 +777,7 @@ public final class ArgumentTest extends TestBase {
     public List<String> objectiveArgument() {
         String name = getMethodName();
         String key = getKey();
-        String objectiveName = "commandlib_it";
+        String objectiveName = "cadence_it";
         Scoreboard scoreboard = Bukkit.getScoreboardManager()
                                       .getMainScoreboard();
         Objective objective = scoreboard.getObjective(objectiveName);

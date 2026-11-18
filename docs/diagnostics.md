@@ -1,6 +1,6 @@
 # Documentation exports and diagnostics
 
-CommandLib can describe the commands it registers: as Markdown or JSON for your plugin's documentation, as a list of
+Cadence can describe the commands it registers: as Markdown or JSON for your plugin's documentation, as a list of
 every permission node for server admins, and at runtime as a diagnostics report of the platform and the registrations.
 
 ## Command documentation
@@ -10,7 +10,7 @@ returns the same object for its own commands:
 
 ```java
 // Spigot / Paper
-CommandLib registration = CommandLib.register(this, new SpawnCommand(), new ConfigCommand());
+Cadence registration = Cadence.register(this, new SpawnCommand(), new ConfigCommand());
 CommandDocs docs = registration.docs();
 
 // Anywhere, also in a build script or a unit test, without registering
@@ -89,7 +89,7 @@ route, so `/config <key>` also needs `myplugin.command.config`.
 
 ## Permission export
 
-`permissionsMarkdown()` and `permissionsJson()` list every node CommandLib registers and checks for the commands, built
+`permissionsMarkdown()` and `permissionsJson()` list every node Cadence registers and checks for the commands, built
 by the [node rules](permissions.md#node-names): one per command and child command, one per option that calls
 `permission(...)`, and one per argument branch, in the order of the command tree, with the default after
 [inheritance](permissions.md#defaults). A node set with `permission("...")` is listed as set, once for each route that uses it.
@@ -116,16 +116,16 @@ by the [node rules](permissions.md#node-names): one per command and child comman
 }
 ```
 
-The default is CommandLib's `DefaultPermission`; see [per platform](permissions.md#per-platform) for what it means on
-each platform. On Forge / NeoForge 1.18+, permission handlers see the nodes with a `commandlib.` namespace in front
-(`commandlib.myplugin.command.config`); the export lists them without it, as `permission(...)` takes them.
+The default is Cadence's `DefaultPermission`; see [per platform](permissions.md#per-platform) for what it means on
+each platform. On Forge / NeoForge 1.18+, permission handlers see the nodes with a `cadence.` namespace in front
+(`cadence.myplugin.command.config`); the export lists them without it, as `permission(...)` takes them.
 
 ## Runtime diagnostics
 
-`CommandLib.diagnostics()` reports what this copy of CommandLib registered and how. Call it on the main server thread.
+`Cadence.diagnostics()` reports what this copy of Cadence registered and how. Call it on the main server thread.
 
 ```java
-CommandLibDiagnostics diagnostics = CommandLib.diagnostics();
+CadenceDiagnostics diagnostics = Cadence.diagnostics();
 getLogger().info(diagnostics.report());
 ```
 
@@ -142,10 +142,10 @@ The platform lines are:
 
 | Platform | Lines |
 |---|---|
-| Spigot (`spigot` artifact) | Artifact, CommandLib package (shows a relocation), server and Minecraft version, Java, the command dispatcher (the vanilla dispatcher through NMS, or Paper's dispatcher when the spigot jar runs on Paper 1.20.6+), each typed NMS module for the server's version with its status (`in use`, `available`, or why it cannot be used), and every NMS wrapper without an implementation. |
-| Paper (`paper` artifact) | Artifact, CommandLib package, server and Minecraft version, Java, the registration API, and whether a `COMMANDS` event has been seen. |
-| Forge / NeoForge / Fabric | Artifact, CommandLib package, loader version, Minecraft version, Java, how commands and permission nodes are registered, and whether a server runs. |
-| Velocity | Artifact, CommandLib package, proxy name and version, Java, and the registration API. |
+| Spigot (`spigot` artifact) | Artifact, Cadence package (shows a relocation), server and Minecraft version, Java, the command dispatcher (the vanilla dispatcher through NMS, or Paper's dispatcher when the spigot jar runs on Paper 1.20.6+), each typed NMS module for the server's version with its status (`in use`, `available`, or why it cannot be used), and every NMS wrapper without an implementation. |
+| Paper (`paper` artifact) | Artifact, Cadence package, server and Minecraft version, Java, the registration API, and whether a `COMMANDS` event has been seen. |
+| Forge / NeoForge / Fabric | Artifact, Cadence package, loader version, Minecraft version, Java, how commands and permission nodes are registered, and whether a server runs. |
+| Velocity | Artifact, Cadence package, proxy name and version, Java, and the registration API. |
 
 A registration's path tells how its commands reach the dispatcher:
 
@@ -156,23 +156,23 @@ A registration's path tells how its commands reach the dispatcher:
 | Forge / NeoForge / Fabric | `server dispatcher` while a server runs, `waiting for the server` before. The owner is the permission prefix, since registration takes no mod id. |
 | Velocity | `BrigadierCommand`. The owner is the plugin id. |
 
-A plugin or mod that shades and relocates CommandLib has its own copy, which reports only its own registrations. A
-CommandLib that several plugins share reports all of them.
+A plugin or mod that shades and relocates Cadence has its own copy, which reports only its own registrations. A
+Cadence that several plugins share reports all of them.
 
 ### Diagnostics command
 
-`CommandLibDiagnosticsCommand` sends the report to a sender. CommandLib never registers it; register it like your
+`CadenceDiagnosticsCommand` sends the report to a sender. Cadence never registers it; register it like your
 other commands, under a name of your choice:
 
 ```java
 // Spigot / Paper
-CommandLib.register(this, new SpawnCommand(), new CommandLibDiagnosticsCommand("myplugin-diagnostics"));
+Cadence.register(this, new SpawnCommand(), new CadenceDiagnosticsCommand("myplugin-diagnostics"));
 
 // Forge / NeoForge / Fabric
-CommandLib.register("mymod.command", new SpawnCommand(), new CommandLibDiagnosticsCommand("mymod-diagnostics"));
+Cadence.register("mymod.command", new SpawnCommand(), new CadenceDiagnosticsCommand("mymod-diagnostics"));
 
 // Velocity
-CommandLib.register(this, proxy, new SendCommand(), new CommandLibDiagnosticsCommand("myproxy-diagnostics"));
+Cadence.register(this, proxy, new SendCommand(), new CadenceDiagnosticsCommand("myproxy-diagnostics"));
 ```
 
 | Input | Sends |
@@ -185,10 +185,10 @@ Its permission nodes follow the usual rules (`myplugin.command.myplugin-diagnost
 `...permissions`) and default to `OP`, like any root command. A summary on Spigot 1.21.4 looks like:
 
 ```text
-CommandLib diagnostics
+Cadence diagnostics
 Platform:
   Artifact: spigot
-  CommandLib package: com.example.myplugin.libs.commandlib
+  Cadence package: com.example.myplugin.libs.cadence
   Server: CraftBukkit 4402-Spigot-... (MC: 1.21.4)
   Minecraft: 1.21.4
   Java: 21.0.5

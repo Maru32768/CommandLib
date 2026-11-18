@@ -12,13 +12,13 @@ import java.nio.file.StandardCopyOption
 
 val mcProtocol by configurations.creating
 
-extra["commandlib.integration.platform"] = "velocity"
-extra["commandlib.integration.minecraftVersion"] = "3.4.0"
+extra["cadence.integration.platform"] = "velocity"
+extra["cadence.integration.minecraftVersion"] = "3.4.0"
 // Paper 1.21.4 needs Java 21; Velocity 3.4 runs on it too.
-extra["commandlib.integration.javaVersion"] = "21"
-extra["commandlib.integration.workDirectory"] = "work"
-extra["commandlib.integration.testPluginSubdirectory"] = "proxy/plugins"
-extra["commandlib.integration.testClass"] = "dev.marulabs.commandlib.integration.VelocityIntegrationTest"
+extra["cadence.integration.javaVersion"] = "21"
+extra["cadence.integration.workDirectory"] = "work"
+extra["cadence.integration.testPluginSubdirectory"] = "proxy/plugins"
+extra["cadence.integration.testClass"] = "dev.marulabs.cadence.integration.VelocityIntegrationTest"
 
 val velocityJarUrl =
     "https://fill-data.papermc.io/v1/objects/fb599cbda6a6d01decce5e281f71f51cae7cacffcfafca32a09601f407b0583e/velocity-3.4.0-566.jar"
@@ -39,7 +39,7 @@ dependencies {
     "testPluginImplementation"(project(":velocity"))
 }
 
-// The plugin with CommandLib (velocity and common) inside it, as a downstream plugin shades it.
+// The plugin with Cadence (velocity and common) inside it, as a downstream plugin shades it.
 val testPluginJar = tasks.register<Jar>("testPluginJar") {
     archiveFileName.set("TestPlugin-velocity.jar")
     destinationDirectory.set(layout.buildDirectory.dir("test-plugin"))
@@ -62,7 +62,7 @@ fun download(url: String, target: File) {
 
 tasks.register("prepareTestPlugin") {
     group = "setup"
-    description = "Downloads the Paper backend and the Velocity proxy and copies the CommandLib test plugin to the proxy."
+    description = "Downloads the Paper backend and the Velocity proxy and copies the Cadence test plugin to the proxy."
     dependsOn(testPluginJar)
     doLast {
         download(backendJarUrl, serverDir.resolve("server.jar"))

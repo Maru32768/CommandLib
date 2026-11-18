@@ -9,7 +9,7 @@ import net.minecraftforge.fml.common.Mod;
 
 //? if fabric {
 /*public final class TestMod implements ModInitializer {
-    public static final String MOD_ID = "commandlibtest";
+    public static final String MOD_ID = "cadencetest";
 
     @Override
     public void onInitialize() {
@@ -19,7 +19,7 @@ import net.minecraftforge.fml.common.Mod;
 *///?} else {
 @Mod(TestMod.MOD_ID)
 public final class TestMod {
-    public static final String MOD_ID = "commandlibtest";
+    public static final String MOD_ID = "cadencetest";
 
     public TestMod() {
         new TestMain().register();

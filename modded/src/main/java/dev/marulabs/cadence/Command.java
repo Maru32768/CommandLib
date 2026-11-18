@@ -1,0 +1,157 @@
+package dev.marulabs.cadence;
+
+import dev.marulabs.cadence.CommonCommand;
+import dev.marulabs.cadence.command.Extractor;
+import dev.marulabs.cadence.exception.CommandPrerequisiteException;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.server.level.ServerPlayer;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+//? if >=1.18 && !fabric
+import net.minecraft.network.chat.Component;
+//? if neoforge {
+/*import net.neoforged.neoforge.server.permission.nodes.PermissionNode;
+import net.neoforged.neoforge.server.permission.nodes.PermissionTypes;
+*///?} elif forge && >=1.18 {
+import net.minecraftforge.server.permission.nodes.PermissionNode;
+import net.minecraftforge.server.permission.nodes.PermissionTypes;
+//?} elif <1.18 {
+/*import net.minecraftforge.server.permission.DefaultPermissionLevel;
+
+import java.util.AbstractMap;
+import java.util.Map;
+*///?}
+
+public class Command extends CommonCommand<CommandContext, Command> {
+    public Command(@NotNull String name) {
+        super(name);
+    }
+
+    /**
+     * A builder of a command named {@code name}, which configures it in one chain. See {@link CommandBuilder}.
+     */
+    @NotNull
+    public static CommandBuilder<CommandContext, Command> builder(@NotNull String name) {
+        return CommandBuilder.of(new Command(name));
+    }
+
+    /**
+     * Returns the player executing the command, and fails the command with {@link Caption#REQUIRE_PLAYER} for any
+     * other source.
+     */
+    public static Extractor<CommandContext, ServerPlayer> player() {
+        return ctx -> {
+            if (!(ctx.getEntity() instanceof ServerPlayer)) {
+                throw new CommandPrerequisiteException(Caption.REQUIRE_PLAYER);
+            }
+            return (ServerPlayer) ctx.getEntity();
+        };
+    }
+
+    /**
+     * Returns the source of a command the console or a remote console executes, and fails the command with
+     * {@link Caption#REQUIRE_CONSOLE} for any other source.
+     */
+    public static Extractor<CommandContext, CommandSourceStack> console() {
+        return ctx -> {
+            if (!ctx.getActor()
+                    .isConsole()) {
+                throw new CommandPrerequisiteException(Caption.REQUIRE_CONSOLE);
+            }
+            return ctx.getSender();
+        };
+    }
+
+    //? if >=1.18 {
+    //? if !fabric {
+    // All of a registration's commands at once, so a cooldown bypass node another command uses is left out.
+    static List<PermissionNode<Boolean>> permissionEntries(@NotNull Collection<? extends Command> commands,
+                                                           @NotNull String prefix) {
+        return CommandTree.permissionConfigs(commands, prefix)
+                          .stream()
+                          .map(c -> {
+                              PermissionNode<Boolean> node = new PermissionNode<>("cadence",
+                                                                                  c.node(),
+                                                                                  PermissionTypes.BOOLEAN,
+                                                                                  (player,
+                                                                                   playerId,
+                                                                                   context) -> resolveDefault(c.defaultPermission(),
+                                                                                                              player));
+                              node.setInformation(Component.nullToEmpty(c.node()),
+                                                  Component.nullToEmpty(c.description()));
+                              return node;
+                          })
+                          .collect(Collectors.toList());
+    }
+    //?}
+
+    // The default of a node, for a permission handler that does not know it.
+    static boolean resolveDefault(@NotNull DefaultPermission common, ServerPlayer player) {
+        switch (common) {
+            case ALL:
+                return true;
+            case NONE:
+                return false;
+            case OP:
+                return player != null && player.hasPermissions(4);
+        }
+        throw new AssertionError(common);
+    }
+    //?} else {
+    /*public final void permission(@NotNull DefaultPermissionLevel level) {
+        permission(toDefaultPermission(level));
+    }
+
+    public final void permission(@NotNull DefaultPermissionLevel level, @NotNull String description) {
+        permission(toDefaultPermission(level));
+        permissionDescription(description);
+    }
+
+    public final void permission(@NotNull String node, @NotNull DefaultPermissionLevel level) {
+        permission(node, toDefaultPermission(level));
+    }
+
+    public final void permission(@NotNull String node,
+                                 @NotNull DefaultPermissionLevel level,
+                                 @NotNull String description) {
+        permission(node, toDefaultPermission(level));
+        permissionDescription(description);
+    }
+
+    // All of a registration's commands at once, so a cooldown bypass node another command uses is left out.
+    static List<Map.Entry<String, DefaultPermissionLevel>> permissionEntries(@NotNull Collection<? extends Command> commands,
+                                                                             @NotNull String prefix) {
+        return CommandTree.permissionConfigs(commands, prefix)
+                          .stream()
+                          .map(c -> new AbstractMap.SimpleEntry<>(c.node(), toForgeDefault(c.defaultPermission())))
+                          .collect(Collectors.toList());
+    }
+
+    private static DefaultPermission toDefaultPermission(@NotNull DefaultPermissionLevel forge) {
+        switch (forge) {
+            case ALL:
+                return DefaultPermission.ALL;
+            case NONE:
+                return DefaultPermission.NONE;
+            case OP:
+                return DefaultPermission.OP;
+        }
+        throw new AssertionError(forge);
+    }
+
+    private static DefaultPermissionLevel toForgeDefault(@NotNull DefaultPermission common) {
+        switch (common) {
+            case ALL:
+                return DefaultPermissionLevel.ALL;
+            case NONE:
+                return DefaultPermissionLevel.NONE;
+            case OP:
+                return DefaultPermissionLevel.OP;
+        }
+        throw new AssertionError(common);
+    }
+    *///?}
+}

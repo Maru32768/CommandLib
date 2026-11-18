@@ -1,6 +1,6 @@
 package dev.marulabs.samplemod;
 
-import dev.marulabs.commandlib.Command;
+import dev.marulabs.cadence.Command;
 import net.minecraft.entity.player.PlayerEntity;
 
 public class PreprocessCommand extends Command {

@@ -1,5 +1,5 @@
 plugins {
-    id("commandlib.spigot-nms")
+    id("cadence.spigot-nms")
 }
 
 // Spigot runs with Mojang names from 26.1, so the module compiles against the server jar as it is.

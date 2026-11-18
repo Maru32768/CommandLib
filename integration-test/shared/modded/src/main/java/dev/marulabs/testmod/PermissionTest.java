@@ -1,7 +1,7 @@
 package dev.marulabs.testmod;
 
-import dev.marulabs.commandlib.Command;
-import dev.marulabs.commandlib.DefaultPermission;
+import dev.marulabs.cadence.Command;
+import dev.marulabs.cadence.DefaultPermission;
 import dev.marulabs.integration.core.TestResult;
 import dev.marulabs.integration.core.TestStatus;
 
@@ -48,8 +48,8 @@ public final class PermissionTest extends TestBase {
             });
         }});
         return List.of(buildCommand(DENIED_PROBE),
-                       "summon minecraft:armor_stand ~ ~ ~ {Tags:[\"commandlibprobe\"],NoGravity:1b}",
-                       "execute as @e[type=minecraft:armor_stand,tag=commandlibprobe,limit=1] run "
+                       "summon minecraft:armor_stand ~ ~ ~ {Tags:[\"cadenceprobe\"],NoGravity:1b}",
+                       "execute as @e[type=minecraft:armor_stand,tag=cadenceprobe,limit=1] run "
                                + buildCommand(DENIED_PROBE),
                        ActorTest.commandBlock(buildCommand(DENIED_PROBE), 5));
     }

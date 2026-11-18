@@ -1,0 +1,11 @@
+{
+  "name": "cadence",
+  "description": "Generate, test, or explain code that uses the Cadence Minecraft command library",
+  "author": {
+    "name": "Maru32768"
+  },
+  "homepage": "https://github.com/Maru32768/Cadence",
+  "repository": "https://github.com/Maru32768/Cadence",
+  "license": "MIT",
+  "keywords": ["minecraft", "spigot", "paper", "velocity", "forge", "neoforge", "fabric", "commands"]
+}

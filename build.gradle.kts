@@ -27,7 +27,7 @@ fun javaSources(vararg includes: String) = fileTree(rootDir) {
     include(*includes)
     exclude("**/build/**", "**/.gradle*/**", ".claude/**")
     // Written by tools/nms-codegen.
-    exclude("nms/**", "spigot/src/main/java/dev/marulabs/commandlib/internal/nms/TypedNmsModules.java")
+    exclude("nms/**", "spigot/src/main/java/dev/marulabs/cadence/internal/nms/TypedNmsModules.java")
 }
 
 // Stonecutter trees keep version-specific imports in conditional comments, which sorting the imports would break.
@@ -137,7 +137,7 @@ subprojects {
         options.encoding = "UTF-8"
     }
 
-    // A console sender's locale is the JVM's, so the tests pin it to get CommandLib's English texts on any machine.
+    // A console sender's locale is the JVM's, so the tests pin it to get Cadence's English texts on any machine.
     tasks.withType<Test>().configureEach {
         systemProperty("user.language", "en")
         systemProperty("user.country", "US")
@@ -304,7 +304,7 @@ configure(subprojects.filter { it.path in publishedProjectPaths || it.path.start
         )
         // Tests pass null on purpose, so NullAway checks only the main sources.
         options.errorprone.check("NullAway", if (name == "compileJava") CheckSeverity.ERROR else CheckSeverity.OFF)
-        options.errorprone.option("NullAway:AnnotatedPackages", "dev.marulabs.commandlib")
+        options.errorprone.option("NullAway:AnnotatedPackages", "dev.marulabs.cadence")
         // Error Prone warnings fail the build too, so they do not pile up again.
         options.compilerArgs.add("-Werror")
     }
@@ -317,25 +317,27 @@ val apiBaselines = mapOf(
     // 0.17.2 published this module as bukkit.
     ":spigot" to "bukkit:0.17.2",
 )
+// JitPack has 0.17.2 under the repository's former name.
+val apiBaselineGroup = "com.github.Maru32768.CommandLib"
 
 configure(subprojects.filter { it.path in apiBaselines }) {
     repositories {
         maven("https://jitpack.io") {
-            content { includeGroup("com.github.Maru32768.CommandLib") }
+            content { includeGroup(apiBaselineGroup) }
         }
     }
 
     val baseline = apiBaselines.getValue(path)
     val apiBaseline = configurations.create("apiBaseline") { isTransitive = false }
-    // The baseline's own CommandLib dependencies, such as common of the same release.
+    // The modules of the baseline release that it depends on, such as common.
     val apiBaselineClasspath = configurations.create("apiBaselineClasspath")
     dependencies {
-        apiBaseline("com.github.Maru32768.CommandLib:$baseline")
-        apiBaselineClasspath("com.github.Maru32768.CommandLib:$baseline")
+        apiBaseline("$apiBaselineGroup:$baseline")
+        apiBaselineClasspath("$apiBaselineGroup:$baseline")
     }
 
     val compileClasspath = configurations.named("compileClasspath")
-    // The compile-only platform APIs, which the published POMs leave out, without the current CommandLib modules.
+    // The compile-only platform APIs, which the published POMs leave out, without the current Cadence modules.
     val externalCompileClasspath = compileClasspath.map { classpath ->
         classpath.incoming.artifactView {
             componentFilter { it !is org.gradle.api.artifacts.component.ProjectComponentIdentifier }

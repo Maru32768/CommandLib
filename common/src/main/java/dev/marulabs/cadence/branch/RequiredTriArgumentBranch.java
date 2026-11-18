@@ -1,0 +1,57 @@
+package dev.marulabs.cadence.branch;
+
+import dev.marulabs.cadence.ArgRef;
+import dev.marulabs.cadence.CommonArgument;
+import dev.marulabs.cadence.CommonCommand;
+import dev.marulabs.cadence.CommonCommandContext;
+import dev.marulabs.cadence.command.AsyncCommandExecutor;
+import dev.marulabs.cadence.command.Extractor;
+import dev.marulabs.cadence.util.function.QuintConsumer;
+import dev.marulabs.cadence.util.function.QuintFunction;
+import dev.marulabs.cadence.util.function.TriFunction;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Collection;
+import java.util.concurrent.CompletionStage;
+import java.util.function.Consumer;
+
+public final class RequiredTriArgumentBranch<S, T1, T2, T3, C extends CommonCommandContext<?, ?>, T extends CommonCommand<C, T>> extends RequiredArgumentBranch<S, C, T> {
+    private final CommonArgument<T1, C, ?> argument1;
+    private final CommonArgument<T2, C, ?> argument2;
+    private final CommonArgument<T3, C, ?> argument3;
+
+    public RequiredTriArgumentBranch(@NotNull Extractor<C, S> extractor,
+                                     @NotNull Consumer<AsyncCommandExecutor<C>> executeRegistrar,
+                                     @NotNull Consumer<Collection<? extends T>> childrenAdder,
+                                     @NotNull CommonArgument<T1, C, ?> argument1,
+                                     @NotNull CommonArgument<T2, C, ?> argument2,
+                                     @NotNull CommonArgument<T3, C, ?> argument3) {
+        super(extractor, executeRegistrar, childrenAdder);
+        this.argument1 = argument1;
+        this.argument2 = argument2;
+        this.argument3 = argument3;
+    }
+
+    public RequiredTriArgumentBranch<S, T1, T2, T3, C, T> execute(@NotNull QuintConsumer<C, T1, T2, T3, S> action) {
+        super.execute((ctx, s) -> action.accept(ctx,
+                                                ctx.getArgument(argument1),
+                                                ctx.getArgument(argument2),
+                                                ctx.getArgument(argument3),
+                                                s));
+        return this;
+    }
+
+    public RequiredTriArgumentBranch<S, T1, T2, T3, C, T> executeAsync(@NotNull QuintFunction<C, T1, T2, T3, S, CompletionStage<?>> action) {
+        super.executeAsync((ctx, s) -> action.apply(ctx,
+                                                    ctx.getArgument(argument1),
+                                                    ctx.getArgument(argument2),
+                                                    ctx.getArgument(argument3),
+                                                    s));
+        return this;
+    }
+
+    public RequiredTriArgumentBranch<S, T1, T2, T3, C, T> child(@NotNull TriFunction<ArgRef<T1>, ArgRef<T2>, ArgRef<T3>, T> factory) {
+        super.child(factory.apply(ArgRef.of(argument1), ArgRef.of(argument2), ArgRef.of(argument3)));
+        return this;
+    }
+}

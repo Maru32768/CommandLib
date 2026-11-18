@@ -26,16 +26,16 @@ if (loader == "fabric") {
 dependencies {
     api(project(path = ":modded:${sc.current.project}", configuration = "namedElements"))
     api("org.mockito:mockito-core:5.11.0")
-    // CommandLibExtension; tests that use it already have JUnit. 5.8.1 is the oldest docs/testing.md supports.
+    // CadenceExtension; tests that use it already have JUnit. 5.8.1 is the oldest docs/testing.md supports.
     compileOnly("org.junit.jupiter:junit-jupiter-api:5.8.1")
 
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-    // Runs fixture classes to see how CommandLibExtension refuses parameters.
+    // Runs fixture classes to see how CadenceExtension refuses parameters.
     testImplementation("org.junit.platform:junit-platform-testkit")
     testImplementation("org.assertj:assertj-core:3.25.3")
     if (loader == "fabric") {
-        // FabricPermissionTest stubs CommandLib's optional fabric-permissions-api lookup.
+        // FabricPermissionTest stubs Cadence's optional fabric-permissions-api lookup.
         "modTestImplementation"("me.lucko:fabric-permissions-api:0.3.1") { isTransitive = false }
     }
 }

@@ -9,11 +9,11 @@ mechanism carries it, and what the sender sees on each platform. It describes th
 A command input goes through two stages, and each stage reports its own errors.
 
 1. **Brigadier parsing (the platform).** The server's Brigadier dispatcher matches the input against the command tree
-   and runs each argument type's parser. Errors at this stage never reach CommandLib code: the platform turns the
+   and runs each argument type's parser. Errors at this stage never reach Cadence code: the platform turns the
    `CommandSyntaxException` into its usual red error message with the `...<--[HERE]` context line.
-2. **CommandLib execution.** When Brigadier finds a node that can run, CommandLib's runner takes over. It checks
+2. **Cadence execution.** When Brigadier finds a node that can run, Cadence's runner takes over. It checks
    permissions again, reads options, converts each argument to its Java value, runs validators, prerequisites,
-   the middlewares, and finally the executor. CommandLib collects the messages of an error at this stage and throws them
+   the middlewares, and finally the executor. Cadence collects the messages of an error at this stage and throws them
    to the platform as a `CommandSyntaxException`, see [Results and failures](#results-and-failures).
 
 The runner works in this order and stops at the first failure:
@@ -29,7 +29,7 @@ The runner works in this order and stops at the first failure:
 | 7 | The executor (`execute` or `executeAsync`) | A `CommandPrerequisiteException` message, `The command timed out.` for a `TimeoutException`, or the generic unexpected-error message |
 
 A middleware can map the failure of the steps after it, see [execution](execution.md#middleware). An
-`errorFormatter(...)` replaces what the sender gets for each failure CommandLib reports at these steps, and can add the
+`errorFormatter(...)` replaces what the sender gets for each failure Cadence reports at these steps, and can add the
 usage line of the argument branch that failed; see [help, usage and error formatting](help.md#error-formatter).
 
 ## Results and failures
@@ -55,7 +55,7 @@ feedback (see the README): a player does not get it while the `sendCommandFeedba
 ### Unknown command
 
 The root literal does not exist, or the sender cannot use it (see [Permission denied](#permission-denied)). The
-platform reports it; CommandLib is not involved.
+platform reports it; Cadence is not involved.
 
 | Platform | Sender sees |
 |---|---|
@@ -91,14 +91,14 @@ The input stops before the end of an argument branch, for example `/msg` or `/ms
 `argument(new PlayerArgument("target"), new StringArgument("text"))`.
 
 Every command literal and every argument node of a branch is executable, so Brigadier never reports an incomplete
-command for CommandLib commands. Instead the runner reaches a node without an executor and sends the **generated
+command for Cadence commands. Instead the runner reaches a node without an executor and sends the **generated
 help** of the command (the `Usage:` list), after checking permissions, options, the arguments typed so far, and
 prerequisites. A command that has its own `execute(...)` runs that executor for the bare `/command` input instead.
 
 The same help is available as `/<command> help` when the command has children, argument branches, or options, unless a
 child is named or aliased `help`. See [help](help.md) for what it lists and how to format it.
 
-### Argument value rejected by CommandLib (`ArgumentParseException`)
+### Argument value rejected by Cadence (`ArgumentParseException`)
 
 The token is syntactically valid, but converting it to the Java value fails in the argument's `parseImpl`. Examples:
 an unknown name for `EnumArgument`, `LiteralArgument`, `ObjectArgument`, `NameableObjectArgument`, `TeamArgument`,
@@ -107,7 +107,7 @@ an unknown name for `EnumArgument`, `LiteralArgument`, `ObjectArgument`, `Nameab
 for `RegistryArgument` on Spigot and Forge / NeoForge; fewer ticks than the minimum of `TimeArgument` on servers before
 1.19.4.
 
-CommandLib uses two message shapes:
+Cadence uses two message shapes:
 
 - `ArgumentParseException.ofIncorrectInput(...)` imitates the vanilla error: a red translatable
   `command.unknown.argument` ("Incorrect argument for command"), then a line with the input before the argument in
@@ -133,7 +133,7 @@ throw a `CommandSyntaxException` then. Examples: a player name or selector that 
 arguments), an unknown team for Spigot's or Forge's `TeamArgument` without a custom scoreboard, an unknown dimension for
 Spigot's `WorldArgument`.
 
-CommandLib reports the exception as vanilla reports a command error, the same on every platform: the exception's
+Cadence reports the exception as vanilla reports a command error, the same on every platform: the exception's
 message in red, kept as the translatable component vanilla made so that the client translates it (`No player was
 found` is `argument.entity.notfound.player`), then, when the exception carries its input and cursor, the context line
 `...<input before the cursor><rest of the input underlined><--[HERE]`. The exceptions vanilla throws while resolving
@@ -146,7 +146,7 @@ A player or entity selector that matches nothing fails with vanilla's `No player
 every platform, for `PlayerArgument`, `PlayersArgument`, `EntityArgument`, and `EntitiesArgument`, as vanilla's
 `EntityArgument.getPlayers` / `getEntities` reject an empty result. Spigot and Forge / NeoForge read the selector with
 those methods. On Paper, `player()` / `entity()` throw the vanilla error themselves, while `players()` / `entities()`
-return an empty list, so CommandLib's `PlayersArgument` / `EntitiesArgument` reject it with the same translatable error.
+return an empty list, so Cadence's `PlayersArgument` / `EntitiesArgument` reject it with the same translatable error.
 
 ### Validator rejected the value (`ArgumentValidationException`)
 
@@ -174,7 +174,7 @@ candidates that the validator rejects.
 
 ### Permission denied
 
-Every command, subcommand, and argument branch has a permission node (see [permissions](permissions.md)). CommandLib
+Every command, subcommand, and argument branch has a permission node (see [permissions](permissions.md)). Cadence
 uses it in two places:
 
 1. **Visibility.** The Brigadier node's `requires` predicate checks the node. A sender without the permission does not
@@ -269,9 +269,9 @@ replace them. The cooldown starts only when the confirmation and the preprocesse
 | Option after a regular argument (`/scan Steve -f`), unknown option token, or a value option without a value | Brigadier | Vanilla "Incorrect argument for command" or the argument type's error, with the context line |
 | Invalid option value (`--limit abc`, out of the option's range) | Brigadier | The value type's vanilla error |
 | Option of a mutually exclusive group given after another of the group (`mutuallyExclusiveOptions(...)`) | Brigadier | Vanilla "Incorrect argument for command", since the rest of the group is removed from the tree |
-| `required()` option missing | CommandLib (`OptionParseException`) | `Missing required option --tag.` in red, or the help when no executor is at the end of the input |
-| `requires(other)` not met | CommandLib (`OptionParseException`) | `--reason requires --force.` in red |
-| `requires(other, value)` not met | CommandLib (`OptionParseException`) | `--threads requires --mode to be parallel.` in red |
+| `required()` option missing | Cadence (`OptionParseException`) | `Missing required option --tag.` in red, or the help when no executor is at the end of the input |
+| `requires(other)` not met | Cadence (`OptionParseException`) | `--reason requires --force.` in red |
+| `requires(other, value)` not met | Cadence (`OptionParseException`) | `--threads requires --mode to be parallel.` in red |
 
 See [options](options.md) for the option syntax.
 
@@ -281,8 +281,8 @@ An exception thrown by the executor or a middleware, or a failed stage of an asy
 `CommandPrerequisiteException`, `CancellationException` (reports nothing) and `TimeoutException` (sends
 `The command timed out.` and calls the handlers):
 
-- it is logged with the input and the sender, through the logger of the plugin that ships CommandLib on Spigot and
-  Paper, the `CommandLib` SLF4J logger on Velocity and the `CommandLib` Log4j logger on Forge, NeoForge and Fabric. The
+- it is logged with the input and the sender, through the logger of the plugin that ships Cadence on Spigot and
+  Paper, the `Cadence` SLF4J logger on Velocity and the `Cadence` Log4j logger on Forge, NeoForge and Fabric. The
   server itself does not log an exception of a command;
 - the sender gets `An unexpected error occurred trying to execute that command` (vanilla's translatable
   `command.failed`, unless `Caption.UNEXPECTED_ERROR` is given a text) and `Check the console for details.` in red;
@@ -301,11 +301,11 @@ of the other providers.
 
 ## Languages
 
-The texts CommandLib sends itself (permission, prerequisite, timeout, option errors, cooldown, confirmation, the plain
+The texts Cadence sends itself (permission, prerequisite, timeout, option errors, cooldown, confirmation, the plain
 argument messages, and the headings of the generated help) are [captions](localization.md): they are sent in the
-sender's locale, CommandLib ships English and Japanese, and a plugin can replace each per locale with `Captions`. The
+sender's locale, Cadence ships English and Japanese, and a plugin can replace each per locale with `Captions`. The
 English texts in this page are their defaults. The vanilla-style "Incorrect argument for command" / "<--[HERE]" parts,
-the vanilla messages CommandLib uses where they mean the same thing (`No player was found`, `Unknown advancement`,
+the vanilla messages Cadence uses where they mean the same thing (`No player was found`, `Unknown advancement`,
 `Unknown recipe`, `Unknown scoreboard objective`, `command.failed`), and the vanilla messages passed through are
 translatable and translated by the client. Brigadier's own errors are the platform's.
 
@@ -313,7 +313,7 @@ translatable and translated by the client. Brigadier's own errors are the platfo
 
 `CommandTester#execute` in every testing artifact throws a `RuntimeException` whose cause is the
 `CommandSyntaxException` when Brigadier rejects the input (unknown command, unknown subcommand, invalid syntax,
-permission hidden node). Everything CommandLib reports itself is captured by `FakeSender#getSentMessages()` /
+permission hidden node). Everything Cadence reports itself is captured by `FakeSender#getSentMessages()` /
 `getSentMessageTexts()`: a failure's messages are sent to the sender one by one, as they were sent, and `execute`
 returns `0`. Otherwise `execute` returns the command's result. Translatable parts read as English text in `spigot-testing` and `modded-testing` and as
 translation keys (`command.unknown.argument`, `command.context.here`) in `paper-testing`. See [testing](testing.md).

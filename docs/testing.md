@@ -1,12 +1,12 @@
 # Testing Commands
 
-CommandLib ships test artifacts that build your commands into a Brigadier dispatcher and run them without a Minecraft
+Cadence ships test artifacts that build your commands into a Brigadier dispatcher and run them without a Minecraft
 server. Use them for unit tests of parsing, permissions, options, messages, and suggestions. Use a real server for
 lifecycle registration, real registries, worlds, and `/execute` behavior.
 
 ## Artifacts
 
-Pick the artifact for the CommandLib artifact your code uses, one per test source set (they share class names):
+Pick the artifact for the Cadence artifact your code uses, one per test source set (they share class names):
 
 | Your code uses | Test artifact | Notes |
 |---|---|---|
@@ -20,12 +20,12 @@ Pick the artifact for the CommandLib artifact your code uses, one per test sourc
 
 ```kotlin
 dependencies {
-    testImplementation("com.github.Maru32768.CommandLib:spigot-testing:<version>")
+    testImplementation("com.github.Maru32768.Cadence:spigot-testing:<version>")
     testImplementation("org.junit.jupiter:junit-jupiter:<version>")
 }
 ```
 
-The artifacts do not bring a test framework; the examples use JUnit 5 and AssertJ. `CommandLibExtension` needs JUnit
+The artifacts do not bring a test framework; the examples use JUnit 5 and AssertJ. `CadenceExtension` needs JUnit
 5 (`junit-jupiter-api` 5.8 or later) on the test classpath; the rest of the artifacts work with any framework.
 
 ## Async commands
@@ -66,7 +66,7 @@ bootstrapped registries on Forge / NeoForge / Fabric. The tester makes those ava
 
 `execute` throws a `RuntimeException` caused by Brigadier's `CommandSyntaxException` when the platform would reject
 the input: unknown command or subcommand, invalid argument syntax, or a node hidden by a missing permission. Everything
-CommandLib reports itself (validation, prerequisites, unexpected errors) is sent to the sender instead. See
+Cadence reports itself (validation, prerequisites, unexpected errors) is sent to the sender instead. See
 [errors](errors.md). An `AssertionError` that a command throws, such as a failed assertion in an executor, is sent as
 an unexpected error and then rethrown by `execute`, so the test fails.
 
@@ -135,7 +135,7 @@ void finds_offline_player() {
 
 ## JUnit 5 extension
 
-Every testing artifact has `CommandLibExtension`. Register it on a field with the
+Every testing artifact has `CadenceExtension`. Register it on a field with the
 tester to create; it creates one tester per test, closes it after the test, and injects `CommandTester` and
 `FakeSender` parameters into test methods and `@BeforeEach` / `@AfterEach` methods. A lifecycle method and the test
 it runs around get the same tester.
@@ -143,7 +143,7 @@ it runs around get the same tester.
 ```java
 class HealCommandTest {
     @RegisterExtension
-    final CommandLibExtension commandLib = new CommandLibExtension(() -> new CommandTester(HealCommand::new,
+    final CadenceExtension cadence = new CadenceExtension(() -> new CommandTester(HealCommand::new,
                                                                                           "myplugin.command"));
 
     @Test
@@ -197,10 +197,10 @@ Adjust a sender with `op(boolean)`, `permissions(nodes...)` (grants only these n
 `uniqueId(uuid)`, `locale(tag)` (a `Locale` in `velocity-testing`), and `name(name)` (not in
 `common-testing`). The builders have the same methods. `velocity-testing` has no builders and only `permissions`,
 `denyPermissions` and `locale`. In `modded-testing` the console passes every permission check, as on a server, so
-`permissions` and `denyPermissions` throw for it. A player's locale decides the language of CommandLib's messages
+`permissions` and `denyPermissions` throw for it. A player's locale decides the language of Cadence's messages
 and of your [captions](localization.md). Players start with `en_us` (`Locale.US` in `velocity-testing`), which a vanilla
 client reports by default, so English assertions do not depend on the JVM's default locale. On Fabric 1.20.1, where
-CommandLib does not read a player's language, players get the JVM's default locale. The console uses the JVM's default locale, as on a server.
+Cadence does not read a player's language, players get the JVM's default locale. The console uses the JVM's default locale, as on a server.
 
 Keep the returned sender: in `common-testing` these methods return a new `FakeSender`, in the other artifacts they
 change the sender and return it.
@@ -214,7 +214,7 @@ FakeSender guest = FakeSender.playerBuilder("Bob")
 ```
 
 The artifacts do not apply `DefaultPermission` defaults: a fake sender has the nodes you give it, whatever the
-command's default is. Test defaults on a server. `velocity-testing` is the exception, since on Velocity CommandLib
+command's default is. Test defaults on a server. `velocity-testing` is the exception, since on Velocity Cadence
 applies the defaults itself: as on a real proxy, a node the sender leaves unset is granted only if its default is
 `ALL`. There `permissions(nodes...)` grants these nodes and leaves the others unset, and `permissions()` with no nodes
 is a player on a proxy without a permission plugin.
@@ -227,7 +227,7 @@ Reading messages:
 | `getSentMessageTexts()` | plain text | plain text, colors stripped | plain text | plain text |
 | `getSentMessageLegacyTexts()` | `§` codes kept | `§` codes kept | — | — |
 
-Translatable messages, such as CommandLib's "Incorrect argument for command", read as English text in `spigot-testing`
+Translatable messages, such as Cadence's "Incorrect argument for command", read as English text in `spigot-testing`
 and `modded-testing` and as their translation keys (`command.unknown.argument`) in `paper-testing`. Check colors on
 the components, for example `getSentMessages().get(0).getColor()` in `spigot-testing`.
 
@@ -255,7 +255,7 @@ void key_branch_needs_its_own_node() {
 }
 ```
 
-The denied branch is hidden, so Brigadier rejects the input before CommandLib runs.
+The denied branch is hidden, so Brigadier rejects the input before Cadence runs.
 
 ### Validation errors
 
@@ -330,12 +330,12 @@ void command_tree_is_unchanged() {
 ```
 
 The first run writes the missing snapshot and fails; review the file, commit it, and run the test again. After an
-intended change, run the tests once with the environment variable `COMMANDLIB_UPDATE_SNAPSHOTS=true` (or the system
-property `commandlib.updateSnapshots=true` in the test JVM) to rewrite the snapshots, and review the diff. Gradle does
+intended change, run the tests once with the environment variable `CADENCE_UPDATE_SNAPSHOTS=true` (or the system
+property `cadence.updateSnapshots=true` in the test JVM) to rewrite the snapshots, and review the diff. Gradle does
 not pass its own `-D` options to the test JVM, so use the environment variable there:
 
 ```bash
-COMMANDLIB_UPDATE_SNAPSHOTS=true ./gradlew test
+CADENCE_UPDATE_SNAPSHOTS=true ./gradlew test
 ```
 
 ## What the artifacts do not cover
@@ -347,4 +347,4 @@ COMMANDLIB_UPDATE_SNAPSHOTS=true ./gradlew test
 - `/execute`, command blocks, and functions. `execute` returns the result, but gamerules and silent sources of
   `sendSuccess` are not modeled.
 
-CommandLib's own coverage of these lives in the repository's `integration-test` module, which runs real servers.
+Cadence's own coverage of these lives in the repository's `integration-test` module, which runs real servers.

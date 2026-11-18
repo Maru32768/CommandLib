@@ -1,8 +1,8 @@
 # The documentation site. Build and preview it as docs/agents/repository.md describes.
-site_name: CommandLib
+site_name: Cadence
 site_description: A type-safe command API for Spigot, Paper, Velocity, Forge, NeoForge and Fabric.
-repo_url: https://github.com/Maru32768/CommandLib
-repo_name: Maru32768/CommandLib
+repo_url: https://github.com/Maru32768/Cadence
+repo_name: Maru32768/Cadence
 edit_uri: ""
 docs_dir: docs
 site_dir: site

@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "id": "commandlibtest",
+  "id": "cadencetest",
   "version": "1.0.0",
-  "name": "CommandLib Test Mod",
-  "description": "Runs CommandLib integration test cases on a real Fabric server.",
+  "name": "Cadence Test Mod",
+  "description": "Runs Cadence integration test cases on a real Fabric server.",
   "license": "MIT",
   "environment": "*",
   "entrypoints": {

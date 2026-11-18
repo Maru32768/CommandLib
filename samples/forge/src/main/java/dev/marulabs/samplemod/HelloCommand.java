@@ -1,7 +1,7 @@
 package dev.marulabs.samplemod;
 
-import dev.marulabs.commandlib.Command;
-import dev.marulabs.commandlib.argument.PlayersArgument;
+import dev.marulabs.cadence.Command;
+import dev.marulabs.cadence.argument.PlayersArgument;
 import net.minecraft.util.Util;
 import net.minecraft.util.text.StringTextComponent;
 

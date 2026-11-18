@@ -20,7 +20,7 @@ repositories {
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21-R0.1-SNAPSHOT")
     // Brings the paper artifact and common-kotlin along.
-    implementation("com.github.Maru32768.CommandLib:paper-kotlin:latest.release")
+    implementation("com.github.Maru32768.Cadence:paper-kotlin:latest.release")
 }
 
 kotlin {
@@ -42,6 +42,6 @@ tasks.named<ShadowJar>("shadowJar") {
     archiveFileName.set("${rootProject.name}-${project.version}.jar")
     // One relocation covers the platform artifact, common and common-kotlin, which must stay together. The Kotlin
     // standard library is shaded as is, since every Kotlin plugin has to ship it.
-    relocate("dev.marulabs.commandlib", "$projectGroup.$projectNameLower.commandlib")
+    relocate("dev.marulabs.cadence", "$projectGroup.$projectNameLower.cadence")
 }
 tasks.named("build") { dependsOn(tasks.named("shadowJar")) }

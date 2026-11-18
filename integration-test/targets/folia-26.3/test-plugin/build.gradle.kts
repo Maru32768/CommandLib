@@ -2,7 +2,7 @@
 extra["platformDependencies"] = "io.papermc.paper:paper-api:1.21.8-R0.1-SNAPSHOT"
 extra["javaVersion"] = "25"
 extra["platform"] = "folia"
-extra["commandlibModule"] = "paper"
+extra["cadenceModule"] = "paper"
 extra["testPluginSuite"] = "folia"
 extra["minecraftServerVersion"] = "26.3"
 extra["serverJarDownloads"] =

@@ -23,10 +23,10 @@ repositories {
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21-R0.1-SNAPSHOT")
-    implementation("com.github.Maru32768.CommandLib:paper:latest.release")
+    implementation("com.github.Maru32768.Cadence:paper:latest.release")
 
     // Runs the commands without a server (src/test). Never shade the testing artifacts.
-    testImplementation("com.github.Maru32768.CommandLib:paper-testing:latest.release")
+    testImplementation("com.github.Maru32768.Cadence:paper-testing:latest.release")
     testImplementation("io.papermc.paper:paper-api:1.21-R0.1-SNAPSHOT")
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
@@ -60,6 +60,6 @@ val projectGroup = project.group.toString()
 val projectNameLower = project.name.lowercase()
 tasks.named<ShadowJar>("shadowJar") {
     archiveFileName.set("${rootProject.name}-${project.version}.jar")
-    relocate("dev.marulabs.commandlib", "$projectGroup.$projectNameLower.commandlib")
+    relocate("dev.marulabs.cadence", "$projectGroup.$projectNameLower.cadence")
 }
 tasks.named("build") { dependsOn(tasks.named("shadowJar")) }

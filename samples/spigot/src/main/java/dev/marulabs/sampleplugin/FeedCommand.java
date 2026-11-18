@@ -1,7 +1,7 @@
 package dev.marulabs.sampleplugin;
 
-import dev.marulabs.commandlib.Command;
-import dev.marulabs.commandlib.argument.PlayerArgument;
+import dev.marulabs.cadence.Command;
+import dev.marulabs.cadence.argument.PlayerArgument;
 
 /**
  * The Java builder style.

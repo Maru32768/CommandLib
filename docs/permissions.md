@@ -1,6 +1,6 @@
 # Permissions
 
-CommandLib gives every command, subcommand, and argument branch its own permission node, registers the nodes with the
+Cadence gives every command, subcommand, and argument branch its own permission node, registers the nodes with the
 platform, and checks them for visibility, tab completion, help, and execution.
 
 ## Node names
@@ -9,12 +9,12 @@ A node is the registration **prefix**, a dot, and the **path** of the route.
 
 | Registration | Prefix |
 |---|---|
-| `CommandLib.register(plugin, commands...)` (Spigot, Paper) | `<plugin name in lower case>.command` |
-| `CommandLib.register(plugin, "myplugin.cmd", commands...)` (Spigot, Paper) | `myplugin.cmd` |
-| `CommandLib.bootstrap(context, commands...)` (Paper) | `<plugin name in lower case>.command` |
-| `CommandLib.register("mymod.command", commands...)` (Forge / NeoForge / Fabric) | `mymod.command` (required) |
-| `CommandLib.register(plugin, proxy, commands...)` (Velocity) | `<plugin id>.command` |
-| `CommandLib.register(plugin, proxy, "myproxy.cmd", commands...)` (Velocity) | `myproxy.cmd` |
+| `Cadence.register(plugin, commands...)` (Spigot, Paper) | `<plugin name in lower case>.command` |
+| `Cadence.register(plugin, "myplugin.cmd", commands...)` (Spigot, Paper) | `myplugin.cmd` |
+| `Cadence.bootstrap(context, commands...)` (Paper) | `<plugin name in lower case>.command` |
+| `Cadence.register("mymod.command", commands...)` (Forge / NeoForge / Fabric) | `mymod.command` (required) |
+| `Cadence.register(plugin, proxy, commands...)` (Velocity) | `<plugin id>.command` |
+| `Cadence.register(plugin, proxy, "myproxy.cmd", commands...)` (Velocity) | `myproxy.cmd` |
 
 The path is built from names, not from aliases:
 
@@ -97,7 +97,7 @@ does not remove it.
 
 ## Defaults
 
-The default decides who has the node when no permission plugin says otherwise. It is CommandLib's
+The default decides who has the node when no permission plugin says otherwise. It is Cadence's
 `DefaultPermission`:
 
 | `DefaultPermission` | Meaning |
@@ -153,14 +153,14 @@ function permission level applies.
 
 ### Registration contract
 
-What `CommandLib.register(...)` and the other entry points promise differs by platform:
+What `Cadence.register(...)` and the other entry points promise differs by platform:
 
 | | Spigot | Paper | Forge / NeoForge / Fabric | Velocity |
 |---|---|---|---|---|
 | Invalid definition (optional argument before a required one, name clash, and so on) | `register` throws | `register` and `bootstrap` throw | `register` throws | `register` throws |
 | First `register` after startup | Works | Throws `IllegalStateException` unless the plugin's first `register` was during its initialization (constructor, `onLoad`, `onEnable`) | Works: the commands are added to the running server's dispatcher | Works |
 | `unregister()` | Yes | Yes, except for `bootstrap` registrations | No: a registration lasts for the game's lifetime | Yes |
-| A label another plugin or mod already has | Replaced: CommandLib's command takes the label in Bukkit's command map | Kept by the other plugin: Paper's registrar, which adds the commands at startup and on every data reload, gives CommandLib's command only `<plugin>:<label>`. A `register` after startup takes the label until the next data reload | Merged: Brigadier adds both commands' children under one literal | Velocity's `CommandManager#register` decides |
+| A label another plugin or mod already has | Replaced: Cadence's command takes the label in Bukkit's command map | Kept by the other plugin: Paper's registrar, which adds the commands at startup and on every data reload, gives Cadence's command only `<plugin>:<label>`. A `register` after startup takes the label until the next data reload | Merged: Brigadier adds both commands' children under one literal | Velocity's `CommandManager#register` decides |
 | Two registrations declare the same node with different defaults | The later registration replaces the permission (a [cooldown bypass](#cooldown-bypass) node keeps the existing one); once it is unregistered, the oldest registration left that declares the node registers it again | The later registration replaces the permission (a cooldown bypass node keeps the existing one); once it is unregistered, the oldest registration left that declares the node registers it again | The first registration's default wins | The first registration's default wins |
 | `register`, `unregister` | Main thread, or `IllegalStateException` | Main thread (Folia: the global region thread), or `IllegalStateException` | Not checked: register during mod initialization or on the server thread | Any thread |
 | `refresh`, `refreshAll` | Main thread, or `IllegalStateException` | Main thread (Folia: a region or the global region thread), or `IllegalStateException` | Any thread; the tree is sent on the server thread | Not available |
@@ -173,55 +173,55 @@ normally. The rule for the same node with different defaults in two registration
 promise: it may change in a later release.
 
 On Paper, a plugin enabled after the server started, such as by a plugin manager, has missed the `COMMANDS` event that
-adds its commands. On the next tick CommandLib adds them to Paper's dispatcher itself. When it cannot read that
+adds its commands. On the next tick Cadence adds them to Paper's dispatcher itself. When it cannot read that
 dispatcher, it calls `Bukkit.reloadData()` instead, which fires the event again but also reloads every data pack, as
 `/minecraft:reload` does. On Folia, which has no data reload, it logs a warning and the commands come with the next
 server start.
 
 ### Spigot
 
-`CommandLib.register(...)` registers every node in Bukkit's `PluginManager` with its default and description,
+`Cadence.register(...)` registers every node in Bukkit's `PluginManager` with its default and description,
 replacing a permission of the same name (except a cooldown bypass node, see [Cooldown bypass](#cooldown-bypass)).
 `unregister()` and the plugin's disable remove them again, take their
 defaults away from players, and recalculate online players' permissions. A permission that a later registration has
 replaced under the same name since stays, since that registration still uses it. Plugin reloads therefore start from a
-clean state. When a registration removes a node that another registration of the same copy of CommandLib still
+clean state. When a registration removes a node that another registration of the same copy of Cadence still
 declares, the oldest of those registers it again with its own default and description, and removes it when it is
 unregistered itself. `/minecraft:reload` keeps the permissions.
 
 ### Paper
 
-`CommandLib.register(...)` from `onEnable` behaves like Spigot, also when a registration removes a node that another
-still declares. `CommandLib.bootstrap(context, ...)` from a `PluginBootstrap` runs before Bukkit's plugin manager
-exists, so the nodes are **not** registered with it. CommandLib
+`Cadence.register(...)` from `onEnable` behaves like Spigot, also when a registration removes a node that another
+still declares. `Cadence.bootstrap(context, ...)` from a `PluginBootstrap` runs before Bukkit's plugin manager
+exists, so the nodes are **not** registered with it. Cadence
 applies their defaults itself unless a permission plugin sets the node or the permission is declared in
 `paper-plugin.yml`. Bootstrap commands cannot be unregistered.
 
 ### Forge / NeoForge
 
-On 1.18+ the nodes are `PermissionNode<Boolean>` objects in the `commandlib` namespace, so the full node name that
-permission handlers see is **`commandlib.<node>`**, for example `commandlib.mymod.command.spawn`. They are added in
+On 1.18+ the nodes are `PermissionNode<Boolean>` objects in the `cadence` namespace, so the full node name that
+permission handlers see is **`cadence.<node>`**, for example `cadence.mymod.command.spawn`. They are added in
 `PermissionGatherEvent.Nodes`. A registration after that event uses the node's default resolver.
 
 Forge's permission API answers only the nodes registered in that event, so a player's check of any other node, such
 as one your code checks with `ctx.getActor().hasPermission(...)`, never reaches the permission handler: it passes only
-for players with permission level 4, and LuckPerms cannot grant it. The nodes CommandLib registers, cooldown bypass
+for players with permission level 4, and LuckPerms cannot grant it. The nodes Cadence registers, cooldown bypass
 nodes included, are not affected. On 1.16.5, Fabric, Spigot, Paper and Velocity the handler answers any node.
 
 On 1.16.5 the nodes are registered with `PermissionAPI.registerNode(node, level, "")` under their own name, without the
-`commandlib.` part, when the server has started.
+`cadence.` part, when the server has started.
 
 ### Fabric
 
 Fabric has no permission registry, so nothing is registered. A player's check asks
 [fabric-permissions-api](https://github.com/lucko/fabric-permissions-api) with the node's own name, without a
-`commandlib.` part, and the default from the table above as its fallback: `Permissions.check(player, node, default)`.
-CommandLib does not ship fabric-permissions-api. Include it in your mod (`include`) for permission mods such as
+`cadence.` part, and the default from the table above as its fallback: `Permissions.check(player, node, default)`.
+Cadence does not ship fabric-permissions-api. Include it in your mod (`include`) for permission mods such as
 LuckPerms to answer; without it the default decides.
 
 ### Velocity
 
-Velocity has no registry of permissions, so nothing is registered. `CommandLib.register(plugin, proxy, ...)` keeps the
+Velocity has no registry of permissions, so nothing is registered. `Cadence.register(plugin, proxy, ...)` keeps the
 defaults of its nodes and applies them when `PermissionSubject#getPermissionValue(node)` is `UNDEFINED`, that is when
 no permission plugin sets the node. A `TRUE` or `FALSE` value always wins. When several registrations declare a node,
 the oldest one that is not unregistered decides its default, so a later one cannot open an `OP` node to everyone;
@@ -255,17 +255,17 @@ one stays visible, until the tree is sent again. Send it again after the change:
 ```java
 // Spigot / Paper: on the main thread, or it throws IllegalStateException
 player.addAttachment(plugin, "myplugin.command.game.start", true);
-CommandLib.refresh(player);
-CommandLib.refreshAll(); // every online player
+Cadence.refresh(player);
+Cadence.refreshAll(); // every online player
 
 // Forge / NeoForge / Fabric: from any thread; the tree is sent on the server thread
-CommandLib.refresh(serverPlayer);
-CommandLib.refreshAll(); // every player on the running server
+Cadence.refresh(serverPlayer);
+Cadence.refreshAll(); // every player on the running server
 ```
 
-The tree lists every command on the server, not only CommandLib's, so one call covers every registration.
+The tree lists every command on the server, not only Cadence's, so one call covers every registration.
 
-Velocity has no API to send the tree again and no `CommandLib.refresh`. It adds the proxy's commands to the tree the
+Velocity has no API to send the tree again and no `Cadence.refresh`. It adds the proxy's commands to the tree the
 backend server sends, so a player sees a permission change when the backend next sends it, such as on a server switch.
 
 Prerequisites (`addPrerequisite`, `require`, `Command.player()`) run when the command runs and do not hide it. To show a
@@ -281,13 +281,13 @@ class GameCommand extends Command {
             visibleWhen(ctx -> !game.isRunning());
             execute(ctx -> {
                 game.start();
-                CommandLib.refreshAll(); // the players now see /game stop instead
+                Cadence.refreshAll(); // the players now see /game stop instead
             });
         }}, new Command("stop") {{
             visibleWhen(ctx -> game.isRunning());
             execute(ctx -> {
                 game.stop();
-                CommandLib.refreshAll();
+                Cadence.refreshAll();
             });
         }}, new Command("kick") {{
             argument(new PlayerArgument("target")).visibleWhen(ctx -> game.isHost(ctx.getSender()))
@@ -305,7 +305,7 @@ and checked. Velocity cannot send the tree again, so a hidden proxy command appe
 
 ## LuckPerms
 
-CommandLib asks the platform, and LuckPerms answers through it:
+Cadence asks the platform, and LuckPerms answers through it:
 
 - Spigot / Paper: `CommandSender#hasPermission(node)`.
 - Forge / NeoForge 1.18+: `PermissionAPI.getPermission(player, node)`.
@@ -320,8 +320,8 @@ No LuckPerms-specific setup is needed. Grant the node names from the tables abov
 /lp group default permission set myplugin.command.spawn true
 /lp group builder permission set myplugin.command.config.* true
 
-# Forge / NeoForge 1.18+: the commandlib. namespace is part of the node
-/lp group default permission set commandlib.mymod.command.spawn true
+# Forge / NeoForge 1.18+: the cadence. namespace is part of the node
+/lp group default permission set cadence.mymod.command.spawn true
 
 # Fabric
 /lp group default permission set mymod.command.spawn true
@@ -331,8 +331,8 @@ Wildcards such as `myplugin.command.config.*` are LuckPerms' own feature. Granti
 grant `myplugin.command.config` itself, which the route also needs.
 
 LuckPerms on Bukkit refreshes players' command trees when their permissions change (its `update-client-command-list`
-option), so newly granted commands appear without a rejoin. This has not been tested with CommandLib on every version.
-Elsewhere, call [`CommandLib.refresh`](#refreshing-the-command-tree) after the change.
+option), so newly granted commands appear without a rejoin. This has not been tested with Cadence on every version.
+Elsewhere, call [`Cadence.refresh`](#refreshing-the-command-tree) after the change.
 
 ## Testing permissions
 

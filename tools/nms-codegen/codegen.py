@@ -5,11 +5,11 @@ import shutil
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-NMS_SOURCES = ROOT / "spigot/src/main/java/dev/marulabs/commandlib/internal/nms"
+NMS_SOURCES = ROOT / "spigot/src/main/java/dev/marulabs/cadence/internal/nms"
 MODULE_TABLE = NMS_SOURCES.relative_to(ROOT) / "TypedNmsModules.java"
 # Where the sources are written; generate.py --check points it at a temporary directory.
 OUT = ROOT
-BASE_PACKAGE = "dev.marulabs.commandlib.internal.nms"
+BASE_PACKAGE = "dev.marulabs.cadence.internal.nms"
 NL = "\n"
 
 
@@ -39,7 +39,7 @@ IMPLICIT_IMPORTS = [
 
 
 def module_package(module):
-    return "dev.marulabs.commandlib.internal.nms.typed." + module.replace("-", "_").replace(".", "_")
+    return "dev.marulabs.cadence.internal.nms.typed." + module.replace("-", "_").replace(".", "_")
 
 
 def source_directory(module, root=None):

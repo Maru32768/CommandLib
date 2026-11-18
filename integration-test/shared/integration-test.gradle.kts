@@ -7,7 +7,7 @@ import java.nio.file.Files
  * Shared Gradle script for Bukkit-family integration-test target plugins.
  *
  * This script is designed for Bukkit-compatible server platforms (Paper, Mohist, Spigot). It uses
- * the Shadow plugin to inline CommandLib sources directly into the test plugin jar. Non-Bukkit
+ * the Shadow plugin to inline Cadence sources directly into the test plugin jar. Non-Bukkit
  * platforms (Forge, Fabric, Velocity, NeoForge) require a separate shared script because their
  * build toolchains differ substantially.
  *
@@ -27,7 +27,7 @@ import java.nio.file.Files
  * - javaVersion: Java toolchain version as a stringified integer.
  *
  * - platform: Runtime server family. Current values: "paper", "folia", "mohist", "spigot".
- *   This describes the server executable, not the CommandLib module.
+ *   This describes the server executable, not the Cadence module.
  *   - "mohist" uses a Mohist server jar but compiles against spigot module sources.
  *   - "paper" uses a Paper server jar and compiles against spigot module sources by default.
  *   - "spigot" uses the Spigot server jar that the root build's buildSpigotServer task builds with BuildTools.
@@ -49,8 +49,8 @@ import java.nio.file.Files
  *
  * Optional properties:
  *
- * - commandlibModule:
- *   Name of the CommandLib module whose sources are included in the test plugin. This corresponds
+ * - cadenceModule:
+ *   Name of the Cadence module whose sources are included in the test plugin. This corresponds
  *   to a directory at the repository root. Bukkit-family targets normally use "spigot" or "paper".
  *   With "spigot", the typed NMS jars that :spigot:collectTypedNms writes to spigot/build/typed-nms
  *   are bundled too, as the published spigot jar bundles them.
@@ -58,7 +58,7 @@ import java.nio.file.Files
  * - testPluginSuite:
  *   Shared Bukkit-family test plugin suite to compile: "spigot", "paper" or "folia". "folia" is a smoke suite for
  *   Folia, which refuses the Bukkit scheduler the other suites use.
- *   Defaults to "paper" when commandlibModule is "paper"; otherwise "spigot".
+ *   Defaults to "paper" when cadenceModule is "paper"; otherwise "spigot".
  *
  * - copyTargets:
  *   Format: "<relative dir>|<relative dir>|..."
@@ -75,7 +75,7 @@ import java.nio.file.Files
  *
  * - autoReloaderJarDownloadUrl:
  *   Override URL for AutoReloader-1.1.0.jar. It can also be supplied with the
- *   COMMANDLIB_AUTORELOADER_JAR_URL environment variable.
+ *   CADENCE_AUTORELOADER_JAR_URL environment variable.
  *
  * Minimal example:
  *   extra["platformDependencies"] = "io.papermc.paper:paper-api:1.20.4-R0.1-SNAPSHOT"
@@ -126,10 +126,10 @@ val platformDependencies: List<String> = project.requiredListProperty("platformD
 val javaVersion = project.requiredStringProperty("javaVersion").toInt()
 val platform = project.requiredStringProperty("platform")
 val minecraftServerVersion = project.requiredStringProperty("minecraftServerVersion")
-// Which CommandLib module's sources to inline.
-val commandlibModule: String = project.requiredStringProperty("commandlibModule")
+// Which Cadence module's sources to inline.
+val cadenceModule: String = project.requiredStringProperty("cadenceModule")
 val testPluginSuite: String = project.optionalStringProperty("testPluginSuite")
-    ?: if (commandlibModule == "paper") "paper" else "spigot"
+    ?: if (cadenceModule == "paper") "paper" else "spigot"
 require(testPluginSuite in listOf("spigot", "paper", "folia")) {
     "Unsupported testPluginSuite: $testPluginSuite"
 }
@@ -141,7 +141,7 @@ val serverJarDownloads = if (platform == "spigot") {
 val copyTargets = project.optionalListProperty("copyTargets").ifEmpty { listOf("server/plugins") }
 val includeProtocolLib = project.optionalBooleanProperty("includeProtocolLib")
 val autoReloaderJarDownloadUrl = providers.gradleProperty("autoReloaderJarDownloadUrl")
-    .orElse(providers.environmentVariable("COMMANDLIB_AUTORELOADER_JAR_URL"))
+    .orElse(providers.environmentVariable("CADENCE_AUTORELOADER_JAR_URL"))
     .orElse("https://github.com/Maru32768/AutoReloader/releases/download/1.1.0/AutoReloader-1.1.0.jar")
 val defaultPluginJarDownloads = mutableListOf(
     "${resolvePlugManXDownloadUrl(minecraftServerVersion)}=>PlugManX.jar",
@@ -174,9 +174,9 @@ dependencies {
     add("compileOnly", "com.mojang:brigadier:1.0.18")
     // paper-api brings these annotations along, spigot-api does not.
     add("compileOnly", "org.jetbrains:annotations:26.0.2")
-    // The servers provide Log4j, which CommandLib filters the function load errors with.
+    // The servers provide Log4j, which Cadence filters the function load errors with.
     add("compileOnly", "org.apache.logging.log4j:log4j-core:2.17.1")
-    if (commandlibModule == "spigot") {
+    if (cadenceModule == "spigot") {
         add("implementation", fileTree("../../../../spigot/build/typed-nms") { include("*.jar") })
     }
 }
@@ -185,7 +185,7 @@ configure<JavaPluginExtension> {
     toolchain.languageVersion.set(JavaLanguageVersion.of(javaVersion))
     sourceSets.named("main") {
         java.srcDirs(
-            "../../../../$commandlibModule/src/main/java",
+            "../../../../$cadenceModule/src/main/java",
             "../../../../common/src/main/java",
             "../../../shared/core/src/main/java",
             "../../../shared/$testPluginSuite/src/main/java"
@@ -194,13 +194,13 @@ configure<JavaPluginExtension> {
         if (testPluginSuite != "folia") {
             java.srcDir("../../../shared/bukkit/src/main/java")
         }
-        if (commandlibModule == "paper") {
+        if (cadenceModule == "paper") {
             java.srcDir("../../../../common/src/adventure/java")
         }
-        if (commandlibModule == "spigot" || commandlibModule == "paper") {
+        if (cadenceModule == "spigot" || cadenceModule == "paper") {
             java.srcDir("../../../../common/src/bukkit/java")
         }
-        resources.srcDirs("../../../../$commandlibModule/src/main/resources", "../../../../common/src/main/resources")
+        resources.srcDirs("../../../../$cadenceModule/src/main/resources", "../../../../common/src/main/resources")
     }
 }
 
@@ -223,7 +223,7 @@ val projectNameLower = project.name.lowercase()
 tasks.named<ShadowJar>("shadowJar") {
     mergeServiceFiles()
     archiveFileName.set("${rootProject.name}-${project.version}.jar")
-    relocate("dev.marulabs.commandlib", "$projectGroup.$projectNameLower.commandlib")
+    relocate("dev.marulabs.cadence", "$projectGroup.$projectNameLower.cadence")
     exclude("net/minecraft")
     exclude("org/bukkit")
     exclude("com/mojang")

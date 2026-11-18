@@ -1,0 +1,97 @@
+package dev.marulabs.cadence;
+
+import dev.marulabs.cadence.internal.nms.NMSClassRegistry;
+import dev.marulabs.cadence.internal.nms.command.NMSCommandListenerWrapper;
+import org.bukkit.World;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Entity;
+import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.*;
+
+class FunctionCompilationPermissionTest {
+    @Test
+    void allowsASourceWithoutBukkitSenderAsFunctionsAreCompiledWithOne() {
+        try (MockedStatic<NMSClassRegistry> registry = mockStatic(NMSClassRegistry.class)) {
+            registry.when(() -> NMSClassRegistry.findClass(NMSCommandListenerWrapper.class))
+                    .thenReturn(SenderlessSource.class);
+
+            assertThat(new PlatformAdapterImpl().hasPermission(new Object(), "plugin.command.foo")).isTrue();
+        }
+    }
+
+    @Test
+    void checksTheBukkitSenderOtherwise() {
+        try (MockedStatic<NMSClassRegistry> registry = mockStatic(NMSClassRegistry.class)) {
+            registry.when(() -> NMSClassRegistry.findClass(NMSCommandListenerWrapper.class))
+                    .thenReturn(DeniedSource.class);
+
+            assertThat(new PlatformAdapterImpl().hasPermission(new Object(), "plugin.command.foo")).isFalse();
+        }
+    }
+
+    @Test
+    void recognizesOnlyCraftBukkitsNullCommandSender() {
+        assertThat(PlatformAdapterImpl.isCraftBukkitNullSender("org.bukkit.craftbukkit.v1_21_R7.command.NullCommandSender")).isTrue();
+        assertThat(PlatformAdapterImpl.isCraftBukkitNullSender("org.bukkit.craftbukkit.command.NullCommandSender")).isTrue();
+        assertThat(PlatformAdapterImpl.isCraftBukkitNullSender("com.example.command.NullCommandSender")).isFalse();
+        assertThat(PlatformAdapterImpl.isCraftBukkitNullSender("org.bukkit.craftbukkit.command.ConsoleCommandSender")).isFalse();
+    }
+
+    /**
+     * Stands in for CraftBukkit's CommandSource.NULL, the source of data pack function compilation.
+     */
+    public static class SenderlessSource extends NMSCommandListenerWrapper {
+        public SenderlessSource(Object handle) {
+            super(handle, Object.class);
+        }
+
+        @Override
+        public CommandSender getBukkitSender() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public Entity getBukkitEntity() {
+            return null;
+        }
+
+        @Override
+        public World getBukkitWorld() {
+            return null;
+        }
+
+        @Override
+        protected dev.marulabs.cadence.internal.nms.world.NMSVec3D getPosition() {
+            return null;
+        }
+
+        @Override
+        protected dev.marulabs.cadence.internal.nms.world.NMSVec2D getRotation() {
+            return null;
+        }
+
+        @Override
+        public void sendSuccess(net.md_5.bungee.api.chat.BaseComponent component, boolean broadcastToOps) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public com.mojang.brigadier.Message toMessage(net.md_5.bungee.api.chat.BaseComponent component) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+    }
+
+    public static final class DeniedSource extends SenderlessSource {
+        public DeniedSource(Object handle) {
+            super(handle);
+        }
+
+        @Override
+        public CommandSender getBukkitSender() {
+            return mock(CommandSender.class);
+        }
+    }
+}

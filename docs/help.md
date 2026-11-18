@@ -1,8 +1,8 @@
 # Help, Usage and Error Formatting
 
-CommandLib generates a help message for every command and reports its own failures with fixed messages. Three hooks
+Cadence generates a help message for every command and reports its own failures with fixed messages. Three hooks
 replace how they look: a **help formatter** for the whole help, a **usage formatter** for each usage line, and an
-**error formatter** for each failure CommandLib reports. Each is set on a command and applies to its argument branches
+**error formatter** for each failure Cadence reports. Each is set on a command and applies to its argument branches
 and to the child commands that set none of their own, as [captions](localization.md) do; set them on each top-level
 command to use them for a whole plugin.
 
@@ -95,7 +95,7 @@ A `CommandHelp.Token` has a `kind()` (`LITERAL`, `ARGUMENT` or `OPTIONS`), a `na
 and `plainText()` gives it as usages show it.
 
 The formatter's context is the command's, so `ctx.caption(...)`, the sender and the platform's own messages (a Paper
-`Component`, a Forge `Component`) are there. `HelpFormatter.DEFAULT` is CommandLib's help; a formatter can send its own
+`Component`, a Forge `Component`) are there. `HelpFormatter.DEFAULT` is Cadence's help; a formatter can send its own
 lines before or after calling it.
 
 ## Usage formatter
@@ -113,7 +113,7 @@ description after a colon.
 
 ## Error formatter
 
-`errorFormatter(ErrorFormatter)` decides what the sender gets for each failure CommandLib reports itself. It gets the
+`errorFormatter(ErrorFormatter)` decides what the sender gets for each failure Cadence reports itself. It gets the
 context and a `CommandError`:
 
 | `CommandError` | Holds |
@@ -121,7 +121,7 @@ context and a `CommandError`:
 | `kind()` | What failed, see below |
 | `exception()` | The exception that carries the failure, null for `PERMISSION_DENIED` |
 | `usage()` | For an argument error, the usage of the argument branch that failed; null for an option value's error |
-| `sendDefault()` | Sends the messages CommandLib sends for it by default |
+| `sendDefault()` | Sends the messages Cadence sends for it by default |
 
 | `CommandError.Kind` | When | Default message |
 |---|---|---|
@@ -153,8 +153,8 @@ and its messages go to the sender directly.
 Not every error reaches it:
 
 - **Brigadier's errors**, such as an unknown command or subcommand, trailing input, an integer out of range or a
-  malformed selector, are reported by the platform before CommandLib runs (see [errors](errors.md#who-reports-an-error)).
-  CommandLib never sees them, so neither the error formatter nor syntax advice can change them.
+  malformed selector, are reported by the platform before Cadence runs (see [errors](errors.md#who-reports-an-error)).
+  Cadence never sees them, so neither the error formatter nor syntax advice can change them.
 - **The cooldown and confirmation messages and a preprocess's messages** have their own hooks: `Cooldown#message`,
   `Confirmation#message` and the messages the preprocess sends.
 - **A missing argument** is not an error: the help is sent, through the help formatter.
@@ -177,7 +177,7 @@ Usage:
 ```
 
 The line is that branch's, the closest to what the sender typed, and the sender has its permission, since the runner
-checked it before parsing. It is not the default, so that CommandLib's errors keep the vanilla shape unless a plugin
+checked it before parsing. It is not the default, so that Cadence's errors keep the vanilla shape unless a plugin
 asks for it. Errors Brigadier reports itself get no advice, as above.
 
 ## In tests

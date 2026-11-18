@@ -1,0 +1,59 @@
+package dev.marulabs.cadence.argument;
+
+import com.google.common.collect.Range;
+import dev.marulabs.cadence.Command;
+import dev.marulabs.cadence.CommandTester;
+import dev.marulabs.cadence.FakeSender;
+import org.junit.jupiter.api.Test;
+
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+class DoubleRangeArgumentTest {
+    private static Command rangeCommand() {
+        return new Command("range") {{
+            argument(new DoubleRangeArgument("range")).execute((ctx, range) -> ctx.sendMessage(range.toString()));
+        }};
+    }
+
+    @Test
+    void bounded_open_and_exact_ranges_are_parsed() {
+        FakeSender sender = FakeSender.player("Alice");
+
+        try (CommandTester tester = new CommandTester(DoubleRangeArgumentTest::rangeCommand, "test.command")) {
+            tester.execute("range 0.5..10", sender);
+            tester.execute("range ..5", sender);
+            tester.execute("range 3.5..", sender);
+            tester.execute("range 0.1", sender);
+        }
+
+        assertThat(sender.getSentMessageTexts()).containsExactly(Range.closed(0.5, 10.0)
+                                                                      .toString(),
+                                                                 Range.atMost(5.0)
+                                                                      .toString(),
+                                                                 Range.atLeast(3.5)
+                                                                      .toString(),
+                                                                 Range.singleton(0.1)
+                                                                      .toString());
+    }
+
+    @Test
+    void swapped_and_empty_ranges_are_syntax_errors() {
+        FakeSender sender = FakeSender.player("Alice");
+
+        try (CommandTester tester = new CommandTester(DoubleRangeArgumentTest::rangeCommand, "test.command")) {
+            assertThatThrownBy(() -> tester.execute("range 2.5..1",
+                                                    sender)).hasMessageContaining("Min cannot be bigger than max");
+            assertThatThrownBy(() -> tester.execute("range ..",
+                                                    sender)).hasMessageContaining("Expected value or range of values");
+            // Java reads these as doubles, vanilla does not.
+            List.of("1d", "1e3", "NaN", "Infinity", "+5", "1..2e1")
+                .forEach(bound -> assertThatThrownBy(() -> tester.execute("range " + bound, sender)).as(bound)
+                                                                                                    .hasMessageContaining("Invalid number"));
+        }
+
+        assertThat(sender.getSentMessageTexts()).isEmpty();
+    }
+}

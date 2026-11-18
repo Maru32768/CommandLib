@@ -1,12 +1,12 @@
 package dev.marulabs.testmod;
 
-import dev.marulabs.commandlib.Command;
-import dev.marulabs.commandlib.CommandContext;
-import dev.marulabs.commandlib.CommandLib;
-import dev.marulabs.commandlib.CommandOption;
-import dev.marulabs.commandlib.Options;
-import dev.marulabs.commandlib.argument.PlayerArgument;
-import dev.marulabs.commandlib.argument.StringArgument;
+import dev.marulabs.cadence.Command;
+import dev.marulabs.cadence.CommandContext;
+import dev.marulabs.cadence.Cadence;
+import dev.marulabs.cadence.CommandOption;
+import dev.marulabs.cadence.Options;
+import dev.marulabs.cadence.argument.PlayerArgument;
+import dev.marulabs.cadence.argument.StringArgument;
 import dev.marulabs.integration.core.TestResult;
 import dev.marulabs.integration.core.TestStatus;
 import net.minecraft.server.level.ServerPlayer;
@@ -143,7 +143,7 @@ public final class OptionTest extends TestBase {
         command.addChildren(new Command("visibleWhenRefreshShow") {{
             execute(ctx -> {
                 visible.set(true);
-                CommandLib.refreshAll();
+                Cadence.refreshAll();
                 // From 1.20.3 a command performed during another is parsed now and run after it, so the control
                 // input is performed after the change rather than queued with the other test commands.
                 TestMain.perform(ctx.getSender()

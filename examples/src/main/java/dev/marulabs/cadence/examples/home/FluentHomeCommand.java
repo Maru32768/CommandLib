@@ -1,0 +1,39 @@
+package dev.marulabs.cadence.examples.home;
+
+import dev.marulabs.cadence.Command;
+import dev.marulabs.cadence.argument.StringArgument;
+import dev.marulabs.cadence.exception.CommandPrerequisiteException;
+
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+/**
+ * Use case 6, per-locale messages: {@code /home set <name>} and {@code /home go <name>} reply in the sender's
+ * locale, and so do the description and the headings of the generated help.
+ */
+public final class FluentHomeCommand extends Command {
+    public FluentHomeCommand() {
+        super("home");
+        captions(HomeCaptions.create());
+        description(HomeCaptions.DESCRIPTION);
+        Set<String> homes = new HashSet<>();
+
+        addChildren(new Command("go") {{
+            StringArgument name = new StringArgument("name");
+            // The untyped executor throws the checked CommandPrerequisiteException; a typed one uses ctx.fail.
+            argument(name).execute(ctx -> {
+                if (!homes.contains(ctx.getArgument(name))) {
+                    throw new CommandPrerequisiteException(HomeCaptions.UNKNOWN,
+                                                           Map.of("name", ctx.getArgument(name)));
+                }
+                ctx.sendSuccess(HomeCaptions.TELEPORTED, Map.of("name", ctx.getArgument(name)));
+            });
+        }}, new Command("set") {{
+            argument(new StringArgument("name")).execute((ctx, name) -> {
+                homes.add(name);
+                ctx.sendSuccess(HomeCaptions.SET, Map.of("name", name));
+            });
+        }});
+    }
+}

@@ -8,7 +8,7 @@
   build.gradle.kts adds the steps Eclipse has no setting for (import order, double brace initialization).
 -->
 <profiles version="23">
-    <profile kind="CodeFormatterProfile" name="CommandLib" version="23">
+    <profile kind="CodeFormatterProfile" name="Cadence" version="23">
         <!-- Indentation: 4 spaces, continuation indent 8 -->
         <setting id="org.eclipse.jdt.core.formatter.tabulation.char" value="space"/>
         <setting id="org.eclipse.jdt.core.formatter.tabulation.size" value="4"/>

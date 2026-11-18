@@ -1,7 +1,7 @@
 package dev.marulabs.testmod;
 
-import dev.marulabs.commandlib.Command;
-import dev.marulabs.commandlib.DefaultPermission;
+import dev.marulabs.cadence.Command;
+import dev.marulabs.cadence.DefaultPermission;
 
 // Registers a command with only a child (no executor) so that the bot can send it directly and receive the
 // help message output. Verification is done by IntegrationTest on the client side.

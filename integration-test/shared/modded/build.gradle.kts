@@ -1,5 +1,5 @@
 // Forge / NeoForge / Fabric test mod for the Docker-based integration tests. It is built once per loader and Minecraft
-// version with Stonecutter, like the modded module, and bundles the published CommandLib jars (remapped to SRG on
+// version with Stonecutter, like the modded module, and bundles the published Cadence jars (remapped to SRG on
 // Forge, Mojang names on NeoForge, intermediary on Fabric) so the tests exercise the same artifacts that downstream
 // mods use.
 plugins {
@@ -57,7 +57,7 @@ tasks.processResources {
 // The test mod jar that is copied into the server's mods directory.
 val testModJar = tasks.register<Jar>("testModJar") {
     group = "build"
-    description = "Builds the test mod jar with the remapped CommandLib jars bundled or nested in."
+    description = "Builds the test mod jar with the remapped Cadence jars bundled or nested in."
     archiveFileName.set("TestMod-${sc.current.project}.jar")
     destinationDirectory.set(layout.buildDirectory.dir("test-mod"))
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE

@@ -1,7 +1,7 @@
 package dev.marulabs.sampleplugin;
 
-import dev.marulabs.commandlib.Command;
-import dev.marulabs.commandlib.argument.PlayersArgument;
+import dev.marulabs.cadence.Command;
+import dev.marulabs.cadence.argument.PlayersArgument;
 
 /**
  * By registering this, you can use the command below.

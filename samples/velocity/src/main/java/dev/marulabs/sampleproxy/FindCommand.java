@@ -1,8 +1,8 @@
 package dev.marulabs.sampleproxy;
 
 import com.velocitypowered.api.proxy.Player;
-import dev.marulabs.commandlib.Command;
-import dev.marulabs.commandlib.argument.PlayerArgument;
+import dev.marulabs.cadence.Command;
+import dev.marulabs.cadence.argument.PlayerArgument;
 
 /**
  * /find <players...>

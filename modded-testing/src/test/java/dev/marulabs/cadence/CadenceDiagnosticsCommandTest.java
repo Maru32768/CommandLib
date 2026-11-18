@@ -1,0 +1,29 @@
+package dev.marulabs.cadence;
+
+import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+class CadenceDiagnosticsCommandTest {
+    @Test
+    void sends_the_platform_and_the_registrations() {
+        FakeSender sender = FakeSender.console();
+
+        try (CommandTester tester = new CommandTester(new CadenceDiagnosticsCommand("diag"), "test.command")) {
+            tester.execute("diag", sender);
+        }
+
+        assertThat(sender.getSentMessageTexts()).startsWith("Cadence diagnostics", "Platform:")
+                                                .contains("  Java: " + System.getProperty("java.version"))
+                                                .anyMatch(x -> x.startsWith("  Loader: "))
+                                                .anyMatch(x -> x.startsWith("Registrations: "));
+    }
+
+    @Test
+    void registration_returns_its_documentation() {
+        String tree = CommandDocs.of("test.command", new CadenceDiagnosticsCommand("diag"))
+                                 .tree();
+
+        assertThat(tree).startsWith("diag [test.command.diag, OP]");
+    }
+}

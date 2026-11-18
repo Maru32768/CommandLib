@@ -1,10 +1,10 @@
 val mcProtocol by configurations.creating
 
-extra["commandlib.integration.platform"] = "spigot"
-extra["commandlib.integration.minecraftVersion"] = "1.20.3"
-extra["commandlib.integration.javaVersion"] = "21"
+extra["cadence.integration.platform"] = "spigot"
+extra["cadence.integration.minecraftVersion"] = "1.20.3"
+extra["cadence.integration.javaVersion"] = "21"
 // BuildTools now resolves 1.20.3 to the 1.20.4 build, so build the last 1.20.3 build.
-extra["commandlib.integration.buildToolsRevision"] = "3961"
+extra["cadence.integration.buildToolsRevision"] = "3961"
 
 dependencies {
     // 1.20.3 and 1.20.4 share their protocol.

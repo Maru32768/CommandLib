@@ -5,24 +5,24 @@ import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.proxy.ProxyServer;
-import dev.marulabs.commandlib.Command;
-import dev.marulabs.commandlib.CommandContext;
-import dev.marulabs.commandlib.CommandLib;
-import dev.marulabs.commandlib.CommonArgument;
-import dev.marulabs.commandlib.DefaultPermission;
-import dev.marulabs.commandlib.argument.BooleanArgument;
-import dev.marulabs.commandlib.argument.DoubleArgument;
-import dev.marulabs.commandlib.argument.DurationArgument;
-import dev.marulabs.commandlib.argument.EnumArgument;
-import dev.marulabs.commandlib.argument.FloatArgument;
-import dev.marulabs.commandlib.argument.IntegerArgument;
-import dev.marulabs.commandlib.argument.LongArgument;
-import dev.marulabs.commandlib.argument.Nameable;
-import dev.marulabs.commandlib.argument.NameableObjectArgument;
-import dev.marulabs.commandlib.argument.ObjectArgument;
-import dev.marulabs.commandlib.argument.PlayerArgument;
-import dev.marulabs.commandlib.argument.ServerArgument;
-import dev.marulabs.commandlib.argument.StringArgument;
+import dev.marulabs.cadence.Cadence;
+import dev.marulabs.cadence.Command;
+import dev.marulabs.cadence.CommandContext;
+import dev.marulabs.cadence.CommonArgument;
+import dev.marulabs.cadence.DefaultPermission;
+import dev.marulabs.cadence.argument.BooleanArgument;
+import dev.marulabs.cadence.argument.DoubleArgument;
+import dev.marulabs.cadence.argument.DurationArgument;
+import dev.marulabs.cadence.argument.EnumArgument;
+import dev.marulabs.cadence.argument.FloatArgument;
+import dev.marulabs.cadence.argument.IntegerArgument;
+import dev.marulabs.cadence.argument.LongArgument;
+import dev.marulabs.cadence.argument.Nameable;
+import dev.marulabs.cadence.argument.NameableObjectArgument;
+import dev.marulabs.cadence.argument.ObjectArgument;
+import dev.marulabs.cadence.argument.PlayerArgument;
+import dev.marulabs.cadence.argument.ServerArgument;
+import dev.marulabs.cadence.argument.StringArgument;
 
 import java.util.List;
 import java.util.Map;
@@ -32,7 +32,7 @@ import java.util.concurrent.TimeUnit;
  * The commands VelocityIntegrationTest runs from the bot, which joins through the proxy. Velocity has no operators,
  * and no permission plugin is installed, so only the nodes with {@link DefaultPermission#ALL} are the player's.
  */
-@Plugin(id = "commandlibtest", name = "CommandLibTest", version = "1.0.0")
+@Plugin(id = "cadencetest", name = "CadenceTest", version = "1.0.0")
 public final class TestPlugin {
     private final ProxyServer proxy;
 
@@ -43,14 +43,14 @@ public final class TestPlugin {
 
     @Subscribe
     public void onProxyInitialize(ProxyInitializeEvent event) {
-        CommandLib.register(this, proxy, command());
+        Cadence.register(this, proxy, command());
         // The console has every permission, so this shows that the OP node the player is refused is registered.
         proxy.getCommandManager()
-             .executeAsync(proxy.getConsoleCommandSource(), "commandlibtest denied");
+             .executeAsync(proxy.getConsoleCommandSource(), "cadencetest denied");
     }
 
     private static Command command() {
-        Command main = new Command("commandlibtest") {{
+        Command main = new Command("cadencetest") {{
             permission(DefaultPermission.ALL);
         }};
         main.addChildren(new Command("echo") {{
@@ -87,7 +87,7 @@ public final class TestPlugin {
                                   + offCaller));
             });
         }});
-        // One child of /commandlibtest value per argument type, which sends the parsed value.
+        // One child of /cadencetest value per argument type, which sends the parsed value.
         main.addChildren(new Command("value") {{
             permission(DefaultPermission.ALL);
             addChildren(value("boolean", new BooleanArgument("v")),

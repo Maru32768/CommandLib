@@ -1,10 +1,10 @@
 package dev.marulabs.testmod;
 
-import dev.marulabs.commandlib.Command;
-import dev.marulabs.commandlib.CommandContext;
-import dev.marulabs.commandlib.CommonArgument;
-import dev.marulabs.commandlib.argument.*;
-import dev.marulabs.commandlib.internal.CurrentServer;
+import dev.marulabs.cadence.Command;
+import dev.marulabs.cadence.CommandContext;
+import dev.marulabs.cadence.CommonArgument;
+import dev.marulabs.cadence.argument.*;
+import dev.marulabs.cadence.internal.CurrentServer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 //? if >=1.19.3
@@ -219,9 +219,9 @@ public final class ArgumentTest extends TestBase {
                            "minecraft:oak_planks"));
         commands.add(check("resourceLocationArgument",
                            new ResourceLocationArgument("a"),
-                           "commandlib:example/path",
+                           "cadence:example/path",
                            String::valueOf,
-                           "commandlib:example/path"));
+                           "cadence:example/path"));
         commands.add(check("registryArgument",
                            //? if >=1.19.3 {
                            new RegistryArgument<>("a", Registries.ITEM),

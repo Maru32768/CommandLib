@@ -1,6 +1,6 @@
 package dev.marulabs.testplugin;
 
-import dev.marulabs.commandlib.Command;
+import dev.marulabs.cadence.Command;
 import dev.marulabs.integration.core.TestResult;
 import dev.marulabs.integration.core.TestStatus;
 import org.bukkit.Bukkit;
@@ -17,17 +17,17 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * Checks that a data pack function can run a CommandLib command after /minecraft:reload, which compiles functions
+ * Checks that a data pack function can run a Cadence command after /minecraft:reload, which compiles functions
  * against fresh vanilla commands. The data pack is written into the world while the plugin enables; the reload
  * discovers and enables it. It also has a function with an unknown subcommand, {@value #BROKEN_FUNCTION}, whose error
- * CommandLib's own compilation must still log, which the integration test checks in the server log. A function tag,
+ * Cadence's own compilation must still log, which the integration test checks in the server log. A function tag,
  * {@value #TAG}, and {@code #minecraft:load} list functions that use a command as well: the reload runs the load
  * function once, and the tag is run after the reload.
  */
 public final class DataPackFunctionTest extends TestBase {
-    public static final String FUNCTION = "commandlibtest:probe";
-    public static final String BROKEN_FUNCTION = "commandlibtest:broken";
-    public static final String TAG = "#commandlibtest:probes";
+    public static final String FUNCTION = "cadencetest:probe";
+    public static final String BROKEN_FUNCTION = "cadencetest:broken";
+    public static final String TAG = "#cadencetest:probes";
     private static final String PROBE = "functionProbe";
     private static final String TAG_PROBE = "functionTagProbe";
     private static final String LOAD_PROBE = "functionLoadProbe";
@@ -80,7 +80,7 @@ public final class DataPackFunctionTest extends TestBase {
     }
 
     /**
-     * The reload runs #minecraft:load once on the tick after it, which has to run the command: CommandLib compiles the
+     * The reload runs #minecraft:load once on the tick after it, which has to run the command: Cadence compiles the
      * functions again with its commands before the server runs them in that tick.
      */
     private void functionLoadProbe() {
@@ -125,32 +125,32 @@ public final class DataPackFunctionTest extends TestBase {
             world = dimensions.getParent();
         }
         Path pack = world.resolve("datapacks")
-                         .resolve("commandlibtest");
+                         .resolve("cadencetest");
         String function = command.name() + " " + PROBE + "\n";
         try {
             // pack_format 6 is 1.16.5's; later versions load the pack anyway and read supported_formats.
             write(pack.resolve("pack.mcmeta"),
                   "{\"pack\":{\"pack_format\":6,\"supported_formats\":{\"min_inclusive\":6,\"max_inclusive\":99},"
-                          + "\"description\":\"CommandLib integration test\"}}");
+                          + "\"description\":\"Cadence integration test\"}}");
             // The directory is "function" from 1.21 and "functions" before.
-            write(pack.resolve("data/commandlibtest/functions/probe.mcfunction"), function);
-            write(pack.resolve("data/commandlibtest/function/probe.mcfunction"), function);
+            write(pack.resolve("data/cadencetest/functions/probe.mcfunction"), function);
+            write(pack.resolve("data/cadencetest/function/probe.mcfunction"), function);
             String broken = command.name() + " noSuchSubcommand\n";
-            write(pack.resolve("data/commandlibtest/functions/broken.mcfunction"), broken);
-            write(pack.resolve("data/commandlibtest/function/broken.mcfunction"), broken);
+            write(pack.resolve("data/cadencetest/functions/broken.mcfunction"), broken);
+            write(pack.resolve("data/cadencetest/function/broken.mcfunction"), broken);
             writeFunction(pack, "tagged", command.name() + " " + TAG_PROBE + "\n");
             writeFunction(pack, "load", command.name() + " " + LOAD_PROBE + "\n");
             writeFunction(pack, ScenarioTest.DENIED_STORE_FUNCTION, ScenarioTest.DENIED_STORE_FUNCTION_BODY);
-            writeTag(pack, "commandlibtest", "probes", "commandlibtest:tagged");
-            writeTag(pack, "minecraft", "load", "commandlibtest:load");
+            writeTag(pack, "cadencetest", "probes", "cadencetest:tagged");
+            writeTag(pack, "minecraft", "load", "cadencetest:load");
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
     }
 
     private static void writeFunction(Path pack, String name, String content) throws IOException {
-        write(pack.resolve("data/commandlibtest/functions/" + name + ".mcfunction"), content);
-        write(pack.resolve("data/commandlibtest/function/" + name + ".mcfunction"), content);
+        write(pack.resolve("data/cadencetest/functions/" + name + ".mcfunction"), content);
+        write(pack.resolve("data/cadencetest/function/" + name + ".mcfunction"), content);
     }
 
     // The tag directory is "function" from 1.21 and "functions" before, like the functions.

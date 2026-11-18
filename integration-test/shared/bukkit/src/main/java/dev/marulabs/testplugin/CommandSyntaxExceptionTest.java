@@ -2,11 +2,11 @@ package dev.marulabs.testplugin;
 
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import dev.marulabs.commandlib.Argument;
-import dev.marulabs.commandlib.Command;
-import dev.marulabs.commandlib.CommandContext;
-import dev.marulabs.commandlib.internal.PlatformAdapter;
-import dev.marulabs.commandlib.util.UncaughtExceptionHandler;
+import dev.marulabs.cadence.Argument;
+import dev.marulabs.cadence.Command;
+import dev.marulabs.cadence.CommandContext;
+import dev.marulabs.cadence.internal.PlatformAdapter;
+import dev.marulabs.cadence.util.UncaughtExceptionHandler;
 import dev.marulabs.integration.core.ExceptionUtil;
 import dev.marulabs.integration.core.TestResult;
 import dev.marulabs.integration.core.TestStatus;
@@ -88,7 +88,7 @@ public class CommandSyntaxExceptionTest extends TestBase {
         }
 
         /**
-         * Converts the exception the same way CommandLib does after parseImpl throws it, and reports a conversion that
+         * Converts the exception the same way Cadence does after parseImpl throws it, and reports a conversion that
          * throws or logs a warning about falling back to plain text.
          */
         private static String checkConversion(CommandSyntaxException e) {

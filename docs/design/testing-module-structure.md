@@ -67,7 +67,7 @@ Dependencies:
 - Brigadier.
 - Mockito / AssertJ / JUnit where needed.
 
-The public package is `dev.marulabs.commandlib`. The NMS mock package stays aligned with the NMS util in the Spigot module.
+The public package is `dev.marulabs.cadence`. The NMS mock package stays aligned with the NMS util in the Spigot module.
 
 ## `paper-testing`
 
@@ -88,7 +88,7 @@ Not responsibilities:
 
 Open questions:
 
-- Whether CommandLib should have its own Adventure component assertions or rely on Kyori test utilities.
+- Whether Cadence should have its own Adventure component assertions or rely on Kyori test utilities.
 
 ## `modded-testing`
 
@@ -109,7 +109,7 @@ Decisions:
 - Run Minecraft's `Bootstrap` to initialize the registries, and parse vanilla argument types with the real implementations. The
   `NetworkHooks.init` called by `Bootstrap` on Forge 1.17+ assumes FML's class transformer, so it is mocked only during bootstrap.
 - `MinecraftServer` / `PlayerList` / `GameProfileCache` are Mockito mocks. Fake players can be resolved by name.
-- Permission nodes are answered by the running `FakeSender` (1.18+ mocks `CommandLib#hasPermission`, 1.16.5 mocks
+- Permission nodes are answered by the running `FakeSender` (1.18+ mocks `Cadence#hasPermission`, 1.16.5 mocks
   `PermissionAPI#hasPermission`, only during execution).
 
 Open questions:
@@ -158,7 +158,7 @@ enum class Platform {
 }
 ```
 
-Fixtures are now named `{version}-{server}` (e.g. `1.20.6-paper`). Fixtures using the paper CommandLib module set `extra["commandlibModule"] = "paper"` explicitly (1.20.6+).
+Fixtures are now named `{version}-{server}` (e.g. `1.20.6-paper`). Fixtures using the paper Cadence module set `extra["cadenceModule"] = "paper"` explicitly (1.20.6+).
 
 ## Split Decision
 

@@ -21,7 +21,7 @@ dependencies {
     compileOnly("com.velocitypowered:velocity-api:3.4.0")
     // Generates velocity-plugin.json from @Plugin.
     annotationProcessor("com.velocitypowered:velocity-api:3.4.0")
-    implementation("com.github.Maru32768.CommandLib:velocity:latest.release")
+    implementation("com.github.Maru32768.Cadence:velocity:latest.release")
 }
 
 configure<JavaPluginExtension> {
@@ -36,6 +36,6 @@ val projectGroup = project.group.toString()
 val projectNameLower = project.name.lowercase()
 tasks.named<ShadowJar>("shadowJar") {
     archiveFileName.set("${rootProject.name}-${project.version}.jar")
-    relocate("dev.marulabs.commandlib", "$projectGroup.$projectNameLower.commandlib")
+    relocate("dev.marulabs.cadence", "$projectGroup.$projectNameLower.cadence")
 }
 tasks.named("build") { dependsOn(tasks.named("shadowJar")) }

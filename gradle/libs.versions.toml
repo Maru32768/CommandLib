@@ -11,7 +11,7 @@ paper-api = "1.21-R0.1-SNAPSHOT"
 paper-api-test = "1.21.8-R0.1-SNAPSHOT"
 velocity-api = "3.4.0"
 junit = "5.10.2"
-# The *-testing modules compile CommandLibExtension against the oldest JUnit docs/testing.md supports.
+# The *-testing modules compile CadenceExtension against the oldest JUnit docs/testing.md supports.
 junit-api-min = "5.8.1"
 assertj = "3.25.3"
 # common, common-testing, spigot and spigot-testing use the older AssertJ, and spigot and spigot-testing Mockito 4.

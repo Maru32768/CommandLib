@@ -1,9 +1,9 @@
 package dev.marulabs.testplugin;
 
-import dev.marulabs.commandlib.Command;
-import dev.marulabs.commandlib.CommandLib;
-import dev.marulabs.commandlib.CommandLibDiagnosticsCommand;
-import dev.marulabs.commandlib.internal.bukkit.BukkitUtil;
+import dev.marulabs.cadence.Cadence;
+import dev.marulabs.cadence.CadenceDiagnosticsCommand;
+import dev.marulabs.cadence.Command;
+import dev.marulabs.cadence.internal.bukkit.BukkitUtil;
 import dev.marulabs.integration.core.JUnitXmlReport;
 import dev.marulabs.integration.core.TestResult;
 import dev.marulabs.integration.core.TestStatus;
@@ -35,7 +35,7 @@ public class TestMain {
     private final Plugin plugin;
     private final Logger logger;
     private boolean errorOccurredOnRegister = false;
-    private CommandLib registration;
+    private Cadence registration;
 
 
     public TestMain(Plugin plugin) {
@@ -53,7 +53,7 @@ public class TestMain {
     }
 
     /**
-     * Unregisters the commands as a plugin may in its onDisable, after CommandLib has already unregistered them on the
+     * Unregisters the commands as a plugin may in its onDisable, after Cadence has already unregistered them on the
      * plugin's disable event. The runner stops the server and checks the result in the log.
      */
     public void unregisterOnDisable() {
@@ -62,9 +62,9 @@ public class TestMain {
         }
         try {
             registration.unregister();
-            logger.info("COMMANDLIB_UNREGISTER_ON_DISABLE_SUCCEEDED");
+            logger.info("CADENCE_UNREGISTER_ON_DISABLE_SUCCEEDED");
         } catch (Throwable e) {
-            logger.log(Level.SEVERE, "COMMANDLIB_UNREGISTER_ON_DISABLE_FAILED", e);
+            logger.log(Level.SEVERE, "CADENCE_UNREGISTER_ON_DISABLE_FAILED", e);
         }
     }
 
@@ -125,9 +125,9 @@ public class TestMain {
                                          .collect(Collectors.toList());
 
             Runnable execute = () -> {
-                logger.info("Received CommandLib test run request.");
+                logger.info("Received Cadence test run request.");
                 if (!running.compareAndSet(false, true)) {
-                    logger.info("CommandLib test cases are already running.");
+                    logger.info("Cadence test cases are already running.");
                     return;
                 }
 
@@ -141,7 +141,7 @@ public class TestMain {
                                   scoreboard.registerNewTeam("test");
                               }
 
-                              logger.info("Executing CommandLib test cases.");
+                              logger.info("Executing Cadence test cases.");
                               for (String command : commands) {
                                   logger.info("Dispatching test command: " + command);
                                   CommandDispatchResult dispatchResult = dispatchProbe.dispatch(Bukkit.getConsoleSender(),
@@ -246,12 +246,10 @@ public class TestMain {
                     execute.run();
                 });
             }});
-            registration = CommandLib.register(plugin,
-                                               mainCommand,
-                                               new CommandLibDiagnosticsCommand("commandlibdiagnostics"));
+            registration = Cadence.register(plugin, mainCommand, new CadenceDiagnosticsCommand("cadencediagnostics"));
         } catch (Throwable e) {
             errorOccurredOnRegister = true;
-            logger.log(Level.SEVERE, "COMMANDLIB_TEST_PLUGIN_ENABLE_FAILED", e);
+            logger.log(Level.SEVERE, "CADENCE_TEST_PLUGIN_ENABLE_FAILED", e);
             throw e;
         }
     }
@@ -271,9 +269,9 @@ public class TestMain {
     }
 
     public void outputResultsToJUnitXml(List<TestResult> results) {
-        String reportName = System.getProperty("commandlib.testReportName",
-                                               "TEST-commandlib-" + BukkitUtil.getMinecraftVersion() + ".xml");
-        Path reportDir = Paths.get(System.getProperty("commandlib.testReportDir", "../../../../shared/test-results"));
+        String reportName = System.getProperty("cadence.testReportName",
+                                               "TEST-cadence-" + BukkitUtil.getMinecraftVersion() + ".xml");
+        Path reportDir = Paths.get(System.getProperty("cadence.testReportDir", "../../../../shared/test-results"));
         Path path = reportDir.resolve(reportName);
         try {
             Files.createDirectories(path.getParent());

@@ -1,4 +1,4 @@
-import commandlib.nms.SpigotRemapTask
+import cadence.nms.SpigotRemapTask
 
 plugins {
     id("io.papermc.paperweight.userdev") version "2.0.0-beta.21"
@@ -23,7 +23,7 @@ configure<JavaPluginExtension> {
 }
 
 tasks.withType<JavaCompile>().configureEach {
-    options.release.set(commandlib.nms.typedNmsRelease("1.21.1"))
+    options.release.set(cadence.nms.typedNmsRelease("1.21.1"))
 }
 
 dependencies {
@@ -31,7 +31,7 @@ dependencies {
     compileOnly(project(":spigot"))
 }
 
-val typedPackage = "dev/marulabs/commandlib/internal/nms/typed/paper_1_21_1"
+val typedPackage = "dev/marulabs/cadence/internal/nms/typed/paper_1_21_1"
 
 val writeSpigotPackageMapping by tasks.registering {
     val mapping = layout.buildDirectory.file("remap/spigot-package.srg")

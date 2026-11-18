@@ -19,7 +19,7 @@ dependencies {
     api(project(":spigot"))
     compileOnly(libs.spigot.api)
     compileOnly(libs.brigadier)
-    // CommandLibExtension; tests that use it already have JUnit. 5.8.1 is the oldest docs/testing.md supports.
+    // CadenceExtension; tests that use it already have JUnit. 5.8.1 is the oldest docs/testing.md supports.
     compileOnly(libs.junit.jupiter.api.min)
     api(libs.mockito.inline.legacy)
 
@@ -27,7 +27,7 @@ dependencies {
     testImplementation(libs.spigot.api)
     testImplementation(libs.junit.jupiter)
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-    // Runs fixture classes to see how CommandLibExtension refuses parameters.
+    // Runs fixture classes to see how CadenceExtension refuses parameters.
     testImplementation("org.junit.platform:junit-platform-testkit")
     testImplementation(libs.assertj.legacy)
 }

@@ -1,24 +1,24 @@
 # Migrating from Cloud
 
-This guide maps [Incendo Cloud](https://cloud.incendo.org/) 2.x concepts to CommandLib for Spigot and Paper plugins.
-The examples use `cloud-paper` / `cloud-bukkit` names on the left and CommandLib's `spigot` / `paper` artifacts on the
+This guide maps [Incendo Cloud](https://cloud.incendo.org/) 2.x concepts to Cadence for Spigot and Paper plugins.
+The examples use `cloud-paper` / `cloud-bukkit` names on the left and Cadence's `spigot` / `paper` artifacts on the
 right. Both end up as Brigadier commands on modern servers, so command syntax and vanilla argument behavior carry over.
 
 The main difference in style: Cloud builds commands with a builder on a `CommandManager` and reads values back by key
-(`ctx.get("name")`). CommandLib declares a `Command` subclass, or chains `Command.builder(name)` (see
+(`ctx.get("name")`). Cadence declares a `Command` subclass, or chains `Command.builder(name)` (see
 [Java builder](../java-builder.md)), and passes typed values to the executor.
 
-Features CommandLib does not have yet are marked **Not available**.
+Features Cadence does not have yet are marked **Not available**.
 
 ## Setup
 
-| Cloud | CommandLib |
+| Cloud | Cadence |
 |---|---|
-| `LegacyPaperCommandManager.createNative(plugin, coordinator)`, `PaperCommandManager.builder()...buildOnEnable(plugin)` | No manager: shade the `spigot` or `paper` artifact and relocate `dev.marulabs.commandlib` |
+| `LegacyPaperCommandManager.createNative(plugin, coordinator)`, `PaperCommandManager.builder()...buildOnEnable(plugin)` | No manager: shade the `spigot` or `paper` artifact and relocate `dev.marulabs.cadence` |
 | `manager.registerBrigadier()` | Not needed; commands are always Brigadier nodes |
-| `manager.command(builder)` | `CommandLib.register(plugin, commands...)` in `onEnable` |
-| `PaperCommandManager.builder()...buildBootstrapped(context)` | `CommandLib.bootstrap(context, commands...)` in `PluginBootstrap#bootstrap` (Paper) |
-| `manager.deleteRootCommand("name")` | `CommandLib#unregister()` removes everything that registration added; plugin disable does it automatically |
+| `manager.command(builder)` | `Cadence.register(plugin, commands...)` in `onEnable` |
+| `PaperCommandManager.builder()...buildBootstrapped(context)` | `Cadence.bootstrap(context, commands...)` in `PluginBootstrap#bootstrap` (Paper) |
+| `manager.deleteRootCommand("name")` | `Cadence#unregister()` removes everything that registration added; plugin disable does it automatically |
 
 ```java
 // Cloud
@@ -32,10 +32,10 @@ public void onEnable() {
 ```
 
 ```java
-// CommandLib
+// Cadence
 @Override
 public void onEnable() {
-    CommandLib.register(this, new Command("ping") {{
+    Cadence.register(this, new Command("ping") {{
         execute(ctx -> ctx.sendMessage("pong"));
     }});
 }
@@ -56,7 +56,7 @@ manager.command(manager.commandBuilder("give")
 ```
 
 ```java
-// CommandLib
+// Cadence
 class GiveCommand extends Command {
     GiveCommand() {
         super("give");
@@ -71,7 +71,7 @@ class GiveCommand extends Command {
 Typed executors take up to seven arguments. Beyond that, `argument(List.of(a, b, ..., h)).execute(ctx -> ...)` reads each value
 typed with `ctx.getArgument(a)` (see [Java builder](../java-builder.md#eight-or-more-arguments)).
 
-| Cloud | CommandLib |
+| Cloud | Cadence |
 |---|---|
 | `required(name, parser)` | An argument instance in `argument(...)` |
 | `optional(name, parser, DefaultValue.constant(v))` | `.optional(v)` on the argument |
@@ -86,7 +86,7 @@ Only the last arguments of a branch can be optional, as in Cloud. See [optional 
 
 ### Parsers
 
-| Cloud parser | CommandLib argument |
+| Cloud parser | Cadence argument |
 |---|---|
 | `integerParser(min, max)`, `longParser`, `floatParser`, `doubleParser`, `booleanParser` | `IntegerArgument(name, min, max)`, `LongArgument`, `FloatArgument`, `DoubleArgument`, `BooleanArgument` |
 | `stringParser()` (one word) | `new StringArgument(name, StringArgument.Type.WORD)` |
@@ -106,7 +106,7 @@ See the [argument catalog](../arguments.md) for the full list and result types.
 
 ### Custom parsers
 
-Cloud parsers implement `ArgumentParser<C, T>` and are registered by type in the `ParserRegistry`. CommandLib has no
+Cloud parsers implement `ArgumentParser<C, T>` and are registered by type in the `ParserRegistry`. Cadence has no
 registry: an argument is an object you put in the branch. For a lookup by name, use `ObjectArgument`,
 `NameableObjectArgument`, or `EnumArgument`; to refine a built-in type, use `validator(...)`, `transformer(...)`, or
 `additionalParser(...)`; otherwise subclass `Argument`.
@@ -124,7 +124,7 @@ public final class ArenaParser implements ArgumentParser<CommandSender, Arena> {
 ```
 
 ```java
-// CommandLib
+// Cadence
 class JoinCommand extends Command {
     JoinCommand(ArenaManager arenas) {
         super("join");
@@ -140,16 +140,16 @@ stand for your own code.
 
 ## Senders
 
-| Cloud | CommandLib |
+| Cloud | Cadence |
 |---|---|
 | `ctx.sender()` | `ctx.getSender()` (`CommandSender`) |
 | `senderType(Player.class)` | `addPrerequisite(Command.player())` on the command, then `ctx.getPlayer()`; or `require(Command.player())` for a typed player |
 | `senderType(ConsoleCommandSender.class)` | `addPrerequisite(Command.console())`, then `ctx.getConsole()` |
-| `SenderMapper` / custom sender type for the whole manager | `CommandDefaults.of(CommandContext.class).provide(GamePlayer.class, ctx -> ...)` passed to `CommandLib.register` maps the sender once per execution for every command; read it with `ctx.get(GamePlayer.class)`, or as a typed executor parameter with `require(ctx -> ctx.get(GamePlayer.class))`. See [context values](../context-values.md) |
+| `SenderMapper` / custom sender type for the whole manager | `CommandDefaults.of(CommandContext.class).provide(GamePlayer.class, ctx -> ...)` passed to `Cadence.register` maps the sender once per execution for every command; read it with `ctx.get(GamePlayer.class)`, or as a typed executor parameter with `require(ctx -> ctx.get(GamePlayer.class))`. See [context values](../context-values.md) |
 | `PaperSimpleSenderMapper`, `CommandSourceStack` | The `paper` artifact reads the `CommandSourceStack` itself; use `ctx.getSender()`, or `ctx.getHandle().getSource()` for the stack |
 
 ```java
-// CommandLib: map the sender to your own type
+// Cadence: map the sender to your own type
 class CoinsCommand extends Command {
     CoinsCommand(Profiles profiles) {
         super("coins");
@@ -178,7 +178,7 @@ manager.command(game.literal("stop").handler(ctx -> { /* stop */ }));
 ```
 
 ```java
-// CommandLib
+// Cadence
 class GameCommand extends Command {
     GameCommand() {
         super("game");
@@ -197,7 +197,7 @@ A literal after an argument (`config <key> get`) is `argument(...).child(key -> 
 
 ## Permissions
 
-| Cloud | CommandLib |
+| Cloud | Cadence |
 |---|---|
 | `permission("myplugin.game")` | `permission("myplugin.game")`, or the generated `<prefix>.game` |
 | No permission | `permission(DefaultPermission.ALL)`; root commands default to OP |
@@ -205,13 +205,13 @@ A literal after an argument (`config <key> get`) is `argument(...).child(key -> 
 | `PredicatePermission.of(sender -> ...)` (hides the command) | `visibleWhen(ctx -> ...)` on the command or the branch ([permissions](../permissions.md#refreshing-the-command-tree)) |
 | `CommandFlag.Builder#withPermission(...)` | `permission(...)` on the option ([permissions](../permissions.md#options)) |
 
-CommandLib registers a Bukkit permission for every command, subcommand, and argument branch with its default and
+Cadence registers a Bukkit permission for every command, subcommand, and argument branch with its default and
 description, and leaves the nodes a sender lacks out of the sender's command tree. See
 [permissions](../permissions.md).
 
 ## Suggestions
 
-| Cloud | CommandLib |
+| Cloud | Cadence |
 |---|---|
 | `required(name, parser, SuggestionProvider.suggestingStrings("a", "b"))` | `.setSuggestionProvider(sb -> sb.suggest("a").suggest("b"))` on the argument |
 | `SuggestionProvider.blockingStrings((ctx, input) -> list)` | `.setSuggestionProvider(sb -> list.forEach(sb::suggest))` |
@@ -222,12 +222,12 @@ description, and leaves the nodes a sender lacks out of the sender's command tre
 | `ctx.get("earlier")` in the provider | `sb.getArgument("earlier")` |
 | `@Suggestions("name")` method | A provider on the argument instance |
 
-CommandLib does not filter what a provider adds; filter by `sb.getLatestInput()` yourself. See
+Cadence does not filter what a provider adds; filter by `sb.getLatestInput()` yourself. See
 [suggestions](../suggestions.md).
 
 ## Flags
 
-Cloud flags become CommandLib options. They are typed keys instead of string lookups, and they are written **before**
+Cloud flags become Cadence options. They are typed keys instead of string lookups, and they are written **before**
 the positional arguments, not after them, unless the command calls `optionsAnywhere()` (see
 [options](../options.md#options-after-the-arguments)).
 
@@ -244,7 +244,7 @@ manager.command(manager.commandBuilder("scan")
 ```
 
 ```java
-// CommandLib: /scan [options] <target>
+// Cadence: /scan [options] <target>
 class ScanCommand extends Command {
     ScanCommand() {
         super("scan");
@@ -259,7 +259,7 @@ class ScanCommand extends Command {
 }
 ```
 
-| Cloud | CommandLib |
+| Cloud | Cadence |
 |---|---|
 | Presence flag | `Options.flag(name[, short])` |
 | Value flag (`withComponent(parser)`) | `Options.bool`, `integer`, `longValue`, `floatValue`, `doubleValue`, `string`, or `Options.of(name[, short], argument)` for any argument, such as a player or an enum |
@@ -271,7 +271,7 @@ See [options](../options.md).
 
 ## Execution coordinators
 
-| Cloud | CommandLib |
+| Cloud | Cadence |
 |---|---|
 | `ExecutionCoordinator.simpleCoordinator()` | Parsing, middlewares and the executor run on the thread where the platform dispatches the command (the server thread for players) |
 | `ExecutionCoordinator.asyncCoordinator()`, `coordinatorFor(executor)` | `executeAsync(...)` per command or branch: parsing stays on the server thread, the work runs on `ctx.supplyAsync(...)` and comes back to it. See [execution](../execution.md#async-executors) |
@@ -279,7 +279,7 @@ See [options](../options.md).
 | Suggestions executor | Providers run on the platform's thread; use `sb.await(...)` for slow lookups |
 
 ```java
-// CommandLib: load off the main thread, reply on it
+// Cadence: load off the main thread, reply on it
 class StatsCommand extends Command {
     StatsCommand(Stats stats) {
         super("stats");
@@ -296,7 +296,7 @@ returning the stage), not a value the work computes.
 
 ## Pre- and postprocessors
 
-| Cloud | CommandLib |
+| Cloud | Cadence |
 |---|---|
 | `registerCommandPreProcessor(...)` (every command) | `addMiddleware((ctx, next) -> ...)` or `addPreprocess(ctx -> ...)` on a top-level command also covers its children (opt out with `disableParentMiddleware()`); no registration for every command at once. See [execution](../execution.md#middleware) |
 | `registerCommandPostProcessor(...)` | A middleware's code before `next.proceed()` runs right before the executor, and a stage chained on it runs after; `addPrerequisite(...)` (inherited, `disableParentPrerequisite()`) runs before the help too |
@@ -304,21 +304,21 @@ returning the stage), not a value the work computes.
 | `cloud-processors-cooldown` | `cooldown(Duration)`, or `cooldown(Cooldown.of(duration).bypassPermission(...))`; kept in memory per unique id |
 | `ctx.store(CloudKey, value)` in a preprocessor, `ctx.get(key)` | `ctx.put(ContextKey, value)` in a middleware, `ctx.get(key)`; see [context values](../context-values.md) |
 | `ParameterInjectorRegistry`, `ctx.inject(Type.class)` | `provide(Type.class, ctx -> ...)` on the command and `ctx.get(Type.class)`; annotated methods take the type as a parameter after `registerContextValue` or `registerDependency` |
-| Guice injection service | Let Guice create the command through its constructor, or `provide(Type.class, ctx -> injector.getInstance(Type.class))`; CommandLib depends on no container |
+| Guice injection service | Let Guice create the command through its constructor, or `provide(Type.class, ctx -> injector.getInstance(Type.class))`; Cadence depends on no container |
 
 See [confirmation and cooldown](../../README.md#confirmation-and-cooldown) in the README for the messages and the order of the checks.
 
 ## Errors and captions
 
-| Cloud | CommandLib |
+| Cloud | Cadence |
 |---|---|
-| `exceptionController().registerHandler(...)` for `NoPermissionException`, `InvalidSyntaxException`, `InvalidCommandSenderException`, ... | `errorFormatter((ctx, error) -> ...)` gets each failure CommandLib reports with its `kind()`; Brigadier syntax errors are the platform's vanilla messages. See [help](../help.md#error-formatter) and [errors](../errors.md) |
+| `exceptionController().registerHandler(...)` for `NoPermissionException`, `InvalidSyntaxException`, `InvalidCommandSenderException`, ... | `errorFormatter((ctx, error) -> ...)` gets each failure Cadence reports with its `kind()`; Brigadier syntax errors are the platform's vanilla messages. See [help](../help.md#error-formatter) and [errors](../errors.md) |
 | An exception thrown by the handler | `addUncaughtExceptionHandler((ctx, e) -> ...)` on the command or argument |
 | `ArgumentParseResult.failure(...)` from a parser | `throw new ArgumentValidationException("...")` from `validator(...)` |
 | Failing from the handler | `throw new CommandPrerequisiteException("...")` from `execute(ctx -> ...)`, `throw ctx.fail("...")` from any executor, or `ctx.sendFailure("..."); return;` |
-| `Caption.of(key)`, `StandardCaptionKeys` | `Caption.of(key, englishDefault)`, CommandLib's own keys as `Caption` constants. See [localization](../localization.md) |
+| `Caption.of(key)`, `StandardCaptionKeys` | `Caption.of(key, englishDefault)`, Cadence's own keys as `Caption` constants. See [localization](../localization.md) |
 | `captionRegistry().registerProvider(...)` | `Captions.create().set(locale, caption, text)`, `bundle(baseName, classLoader)` or `load(locale, resourceBundle)`, given to the command with `captions(...)` |
-| `cloud-translations` bundles | CommandLib ships English and Japanese |
+| `cloud-translations` bundles | Cadence ships English and Japanese |
 | `captionFormatter(...)`, `<name>` placeholders | `Captions#sender(...)` formats every caption; placeholders are `{name}`, replaced from `Map.of("name", value)` |
 | `LocaleExtractor` | Built in: `ctx.getLocale()`, the sender's client locale, or the JVM's default for the console |
 | `MinecraftExceptionHandler` (minecraft-extras) | Not needed: failures are sent in red like vanilla errors |
@@ -333,7 +333,7 @@ argument(new IntegerArgument("amount").validator((ctx, amount) -> {
 
 ## Help
 
-| Cloud | CommandLib |
+| Cloud | Cadence |
 |---|---|
 | `MinecraftHelp` (minecraft-extras), `createHelpHandler()` | Built in: `/<command> help`, and the usage is sent when a node has no executor; `helpFormatter(...)` replaces how it looks, see [help](../help.md) |
 | `CommandDescription` / `Description.of(...)` on a command or component | `description(...)` on commands and branches |
@@ -341,10 +341,10 @@ argument(new IntegerArgument("amount").validator((ctx, amount) -> {
 
 ## Annotations
 
-CommandLib's [annotation API](../annotations.md) reads annotated methods instead of a syntax string
+Cadence's [annotation API](../annotations.md) reads annotated methods instead of a syntax string
 (`@Subcommand("game start")` and one parameter per argument). The fluent equivalents:
 
-| `cloud-annotations` | CommandLib |
+| `cloud-annotations` | Cadence |
 |---|---|
 | `@Command("give <target> [amount]")` | `super("give")` and `argument(new PlayerArgument("target"), new IntegerArgument("amount").optional(1))` |
 | `@Command("game start")` | `addChildren(new Command("start") {{ ... }})` inside `game` |
@@ -361,13 +361,13 @@ CommandLib's [annotation API](../annotations.md) reads annotated methods instead
 ## Kotlin
 
 Cloud's `cloud-kotlin-extensions` (builder DSL) and `cloud-kotlin-coroutines` (suspending handlers) correspond to
-CommandLib's [Kotlin DSL](../kotlin.md): `command("name") { ... }` blocks with typed argument references and options as
+Cadence's [Kotlin DSL](../kotlin.md): `command("name") { ... }` blocks with typed argument references and options as
 delegated properties, `executeSuspend { ctx -> }` for suspending handlers, which resume on the server thread through
 the platform's scheduler, and `addSuggestionProviderSuspend { sb -> }` for suspending suggestions.
 
 ## Testing
 
-CommandLib's `spigot-testing` / `paper-testing` run commands without a server:
+Cadence's `spigot-testing` / `paper-testing` run commands without a server:
 `new CommandTester(GiveCommand::new, "myplugin.command")`, then `tester.execute("give Steve 3", sender)`. See
 [testing](../testing.md).
 

@@ -31,7 +31,7 @@ Command heal = Command.builder("heal")
                                        .execute(ctx -> Bukkit.getOnlinePlayers().forEach(p -> p.setHealth(20))))
                       .build();
 
-CommandLib.register(this, heal);
+Cadence.register(this, heal);
 ```
 
 is the same command as

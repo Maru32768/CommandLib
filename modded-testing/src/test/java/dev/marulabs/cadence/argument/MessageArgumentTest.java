@@ -1,0 +1,92 @@
+package dev.marulabs.cadence.argument;
+
+import dev.marulabs.cadence.Command;
+import dev.marulabs.cadence.CommandTester;
+import dev.marulabs.cadence.FakeSender;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+// Runs the vanilla message parser of every node.
+class MessageArgumentTest {
+    @Test
+    void message_takes_the_rest_of_the_input() {
+        FakeSender sender = FakeSender.player("Alice");
+
+        try (CommandTester tester = new CommandTester(MessageArgumentTest::command, "test.command")) {
+            tester.execute("shout 2 hello there, {world}!", sender);
+        }
+
+        assertThat(sender.getSentMessageTexts()).containsExactly("2: hello there, {world}!");
+    }
+
+    @Test
+    void selectors_are_kept_as_written_for_a_sender_that_may_not_use_them() {
+        FakeSender sender = FakeSender.player("Alice");
+
+        try (CommandTester tester = new CommandTester(MessageArgumentTest::command, "test.command")) {
+            tester.execute("shout 2 hello @a!", sender);
+        }
+
+        assertThat(sender.getSentMessageTexts()).containsExactly("2: hello @a!");
+    }
+
+    @Test
+    void an_operator_gets_the_selectors_resolved_over_the_online_players() {
+        FakeSender sender = FakeSender.player("Alice")
+                                      .op(true);
+
+        try (CommandTester tester = new CommandTester(MessageArgumentTest::command,
+                                                      "test.command").withPlayer(FakeSender.player("Bob"))) {
+            tester.execute("shout 2 hello @a!", sender);
+        }
+
+        assertThat(sender.getSentMessageTexts()).containsExactly("2: hello Bob, Alice!");
+    }
+
+    @Test
+    void an_operator_gets_the_selectors_resolved_in_an_overworld_the_test_adds() {
+        FakeSender sender = FakeSender.player("Alice")
+                                      .op(true);
+        ServerLevel overworld = Mockito.mock(ServerLevel.class);
+        Mockito.when(overworld.dimension())
+               .thenReturn(Level.OVERWORLD);
+
+        try (CommandTester tester = new CommandTester(MessageArgumentTest::command,
+                                                      "test.command").withLevel(overworld)) {
+            tester.execute("shout 2 hello @a!", sender);
+        }
+
+        assertThat(sender.getSentMessageTexts()).containsExactly("2: hello Alice!");
+    }
+
+    @Test
+    void missing_message_is_a_syntax_error() {
+        try (CommandTester tester = new CommandTester(MessageArgumentTest::command, "test.command")) {
+            assertThatThrownBy(() -> tester.execute("shout 2 ",
+                                                    FakeSender.player("Alice"))).hasMessageContaining("Command syntax error");
+        }
+    }
+
+    @Test
+    void there_are_no_suggestions() {
+        try (CommandTester tester = new CommandTester(MessageArgumentTest::command, "test.command")) {
+            assertThat(tester.suggestions("shout 2 he", FakeSender.player("Alice"))
+                             .join()
+                             .getList()).isEmpty();
+        }
+    }
+
+    private static Command command() {
+        return new Command("shout") {{
+            argument(new IntegerArgument("times"),
+                     new MessageArgument("message")).execute((ctx, times, message) -> {
+                         ctx.sendMessage(times + ": " + message.getString());
+                     });
+        }};
+    }
+}

@@ -1,6 +1,6 @@
 # Execution Pipeline
 
-This note describes how CommandLib runs a command once Brigadier has matched it: the middleware chain around the
+This note describes how Cadence runs a command once Brigadier has matched it: the middleware chain around the
 executor, async executors, and the thread abstraction they share. User documentation is in
 [`docs/execution.md`](../execution.md); failure messages are in [`docs/errors.md`](../errors.md).
 
@@ -78,7 +78,7 @@ rather than `thenApplyAsync`, since the latter completes a failed stage on the c
 `addMiddleware` takes `CommandMiddleware<? super C>`, so a middleware written for `CommonCommandContext<?, ?>` works on
 every platform.
 
-`CommandDefaults` holds the middlewares and providers of a registration. `CommandLib.register` and the testers'
+`CommandDefaults` holds the middlewares and providers of a registration. `Cadence.register` and the testers'
 builders set it on each top-level command, and `CommonCommand#middlewares()` / `providers()` read it from the root of
 the tree, so the node creators need no new parameter. Its middlewares come before the cooldown and confirmation, and
 apply also below `disableParentMiddleware()`: they belong to the registration, so a child that opts out of its parent's
@@ -102,7 +102,7 @@ After the chain returns its stage:
 Vanilla needs a command's result synchronously (`/execute store`, functions, command blocks), so the async outcome
 cannot be stored. The options were: return 0 (store success 0), return 1, or block. Blocking the server thread defeats
 the feature. Returning 0 would make `store success` report failure for every async command, and `execute if function`
-treat them as failed. CommandLib returns what a synchronous command returns when it does not set a result (1), plus any
+treat them as failed. Cadence returns what a synchronous command returns when it does not set a result (1), plus any
 `setResult` before the stage was returned, so an author can still choose. The documentation tells function authors not
 to depend on async outcomes.
 
@@ -124,10 +124,10 @@ executor's exception (generic error message and handlers) instead of being rethr
 
 ## Timeout and cancellation
 
-CommandLib sets no default timeout. It cannot interrupt the work, so a timeout would only stop waiting, and the right
+Cadence sets no default timeout. It cannot interrupt the work, so a timeout would only stop waiting, and the right
 bound depends on the work. Authors use `CompletableFuture#orTimeout`, whose `TimeoutException` gets the message above.
 Cancellation is the author's: cancelling the returned stage (or one the middleware chain sees) reports nothing.
-CommandLib does not cancel on sender quit, plugin disable, or server stop; the Bukkit scheduler rejects tasks of a
+Cadence does not cancel on sender quit, plugin disable, or server stop; the Bukkit scheduler rejects tasks of a
 disabled plugin, which drops the follow-up, and a message to a player who left is dropped by the platform.
 
 ## Threads
@@ -151,7 +151,7 @@ public interface CommandScheduler {
   is the proxy scheduler's `buildTask(plugin, task)`.
 - **Testers**: `CommandScheduler.of(Runnable::run, Runnable::run)` unless the builder's `scheduler(...)` sets one.
 
-The scheduler is passed to `CommandNodeCreator` by each platform's `CommandLib` and the testers, and from there to each
+The scheduler is passed to `CommandNodeCreator` by each platform's `Cadence` and the testers, and from there to each
 `CommandRunner`, which hands it to the context (`CommonCommandContext#scheduler`). The context exposes
 `syncExecutor()`, `asyncExecutor()`, `supplyAsync(Supplier)` and `runAsync(Runnable)`; the last two complete their
 future on the sync executor, so non-async dependent stages (`thenAccept`) run on the sync thread whether they were
@@ -185,7 +185,7 @@ that ticks a region (`TickRegionScheduler#getCurrentRegion` is not null); the gl
 enables and disables plugins pass, since `RegionizedServer#isGlobalTickThread` is false outside the tick loop. Folia runs no data pack functions and has no data reload,
 so `ServerFunctions` does not compile them again there, and a registration that missed the `COMMANDS` event logs a
 warning instead of calling `Bukkit.reloadData()`. The spigot module throws `UnsupportedOperationException` from
-`CommandLib.register` on Folia.
+`Cadence.register` on Folia.
 
 ## Thread safety of the context
 
@@ -226,7 +226,7 @@ Alternatives considered:
   prerequisites, optional-argument defaults, suggestions and help could not read the mapped sender, and the work would
   run even when nothing reads it. Providers are lazy; `put` covers values that depend on the middleware's own work.
 - **A platform-wide registry**, shared by every registration of a plugin: `CommandDefaults` on each
-  `CommandLib.register` gives the same scope without global state, and the testers take the same object.
+  `Cadence.register` gives the same scope without global state, and the testers take the same object.
 
 `get` does not declare `CommandPrerequisiteException`, since the typed executors (`(ctx, team) -> ...`) cannot throw
 checked exceptions and the main use, a sender mapper, has to refuse some senders. The provider's exception is rethrown

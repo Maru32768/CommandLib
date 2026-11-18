@@ -27,7 +27,7 @@ repositories {
 
 dependencies {
     compileOnly("org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT")
-    implementation("com.github.Maru32768.CommandLib:spigot:latest.release")
+    implementation("com.github.Maru32768.Cadence:spigot:latest.release")
 }
 
 configure<JavaPluginExtension> {
@@ -53,6 +53,6 @@ val projectGroup = project.group.toString()
 val projectNameLower = project.name.lowercase()
 tasks.named<ShadowJar>("shadowJar") {
     archiveFileName.set("${rootProject.name}-${project.version}.jar")
-    relocate("dev.marulabs.commandlib", "$projectGroup.$projectNameLower.commandlib")
+    relocate("dev.marulabs.cadence", "$projectGroup.$projectNameLower.cadence")
 }
 tasks.named("build") { dependsOn(tasks.named("shadowJar")) }

@@ -55,7 +55,7 @@ The value factories are `bool`, `integer` (optionally with a range), `longValue`
 `string`. Each takes the default value returned when the option is not given, and has an overload with a `char`
 short name.
 
-`Options.of` takes any CommandLib argument as the value, with the argument's type, suggestions, validator and
+`Options.of` takes any Cadence argument as the value, with the argument's type, suggestions, validator and
 transformer:
 
 ```java

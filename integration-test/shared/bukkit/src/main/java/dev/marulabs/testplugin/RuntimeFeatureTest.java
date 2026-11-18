@@ -1,10 +1,10 @@
 package dev.marulabs.testplugin;
 
-import dev.marulabs.commandlib.Caption;
-import dev.marulabs.commandlib.Captions;
-import dev.marulabs.commandlib.Command;
-import dev.marulabs.commandlib.CommandLib;
-import dev.marulabs.commandlib.CommandLibDiagnostics;
+import dev.marulabs.cadence.Cadence;
+import dev.marulabs.cadence.CadenceDiagnostics;
+import dev.marulabs.cadence.Caption;
+import dev.marulabs.cadence.Captions;
+import dev.marulabs.cadence.Command;
 import dev.marulabs.integration.core.ExceptionUtil;
 import dev.marulabs.integration.core.TestResult;
 import dev.marulabs.integration.core.TestStatus;
@@ -87,7 +87,7 @@ public final class RuntimeFeatureTest extends TestBase {
         command.addChildren(new Command(name) {{
             execute(ctx -> {
                 try {
-                    CommandLibDiagnostics diagnostics = CommandLib.diagnostics();
+                    CadenceDiagnostics diagnostics = Cadence.diagnostics();
                     String report = diagnostics.report();
                     List<String> problems = new ArrayList<>();
                     if (!report.contains(MainCommand.NAME)) {

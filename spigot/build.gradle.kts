@@ -33,7 +33,7 @@ dependencies {
     testImplementation(libs.assertj.legacy)
     testImplementation(libs.mockito.core.legacy)
     testImplementation(libs.mockito.inline.legacy)
-    // Mockito's own dependency, for an instance of CommandLib without its constructor, which Mockito cannot mock.
+    // Mockito's own dependency, for an instance of Cadence without its constructor, which Mockito cannot mock.
     testImplementation(libs.objenesis)
 }
 
@@ -42,7 +42,7 @@ tasks.test {
 }
 
 // The typed NMS implementations compiled in the :nms modules are bundled into the spigot jar. They are the only NMS
-// implementations, so a jar built with some modules left out (-Pcommandlib.typedNms) lacks the versions they cover.
+// implementations, so a jar built with some modules left out (-Pcadence.typedNms) lacks the versions they cover.
 val typedNms by configurations.creating {
     isCanBeConsumed = false
     isCanBeResolved = true
@@ -64,7 +64,7 @@ val collectTypedNms by tasks.registering(Sync::class) {
 tasks.named<Jar>("jar") {
     // Only the classes: each module jar also carries the LICENSE that this jar already has.
     from(typedNms.elements.map { files -> files.map { zipTree(it.asFile) } }) {
-        include("dev/marulabs/commandlib/internal/nms/typed/**")
+        include("dev/marulabs/cadence/internal/nms/typed/**")
     }
 }
 
@@ -78,7 +78,7 @@ val missingTypedNms = rootProject.file("nms")
 tasks.withType<AbstractPublishToMaven>().configureEach {
     doFirst {
         check(missingTypedNms.isEmpty()) {
-            "The spigot jar lacks the typed NMS modules $missingTypedNms, which -Pcommandlib.typedNms left out. " +
+            "The spigot jar lacks the typed NMS modules $missingTypedNms, which -Pcadence.typedNms left out. " +
                 "Publish without that property."
         }
     }

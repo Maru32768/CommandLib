@@ -1,9 +1,9 @@
-# CommandLib Repository Notes
+# Cadence Repository Notes
 
 ## Scope
 
-This document is for agents editing the CommandLib repository itself. The
-Claude Code skill under `plugins/commandlib/skills/commandlib` is for downstream library
+This document is for agents editing the Cadence repository itself. The
+Claude Code skill under `plugins/cadence/skills/cadence` is for downstream library
 users and should not be used as the main source of repository maintenance
 instructions.
 
@@ -74,10 +74,10 @@ Install the generator in a virtual environment outside the repository, then buil
 root:
 
 ```bash
-python -m venv ~/.venvs/commandlib-docs
-~/.venvs/commandlib-docs/bin/pip install -r tools/docs-site/requirements.txt   # Scripts\pip on Windows
-~/.venvs/commandlib-docs/bin/mkdocs build --strict   # writes site/, which Git ignores
-~/.venvs/commandlib-docs/bin/mkdocs serve            # previews at http://127.0.0.1:8000
+python -m venv ~/.venvs/cadence-docs
+~/.venvs/cadence-docs/bin/pip install -r tools/docs-site/requirements.txt   # Scripts\pip on Windows
+~/.venvs/cadence-docs/bin/mkdocs build --strict   # writes site/, which Git ignores
+~/.venvs/cadence-docs/bin/mkdocs serve            # previews at http://127.0.0.1:8000
 ```
 
 `--strict` fails on links to missing pages or anchors. The site is not published yet: `mkdocs gh-deploy` would push
@@ -111,5 +111,5 @@ before committing.
 ## Public Usage Patterns
 
 When writing examples or tests that represent downstream user code, prefer the
-same patterns documented in `plugins/commandlib/skills/commandlib/references/patterns.md`.
+same patterns documented in `plugins/cadence/skills/cadence/references/patterns.md`.
 Those patterns are user-facing API guidance, not repository architecture rules.

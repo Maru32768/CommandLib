@@ -7,7 +7,7 @@ The main goal is to verify that commands using each `Argument` can be registered
 Minecraft server.
 
 This is intentionally not a normal unit test.
-CommandLib depends on each platform, Brigadier, and NMS behavior that is only reliable inside an actual server runtime.
+Cadence depends on each platform, Brigadier, and NMS behavior that is only reliable inside an actual server runtime.
 
 Fast tests remain in the module-level test projects such as `spigot/src/test`, `spigot-testing`, and `paper-testing`.
 Use this module only for cases that need a real server, platform runtime internals, command registration, or a real
@@ -27,7 +27,7 @@ Each `minecraftIntegrationTest*` task does the following:
    version exclusions, and fails on missing, unexpected, duplicate, failed or skipped cases or inconsistent counters.
 
 On the Bukkit-family targets (Spigot, Paper, Mohist) most of the suite runs from the server console, not from the bot.
-The bot sends `/commandlibtest runTests`, and the fixture then dispatches every case of the JUnit report as
+The bot sends `/cadencetest runTests`, and the fixture then dispatches every case of the JUnit report as
 `Bukkit.getConsoleSender()`, so those cases run with the console's permissions and do not see what a player receives.
 A case that needs a player names the bot (`Maru32768`) as an argument instead. Only a few checks use the bot itself: a
 tab completion request before the run, the command tree it receives, and the bot-side checks in `IntegrationTest` after
@@ -101,7 +101,7 @@ The AutoReloader URL can be overridden when needed:
 .\gradlew.bat -p integration-test/targets/paper-1.20.4/test-plugin downloadPluginJars -PautoReloaderJarDownloadUrl=<download-url>
 ```
 
-The same URL can be supplied with `COMMANDLIB_AUTORELOADER_JAR_URL`.
+The same URL can be supplied with `CADENCE_AUTORELOADER_JAR_URL`.
 
 ## Targets
 
@@ -127,18 +127,18 @@ module:
   Paper suite, which schedules with the Bukkit scheduler that Folia refuses. It checks that the commands register, that
   the bot gets the messages of the bot-side checks every target runs, that `executeAsync` runs its work off the thread
   that owns the sender and its continuation on the player's region thread for the bot and on the global region thread
-  for the console, and that the suggestions of a CommandLib argument are sent to the bot. Command blocks,
+  for the console, and that the suggestions of a Cadence argument are sent to the bot. Command blocks,
   `/execute as` and the `spigot` module's refusal of Folia are not covered. Folia rejects the only player as "The
   server is full!" when `max-players` is 1, so this target sets it to 2.
 - `paper-26.3-spigot-jar`: the `spigot` module on Paper 26.3, which it does not support. The target sets
-  `commandlib.integration.expectedEnableFailure`, so it starts no bot and passes when the plugin fails to enable with
+  `cadence.integration.expectedEnableFailure`, so it starts no bot and passes when the plugin fails to enable with
   that text, which names the paper artifact.
 - `velocity-3.4.0`: the `velocity` module in a plugin on a Velocity 3.4.0 proxy (build 566), in front of a Paper 1.21.4
   backend. `VelocityIntegrationTest` runs it instead of `IntegrationTest`, which the target selects with
-  `commandlib.integration.testClass`. The target compiles the plugin from its `testPlugin` source set with `velocity`
+  `cadence.integration.testClass`. The target compiles the plugin from its `testPlugin` source set with `velocity`
   and `common` inside it. Its image holds the backend in `work/server` and the proxy in `work/server/proxy`. The test
   starts one container of each on a Docker network, and the bot (MCProtocolLib 1.21.4) joins through the proxy. The
-  smoke test checks that the command tree the bot receives has CommandLib's nodes and leaves out a
+  smoke test checks that the command tree the bot receives has Cadence's nodes and leaves out a
   `DefaultPermission.OP` node, and that `ServerArgument` and `PlayerArgument` suggestions reach the bot. It checks that
   the bot receives the messages of a child command with an argument, of a `ServerArgument` and a `PlayerArgument`
   command, of a command for each other argument type (`ArgumentIntegrationCoverageTest` keeps the list complete), of an
@@ -148,7 +148,7 @@ module:
   Options, permission plugins and Velocity 4.x are not covered.
 
 From 26.1 the servers need Java 25, and from 26.2 MCProtocolLib needs Java 21 and Adventure 5, so those targets set
-`commandlib.integration.botJavaVersion` to 21. A bot that brings adventure-api 5 goes before the test's own
+`cadence.integration.botJavaVersion` to 21. A bot that brings adventure-api 5 goes before the test's own
 Adventure 4 on the test classpath.
 
 Minecraft 1.17 has no target: no MCProtocolLib release speaks its protocol (755), and a 1.17 server rejects the 1.17.1
@@ -158,7 +158,7 @@ Spigot targets (`spigot-<version>`) run the `spigot` module on a plain Spigot se
 produced by BuildTools, so the target's `buildSpigotServer` task runs it (through the same BuildTools setup as the typed
 NMS modules, see `docs/agents/nms-build.md`) and copies the jar to `test-plugin/server/server.jar`. BuildTools resolves
 1.20, 1.20.3, 1.20.5, 1.21, 1.21.2, 1.21.7, 1.21.9, 26.1 and 26.1.1 to the build of the following hotfix release, so those
-targets set the Spigot build number of the last build of their release in `commandlib.integration.buildToolsRevision`. BuildTools also installs the remapped
+targets set the Spigot build number of the last build of their release in `cadence.integration.buildToolsRevision`. BuildTools also installs the remapped
 artifacts only for a version that has a typed NMS module. The first run of a version takes several minutes.
 
 `minecraftIntegrationTest` is the aggregate task for all configured targets.
@@ -181,13 +181,13 @@ Docker image flow, and MCProtocolLib bot, but prepare the server differently:
   The tests therefore run the same artifact downstream mods use, which catches bugs that only appear with production
   names.
 - `integration-test/gradle/forge-integration-target.gradle.kts` registers `prepareTestPlugin`. It downloads the Forge,
-  NeoForge or Fabric installer (selected by `commandlib.integration.platform`), installs the server into
+  NeoForge or Fabric installer (selected by `cadence.integration.platform`), installs the server into
   `targets/<target>/work/server`, and copies the test mod into `mods`. The NeoForge test mod ships
   `META-INF/neoforge.mods.toml` instead of `mods.toml`. On Fabric the official Fabric installer installs Fabric Loader
   and downloads the vanilla server jar, and the Fabric API jar of the node (`deps.fabricApi`, from maven.fabricmc.net)
   is copied into `mods` next to the test mod.
 - The loader build is read from `modded/versions/<node>/gradle.properties`, so the server runs the build the
-  CommandLib jars are compiled against. The server is started with arguments derived from it (an
+  Cadence jars are compiled against. The server is started with arguments derived from it (an
   `@libraries/.../unix_args.txt` file for 1.17+ and NeoForge, `-jar forge-<version>.jar` for 1.16.5,
   `-jar fabric-server-launch.jar` for Fabric).
 - Test commands are performed through `Commands#performPrefixedCommand`, like typed commands. On 1.20.3+ commands
@@ -200,7 +200,7 @@ with a middleware, the diagnostics, a command after `/reload` and a sub command 
 targets run the same suite on Fabric Loader 0.16.14 with Fabric API, so they check registration through
 `CommandRegistrationCallback`, the commands after `/reload`, and the production (intermediary) names, such as the raw
 command source that `unwrap` reads by reflection. They do not cover RCON, fabric-permissions-api (no
-permission mod is installed), or CommandLib shaded into a mod instead of nested.
+permission mod is installed), or Cadence shaded into a mod instead of nested.
 
 Notes:
 
@@ -247,7 +247,7 @@ so repeated test runs avoid unnecessary Mohist library validation.
 
 Mohist 1.16.5 cannot start with the library check: it puts the Guava 20 it checks before the Guava 21 of the
 Minecraft server, which fails in `GameRules` with `NoSuchMethodError` (`ImmutableMap.toImmutableMap`). Its target sets
-`commandlib.integration.mohistInstallArgs` to `-noserver`, so the bootstrap first runs Mohist with the check and that
+`cadence.integration.mohistInstallArgs` to `-noserver`, so the bootstrap first runs Mohist with the check and that
 argument, which installs the libraries and exits, and then starts the server without the check, as the Docker run does.
 
 Example:
@@ -285,7 +285,7 @@ Run all configured targets:
 Each target builds a reusable Docker image for its server base before running the Minecraft integration test. The image
 contains the server jar, generated libraries, helper artifacts, base configuration, and pre-generated overworld data. The
 current fixture artifact is copied into the container at test startup, so normal code changes do not require recopying the
-whole server directory. The image is tagged `commandlib-it-<target>:<hash>` with a hash of the staged server base, and
+whole server directory. The image is tagged `cadence-it-<target>:<hash>` with a hash of the staged server base, and
 the image task is skipped while Docker has that tag. Checkouts and worktrees with the same server base therefore share
 one image, and different server bases never replace each other's image. Images of older server bases stay in Docker
 until removed, for example with `docker image rm` or `docker image prune -a`.
@@ -297,10 +297,10 @@ changes; rebuilding the image therefore takes about one extra server start. A fa
 image build instead of caching a forcibly stopped world.
 
 The nested `test-plugin` builds use the same Gradle user home as the outer build, so they reuse its Gradle
-distributions, dependencies and toolchains. Pass `-Pcommandlib.integrationGradleUserHome=<dir>` to give them a separate
+distributions, dependencies and toolchains. Pass `-Pcadence.integrationGradleUserHome=<dir>` to give them a separate
 one.
 
-The outer `prepareTestPlugin` task tracks fixture sources, CommandLib sources and resources, build scripts, local
+The outer `prepareTestPlugin` task tracks fixture sources, Cadence sources and resources, build scripts, local
 libraries, typed NMS jars and the prepared server/fixture jars. An unchanged run skips the nested Gradle process;
 changing an input or removing a prepared jar runs it again. `--refresh-dependencies` forces preparation and is
 forwarded to the nested build. `--rerun-tasks` also forces the outer preparation task when diagnosing the build.
@@ -322,7 +322,7 @@ was measured under heavy load.
 For smaller Docker Desktop environments, reduce the concurrency:
 
 ```powershell
-.\gradlew.bat :integration-test:minecraftIntegrationTest -Pcommandlib.minecraftIntegrationMaxParallel=1
+.\gradlew.bat :integration-test:minecraftIntegrationTest -Pcadence.minecraftIntegrationMaxParallel=1
 ```
 
 Mohist bootstrap is throttled separately and defaults to 4. Each Mohist target writes a target-specific bootstrap
@@ -331,7 +331,7 @@ Mohist bootstrap is throttled separately and defaults to 4. Each Mohist target w
 To reduce Mohist bootstrap concurrency:
 
 ```powershell
-.\gradlew.bat :integration-test:minecraftIntegrationTest -Pcommandlib.mohistBootstrapMaxParallel=1
+.\gradlew.bat :integration-test:minecraftIntegrationTest -Pcadence.mohistBootstrapMaxParallel=1
 ```
 
 Each Dockerized Minecraft server is also CPU-limited by default so one server startup cannot consume the whole Docker
@@ -340,8 +340,8 @@ Desktop CPU budget. The default is 2 CPUs per container.
 To tune or disable the limit:
 
 ```powershell
-.\gradlew.bat :integration-test:minecraftIntegrationTest -Pcommandlib.containerCpuLimit=1.5
-.\gradlew.bat :integration-test:minecraftIntegrationTest -Pcommandlib.containerCpuLimit=0
+.\gradlew.bat :integration-test:minecraftIntegrationTest -Pcadence.containerCpuLimit=1.5
+.\gradlew.bat :integration-test:minecraftIntegrationTest -Pcadence.containerCpuLimit=0
 ```
 
 The normal `test` task runs lightweight integration coverage checks only. Real server tests run from the target

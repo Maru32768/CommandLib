@@ -10,8 +10,8 @@ removed from their command tree and parsed as if they did not exist. Check the n
 
 ## A LuckPerms grant has no effect on Forge / NeoForge
 
-On Forge 1.18+ and NeoForge, CommandLib's nodes live in the `commandlib` namespace. Grant
-`commandlib.<prefix>.<path>`, for example `commandlib.mymod.command.spawn`, not `mymod.command.spawn`.
+On Forge 1.18+ and NeoForge, Cadence's nodes live in the `cadence` namespace. Grant
+`cadence.<prefix>.<path>`, for example `cadence.mymod.command.spawn`, not `mymod.command.spawn`.
 
 On Fabric the node has no namespace (`mymod.command.spawn`), and LuckPerms answers only when a mod ships
 fabric-permissions-api. Without it, the node's default decides.
@@ -23,7 +23,7 @@ it by default. Grant the node, or use `DefaultPermission.ALL` with your own chec
 
 ## A granted command does not show up until the player rejoins
 
-CommandLib does not resend the command tree when permissions change. Call `player.updateCommands()` (Bukkit) after
+Cadence does not resend the command tree when permissions change. Call `player.updateCommands()` (Bukkit) after
 changing permissions in code. LuckPerms on Bukkit does this itself unless its `update-client-command-list` option is
 off.
 
@@ -62,22 +62,22 @@ The executor threw an exception. It is in the server log, with the command's inp
 
 ## Commands from data pack functions fail to load
 
-Functions are compiled before plugins enable on Spigot and Paper. CommandLib compiles the functions that use its
+Functions are compiled before plugins enable on Spigot and Paper. Cadence compiles the functions that use its
 commands again after it registers them, and on later `/minecraft:reload`s, so the earlier "Unknown or incomplete
 command" load error of such a function can be ignored. On Paper, registering from a `PluginBootstrap` with
-`CommandLib.bootstrap(...)` makes the commands exist before the first compilation.
+`Cadence.bootstrap(...)` makes the commands exist before the first compilation.
 
 ## Java 26 warns that a final field "has been mutated reflectively"
 
-On Spigot and Paper, CommandLib swaps the children maps of Brigadier command nodes when it registers or unregisters
+On Spigot and Paper, Cadence swaps the children maps of Brigadier command nodes when it registers or unregisters
 commands, because Paper reads those maps on another thread. The maps are in `final` fields. From Java 26 the JVM warns
 on the first such write, and a JVM that denies it (`--illegal-final-field-mutation=deny`, planned as the default of a
 later release) makes registration fail. Start the server with `--enable-final-field-mutation=ALL-UNNAMED` to allow
 the write and silence the warning.
 
-## Two plugins shading CommandLib conflict
+## Two plugins shading Cadence conflict
 
-Relocate `dev.marulabs.commandlib` in the shadow jar (see the README installation snippets). Each plugin then has its
+Relocate `dev.marulabs.cadence` in the shadow jar (see the README installation snippets). Each plugin then has its
 own copy.
 
 ## Tests fail with `UnsupportedOperationException` or `IllegalStateException: No active CommandTester`

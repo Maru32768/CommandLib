@@ -4,12 +4,12 @@ import com.destroystokyo.paper.event.brigadier.AsyncPlayerSendSuggestionsEvent;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestion;
-import dev.marulabs.commandlib.Argument;
-import dev.marulabs.commandlib.Command;
-import dev.marulabs.commandlib.CommandContext;
-import dev.marulabs.commandlib.CommandLib;
-import dev.marulabs.commandlib.argument.EnumArgument;
-import dev.marulabs.commandlib.argument.StringArgument;
+import dev.marulabs.cadence.Argument;
+import dev.marulabs.cadence.Cadence;
+import dev.marulabs.cadence.Command;
+import dev.marulabs.cadence.CommandContext;
+import dev.marulabs.cadence.argument.EnumArgument;
+import dev.marulabs.cadence.argument.StringArgument;
 import dev.marulabs.integration.core.JUnitXmlReport;
 import dev.marulabs.integration.core.TestResult;
 import dev.marulabs.integration.core.TestStatus;
@@ -44,7 +44,7 @@ import java.util.stream.Collectors;
  * {@code runTests}, so the player check runs on the player's region thread.
  */
 public class TestMain {
-    private static final String NAME = "commandlibtest";
+    private static final String NAME = "cadencetest";
     private static final String SUGGESTION_BUFFER = "/" + NAME + " suggestionCapture abc";
     private static final String RUNNING_ON_FOLIA = "FoliaSmokeTest.runningOnFolia";
     private static final String PLAYER_ASYNC_THREAD = "FoliaSmokeTest.playerAsyncThread";
@@ -84,9 +84,9 @@ public class TestMain {
                           }
                       }
                   }, plugin);
-            CommandLib.register(plugin, mainCommand());
+            Cadence.register(plugin, mainCommand());
         } catch (Throwable e) {
-            logger.log(Level.SEVERE, "COMMANDLIB_TEST_PLUGIN_ENABLE_FAILED", e);
+            logger.log(Level.SEVERE, "CADENCE_TEST_PLUGIN_ENABLE_FAILED", e);
             throw e;
         }
     }
@@ -207,8 +207,8 @@ public class TestMain {
     private void writeReport() {
         checkSuggestion();
         List<TestResult> list = new ArrayList<>(results.values());
-        Path path = Paths.get(System.getProperty("commandlib.testReportDir", "test-results"))
-                         .resolve(System.getProperty("commandlib.testReportName", "TEST-commandlib-folia.xml"));
+        Path path = Paths.get(System.getProperty("cadence.testReportDir", "test-results"))
+                         .resolve(System.getProperty("cadence.testReportName", "TEST-cadence-folia.xml"));
         try {
             Files.createDirectories(path.getParent());
             Files.writeString(path, JUnitXmlReport.build(list));

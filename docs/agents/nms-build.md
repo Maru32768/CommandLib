@@ -29,7 +29,7 @@ server. They follow CommandAPI's build layout:
   Likewise `spigot-1.21.3` covers 1.21.2, `spigot-1.21.8` 1.21.7 and `spigot-1.21.10` 1.21.9.
   BuildTools now resolves those releases, and 1.20.3, 1.20, 26.1 and 26.1.1, to the following hotfix build, so a
   target or module builds the last build of the release by its Spigot build number
-  (`commandlib.integration.buildToolsRevision`, `spigotNms.buildToolsRevision`).
+  (`cadence.integration.buildToolsRevision`, `spigotNms.buildToolsRevision`).
 - From 26.1 Spigot runs with Mojang names and keeps CraftBukkit in the unversioned `org.bukkit.craftbukkit` package,
   so `spigot-26.1.2` compiles against the server jar as it is, without remapping. Mojang names do not change between
   releases the way obfuscated ones do, so the module covers every 26.x release whose target passes.
@@ -42,7 +42,7 @@ server. They follow CommandAPI's build layout:
 - On Paper the spigot module ends at 1.21.1, the last release with a Paper module; later Paper releases use the
   `paper` module.
 - From 1.20.5 Paper runs with Mojang names. The Paper modules use paperweight userdev. Paper still remaps a plugin
-  from Spigot names to Mojang names when the plugin does not declare Mojang mappings in its manifest, and CommandLib
+  from Spigot names to Mojang names when the plugin does not declare Mojang mappings in its manifest, and Cadence
   is shaded into plugins of both kinds. Some Spigot names are Mojang names of other classes (Spigot `MobEffect` is
   Mojang `MobEffectInstance`), so Mojang-named classes break in a remapped plugin. A Paper module therefore ships its
   Mojang-named jar and its paperweight `reobfJar`, moved to the `<package>_spigot` package. Each package has a
@@ -67,14 +67,14 @@ public API (`CommandBuildContext.simple`), on Spigot and Paper alike.
 
 ## BuildTools
 
-The `commandlib.spigot-nms` plugin in `buildSrc` adds `org.spigotmc:spigot` from the local Maven repository and an
+The `cadence.spigot-nms` plugin in `buildSrc` adds `org.spigotmc:spigot` from the local Maven repository and an
 `installSpigot` task that `compileJava` depends on. `installSpigot` runs BuildTools only when the local Maven repository
 lacks the jars (and, for remapped modules, the `minecraft-server` mappings):
 
-- BuildTools.jar and its working directory live in `<gradle user home>/caches/commandlib-buildtools`. Runs share that
+- BuildTools.jar and its working directory live in `<gradle user home>/caches/cadence-buildtools`. Runs share that
   directory, so a build service serializes them within a build and a file lock (`buildtools.lock`) across Gradle
   processes. Processes with different Gradle user homes share the local Maven repository, so a run also locks
-  `org/spigotmc/.commandlib-buildtools.lock` there, before the directory lock. The locks also cover checking the
+  `org/spigotmc/.cadence-buildtools.lock` there, before the directory lock. The locks also cover checking the
   artifacts and copying a target's server jar, which BuildTools writes in place. BuildTools.jar is downloaded again
   before each run, and the cached jar is used when the download fails.
 - The local Maven repository is found as Maven finds it: `-Dmaven.repo.local`, then `<localRepository>` in
@@ -88,13 +88,13 @@ lacks the jars (and, for remapped modules, the `minecraft-server` mappings):
   and 25 from 26.1.
 - A BuildTools run takes several minutes and needs network access. Later builds reuse the local Maven repository,
   and the BuildTools JDK is resolved only when BuildTools runs.
-- `-Pcommandlib.buildToolsUrl=<url>` overrides the BuildTools download URL.
+- `-Pcadence.buildToolsUrl=<url>` overrides the BuildTools download URL.
 - To prepare a machine ahead of time, run `./gradlew installSpigot`, which runs the task in every module.
 
-`-Pcommandlib.typedNms=false` leaves every `nms:*` project out of the build, so neither BuildTools nor paperweight
+`-Pcadence.typedNms=false` leaves every `nms:*` project out of the build, so neither BuildTools nor paperweight
 runs. The spigot jar then has no NMS implementations and does not work on a server, so this is only for work that
 does not need the jar: `:spigot:test`, `spigot-testing` and the other modules. A comma-separated list, such as
-`-Pcommandlib.typedNms=spigot-1.20.4,paper-1.20.6`, includes only those modules, for example to run the integration
+`-Pcadence.typedNms=spigot-1.20.4,paper-1.20.6`, includes only those modules, for example to run the integration
 targets of those versions while BuildTools has not run for the others. The spigot publish tasks fail while any module
 is left out.
 
@@ -141,7 +141,7 @@ is left out.
 2. Generate the classes with `tools/nms-codegen` (see its README): add the module, its versions and, for a Spigot
    module, its CraftBukkit package to `MODULES` in `generate.py`, then run `uv run generate.py <module>`. That also
    writes the module table to `TypedNmsModules`, and `settings.gradle.kts` fails for a module directory missing from
-   it. Classes go to `dev.marulabs.commandlib.internal.nms.typed.<module>`, named `<NMSWrapper>_<module>` with dots
+   it. Classes go to `dev.marulabs.cadence.internal.nms.typed.<module>`, named `<NMSWrapper>_<module>` with dots
    replaced by underscores, such as `NMSArgumentPlayer_spigot_1_20_4`, and are listed in `TypedNmsClasses`; the
    package's generated `package-info.java` marks it `@ApiStatus.Internal`. Where the Minecraft API changed, add a
    version flag in `mojang.py` rather than editing the generated classes, which a regeneration overwrites. A new wrapper needs a class in every module whose versions use it.

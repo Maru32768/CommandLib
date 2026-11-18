@@ -1,6 +1,6 @@
-# CommandLib paper-testing
+# Cadence paper-testing
 
-`paper-testing` provides lightweight test utilities for CommandLib's Paper API.
+`paper-testing` provides lightweight test utilities for Cadence's Paper API.
 Use it for tests built on `Command`, `CommandContext`, Paper-backed arguments, and Adventure components.
 
 It does not depend on a running Paper server.
@@ -15,7 +15,7 @@ repositories {
 }
 
 dependencies {
-    testImplementation "com.github.Maru32768.CommandLib:paper-testing:latest.release"
+    testImplementation "com.github.Maru32768.Cadence:paper-testing:latest.release"
 }
 ```
 

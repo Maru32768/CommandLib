@@ -1,6 +1,6 @@
 [
     {
-        "benchmark": "dev.marulabs.commandlib.benchmark.ExecuteBenchmark.execute",
+        "benchmark": "dev.marulabs.cadence.benchmark.ExecuteBenchmark.execute",
         "mode": "thrpt",
         "params": {
             "commands": "10",
@@ -25,7 +25,7 @@
         }
     },
     {
-        "benchmark": "dev.marulabs.commandlib.benchmark.ExecuteBenchmark.execute",
+        "benchmark": "dev.marulabs.cadence.benchmark.ExecuteBenchmark.execute",
         "mode": "thrpt",
         "params": {
             "commands": "10",
@@ -50,7 +50,7 @@
         }
     },
     {
-        "benchmark": "dev.marulabs.commandlib.benchmark.ExecuteBenchmark.execute",
+        "benchmark": "dev.marulabs.cadence.benchmark.ExecuteBenchmark.execute",
         "mode": "thrpt",
         "params": {
             "commands": "10",
@@ -75,7 +75,7 @@
         }
     },
     {
-        "benchmark": "dev.marulabs.commandlib.benchmark.ExecuteBenchmark.execute",
+        "benchmark": "dev.marulabs.cadence.benchmark.ExecuteBenchmark.execute",
         "mode": "thrpt",
         "params": {
             "commands": "10",
@@ -100,7 +100,7 @@
         }
     },
     {
-        "benchmark": "dev.marulabs.commandlib.benchmark.ExecuteBenchmark.execute",
+        "benchmark": "dev.marulabs.cadence.benchmark.ExecuteBenchmark.execute",
         "mode": "thrpt",
         "params": {
             "commands": "10",
@@ -125,7 +125,7 @@
         }
     },
     {
-        "benchmark": "dev.marulabs.commandlib.benchmark.ExecuteBenchmark.execute",
+        "benchmark": "dev.marulabs.cadence.benchmark.ExecuteBenchmark.execute",
         "mode": "thrpt",
         "params": {
             "commands": "1000",
@@ -150,7 +150,7 @@
         }
     },
     {
-        "benchmark": "dev.marulabs.commandlib.benchmark.ExecuteBenchmark.execute",
+        "benchmark": "dev.marulabs.cadence.benchmark.ExecuteBenchmark.execute",
         "mode": "thrpt",
         "params": {
             "commands": "1000",
@@ -175,7 +175,7 @@
         }
     },
     {
-        "benchmark": "dev.marulabs.commandlib.benchmark.ExecuteBenchmark.execute",
+        "benchmark": "dev.marulabs.cadence.benchmark.ExecuteBenchmark.execute",
         "mode": "thrpt",
         "params": {
             "commands": "1000",
@@ -200,7 +200,7 @@
         }
     },
     {
-        "benchmark": "dev.marulabs.commandlib.benchmark.ExecuteBenchmark.execute",
+        "benchmark": "dev.marulabs.cadence.benchmark.ExecuteBenchmark.execute",
         "mode": "thrpt",
         "params": {
             "commands": "1000",
@@ -225,7 +225,7 @@
         }
     },
     {
-        "benchmark": "dev.marulabs.commandlib.benchmark.ExecuteBenchmark.execute",
+        "benchmark": "dev.marulabs.cadence.benchmark.ExecuteBenchmark.execute",
         "mode": "thrpt",
         "params": {
             "commands": "1000",
@@ -250,7 +250,7 @@
         }
     },
     {
-        "benchmark": "dev.marulabs.commandlib.benchmark.OptionTreeBenchmark.register",
+        "benchmark": "dev.marulabs.cadence.benchmark.OptionTreeBenchmark.register",
         "mode": "avgt",
         "params": {
             "flags": "2"
@@ -274,7 +274,7 @@
         }
     },
     {
-        "benchmark": "dev.marulabs.commandlib.benchmark.OptionTreeBenchmark.register",
+        "benchmark": "dev.marulabs.cadence.benchmark.OptionTreeBenchmark.register",
         "mode": "avgt",
         "params": {
             "flags": "4"
@@ -298,7 +298,7 @@
         }
     },
     {
-        "benchmark": "dev.marulabs.commandlib.benchmark.OptionTreeBenchmark.register",
+        "benchmark": "dev.marulabs.cadence.benchmark.OptionTreeBenchmark.register",
         "mode": "avgt",
         "params": {
             "flags": "6"
@@ -322,7 +322,7 @@
         }
     },
     {
-        "benchmark": "dev.marulabs.commandlib.benchmark.RegistrationBenchmark.register",
+        "benchmark": "dev.marulabs.cadence.benchmark.RegistrationBenchmark.register",
         "mode": "avgt",
         "params": {
             "commands": "10"
@@ -346,7 +346,7 @@
         }
     },
     {
-        "benchmark": "dev.marulabs.commandlib.benchmark.RegistrationBenchmark.register",
+        "benchmark": "dev.marulabs.cadence.benchmark.RegistrationBenchmark.register",
         "mode": "avgt",
         "params": {
             "commands": "100"
@@ -370,7 +370,7 @@
         }
     },
     {
-        "benchmark": "dev.marulabs.commandlib.benchmark.RegistrationBenchmark.register",
+        "benchmark": "dev.marulabs.cadence.benchmark.RegistrationBenchmark.register",
         "mode": "avgt",
         "params": {
             "commands": "1000"
@@ -394,7 +394,7 @@
         }
     },
     {
-        "benchmark": "dev.marulabs.commandlib.benchmark.ExecuteBenchmark.execute",
+        "benchmark": "dev.marulabs.cadence.benchmark.ExecuteBenchmark.execute",
         "mode": "sample",
         "params": {
             "commands": "10",
@@ -419,7 +419,7 @@
         }
     },
     {
-        "benchmark": "dev.marulabs.commandlib.benchmark.ExecuteBenchmark.execute",
+        "benchmark": "dev.marulabs.cadence.benchmark.ExecuteBenchmark.execute",
         "mode": "sample",
         "params": {
             "commands": "10",
@@ -444,7 +444,7 @@
         }
     },
     {
-        "benchmark": "dev.marulabs.commandlib.benchmark.ExecuteBenchmark.execute",
+        "benchmark": "dev.marulabs.cadence.benchmark.ExecuteBenchmark.execute",
         "mode": "sample",
         "params": {
             "commands": "10",
@@ -469,7 +469,7 @@
         }
     },
     {
-        "benchmark": "dev.marulabs.commandlib.benchmark.ExecuteBenchmark.execute",
+        "benchmark": "dev.marulabs.cadence.benchmark.ExecuteBenchmark.execute",
         "mode": "sample",
         "params": {
             "commands": "10",
@@ -494,7 +494,7 @@
         }
     },
     {
-        "benchmark": "dev.marulabs.commandlib.benchmark.ExecuteBenchmark.execute",
+        "benchmark": "dev.marulabs.cadence.benchmark.ExecuteBenchmark.execute",
         "mode": "sample",
         "params": {
             "commands": "10",
@@ -519,7 +519,7 @@
         }
     },
     {
-        "benchmark": "dev.marulabs.commandlib.benchmark.ExecuteBenchmark.execute",
+        "benchmark": "dev.marulabs.cadence.benchmark.ExecuteBenchmark.execute",
         "mode": "sample",
         "params": {
             "commands": "1000",
@@ -544,7 +544,7 @@
         }
     },
     {
-        "benchmark": "dev.marulabs.commandlib.benchmark.ExecuteBenchmark.execute",
+        "benchmark": "dev.marulabs.cadence.benchmark.ExecuteBenchmark.execute",
         "mode": "sample",
         "params": {
             "commands": "1000",
@@ -569,7 +569,7 @@
         }
     },
     {
-        "benchmark": "dev.marulabs.commandlib.benchmark.ExecuteBenchmark.execute",
+        "benchmark": "dev.marulabs.cadence.benchmark.ExecuteBenchmark.execute",
         "mode": "sample",
         "params": {
             "commands": "1000",
@@ -594,7 +594,7 @@
         }
     },
     {
-        "benchmark": "dev.marulabs.commandlib.benchmark.ExecuteBenchmark.execute",
+        "benchmark": "dev.marulabs.cadence.benchmark.ExecuteBenchmark.execute",
         "mode": "sample",
         "params": {
             "commands": "1000",
@@ -619,7 +619,7 @@
         }
     },
     {
-        "benchmark": "dev.marulabs.commandlib.benchmark.ExecuteBenchmark.execute",
+        "benchmark": "dev.marulabs.cadence.benchmark.ExecuteBenchmark.execute",
         "mode": "sample",
         "params": {
             "commands": "1000",
@@ -644,7 +644,7 @@
         }
     },
     {
-        "benchmark": "dev.marulabs.commandlib.benchmark.SuggestBenchmark.suggest",
+        "benchmark": "dev.marulabs.cadence.benchmark.SuggestBenchmark.suggest",
         "mode": "sample",
         "params": {
             "commands": "10",
@@ -669,7 +669,7 @@
         }
     },
     {
-        "benchmark": "dev.marulabs.commandlib.benchmark.SuggestBenchmark.suggest",
+        "benchmark": "dev.marulabs.cadence.benchmark.SuggestBenchmark.suggest",
         "mode": "sample",
         "params": {
             "commands": "10",
@@ -694,7 +694,7 @@
         }
     },
     {
-        "benchmark": "dev.marulabs.commandlib.benchmark.SuggestBenchmark.suggest",
+        "benchmark": "dev.marulabs.cadence.benchmark.SuggestBenchmark.suggest",
         "mode": "sample",
         "params": {
             "commands": "10",
@@ -719,7 +719,7 @@
         }
     },
     {
-        "benchmark": "dev.marulabs.commandlib.benchmark.SuggestBenchmark.suggest",
+        "benchmark": "dev.marulabs.cadence.benchmark.SuggestBenchmark.suggest",
         "mode": "sample",
         "params": {
             "commands": "10",
@@ -744,7 +744,7 @@
         }
     },
     {
-        "benchmark": "dev.marulabs.commandlib.benchmark.SuggestBenchmark.suggest",
+        "benchmark": "dev.marulabs.cadence.benchmark.SuggestBenchmark.suggest",
         "mode": "sample",
         "params": {
             "commands": "1000",
@@ -769,7 +769,7 @@
         }
     },
     {
-        "benchmark": "dev.marulabs.commandlib.benchmark.SuggestBenchmark.suggest",
+        "benchmark": "dev.marulabs.cadence.benchmark.SuggestBenchmark.suggest",
         "mode": "sample",
         "params": {
             "commands": "1000",
@@ -794,7 +794,7 @@
         }
     },
     {
-        "benchmark": "dev.marulabs.commandlib.benchmark.SuggestBenchmark.suggest",
+        "benchmark": "dev.marulabs.cadence.benchmark.SuggestBenchmark.suggest",
         "mode": "sample",
         "params": {
             "commands": "1000",
@@ -819,7 +819,7 @@
         }
     },
     {
-        "benchmark": "dev.marulabs.commandlib.benchmark.SuggestBenchmark.suggest",
+        "benchmark": "dev.marulabs.cadence.benchmark.SuggestBenchmark.suggest",
         "mode": "sample",
         "params": {
             "commands": "1000",

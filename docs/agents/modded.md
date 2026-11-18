@@ -74,11 +74,11 @@ final class Messages {
 
 - Prefer code that needs no condition when the same call works on every
   version.
-- Use `dev.marulabs.commandlib.internal.CurrentServer.get()` for the running server.
+- Use `dev.marulabs.cadence.internal.CurrentServer.get()` for the running server.
   It wraps Forge's `ServerLifecycleHooks` and follows Fabric's server lifecycle
   events, and `modded-testing` mocks it (and `ServerLifecycleHooks` on Forge and NeoForge).
   The modded jars are plain libraries on every loader, Fabric included: no
-  `fabric.mod.json`, no entrypoint. Do not add code that needs CommandLib to be
+  `fabric.mod.json`, no entrypoint. Do not add code that needs Cadence to be
   loaded as a mod.
 - If the active node was switched in the IDE, switch back to the
   `vcsVersion` before committing.
@@ -130,7 +130,7 @@ The test mod is in `integration-test/shared/modded` (see `integration-test/READM
 public argument class, add a case to its `ArgumentTest`; `:integration-test:test` fails when one is missing.
 
 The Fabric targets (`fabric-1.20.1`, `fabric-1.21.1`) run the same test mod on a Fabric server with Fabric API, with
-the intermediary-remapped CommandLib jar nested with `include()`. `fabric-1.21.4` has no target, and no target installs
+the intermediary-remapped Cadence jar nested with `include()`. `fabric-1.21.4` has no target, and no target installs
 fabric-permissions-api.
 
 ## Adding A Node

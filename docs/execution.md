@@ -73,7 +73,7 @@ typed for the common context, `CommandMiddleware<CommonCommandContext<?, ?>>`, w
 ### Registration-wide middlewares and providers
 
 `CommandDefaults` holds middlewares and [context value](context-values.md) providers for every command of a
-registration. Pass it to `CommandLib.register` (or `CommandLib.bootstrap` on Paper) before the commands, and to the
+registration. Pass it to `Cadence.register` (or `Cadence.bootstrap` on Paper) before the commands, and to the
 testers' builder with `defaults(...)`, so the tests run the same chain:
 
 ```java
@@ -81,7 +81,7 @@ CommandDefaults<CommandContext> defaults = CommandDefaults.of(CommandContext.cla
         .addMiddleware(new AuditMiddleware(getLogger()))
         .provide(GamePlayer.class, ctx -> games.of(Command.player().extract(ctx)));
 
-CommandLib.register(this, defaults, List.of(new TeamCommand(), new ArenaCommand()));
+Cadence.register(this, defaults, List.of(new TeamCommand(), new ArenaCommand()));
 
 // In a test
 CommandTester tester = CommandTester.builder()
@@ -144,7 +144,7 @@ public final class StatsCommand extends Command {
 |---|---|---|
 | Spigot, Paper | The main thread, through the Bukkit scheduler of the registering plugin; a task given on the main thread runs at once | The Bukkit scheduler's async pool |
 | Folia (`paper` artifact) | The thread that owns the source: the entity scheduler of the entity the command runs as, the region of a command block, or the global region for the console; a task given on that thread runs at once | Folia's async scheduler |
-| Forge, NeoForge, Fabric | The server of the command's source (`MinecraftServer#execute`), which runs a task at once on the server thread | A pool of daemon threads owned by CommandLib, growing with the work |
+| Forge, NeoForge, Fabric | The server of the command's source (`MinecraftServer#execute`), which runs a task at once on the server thread | A pool of daemon threads owned by Cadence, growing with the work |
 | Velocity | The calling thread: the proxy has no main thread and its API may be used from any thread | The proxy's scheduler, under the registering plugin |
 | Testers | `Runnable::run` unless the builder's `scheduler(...)` sets another | `Runnable::run` unless set |
 
@@ -155,7 +155,7 @@ command context, which is how Folia gets the thread of each command.
 ### Folia
 
 Use the `paper` artifact. It detects Folia at runtime and needs no other setup; the `spigot` artifact refuses Folia
-with an `UnsupportedOperationException` from `CommandLib.register`. Folia loads only plugins that declare it, in
+with an `UnsupportedOperationException` from `Cadence.register`. Folia loads only plugins that declare it, in
 `plugin.yml` or `paper-plugin.yml`:
 
 ```yaml
@@ -172,9 +172,9 @@ folia-supported: true
   touch the entity there: it is gone, and Folia's thread checks may throw.
 - **Registration**: register commands during the plugin's initialization, as on Paper. A later `register` or
   `unregister` must run on the global region thread (`Bukkit.getGlobalRegionScheduler()`).
-- **`CommandLib.refresh` / `refreshAll`**: call them on any region thread or the global region thread; Folia sends the
+- **`Cadence.refresh` / `refreshAll`**: call them on any region thread or the global region thread; Folia sends the
   tree on each player's own thread.
-- **Functions**: Folia runs no data pack functions and has no `/minecraft:reload`, so CommandLib does not compile them
+- **Functions**: Folia runs no data pack functions and has no `/minecraft:reload`, so Cadence does not compile them
   again there.
 
 ### The result for `/execute store`
@@ -196,7 +196,7 @@ A function or command block that needs the outcome of the work must not depend o
 
 ### Timeout and cancellation
 
-CommandLib sets no timeout, since it cannot stop the work and a slow database is not an error by itself. Bound the work
+Cadence sets no timeout, since it cannot stop the work and a slow database is not an error by itself. Bound the work
 yourself with `orTimeout`:
 
 ```java
@@ -208,7 +208,7 @@ executeAsync(ctx -> ctx.supplyAsync(() -> api.fetch(...))
 A stage that fails with a `TimeoutException` sends "The command timed out." in red, logs nothing, and
 reaches the `UncaughtExceptionHandler`s. A stage that is cancelled (`CancellationException`) reports nothing: cancel
 it when the work is no longer wanted. Cancelling a `CompletableFuture` does not interrupt the thread doing the work.
-CommandLib does not cancel a command when its sender leaves; messages to a player who has left are dropped by the
+Cadence does not cancel a command when its sender leaves; messages to a player who has left are dropped by the
 platform.
 
 ### Thread safety of the context

@@ -1,6 +1,6 @@
 # Testing Strategy
 
-This document defines CommandLib's testing strategy. In particular, it covers how NMS / reflection code is tested and the role and policy of each test layer.
+This document defines Cadence's testing strategy. In particular, it covers how NMS / reflection code is tested and the role and policy of each test layer.
 
 ## Test Layer Overview
 
@@ -10,7 +10,7 @@ Layer 2: spigot-testing (command-level unit tests with NMS mocks)
 Layer 3: integration-test (Docker + real Minecraft servers)
 ```
 
-Each layer can run independently. Layer 3 is opt-in (`COMMANDLIB_RUN_MINECRAFT_IT=true`).
+Each layer can run independently. Layer 3 is opt-in (`CADENCE_RUN_MINECRAFT_IT=true`).
 
 ---
 
@@ -93,7 +93,7 @@ class XxxCommandTest {
 ```
 
 Keep the existing `Mockito.mockStatic` approach.
-CommandLib does not need the "real NMS instances + `Bootstrap.bootStrap()` + Mockito spies" approach used by CommandAPI.
+Cadence does not need the "real NMS instances + `Bootstrap.bootStrap()` + Mockito spies" approach used by CommandAPI.
 For test speed and less environment dependency, keep the full-stub approach based on mock implementation classes.
 
 ---
@@ -135,7 +135,7 @@ Scope: command registration, execution, tab completion, and permissions on real 
 ./gradlew :integration-test:minecraftIntegrationTest1165
 
 # Can also be controlled with an environment variable
-COMMANDLIB_RUN_MINECRAFT_IT=true ./gradlew :integration-test:test
+CADENCE_RUN_MINECRAFT_IT=true ./gradlew :integration-test:test
 ```
 
 ### When to Add Integration Tests
@@ -175,7 +175,7 @@ modules whose range matches. In tests, it is replaced with `Mockito.mockStatic`.
 ## Comparison with CommandAPI
 
 CommandAPI uses a heavyweight testing strategy: "real NMS + Mockito spies + `Bootstrap.bootStrap()`".
-CommandLib's current strategy (mock implementation classes + `Mockito.mockStatic`) is lighter:
+Cadence's current strategy (mock implementation classes + `Mockito.mockStatic`) is lighter:
 
 - No runtime dependency on the Minecraft server jar.
 - No registry initialization through `Bootstrap.bootStrap()`.
@@ -229,7 +229,7 @@ Integration tests (Layer 3) guarantee real NMS behavior, so this division of wor
 `CommandTester` / `FakeSender`.
 `docs/testing.md` documents their use.
 
-- **`CommandLibExtension`**: a JUnit 5 `ParameterResolver` registered with `@RegisterExtension` and a
+- **`CadenceExtension`**: a JUnit 5 `ParameterResolver` registered with `@RegisterExtension` and a
   `Supplier<CommandTester>`. It creates the tester lazily in the store of the method's `ExtensionContext`, so a
   `@BeforeEach` method and its test share one tester and the store closes it after the test. `@Sender` configures
   injected `FakeSender`s; outside `common-testing` an injected player is registered with the tester
@@ -237,17 +237,17 @@ Integration tests (Layer 3) guarantee real NMS behavior, so this division of wor
   `@RegisterCommand` annotation, because commands often take constructor arguments and the Spigot tester must build them while its NMS mocks are active. The artifacts declare
   `junit-jupiter-api` as `compileOnly`, so they add no test framework to downstream classpaths.
 - **`CommandTester#suggest`**: returns the suggestion texts, so tests assert on a `List<String>` with their own
-  assertion library. No CommandLib assertion classes are provided; AssertJ (or any list assertion) already covers
+  assertion library. No Cadence assertion classes are provided; AssertJ (or any list assertion) already covers
   messages (`getSentMessageTexts()`), results (`execute` returns an `int`) and suggestions.
-- **Command tree snapshots**: `CommandTreeRenderer` in `common` renders the CommandLib command model (not the
+- **Command tree snapshots**: `CommandTreeRenderer` in `common` renders the Cadence command model (not the
   Brigadier tree, whose option permutations would bury the structure) with aliases, permission nodes, default
   permissions, options and argument branches. `Snapshots` in `common` compares text with
   `src/test/resources/snapshots/<name>`, writes a missing snapshot and fails, and rewrites snapshots when
-  `COMMANDLIB_UPDATE_SNAPSHOTS=true` or `-Dcommandlib.updateSnapshots=true` is set. Both are package-private; the
+  `CADENCE_UPDATE_SNAPSHOTS=true` or `-Dcadence.updateSnapshots=true` is set. Both are package-private; the
   testing artifacts reach them from the same package, as they do `CommandNodeCreator`, because `CommandTester` is API
   in the root package and the tree generation cannot leave it without widening `CommonCommand` (see
   `module-structure.md#packages-and-visibility`). The help snapshot tests of
   `common` use the same `Snapshots`.
 
-The testing artifacts each have their own copy of `CommandLibExtension` and `@Sender`, because each has its own
+The testing artifacts each have their own copy of `CadenceExtension` and `@Sender`, because each has its own
 `CommandTester` and `FakeSender` with the same names, and one test classpath holds only one of them.

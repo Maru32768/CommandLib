@@ -1,0 +1,168 @@
+package dev.marulabs.cadence.branch;
+
+import dev.marulabs.cadence.ArgRef;
+import dev.marulabs.cadence.Caption;
+import dev.marulabs.cadence.CommonArgument;
+import dev.marulabs.cadence.CommonCommand;
+import dev.marulabs.cadence.CommonCommandContext;
+import dev.marulabs.cadence.DefaultPermission;
+import dev.marulabs.cadence.command.AsyncCommandExecutor;
+import dev.marulabs.cadence.command.CommandExecutor;
+import dev.marulabs.cadence.command.Extractor;
+import dev.marulabs.cadence.command.Prerequisite;
+import dev.marulabs.cadence.internal.ArgumentBranchDelegate;
+import dev.marulabs.cadence.util.function.HexaConsumer;
+import dev.marulabs.cadence.util.function.HexaFunction;
+import dev.marulabs.cadence.util.function.QuintFunction;
+import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.concurrent.CompletionStage;
+import java.util.function.Function;
+import java.util.function.Predicate;
+
+public final class QuintArgumentBranch<T1, T2, T3, T4, T5, C extends CommonCommandContext<?, ?>, T extends CommonCommand<C, T>> extends ArgumentBranch<C, T> {
+    private final CommonArgument<T1, C, ?> argument1;
+    private final CommonArgument<T2, C, ?> argument2;
+    private final CommonArgument<T3, C, ?> argument3;
+    private final CommonArgument<T4, C, ?> argument4;
+    private final CommonArgument<T5, C, ?> argument5;
+
+    @ApiStatus.Internal
+    public QuintArgumentBranch(ArgumentBranchDelegate<C, T> delegate,
+                               CommonArgument<T1, C, ?> argument1,
+                               CommonArgument<T2, C, ?> argument2,
+                               CommonArgument<T3, C, ?> argument3,
+                               CommonArgument<T4, C, ?> argument4,
+                               CommonArgument<T5, C, ?> argument5) {
+        super(delegate);
+        this.argument1 = argument1;
+        this.argument2 = argument2;
+        this.argument3 = argument3;
+        this.argument4 = argument4;
+        this.argument5 = argument5;
+    }
+
+    public QuintArgumentBranch<T1, T2, T3, T4, T5, C, T> execute(@NotNull HexaConsumer<C, T1, T2, T3, T4, T5> action) {
+        super.execute(ctx -> action.accept(ctx,
+                                           ctx.getArgument(argument1),
+                                           ctx.getArgument(argument2),
+                                           ctx.getArgument(argument3),
+                                           ctx.getArgument(argument4),
+                                           ctx.getArgument(argument5)));
+        return this;
+    }
+
+    public QuintArgumentBranch<T1, T2, T3, T4, T5, C, T> executeAsync(@NotNull HexaFunction<C, T1, T2, T3, T4, T5, CompletionStage<?>> action) {
+        super.executeAsync(ctx -> action.apply(ctx,
+                                               ctx.getArgument(argument1),
+                                               ctx.getArgument(argument2),
+                                               ctx.getArgument(argument3),
+                                               ctx.getArgument(argument4),
+                                               ctx.getArgument(argument5)));
+        return this;
+    }
+
+    @Override
+    public QuintArgumentBranch<T1, T2, T3, T4, T5, C, T> execute(@NotNull CommandExecutor<C> action) {
+        super.execute(action);
+        return this;
+    }
+
+    @Override
+    public QuintArgumentBranch<T1, T2, T3, T4, T5, C, T> executeAsync(@NotNull AsyncCommandExecutor<C> action) {
+        super.executeAsync(action);
+        return this;
+    }
+
+    @Override
+    public QuintArgumentBranch<T1, T2, T3, T4, T5, C, T> description(@NotNull String description) {
+        super.description(description);
+        return this;
+    }
+
+    @Override
+    public QuintArgumentBranch<T1, T2, T3, T4, T5, C, T> description(@NotNull Function<C, String> description) {
+        super.description(description);
+        return this;
+    }
+
+    @Override
+    public QuintArgumentBranch<T1, T2, T3, T4, T5, C, T> description(@NotNull Caption caption) {
+        super.description(caption);
+        return this;
+    }
+
+    @Override
+    public QuintArgumentBranch<T1, T2, T3, T4, T5, C, T> permission(@NotNull String node) {
+        super.permission(node);
+        return this;
+    }
+
+    @Override
+    public QuintArgumentBranch<T1, T2, T3, T4, T5, C, T> permission(@NotNull DefaultPermission defaultPermission) {
+        super.permission(defaultPermission);
+        return this;
+    }
+
+    @Override
+    public QuintArgumentBranch<T1, T2, T3, T4, T5, C, T> permission(@NotNull DefaultPermission defaultPermission,
+                                                                    @NotNull String description) {
+        super.permission(defaultPermission, description);
+        return this;
+    }
+
+    @Override
+    public QuintArgumentBranch<T1, T2, T3, T4, T5, C, T> permission(@NotNull String node,
+                                                                    @NotNull DefaultPermission defaultPermission) {
+        super.permission(node, defaultPermission);
+        return this;
+    }
+
+    @Override
+    public QuintArgumentBranch<T1, T2, T3, T4, T5, C, T> permission(@NotNull String node,
+                                                                    @NotNull DefaultPermission defaultPermission,
+                                                                    @NotNull String description) {
+        super.permission(node, defaultPermission, description);
+        return this;
+    }
+
+    @Override
+    public QuintArgumentBranch<T1, T2, T3, T4, T5, C, T> permissionDescription(@NotNull String description) {
+        super.permissionDescription(description);
+        return this;
+    }
+
+    @Override
+    public QuintArgumentBranch<T1, T2, T3, T4, T5, C, T> visibleWhen(@NotNull Predicate<? super C> predicate) {
+        super.visibleWhen(predicate);
+        return this;
+    }
+
+    @Override
+    public QuintArgumentBranch<T1, T2, T3, T4, T5, C, T> addPrerequisite(@NotNull Prerequisite<C> prerequisite) {
+        super.addPrerequisite(prerequisite);
+        return this;
+    }
+
+    public QuintArgumentBranch<T1, T2, T3, T4, T5, C, T> child(@NotNull QuintFunction<ArgRef<T1>, ArgRef<T2>, ArgRef<T3>, ArgRef<T4>, ArgRef<T5>, T> factory) {
+        child(factory.apply(ArgRef.of(argument1),
+                            ArgRef.of(argument2),
+                            ArgRef.of(argument3),
+                            ArgRef.of(argument4),
+                            ArgRef.of(argument5)));
+        return this;
+    }
+
+    @Override
+    public <S> RequiredQuintArgumentBranch<S, T1, T2, T3, T4, T5, C, T> require(@NotNull Extractor<C, S> extractor) {
+        return new RequiredQuintArgumentBranch<>(extractor,
+                                                 this::executeAsync,
+                                                 children -> delegate.addChildren(children),
+                                                 argument1,
+                                                 argument2,
+                                                 argument3,
+                                                 argument4,
+                                                 argument5);
+    }
+}

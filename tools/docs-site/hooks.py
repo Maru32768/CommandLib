@@ -10,7 +10,7 @@ import re
 
 from mkdocs.structure.files import File
 
-GITHUB = "https://github.com/Maru32768/CommandLib"
+GITHUB = "https://github.com/Maru32768/Cadence"
 BRANCH = "master"
 LINK = re.compile(r"\]\(([^)\s]+)\)")
 SCHEME = re.compile(r"^[a-zA-Z][a-zA-Z0-9+.-]*:")

@@ -1,7 +1,7 @@
 [project]
 name = "nms-codegen"
 version = "0.1.0"
-description = "Generates the typed NMS classes of CommandLib's nms modules."
+description = "Generates the typed NMS classes of Cadence's nms modules."
 requires-python = ">=3.10"
 dependencies = []
 

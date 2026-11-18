@@ -1,6 +1,6 @@
 package dev.marulabs.sampleplugin;
 
-import dev.marulabs.commandlib.Command;
+import dev.marulabs.cadence.Command;
 
 /**
  * /ping

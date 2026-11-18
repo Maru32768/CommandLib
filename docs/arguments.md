@@ -1,12 +1,12 @@
 # Arguments
 
-This catalog lists CommandLib's built-in arguments, compares each one by behavior with
+This catalog lists Cadence's built-in arguments, compares each one by behavior with
 [CommandAPI](https://docs.commandapi.dev/create-commands/arguments/arguments) and Paper's
 [`ArgumentTypes`](https://jd.papermc.io/paper/1.21.11/io/papermc/paper/command/brigadier/argument/ArgumentTypes.html),
 and lists the gaps. The comparison looks at what the argument does, not at its name: the input it accepts, its
 suggestions, its errors, and how it looks values up in a registry.
 
-All argument classes live in `dev.marulabs.commandlib.argument`. The class names are the same on every platform where
+All argument classes live in `dev.marulabs.cadence.argument`. The class names are the same on every platform where
 an argument exists, so code written against the `spigot` artifact usually compiles against `paper` unchanged.
 
 Fabric (`fabric-<minecraft-version>`) is built from the same source tree as Forge / NeoForge and has the same arguments
@@ -24,10 +24,10 @@ The tables below compare the server platforms. Velocity, a proxy, has its own sm
 | **equivalent** | Same input syntax, same kind of result, comparable suggestions and errors. |
 | **partial** | Exists, but the input syntax, result type, suggestions, or registry semantics differ. The note says how. |
 | **missing** | No built-in argument. A workaround is given where one exists. |
-| **unverified** | CommandLib has it, but the comparison point has not been checked (by code reading or a test). |
-| — | The platform has no such concept, or the argument is CommandLib-specific. |
+| **unverified** | Cadence has it, but the comparison point has not been checked (by code reading or a test). |
+| — | The platform has no such concept, or the argument is Cadence-specific. |
 
-The status was checked by reading CommandLib's source and tests, CommandAPI's documentation, and the Paper Javadoc.
+The status was checked by reading Cadence's source and tests, CommandAPI's documentation, and the Paper Javadoc.
 Every built-in Spigot, Paper, Forge, NeoForge, and Fabric (1.20.1 and 1.21.1) argument also runs on a real server in
 the integration tests (`integration-test/shared/*/ArgumentTest.java`), which check that a valid input parses; they do
 not compare error texts or suggestions with the references. Fabric 1.21.4 has no integration target, so its arguments
@@ -35,7 +35,7 @@ are checked only by `fabric-testing`.
 
 ## Primitive and string arguments
 
-| CommandLib | Result | Input and suggestions | CommandAPI | Paper | Spigot | Paper | Forge / NeoForge |
+| Cadence | Result | Input and suggestions | CommandAPI | Paper | Spigot | Paper | Forge / NeoForge |
 |---|---|---|---|---|---|---|---|
 | `BooleanArgument` | `Boolean` | `true` / `false`, suggested by Brigadier | `BooleanArgument` | Brigadier `bool()` | equivalent | equivalent | equivalent |
 | `IntegerArgument(name[, min, max])` | `Integer` | Brigadier integer; out-of-range input is a Brigadier error | `IntegerArgument` | Brigadier `integer()` | equivalent | equivalent | equivalent |
@@ -75,12 +75,12 @@ Notes:
   it combines units (`1h30m`) but rejects decimals and bare numbers. The client sees a word, so malformed input fails
   when the command runs with "Incorrect argument for command". Use it for cooldowns, bans and other wall-clock times.
 - `TimeArgument`'s minimum is checked by the client and the parser from 1.19.4. Older Spigot servers and Forge 1.16.5,
-  1.18.2 and 1.19.2 have no minimum in the vanilla type (it only rejects negative values), so CommandLib rejects a smaller value when the
+  1.18.2 and 1.19.2 have no minimum in the vanilla type (it only rejects negative values), so Cadence rejects a smaller value when the
   command runs with `Tick count must not be less than <minimum>, found <ticks>`.
 
 ## Entities and players
 
-| CommandLib | Result (Spigot, Paper / Forge, NeoForge) | Input | CommandAPI | Paper | Spigot | Paper | Forge / NeoForge |
+| Cadence | Result (Spigot, Paper / Forge, NeoForge) | Input | CommandAPI | Paper | Spigot | Paper | Forge / NeoForge |
 |---|---|---|---|---|---|---|---|
 | `PlayerArgument` | `Player` / `ServerPlayer` | vanilla single-player selector: name, UUID, `@p`, `@s`, `@r`, `@a[limit=1]` | `EntitySelectorArgument.OnePlayer` | `player()` | equivalent | equivalent | equivalent |
 | `PlayersArgument` | `List<Player>` / `List<ServerPlayer>` | vanilla player selector | `EntitySelectorArgument.ManyPlayers` | `players()` | equivalent | equivalent | equivalent |
@@ -100,7 +100,7 @@ Notes:
 - When a selector or name matches nothing, all four selector arguments fail with vanilla's translatable
   `No player was found` / `No entity was found` on every platform, as vanilla's `EntityArgument.getPlayers` /
   `getEntities` do; the executor never gets an empty list. Paper's `players()` / `entities()` resolvers return an empty
-  list, so CommandLib's `PlayersArgument` / `EntitiesArgument` reject it there. (CommandAPI's `ManyPlayers` /
+  list, so Cadence's `PlayersArgument` / `EntitiesArgument` reject it there. (CommandAPI's `ManyPlayers` /
   `ManyEntities` allow empty results by default.)
 - `UUIDArgument` is `partial` because it also accepts player names, which vanilla's `uuid` argument and CommandAPI's
   `UUIDArgument` do not. A UUID string always works.
@@ -109,9 +109,9 @@ Notes:
 
 ## Positions and worlds
 
-| CommandLib | Result | Input | CommandAPI | Paper | Spigot | Paper | Forge / NeoForge |
+| Cadence | Result | Input | CommandAPI | Paper | Spigot | Paper | Forge / NeoForge |
 |---|---|---|---|---|---|---|---|
-| `LocationArgument(name[, centerIntegers])` | Bukkit `Location` / CommandLib `util.Location` (Forge) | vanilla `vec3`: `x y z`, `~`, `^`; integer x and z are centered (`1 64 1` → `1.5 64 1.5`) unless `centerIntegers` is false; world is the sender's | `LocationArgument` (`PRECISE_POSITION`) | `finePosition(centerIntegers)` | equivalent | equivalent | equivalent |
+| `LocationArgument(name[, centerIntegers])` | Bukkit `Location` / Cadence `util.Location` (Forge) | vanilla `vec3`: `x y z`, `~`, `^`; integer x and z are centered (`1 64 1` → `1.5 64 1.5`) unless `centerIntegers` is false; world is the sender's | `LocationArgument` (`PRECISE_POSITION`) | `finePosition(centerIntegers)` | equivalent | equivalent | equivalent |
 | `BlockPositionArgument` | Bukkit `Location` with integer coordinates in the sender's world / vanilla `BlockPos` | vanilla `block_pos`: integer `x y z`, `~`, `^`; neither the chunk nor the world height is checked | `LocationArgument` (`BLOCK_POSITION`) | `blockPosition()` | equivalent | equivalent | equivalent |
 | `WorldArgument` | Bukkit `World` / vanilla `ServerLevel` | dimension key such as `minecraft:overworld`, suggested by the server | `WorldArgument` | `world()` | equivalent | equivalent | equivalent |
 | 2D location | — | — | `Location2DArgument` | `columnBlockPosition()`, `columnFinePosition()` | missing | missing | missing |
@@ -131,7 +131,7 @@ Notes:
 
 ## Blocks, items, and effects
 
-| CommandLib | Result | Input | CommandAPI | Paper | Spigot | Paper | Forge / NeoForge |
+| Cadence | Result | Input | CommandAPI | Paper | Spigot | Paper | Forge / NeoForge |
 |---|---|---|---|---|---|---|---|
 | `BlockDataArgument` (Bukkit) | `BlockData` | vanilla block state: `stone`, `oak_stairs[facing=east]`, NBT accepted | `BlockStateArgument` (`BlockState`) | `blockState()` (`BlockState`) | partial | partial | — |
 | `BlockStateArgument` (Forge / NeoForge) | `BlockInput` | vanilla block state with NBT | — | — | — | — | equivalent |
@@ -159,7 +159,7 @@ Notes:
 
 ## Registry-backed values
 
-| CommandLib | Result | Input and suggestions | CommandAPI | Paper | Spigot | Paper | Forge / NeoForge |
+| Cadence | Result | Input and suggestions | CommandAPI | Paper | Spigot | Paper | Forge / NeoForge |
 |---|---|---|---|---|---|---|---|
 | `NamespacedKeyArgument` (Bukkit) | `NamespacedKey` | `namespace:path`; no namespace means `minecraft` | `NamespacedKeyArgument` | `namespacedKey()` | equivalent | equivalent | — |
 | `ResourceLocationArgument` (Forge / NeoForge) | `ResourceLocation` | `namespace:path` | — | — | — | — | equivalent |
@@ -177,7 +177,7 @@ Notes:
 
 - On Spigot the registry-backed arguments use the vanilla resource-location argument type and look the key up in
   Bukkit's `Registry` (or `Bukkit.getAdvancement` / `getLootTable` / `getRecipe`). The client sees a resource location,
-  so it does not know which keys exist; an unknown key is reported by CommandLib as `<key> is not a known <kind>`.
+  so it does not know which keys exist; an unknown key is reported by Cadence as `<key> is not a known <kind>`.
   Suggestions are the registry keys containing the typed text.
 - On Paper, `SoundArgument`, `BiomeArgument`, `AttributeArgument`, `EntityTypeArgument`, `EnchantmentArgument`,
   `PotionEffectArgument`, and `ParticleArgument` use Paper's `ArgumentTypes.resource(...)`, so Paper parses, suggests,
@@ -202,7 +202,7 @@ Notes:
 
 ## Scoreboard and game systems
 
-| CommandLib | Result | Input | CommandAPI | Paper | Spigot | Paper | Forge / NeoForge |
+| Cadence | Result | Input | CommandAPI | Paper | Spigot | Paper | Forge / NeoForge |
 |---|---|---|---|---|---|---|---|
 | `TeamArgument` | Bukkit `Team` / vanilla `PlayerTeam` | team name; `scoreboard(Supplier)` selects another scoreboard | `TeamArgument` | — | equivalent | equivalent | equivalent |
 | `ObjectiveArgument` | Bukkit `Objective` / vanilla `Objective` | objective name; `scoreboard(Supplier)` selects another scoreboard | `ObjectiveArgument` | — | equivalent | equivalent | equivalent |
@@ -216,7 +216,7 @@ Notes:
 
 - On Spigot without `scoreboard(...)`, `TeamArgument` uses vanilla's team argument (server scoreboard, vanilla
   suggestions and `Unknown team` error). Paper's and the custom-scoreboard variants are a word argument with
-  CommandLib's suggestions and the "Incorrect argument for command" error.
+  Cadence's suggestions and the "Incorrect argument for command" error.
 - `ScoreboardDisplaySlotArgument` and `ChatColorArgument` use vanilla's `scoreboard_slot` and `color` argument types,
   through NMS on Spigot, and Paper's `scoreboardDisplaySlot()` and vanilla's `color` on Paper. The client validates and
   suggests them, and an unknown name is vanilla's `Unknown display slot` / `Unknown color` error while parsing.
@@ -235,7 +235,7 @@ Notes:
 
 ## Text, NBT, and other advanced arguments
 
-| CommandLib | Result | Input | CommandAPI | Paper | Spigot | Paper | Forge / NeoForge |
+| Cadence | Result | Input | CommandAPI | Paper | Spigot | Paper | Forge / NeoForge |
 |---|---|---|---|---|---|---|---|
 | `ComponentArgument` | Bungee `BaseComponent` / Adventure `Component` / vanilla `Component` | vanilla text component: JSON such as `{"text":"hi","color":"red"}`, SNBT from 1.21.5 | `ChatComponentArgument` (`BaseComponent[]`), `AdventureChatComponentArgument` | `component()` | equivalent | equivalent | equivalent |
 | `MessageArgument` | same types as `ComponentArgument`, selectors resolved | the rest of the input, like `/say` | `ChatArgument`, `AdventureChatArgument` | `signedMessage()` (`SignedMessageResolver`) | equivalent | partial | equivalent |
@@ -273,7 +273,7 @@ Notes:
   vanilla `CompoundTag`.
 - Custom arguments: extend the platform's `Argument<T, SELF>` with an existing Brigadier or vanilla `ArgumentType` and
   implement `cast` and `parseImpl`, or adapt an existing argument with `validator`, `transformer`, and
-  `additionalParser`. A new `ArgumentType` class must be known to the client, which CommandLib does not register for
+  `additionalParser`. A new `ArgumentType` class must be known to the client, which Cadence does not register for
   you (only the internal raw word type of `UnparsedArgument` is), so it is `partial`.
 - Optional and variadic arguments: `optional(defaultValue)` lets the sender omit the last arguments of a branch, and
   `optional(extractor)` computes the default, e.g. `optional(Command.player())` for the sender. `variadic()`
@@ -288,10 +288,10 @@ Notes:
 A proxy has no worlds, entities, blocks, or registries, and the client knows only Brigadier's own argument types
 through it, so the `velocity` artifact has a smaller set. The Spigot / Paper parity rule does not apply to it.
 
-| CommandLib | Result | Input and suggestions | Status |
+| Cadence | Result | Input and suggestions | Status |
 |---|---|---|---|
 | `BooleanArgument`, `IntegerArgument`, `LongArgument`, `FloatArgument`, `DoubleArgument`, `StringArgument` | as on the servers | Brigadier types, validated by the client | equivalent to the server platforms |
-| `DurationArgument`, `LiteralArgument`, `EnumArgument`, `ObjectArgument`, `NameableObjectArgument` | as on the servers | string arguments with CommandLib's suggestions | equivalent to the server platforms |
+| `DurationArgument`, `LiteralArgument`, `EnumArgument`, `ObjectArgument`, `NameableObjectArgument` | as on the servers | string arguments with Cadence's suggestions | equivalent to the server platforms |
 | `PlayerArgument` | Velocity `Player` | the name of a player online on the proxy, ignoring case (a word); suggests online players containing the input | — (no selectors) |
 | `ServerArgument` | `RegisteredServer` | the name of a registered server, ignoring case (a word or a `"quoted name"`); suggests registered servers | — |
 
@@ -301,7 +301,7 @@ Notes:
   `NameableObjectArgument` approach. An unknown name is "Incorrect argument for command".
 - Selectors (`@a`, `@p`), UUIDs, and offline players are not accepted. Use `ObjectArgument` with your own map for
   other proxy objects.
-- `UnparsedArgument`, `TimeArgument` and the range arguments are missing: their argument types are CommandLib's or
+- `UnparsedArgument`, `TimeArgument` and the range arguments are missing: their argument types are Cadence's or
   Minecraft's, not Brigadier's, so a proxy cannot send them to the client.
 - `velocity-testing`'s `CommandTester` runs the real parsers. `PlayerArgument` and `ServerArgument` look up the
   players and servers added with `withFakePlayer` and `withFakeServer` on its Mockito `ProxyServer`.

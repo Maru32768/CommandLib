@@ -3,12 +3,12 @@
 ## Purpose
 
 `spigot-testing` is a test utility module for plugins and libraries that use
-CommandLib's Spigot/Bukkit API. It provides `CommandTester` and `FakeSender` so command
+Cadence's Spigot/Bukkit API. It provides `CommandTester` and `FakeSender` so command
 execution can be tested without a running Minecraft server.
 
 ## How NMS Is Bypassed
 
-CommandLib's `spigot` module depends on NMS, the version-specific Minecraft
+Cadence's `spigot` module depends on NMS, the version-specific Minecraft
 internals. `CommandTester` keeps a static mock alive for the lifetime of a
 tester instance:
 
@@ -27,7 +27,7 @@ own still reaches the sender.
 ## Package Structure
 
 ```text
-dev.marulabs.commandlib
+dev.marulabs.cadence
 |-- CommandTester.java
 |-- FakeSender.java
 `-- internal/nms/mock/

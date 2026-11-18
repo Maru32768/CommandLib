@@ -24,13 +24,13 @@ tasks.test {
     inputs.dir("expected-cases")
     inputs.files(fileTree("targets") { include("*/build.gradle.kts") })
     filter {
-        excludeTestsMatching("dev.marulabs.commandlib.integration.IntegrationTest")
+        excludeTestsMatching("dev.marulabs.cadence.integration.IntegrationTest")
     }
     // Real-server tests live in integration-test:targets:* and are intentionally opt-in there.
     // Keeping this property false by default preserves the lightweight coverage check on :integration-test:test.
-    systemProperty("commandlib.rootDir", rootProject.projectDir.absolutePath)
-    systemProperty("commandlib.integrationTestDir", project.projectDir.absolutePath)
-    systemProperty("commandlib.runMinecraftIntegration", "false")
+    systemProperty("cadence.rootDir", rootProject.projectDir.absolutePath)
+    systemProperty("cadence.integrationTestDir", project.projectDir.absolutePath)
+    systemProperty("cadence.runMinecraftIntegration", "false")
 }
 
 tasks.register("minecraftIntegrationTest") {

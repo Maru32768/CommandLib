@@ -1,6 +1,6 @@
 # Command Registration Audit (Spigot / Paper)
 
-This document records how CommandLib registers commands on Spigot and Paper,
+This document records how Cadence registers commands on Spigot and Paper,
 compared with CommandAPI 12.1.0 (`commandapi-platforms/commandapi-spigot` and
 `commandapi-paper`). It lists what was fixed and what is left open.
 
@@ -33,11 +33,11 @@ dev bundles. Line numbers refer to the commit that adds this document.
   fires the `COMMANDS` lifecycle event, then `ServerResourcesReloadedEvent`.
   The `COMMANDS` event for plugins first fires after `enablePlugins(POSTWORLD)`.
 
-## CommandLib
+## Cadence
 
 ### spigot module (Spigot 1.16.5-1.21.1, Paper 1.16.5-1.21.1)
 
-`spigot/.../CommandLib.java`:
+`spigot/.../Cadence.java`:
 
 - `enable()` (line 177): builds the nodes, removes any command with the same
   name from R, V and the command map, adds each node to V (read through the
@@ -47,9 +47,9 @@ dev bundles. Line numbers refer to the commit that adds this document.
   with a wrapper of R.
 - In `onEnable` during startup R is V, so CraftBukkit later adds
   `minecraft:<name>` for the node, a `VanillaCommandWrapper` describing a Mojang
-  command. On `ServerLoadEvent` (startup and Bukkit `/reload`) CommandLib removes
+  command. On `ServerLoadEvent` (startup and Bukkit `/reload`) Cadence removes
   that label again when it wraps the node (`removeMinecraftNamespacedCommands`):
-  CommandLib commands are plugin commands, which Bukkit labels
+  Cadence commands are plugin commands, which Bukkit labels
   `<plugin>:<name>` only, and CommandAPI removes the label as well for commands
   outside the `minecraft` namespace. At runtime R is the dispatcher built by
   `syncCommands()`.
@@ -90,7 +90,7 @@ dev bundles. Line numbers refer to the commit that adds this document.
   the old maps; changing them in place logged `ConcurrentModificationException`
   (seen in the paper-1.21.1 run before the handler existed). Paper builds help
   topics only when the server loads and on `/minecraft:reload`, before that
-  event, so CommandLib puts a topic for each label from Paper's wrapper with the
+  event, so Cadence puts a topic for each label from Paper's wrapper with the
   command permission set on it at registration and after the reload
   (`showPaperHelpTopics`).
 - Permissions are checked by the Brigadier `requires` predicate, which asks
@@ -120,7 +120,7 @@ dev bundles. Line numbers refer to the commit that adds this document.
   before the server ticks functions, so the server runs `#load` with its own
   compilation, which dropped the tag. When the resources changed since the
   last compilation (`FunctionCompilationMarker#reloaded`) and the server's
-  library lacks the `#minecraft:load` tag that CommandLib's compilation has,
+  library lacks the `#minecraft:load` tag that Cadence's compilation has,
   the run that `replaceLibrary` schedules stays, so the tag runs once, a tick
   late.
   The task stops when the last registration of the copy is unregistered, after
@@ -130,7 +130,7 @@ dev bundles. Line numbers refer to the commit that adds this document.
   instance of the plugin and compiles the functions at once, while the server
   runs, since the plugin's tasks are cancelled then; otherwise the functions ran
   the disabled plugin's commands until the next data reload.
-- Shaded copies: each plugin shades and relocates its own copy of CommandLib, so
+- Shaded copies: each plugin shades and relocates its own copy of Cadence, so
   each copy checks and compiles on its own. The copies share two system
   properties (`FunctionCompilationMarker`): a counter of changes, which every
   registration, unregister and paper module trigger increases, and the identity
@@ -144,11 +144,11 @@ dev bundles. Line numbers refer to the commit that adds this document.
 
 ### paper module (Paper 1.21+)
 
-`paper/.../CommandLib.java`. Each plugin's registrations share a
+`paper/.../Cadence.java`. Each plugin's registrations share a
 `PluginRegistrationState`, whose `Mode` says how their commands reach the
 dispatcher: `Unhandled` (no `COMMANDS` handler yet), `Handled` (the plugin's
 handler adds them, with the dispatcher it last saw) or `Direct` (added to the
-live dispatcher after initialization). Each `CommandLib` instance holds its
+live dispatcher after initialization). Each `Cadence` instance holds its
 immutable `CommandSet` and a `State`: `Pending`, `Live` (the dispatcher and the
 labels the commands got there) or `Unregistered`. Both change only under the
 plugin state's lock. The live dispatcher changes are in `PaperDispatcher`, the
@@ -193,13 +193,13 @@ plugin state's lock. The live dispatcher changes are in `PaperDispatcher`, the
   update and a function compilation, and the handler adds them after the next
   reload. The live dispatcher is read from Paper's registrar
   (`PaperCommands.INSTANCE.getDispatcherInternal()`), which Paper replaces on
-  every data reload; without it CommandLib falls back to `Bukkit.reloadData()`.
+  every data reload; without it Cadence falls back to `Bukkit.reloadData()`.
 - Data pack functions: Paper compiles them in `ReloadableServerResources.loadResources`
   and fires the `COMMANDS` handlers of plugins later, after the function library
   is in place, at startup and on every data reload, so a function using a plugin
   command was dropped. The function library compiles with the dispatcher that
   the plugin handlers then fill, so on the next tick after `ServerLoadEvent`,
-  `ServerResourcesReloadedEvent` or a runtime change CommandLib compiles the
+  `ServerResourcesReloadedEvent` or a runtime change Cadence compiles the
   functions again and hands the library to the function manager
   (`ServerFunctions`, by reflection with Mojang names; `ServerFunctionLibrary#reload`
   changed its parameters in 1.21.2 and later releases, which it fills by type).
@@ -214,7 +214,7 @@ plugin state's lock. The live dispatcher changes are in `PaperDispatcher`, the
   fires the bootstrap `COMMANDS` handlers in
   `ReloadableServerResources.loadResources`, before the function library is
   loaded, so data pack functions can use the commands. The server does not exist
-  then, so the permissions are not added to the plugin manager; CommandLib keeps
+  then, so the permissions are not added to the plugin manager; Cadence keeps
   their defaults and applies them when a permission is neither set on the sender
   nor registered (`CommandPermissions#hasPermission`). Paper's `NullCommandSender`, used
   to compile functions, keeps its "every permission" answer. Bootstrap commands
@@ -224,13 +224,13 @@ plugin state's lock. The live dispatcher changes are in `PaperDispatcher`, the
   and wraps each label in a `PluginCommandNode`, which the command map shows as
   a `PluginVanillaCommandWrapper`, so the help map lists the commands under the
   plugin instead of "Minecraft". The wrapper has no permission, so `/help`
-  listed the commands for everyone; CommandLib now calls `amendCanSee` with the
+  listed the commands for everyone; Cadence now calls `amendCanSee` with the
   command permission on each label's topic after `ServerLoadEvent` and
   `ServerResourcesReloadedEvent`, when the help map has been rebuilt, and
   applies the `serverHelp` page (`HelpTopics#amend`). At startup and on Bukkit
   `/reload` Paper builds the help map once before the `COMMANDS` event and once
   after it, keeping the plugin indexes of the first pass, so a plugin index made
-  for the plugin's `plugin.yml` commands lacked CommandLib's; `HelpTopics#amend`
+  for the plugin's `plugin.yml` commands lacked Cadence's; `HelpTopics#amend`
   adds them. The description, empty before, is the server help text. Bootstrap
   commands keep the unrestricted topic, since there is no plugin to listen with.
 
@@ -238,7 +238,7 @@ plugin state's lock. The live dispatcher changes are in `PaperDispatcher`, the
 
 Commands are added to the dispatcher's root under their names only. Vanilla
 commands are not namespaced in the dispatcher, and neither Forge nor NeoForge
-adds a `<modid>:` label for mod commands, so CommandLib adds none. There is no
+adds a `<modid>:` label for mod commands, so Cadence adds none. There is no
 `/help` topic system, so `serverHelp` is ignored, and no unregister API.
 
 ## CommandAPI
@@ -262,10 +262,10 @@ adds a `<modid>:` label for mod commands, so CommandLib adds none. There is no
 
 ## Findings
 
-| Area | CommandLib | CommandAPI | Verdict | Status |
+| Area | Cadence | CommandAPI | Verdict | Status |
 |---|---|---|---|---|
 | Spigot dispatcher choice | was R (V during startup) plus V through the `execute run` redirect | always V, R at runtime | The redirect lookup was indirect and missed V without an `execute` node. | Fixed: always V through the typed accessor, plus R when it is not V |
-| Startup `minecraft:<name>` label | Created by CraftBukkit; unregister left it in the command map and client tree, pointing at a removed command; while registered it was a Mojang-described wrapper without the command permission, which `/help` did not list | removed for commands outside the `minecraft` namespace (`fixNamespaces`), kept only for commands registered in it | Bug | Fixed: unregister removes the label when it wraps the node (`removeMinecraftNamespacedCommand`, line 335). The label is now removed on `ServerLoadEvent` too, since CommandLib commands are plugin commands, which Bukkit labels `<plugin>:<name>` (CraftBukkit adds `minecraft:` labels only for the vanilla dispatcher's commands); checked by the spigot module fixture (`HelpTopicTest`) |
+| Startup `minecraft:<name>` label | Created by CraftBukkit; unregister left it in the command map and client tree, pointing at a removed command; while registered it was a Mojang-described wrapper without the command permission, which `/help` did not list | removed for commands outside the `minecraft` namespace (`fixNamespaces`), kept only for commands registered in it | Bug | Fixed: unregister removes the label when it wraps the node (`removeMinecraftNamespacedCommand`, line 335). The label is now removed on `ServerLoadEvent` too, since Cadence commands are plugin commands, which Bukkit labels `<plugin>:<name>` (CraftBukkit adds `minecraft:` labels only for the vanilla dispatcher's commands); checked by the spigot module fixture (`HelpTopicTest`) |
 | Paper module direct add | `addChild` merged into a same-named command, keeping its requirement and children | goes through the registrar | Bug | Fixed: `replaceChild` (line 387) removes the command first |
 | `plugin:<name>` label (spigot module) | not added | added (`fixNamespaces`, runtime path) | Missing feature | Fixed on Spigot and Paper before 1.20.6: every label, aliases included, also gets `<plugin>:<label>`, the same wrapper under a second command-map key like Bukkit's fallback labels; a runtime registration also adds a copy of the node under that name to R, as `syncCommands` does at startup (`addNamespacedCommand`). Unregister removes both. `execute run <plugin>:<label>` does not work, as for Bukkit's own namespaced labels, because the label is not a node of V. Fixed on Paper 1.20.6+: a copy of the node under `<plugin>:<label>` is added to Paper's dispatcher, as Paper's registrar does, and unregister removes it; there `execute run <plugin>:<label>` works. Checked by the integration fixture (`ScenarioTest`, `HelpTopicTest`) |
 | `plugin:<name>` label (paper module) | registrar labels; the runtime direct add had none | registrar | Missing edge case | Fixed: the direct add also adds `<plugin>:<label>` |
@@ -275,9 +275,9 @@ adds a `<modid>:` label for mod commands, so CommandLib adds none. There is no
 | `/help` text | the description when it was a string, else "A command by the &lt;plugin&gt; plugin."; the paper module passed an empty description | `withShortDescription` / `withFullDescription` / `withHelp` | Missing feature | Added `Command#serverHelp(shortText)` and `serverHelp(shortText, fullText)`: the short text for the `/help` lists and the command-map description, the full text replacing the `/help <command>` page (through `HelpTopic#amendTopic`, so `<text>` in it stands for the generated page, as in `help.yml`). Without it the plugin-named text, on every Bukkit-family path; `description(...)` is not used for the server help |
 | `/help` plugin index | CraftBukkit listed the spigot module's commands under "Minecraft", since it picks the index by the wrapper class | CommandAPI's Spigot topics stay under "Minecraft" too | Missing feature | Fixed: topics are moved into the plugin's index (`fileUnderPluginIndex`); on Paper 1.20.6+ the plugin-attributed wrappers are listed under the plugin by Paper itself |
 | `/minecraft:reload` | Spigot: kept through `knownCommands`; Paper 1.20.6+: added again on `ServerResourcesReloadedEvent`; paper module: `COMMANDS` handler | same | Correct | - |
-| Data pack functions | functions are compiled when data packs load, before plugins add commands, and a function with an unknown command is dropped | function library points at V and all data packs are reloaded after startup; nothing for `/minecraft:reload` on Spigot; Paper bootstrap registration | Missing feature | Fixed in the spigot module (Spigot, Paper before and from 1.20.6): the function library's dispatcher is set to the one holding the commands and only the functions are compiled again (`NMSDedicatedServer#recompileFunctions`), instead of CommandAPI's full data pack reload, which also needs recipes registered again. Spigot fires no event for `/minecraft:reload`, so a task checks each tick whether the data pack resources object was replaced or the commands changed, which also covers a command registered or unregistered after startup (`compileFunctionsWithCommands`). The check made a few reflective calls per tick (a wrapper of the server and of the resources, each through a reflective constructor); the task now keeps the server wrapper and reads the resources object through a typed accessor (`NMSDedicatedServer#getDataPackResourcesHandle`), so a tick costs a field read and an identity comparison. Spigot has no reload event or listener to hook instead. A permission check from the compiling source, which has no Bukkit sender, passes, as in CommandAPI. Checked by the integration fixture after `/minecraft:reload` (`DataPackFunctionTest`). Paper module: `CommandLib.bootstrap(BootstrapContext, ...)` registers from the bootstrapper's `COMMANDS` handler, which fires before functions are compiled (see "paper module" above). Commands registered from a plugin, whose handlers Paper fires after the functions are compiled, are seen after CommandLib compiles the functions again on the next tick (`ServerFunctions`); checked by the paper module fixture after `/minecraft:reload` (`DataPackFunctionTest`) |
-| "Failed to load function" on reload | every data reload logged an error with a stack trace for each function using a CommandLib command: the server compiles functions against its new dispatcher before CommandLib's nodes are in it, and CommandLib compiles them again a tick later | not handled | Noise; the functions work | Fixed by filtering, since the nodes cannot be put in first: Spigot builds the new `Commands` and starts compiling the functions on background threads inside `MinecraftServer#reloadResources` with no plugin hook in between (`ReloadableServerResources` takes a fixed list of reload listeners, and the vanilla commands are registered by static methods), and Paper fires the `COMMANDS` handlers of plugins only after `replaceLibrary`; only bootstrap handlers run before the compilation, and a plugin cannot own one. While CommandLib is going to compile the functions again, a context-wide Log4j filter drops the server's "Failed to load function {}" errors; the errors of CommandLib's own compilation, recognized by a `recompileFunctions` frame on the stack, pass, so a function that is really broken is still reported once (`FunctionLoadErrorFilter`). The filter is checked in the logging thread before the event is made, so asynchronous loggers do not defeat the stack check. At startup the server compiles the functions before plugins load, so a data pack present at startup still logs the error once for such functions on Spigot and for plugin (not bootstrap) commands on Paper. The integration test fails on the error in the server log, and the fixtures' data pack also has a function with an unknown subcommand, whose error the test requires after the reload, so the stack check is covered on every Bukkit-family target; `paper-1.21.4` covers the paper module's reflection on the 1.21.2+ `ServerFunctionLibrary#reload` |
-| Shaded copies and functions | each plugin's copy of CommandLib compiled the functions after every trigger, so N plugins compiled them N times | one copy (CommandAPI is usually a plugin of its own) | Inefficient | Fixed: the copies share a change counter and the last compilation in system properties (`FunctionCompilationMarker`), and a copy skips a compilation that another one already did after the last change |
+| Data pack functions | functions are compiled when data packs load, before plugins add commands, and a function with an unknown command is dropped | function library points at V and all data packs are reloaded after startup; nothing for `/minecraft:reload` on Spigot; Paper bootstrap registration | Missing feature | Fixed in the spigot module (Spigot, Paper before and from 1.20.6): the function library's dispatcher is set to the one holding the commands and only the functions are compiled again (`NMSDedicatedServer#recompileFunctions`), instead of CommandAPI's full data pack reload, which also needs recipes registered again. Spigot fires no event for `/minecraft:reload`, so a task checks each tick whether the data pack resources object was replaced or the commands changed, which also covers a command registered or unregistered after startup (`compileFunctionsWithCommands`). The check made a few reflective calls per tick (a wrapper of the server and of the resources, each through a reflective constructor); the task now keeps the server wrapper and reads the resources object through a typed accessor (`NMSDedicatedServer#getDataPackResourcesHandle`), so a tick costs a field read and an identity comparison. Spigot has no reload event or listener to hook instead. A permission check from the compiling source, which has no Bukkit sender, passes, as in CommandAPI. Checked by the integration fixture after `/minecraft:reload` (`DataPackFunctionTest`). Paper module: `Cadence.bootstrap(BootstrapContext, ...)` registers from the bootstrapper's `COMMANDS` handler, which fires before functions are compiled (see "paper module" above). Commands registered from a plugin, whose handlers Paper fires after the functions are compiled, are seen after Cadence compiles the functions again on the next tick (`ServerFunctions`); checked by the paper module fixture after `/minecraft:reload` (`DataPackFunctionTest`) |
+| "Failed to load function" on reload | every data reload logged an error with a stack trace for each function using a Cadence command: the server compiles functions against its new dispatcher before Cadence's nodes are in it, and Cadence compiles them again a tick later | not handled | Noise; the functions work | Fixed by filtering, since the nodes cannot be put in first: Spigot builds the new `Commands` and starts compiling the functions on background threads inside `MinecraftServer#reloadResources` with no plugin hook in between (`ReloadableServerResources` takes a fixed list of reload listeners, and the vanilla commands are registered by static methods), and Paper fires the `COMMANDS` handlers of plugins only after `replaceLibrary`; only bootstrap handlers run before the compilation, and a plugin cannot own one. While Cadence is going to compile the functions again, a context-wide Log4j filter drops the server's "Failed to load function {}" errors; the errors of Cadence's own compilation, recognized by a `recompileFunctions` frame on the stack, pass, so a function that is really broken is still reported once (`FunctionLoadErrorFilter`). The filter is checked in the logging thread before the event is made, so asynchronous loggers do not defeat the stack check. At startup the server compiles the functions before plugins load, so a data pack present at startup still logs the error once for such functions on Spigot and for plugin (not bootstrap) commands on Paper. The integration test fails on the error in the server log, and the fixtures' data pack also has a function with an unknown subcommand, whose error the test requires after the reload, so the stack check is covered on every Bukkit-family target; `paper-1.21.4` covers the paper module's reflection on the 1.21.2+ `ServerFunctionLibrary#reload` |
+| Shaded copies and functions | each plugin's copy of Cadence compiled the functions after every trigger, so N plugins compiled them N times | one copy (CommandAPI is usually a plugin of its own) | Inefficient | Fixed: the copies share a change counter and the last compilation in system properties (`FunctionCompilationMarker`), and a copy skips a compilation that another one already did after the last change |
 | Bukkit `/reload` (Spigot) | after reload `execute run <command>` failed: no `execute` node in R during `onEnable`, so the node never reached V | uses V directly | Missing edge case (unsupported server feature) | Fixed: nodes go to V through the typed accessor |
 | Runtime wrapper dispatcher | wrapped with R, which goes stale after a reload but still holds the node | wraps with V | Worked, held the old dispatcher | Fixed: wraps with V |
 | Paper module, plugin enabled at runtime | the `COMMANDS` handler registers but does not fire until the next reload, so the commands are missing | `Bukkit.reloadData()` after runtime changes | Missing edge case | Fixed: once the plugin is enabled, a task on the next tick adds the registrations to the live dispatcher if the handler has not run yet (`addIfCommandsEventMissed`). Startup fires the event before the first tick, so the check is a no-op there. It called `Bukkit.reloadData()` first, since Paper has no public way to reach the live dispatcher outside the event (a fresh plugin has nothing cached); the copy-on-write path of runtime changes now adds the nodes, `<plugin>:<name>` labels, help topics and the tree update without a data reload, with the dispatcher read from Paper's registrar, and the reload remains the fallback when that is not found. Registering only after `onEnable()` with nothing cached still throws, since Paper then rejects the handler and no handler would add the commands again after a reload |
@@ -286,5 +286,5 @@ adds a `<modid>:` label for mod commands, so CommandLib adds none. There is no
 | Spigot module on Paper 1.20.6+, registration after enabling | no `COMMANDS` handler (Paper refuses it), so the nodes were added on `ServerResourcesReloadedEvent` by changing the live root while Paper built the trees `syncCommands` had queued | - | Missing edge case; `ConcurrentModificationException` logged on `/minecraft:reload` | Fixed: the root's children maps are replaced instead of changed (`CommandNodeChildren`), at registration, unregister and after a reload; the update on the next tick sends the trees with the commands |
 | Paper < 1.20.6 async command tree | mutates the root on the main thread; skips the update on disable | same | Acceptable | - |
 | Paper module unregister on plugin disable | removed the commands but sent no tree, since the plugin's tasks are cancelled on disable | - | Bug: players kept the removed commands in their trees until the next update | Fixed: the trees are sent at once on disable, which the replaced maps make safe, except while the server stops |
-| Folia | no handling | runtime changes throw | Missing platform | Fixed in the paper module: async commands use Folia's entity, region and global region schedulers (`FoliaCommandScheduler`); the tree update and function work already ran on the global region scheduler, which Folia has, and Folia's `sendCommands` sends the tree on the player's thread; functions are not compiled again, since Folia runs none and has no data reload; a missed `COMMANDS` event logs a warning instead of `Bukkit.reloadData()`. The spigot module refuses Folia in `CommandLib.register` |
-| Mohist | no special handling; integration fixtures 1.16.5 / 1.20.1 | none | Acceptable, with three fixes from the integration runs | Fixed: Mohist's source for compiling functions throws `NullPointerException` instead of CraftBukkit's `UnsupportedOperationException` when asked for its Bukkit sender, which failed every permission check of CommandLib's recompilation (1.20.1); Mohist 1.16.5 remaps `IReloadListener` but not its inner barrier interface, so `NMSDedicatedServer_spigot_1_16_5` did not link and every registration failed, and the barrier is now a proxy of the reload method's parameter type; Forge's Log4j configuration has context-wide filters that accept errors and ModLauncher logs each class it loads, so `FunctionLoadErrorFilter` goes first among the context filters, loads what it uses before it is added, and ignores calls made while it judges an error |
+| Folia | no handling | runtime changes throw | Missing platform | Fixed in the paper module: async commands use Folia's entity, region and global region schedulers (`FoliaCommandScheduler`); the tree update and function work already ran on the global region scheduler, which Folia has, and Folia's `sendCommands` sends the tree on the player's thread; functions are not compiled again, since Folia runs none and has no data reload; a missed `COMMANDS` event logs a warning instead of `Bukkit.reloadData()`. The spigot module refuses Folia in `Cadence.register` |
+| Mohist | no special handling; integration fixtures 1.16.5 / 1.20.1 | none | Acceptable, with three fixes from the integration runs | Fixed: Mohist's source for compiling functions throws `NullPointerException` instead of CraftBukkit's `UnsupportedOperationException` when asked for its Bukkit sender, which failed every permission check of Cadence's recompilation (1.20.1); Mohist 1.16.5 remaps `IReloadListener` but not its inner barrier interface, so `NMSDedicatedServer_spigot_1_16_5` did not link and every registration failed, and the barrier is now a proxy of the reload method's parameter type; Forge's Log4j configuration has context-wide filters that accept errors and ModLauncher logs each class it loads, so `FunctionLoadErrorFilter` goes first among the context filters, loads what it uses before it is added, and ignores calls made while it judges an error |

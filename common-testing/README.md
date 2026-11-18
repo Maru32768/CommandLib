@@ -1,6 +1,6 @@
-# CommandLib common-testing
+# Cadence common-testing
 
-`common-testing` provides lightweight test utilities for CommandLib's platform-neutral `common` API.
+`common-testing` provides lightweight test utilities for Cadence's platform-neutral `common` API.
 Use it for tests built on `CommonCommand`, `CommonCommandContext`, and `Common*Argument` classes.
 
 It does not depend on Bukkit, Paper, Forge, or a running Minecraft server.
@@ -15,7 +15,7 @@ repositories {
 }
 
 dependencies {
-    testImplementation "com.github.Maru32768.CommandLib:common-testing:latest.release"
+    testImplementation "com.github.Maru32768.Cadence:common-testing:latest.release"
 }
 ```
 

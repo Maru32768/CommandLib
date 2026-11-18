@@ -10,8 +10,8 @@ repositories {
 gradlePlugin {
     plugins {
         create("spigotNms") {
-            id = "commandlib.spigot-nms"
-            implementationClass = "commandlib.nms.SpigotNmsPlugin"
+            id = "cadence.spigot-nms"
+            implementationClass = "cadence.nms.SpigotNmsPlugin"
         }
     }
 }

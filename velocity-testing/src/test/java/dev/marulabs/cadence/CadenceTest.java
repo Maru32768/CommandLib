@@ -1,0 +1,230 @@
+package dev.marulabs.cadence;
+
+import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.velocitypowered.api.command.BrigadierCommand;
+import com.velocitypowered.api.command.CommandManager;
+import com.velocitypowered.api.command.CommandMeta;
+import com.velocitypowered.api.command.CommandSource;
+import com.velocitypowered.api.permission.Tristate;
+import com.velocitypowered.api.plugin.PluginContainer;
+import com.velocitypowered.api.plugin.PluginDescription;
+import com.velocitypowered.api.plugin.PluginManager;
+import com.velocitypowered.api.proxy.Player;
+import com.velocitypowered.api.proxy.ProxyServer;
+import com.velocitypowered.api.util.ProxyVersion;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+// Each test registers its own labels: the permission defaults of Cadence.register are global, and the oldest live
+// registration of a node decides its default.
+class CadenceTest {
+    private final Object plugin = new Object();
+    private final ProxyServer proxy = Mockito.mock(ProxyServer.class);
+    private final CommandManager commandManager = Mockito.mock(CommandManager.class);
+    private final ArgumentCaptor<BrigadierCommand> registered = ArgumentCaptor.forClass(BrigadierCommand.class);
+
+    @BeforeEach
+    void setUp() {
+        PluginManager pluginManager = Mockito.mock(PluginManager.class);
+        PluginContainer container = Mockito.mock(PluginContainer.class);
+        PluginDescription description = Mockito.mock(PluginDescription.class);
+        Mockito.when(description.getId())
+               .thenReturn("myplugin");
+        Mockito.when(container.getDescription())
+               .thenReturn(description);
+        Mockito.when(pluginManager.fromInstance(plugin))
+               .thenReturn(Optional.of(container));
+        Mockito.when(proxy.getPluginManager())
+               .thenReturn(pluginManager);
+        Mockito.when(proxy.getCommandManager())
+               .thenReturn(commandManager);
+        Mockito.when(proxy.getVersion())
+               .thenReturn(new ProxyVersion("Velocity", "Velocity Contributors", "3.4.0"));
+        Mockito.when(commandManager.metaBuilder(Mockito.any(BrigadierCommand.class)))
+               .thenAnswer(invocation -> {
+                   CommandMeta.Builder builder = Mockito.mock(CommandMeta.Builder.class);
+                   Mockito.when(builder.plugin(Mockito.any()))
+                          .thenReturn(builder);
+                   Mockito.when(builder.build())
+                          .thenReturn(Mockito.mock(CommandMeta.class));
+                   return builder;
+               });
+    }
+
+    @Test
+    void registers_each_command_and_alias_and_unregisters_them() {
+        Cadence cadence = Cadence.register(plugin, proxy, new Command("hub") {{
+            addAliases("lobby");
+            execute(ctx -> ctx.sendMessage("hub"));
+        }});
+
+        Mockito.verify(commandManager, Mockito.times(2))
+               .register(Mockito.any(CommandMeta.class), registered.capture());
+        assertThat(registered.getAllValues()
+                             .stream()
+                             .map(x -> x.getNode()
+                                        .getLiteral())
+                             .collect(Collectors.toList())).containsExactly("hub", "lobby");
+
+        assertThat(Cadence.diagnostics()
+                          .registrations()).anySatisfy(x -> {
+                              assertThat(x.owner()).isEqualTo("myplugin");
+                              assertThat(x.labels()).containsExactly("hub", "lobby");
+                          });
+
+        cadence.unregister();
+        Mockito.verify(commandManager, Mockito.times(2))
+               .unregister(Mockito.any(CommandMeta.class));
+        assertThat(Cadence.diagnostics()
+                          .registrations()).noneSatisfy(x -> assertThat(x.labels()).containsExactly("hub", "lobby"));
+    }
+
+    @Test
+    void registration_defaults_apply_to_every_command() throws CommandSyntaxException {
+        List<String> log = new java.util.ArrayList<>();
+        CommandDefaults<CommandContext> defaults = CommandDefaults.of(CommandContext.class)
+                                                                  .addMiddleware((ctx, next) -> {
+                                                                      log.add("audit");
+                                                                      return next.proceed();
+                                                                  })
+                                                                  .provide(String.class, ctx -> "default");
+        Cadence.register(plugin, proxy, defaults, List.of(new Command("spawn") {{
+            permission(DefaultPermission.ALL);
+            execute(ctx -> log.add("spawn " + ctx.get(String.class)));
+        }}));
+        Mockito.verify(commandManager)
+               .register(Mockito.any(CommandMeta.class), registered.capture());
+        CommandDispatcher<CommandSource> dispatcher = new CommandDispatcher<>();
+        dispatcher.getRoot()
+                  .addChild(registered.getValue()
+                                      .getNode());
+        Player player = Mockito.mock(Player.class);
+        Mockito.when(player.getPermissionValue(Mockito.anyString()))
+               .thenReturn(Tristate.UNDEFINED);
+
+        dispatcher.execute("spawn", player);
+
+        assertThat(log).containsExactly("audit", "spawn default");
+    }
+
+    @Test
+    void permission_defaults_apply_when_the_permission_is_unset() throws CommandSyntaxException {
+        Cadence.register(plugin, proxy, new Command("warp") {{
+            permission(DefaultPermission.ALL);
+            execute(ctx -> ctx.sendMessage("warp"));
+        }}, new Command("kick") {{
+            execute(ctx -> ctx.sendMessage("kick"));
+        }});
+        Mockito.verify(commandManager, Mockito.times(2))
+               .register(Mockito.any(CommandMeta.class), registered.capture());
+        CommandDispatcher<CommandSource> dispatcher = new CommandDispatcher<>();
+        registered.getAllValues()
+                  .forEach(x -> dispatcher.getRoot()
+                                          .addChild(x.getNode()));
+        Player player = Mockito.mock(Player.class);
+        Mockito.when(player.getPermissionValue(Mockito.anyString()))
+               .thenReturn(Tristate.UNDEFINED);
+
+        dispatcher.execute("warp", player);
+        assertThatThrownBy(() -> dispatcher.execute("kick", player)).isInstanceOf(CommandSyntaxException.class);
+
+        Mockito.when(player.getPermissionValue("myplugin.command.kick"))
+               .thenReturn(Tristate.TRUE);
+        Mockito.when(player.getPermissionValue("myplugin.command.warp"))
+               .thenReturn(Tristate.FALSE);
+        dispatcher.execute("kick", player);
+        assertThatThrownBy(() -> dispatcher.execute("warp", player)).isInstanceOf(CommandSyntaxException.class);
+    }
+
+    @Test
+    void the_first_registration_of_a_node_keeps_its_default() {
+        Cadence.register(plugin, proxy, new Command("vote") {{
+            execute(ctx -> ctx.sendMessage("vote"));
+        }});
+        Cadence.register(plugin, proxy, new Command("vote") {{
+            permission(DefaultPermission.ALL);
+            execute(ctx -> ctx.sendMessage("vote"));
+        }});
+        Mockito.verify(commandManager, Mockito.times(2))
+               .register(Mockito.any(CommandMeta.class), registered.capture());
+        CommandDispatcher<CommandSource> dispatcher = new CommandDispatcher<>();
+        dispatcher.getRoot()
+                  .addChild(registered.getAllValues()
+                                      .get(1)
+                                      .getNode());
+        Player player = Mockito.mock(Player.class);
+        Mockito.when(player.getPermissionValue(Mockito.anyString()))
+               .thenReturn(Tristate.UNDEFINED);
+
+        assertThatThrownBy(() -> dispatcher.execute("vote", player)).isInstanceOf(CommandSyntaxException.class);
+    }
+
+    @Test
+    void the_default_of_an_unregistered_registration_does_not_outlive_it() {
+        Cadence.register(plugin, proxy, new Command("audit") {{
+            permission(DefaultPermission.ALL);
+            execute(ctx -> ctx.sendMessage("audit"));
+        }})
+               .unregister();
+        Cadence.register(plugin, proxy, new Command("audit") {{
+            permission(DefaultPermission.NONE);
+            execute(ctx -> ctx.sendMessage("audit"));
+        }});
+
+        assertThatThrownBy(() -> lastRegistered().execute("audit",
+                                                          undefinedPlayer())).isInstanceOf(CommandSyntaxException.class);
+    }
+
+    @Test
+    void the_next_registration_of_a_node_decides_its_default_once_the_first_is_unregistered() throws CommandSyntaxException {
+        Cadence first = Cadence.register(plugin, proxy, new Command("relay") {{
+            permission(DefaultPermission.NONE);
+            execute(ctx -> ctx.sendMessage("relay"));
+        }});
+        Cadence.register(plugin, proxy, new Command("relay") {{
+            permission(DefaultPermission.ALL);
+            execute(ctx -> ctx.sendMessage("relay"));
+        }});
+        CommandDispatcher<CommandSource> dispatcher = lastRegistered();
+        Player player = undefinedPlayer();
+        assertThatThrownBy(() -> dispatcher.execute("relay", player)).isInstanceOf(CommandSyntaxException.class);
+
+        first.unregister();
+
+        dispatcher.execute("relay", player);
+    }
+
+    private CommandDispatcher<CommandSource> lastRegistered() {
+        Mockito.verify(commandManager, Mockito.atLeastOnce())
+               .register(Mockito.any(CommandMeta.class), registered.capture());
+        CommandDispatcher<CommandSource> dispatcher = new CommandDispatcher<>();
+        dispatcher.getRoot()
+                  .addChild(registered.getValue()
+                                      .getNode());
+        return dispatcher;
+    }
+
+    private static Player undefinedPlayer() {
+        Player player = Mockito.mock(Player.class);
+        Mockito.when(player.getPermissionValue(Mockito.anyString()))
+               .thenReturn(Tristate.UNDEFINED);
+        return player;
+    }
+
+    @Test
+    void rejects_an_object_that_is_not_a_plugin() {
+        assertThatThrownBy(() -> Cadence.register(new Object(),
+                                                  proxy,
+                                                  List.of(new Command("hub")))).isInstanceOf(IllegalArgumentException.class);
+    }
+}

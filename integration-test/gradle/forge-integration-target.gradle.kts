@@ -1,12 +1,12 @@
 /*
  * Prepares a Forge, NeoForge or Fabric integration-test target. Apply it before integration-test-target.gradle.kts:
  *
- *   extra["commandlib.integration.platform"] = "forge"    // or "neoforge" or "fabric"
+ *   extra["cadence.integration.platform"] = "forge"    // or "neoforge" or "fabric"
  *   apply(from = "../../gradle/forge-integration-target.gradle.kts")
  *   apply(from = "../../gradle/integration-test-target.gradle.kts")
  *
  * The target is named like the modded node (<loader>-<minecraft version>). The loader build is read from
- * modded/versions/<node>/gradle.properties, so the server runs the same build the CommandLib jars are compiled
+ * modded/versions/<node>/gradle.properties, so the server runs the same build the Cadence jars are compiled
  * against, and the server launch arguments are derived from it.
  *
  * It registers prepareTestPlugin, which installs the server with the loader's official installer and copies
@@ -20,8 +20,8 @@ import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import java.util.Properties
 
-val loader = extra["commandlib.integration.platform"].toString()
-val forgeMinecraftVersion = extra["commandlib.integration.minecraftVersion"].toString()
+val loader = extra["cadence.integration.platform"].toString()
+val forgeMinecraftVersion = extra["cadence.integration.minecraftVersion"].toString()
 val nodeProperties = Properties().apply {
     rootProject.file("modded/versions/$loader-$forgeMinecraftVersion/gradle.properties")
         .reader()
@@ -34,8 +34,8 @@ val forgeVersion = when (loader) {
 }
 // Forge 1.17+ and NeoForge installers write an argument file; older Forge installers write a server jar, and the
 // Fabric installer writes a launcher jar that starts the vanilla server.jar.
-if (!extra.has("commandlib.integration.serverLaunchArgs")) {
-    extra["commandlib.integration.serverLaunchArgs"] = when {
+if (!extra.has("cadence.integration.serverLaunchArgs")) {
+    extra["cadence.integration.serverLaunchArgs"] = when {
         loader == "fabric" -> "-jar fabric-server-launch.jar"
         loader == "neoforge" -> "@libraries/net/neoforged/neoforge/$forgeVersion/unix_args.txt"
         forgeMinecraftVersion.split('.')[1].toInt() < 17 -> "-jar forge-$forgeVersion.jar"
@@ -47,11 +47,11 @@ val installerUrl = when (loader) {
     "fabric" -> "https://maven.fabricmc.net/net/fabricmc/fabric-installer/1.0.1/fabric-installer-1.0.1.jar"
     else -> "https://maven.minecraftforge.net/net/minecraftforge/forge/$forgeVersion/forge-$forgeVersion-installer.jar"
 }
-val forgeJavaVersion = extra["commandlib.integration.javaVersion"].toString().toInt()
-val forgeWorkDir = project.file(extra["commandlib.integration.workDirectory"].toString())
+val forgeJavaVersion = extra["cadence.integration.javaVersion"].toString().toInt()
+val forgeWorkDir = project.file(extra["cadence.integration.workDirectory"].toString())
 val forgeServerDir = forgeWorkDir.resolve("server")
 // The last launch argument names the server jar (-jar <jar>) or the argument file (@<file>).
-val forgeLaunchFile = extra["commandlib.integration.serverLaunchArgs"].toString()
+val forgeLaunchFile = extra["cadence.integration.serverLaunchArgs"].toString()
     .trim()
     .split(Regex("\\s+"))
     .last()
@@ -64,7 +64,7 @@ val fixturePath = ":integration-test:shared:modded-fixture:$loader-$forgeMinecra
 evaluationDependsOn(fixturePath)
 val testModJar = project(fixturePath).tasks.named<Jar>("testModJar")
 
-// CommandLib's Fabric jar needs Fabric API (fabric-command-api-v2, fabric-lifecycle-events-v1) on the server.
+// Cadence's Fabric jar needs Fabric API (fabric-command-api-v2, fabric-lifecycle-events-v1) on the server.
 val fabricApi = configurations.create("fabricApi") {
     isTransitive = false
 }
@@ -126,7 +126,7 @@ val installForgeServer = tasks.register<Exec>("installForgeServer") {
 
 tasks.register<Sync>("prepareTestPlugin") {
     group = "setup"
-    description = "Installs the $loader server and copies the CommandLib test mod into its mods directory."
+    description = "Installs the $loader server and copies the Cadence test mod into its mods directory."
     dependsOn(installForgeServer)
     from(testModJar)
     from(fabricApi)

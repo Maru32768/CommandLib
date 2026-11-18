@@ -153,11 +153,11 @@ team.addMiddleware((ctx, next) -> {
   field without a registered dependency or one that is static or final. An execution that reaches a method whose
   value of `registerContextValue(type)` nobody gave fails like an executor exception.
 - `@Dependency` sets fields of the class and its superclasses with reflection. NullAway users can exclude them from
-  the initialization check with `-XepOpt:NullAway:ExcludedFieldAnnotations=dev.marulabs.commandlib.annotation.Dependency`.
+  the initialization check with `-XepOpt:NullAway:ExcludedFieldAnnotations=dev.marulabs.cadence.annotation.Dependency`.
 
 ### Guice, Dagger and other containers
 
-CommandLib depends on no container. Let the container create the command class through its constructor, and pass the
+Cadence depends on no container. Let the container create the command class through its constructor, and pass the
 services that executions read to `registerContextValue`, `registerDependency` or `provide`:
 
 ```java
@@ -172,7 +172,7 @@ provide(Economy.class, ctx -> injector.getInstance(Economy.class));
 ```
 
 With Dagger, inject the command classes from a component (`component.teamCommand()`) and pass the result to `parse` or
-to `CommandLib.register`.
+to `Cadence.register`.
 
 ## Scope
 
@@ -183,7 +183,7 @@ registration with `CommandDefaults`, which also holds registration-wide middlewa
 ```java
 CommandDefaults<CommandContext> defaults = CommandDefaults.of(CommandContext.class)
         .provide(GamePlayer.class, ctx -> games.of(Command.player().extract(ctx)));
-CommandLib.register(this, defaults, List.of(new TeamCommand(games), new ArenaCommand(arenas)));
+Cadence.register(this, defaults, List.of(new TeamCommand(games), new ArenaCommand(arenas)));
 ```
 
 A command that provides the same key replaces the registration's provider for its subtree. Testers take the same

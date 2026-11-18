@@ -1,8 +1,8 @@
 val mcProtocol by configurations.creating
 
-extra["commandlib.integration.platform"] = "spigot"
-extra["commandlib.integration.minecraftVersion"] = "1.19.3"
-extra["commandlib.integration.javaVersion"] = "17"
+extra["cadence.integration.platform"] = "spigot"
+extra["cadence.integration.minecraftVersion"] = "1.19.3"
+extra["cadence.integration.javaVersion"] = "17"
 
 dependencies {
     mcProtocol("com.github.steveice10:mcprotocollib:1.19.3-SNAPSHOT")

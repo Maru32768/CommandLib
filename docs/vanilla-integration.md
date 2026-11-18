@@ -1,6 +1,6 @@
 # Vanilla Command Integration
 
-CommandLib registers its commands in the server's Brigadier dispatcher, the one vanilla commands live in. They can
+Cadence registers its commands in the server's Brigadier dispatcher, the one vanilla commands live in. They can
 therefore be run by everything that runs vanilla commands: `/execute ... run`, command blocks, data pack functions and
 function tags. This page describes what a command sees in each case and where the platforms differ. Velocity is a
 proxy without `/execute`, command blocks or functions, so this page does not apply to it.
@@ -16,7 +16,7 @@ player's command packet. Only the work an `executeAsync` command hands to the as
 
 ## `/execute`
 
-`/execute` changes the source of the command it runs. CommandLib reads the changed source, so the subcommands of
+`/execute` changes the source of the command it runs. Cadence reads the changed source, so the subcommands of
 `/execute` reach the command context:
 
 | Subcommand | Changes | Read with |
@@ -61,7 +61,7 @@ A command block runs its command with a source at the center of the block:
   `/execute store result ...` to keep the result. This is vanilla behavior: the block adds one for each successful
   result callback.
 - Spigot 1.20.3 stores 0 from `/execute store result` and leaves `SuccessCount` at 0 for every command, vanilla commands
-  included. CommandLib commands behave the same there.
+  included. Cadence commands behave the same there.
 - Paper 1.20.5 does not tick the spawn chunks (its `spawnChunkRadius` is 0), and in the fixture a command block over the
   spawn ran only after its chunk was added with `/forceload`; the bot standing next to it was not enough.
 - A failure's messages become the block's `LastOutput`, like a vanilla command's error.
@@ -80,16 +80,16 @@ A function is compiled when the data packs load: at startup, on `/minecraft:relo
 dropped.
 
 - **Forge / NeoForge** add the commands on `RegisterCommandsEvent` and **Fabric** on `CommandRegistrationCallback`,
-  which the server fires before it compiles the functions, so functions see them without help from CommandLib.
+  which the server fires before it compiles the functions, so functions see them without help from Cadence.
 - **Spigot** compiles the functions before plugins can add commands, and has no event for a data reload. While it has
-  a registration, CommandLib checks every tick whether the data pack resources were replaced or its commands changed,
+  a registration, Cadence checks every tick whether the data pack resources were replaced or its commands changed,
   and then compiles the functions and function tags again with its commands.
 - **Paper** fires the `COMMANDS` lifecycle event after the functions were compiled, at startup and on every reload.
-  CommandLib compiles them again on the next tick.
+  Cadence compiles them again on the next tick.
 
-The server's own compilation reports every function that uses a CommandLib command as `Failed to load function ...`,
+The server's own compilation reports every function that uses a Cadence command as `Failed to load function ...`,
 and every function tag that lists one as `Couldn't load tag ... as it is missing following references: ...`. Both
-errors are dropped while CommandLib is going to compile again, and the errors of CommandLib's own compilation are still
+errors are dropped while Cadence is going to compile again, and the errors of Cadence's own compilation are still
 logged, so a function that is really broken is reported once.
 
 Function tags, such as `function #mypack:setup`, run the commands like functions do, since the recompilation rebuilds
@@ -117,5 +117,5 @@ registration in a `bootstrap`.
 | Actor after `execute as` | Original sender | Original sender | The entity |
 | Executing entity | `getEntity()` | `getEntity()` | `getEntity()` |
 | Location and rotation | `getLocation()`, nullable when the source has no world | `getLocation()` | `getLocation()` |
-| Functions using the commands | Compiled again by CommandLib every tick the resources change | Compiled again by CommandLib on the next tick | Native |
+| Functions using the commands | Compiled again by Cadence every tick the resources change | Compiled again by Cadence on the next tick | Native |
 | Command block sender | `BlockCommandSender` | `BlockCommandSender` | `CommandSourceStack` of the block |

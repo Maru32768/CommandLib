@@ -1,8 +1,8 @@
 package dev.marulabs.testmod;
 
-import dev.marulabs.commandlib.Command;
-import dev.marulabs.commandlib.DefaultPermission;
-import dev.marulabs.commandlib.argument.StringArgument;
+import dev.marulabs.cadence.Command;
+import dev.marulabs.cadence.DefaultPermission;
+import dev.marulabs.cadence.argument.StringArgument;
 import dev.marulabs.integration.core.TestResult;
 import dev.marulabs.integration.core.TestStatus;
 
@@ -21,7 +21,7 @@ public final class SuggestionTest extends TestBase {
         String key = getKey("latestInputFromClientTabComplete");
         putResult(new TestResult(key, TestStatus.FAILED, "Suggestion provider was not called before verification."));
 
-        // IntegrationTest sends "/commandlibtest suggestionCapture abc" as a tab-complete request before runTests.
+        // IntegrationTest sends "/cadencetest suggestionCapture abc" as a tab-complete request before runTests.
         command.addChildren(new Command("suggestionCapture") {{
             permission(DefaultPermission.ALL);
             argument(new StringArgument("a").addSuggestionProvider(builder -> {

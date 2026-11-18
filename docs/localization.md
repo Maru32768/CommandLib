@@ -1,13 +1,13 @@
 # Localization
 
-CommandLib's own messages, such as the permission error, the option errors, the cooldown and confirmation messages and
+Cadence's own messages, such as the permission error, the option errors, the cooldown and confirmation messages and
 the headings of the generated help, are **captions**: each has a stable key and an English default, and is sent in the
 sender's locale. A plugin can translate them, replace them per locale, load them from properties files, and change how
 they are sent. It can use the same mechanism for its own messages.
 
 ## Captions
 
-A `Caption` is a key with an English default. CommandLib's own captions are the constants of `Caption`; make your own
+A `Caption` is a key with an English default. Cadence's own captions are the constants of `Caption`; make your own
 with `Caption.of`:
 
 ```java
@@ -45,8 +45,8 @@ command blocks and other senders. A player whose client has not sent its setting
 
 For a locale such as `ja_JP`, the text of a caption is looked up for `ja_JP`, then `ja`, then the root locale. At each
 step the texts given to `set` and `load` come first, then the bundles added with `bundle(...)` from the last added, then
-CommandLib's own translations. Without any, the caption's English default is used. A more specific locale wins over a
-less specific one, so a text set for `Locale.ROOT` replaces the English default but not CommandLib's Japanese text for a
+Cadence's own translations. Without any, the caption's English default is used. A more specific locale wins over a
+less specific one, so a text set for `Locale.ROOT` replaces the English default but not Cadence's Japanese text for a
 Japanese player; set it for `Locale.JAPANESE` too to replace that.
 
 ## Configuring captions
@@ -72,7 +72,7 @@ public final class HomeCommand extends Command {
 }
 ```
 
-- `create()` starts with CommandLib's English and Japanese texts.
+- `create()` starts with Cadence's English and Japanese texts.
 - `set(caption, text)` sets the text for the root locale, `set(locale, caption, text)` for one locale.
 - `load(locale, resourceBundle)` sets every text of a `ResourceBundle`, keyed by caption key. For a file the server
   owner edits, such as one in the plugin's data folder:
@@ -89,7 +89,7 @@ A bundle is a properties file of caption keys:
 
 ```properties
 # lang/messages_ja.properties
-commandlib.permission.denied=権限がありません。
+cadence.permission.denied=権限がありません。
 myplugin.home.set=ホーム {name} を設定しました。
 ```
 
@@ -97,7 +97,7 @@ myplugin.home.set=ホーム {name} を設定しました。
 
 `Captions#sender(CaptionSender)` replaces how each caption is sent. It gets the context, the caption, the message as a
 `RichText` (the text with its placeholders replaced, and for the confirmation request the `[Confirm]` button after it)
-and `send`, which sends a message the way CommandLib does for that caption, such as in red for a failure:
+and `send`, which sends a message the way Cadence does for that caption, such as in red for a failure:
 
 ```java
 // A prefix before every caption.
@@ -130,7 +130,7 @@ usage. A `HelpFormatter` replaces the whole help, see [help](help.md).
 
 ## Vanilla translation keys
 
-Where vanilla has a translation key that means the same thing, CommandLib sends a translatable text, which every client
+Where vanilla has a translation key that means the same thing, Cadence sends a translatable text, which every client
 translates into its own language, instead of a caption:
 
 | Message | Vanilla key |
@@ -144,52 +144,52 @@ translates into its own language, instead of a caption:
 These are not captions, so `Captions` cannot change them; reject the value in a validator with your own caption to
 replace one. `Caption.UNEXPECTED_ERROR` is both: unless a text is set for it, from `set`, `load` or `bundle`, it is
 sent as vanilla's `command.failed` ("An unexpected error occurred trying to execute that command"), so it is translated
-for every language. CommandLib's Japanese bundle leaves it out for that reason.
+for every language. Cadence's Japanese bundle leaves it out for that reason.
 
-The rest of CommandLib's messages have no vanilla equivalent, such as the permission message (Bukkit's own permission
+The rest of Cadence's messages have no vanilla equivalent, such as the permission message (Bukkit's own permission
 message is not translatable either) and the option errors, so they are captions.
 
 ## Built-in captions
 
 | Constant | Key | English |
 |---|---|---|
-| `PERMISSION_DENIED` | `commandlib.permission.denied` | You do not have permission to execute this command. |
-| `REQUIRE_PLAYER` | `commandlib.prerequisite.player` | This command can only be executed by a player. |
-| `REQUIRE_CONSOLE` | `commandlib.prerequisite.console` | This command can only be executed from the console. |
-| `INVALID_VALUE` | `commandlib.argument.invalid_value` | Invalid value. |
-| `INVALID_KEY` | `commandlib.argument.invalid_key` | {value} is not a valid namespaced key |
-| `UNKNOWN_PLAYER_OR_UUID` | `commandlib.argument.unknown_player_or_uuid` | {value} is neither a known player nor a valid UUID |
-| `INVALID_SELECTOR` | `commandlib.argument.invalid_selector` | {value} is not a valid selector |
-| `UNKNOWN_LOOT_TABLE` | `commandlib.argument.unknown_loot_table` | {value} is not a known loot table |
-| `UNKNOWN_ATTRIBUTE` | `commandlib.argument.unknown_attribute` | {value} is not a known attribute |
-| `UNKNOWN_BIOME` | `commandlib.argument.unknown_biome` | {value} is not a known biome |
-| `UNKNOWN_ENTITY_TYPE` | `commandlib.argument.unknown_entity_type` | {value} is not a known entity type |
-| `UNKNOWN_SOUND` | `commandlib.argument.unknown_sound` | {value} is not a known sound |
-| `UNKNOWN_REGISTRY_ENTRY` | `commandlib.argument.unknown_registry_entry` | {value} is not a known registry entry |
-| `UNKNOWN_DISPLAY_SLOT` | `commandlib.argument.unknown_display_slot` | {value} is not a display slot of this server |
-| `NOT_A_COLOR` | `commandlib.argument.not_a_color` | {value} is not a color |
-| `TICK_COUNT_TOO_LOW` | `commandlib.argument.tick_count_too_low` | Tick count must not be less than {minimum}, found {ticks} |
-| `OPTION_MISSING` | `commandlib.option.missing` | Missing required option {option}. |
-| `OPTION_REQUIRES` | `commandlib.option.requires` | {option} requires {required}. |
-| `OPTION_REQUIRES_VALUE` | `commandlib.option.requires_value` | {option} requires {required} to be {value}. |
-| `COOLDOWN` | `commandlib.cooldown` | You must wait {remaining} before using this command again. |
-| `CONFIRMATION_REQUEST` | `commandlib.confirmation.request` | Run the command again within {timeout} to confirm. |
-| `CONFIRMATION_BUTTON` | `commandlib.confirmation.button` | [Confirm] |
-| `DURATION_HOURS` | `commandlib.duration.hours` | {value}h |
-| `DURATION_MINUTES` | `commandlib.duration.minutes` | {value}m |
-| `DURATION_SECONDS` | `commandlib.duration.seconds` | {value}s |
-| `TIMEOUT` | `commandlib.execution.timeout` | The command timed out. |
-| `UNEXPECTED_ERROR` | `commandlib.execution.unexpected_error` | An unexpected error occurred trying to execute that command. (vanilla `command.failed` unless set) |
-| `SEE_CONSOLE` | `commandlib.execution.see_console` | Check the console for details. |
-| `HELP_USAGE` | `commandlib.help.usage` | Usage: |
-| `HELP_OPTIONS` | `commandlib.help.options` | Options: |
-| `HELP_OPTIONS_TAG` | `commandlib.help.options_tag` | options |
-| `HELP_REQUIRED` | `commandlib.help.required` | required |
-| `HELP_MAX_OCCURRENCES` | `commandlib.help.max_occurrences` | up to {count} times |
-| `HELP_EXAMPLES` | `commandlib.help.examples` | Examples: |
+| `PERMISSION_DENIED` | `cadence.permission.denied` | You do not have permission to execute this command. |
+| `REQUIRE_PLAYER` | `cadence.prerequisite.player` | This command can only be executed by a player. |
+| `REQUIRE_CONSOLE` | `cadence.prerequisite.console` | This command can only be executed from the console. |
+| `INVALID_VALUE` | `cadence.argument.invalid_value` | Invalid value. |
+| `INVALID_KEY` | `cadence.argument.invalid_key` | {value} is not a valid namespaced key |
+| `UNKNOWN_PLAYER_OR_UUID` | `cadence.argument.unknown_player_or_uuid` | {value} is neither a known player nor a valid UUID |
+| `INVALID_SELECTOR` | `cadence.argument.invalid_selector` | {value} is not a valid selector |
+| `UNKNOWN_LOOT_TABLE` | `cadence.argument.unknown_loot_table` | {value} is not a known loot table |
+| `UNKNOWN_ATTRIBUTE` | `cadence.argument.unknown_attribute` | {value} is not a known attribute |
+| `UNKNOWN_BIOME` | `cadence.argument.unknown_biome` | {value} is not a known biome |
+| `UNKNOWN_ENTITY_TYPE` | `cadence.argument.unknown_entity_type` | {value} is not a known entity type |
+| `UNKNOWN_SOUND` | `cadence.argument.unknown_sound` | {value} is not a known sound |
+| `UNKNOWN_REGISTRY_ENTRY` | `cadence.argument.unknown_registry_entry` | {value} is not a known registry entry |
+| `UNKNOWN_DISPLAY_SLOT` | `cadence.argument.unknown_display_slot` | {value} is not a display slot of this server |
+| `NOT_A_COLOR` | `cadence.argument.not_a_color` | {value} is not a color |
+| `TICK_COUNT_TOO_LOW` | `cadence.argument.tick_count_too_low` | Tick count must not be less than {minimum}, found {ticks} |
+| `OPTION_MISSING` | `cadence.option.missing` | Missing required option {option}. |
+| `OPTION_REQUIRES` | `cadence.option.requires` | {option} requires {required}. |
+| `OPTION_REQUIRES_VALUE` | `cadence.option.requires_value` | {option} requires {required} to be {value}. |
+| `COOLDOWN` | `cadence.cooldown` | You must wait {remaining} before using this command again. |
+| `CONFIRMATION_REQUEST` | `cadence.confirmation.request` | Run the command again within {timeout} to confirm. |
+| `CONFIRMATION_BUTTON` | `cadence.confirmation.button` | [Confirm] |
+| `DURATION_HOURS` | `cadence.duration.hours` | {value}h |
+| `DURATION_MINUTES` | `cadence.duration.minutes` | {value}m |
+| `DURATION_SECONDS` | `cadence.duration.seconds` | {value}s |
+| `TIMEOUT` | `cadence.execution.timeout` | The command timed out. |
+| `UNEXPECTED_ERROR` | `cadence.execution.unexpected_error` | An unexpected error occurred trying to execute that command. (vanilla `command.failed` unless set) |
+| `SEE_CONSOLE` | `cadence.execution.see_console` | Check the console for details. |
+| `HELP_USAGE` | `cadence.help.usage` | Usage: |
+| `HELP_OPTIONS` | `cadence.help.options` | Options: |
+| `HELP_OPTIONS_TAG` | `cadence.help.options_tag` | options |
+| `HELP_REQUIRED` | `cadence.help.required` | required |
+| `HELP_MAX_OCCURRENCES` | `cadence.help.max_occurrences` | up to {count} times |
+| `HELP_EXAMPLES` | `cadence.help.examples` | Examples: |
 
 The durations join their parts with a space, such as `1h 2m 3s` or `1時間 2分 3秒`. The English and Japanese files are
-`dev/marulabs/commandlib/lang/commandlib_en.properties` and `commandlib_ja.properties` in the `common` jar; copy the
+`dev/marulabs/cadence/lang/cadence_en.properties` and `cadence_ja.properties` in the `common` jar; copy the
 English one to start a translation, and add it to your plugin with `bundle(...)`. `Caption.builtIns()` lists the
 constants.
 

@@ -1,10 +1,10 @@
 package dev.marulabs.sampleplugin;
 
-import dev.marulabs.commandlib.Command;
-import dev.marulabs.commandlib.CommandContext;
-import dev.marulabs.commandlib.CommandOption;
-import dev.marulabs.commandlib.Options;
-import dev.marulabs.commandlib.argument.StringArgument;
+import dev.marulabs.cadence.Command;
+import dev.marulabs.cadence.CommandContext;
+import dev.marulabs.cadence.CommandOption;
+import dev.marulabs.cadence.Options;
+import dev.marulabs.cadence.argument.StringArgument;
 
 /**
  * /broadcast [-s|--silent] [-r|--repeat <count>] <message>

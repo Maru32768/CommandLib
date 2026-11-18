@@ -46,7 +46,7 @@ Forge 1.16.5, 1.18.2, 1.19.2 and 1.20.1, NeoForge 1.21.1 and 1.21.4, and Fabric
   NeoForge back with `ServerLifecycleHooks`. Permissions go through
   fabric-permissions-api (`Permissions.check(player, node, default)`) when a
   mod ships it, and otherwise resolve the node's `DefaultPermission` against
-  the vanilla permission level. The node names have no `commandlib.` prefix.
+  the vanilla permission level. The node names have no `cadence.` prefix.
   The jar is not a mod: it has no `fabric.mod.json`. Its manifest sets
   `Fabric-Loom-Remap: true` so that Loom remaps it as a `modImplementation`
   dependency. `CurrentServer` registers its lifecycle listeners when the class
@@ -132,7 +132,7 @@ common
 
 The exact Gradle project names can change, but the boundary should stay:
 
-- `forge-api`: source-compatible CommandLib API that does not expose version
+- `forge-api`: source-compatible Cadence API that does not expose version
   specific Minecraft classes where avoidable.
 - `forge/1.16.5`: current implementation moved mostly as-is.
 - `forge/1.20.1` or another LTS-like target: modern Forge implementation on
@@ -168,7 +168,7 @@ artifactId:    forge-1.20.1
 
 For modded platforms, exact-line artifacts are preferable to one broad
 `forge` artifact. Downstream Forge mods are already tied to a Minecraft and
-ForgeGradle line, so selecting a versioned CommandLib artifact is normal and
+ForgeGradle line, so selecting a versioned Cadence artifact is normal and
 reduces accidental binary incompatibility.
 
 ### Forge Minor And Patch Versions
@@ -194,7 +194,7 @@ Do not split a module just because Forge has a different patch version. Split
 below the Minecraft-version level only when the same artifact cannot honestly
 support the affected Forge range. Examples:
 
-- a Forge minor or patch version changes a compile-time API used by CommandLib,
+- a Forge minor or patch version changes a compile-time API used by Cadence,
 - the same compiled artifact hits a linkage error on a Forge minor/patch line,
 - command registration, permissions, or registry behavior differs enough that
   one implementation would need separate source,
@@ -218,7 +218,7 @@ compatibility matrix = Forge minor/patch range
 
 ## Public API Direction
 
-Keep the high-level CommandLib model consistent, but avoid promising one Java
+Keep the high-level Cadence model consistent, but avoid promising one Java
 source file can compile unchanged against all Forge versions when it mentions
 Minecraft-native types.
 
@@ -231,11 +231,11 @@ Recommended split:
 - For public native argument return types, allow version-specific artifacts to
   expose their native Minecraft type. For example, 1.16.5 may return
   `ServerPlayerEntity`, while a modern module may return `ServerPlayer`.
-- Where a type can be made CommandLib-owned without losing practical value,
+- Where a type can be made Cadence-owned without losing practical value,
   prefer that for cross-version consistency. `Location` is a candidate, but
   player/entity/item/block native types are less suitable.
 - Deprecate or avoid new overloads that expose Forge's old
-  `DefaultPermissionLevel` in any modern API. Use CommandLib's
+  `DefaultPermissionLevel` in any modern API. Use Cadence's
   `DefaultPermission` in common-facing APIs, and adapt to Forge-specific
   permission systems internally.
 
@@ -349,7 +349,7 @@ Forge server startup is heavier than command-level unit tests, so start with:
 - What is the minimum supported Forge minor/patch for each Minecraft-version
   artifact?
 - Should modern Forge expose native `Component` APIs directly, or should
-  CommandLib-owned text builders remain the primary user-facing path?
+  Cadence-owned text builders remain the primary user-facing path?
 - How much source compatibility do we want between `forge-1.16.5` and modern
   Forge modules when native Minecraft types necessarily differ?
 - Should `forge-testing` be one artifact per version line, or a test helper

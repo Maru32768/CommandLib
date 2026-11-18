@@ -47,7 +47,7 @@ and chooses the correct implementation at runtime with a version handler.
 - Avoid making normal local development depend on BuildTools unless explicitly
   requested.
 - Make NMS verification suitable for CI or a manual/nightly CI job.
-- Preserve the public CommandLib API.
+- Preserve the public Cadence API.
 
 ## Non-Goals
 
@@ -255,7 +255,7 @@ The `spigot-nms-runtime` artifact depends on all typed NMS implementations.
 This is closer to CommandAPI's dependency aggregation model, but it is more
 complex for users unless `spigot` depends on the aggregate.
 
-Option A is recommended for CommandLib unless jar size or class loading becomes
+Option A is recommended for Cadence unless jar size or class loading becomes
 a problem.
 
 ## Relationship To Paper
@@ -319,7 +319,7 @@ After `v1_16_R3` works, choose the next boundary based on maintenance pain:
 - CI runners may need a specific Java version for old Minecraft builds.
 - Spigot artifacts are not as stable as normal Maven Central dependencies.
 - Typed NMS compile jobs can fail for infrastructure reasons unrelated to
-  CommandLib source changes.
+  Cadence source changes.
 
 Mitigations:
 

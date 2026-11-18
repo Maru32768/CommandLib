@@ -1,10 +1,10 @@
 package dev.marulabs.testplugin;
 
-import dev.marulabs.commandlib.Command;
-import dev.marulabs.commandlib.CommandActorType;
-import dev.marulabs.commandlib.argument.EntityArgument;
-import dev.marulabs.commandlib.exception.CommandPrerequisiteException;
-import dev.marulabs.commandlib.internal.bukkit.BukkitUtil;
+import dev.marulabs.cadence.Command;
+import dev.marulabs.cadence.CommandActorType;
+import dev.marulabs.cadence.argument.EntityArgument;
+import dev.marulabs.cadence.exception.CommandPrerequisiteException;
+import dev.marulabs.cadence.internal.bukkit.BukkitUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
  * location and selectors relative to the executor.
  */
 public final class VanillaExecutionTest extends TestBase {
-    private static final String OBJECTIVE = "commandlibblock";
+    private static final String OBJECTIVE = "cadenceblock";
     private static final String SUCCESS_COUNT = "commandBlockSuccessCount";
     private final String playerName;
     private final World world;
