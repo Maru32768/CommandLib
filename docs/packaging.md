@@ -30,18 +30,14 @@ CommandLib is still 0.x. A minor release (0.17 to 0.18) may break the binary API
 1.0 promises binary compatibility, the version picked under Jar-in-Jar can be one your mod was not built for.
 A relocated copy cannot be replaced by another mod's: each mod runs the version it was built and tested with.
 
-If you still use `include()` on Fabric, list the CommandLib versions outside your minor version under `breaks` in your
-`fabric.mod.json`. An incompatible combination then fails at startup with a clear message instead of failing later.
-CommandLib's jar is not a mod, so refer to it by the id that Loom generates for the nested jar. Loom builds the id from
-the jar's group, name and classifier, replacing `.` with `_` and converting the result to lower case. The id exists
-only in your built jar: Loom's development runs load CommandLib as a library, so a `depends` on the id stops them with
-a missing-mod error, while `breaks` does not.
-
-```json
-"breaks": {
-  "com_github_maru32768_commandlib_fabric-1_21_1": ["<0.18.0", ">=0.19.0"]
-}
-```
+If you still use `include()` on Fabric, your `fabric.mod.json` cannot pin the nested CommandLib well. CommandLib's
+jars are not mods, so the only ids to refer to are the ones Loom generates for the nested jars, one for the platform
+jar and one for `common`. Loom builds an id from the jar's group, name and classifier, replacing `.` with `_` and
+converting the result to lower case, such as `com_github_maru32768_commandlib_fabric-1_21_1` and
+`com_github_maru32768_commandlib_common`. A `depends` on both ids pins the version in your built jar, but the ids exist
+only there: Loom's development runs load CommandLib as a library, so the `depends` stops them with a missing-mod error.
+A `breaks` does not fail at startup: Fabric Loader avoids the listed versions by loading another nested copy, or none,
+without a message. Shade CommandLib if your mod must run the version it was built with.
 
 ## What to shade and relocate
 
@@ -258,8 +254,7 @@ dependencies {
 }
 ```
 
-List the incompatible versions under `breaks` as shown in [version conflicts](#jar-in-jar-and-version-conflicts) if
-you do.
+Fabric Loader then picks which nested copy runs, as described in [version conflicts](#jar-in-jar-and-version-conflicts).
 
 To let permission mods such as LuckPerms answer CommandLib's permission checks, nest
 [fabric-permissions-api](https://github.com/lucko/fabric-permissions-api) with `include()` as usual. It is a separate
