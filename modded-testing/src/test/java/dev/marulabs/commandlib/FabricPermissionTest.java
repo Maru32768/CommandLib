@@ -127,9 +127,9 @@ class FabricPermissionTest {
         }
     }
 
-    // The test classpath has the client classes, so CurrentServer is loaded again without the packages that the
-    // server jars lack. The verifier loads the classes a method's types need, so a reference anywhere on the dedicated
-    // path fails here as it does on a server.
+    // The test classpath has the client classes, so CommandLib's classes are loaded again without Minecraft's client
+    // packages. A client class that their verification, static initializers or get() need on a dedicated server then
+    // fails here as it does on a server.
     @Test
     void a_dedicated_server_loads_no_client_class() throws Exception {
         MinecraftServer dedicated = Mockito.mock(MinecraftServer.class);
@@ -143,7 +143,7 @@ class FabricPermissionTest {
                     || name.startsWith("com.mojang.blaze3d.") || name.startsWith("com.mojang.realmsclient.")) {
                     throw new ClassNotFoundException(name);
                 }
-                if (!name.startsWith(CurrentServer.class.getName())) {
+                if (!name.startsWith("dev.marulabs.commandlib.")) {
                     return super.loadClass(name, resolve);
                 }
                 synchronized (getClassLoadingLock(name)) {
@@ -152,6 +152,9 @@ class FabricPermissionTest {
                         return loaded;
                     }
                     try (InputStream in = getParent().getResourceAsStream(name.replace('.', '/') + ".class")) {
+                        if (in == null) {
+                            throw new ClassNotFoundException(name);
+                        }
                         byte[] bytes = in.readAllBytes();
                         return defineClass(name, bytes, 0, bytes.length);
                     } catch (IOException e) {
